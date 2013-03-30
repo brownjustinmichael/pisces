@@ -56,6 +56,8 @@ namespace io
 		
 		file_stream.open (file_name.c_str ());		
 		file_stream << header_ptr->output_header ();
+		
+		LOG4CXX_DEBUG (config::logger, "output_stream [output] n = " << n)
 				
 		for (i = 0; i < n; ++i)
 		{

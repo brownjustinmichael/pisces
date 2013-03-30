@@ -63,18 +63,16 @@ int main (int argc, char const *argv[])
 					
 	std::vector<double> velocity (N, 0.0);
 	std::vector<double *> data_ptrs (2);
-	data_ptrs [0] = &velocity[0];
-	data_ptrs [1] = &velocity[0];
+	data_ptrs [0] = &velocity [0];
 	
 	velocity [0] = 1.0;
 	velocity [1] = 1.0;
 	velocity [2] = 1.0;
 	velocity [3] = 1.0;
 	
-	io::incremental_output_stream_1D test_stream ("../data/test", ".dat", 4, new io::header, N, 1, &data_ptrs [0]);
+	io::incremental_output_stream_1D test_stream ("../output/test", ".dat", 4, new io::header, N, 1, &data_ptrs [0]);
 		
-	diffusion::cheb_1D diffusion_operation (N);
-	diffusion::plan diffusion_plan (&diffusion_operation, 2, &data_ptrs [0]);
+	diffusion::cheb_1D diffusion_plan (1., N, &velocity [0]);
 
 	LOG4CXX_TRACE (config::logger, "main: Entering main loop.");
 

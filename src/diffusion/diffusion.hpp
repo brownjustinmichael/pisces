@@ -35,69 +35,44 @@ extern "C" void   dtpsv_(char *uplo, char *trans, char *diag, int *n, double *a,
 
 namespace diffusion
 {
-	//! \brief Abstract base class for any diffusion solver
-	// 
-	//! The operation class has one virtual function, solve, which takes the timestep as a parameter and uses this to update the data.
-	class operation
-	{
-	public:
-		int n; //!< The integer number of data elements (grid points) the operator is designed to handle
-		int n_data_ptrs; //!< The integer number of data arrays (e.g. input_velocity, output_temperature, etc.) the operator is designed to handle
-		
-		//! \param i_n an integer number of data elements (grid points) the operator should be built to handle
-		//! \param i_n_data_ptrs an integer number of data arrays (e.g. input_velocity, output_temperature, etc.) the operator should be built to handle
-		
-		operation (int i_n, int i_n_data_ptrs) {n = i_n; n_data_ptrs = i_n_data_ptrs;}
-		//! \brief A virtual function for processing the operation on the given data
-		// 
-		//! \param timestep a double specifying the timestep over which to update the data
-		//! \param data_ptrs an array of double pointers specifying the addresses of the data arrays on which to operate
-		virtual void operate (double timestep, double **data_ptrs) = 0;
-		// virtual ~operation ();
-	};
-	
 	//! \brief The basic functional unit of the diffusion module, containing an operation and a number of data pointers
 	//
 	//! The plan class contains the operator and the addresses of all the relevant data arrays to operate on. Each plan need be constructed only once and can run any number of times each timestep.
 	// We may decide later to remove this class from the diffusion module, as it may be generally applicable to the entire code.
 	class plan
 	{
-	private:
-		operation *operation_ptr; //!< A pointer pointing to the operation for the plan
-		std::vector<double *> data_ptrs; //!< A vector of double pointers that contains the addresses of all data arrays required for the execution of the plan
 	public:
-		//! \param i_operation_ptr a pointer to the operation specified by the plan
-		//! \param i_n_data_ptrs an integer number of pointers in i_data_ptrs
-		//! \param i_data_ptrs an array of double pointers to all the data arrays required for the execution of the plan
-		plan (operation *i_operation_ptr, int i_n_data_ptrs, double **i_data_ptrs);
-		
 		//! \brief Operate the plan operator on the data arrays specified
 		//
-		//! The plan class serves as a wrapper for this function. The user specifies the time step and the operator determines how to take care of the operation itself.
+		//! The plan class serves as a wrapper for this function. The user specifies the time step and the plan determines how to take care of the operation itself.
 		//! \param timestep a double length of time over which to apply the operation
-		inline void execute (double timestep) {operation_ptr->operate (timestep, &data_ptrs [0]);}
+		virtual void execute (double timestep) = 0;
 		// virtual ~plan ();
 	};
 		
 	//! \brief Subclass of operation, one implementation of diffusion for data expressed as a sum of Chebyshev polynomials in 1D
 	//
 	//! This implementation is a simple forward time-difference scheme, solving only for the diffusion component of the equations. The class solves this implicitly with two matrix equations, one for the even and one for the odd Chebyshev polynomials. It uses the BLAS library to do so.
-	class cheb_1D : public operation
+	class cheb_1D : public plan
 	{
 	private:
 		double coeff; //!< a double that represents the coefficient in front of the diffusion term in the differential equation
+		int n; //!< an integer number of data elements (grid points) that cheb_1D will be built to handle
+		double *data_in; //!< a double pointer to the input data
+		double *data_out; //!< a double pointer to the output data; if data_in == data_out, the operation is done in place
 		std::vector<double> even_diffusion_matrix; //!< a 1D vector to be filled with the triangular packed matrix equation for the even Chebyshev polynomials
 		std::vector<double> odd_diffusion_matrix; //!< a 1D vector to be filled with the triangular packed matrix equation for the odd Chebyshev polynomials
 	public:
-		//! \param i_n an integer number of data elements (grid points) that cheb_1D will be built to tackle
 		//! \param i_coeff a double containing the coefficient in front of the diffusion term in the differential equation
-		cheb_1D (int i_n, double i_coeff = 1.);
+		//! \param i_n an integer number of data elements (grid points) that cheb_1D will be built to tackle
+		//! \param i_data_in a double pointer pointing to the input data
+		//! \param i_data_out a double pointer pointing to the output data; if data_out == data_in or NULL, the operation is done in place
+		cheb_1D (double i_coeff, int i_n, double *i_data_in, double *i_data_out = NULL);
 		
-		//! \brief Operate on the given data for a given timestep duration
+		//! \brief Execute the operation on the data for a given timestep duration
 		//
 		//! \param timestep a double duration over which the diffusion step will happen
-		//! \param data_ptrs an array containing two pointers: the first to the original data, and the second to the location of the desired output
-		void operate (double timestep, double **data_ptrs);
+		void execute (double timestep);
 	};	
 } /* diffusion */
 

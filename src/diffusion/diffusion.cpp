@@ -14,30 +14,23 @@
 
 namespace diffusion
 {
-	plan::plan (operation *i_operation_ptr, int i_n_data_ptrs, double **i_data_ptrs) {
-		int i;
-	
-		// Check that the number of data pointers for the operation equals the number passed
-		assert (i_operation_ptr->n_data_ptrs == i_n_data_ptrs);
-
-		operation_ptr = i_operation_ptr;
-
-		LOG4CXX_TRACE (config::logger, "plan: Instantiating...");
-
-		for (i = 0; i < i_n_data_ptrs; ++i) {
-			data_ptrs.push_back (i_data_ptrs [i]);
-		}
-	
-		LOG4CXX_TRACE (config::logger, "plan: Instantiation complete.");
-	}
-
-	cheb_1D::cheb_1D (int i_n, double i_coeff) : operation (i_n, 2) {
+	cheb_1D::cheb_1D (double i_coeff, int i_n, double *i_data_in, double *i_data_out) {
 		int i, j;
 		coeff = i_coeff;
-		even_diffusion_matrix.resize (i_n / 2*(i_n / 2+3)/2);
-		odd_diffusion_matrix.resize (i_n / 2*(i_n / 2+3)/2);
+		n = i_n;
+		data_in = i_data_in;
+		if (i_data_out == NULL) {
+			data_out = i_data_in;	
+		} else {
+			data_out = i_data_out;
+		}
 		
-		LOG4CXX_TRACE (config::logger, "cheb_1D: Instantiating...");
+		LOG4CXX_DEBUG (config::logger, "cheb_1D: [cheb_1d] Input pointer: " << data_in << ", Output pointer: " << data_out);
+		
+		even_diffusion_matrix.resize (i_n * (i_n + 6) / 8);
+		odd_diffusion_matrix.resize (i_n * (i_n + 6) / 8);
+		
+		LOG4CXX_TRACE (config::logger, "cheb_1D: [cheb_1d] Instantiating...");
 		
 	   	for (j = 0; j < i_n / 2; ++j) {
 			even_diffusion_matrix [j*(j+1)/2] = -4*j*j*j*coeff;
@@ -48,10 +41,10 @@ namespace diffusion
 			}
 		}
 		
-		LOG4CXX_TRACE (config::logger, "cheb_1D: Instantiation complete.");
+		LOG4CXX_TRACE (config::logger, "cheb_1D: [cheb_1d] Instantiation complete.");
 	}
 
-	void cheb_1D::operate (double timestep, double **data_ptrs) {
+	void cheb_1D::execute (double timestep) {
 		int i;
 	    int ione=1, itwo=2, nhalf = n / 2;
 	    char charN = 'N', charU = 'U';
@@ -64,15 +57,15 @@ namespace diffusion
 			odd_diffusion_matrix [i*(i+3)/2] = 1.0 / timestep * coeff;
 		}
 	
-		if (data_ptrs [0] != data_ptrs [1]) {
-			dcopy_ (&n, data_ptrs [0], &ione, data_ptrs [1], &ione);
+		if (data_in != data_out) {
+			dcopy_ (&n, data_in, &ione, data_out, &ione);
 		}
 	
-	    dtpsv_(&charU, &charN, &charN, &nhalf, &(even_diffusion_matrix [0]), data_ptrs [1], &itwo);
-	    dtpsv_(&charU, &charN, &charN, &nhalf, &(odd_diffusion_matrix [0]), &(data_ptrs [1] [1]), &itwo);
+	    dtpsv_(&charU, &charN, &charN, &nhalf, &(even_diffusion_matrix [0]), data_out, &itwo);
+	    dtpsv_(&charU, &charN, &charN, &nhalf, &(odd_diffusion_matrix [0]), &(data_out [1]), &itwo);
 		
 		for (i = 0; i < n; ++i) {
-			data_ptrs [1] [i] /= timestep;
+			data_out [i] /= timestep;
 		}
 		
 		LOG4CXX_TRACE (config::logger, "cheb_1D: [operate] Operation complete.");
