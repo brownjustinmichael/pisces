@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <string>
+#include <fftw3.h>
 #include "config.hpp"
 #include "diffusion/diffusion.hpp"
 #include "io/io.hpp"
@@ -33,7 +34,7 @@ log4cxx::LevelPtr config::levels [6];
 
 int main (int argc, char const *argv[])
 {	
-	int i;
+	int i, j;
 	
 	// Here, we're setting up the log. The levels array allows us to easily convert from integer to logging severity, which is specified by the -D flag at the command line, e.g. -D3 specifies that only warnings, errors, and fatal messages will be logged.
 	log4cxx::xml::DOMConfigurator::configure("../input/Log4cxxConfig.xml");
@@ -70,9 +71,12 @@ int main (int argc, char const *argv[])
 	velocity [2] = 1.0;
 	velocity [3] = 1.0;
 	
-	io::incremental_output_stream_1D test_stream ("../output/test", ".dat", 4, new io::header, N, 1, &data_ptrs [0]);
+	io::incremental_output_stream_1D cheb_stream ("../output/test_cheb", ".dat", 4, new io::header, N, 1, &data_ptrs [0]);
+	io::incremental_output_stream_1D angle_stream ("../output/test_angle", ".dat", 4, new io::header, N, 1, &data_ptrs [0]);
 		
 	diffusion::cheb_1D diffusion_plan (1., N, &velocity [0]);
+	
+	fftw_plan fourier_plan = fftw_plan_r2r_1d (N, &velocity [0], &velocity [0], FFTW_REDFT00, FFTW_ESTIMATE);
 
 	LOG4CXX_TRACE (config::logger, "main: Entering main loop.");
 
@@ -80,8 +84,24 @@ int main (int argc, char const *argv[])
 		LOG4CXX_TRACE (config::logger, "main: Beginning timestep...");
 		LOG4CXX_INFO (config::logger, "main: Timestep: " << i);
 
-		test_stream.output ();
+		// Output in Chebyshev space
+		cheb_stream.output ();
+		// Calculate the diffusion in Chebyshev space
 		diffusion_plan.execute (0.01);
+		
+		// Transform forward
+		fftw_execute (fourier_plan);
+
+		// Output in angle space
+		angle_stream.output ();
+		
+		// Transform backward
+		fftw_execute (fourier_plan);
+		
+		// We rescale the values to account for the factor of 2(N-1) that occurs during FFT
+		for (j = 0; j < N; ++j) {
+			velocity [j] /= (2 * (N - 1));
+		}
 
 		LOG4CXX_TRACE (config::logger, "main: Timestep " << i << " complete.");
 	}
