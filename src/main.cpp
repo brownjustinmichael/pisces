@@ -14,6 +14,7 @@
 #include "config.hpp"
 #include "diffusion/diffusion.hpp"
 #include "io/io.hpp"
+#include "io/exceptions.hpp"
 
 #define N 8
 
@@ -73,6 +74,7 @@ int main (int argc, char const *argv[])
 	
 	io::incremental_output_stream_1D cheb_stream ("../output/test_cheb", ".dat", 4, new io::header, N, 1, &data_ptrs [0]);
 	io::incremental_output_stream_1D angle_stream ("../output/test_angle", ".dat", 4, new io::header, N, 1, &data_ptrs [0]);
+	io::simple_output_stream_1D failsafe_dump ("_dump.dat", N, 1, &data_ptrs [0]);
 		
 	diffusion::cheb_1D diffusion_plan (1., N, &velocity [0]);
 	
@@ -85,7 +87,13 @@ int main (int argc, char const *argv[])
 		LOG4CXX_INFO (config::logger, "main: Timestep: " << i);
 
 		// Output in Chebyshev space
-		cheb_stream.output ();
+		try {
+			cheb_stream.output ();
+		} catch (io::exceptions::file_exception &io_exception) {
+			LOG4CXX_ERROR (config::logger, "Unable to print to file, outputting failsafe dump to _dump.dat");
+			failsafe_dump.output ();
+			exit (EXIT_FAILURE);
+		}
 		// Calculate the diffusion in Chebyshev space
 		diffusion_plan.execute (0.01);
 		

@@ -9,6 +9,7 @@
 #include <cmath>
 #include <iomanip>
 #include "io.hpp"
+#include "exceptions.hpp"
 #include "../config.hpp"
 
 namespace io
@@ -54,7 +55,14 @@ namespace io
 		
 		LOG4CXX_INFO (config::logger, "output_stream: [output] Outputting to file " << file_name << "...");
 		
-		file_stream.open (file_name.c_str ());		
+		file_stream.open (file_name.c_str ());
+		
+		if (not file_stream.is_open ()) {
+			exceptions::file_exception failure;
+			LOG4CXX_ERROR (config::logger, "output_stream: [output] Failed to open file " << file_name);
+			throw failure;
+		}
+		
 		file_stream << header_ptr->output_header ();
 						
 		for (i = 0; i < n; ++i)

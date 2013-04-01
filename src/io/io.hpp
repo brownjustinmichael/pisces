@@ -10,7 +10,6 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include "../config.hpp"
 
 #ifndef IO_HPP_C1E9B6EF
 #define IO_HPP_C1E9B6EF
