@@ -58,6 +58,10 @@ namespace io
 		std::ofstream file_stream; //!< A file stream object to be used when writing to file 
 	public:
 		output_stream (header *i_header_ptr, int i_n, int i_n_data_ptrs, double **i_data_ptrs);
+		//! \brief A virtual function to output the data to file
+		//
+		//! This function should be overwritten by subclasses, though it may contain a call to this function, which will output with default double representation in C++
+		//! \param i_file_name A string containing the file name where the class will output
 		virtual void output (std::string i_file_name);
 		// virtual ~output_stream ();
 	};
@@ -70,6 +74,10 @@ namespace io
 	private:
 		std::string file_name; //!< A string containing the file name where the class should output
 	public:
+		//! \param i_file_name A string of the file to which the data will be output
+		//! \param i_n An integer number of data points contained within each array
+		//! \param i_n_data_ptrs The number of columns that will be output
+		//! \param i_data_ptrs An array of pointers to data arrays to be output
 		simple_output_stream_1D (std::string i_file_name, int i_n, int i_n_data_ptrs, double **i_data_ptrs) : output_stream (new header, i_n, i_n_data_ptrs, i_data_ptrs) {file_name = i_file_name;}
 		using output_stream::output;
 		void output () {output_stream::output (file_name);} 
@@ -83,8 +91,8 @@ namespace io
 	private:
 		int n_outputs; //!< An incremental integer that will be appended to the end of each file_base
 		int int_width; //!< The total number of characters the integer in the file name can have
-		std::string file_base;
-		std::string file_extension;
+		std::string file_base; //!< A string containing the file name base (the string before the numbers, including the path)
+		std::string file_extension; //!< A string containing the file name extension (the string after the numbers, including the '.')
 	public:
 		incremental_output_stream_1D (std::string i_file_base, std::string i_file_extension, int i_int_width, header *i_header_ptr, int i_n, int i_n_data_ptrs, double **i_data_ptrs) : output_stream (i_header_ptr, i_n, i_n_data_ptrs, i_data_ptrs) {n_outputs = 0; int_width = i_int_width, file_base = i_file_base; file_extension = i_file_extension;}
 		std::string generate_file_name ();

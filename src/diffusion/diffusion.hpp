@@ -12,6 +12,7 @@
 #define diffusion_H_1AIIK1RA
 
 #include <vector>
+#include "../plan.hpp"
 
 //! \brief Function from blas that copies a double array to another in place
 //
@@ -35,21 +36,6 @@ extern "C" void   dtpsv_(char *uplo, char *trans, char *diag, int *n, double *a,
 
 namespace diffusion
 {
-	//! \brief The basic functional unit of the diffusion module, containing an operation and a number of data pointers
-	//
-	//! The plan class contains the operator and the addresses of all the relevant data arrays to operate on. Each plan need be constructed only once and can run any number of times each timestep.
-	// We may decide later to remove this class from the diffusion module, as it may be generally applicable to the entire code.
-	class plan
-	{
-	public:
-		//! \brief Operate the plan operator on the data arrays specified
-		//
-		//! The plan class serves as a wrapper for this function. The user specifies the time step and the plan determines how to take care of the operation itself.
-		//! \param timestep a double length of time over which to apply the operation
-		virtual void execute (double timestep) = 0;
-		// virtual ~plan ();
-	};
-		
 	//! \brief Subclass of operation, one implementation of diffusion for data expressed as a sum of Chebyshev polynomials in 1D
 	//
 	//! This implementation is a simple forward time-difference scheme, solving only for the diffusion component of the equations. The class solves this implicitly with two matrix equations, one for the even and one for the odd Chebyshev polynomials. It uses the BLAS library to do so.
