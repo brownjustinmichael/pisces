@@ -65,7 +65,7 @@ int main (int argc, char const *argv[])
 	
 	LOG4CXX_TRACE (config::logger, "Beginning main...");
 	
-	double timestep = 0.001;
+	double timestep = 0.1;
 	
 	std::vector<double> velocity (N, 0.0);
 	std::vector<double> position (N, 0.0);
@@ -89,7 +89,7 @@ int main (int argc, char const *argv[])
 	io::incremental_output_stream_1D angle_stream ("../output/test_angle", ".dat", 4, new io::header, N, 2, &data_ptrs [0]);
 	io::simple_output_stream_1D failsafe_dump ("_dump.dat", N, 2, &data_ptrs [0]);
 		
-	diffusion::cheb_1D diffusion_plan (1., N, &velocity [0]);
+	diffusion::fixed_angle_1D diffusion_plan (1., N, &velocity [0]);
 	
 	boundary::fixed_cart_1D upper_bound (&velocity [0], 0.0);
 	boundary::fixed_cart_1D lower_bound (&velocity [N - 1], 0.0);
@@ -129,15 +129,16 @@ int main (int argc, char const *argv[])
 			failsafe_dump.output ();
 			exit (EXIT_FAILURE);
 		}
-		// Calculate the diffusion in Chebyshev space
-		diffusion_plan.execute (timestep);
-		
+
 		// Transform forward
 		fftw_execute (fourier_plan);
 		
+		// Calculate the diffusion in Angle space
+		diffusion_plan.execute (timestep);
+		
 		// Apply boundary conditions
-		upper_bound.execute (timestep);
-		lower_bound.execute (timestep);
+		// upper_bound.execute (timestep);
+		// lower_bound.execute (timestep);
 
 		// Output in angle space
 		angle_stream.output ();
