@@ -10,13 +10,15 @@
 #include <stdlib.h>
 #include <vector>
 #include <string>
+#include <cmath>
 #include <fftw3.h>
 #include "config.hpp"
 #include "diffusion/diffusion.hpp"
+#include "boundary/boundary.hpp"
 #include "io/io.hpp"
 #include "io/exceptions.hpp"
 
-#define N 8
+#define N 16
 
 log4cxx::LoggerPtr config::logger (log4cxx::Logger::getLogger ("main"));
 log4cxx::LevelPtr config::levels [6];
@@ -62,26 +64,59 @@ int main (int argc, char const *argv[])
 	}
 	
 	LOG4CXX_TRACE (config::logger, "Beginning main...");
-					
+	
+	double timestep = 0.001;
+	
 	std::vector<double> velocity (N, 0.0);
+	std::vector<double> position (N, 0.0);
+	
+	double pioN = std::acos (-1.0) / N;
+	
+	for (i = 0; i < N; ++i) {
+		position [i] = std::cos (pioN * i);
+	}
+	
 	std::vector<double *> data_ptrs (2);
-	data_ptrs [0] = &velocity [0];
+	data_ptrs [0] = &position [0];
+	data_ptrs [1] = &velocity [0];
 	
-	velocity [0] = 1.0;
-	velocity [1] = 1.0;
-	velocity [2] = 1.0;
-	velocity [3] = 1.0;
+	velocity [0] = 2.0;
+	velocity [1] = 0.0;
+	velocity [2] = -1.0;
+	velocity [3] = 0.0;
 	
-	io::incremental_output_stream_1D cheb_stream ("../output/test_cheb", ".dat", 4, new io::header, N, 1, &data_ptrs [0]);
-	io::incremental_output_stream_1D angle_stream ("../output/test_angle", ".dat", 4, new io::header, N, 1, &data_ptrs [0]);
-	io::simple_output_stream_1D failsafe_dump ("_dump.dat", N, 1, &data_ptrs [0]);
+	io::incremental_output_stream_1D cheb_stream ("../output/test_cheb", ".dat", 4, new io::header, N, 1, &data_ptrs [1]);
+	io::incremental_output_stream_1D angle_stream ("../output/test_angle", ".dat", 4, new io::header, N, 2, &data_ptrs [0]);
+	io::simple_output_stream_1D failsafe_dump ("_dump.dat", N, 2, &data_ptrs [0]);
 		
 	diffusion::cheb_1D diffusion_plan (1., N, &velocity [0]);
+	
+	boundary::fixed_cart_1D upper_bound (&velocity [0], 0.0);
+	boundary::fixed_cart_1D lower_bound (&velocity [N - 1], 0.0);
 	
 	fftw_plan fourier_plan = fftw_plan_r2r_1d (N, &velocity [0], &velocity [0], FFTW_REDFT00, FFTW_ESTIMATE);
 
 	LOG4CXX_TRACE (config::logger, "main: Entering main loop.");
 
+	// Output in Chebyshev space
+	try {
+		cheb_stream.output ();
+	} catch (io::exceptions::file_exception &io_exception) {
+		LOG4CXX_ERROR (config::logger, "Unable to print to file, outputting failsafe dump to _dump.dat");
+		failsafe_dump.output ();
+		exit (EXIT_FAILURE);
+	}
+	// Transform forward
+	fftw_execute (fourier_plan);
+	// Output in angle space
+	angle_stream.output ();
+	// Transform backward
+	fftw_execute (fourier_plan);
+	// We rescale the values to account for the factor of 2(N-1) that occurs during FFT
+	for (j = 0; j < N; ++j) {
+		velocity [j] /= (2 * (N - 1));
+	}
+	
 	for (i = 0; i < 10; ++i) {
 		LOG4CXX_TRACE (config::logger, "main: Beginning timestep...");
 		LOG4CXX_INFO (config::logger, "main: Timestep: " << i);
@@ -95,10 +130,14 @@ int main (int argc, char const *argv[])
 			exit (EXIT_FAILURE);
 		}
 		// Calculate the diffusion in Chebyshev space
-		diffusion_plan.execute (0.01);
+		diffusion_plan.execute (timestep);
 		
 		// Transform forward
 		fftw_execute (fourier_plan);
+		
+		// Apply boundary conditions
+		upper_bound.execute (timestep);
+		lower_bound.execute (timestep);
 
 		// Output in angle space
 		angle_stream.output ();

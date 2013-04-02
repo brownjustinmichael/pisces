@@ -34,6 +34,8 @@ extern "C" void   dcopy_(int *n, double *x, int *incx, double *y, int *incy);
 //! \param incx a pointer to an integer spacing of elements in x
 extern "C" void   dtpsv_(char *uplo, char *trans, char *diag, int *n, double *a, double *x, int *incx);
 
+extern "C" void dgtsv_(int *n, int *nrhs, double *dl, double *d, double *du, double *b, int *ldb, int *info);
+
 namespace diffusion
 {
 	//! \brief Subclass of operation, one implementation of diffusion for data expressed as a sum of Chebyshev polynomials in 1D
@@ -59,7 +61,22 @@ namespace diffusion
 		//
 		//! \param timestep a double duration over which the diffusion step will happen
 		void execute (double timestep);
-	};	
+	};
+	
+	class fixed_angle_1D : public plan
+	{
+	private:
+		double coeff;
+		int n;
+		double *data_in;
+		double *data_out;
+		std::vector<double> diagonal_left;
+		std::vector<double> diagonal_right;
+		std::vector<double> diagonal;
+	public:
+		fixed_angle_1D (double i_coeff, int i_n, double *i_data_in, double *i_data_out = NULL);
+		void execute (double timestep);
+	};
 } /* diffusion */
 
 #endif /* end of include guard: diffusion_H_1AIIK1RA */
