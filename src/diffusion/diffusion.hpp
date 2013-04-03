@@ -59,7 +59,7 @@ namespace diffusion
 		//! \param i_n an integer number of data elements (grid points) that cheb_1D will be built to tackle
 		//! \param i_data_in a double pointer pointing to the input data
 		//! \param i_data_out a double pointer pointing to the output data
-		cheb_1D (double i_coeff, double alpha, int i_n, double *i_data_in, double *i_data_out);
+		cheb_1D (double i_coeff, double alpha, int i_n, double *i_data_in, double *i_data_out = NULL);
 		virtual ~cheb_1D () {delete cheb;}
 		//! \brief Execute the operation on the data for a given timestep duration
 		//

@@ -1,4 +1,4 @@
 import os
 env = Environment (ENV = os.environ)
 env.Default ("../run/main")
-env.Program(target = "../run/main", source = ["main.cpp", "diffusion/diffusion.cpp", "io/io.cpp"], srcdir = "../src/", LIBS = ["log4cxx", "blas", "fftw3"], LIBPATH = ["/opt/local/lib/"])
+env.Program(target = "../run/main", source = ["main.cpp", "diffusion/diffusion.cpp", "io/io.cpp", "collocation/collocation.cpp"], srcdir = "../src/", LIBS = ["log4cxx", "blas", "fftw3", "lapack"], LIBPATH = ["/opt/local/lib/"])

@@ -21,17 +21,27 @@ namespace diffusion
 		alpha = i_alpha;
 		n = i_n;
 		data_in = i_data_in;
-		data_out = i_data_out;
+		if (i_data_out == NULL) {
+			data_out = i_data_in;
+		} else {
+			data_out = i_data_out;
+		}
 
-		LOG4CXX_TRACE (config::logger, "cheb_1D: [cheb_1d] Instantiating...");
+		LOG4CXX_TRACE (config::logger, "Instantiating...");
 
 		cheb = new collocation::cheb_grid (i_n, i_n);
 		
-		LOG4CXX_DEBUG (config::logger, "cheb_1D: [cheb_1d] Input pointer: " << data_in << ", Output pointer: " << data_out);
+		LOG4CXX_DEBUG (config::logger, "Input pointer: " << data_in << ", Output pointer: " << data_out);
+
+		for (i = 0; i < n; ++i) {
+			for (j = 0; j < n; ++j) {
+				LOG4CXX_DEBUG (config::logger, "cheb [" << i << ", " << j << "] = " << cheb->index (0, i, j));
+			}
+		}
 		
 		diffusion_matrix.resize (i_n * i_n);
 		
-		LOG4CXX_TRACE (config::logger, "cheb_1D: [cheb_1d] Instantiation complete.");
+		LOG4CXX_TRACE (config::logger, "Instantiation complete.");
 	}
 
 	void cheb_1D::execute (double timestep) {
@@ -40,7 +50,7 @@ namespace diffusion
 	    char charN = 'N', charU = 'U';
 	    double dpone = 1.e0, dmone = -1.e0;
 	
-		LOG4CXX_TRACE (config::logger, "cheb_1D: [operate] Operating...");
+		LOG4CXX_TRACE (config::logger, "Operating...");
 		
 		double scalar = std::sqrt (2.0 / (n - 1.0));
 		double scalar_half = scalar / 2.0;
@@ -53,7 +63,7 @@ namespace diffusion
 			diffusion_matrix [i * n + n - 1] = scalar_half * (cheb->index (0, i, n - 1) - alpha_scalar * cheb->index (2, i, n - 1));
 		}
 	
-		LOG4CXX_TRACE (config::logger, "cheb_1D: [operate] Operation complete.");
+		LOG4CXX_TRACE (config::logger, "Operation complete.");
 	}
 	
 	fixed_angle_1D::fixed_angle_1D (double i_coeff, int i_n, double *i_data_in, double *i_data_out) {

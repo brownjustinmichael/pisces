@@ -89,7 +89,7 @@ int main (int argc, char const *argv[])
 	io::incremental_output_stream_1D angle_stream ("../output/test_angle", ".dat", 4, new io::header, N, 2, &data_ptrs [0]);
 	io::simple_output_stream_1D failsafe_dump ("_dump.dat", N, 2, &data_ptrs [0]);
 		
-	diffusion::fixed_angle_1D diffusion_plan (1., N, &velocity [0]);
+	diffusion::cheb_1D diffusion_plan (1., 0.5, N, &velocity [0]);
 	
 	boundary::fixed_cart_1D upper_bound (&velocity [0], 0.0);
 	boundary::fixed_cart_1D lower_bound (&velocity [N - 1], 0.0);
