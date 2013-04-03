@@ -13,6 +13,7 @@
 
 #include <vector>
 #include "../plan.hpp"
+#include "../collocation/collocation.hpp"
 
 //! \brief Function from blas that copies a double array to another in place
 //
@@ -36,6 +37,8 @@ extern "C" void   dtpsv_(char *uplo, char *trans, char *diag, int *n, double *a,
 
 extern "C" void dgtsv_(int *n, int *nrhs, double *dl, double *d, double *du, double *b, int *ldb, int *info);
 
+extern "C" void dgbsv_(int *n, int *kl, int *ku, int *nrhs, double *ab, int *ldab, int *ipiv, double *b, int *ldb, int *info);
+
 namespace diffusion
 {
 	//! \brief Subclass of operation, one implementation of diffusion for data expressed as a sum of Chebyshev polynomials in 1D
@@ -45,18 +48,19 @@ namespace diffusion
 	{
 	private:
 		double coeff; //!< a double that represents the coefficient in front of the diffusion term in the differential equation
+		double alpha;
 		int n; //!< an integer number of data elements (grid points) that cheb_1D will be built to handle
 		double *data_in; //!< a double pointer to the input data
 		double *data_out; //!< a double pointer to the output data; if data_in == data_out, the operation is done in place
-		std::vector<double> even_diffusion_matrix; //!< a 1D vector to be filled with the triangular packed matrix equation for the even Chebyshev polynomials
-		std::vector<double> odd_diffusion_matrix; //!< a 1D vector to be filled with the triangular packed matrix equation for the odd Chebyshev polynomials
+		std::vector<double> diffusion_matrix; //!< a 1D vector to be filled with the matrix equation for the Chebyshev polynomials
+		collocation::cheb_grid *cheb;
 	public:
 		//! \param i_coeff a double containing the coefficient in front of the diffusion term in the differential equation
 		//! \param i_n an integer number of data elements (grid points) that cheb_1D will be built to tackle
 		//! \param i_data_in a double pointer pointing to the input data
-		//! \param i_data_out a double pointer pointing to the output data; if data_out == data_in or NULL, the operation is done in place
-		cheb_1D (double i_coeff, int i_n, double *i_data_in, double *i_data_out = NULL);
-		
+		//! \param i_data_out a double pointer pointing to the output data
+		cheb_1D (double i_coeff, double alpha, int i_n, double *i_data_in, double *i_data_out);
+		virtual ~cheb_1D () {delete cheb;}
 		//! \brief Execute the operation on the data for a given timestep duration
 		//
 		//! \param timestep a double duration over which the diffusion step will happen
