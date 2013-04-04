@@ -37,6 +37,10 @@ extern "C" void   dtpsv_(char *uplo, char *trans, char *diag, int *n, double *a,
 
 extern "C" void dgtsv_(int *n, int *nrhs, double *dl, double *d, double *du, double *b, int *ldb, int *info);
 
+extern "C" void dgesv_ (int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info);
+
+extern "C" void dgemv_ (char *trans, int *m, int *n, double *alpha, double *a, int *lda, double *x, int *incx, double *beta, double *y, int *incy);
+
 extern "C" void dgbsv_(int *n, int *kl, int *ku, int *nrhs, double *ab, int *ldab, int *ipiv, double *b, int *ldb, int *info);
 
 namespace diffusion
@@ -53,6 +57,9 @@ namespace diffusion
 		double *data_in; //!< a double pointer to the input data
 		double *data_out; //!< a double pointer to the output data; if data_in == data_out, the operation is done in place
 		std::vector<double> diffusion_matrix; //!< a 1D vector to be filled with the matrix equation for the Chebyshev polynomials
+		std::vector<double> pre_matrix;
+		std::vector<double> temp;
+		std::vector<int> ipiv;
 		collocation::cheb_grid *cheb;
 	public:
 		//! \param i_coeff a double containing the coefficient in front of the diffusion term in the differential equation

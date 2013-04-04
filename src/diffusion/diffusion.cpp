@@ -21,6 +21,7 @@ namespace diffusion
 		alpha = i_alpha;
 		n = i_n;
 		data_in = i_data_in;
+		data_in = i_data_in;
 		if (i_data_out == NULL) {
 			data_out = i_data_in;
 		} else {
@@ -32,36 +33,71 @@ namespace diffusion
 		cheb = new collocation::cheb_grid (i_n, i_n);
 		
 		LOG4CXX_DEBUG (config::logger, "Input pointer: " << data_in << ", Output pointer: " << data_out);
-
-		for (i = 0; i < n; ++i) {
-			for (j = 0; j < n; ++j) {
-				LOG4CXX_DEBUG (config::logger, "cheb [" << i << ", " << j << "] = " << cheb->index (0, i, j));
-			}
-		}
 		
 		diffusion_matrix.resize (i_n * i_n);
+		ipiv.resize (i_n * i_n);
+		pre_matrix.resize (i_n * i_n);
+		temp.resize (i_n);
 		
 		LOG4CXX_TRACE (config::logger, "Instantiation complete.");
 	}
 
 	void cheb_1D::execute (double timestep) {
 		int i, j;
-	    int ione=1, itwo=2, nhalf = n / 2;
+	    int ione=1, itwo=2, info;
 	    char charN = 'N', charU = 'U';
-	    double dpone = 1.e0, dmone = -1.e0;
+	    double dpone = 1.e0, dmone = -1.e0, dzero = 0.0;
+		double d2sum;
 	
 		LOG4CXX_TRACE (config::logger, "Operating...");
 		
+		dcopy_ (&n, &data_in [0], &ione, &temp [0], &ione);
+		
 		double scalar = std::sqrt (2.0 / (n - 1.0));
 		double scalar_half = scalar / 2.0;
-		double alpha_scalar = alpha * timestep * coeff;
-	   	for (i = 0; i < n; ++i) {
-			diffusion_matrix [i * n] = scalar_half * (cheb->index (0, i, 0) - alpha_scalar * cheb->index (2, i, 0));
-		   	for (j = 1; j < n - 1; ++j) {
-				diffusion_matrix [i * n + j] = scalar * (cheb->index (0, i, j) - alpha_scalar * cheb->index (2, i, j));
-			}
-			diffusion_matrix [i * n + n - 1] = scalar_half * (cheb->index (0, i, n - 1) - alpha_scalar * cheb->index (2, i, n - 1));
+		double alpha_scalar = (1.0 - alpha) * timestep * coeff;
+		
+		pre_matrix [0] = scalar_half * cheb->index (0, 0, 0);
+		for (j = 1; j < n - 1; ++j) {
+			pre_matrix [j * n] = scalar * cheb->index (0, j, 0);
 		}
+		pre_matrix [(n - 1) * n] = scalar_half * cheb->index (0, n - 1, 0);
+		for (i = 1; i < n - 1; ++i) {
+			pre_matrix [i] = scalar_half * (cheb->index (0, 0, i) + alpha_scalar * cheb->index (2, 0, i));
+		   	for (j = 1; j < n - 1; ++j) {
+				pre_matrix [i + j * n] = scalar * (cheb->index (0, j, i) + alpha_scalar * cheb->index (2, j, i));
+			}
+			pre_matrix [i + (n - 1) * n] = scalar_half * (cheb->index (0, n - 1, i) + alpha_scalar * cheb->index (2, n - 1, i));
+		}
+		pre_matrix [(n - 1)] = scalar_half * cheb->index (0, 0, n - 1);
+		for (j = 1; j < n - 1; ++j) {
+			pre_matrix [(n - 1) + j * n] = scalar * cheb->index (0, j, n - 1);
+		}
+		pre_matrix [(n - 1) + (n - 1) * n] = scalar_half * cheb->index (0, n - 1, n - 1);
+			
+		alpha_scalar = alpha * timestep * coeff;
+		
+		diffusion_matrix [0] = scalar_half * cheb->index (0, 0, 0);
+		for (j = 1; j < n - 1; ++j) {
+			diffusion_matrix [j * n] = scalar * cheb->index (0, j, 0);
+		}
+		diffusion_matrix [(n - 1) * n] = scalar_half * cheb->index (0, n - 1, 0);
+		for (i = 1; i < n - 1; ++i) {
+			diffusion_matrix [i] = scalar_half * (cheb->index (0, 0, i) - alpha_scalar * cheb->index (2, 0, i));
+		   	for (j = 1; j < n - 1; ++j) {
+				diffusion_matrix [i + j * n] = scalar * (cheb->index (0, j, i) - alpha_scalar * cheb->index (2, j, i));
+			}
+			diffusion_matrix [i + (n - 1) * n] = scalar_half * (cheb->index (0, n - 1, i) - alpha_scalar * cheb->index (2, n - 1, i));
+		}
+		diffusion_matrix [(n - 1)] = scalar_half * cheb->index (0, 0, n - 1);
+		for (j = 1; j < n - 1; ++j) {
+			diffusion_matrix [(n - 1) + j * n] = scalar * cheb->index (0, j, n - 1);
+		}
+		diffusion_matrix [(n - 1) + (n - 1) * n] = scalar_half * cheb->index (0, n - 1, n - 1);
+		
+		dgemv_ (&charN, &n, &n, &dpone, &pre_matrix [0], &n, &temp [0], &ione, &dzero, &data_out [0], &ione);
+		
+		dgesv_ (&n, &ione, &diffusion_matrix [0], &n, &ipiv [0], &data_out [0], &n, &info);
 	
 		LOG4CXX_TRACE (config::logger, "Operation complete.");
 	}

@@ -18,7 +18,7 @@
 #include "io/io.hpp"
 #include "io/exceptions.hpp"
 
-#define N 16
+#define N 128
 
 log4cxx::LoggerPtr config::logger (log4cxx::Logger::getLogger ("main"));
 log4cxx::LevelPtr config::levels [6];
@@ -65,7 +65,7 @@ int main (int argc, char const *argv[])
 	
 	LOG4CXX_TRACE (config::logger, "Beginning main...");
 	
-	double timestep = 0.1;
+	double timestep = 0.01;
 	
 	std::vector<double> velocity (N, 0.0);
 	std::vector<double> position (N, 0.0);
@@ -89,11 +89,8 @@ int main (int argc, char const *argv[])
 	io::incremental_output_stream_1D angle_stream ("../output/test_angle", ".dat", 4, new io::header, N, 2, &data_ptrs [0]);
 	io::simple_output_stream_1D failsafe_dump ("_dump.dat", N, 2, &data_ptrs [0]);
 		
-	diffusion::cheb_1D diffusion_plan (1., 0.5, N, &velocity [0]);
-	
-	boundary::fixed_cart_1D upper_bound (&velocity [0], 0.0);
-	boundary::fixed_cart_1D lower_bound (&velocity [N - 1], 0.0);
-	
+	diffusion::cheb_1D diffusion_plan (1., 0.0, N, &velocity [0]);
+
 	fftw_plan fourier_plan = fftw_plan_r2r_1d (N, &velocity [0], &velocity [0], FFTW_REDFT00, FFTW_ESTIMATE);
 
 	LOG4CXX_TRACE (config::logger, "main: Entering main loop.");
@@ -121,6 +118,9 @@ int main (int argc, char const *argv[])
 		LOG4CXX_TRACE (config::logger, "main: Beginning timestep...");
 		LOG4CXX_INFO (config::logger, "main: Timestep: " << i);
 
+		// Calculate the diffusion in Chebyshev space
+		diffusion_plan.execute (timestep);
+
 		// Output in Chebyshev space
 		try {
 			cheb_stream.output ();
@@ -133,13 +133,6 @@ int main (int argc, char const *argv[])
 		// Transform forward
 		fftw_execute (fourier_plan);
 		
-		// Calculate the diffusion in Angle space
-		diffusion_plan.execute (timestep);
-		
-		// Apply boundary conditions
-		// upper_bound.execute (timestep);
-		// lower_bound.execute (timestep);
-
 		// Output in angle space
 		angle_stream.output ();
 		
