@@ -65,7 +65,7 @@ int main (int argc, char const *argv[])
 	
 	LOG4CXX_TRACE (config::logger, "Beginning main...");
 	
-	double timestep = 0.01;
+	double timestep = 0.1;
 	
 	std::vector<double> velocity (N, 0.0);
 	std::vector<double> position (N, 0.0);
@@ -89,7 +89,7 @@ int main (int argc, char const *argv[])
 	io::incremental_output_stream_1D angle_stream ("../output/test_angle", ".dat", 4, new io::header, N, 2, &data_ptrs [0]);
 	io::simple_output_stream_1D failsafe_dump ("_dump.dat", N, 2, &data_ptrs [0]);
 		
-	diffusion::cheb_1D diffusion_plan (1., 0.0, N, &velocity [0]);
+	diffusion::cheb_1D diffusion_plan (1., 0.5, N, &velocity [0]);
 
 	fftw_plan fourier_plan = fftw_plan_r2r_1d (N, &velocity [0], &velocity [0], FFTW_REDFT00, FFTW_ESTIMATE);
 

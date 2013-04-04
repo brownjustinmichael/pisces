@@ -96,7 +96,7 @@ namespace diffusion
 		diffusion_matrix [(n - 1) + (n - 1) * n] = scalar_half * cheb->index (0, n - 1, n - 1);
 		
 		dgemv_ (&charN, &n, &n, &dpone, &pre_matrix [0], &n, &temp [0], &ione, &dzero, &data_out [0], &ione);
-		
+
 		dgesv_ (&n, &ione, &diffusion_matrix [0], &n, &ipiv [0], &data_out [0], &n, &info);
 	
 		LOG4CXX_TRACE (config::logger, "Operation complete.");
