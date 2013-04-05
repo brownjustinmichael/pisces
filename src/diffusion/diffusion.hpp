@@ -24,24 +24,11 @@
 //! \param incy a pointer to an integer spacing of elements in y
 extern "C" void   dcopy_(int *n, double *x, int *incx, double *y, int *incy);
 
-//! \brief Function from blas that solves a packed triangular matrix equation
-//
-//! \param uplo a pointer to a character, "U" for upper triangular matrix, "L" for lower triangular matrix
-//! \param trans (no idea, just set this to a pointer to "N")
-//! \param diag a pointer to a character, "U" for unit diagonal, "N" for anything else
-//! \param n a pointer to an integer number of elements in x to copy to y
-//! \param a the triangular packed array of matrix elements
-//! \param x the array of right-hand-side elements in the equation which will be replaced with the resulting array
-//! \param incx a pointer to an integer spacing of elements in x
-extern "C" void   dtpsv_(char *uplo, char *trans, char *diag, int *n, double *a, double *x, int *incx);
-
 extern "C" void dgtsv_(int *n, int *nrhs, double *dl, double *d, double *du, double *b, int *ldb, int *info);
 
 extern "C" void dgesv_ (int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info);
 
 extern "C" void dgemv_ (char *trans, int *m, int *n, double *alpha, double *a, int *lda, double *x, int *incx, double *beta, double *y, int *incy);
-
-extern "C" void dgbsv_(int *n, int *kl, int *ku, int *nrhs, double *ab, int *ldab, int *ipiv, double *b, int *ldb, int *info);
 
 namespace diffusion
 {
