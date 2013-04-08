@@ -18,12 +18,12 @@ namespace collocation
 		cols = i_cols;
 		derivs = i_derivs;
 		
-		LOG4CXX_TRACE (config::logger, "Instantiating...")
+		TRACE ("Instantiating...")
 		
 		data.resize (i_rows * i_cols * i_derivs);
 		exists_array.resize (i_rows * i_cols * i_derivs, false);
 		
-		LOG4CXX_TRACE (config::logger, "Instantiated...")
+		TRACE ("Instantiated...")
 	}
 	
 	double &collocation_grid::index (int deriv, int row, int col) {
@@ -34,7 +34,7 @@ namespace collocation
 		int d, m, k;
 		pioN = std::acos (-1.0) / i_N;
 		
-		LOG4CXX_TRACE (config::logger, "Instantiating...");
+		TRACE ("Instantiating...");
 		
 		for (d = 0; d < 3; ++d) {
 			for (m = 0; m < i_M; ++m) {
@@ -45,12 +45,10 @@ namespace collocation
 			}
 		}
 		
-		LOG4CXX_TRACE (config::logger, "Instantiated...")
+		TRACE ("Instantiated...")
 	}
 	
-	double cheb_grid::recursion (int d, int m, int k) {
-		LOG4CXX_TRACE (config::logger, "Calculating d^" << d << " T_" << m << " (x_" << k << ")...");
-		
+	double cheb_grid::recursion (int d, int m, int k) {		
 		assert (d >= 0);
 		assert (d < 3);
 		assert (m >= 0);
@@ -80,10 +78,8 @@ namespace collocation
 			return 4.0 * recursion (1, m - 1, k) + 2.0 * std::cos (pioN * k) * recursion (2, m - 1, k) - recursion (2, m - 2, k);
 		} else {
 			// There's been a bad index, kill the program
-			LOG4CXX_FATAL (config::logger, "Bad index")
+			FATAL ("Bad index")
 			throw 0;
 		}
-		
-		LOG4CXX_TRACE (config::logger, "Calculated.");
 	}
 } /* collocation */

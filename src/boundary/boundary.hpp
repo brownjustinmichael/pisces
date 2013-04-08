@@ -13,17 +13,9 @@
 
 namespace boundary
 {
-	class fixed_cart_1D : public plan
-	{
-	private:
-		double *element; //!< A pointer to the double data element to fix
-		double value; //!< The double value at which the element will remained fixed
-	public:
-		//! \param i_element A pointer to the double data element to fix
-		//! \param i_vaule The double value at which the element will remain fixed
-		fixed_cart_1D (double *i_element, double i_value) {element = i_element; value = i_value;}
-		
-		inline void execute (double timestep) {*element = value;}
+	enum flags {
+		fixed_upper = 0x01,
+		fixed_lower = 0x02
 	};
 } /* boundary */
 

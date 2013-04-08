@@ -41,14 +41,6 @@ int main (int argc, char const *argv[])
 	
 	// Here, we're setting up the log. The levels array allows us to easily convert from integer to logging severity, which is specified by the -D flag at the command line, e.g. -D3 specifies that only warnings, errors, and fatal messages will be logged.
 	log4cxx::xml::DOMConfigurator::configure("../input/Log4cxxConfig.xml");
-	
-	config::levels [0] = log4cxx::Level::getTrace ();
-	config::levels [1] = log4cxx::Level::getDebug ();
-	config::levels [2] = log4cxx::Level::getInfo ();
-	config::levels [3] = log4cxx::Level::getWarn ();
-	config::levels [4] = log4cxx::Level::getError ();
-	config::levels [5] = log4cxx::Level::getFatal ();
-
 	config::logger->setLevel (config::levels [4]); // The default logging severity is 4, errors and fatal messages only.
 	
 	// The program runs through the execution flags.
@@ -56,7 +48,7 @@ int main (int argc, char const *argv[])
 		switch (argv [1] [1]) {
 			// Debug switch
 			case 'D':
-				config::logger->setLevel (config::levels [atoi (&(argv [1] [2]))]);
+				config::logger->setLevel (config::int_to_severity (atoi (&(argv [1] [2]))));
 				break;
 		}
 		--argc;
@@ -93,13 +85,13 @@ int main (int argc, char const *argv[])
 
 	fftw_plan fourier_plan = fftw_plan_r2r_1d (N, &velocity [0], &velocity [0], FFTW_REDFT00, FFTW_ESTIMATE);
 
-	LOG4CXX_TRACE (config::logger, "main: Entering main loop.");
+	TRACE ("main: Entering main loop.");
 
 	// Output in Chebyshev space
 	try {
 		cheb_stream.output ();
 	} catch (io::exceptions::file_exception &io_exception) {
-		LOG4CXX_ERROR (config::logger, "Unable to print to file, outputting failsafe dump to _dump.dat");
+		ERROR ("Unable to print to file, outputting failsafe dump to _dump.dat");
 		failsafe_dump.output ();
 		exit (EXIT_FAILURE);
 	}
@@ -115,8 +107,8 @@ int main (int argc, char const *argv[])
 	}
 	
 	for (i = 0; i < 10; ++i) {
-		LOG4CXX_TRACE (config::logger, "main: Beginning timestep...");
-		LOG4CXX_INFO (config::logger, "main: Timestep: " << i);
+		TRACE ("main: Beginning timestep...");
+		INFO ("main: Timestep: " << i);
 
 		// Calculate the diffusion in Chebyshev space
 		diffusion_plan.execute (timestep);
@@ -125,7 +117,7 @@ int main (int argc, char const *argv[])
 		try {
 			cheb_stream.output ();
 		} catch (io::exceptions::file_exception &io_exception) {
-			LOG4CXX_ERROR (config::logger, "Unable to print to file, outputting failsafe dump to _dump.dat");
+			ERROR ("Unable to print to file, outputting failsafe dump to _dump.dat");
 			failsafe_dump.output ();
 			exit (EXIT_FAILURE);
 		}
@@ -144,10 +136,10 @@ int main (int argc, char const *argv[])
 			velocity [j] /= (2 * (N - 1));
 		}
 
-		LOG4CXX_TRACE (config::logger, "main: Timestep " << i << " complete.");
+		TRACE ("main: Timestep " << i << " complete.");
 	}
 
-	LOG4CXX_TRACE (config::logger, "main: End of main.");
+	TRACE ("main: End of main.");
 
 	return 0;
 }
