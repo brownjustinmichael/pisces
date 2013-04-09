@@ -9,6 +9,7 @@
 #ifndef diffusion_H_1AIIK1RA
 #define diffusion_H_1AIIK1RA
 
+#include <memory>
 #include <vector>
 #include "../plan.hpp"
 #include "../collocation/collocation.hpp"
@@ -85,7 +86,7 @@ namespace diffusion
 		std::vector<double> pre_matrix; //!< A 1D vector to be filled with the explicit matrix equation for the Chebyshev polynomials
 		std::vector<double> temp; //!< A temporary 1D vector to store the intermediate step
 		std::vector<int> ipiv; //!< An integer vector that contains the reordering for use in the LAPACK routine
-		unique_ptr<collocation::cheb_grid> cheb; //!< A pointer to a collocation grid that contains the the Chebyshev values
+		std::unique_ptr<collocation::cheb_grid> cheb; //!< A pointer to a collocation grid that contains the the Chebyshev values
 	};
 } /* diffusion */
 
