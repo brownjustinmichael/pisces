@@ -17,6 +17,7 @@ namespace collocation
 		rows = i_rows;
 		cols = i_cols;
 		derivs = i_derivs;
+		int i;
 		
 		TRACE ("Instantiating...")
 		

@@ -8,6 +8,8 @@
 
 #include "config.hpp"
 
+#ifdef __APPLE__
+
 log4cxx::LevelPtr config::int_to_severity (int severity_index) {
 	switch (severity_index) {
 		case 0:
@@ -24,3 +26,5 @@ log4cxx::LevelPtr config::int_to_severity (int severity_index) {
 		return log4cxx::Level::getFatal (); break;
 	}
 }
+
+#endif // #ifdef __APPLE__

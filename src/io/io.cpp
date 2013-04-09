@@ -7,6 +7,7 @@
  ************************************************************************/
 
 #include <cmath>
+#include <sstream>
 #include <iomanip>
 #include "io.hpp"
 #include "exceptions.hpp"
@@ -17,7 +18,7 @@ namespace io
 	simple_header::simple_header (int i_n_data_headers, std::string *i_data_headers, std::string i_comment_string) : header () {
 		int i;
 
-		LOG4CXX_TRACE (config::logger, "Constructing...");
+		TRACE ("Constructing...");
 
 		header_string = i_comment_string;
 			
@@ -29,7 +30,7 @@ namespace io
 		
 		header_string.append ("\n");
 
-		LOG4CXX_TRACE (config::logger, "Constructed.");
+		TRACE ("Constructed.");
 	}
 	
 	output::output (header *i_header_ptr, int i_n, int i_n_data_ptrs, double **i_data_ptrs) {
@@ -38,7 +39,7 @@ namespace io
 		n_data_ptrs = i_n_data_ptrs;
 		header_ptr = i_header_ptr;
 		
-		LOG4CXX_TRACE (config::logger, "Constructing...");
+		TRACE ("Constructing...");
 
 		for (i = 0; i < i_n_data_ptrs; ++i)
 		{
@@ -46,7 +47,7 @@ namespace io
 			int_ptrs.push_back (NULL);
 		}
 
-		LOG4CXX_TRACE (config::logger, "Constructed.");
+		TRACE ("Constructed.");
 	}
 	
 	void output::append (double *data_ptr) {
@@ -64,15 +65,15 @@ namespace io
 	void output::to_file (std::string file_name) {
 		int i, j;
 		
-		LOG4CXX_TRACE (config::logger, "Beginning output...");		
+		TRACE ("Beginning output...");		
 		
-		LOG4CXX_INFO (config::logger, "Outputting to file " << file_name << "...");
+		INFO ("Outputting to file " << file_name << "...");
 		
 		file_stream.open (file_name.c_str ());
 		
-		if (not file_stream.is_open ()) {
+		if (! file_stream.is_open ()) {
 			exceptions::file_exception failure;
-			LOG4CXX_ERROR (config::logger, "Failed to open file " << file_name);
+			ERROR ("Failed to open file " << file_name);
 			throw failure;
 		}
 		
@@ -94,22 +95,23 @@ namespace io
 				
 		file_stream.close ();
 		
-		LOG4CXX_TRACE (config::logger, "Output to file.");
+		TRACE ("Output to file.");
 	}
 	
 	std::string incremental_output::generate_file_name () {
 
-		LOG4CXX_TRACE (config::logger, "Generating new file_name...");
+		TRACE ("Generating new file_name...");
 
-		if (n_outputs >= std::pow (10, int_width)) {
-			LOG4CXX_ERROR (config::logger, "Exceeded maximum number of outputs")
+		if (n_outputs >= std::pow (10., int_width)) {
+			ERROR ("Exceeded maximum number of outputs")
 		}
 		std::ostringstream new_file_name;
 		new_file_name << file_base << std::setfill ('0') << std::setw (int_width) << n_outputs << file_extension;
 
 		++n_outputs;
 
-		LOG4CXX_TRACE (config::logger, "New file name is " << new_file_name.str () << ".");
+		TRACE ("New file name is " << new_file_name.str () << ".");
+		
 		return std::string (new_file_name.str ());
 	}
 } /* io */
