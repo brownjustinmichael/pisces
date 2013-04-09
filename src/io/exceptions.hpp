@@ -1,10 +1,10 @@
-// 
-//! \file exceptions.hpp
-//  io
-//  
-//  Created by Justin Brown on 2013-04-01.
-//  Copyright 2013 Justin Brown. All rights reserved.
-// 
+/*!***********************************************************************
+ * \file exceptions.hpp
+ * Spectral Element
+ * 
+ * Created by Justin Brown on 2013-04-09.
+ * Copyright 2013 Justin Brown. All rights reserved.
+ ************************************************************************/
 
 #ifndef EXCEPTIONS_HPP_82T7S9HQ
 #define EXCEPTIONS_HPP_82T7S9HQ
@@ -15,6 +15,9 @@ namespace io
 {
 	namespace exceptions
 	{
+		/*!*******************************************************************
+		 * \brief This is an exception that can occur when opening files
+		 *********************************************************************/
 		class file_exception : public std::exception
 		{
 		public:

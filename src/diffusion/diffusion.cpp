@@ -1,10 +1,10 @@
-// 
-//! \file diffusion.cpp
-//  src
-//  
-//  Created by Justin Brown on 2013-03-22.
-//  Copyright 2013 Justin Brown. All rights reserved.
-// 
+/*!***********************************************************************
+ * \file diffusion.cpp
+ * Spectral Element
+ * 
+ * Created by Justin Brown on 2013-04-08.
+ * Copyright 2013 Justin Brown. All rights reserved.
+ ************************************************************************/
 
 #include <iostream>
 #include <cmath>
@@ -31,7 +31,7 @@ namespace diffusion
 
 		TRACE ("Instantiating...");
 
-		cheb = new collocation::cheb_grid (i_n, i_n);
+		cheb.reset (new collocation::cheb_grid (i_n, i_n));
 		
 		DEBUG ("Input pointer: " << data_in << ", Output pointer: " << data_out);
 		

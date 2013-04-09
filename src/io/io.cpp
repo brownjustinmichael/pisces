@@ -1,10 +1,10 @@
-// 
-//! \file io.cpp
-//  io
-//  
-//  Created by Justin Brown on 2013-03-26.
-//  Copyright 2013 Justin Brown. All rights reserved.
-// 
+/*!***********************************************************************
+ * \file io.cpp
+ * Spectral Element
+ * 
+ * Created by Justin Brown on 2013-04-08.
+ * Copyright 2013 Justin Brown. All rights reserved.
+ ************************************************************************/
 
 #include <cmath>
 #include <iomanip>

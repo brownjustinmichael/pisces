@@ -1,10 +1,10 @@
-// 
-//! \file collocation.cpp
-//  src
-//  
-//  Created by Justin Brown on 2013-04-02.
-//  Copyright 2013 Justin Brown. All rights reserved.
-// 
+/*!***********************************************************************
+ * \file collocation.cpp
+ * Spectral Element
+ * 
+ * Created by Justin Brown on 2013-04-08.
+ * Copyright 2013 Justin Brown. All rights reserved.
+ ************************************************************************/
 
 #include <cassert>
 #include <exception>

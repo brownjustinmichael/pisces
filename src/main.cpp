@@ -1,10 +1,10 @@
-// 
-//! \file main.cpp
-//  spectral element
-//  
-//  Created by Justin Brown on 2013-03-22.
-//  Copyright 2013 Justin Brown. All rights reserved.
-// 
+/*!***********************************************************************
+ * \file main.cpp
+ * Spectral Element
+ * 
+ * Created by Justin Brown on 2013-04-08.
+ * Copyright 2013 Justin Brown. All rights reserved.
+ ************************************************************************/
 
 #include "config.hpp"
 #include "boundary/boundary.hpp"
@@ -15,17 +15,21 @@
 log4cxx::LoggerPtr config::logger (log4cxx::Logger::getLogger ("main"));
 log4cxx::LevelPtr config::levels [6];
 
-/*! \mainpage
+/*!*******************************************************************
+ * \mainpage
  *
- *  \author Justin Brown
- *  \author Ryan Moll
+ * \author Justin Brown
+ * \author Ryan Moll
  *
- *  \section Introduction
+ * \section Introduction
  *
- *  The goal of this project is to set up a code designed to do 2D Anelastic simulations using a spectral element scheme. Currently, the aim is do get the solution to the 1D advection-diffusion equation for a constant background flow.
+ * The goal of this project is to set up a code designed to do 2D 
+ * Anelastic simulations using a spectral element scheme. Currently, 
+ * the aim is do get the solution to the 1D advection-diffusion 
+ * equation for a constant background flow.
  *
- *  Possible further reaching goals: 3D, pseudo-incompressible
- */
+ * Possible further reaching goals: 3D, pseudo-incompressible
+ *********************************************************************/
 
 int main (int argc, char const *argv[])
 {	

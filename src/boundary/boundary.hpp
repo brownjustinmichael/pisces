@@ -1,10 +1,10 @@
-// 
-//! \file boundary.hpp
-//  boundary
-//  
-//  Created by Justin Brown on 2013-04-01.
-//  Copyright 2013 Justin Brown. All rights reserved.
-// 
+/*!***********************************************************************
+ * \file boundary.hpp
+ * Spectral Element
+ * 
+ * Created by Justin Brown on 2013-04-09.
+ * Copyright 2013 Justin Brown. All rights reserved.
+ ************************************************************************/
 
 #ifndef BOUNDARY_HPP_CP5DR4CP
 #define BOUNDARY_HPP_CP5DR4CP
