@@ -6,17 +6,9 @@
 //  Copyright 2013 Justin Brown. All rights reserved.
 // 
 
-#include <iostream>
-#include <stdlib.h>
-#include <vector>
-#include <string>
-#include <cmath>
-#include <fftw3.h>
 #include "config.hpp"
-#include "diffusion/diffusion.hpp"
 #include "boundary/boundary.hpp"
-#include "io/io.hpp"
-#include "io/exceptions.hpp"
+#include "element/element.hpp"
 
 #define N 128
 
@@ -37,7 +29,7 @@ log4cxx::LevelPtr config::levels [6];
 
 int main (int argc, char const *argv[])
 {	
-	int i, j;
+	int i;
 	
 	// Here, we're setting up the log. The levels array allows us to easily convert from integer to logging severity, which is specified by the -D flag at the command line, e.g. -D3 specifies that only warnings, errors, and fatal messages will be logged.
 	log4cxx::xml::DOMConfigurator::configure("../input/Log4cxxConfig.xml");
@@ -55,86 +47,17 @@ int main (int argc, char const *argv[])
 		++argv;
 	}
 	
-	LOG4CXX_TRACE (config::logger, "Beginning main...");
+	TRACE ("Beginning main...");
 	
-	double timestep = 0.1;
-	
-	std::vector<double> velocity (N, 0.0);
-	std::vector<double> position (N, 0.0);
-	
-	double pioN = std::acos (-1.0) / N;
-	
-	for (i = 0; i < N; ++i) {
-		position [i] = std::cos (pioN * i);
-	}
-	
-	std::vector<double *> data_ptrs (2);
-	data_ptrs [0] = &position [0];
-	data_ptrs [1] = &velocity [0];
-	
-	velocity [0] = 2.0;
-	velocity [1] = 0.0;
-	velocity [2] = -1.0;
-	velocity [3] = 0.0;
-	
-	io::incremental_output_stream_1D cheb_stream ("../output/test_cheb", ".dat", 4, new io::header, N, 1, &data_ptrs [1]);
-	io::incremental_output_stream_1D angle_stream ("../output/test_angle", ".dat", 4, new io::header, N, 2, &data_ptrs [0]);
-	io::simple_output_stream_1D failsafe_dump ("_dump.dat", N, 2, &data_ptrs [0]);
-		
-	diffusion::cheb_1D diffusion_plan (1., 0.5, N, &velocity [0]);
-
-	fftw_plan fourier_plan = fftw_plan_r2r_1d (N, &velocity [0], &velocity [0], FFTW_REDFT00, FFTW_ESTIMATE);
+	element::diffusion_element main_element (N, boundary::fixed_upper | boundary::fixed_lower);
 
 	TRACE ("main: Entering main loop.");
-
-	// Output in Chebyshev space
-	try {
-		cheb_stream.output ();
-	} catch (io::exceptions::file_exception &io_exception) {
-		ERROR ("Unable to print to file, outputting failsafe dump to _dump.dat");
-		failsafe_dump.output ();
-		exit (EXIT_FAILURE);
-	}
-	// Transform forward
-	fftw_execute (fourier_plan);
-	// Output in angle space
-	angle_stream.output ();
-	// Transform backward
-	fftw_execute (fourier_plan);
-	// We rescale the values to account for the factor of 2(N-1) that occurs during FFT
-	for (j = 0; j < N; ++j) {
-		velocity [j] /= (2 * (N - 1));
-	}
 	
-	for (i = 0; i < 10; ++i) {
+	for (i = 0; i < 100; ++i) {
 		TRACE ("main: Beginning timestep...");
 		INFO ("main: Timestep: " << i);
 
-		// Calculate the diffusion in Chebyshev space
-		diffusion_plan.execute (timestep);
-
-		// Output in Chebyshev space
-		try {
-			cheb_stream.output ();
-		} catch (io::exceptions::file_exception &io_exception) {
-			ERROR ("Unable to print to file, outputting failsafe dump to _dump.dat");
-			failsafe_dump.output ();
-			exit (EXIT_FAILURE);
-		}
-
-		// Transform forward
-		fftw_execute (fourier_plan);
-		
-		// Output in angle space
-		angle_stream.output ();
-		
-		// Transform backward
-		fftw_execute (fourier_plan);
-		
-		// We rescale the values to account for the factor of 2(N-1) that occurs during FFT
-		for (j = 0; j < N; ++j) {
-			velocity [j] /= (2 * (N - 1));
-		}
+		main_element.update ();
 
 		TRACE ("main: Timestep " << i << " complete.");
 	}

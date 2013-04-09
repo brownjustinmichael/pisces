@@ -32,7 +32,7 @@ namespace io
 		LOG4CXX_TRACE (config::logger, "Constructed.");
 	}
 	
-	output_stream::output_stream (header *i_header_ptr, int i_n, int i_n_data_ptrs, double **i_data_ptrs) {
+	output::output (header *i_header_ptr, int i_n, int i_n_data_ptrs, double **i_data_ptrs) {
 		int i;
 		n = i_n;
 		n_data_ptrs = i_n_data_ptrs;
@@ -42,13 +42,26 @@ namespace io
 
 		for (i = 0; i < i_n_data_ptrs; ++i)
 		{
-			data_ptrs.push_back (i_data_ptrs [i]);
+			double_ptrs.push_back (i_data_ptrs [i]);
+			int_ptrs.push_back (NULL);
 		}
 
 		LOG4CXX_TRACE (config::logger, "Constructed.");
 	}
 	
-	void output_stream::output (std::string file_name) {
+	void output::append (double *data_ptr) {
+		++n_data_ptrs;
+		double_ptrs.push_back (data_ptr);
+		int_ptrs.push_back (NULL);
+	}
+	
+	void output::append (int *data_ptr) {
+		++n_data_ptrs;
+		double_ptrs.push_back (NULL);
+		int_ptrs.push_back (data_ptr);
+	}
+	
+	void output::to_file (std::string file_name) {
 		int i, j;
 		
 		LOG4CXX_TRACE (config::logger, "Beginning output...");		
@@ -69,7 +82,11 @@ namespace io
 		{
 			for (j = 0; j < n_data_ptrs; ++j)
 			{
-				file_stream << data_ptrs [j] [i];
+				if (double_ptrs [j] == NULL) {
+					file_stream << int_ptrs [j] [i];
+				} else {
+					file_stream << double_ptrs [j] [i];
+				}
 				file_stream << ' ';
 			}
 			file_stream << '\n';
@@ -80,7 +97,7 @@ namespace io
 		LOG4CXX_TRACE (config::logger, "Output to file.");
 	}
 	
-	std::string incremental_output_stream_1D::generate_file_name () {
+	std::string incremental_output::generate_file_name () {
 
 		LOG4CXX_TRACE (config::logger, "Generating new file_name...");
 

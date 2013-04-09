@@ -21,7 +21,6 @@ namespace collocation
 		TRACE ("Instantiating...")
 		
 		data.resize (i_rows * i_cols * i_derivs);
-		exists_array.resize (i_rows * i_cols * i_derivs, false);
 		
 		TRACE ("Instantiated...")
 	}
@@ -33,6 +32,7 @@ namespace collocation
 	cheb_grid::cheb_grid (int i_M, int i_N) : collocation_grid (3, i_M, i_N) {
 		int d, m, k;
 		pioN = std::acos (-1.0) / i_N;
+		exists_array.resize (i_M * i_N * 3, false);
 		
 		TRACE ("Instantiating...");
 		
@@ -58,7 +58,7 @@ namespace collocation
 		if (exists (d, m, k)) {
 			// This value has already been calculated
 			return index (d, m, k);
-		} else if ((d == 2 && (m == 0 || m == 1) || (d == 1 && m == 0))) {
+		} else if ((d == 2 && (m == 0 || m == 1)) || (d == 1 && m == 0)) {
 			// The first two polynomials of the second derivative and the first polynomial of the first derivative are 0.0
 			return 0.0;
 		} else if ((d == 1 && m == 1) || (d == 0 && m == 0)) {

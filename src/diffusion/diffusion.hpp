@@ -35,18 +35,6 @@ namespace diffusion
 	//! This implementation is a simple forward time-difference scheme, solving only for the diffusion component of the equations. The class solves this implicitly with two matrix equations, one for the even and one for the odd Chebyshev polynomials. It uses the BLAS library to do so.
 	class cheb_1D : public plan
 	{
-	private:
-		double coeff; //!< a double that represents the coefficient in front of the diffusion term in the differential equation
-		double alpha;
-		int n; //!< an integer number of data elements (grid points) that cheb_1D will be built to handle
-		double *data_in; //!< a double pointer to the input data
-		double *data_out; //!< a double pointer to the output data; if data_in == data_out, the operation is done in place
-		int flags;
-		std::vector<double> diffusion_matrix; //!< a 1D vector to be filled with the matrix equation for the Chebyshev polynomials
-		std::vector<double> pre_matrix;
-		std::vector<double> temp;
-		std::vector<int> ipiv;
-		collocation::cheb_grid *cheb;
 	public:
 		//! \param i_coeff a double containing the coefficient in front of the diffusion term in the differential equation
 		//! \param i_n an integer number of data elements (grid points) that cheb_1D will be built to tackle
@@ -59,6 +47,19 @@ namespace diffusion
 		//! \param timestep a double duration over which the diffusion step will happen
 		void execute (double timestep);
 		void matrix (double alpha_scalar, double *matrix);
+		
+	private:
+		double coeff; //!< a double that represents the coefficient in front of the diffusion term in the differential equation
+		double alpha;
+		int n; //!< an integer number of data elements (grid points) that cheb_1D will be built to handle
+		double *data_in; //!< a double pointer to the input data
+		double *data_out; //!< a double pointer to the output data; if data_in == data_out, the operation is done in place
+		int flags;
+		std::vector<double> diffusion_matrix; //!< a 1D vector to be filled with the matrix equation for the Chebyshev polynomials
+		std::vector<double> pre_matrix;
+		std::vector<double> temp;
+		std::vector<int> ipiv;
+		collocation::cheb_grid *cheb;
 	};
 } /* diffusion */
 

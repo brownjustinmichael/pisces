@@ -17,7 +17,6 @@
 namespace diffusion
 {
 	cheb_1D::cheb_1D (double i_coeff, double i_alpha, int i_n, double *i_data_in, double *i_data_out, int i_flags) {
-		int i, j;
 		coeff = i_coeff;
 		alpha = i_alpha;
 		n = i_n;
@@ -46,10 +45,9 @@ namespace diffusion
 
 	void cheb_1D::execute (double timestep) {
 		int i, j;
-	    int ione=1, itwo=2, info;
-	    char charN = 'N', charU = 'U';
-	    double dpone = 1.e0, dmone = -1.e0, dzero = 0.0;
-		double d2sum;
+	    int ione=1, info;
+	    char charN = 'N';
+	    double dpone = 1.e0, dzero = 0.0;
 	
 		TRACE ("Operating...");
 		
@@ -78,31 +76,39 @@ namespace diffusion
 	}
 	
 	void cheb_1D::matrix (double alpha_scalar, double *matrix) {
-		int i, j;
+		int i, j, start, end;
 		double scalar = std::sqrt (2.0 / (n - 1.0));
 		double scalar_half = scalar / 2.0;
 		
-		// This equation fixes the value at the top boundary
-		matrix [0] = scalar_half * cheb->index (0, 0, 0);
-		for (j = 1; j < n - 1; ++j) {
-			matrix [j * n] = scalar * cheb->index (0, j, 0);
+		start = 0;
+		end = n;
+		if (flags & boundary::fixed_upper) {
+			// This equation fixes the value at the top boundary
+			start = 1;
+			matrix [0] = scalar_half * cheb->index (0, 0, 0);
+			for (j = 1; j < n - 1; ++j) {
+				matrix [j * n] = scalar * cheb->index (0, j, 0);
+			}
+			matrix [(n - 1) * n] = scalar_half * cheb->index (0, n - 1, 0);
 		}
-		matrix [(n - 1) * n] = scalar_half * cheb->index (0, n - 1, 0);
+		
+		if (flags & boundary::fixed_lower) {
+			// This equation fixes the value at the bottom boundary
+			end = n - 1;
+			matrix [(n - 1)] = scalar_half * cheb->index (0, 0, n - 1);
+			for (j = 1; j < n - 1; ++j) {
+				matrix [(n - 1) + j * n] = scalar * cheb->index (0, j, n - 1);
+			}
+			matrix [(n - 1) + (n - 1) * n] = scalar_half * cheb->index (0, n - 1, n - 1);
+		}
 		
 		// This is the main loop for setting up the diffusion equation in Chebyshev space
-		for (i = 1; i < n - 1; ++i) {
+		for (i = start; i < end; ++i) {
 			matrix [i] = scalar_half * (cheb->index (0, 0, i) + alpha_scalar * cheb->index (2, 0, i));
 		   	for (j = 1; j < n - 1; ++j) {
 				matrix [i + j * n] = scalar * (cheb->index (0, j, i) + alpha_scalar * cheb->index (2, j, i));
 			}
 			matrix [i + (n - 1) * n] = scalar_half * (cheb->index (0, n - 1, i) + alpha_scalar * cheb->index (2, n - 1, i));
 		}
-		
-		// This equation fixes the value at the bottom boundary
-		matrix [(n - 1)] = scalar_half * cheb->index (0, 0, n - 1);
-		for (j = 1; j < n - 1; ++j) {
-			matrix [(n - 1) + j * n] = scalar * cheb->index (0, j, n - 1);
-		}
-		matrix [(n - 1) + (n - 1) * n] = scalar_half * cheb->index (0, n - 1, n - 1);
 	}
 } /* diffusion */
