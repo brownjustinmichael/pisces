@@ -21,6 +21,7 @@ namespace element
 		cell.resize (i_n);
 		position.resize (i_n);
 		velocity.resize (i_n, 0.0);
+		rhs.resize (i_n, 0.0);
 		
 		TRACE ("Initializing...");
 		
@@ -41,7 +42,7 @@ namespace element
 		failsafe_dump.reset (new io::simple_output ("_dump.dat", i_n));
 		failsafe_dump->append (&velocity [0]);
 		
-		diffusion_plan.reset (new diffusion::collocation_chebyshev_1D (2., 0.5, i_n, &velocity [0], &velocity [0], i_flags));
+		diffusion_plan.reset (new diffusion::collocation_chebyshev_1D (2., 0.5, i_n, &velocity [0], &rhs [0], &velocity [0], i_flags));
 		fourier_plan = fftw_plan_r2r_1d (i_n, &velocity [0], &velocity [0], FFTW_REDFT00, FFTW_ESTIMATE);
 		
 		TRACE ("Initialized.");
@@ -55,6 +56,10 @@ namespace element
 		try {
 			// Should be replaced by a CFL check
 			double timestep = 0.1;
+			
+			for (i = 0; i < n; ++i) {
+				rhs [i] = 0.0;
+			}
 		
 			// Calculate the diffusion in Chebyshev space
 			diffusion_plan->execute (timestep);

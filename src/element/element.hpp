@@ -60,6 +60,7 @@ namespace element
 		std::vector<int> cell; //!< An integer array for tracking each cell number for output
 		std::vector<double> position; //!< A double array containing position information
 		std::vector<double> velocity; //!< A double array containing velocity information
+		std::vector<double> rhs; //!< A double array containing the right-hand-side of the differential equation
 		
 		std::unique_ptr<diffusion::collocation_chebyshev_1D> diffusion_plan; //!< The diffusion implementation
 		std::unique_ptr<io::incremental_output> angle_stream; //!< An implementation to output in angle space

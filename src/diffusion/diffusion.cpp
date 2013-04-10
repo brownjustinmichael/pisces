@@ -16,18 +16,19 @@
 
 namespace diffusion
 {
-	collocation_chebyshev_1D::collocation_chebyshev_1D (double i_coeff, double i_alpha, int i_n, double *i_data_in, double *i_data_out, int i_flags) {
+	collocation_chebyshev_1D::collocation_chebyshev_1D (double i_coeff, double i_alpha, int i_n, double *i_data_in, double *i_data_out, double *i_rhs, int i_flags) {
 		coeff = i_coeff;
 		alpha = i_alpha;
 		previous_timestep = 0.0;
 		n = i_n;
 		data_in = i_data_in;
-		data_in = i_data_in;
+		rhs = i_rhs;
 		if (i_data_out == NULL) {
 			data_out = i_data_in;
 		} else {
 			data_out = i_data_out;
 		}
+		
 		flags = i_flags;
 
 		TRACE ("Instantiating...");
@@ -39,7 +40,6 @@ namespace diffusion
 		diffusion_matrix.resize (i_n * i_n);
 		ipiv.resize (i_n * i_n);
 		pre_matrix.resize (i_n * i_n);
-		temp.resize (i_n);
 		
 		TRACE ("Instantiation complete.");
 	}
@@ -47,18 +47,20 @@ namespace diffusion
 	void collocation_chebyshev_1D::execute (double timestep) {
 	    int ione=1, info;
 	    char charN = 'N';
-	    double dpone = 1.e0, dzero = 0.0;
+	    double dpone = 1.e0;
 	
 		TRACE ("Operating...");
-		
-		dcopy_ (&n, &data_in [0], &ione, &temp [0], &ione);
 		
 		// Set up and evaluate the explicit part of the diffusion equation
 		if (timestep != previous_timestep) {
 			matrix ((1.0 - alpha) * timestep * coeff, &pre_matrix [0]);			
 		}
-		dgemv_ (&charN, &n, &n, &dpone, &pre_matrix [0], &n, &temp [0], &ione, &dzero, &data_out [0], &ione);
+		dgemv_ (&charN, &n, &n, &dpone, &pre_matrix [0], &n, &data_in [0], &ione, &dpone, &rhs [0], &ione);
 
+		if (rhs != data_out) {
+			dcopy_ (&n, &rhs [0], &ione, &data_out [0], &ione);
+		}
+		
 		// Set up and evaluate the implicit part of the diffusion equation
 		if (timestep != previous_timestep) {
 			matrix (- alpha * timestep * coeff, &diffusion_matrix [0]);
@@ -71,7 +73,7 @@ namespace diffusion
 		
 		if (info != 0) {
 			ERROR ("Unable to invert matrix");
-			throw 0; // For now, kill the program. 
+			// throw 0; // For now, kill the program. 
 			/*
 				TODO Replace this with a more useful exception that can be handled
 			*/
