@@ -16,9 +16,10 @@
 
 namespace diffusion
 {
-	cheb_1D::cheb_1D (double i_coeff, double i_alpha, int i_n, double *i_data_in, double *i_data_out, int i_flags) {
+	collocation_chebyshev_1D::collocation_chebyshev_1D (double i_coeff, double i_alpha, int i_n, double *i_data_in, double *i_data_out, int i_flags) {
 		coeff = i_coeff;
 		alpha = i_alpha;
+		previous_timestep = 0.0;
 		n = i_n;
 		data_in = i_data_in;
 		data_in = i_data_in;
@@ -31,7 +32,7 @@ namespace diffusion
 
 		TRACE ("Instantiating...");
 
-		cheb.reset (new collocation::cheb_grid (i_n, i_n));
+		cheb.reset (new collocation::chebyshev_grid (i_n, i_n));
 		
 		DEBUG ("Input pointer: " << data_in << ", Output pointer: " << data_out);
 		
@@ -43,8 +44,7 @@ namespace diffusion
 		TRACE ("Instantiation complete.");
 	}
 
-	void cheb_1D::execute (double timestep) {
-		int i, j;
+	void collocation_chebyshev_1D::execute (double timestep) {
 	    int ione=1, info;
 	    char charN = 'N';
 	    double dpone = 1.e0, dzero = 0.0;
@@ -54,28 +54,35 @@ namespace diffusion
 		dcopy_ (&n, &data_in [0], &ione, &temp [0], &ione);
 		
 		// Set up and evaluate the explicit part of the diffusion equation
-		matrix ((1.0 - alpha) * timestep * coeff, &pre_matrix [0]);
+		if (timestep != previous_timestep) {
+			matrix ((1.0 - alpha) * timestep * coeff, &pre_matrix [0]);			
+		}
 		dgemv_ (&charN, &n, &n, &dpone, &pre_matrix [0], &n, &temp [0], &ione, &dzero, &data_out [0], &ione);
 
 		// Set up and evaluate the implicit part of the diffusion equation
-		matrix (- alpha * timestep * coeff, &diffusion_matrix [0]);
+		if (timestep != previous_timestep) {
+			matrix (- alpha * timestep * coeff, &diffusion_matrix [0]);
+			dgetrf_ (&n, &n, &diffusion_matrix [0], &n, &ipiv [0], &info);
+		}
 		
-		for (i = 0; i < n; ++i) {
-			for (j = 0; j < n; ++j) {
-				DEBUG ("matrix [" << i << ", " << j << "] = " << diffusion_matrix [i + j * n]);
-			}
+		if (info == 0) {
+			dgetrs_ (&charN, &n, &ione, &diffusion_matrix [0], &n, &ipiv [0], &data_out [0], &n, &info);			
+		} 
+		
+		if (info != 0) {
+			ERROR ("Unable to invert matrix");
+			throw 0; // For now, kill the program. 
+			/*
+				TODO Replace this with a more useful exception that can be handled
+			*/
 		}
-		for (i = 0; i < n; ++i) {
-			DEBUG ("in [" << i << "] = " << data_out [i]);
-		}
-		dgesv_ (&n, &ione, &diffusion_matrix [0], &n, &ipiv [0], &data_out [0], &n, &info);
-		for (i = 0; i < n; ++i) {
-			DEBUG ("out [" << i << "] = " << data_out [i]);
-		}	
+		
+		previous_timestep = timestep;
+
 		TRACE ("Operation complete.");
 	}
 	
-	void cheb_1D::matrix (double alpha_scalar, double *matrix) {
+	void collocation_chebyshev_1D::matrix (double alpha_scalar, double *matrix) {
 		int i, j, start, end;
 		double scalar = std::sqrt (2.0 / (n - 1.0));
 		double scalar_half = scalar / 2.0;

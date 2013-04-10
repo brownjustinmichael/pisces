@@ -61,7 +61,7 @@ namespace element
 		std::vector<double> position; //!< A double array containing position information
 		std::vector<double> velocity; //!< A double array containing velocity information
 		
-		std::unique_ptr<diffusion::cheb_1D> diffusion_plan; //!< The diffusion implementation
+		std::unique_ptr<diffusion::collocation_chebyshev_1D> diffusion_plan; //!< The diffusion implementation
 		std::unique_ptr<io::incremental_output> angle_stream; //!< An implementation to output in angle space
 		std::unique_ptr<io::simple_output> failsafe_dump; //!< An implementation to dump in case of failure
 		fftw_plan fourier_plan; //!< The fft implementation

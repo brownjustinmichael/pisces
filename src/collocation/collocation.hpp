@@ -58,15 +58,15 @@ namespace collocation
 	 * This collocation grid stores the N collocation points for up to the
 	 * Mth order Chebyshev polynomial and its first and second derivatives
 	 *********************************************************************/
-	class cheb_grid : public collocation_grid
+	class chebyshev_grid : public collocation_grid
 	{
 	public:
 		/*!*******************************************************************
 		 * \param i_M The integer max order of Chebyshev polynomial
 		 * \param i_N The integer number of collocation points
 		 *********************************************************************/
-		cheb_grid (int i_M, int i_N);
-		virtual ~cheb_grid () {};
+		chebyshev_grid (int i_M, int i_N);
+		virtual ~chebyshev_grid () {};
 		
 	private:
 		std::vector<bool> exists_array; //!< A bool vector containing whether the points exist

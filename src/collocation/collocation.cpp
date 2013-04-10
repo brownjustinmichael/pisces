@@ -30,7 +30,7 @@ namespace collocation
 		return data [deriv * rows * cols + row * cols + col];
 	}
 
-	cheb_grid::cheb_grid (int i_M, int i_N) : collocation_grid (3, i_M, i_N) {
+	chebyshev_grid::chebyshev_grid (int i_M, int i_N) : collocation_grid (3, i_M, i_N) {
 		int d, m, k;
 		pioN = std::acos (-1.0) / i_N;
 		exists_array.resize (i_M * i_N * 3, false);
@@ -49,7 +49,7 @@ namespace collocation
 		TRACE ("Instantiated...")
 	}
 	
-	double cheb_grid::recursion (int d, int m, int k) {		
+	double chebyshev_grid::recursion (int d, int m, int k) {		
 		assert (d >= 0);
 		assert (d < 3);
 		assert (m >= 0);

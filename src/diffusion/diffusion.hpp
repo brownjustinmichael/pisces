@@ -17,17 +17,56 @@
 /*!*******************************************************************
  * \brief Function from BLAS that copies a double array to another in place
  * 
- * \param n a pointer to an integer number of elements in x to copy to y
- * \param x the array from which the data are copied
- * \param incx a pointer to an integer spacing of elements in x
- * \param y the array to which the data are copied
- * \param incy a pointer to an integer spacing of elements in y
+ * \param n A pointer to an integer number of elements in x to copy to y
+ * \param x The array from which the data are copied
+ * \param incx A pointer to an integer spacing of elements in x
+ * \param y The array to which the data are copied
+ * \param incy A pointer to an integer spacing of elements in y
  *********************************************************************/
-extern "C" void   dcopy_(int *n, double *x, int *incx, double *y, int *incy);
+extern "C" void dcopy_(int *n, double *x, int *incx, double *y, int *incy);
 
-extern "C" void dgesv_ (int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info);
-
+/*!*******************************************************************
+ * \brief Function from BLAS for matrix-vector multiplication (y = alpha * a * x + beta * y)
+ * 
+ * \param trans A pointer to transposition character ("N" for not transposed, "T" for transposed)
+ * \param m A pointer to the number of rows in a
+ * \param n A pointer to the number of columns in a
+ * \param alpha A pointer to the double multiplier on a
+ * \param a The double matrix a
+ * \param lda A pointer to the integer number of leading dimension of a
+ * \param x The double vector x
+ * \param incx A pointer to an integer spacing of elements in x
+ * \param beta A pointer to the double multiplier on y
+ * \param y The double vector y, overwritten with the solution
+ * \param incy A pointer to an integer spacing of elements in y
+ *********************************************************************/
 extern "C" void dgemv_ (char *trans, int *m, int *n, double *alpha, double *a, int *lda, double *x, int *incx, double *beta, double *y, int *incy);
+
+/*!*******************************************************************
+ * \brief Function from LAPACK that factorizes the matrix a by LU decomposition
+ * 
+ * \param m A pointer to the number of rows in a
+ * \param n A pointer to the number of columns in a
+ * \param a A double matrix to be overwritten with its LU decomposition
+ * \param ipiv An integer array to contain the pivot indices
+ * \param info A pointer to an integer indicating success (0 for successful exit)
+ *********************************************************************/
+extern "C" void dgetrf_ (int *m, int *n, double *a, int *lda, int *ipiv, int *info);
+
+/*!*******************************************************************
+ * \brief Function from LAPACK that solves a factorized matrix equation
+ * 
+ * \param trans A pointer to transposition character ("N" for not transposed, "T" for transposed)
+ * \param n A pointer to the number of columns in a
+ * \param nrhs A pointer to the number of right hand sides
+ * \param a A double matrix to be overwritten with its LU decomposition
+ * \param lda A pointer to the integer number of leading dimension of a
+ * \param ipiv An integer array to contain the pivot indices
+ * \param b The double right hand side array, overwritten with solution
+ * \param ldb A pointer to the integer number of leading dimension of b
+ * \param info A pointer to an integer indicating success (0 for successful exit)
+ *********************************************************************/
+extern "C" void dgetrs_ (char *trans, int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info);
 
 namespace diffusion
 {
@@ -40,20 +79,20 @@ namespace diffusion
 	 * and one for the odd Chebyshev polynomials. It uses the BLAS library 
 	 * to do so.
 	 *********************************************************************/
-	class cheb_1D : public plan
+	class collocation_chebyshev_1D : public plan
 	{
 	public:
 		/*!*******************************************************************
 		 * \param i_coeff A double containing the coefficient in front of the diffusion term in the differential equation
 		 * \param i_alpha A double that determines the degree of implicit calculation (0.0 = explicit, 1.0 = implicit, 0.5 recommended)
-		 * \param i_n An integer number of data elements (grid points) that cheb_1D will be built to tackle
+		 * \param i_n An integer number of data elements (grid points) that collocation_chebyshev_1D will be built to tackle
 		 * \param i_data_in A double pointer pointing to the input data
 		 * \param i_data_out A double pointer pointing to the output data
 		 * \param i_flags An integer containing the binary boundary and execution flags
 		 *********************************************************************/
-		cheb_1D (double i_coeff, double i_alpha, int i_n, double *i_data_in, double *i_data_out = NULL, int flags = 0x00);
+		collocation_chebyshev_1D (double i_coeff, double i_alpha, int i_n, double *i_data_in, double *i_data_out = NULL, int flags = 0x00);
 		
-		virtual ~cheb_1D () {}
+		virtual ~collocation_chebyshev_1D () {}
 		
 		/*!*******************************************************************
 		 * \brief Execute the operation on the data for a given timestep duration
@@ -78,7 +117,8 @@ namespace diffusion
 	private:
 		double coeff; //!< A double that represents the coefficient in front of the diffusion term in the differential equation
 		double alpha; //!< A double that determines the degree of implicit calculation (0.0 = explicit, 1.0 = implicit, 0.5 recommended)
-		int n; //!< An integer number of data elements (grid points) that cheb_1D will be built to handle
+		double previous_timestep; //!< A double that records the previous timestep 
+		int n; //!< An integer number of data elements (grid points) that collocation_chebyshev_1D will be built to handle
 		double *data_in; //!< A double pointer to the input data
 		double *data_out; //!< A double pointer to the output data; if data_in == data_out, the operation is done in place
 		int flags; //!< An integer containing the binary boundary and execution flags
@@ -86,7 +126,7 @@ namespace diffusion
 		std::vector<double> pre_matrix; //!< A 1D vector to be filled with the explicit matrix equation for the Chebyshev polynomials
 		std::vector<double> temp; //!< A temporary 1D vector to store the intermediate step
 		std::vector<int> ipiv; //!< An integer vector that contains the reordering for use in the LAPACK routine
-		std::unique_ptr<collocation::cheb_grid> cheb; //!< A pointer to a collocation grid that contains the the Chebyshev values
+		std::unique_ptr<collocation::chebyshev_grid> cheb; //!< A pointer to a collocation grid that contains the the Chebyshev values
 	};
 } /* diffusion */
 

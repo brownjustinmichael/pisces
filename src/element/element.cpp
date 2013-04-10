@@ -41,7 +41,7 @@ namespace element
 		failsafe_dump.reset (new io::simple_output ("_dump.dat", i_n));
 		failsafe_dump->append (&velocity [0]);
 		
-		diffusion_plan.reset (new diffusion::cheb_1D (2., 0.5, i_n, &velocity [0], &velocity [0], i_flags));
+		diffusion_plan.reset (new diffusion::collocation_chebyshev_1D (2., 0.5, i_n, &velocity [0], &velocity [0], i_flags));
 		fourier_plan = fftw_plan_r2r_1d (i_n, &velocity [0], &velocity [0], FFTW_REDFT00, FFTW_ESTIMATE);
 		
 		TRACE ("Initialized.");
