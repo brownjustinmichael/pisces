@@ -16,7 +16,7 @@
 
 namespace diffusion
 {
-	collocation_chebyshev_1D::collocation_chebyshev_1D (double i_coeff, double i_alpha, int i_n, double *i_data_in, double *i_data_out, double *i_rhs, int i_flags) {
+	collocation_chebyshev_1D::collocation_chebyshev_1D (double i_coeff, double i_alpha, int i_n, double *i_data_in, double *i_rhs, double *i_data_out, int i_flags) {
 		coeff = i_coeff;
 		alpha = i_alpha;
 		previous_timestep = 0.0;
@@ -45,10 +45,10 @@ namespace diffusion
 	}
 
 	void collocation_chebyshev_1D::execute (double timestep) {
-	    int ione=1, info;
+	    int ione = 1, info;
 	    char charN = 'N';
-	    double dpone = 1.e0;
-	
+	    double dpone = 1.e0, dzero = 0.0;
+			
 		TRACE ("Operating...");
 		
 		// Set up and evaluate the explicit part of the diffusion equation
@@ -60,16 +60,13 @@ namespace diffusion
 		if (rhs != data_out) {
 			dcopy_ (&n, &rhs [0], &ione, &data_out [0], &ione);
 		}
-		
+
 		// Set up and evaluate the implicit part of the diffusion equation
 		if (timestep != previous_timestep) {
 			matrix (- alpha * timestep * coeff, &diffusion_matrix [0]);
-			dgetrf_ (&n, &n, &diffusion_matrix [0], &n, &ipiv [0], &info);
+			dgetrf_ (&n, &n, &diffusion_matrix [0], &n, &ipiv [0], &info);			
 		}
-		
-		if (info == 0) {
-			dgetrs_ (&charN, &n, &ione, &diffusion_matrix [0], &n, &ipiv [0], &data_out [0], &n, &info);			
-		} 
+		dgetrs_ (&charN, &n, &ione, &diffusion_matrix [0], &n, &ipiv [0], &data_out [0], &n, &info);
 		
 		if (info != 0) {
 			ERROR ("Unable to invert matrix");
@@ -80,8 +77,9 @@ namespace diffusion
 		}
 		
 		previous_timestep = timestep;
-
+		
 		TRACE ("Operation complete.");
+
 	}
 	
 	void collocation_chebyshev_1D::matrix (double alpha_scalar, double *matrix) {

@@ -79,6 +79,8 @@ extern "C" void dgetrf_ (int *m, int *n, double *a, int *lda, int *ipiv, int *in
  *********************************************************************/
 extern "C" void dgetrs_ (char *trans, int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info);
 
+extern "C" void dgesv_ (int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info);
+
 namespace diffusion
 {
 	/*!*******************************************************************
