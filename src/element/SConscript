@@ -1,0 +1,6 @@
+Import ("env")
+Import ("objects")
+
+env.Append (LIBS = ["fftw3"])
+
+objects.append (env.Object ("element.cpp"))

@@ -1,0 +1,13 @@
+import os
+Import ("env")
+
+objects = []
+
+for subdir in filter (os.path.isdir, os.listdir ('.')):
+    env.SConscript('%s/SConscript' % subdir, duplicate = 0, exports = {'env': env, "objects": objects})
+
+objects.append (env.Object ("config.cpp"))
+
+env.Append (LIBS = ["log4cxx"])
+
+env.Default (env.Program(target = "../run/main", source = (["main.cpp"] + objects)))

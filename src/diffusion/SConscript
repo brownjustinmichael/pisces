@@ -1,0 +1,6 @@
+Import ("env")
+Import ("objects")
+
+env.Append (LIBS = ["lapack", "blas", "atlas"])
+
+objects.append (env.Object ("diffusion.cpp"))

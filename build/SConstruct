@@ -1,5 +1,6 @@
 import os
 env = Environment (ENV = os.environ)
 env.Append (CPPFLAGS = ["-Wall", "-g", "-std=c++0x"])
-env.Default ("../run/main")
-env.Program(target = "../run/main", source = ["main.cpp", "config.cpp", "element/element.cpp", "diffusion/diffusion.cpp", "io/io.cpp", "collocation/collocation.cpp"], srcdir = "../src/", LIBS = ["log4cxx", "fftw3", "lapack", "blas", "atlas"], LIBPATH = ["/opt/local/lib/"])
+env.Append (LIBPATH = ["/opt/local/lib/"])
+
+env.SConscript ("../src/SConscript", variant_dir = ".", duplicate = 0, exports = {"env": env})
