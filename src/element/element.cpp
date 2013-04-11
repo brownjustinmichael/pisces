@@ -54,6 +54,7 @@ namespace element
 		TRACE ("Updating...");
 		
 		try {
+			// Testing
 			// Should be replaced by a CFL check
 			double timestep = 0.1;
 		
