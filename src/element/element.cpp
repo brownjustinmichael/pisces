@@ -26,36 +26,33 @@ namespace element
 		return 0.0;
 	}
 	
-	diffusion_element::diffusion_element (int i_n, int i_flags) {
+	diffusion_element::diffusion_element (int i_n, int i_flags) : element_1D (i_n) {
 		int i;
-		n = i_n;
 		flags = i_flags;
-		cell.resize (i_n);
-		position.resize (i_n);
-		velocity.resize (i_n, 0.0);
-		rhs.resize (i_n, 0.0);
+		add_scalar (position);
+		add_scalar (velocity);
+		add_scalar (rhs);
 		
 		TRACE ("Initializing...");
 		
 		double pioN = std::acos (-1.0) / i_n;
 		for (i = 0; i < i_n; ++i) {
-			cell [i] = i;
-			position [i] = std::cos (pioN * i);
+			(scalars [position]) [i] = std::cos (pioN * i);
 		}
 		
-		velocity [0] = 2.0;
-		velocity [2] = -1.0;
+		(scalars [velocity]) [0] = 2.0;
+		(scalars [velocity]) [2] = -1.0;
 
 		angle_stream.reset (new io::incremental_output ("../output/test_angle", ".dat", 4, new io::header, i_n));
 		angle_stream->append (&cell [0]);
-		angle_stream->append (&position [0]);
-		angle_stream->append (&velocity [0]);
+		angle_stream->append (&(scalars [position]) [0]);
+		angle_stream->append (&(scalars [velocity]) [0]);
 		
 		failsafe_dump.reset (new io::simple_output ("_dump.dat", i_n));
-		failsafe_dump->append (&velocity [0]);
+		failsafe_dump->append (&(scalars [velocity]) [0]);
 		
-		diffusion_plan.reset (new diffusion::collocation_chebyshev_1D (2., 0.5, i_n, &velocity [0], &rhs [0], &velocity [0], i_flags));
-		fourier_plan = fftw_plan_r2r_1d (i_n, &velocity [0], &velocity [0], FFTW_REDFT00, FFTW_ESTIMATE);
+		diffusion_plan.reset (new diffusion::collocation_chebyshev_1D (2., 0.5, i_n, &(scalars [velocity]) [0], &(scalars [rhs]) [0], &(scalars [velocity]) [0], i_flags));
+		fourier_plan = fftw_plan_r2r_1d (i_n, &(scalars [velocity]) [0], &(scalars [velocity]) [0], FFTW_REDFT00, FFTW_ESTIMATE);
 		
 		TRACE ("Initialized.");
 	}
@@ -78,7 +75,7 @@ namespace element
 			
 			// We rescale the values to account for the factor of 2(N-1) that occurs during FFT
 			for (i = 0; i < n; ++i) {
-				velocity [i] /= sqrt (2 * (n - 1));
+				(scalars [velocity]) [i] /= sqrt (2 * (n - 1));
 			}
 					
 			// Output in angle space
@@ -89,13 +86,13 @@ namespace element
 		
 			// We rescale the values to account for the factor of 2(N-1) that occurs during FFT
 			for (i = 0; i < n; ++i) {
-				velocity [i] /= sqrt (2 * (n - 1));
+				(scalars [velocity]) [i] /= sqrt (2 * (n - 1));
 			}
 			
-			rhs [0] = 0.0;
-			rhs [n - 1] = 0.0;
+			(scalars [rhs]) [0] = 0.0;
+			(scalars [rhs]) [n - 1] = 0.0;
 			for (i = 1; i < n - 1; ++i) {
-				rhs [i] = 0.0;
+				(scalars [rhs]) [i] = 0.0;
 			}
 			
 		} catch (io::exceptions::file_exception &io_exception) {

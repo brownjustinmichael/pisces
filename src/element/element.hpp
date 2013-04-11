@@ -10,6 +10,9 @@
 #define ELEMENT_HPP_3SURDTOH
 
 #include <memory>
+#include <string>
+#include <vector>
+#include <map>
 #include <fftw3.h>
 #include "../diffusion/diffusion.hpp"
 #include "../io/io.hpp"
@@ -18,7 +21,8 @@ namespace element
 {
 	enum index {
 		position = 0,
-		velocity = 1
+		velocity = 1,
+		rhs = 2
 	};
 	
 	/*!*******************************************************************
@@ -40,26 +44,34 @@ namespace element
 	class element_1D : public element
 	{
 	public:
-		element_1D (int i_n, int i_n_scalars) {
+		element_1D (int i_n) {
 			int i;
 			n = i_n;
-			n_scalars = i_n_scalars;
-			scalars.resize (i_n_scalars);
-			for (i = 0; i < i_n_scalars; ++i) {
-				scalars [i].resize (i_n);
+			n_scalars = 0;
+			
+			cell.resize (i_n);
+			for (i = 0; i < i_n; ++i) {
+				cell [i] = i;
 			}
 		}
 		
 		virtual ~element_1D () {}
 		
+		inline void add_scalar (int index) {
+			++n_scalars;
+			
+			scalars [index].resize (n);
+		}
+		
 		double boundary_top (int deriv);
 		
 		double boundary_bottom (int deriv);
 	
-	private:
-		int n;
+	protected:
+		int n; //!< The number of elements in each 1D array
 		int n_scalars;
-		std::vector<std::vector<double>> scalars; //!< A vector of scalar vectors
+		std::vector<int> cell; //!< An integer array for tracking each cell number for output
+		std::map<int, std::vector<double>> scalars; //!< A vector of scalar vectors
 	};
 
 	/*!*******************************************************************
@@ -69,7 +81,7 @@ namespace element
 	 * element diffusion in 1D. It cannot yet tie to other elements or 
 	 * calculate its own timestep. 
 	 *********************************************************************/
-	class diffusion_element : public element
+	class diffusion_element : public element_1D
 	{
 	public:
 		/*!*******************************************************************
@@ -84,14 +96,8 @@ namespace element
 		void update ();
 	
 	private:
-		int n; //!< The number of elements in each 1D array
 		int flags; //!< Flags for the boundary conditions and evaluation
-		
-		std::vector<int> cell; //!< An integer array for tracking each cell number for output
-		std::vector<double> position; //!< A double array containing position information
-		std::vector<double> velocity; //!< A double array containing velocity information
-		std::vector<double> rhs; //!< A double array containing the right-hand-side of the differential equation
-		
+				
 		std::unique_ptr<diffusion::collocation_chebyshev_1D> diffusion_plan; //!< The diffusion implementation
 		std::unique_ptr<io::incremental_output> angle_stream; //!< An implementation to output in angle space
 		std::unique_ptr<io::simple_output> failsafe_dump; //!< An implementation to dump in case of failure
