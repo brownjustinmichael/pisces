@@ -56,17 +56,18 @@ namespace element
 		try {
 			// Should be replaced by a CFL check
 			double timestep = 0.1;
-			
-			for (i = 0; i < n; ++i) {
-				rhs [i] = 0.0;
-			}
 		
 			// Calculate the diffusion in Chebyshev space
 			diffusion_plan->execute (timestep);
 			
 			// Transform forward
 			fftw_execute (fourier_plan);
-		
+			
+			// We rescale the values to account for the factor of 2(N-1) that occurs during FFT
+			for (i = 0; i < n; ++i) {
+				velocity [i] /= sqrt (2 * (n - 1));
+			}
+					
 			// Output in angle space
 			angle_stream->to_file ();
 					
@@ -75,7 +76,13 @@ namespace element
 		
 			// We rescale the values to account for the factor of 2(N-1) that occurs during FFT
 			for (i = 0; i < n; ++i) {
-				velocity [i] /= (2 * (n - 1));
+				velocity [i] /= sqrt (2 * (n - 1));
+			}
+			
+			rhs [0] = 0.0;
+			rhs [n - 1] = 0.0;
+			for (i = 1; i < n - 1; ++i) {
+				rhs [i] = 0.0;
 			}
 			
 		} catch (io::exceptions::file_exception &io_exception) {
