@@ -16,6 +16,11 @@
 
 namespace element
 {
+	enum index {
+		position = 0,
+		velocity = 1
+	};
+	
 	/*!*******************************************************************
 	 * \brief This is the basic class of the code
 	 * 
@@ -30,6 +35,31 @@ namespace element
 		 * \brief This virtual function should update the element by one step
 		 *********************************************************************/
 		virtual void update () = 0;
+	};
+	
+	class element_1D : public element
+	{
+	public:
+		element_1D (int i_n, int i_n_scalars) {
+			int i;
+			n = i_n;
+			n_scalars = i_n_scalars;
+			scalars.resize (i_n_scalars);
+			for (i = 0; i < i_n_scalars; ++i) {
+				scalars [i].resize (i_n);
+			}
+		}
+		
+		virtual ~element_1D () {}
+		
+		double boundary_top (int deriv);
+		
+		double boundary_bottom (int deriv);
+	
+	private:
+		int n;
+		int n_scalars;
+		std::vector<std::vector<double>> scalars; //!< A vector of scalar vectors
 	};
 
 	/*!*******************************************************************

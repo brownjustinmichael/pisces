@@ -14,6 +14,18 @@
 
 namespace element
 {
+	double element_1D::boundary_top (int deriv) {
+		int i;
+		
+		return 0.0;
+	}
+	
+	double element_1D::boundary_bottom (int deriv) {
+		int i;
+		
+		return 0.0;
+	}
+	
 	diffusion_element::diffusion_element (int i_n, int i_flags) {
 		int i;
 		n = i_n;

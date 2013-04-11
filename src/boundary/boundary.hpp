@@ -17,16 +17,6 @@ namespace boundary
 		fixed_upper = 0x01,
 		fixed_lower = 0x02
 	};
-	
-	class boundary
-	{
-	public:
-		boundary ();
-		virtual ~boundary ();
-	
-	private:
-		/* data */
-	};
 } /* boundary */
 
 #endif /* end of include guard: BOUNDARY_HPP_CP5DR4CP */
