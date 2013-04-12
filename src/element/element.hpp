@@ -63,9 +63,9 @@ namespace element
 			scalars [index].resize (n);
 		}
 		
-		double boundary_top (int deriv);
+		double virtual boundary_top (int index, int deriv) = 0;
 		
-		double boundary_bottom (int deriv);
+		double virtual boundary_bottom (int index, int deriv) = 0;
 	
 	protected:
 		int n; //!< The number of elements in each 1D array
@@ -94,10 +94,14 @@ namespace element
 		 * \brief This calculates diffusion and output for a constant timestep
 		 *********************************************************************/
 		void update ();
+		
+		double boundary_top (int index, int deriv);
+		double boundary_bottom (int index, int deriv);
 	
 	private:
 		int flags; //!< Flags for the boundary conditions and evaluation
-				
+		
+		std::shared_ptr<collocation::chebyshev_grid> cheb;
 		std::unique_ptr<diffusion::collocation_chebyshev_1D> diffusion_plan; //!< The diffusion implementation
 		std::unique_ptr<io::incremental_output> angle_stream; //!< An implementation to output in angle space
 		std::unique_ptr<io::simple_output> failsafe_dump; //!< An implementation to dump in case of failure

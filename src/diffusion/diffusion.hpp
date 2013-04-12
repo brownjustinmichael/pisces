@@ -104,7 +104,7 @@ namespace diffusion
 		 * \param i_data_out A double pointer to the output data (if NULL or the same as i_data_in, the operation occurs in place but uses an additional call of dcopy_)
 		 * \param i_flags An integer containing the binary boundary and execution flags
 		 *********************************************************************/
-		collocation_chebyshev_1D (double i_coeff, double i_alpha, int i_n, double *i_data_in, double *i_rhs, double *i_data_out = NULL, int flags = 0x00);
+		collocation_chebyshev_1D (double i_coeff, double i_alpha, int i_n, std::shared_ptr<collocation::chebyshev_grid> i_cheb, double *i_data_in, double *i_rhs, double *i_data_out = NULL, int flags = 0x00);
 		
 		virtual ~collocation_chebyshev_1D () {}
 		
@@ -143,7 +143,7 @@ namespace diffusion
 		std::vector<double> diffusion_matrix; //!< A 1D vector to be filled with the implicit matrix equation for the Chebyshev polynomials
 		std::vector<double> pre_matrix; //!< A 1D vector to be filled with the explicit matrix equation for the Chebyshev polynomials
 		std::vector<int> ipiv; //!< An integer vector that contains the reordering for use in the LAPACK routine
-		std::unique_ptr<collocation::chebyshev_grid> cheb; //!< A pointer to a collocation grid that contains the the Chebyshev values
+		std::shared_ptr<collocation::chebyshev_grid> cheb; //!< A pointer to a collocation grid that contains the the Chebyshev values
 	};
 } /* diffusion */
 

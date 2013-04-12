@@ -9,6 +9,7 @@
 #include <iostream>
 #include <cmath>
 #include <cassert>
+#include <memory>
 #include "../config.hpp"
 #include "diffusion.hpp"
 #include "../collocation/collocation.hpp"
@@ -16,7 +17,7 @@
 
 namespace diffusion
 {
-	collocation_chebyshev_1D::collocation_chebyshev_1D (double i_coeff, double i_alpha, int i_n, double *i_data_in, double *i_rhs, double *i_data_out, int i_flags) {
+	collocation_chebyshev_1D::collocation_chebyshev_1D (double i_coeff, double i_alpha, int i_n, std::shared_ptr<collocation::chebyshev_grid> i_cheb, double *i_data_in, double *i_rhs, double *i_data_out, int i_flags) {
 		coeff = i_coeff;
 		alpha = i_alpha;
 		previous_timestep = 0.0;
@@ -33,7 +34,13 @@ namespace diffusion
 
 		TRACE ("Instantiating...");
 
-		cheb.reset (new collocation::chebyshev_grid (i_n, i_n));
+		if (!i_cheb) {
+			TRACE ("No collocation grid yet, constructing...")
+			cheb.reset (new collocation::chebyshev_grid (i_n, i_n));
+		} else {
+			TRACE ("Existing collocation grid, sharing pointer...")
+			cheb = i_cheb;
+		}
 		
 		DEBUG ("Input pointer: " << data_in << ", Output pointer: " << data_out);
 		

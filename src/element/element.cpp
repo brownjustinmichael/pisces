@@ -14,16 +14,26 @@
 
 namespace element
 {
-	double element_1D::boundary_top (int deriv) {
+	double diffusion_element::boundary_top (int index, int deriv) {
 		int i;
+		double result = 0.0;
 		
-		return 0.0;
+		for (i = 0; i < n; ++i) {
+			result += scalars [index] [i] * cheb->index (deriv, i, 0);
+		}
+		
+		return result;
 	}
 	
-	double element_1D::boundary_bottom (int deriv) {
+	double diffusion_element::boundary_bottom (int index, int deriv) {
 		int i;
+		double result = 0.0;
 		
-		return 0.0;
+		for (i = 0; i < n; ++i) {
+			result += scalars [index] [i] * cheb->index (deriv, i, 0);
+		}
+		
+		return result;
 	}
 	
 	diffusion_element::diffusion_element (int i_n, int i_flags) : element_1D (i_n) {
@@ -37,11 +47,13 @@ namespace element
 		
 		double pioN = std::acos (-1.0) / i_n;
 		for (i = 0; i < i_n; ++i) {
-			(scalars [position]) [i] = std::cos (pioN * i);
+			scalars [position] [i] = std::cos (pioN * i);
 		}
 		
-		(scalars [velocity]) [0] = 2.0;
-		(scalars [velocity]) [2] = -1.0;
+		scalars [velocity] [0] = 2.0;
+		scalars [velocity] [2] = -1.0;
+		
+		cheb.reset (new collocation::chebyshev_grid (i_n, i_n));
 
 		angle_stream.reset (new io::incremental_output ("../output/test_angle", ".dat", 4, new io::header, i_n));
 		angle_stream->append (&cell [0]);
@@ -51,7 +63,7 @@ namespace element
 		failsafe_dump.reset (new io::simple_output ("_dump.dat", i_n));
 		failsafe_dump->append (&(scalars [velocity]) [0]);
 		
-		diffusion_plan.reset (new diffusion::collocation_chebyshev_1D (2., 0.5, i_n, &(scalars [velocity]) [0], &(scalars [rhs]) [0], &(scalars [velocity]) [0], i_flags));
+		diffusion_plan.reset (new diffusion::collocation_chebyshev_1D (2., 0.5, i_n, cheb, &(scalars [velocity]) [0], &(scalars [rhs]) [0], &(scalars [velocity]) [0], i_flags));
 		fourier_plan = fftw_plan_r2r_1d (i_n, &(scalars [velocity]) [0], &(scalars [velocity]) [0], FFTW_REDFT00, FFTW_ESTIMATE);
 		
 		TRACE ("Initialized.");
@@ -61,6 +73,8 @@ namespace element
 		int i;
 		
 		TRACE ("Updating...");
+		
+		DEBUG ("cheb.use_count () = " << cheb.use_count ());
 		
 		try {
 			// Testing
@@ -89,10 +103,10 @@ namespace element
 				(scalars [velocity]) [i] /= sqrt (2 * (n - 1));
 			}
 			
-			(scalars [rhs]) [0] = 0.0;
-			(scalars [rhs]) [n - 1] = 0.0;
+			scalars [rhs] [0] = 0.0;
+			scalars [rhs] [n - 1] = 0.0;
 			for (i = 1; i < n - 1; ++i) {
-				(scalars [rhs]) [i] = 0.0;
+				scalars [rhs] [i] = 0.0;
 			}
 			
 		} catch (io::exceptions::file_exception &io_exception) {
