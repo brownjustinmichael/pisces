@@ -56,7 +56,7 @@ namespace element
 		try {
 			// Testing
 			// Should be replaced by a CFL check
-			double timestep = 0.1;
+			double timestep = 0.01;
 		
 			// Calculate the diffusion in Chebyshev space
 			implicit_diffusion->execute (timestep);

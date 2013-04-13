@@ -50,6 +50,7 @@ namespace diffusion
 		diffusion_matrix.resize (i_n * i_n);
 		ipiv.resize (i_n * i_n);
 		pre_matrix.resize (i_n * i_n);
+		temp.resize (i_n);
 		
 		TRACE ("Instantiation complete.");
 	}
@@ -76,13 +77,19 @@ namespace diffusion
 		if (timestep != previous_timestep) {
 			matrix ((1.0 - alpha) * timestep * coeff, &pre_matrix [0]);
 		}
-		dgemv_ (&charN, &n, &n, &dpone, &pre_matrix [0], &n, &data_in [0], &ione, &dpone, &rhs [0], &ione);
+		
+		double scalar = (1.0 - alpha) * timestep * coeff;
+		
+		dgemv_ (&charN, &n, &n, &dpone, cheb->get_data (2), &n, &data_in [0], &ione, &dzero, &rhs [0], &ione);
+		rhs [0] = 0.0;
+		rhs [n - 1] = 0.0;
+		dscal_ (&n, &scalar, &rhs [0], &ione);
+		dgemv_ (&charN, &n, &n, &dpone, cheb->get_data (0), &n, &data_in [0], &ione, &dpone, &rhs [0], &ione);
 
 		if (rhs != data_out) {
 			dcopy_ (&n, &rhs [0], &ione, &data_out [0], &ione);
 		}
 		
-
 		// Set up and evaluate the implicit part of the diffusion equation
 		if (timestep != previous_timestep) {
 			matrix (- alpha * timestep * coeff, &diffusion_matrix [0]);

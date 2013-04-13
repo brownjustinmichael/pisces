@@ -180,6 +180,7 @@ namespace diffusion
 		double *data_out; //!< A double pointer to the output data; if data_in == data_out, the operation is done in place (but inefficient)
 		double *rhs; //!< A double pointer to the right-hand-side; if rhs == data_out, the operation is most efficient
 		int flags; //!< An integer containing the binary boundary and execution flags
+		std::vector<double> temp;
 		std::vector<double> diffusion_matrix; //!< A 1D vector to be filled with the implicit matrix equation for the Chebyshev polynomials
 		std::vector<double> pre_matrix; //!< A 1D vector to be filled with the explicit matrix equation for the Chebyshev polynomials
 		std::vector<int> ipiv; //!< An integer vector that contains the reordering for use in the LAPACK routine

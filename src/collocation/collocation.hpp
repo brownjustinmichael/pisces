@@ -42,7 +42,7 @@ namespace collocation
 		 * \return The double value at the index
 		 *********************************************************************/
 		inline double &index (int deriv, int row, int col) {
-			return data [deriv] [row + col * rows];
+			return data [deriv] [row * cols + col];
 		}
 		inline double *get_data (int deriv) {
 			return &(data [deriv] [0]);
