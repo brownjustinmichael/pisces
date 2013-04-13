@@ -59,7 +59,7 @@ namespace element
 			double timestep = 0.000001;
 		
 			// Calculate the diffusion in Chebyshev space
-			explicit_diffusion->execute (timestep);
+			// explicit_diffusion->execute (timestep);
 			
 			// Transform forward
 			fftw_execute (fourier_plan);
@@ -73,6 +73,14 @@ namespace element
 			angle_stream->to_file ();
 
 			implicit_diffusion->execute (timestep);
+			
+			// Transform forward
+			fftw_execute (fourier_plan);
+
+			// We rescale the values to account for the factor of 2(N-1) that occurs during FFT
+			for (i = 0; i < n; ++i) {
+				(scalars [velocity]) [i] /= sqrt (2.0 * (n - 1));
+			}
 			
 			for (i = 0; i < n; ++i) {
 				scalars [rhs] [i] = 0.0;

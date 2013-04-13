@@ -61,15 +61,27 @@ namespace diffusion
 			
 		TRACE ("Operating...");
 				
-		if (data_out == rhs) {
-			dscal_ (&n, &timestep, &rhs [0], &ione);
-			daxpy_ (&n, &dpone, &data_in [0], &ione, &data_out [0], &ione);
-		} else {
-			if (data_in != data_out) {
-				dcopy_ (&n, &data_in [0], &ione, &data_out [0], &ione);
-			}
-			daxpy_ (&n, &timestep, &rhs [0], &ione, &data_out [0], &ione);
+		// if (data_out == rhs) {
+		// 	dscal_ (&n, &timestep, &rhs [0], &ione);
+		// 	daxpy_ (&n, &dpone, &data_in [0], &ione, &data_out [0], &ione);
+		// } else {
+		// 	if (data_in != data_out) {
+		// 		dcopy_ (&n, &data_in [0], &ione, &data_out [0], &ione);
+		// 	}
+		// 	daxpy_ (&n, &timestep, &rhs [0], &ione, &data_out [0], &ione);
+		// }
+		// 
+				
+		// Set up and evaluate the explicit part of the diffusion equation
+		if (timestep != previous_timestep) {
+			matrix ((1.0 - alpha) * timestep * coeff, &pre_matrix [0]);
 		}
+		dgemv_ (&charN, &n, &n, &dpone, &pre_matrix [0], &n, &data_in [0], &ione, &dpone, &rhs [0], &ione);
+
+		if (rhs != data_out) {
+			dcopy_ (&n, &rhs [0], &ione, &data_out [0], &ione);
+		}
+		
 
 		// Set up and evaluate the implicit part of the diffusion equation
 		if (timestep != previous_timestep) {
