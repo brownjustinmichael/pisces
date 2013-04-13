@@ -56,33 +56,33 @@ namespace element
 		try {
 			// Testing
 			// Should be replaced by a CFL check
-			double timestep = 0.000001;
+			double timestep = 0.1;
 		
 			// Calculate the diffusion in Chebyshev space
-			// explicit_diffusion->execute (timestep);
-			
-			// Transform forward
-			fftw_execute (fourier_plan);
-
-			// We rescale the values to account for the factor of 2(N-1) that occurs during FFT
-			for (i = 0; i < n; ++i) {
-				(scalars [velocity]) [i] /= sqrt (2.0 * (n - 1));
-			}
-			
-			// Output in angle space
-			angle_stream->to_file ();
-
 			implicit_diffusion->execute (timestep);
 			
 			// Transform forward
 			fftw_execute (fourier_plan);
-
+			
 			// We rescale the values to account for the factor of 2(N-1) that occurs during FFT
 			for (i = 0; i < n; ++i) {
-				(scalars [velocity]) [i] /= sqrt (2.0 * (n - 1));
+				(scalars [velocity]) [i] /= sqrt (2 * (n - 1));
+			}
+					
+			// Output in angle space
+			angle_stream->to_file ();
+					
+			// Transform backward
+			fftw_execute (fourier_plan);
+		
+			// We rescale the values to account for the factor of 2(N-1) that occurs during FFT
+			for (i = 0; i < n; ++i) {
+				(scalars [velocity]) [i] /= sqrt (2 * (n - 1));
 			}
 			
-			for (i = 0; i < n; ++i) {
+			scalars [rhs] [0] = 0.0;
+			scalars [rhs] [n - 1] = 0.0;
+			for (i = 1; i < n - 1; ++i) {
 				scalars [rhs] [i] = 0.0;
 			}
 			
@@ -94,5 +94,6 @@ namespace element
 		
 		TRACE ("Update complete");
 	
+
 	}
 } /* element */
