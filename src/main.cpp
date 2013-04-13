@@ -66,7 +66,7 @@ int main (int argc, char const *argv[])
 
 	TRACE ("main: Entering main loop.");
 	
-	for (i = 0; i < 100; ++i) {
+	for (i = 0; i < 10; ++i) {
 		TRACE ("main: Beginning timestep...");
 		INFO ("main: Timestep: " << i);
 

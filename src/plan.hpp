@@ -19,6 +19,7 @@
 class plan
 {
 public:
+	virtual ~plan () {}
 	/*!*******************************************************************
 	 * \brief Operate the plan on the data arrays contained in the class
 	 * 
@@ -29,7 +30,6 @@ public:
 	 * \param timestep A double length of time over which to operate
 	 *********************************************************************/
 	virtual void execute (double timestep) = 0;
-	virtual ~plan () {}
 };
 
 #endif /* end of include guard: PLAN_HPP_S9YPWHOM */

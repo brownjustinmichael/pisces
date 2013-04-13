@@ -14,23 +14,25 @@
 namespace collocation
 {
 	collocation_grid::collocation_grid (int i_derivs, int i_rows, int i_cols) {
+		int i;
 		rows = i_rows;
 		cols = i_cols;
 		derivs = i_derivs;
 		
 		TRACE ("Instantiating...")
 		
-		data.resize (i_rows * i_cols * i_derivs);
+		data.resize (derivs);
+		
+		for (i = 0; i < i_derivs; ++i) {
+			data [i].resize (i_rows * i_cols);
+		}
 		
 		TRACE ("Instantiated...")
 	}
-	
-	double &collocation_grid::index (int deriv, int row, int col) {
-		return data [deriv * rows * cols + row * cols + col];
-	}
 
-	chebyshev_grid::chebyshev_grid (int i_M, int i_N) : collocation_grid (3, i_M, i_N) {
+	chebyshev_grid::chebyshev_grid (int i_M, int i_N, double i_scale) : collocation_grid (3, i_M, i_N) {
 		int d, m, k;
+		scale = i_scale;
 		pioN = std::acos (-1.0) / i_N;
 		exists_array.resize (i_M * i_N * 3, false);
 		
@@ -42,6 +44,13 @@ namespace collocation
 					index (d, m, k) = recursion (d, m, k);
 					exists (d, m, k) = true;
 				}
+			}
+		}
+		
+		for (d = 0; d < 3; ++d) {
+			for (k = 0; k < i_N; ++k) {
+				index (d, 0, k) /= 2.0;
+				index (d, i_M - 1, k) /= 2.0;
 			}
 		}
 		
@@ -63,10 +72,10 @@ namespace collocation
 			return 0.0;
 		} else if ((d == 1 && m == 1) || (d == 0 && m == 0)) {
 			// The second polynomial of the first derivative and the first Chebyshev polynomial are 1.0
-			return 1.0;
+			return scale;
 		} else if (d == 0 && m == 1) {
 			// The second Chebyshev polynomial is cos (theta)
-			return std::cos (pioN * k);
+			return scale * std::cos (pioN * k);
 		} else if (d == 0) {
 			// Use recursion to find the Chebyshev polynomial
 			return 2.0 * std::cos (pioN * k) * recursion (0, m - 1, k) - recursion (0, m - 2, k);

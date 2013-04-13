@@ -57,21 +57,24 @@ namespace element
 		
 		virtual ~element_1D () {}
 		
-		inline void add_scalar (int index) {
+		inline void add_scalar (int name) {
 			++n_scalars;
 			
-			scalars [index].resize (n);
+			scalars [name].resize (n);
 		}
 		
-		double virtual boundary_top (int index, int deriv) = 0;
+		inline double index (int name, int i) {
+			return scalars [name] [i];
+		}
 		
-		double virtual boundary_bottom (int index, int deriv) = 0;
-	
+
+			
 	protected:
 		int n; //!< The number of elements in each 1D array
 		int n_scalars;
 		std::vector<int> cell; //!< An integer array for tracking each cell number for output
 		std::map<int, std::vector<double>> scalars; //!< A vector of scalar vectors
+		std::shared_ptr<collocation::chebyshev_grid> grid;
 	};
 
 	/*!*******************************************************************
@@ -95,14 +98,24 @@ namespace element
 		 *********************************************************************/
 		void update ();
 		
-		double boundary_top (int index, int deriv);
-		double boundary_bottom (int index, int deriv);
-	
+		inline double derivative (int name, int deriv, int k) {
+			if (deriv == 0) {
+				return index (name, k);
+			} else {
+				int i;
+				double derivative = 0.0;
+				for (i = 0; i < n; ++i) {
+					derivative += scalars [name] [i] * grid->index (deriv, i, k);
+				}
+				return derivative;
+			}
+		};
+		
 	private:
 		int flags; //!< Flags for the boundary conditions and evaluation
 		
-		std::shared_ptr<collocation::chebyshev_grid> cheb;
-		std::unique_ptr<diffusion::collocation_chebyshev_1D> diffusion_plan; //!< The diffusion implementation
+		std::unique_ptr<diffusion::collocation_chebyshev_implicit_1D> implicit_diffusion; //!< The diffusion implementation
+		std::unique_ptr<diffusion::collocation_chebyshev_explicit_1D> explicit_diffusion; //!< The diffusion implementation
 		std::unique_ptr<io::incremental_output> angle_stream; //!< An implementation to output in angle space
 		std::unique_ptr<io::simple_output> failsafe_dump; //!< An implementation to dump in case of failure
 		fftw_plan fourier_plan; //!< The fft implementation

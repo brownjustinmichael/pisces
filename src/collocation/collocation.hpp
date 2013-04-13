@@ -41,7 +41,12 @@ namespace collocation
 		 * 
 		 * \return The double value at the index
 		 *********************************************************************/
-		double &index (int deriv, int row, int col);
+		inline double &index (int deriv, int row, int col) {
+			return data [deriv] [row + col * rows];
+		}
+		inline double *get_data (int deriv) {
+			return &(data [deriv] [0]);
+		}
 		
 	protected:
 		int rows; //!< The integer number of rows in the grid
@@ -49,7 +54,7 @@ namespace collocation
 		int derivs; //!< The integer number of derivatives deep the collocation grid runs
 		
 	private:
-		std::vector<double> data; //!< A double vector containing the collocation points
+		std::vector<std::vector<double>> data; //!< A double vector containing the collocation points
 	};
 	
 	/*!*******************************************************************
@@ -65,10 +70,11 @@ namespace collocation
 		 * \param i_M The integer max order of Chebyshev polynomial
 		 * \param i_N The integer number of collocation points
 		 *********************************************************************/
-		chebyshev_grid (int i_M, int i_N);
+		chebyshev_grid (int i_M, int i_N, double i_scale = 1.0);
 		virtual ~chebyshev_grid () {};
 		
 	private:
+		double scale;
 		std::vector<bool> exists_array; //!< A bool vector containing whether the points exist
 		double pioN; //!< The double 3.14159.../N, for use in calculations
 		/*!*******************************************************************
@@ -81,7 +87,7 @@ namespace collocation
 		* \return An std::vector<bool>::reference of whether the element exists
 	 	*********************************************************************/
 		std::vector<bool>::reference exists (int d, int m, int k) {
-			return exists_array [d * rows * cols + m * cols + k];
+			return exists_array [d + m * derivs + k * derivs * rows];
 		}
 		/*!*******************************************************************
 		 * \brief A recursive method to calculate the full collocation grid

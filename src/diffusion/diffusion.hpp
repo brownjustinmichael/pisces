@@ -36,6 +36,10 @@ extern "C" void dcopy_(int *n, double *x, int *incx, double *y, int *incy);
  *********************************************************************/
 extern "C" void dswap_(int *n, double *dx, int *incx, double *dy, int *incy);
 
+extern "C" void daxpy_ (int *n, double *da, double *dx, int *incx, double *y, int *incy);
+
+extern "C" void dscal_ (int *n, double *da, double *dx, int *incx);
+
 /*!*******************************************************************
  * \brief Function from BLAS for matrix-vector multiplication (y = alpha * a * x + beta * y)
  * 
@@ -92,7 +96,7 @@ namespace diffusion
 	 * and one for the odd Chebyshev polynomials. It uses the BLAS library 
 	 * to do so.
 	 *********************************************************************/
-	class collocation_chebyshev_1D : public plan
+	class collocation_chebyshev_explicit_1D : public plan
 	{
 	public:
 		/*!*******************************************************************
@@ -104,9 +108,45 @@ namespace diffusion
 		 * \param i_data_out A double pointer to the output data (if NULL or the same as i_data_in, the operation occurs in place but uses an additional call of dcopy_)
 		 * \param i_flags An integer containing the binary boundary and execution flags
 		 *********************************************************************/
-		collocation_chebyshev_1D (double i_coeff, double i_alpha, int i_n, std::shared_ptr<collocation::chebyshev_grid> i_cheb, double *i_data_in, double *i_rhs, double *i_data_out = NULL, int flags = 0x00);
+		collocation_chebyshev_explicit_1D (double i_coeff, int i_n, std::shared_ptr<collocation::chebyshev_grid> i_cheb, double *i_data_in, double *i_data_out, int flags = 0x00);
 		
-		virtual ~collocation_chebyshev_1D () {}
+		virtual ~collocation_chebyshev_explicit_1D () {}
+		
+		/*!*******************************************************************
+		 * \brief Execute the operation on the data for a given timestep duration
+		 * 
+		 * Of particular note, rhs is overwritten with the full right-hand-side 
+		 * (including diffusion terms) after execution.
+		 * 
+		 * \param timestep a double duration over which the diffusion step will happen
+		 *********************************************************************/
+		void execute (double timestep);
+		
+	private:
+		double coeff; //!< A double that represents the coefficient in front of the diffusion term in the differential equation
+		double previous_timestep; //!< A double that records the previous timestep 
+		int n; //!< An integer number of data elements (grid points) that collocation_chebyshev_1D will be built to handle
+		double *data_in; //!< A double pointer to the input data
+		double *data_out; //!< A double pointer to the output data; if data_in == data_out, the operation is done in place (but inefficient)
+		int flags; //!< An integer containing the binary boundary and execution flags
+		std::shared_ptr<collocation::chebyshev_grid> cheb; //!< A pointer to a collocation grid that contains the the Chebyshev values
+	};
+	
+	class collocation_chebyshev_implicit_1D : public plan
+	{
+	public:
+		/*!*******************************************************************
+		 * \param i_coeff A double containing the coefficient in front of the diffusion term in the differential equation
+		 * \param i_alpha A double that determines the degree of implicit calculation (0.0 = explicit, 1.0 = implicit, 0.5 recommended)
+		 * \param i_n An integer number of data elements (grid points) that collocation_chebyshev_1D will be built to tackle
+		 * \param i_data_in A double pointer to the input data
+		 * \param i_rhs The double array of the right-hand-side, overwritten each timestep with the full right-hand-side (can equal i_data_out)
+		 * \param i_data_out A double pointer to the output data (if NULL or the same as i_data_in, the operation occurs in place but uses an additional call of dcopy_)
+		 * \param i_flags An integer containing the binary boundary and execution flags
+		 *********************************************************************/
+		collocation_chebyshev_implicit_1D (double i_coeff, double i_alpha, int i_n, std::shared_ptr<collocation::chebyshev_grid> i_cheb, double *i_data_in, double *i_rhs, double *i_data_out, int flags = 0x00);
+		
+		virtual ~collocation_chebyshev_implicit_1D () {}
 		
 		/*!*******************************************************************
 		 * \brief Execute the operation on the data for a given timestep duration

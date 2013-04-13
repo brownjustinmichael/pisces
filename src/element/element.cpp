@@ -14,28 +14,6 @@
 
 namespace element
 {
-	double diffusion_element::boundary_top (int index, int deriv) {
-		int i;
-		double result = 0.0;
-		
-		for (i = 0; i < n; ++i) {
-			result += scalars [index] [i] * cheb->index (deriv, i, 0);
-		}
-		
-		return result;
-	}
-	
-	double diffusion_element::boundary_bottom (int index, int deriv) {
-		int i;
-		double result = 0.0;
-		
-		for (i = 0; i < n; ++i) {
-			result += scalars [index] [i] * cheb->index (deriv, i, 0);
-		}
-		
-		return result;
-	}
-	
 	diffusion_element::diffusion_element (int i_n, int i_flags) : element_1D (i_n) {
 		int i;
 		flags = i_flags;
@@ -53,7 +31,7 @@ namespace element
 		scalars [velocity] [0] = 2.0;
 		scalars [velocity] [2] = -1.0;
 		
-		cheb.reset (new collocation::chebyshev_grid (i_n, i_n));
+		grid.reset (new collocation::chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1))));
 
 		angle_stream.reset (new io::incremental_output ("../output/test_angle", ".dat", 4, new io::header, i_n));
 		angle_stream->append (&cell [0]);
@@ -63,7 +41,8 @@ namespace element
 		failsafe_dump.reset (new io::simple_output ("_dump.dat", i_n));
 		failsafe_dump->append (&(scalars [velocity]) [0]);
 		
-		diffusion_plan.reset (new diffusion::collocation_chebyshev_1D (2., 0.5, i_n, cheb, &(scalars [velocity]) [0], &(scalars [rhs]) [0], &(scalars [velocity]) [0], i_flags));
+		implicit_diffusion.reset (new diffusion::collocation_chebyshev_implicit_1D (1., 0.5, i_n, grid, &(scalars [velocity]) [0], &(scalars [rhs]) [0], &(scalars [velocity]) [0], i_flags));
+		explicit_diffusion.reset (new diffusion::collocation_chebyshev_explicit_1D (0.5, i_n, grid, &(scalars [velocity]) [0], &(scalars [rhs]) [0], i_flags));
 		fourier_plan = fftw_plan_r2r_1d (i_n, &(scalars [velocity]) [0], &(scalars [velocity]) [0], FFTW_REDFT00, FFTW_ESTIMATE);
 		
 		TRACE ("Initialized.");
@@ -73,39 +52,29 @@ namespace element
 		int i;
 		
 		TRACE ("Updating...");
-		
-		DEBUG ("cheb.use_count () = " << cheb.use_count ());
-		
+				
 		try {
 			// Testing
 			// Should be replaced by a CFL check
-			double timestep = 0.1;
+			double timestep = 0.000001;
 		
 			// Calculate the diffusion in Chebyshev space
-			diffusion_plan->execute (timestep);
+			explicit_diffusion->execute (timestep);
 			
 			// Transform forward
 			fftw_execute (fourier_plan);
-			
+
 			// We rescale the values to account for the factor of 2(N-1) that occurs during FFT
 			for (i = 0; i < n; ++i) {
-				(scalars [velocity]) [i] /= sqrt (2 * (n - 1));
+				(scalars [velocity]) [i] /= sqrt (2.0 * (n - 1));
 			}
-					
+			
 			// Output in angle space
 			angle_stream->to_file ();
-					
-			// Transform backward
-			fftw_execute (fourier_plan);
-		
-			// We rescale the values to account for the factor of 2(N-1) that occurs during FFT
-			for (i = 0; i < n; ++i) {
-				(scalars [velocity]) [i] /= sqrt (2 * (n - 1));
-			}
+
+			implicit_diffusion->execute (timestep);
 			
-			scalars [rhs] [0] = 0.0;
-			scalars [rhs] [n - 1] = 0.0;
-			for (i = 1; i < n - 1; ++i) {
+			for (i = 0; i < n; ++i) {
 				scalars [rhs] [i] = 0.0;
 			}
 			
