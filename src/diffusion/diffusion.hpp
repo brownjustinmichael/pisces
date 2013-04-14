@@ -144,7 +144,7 @@ namespace diffusion
 		 * \param i_data_out A double pointer to the output data (if NULL or the same as i_data_in, the operation occurs in place but uses an additional call of dcopy_)
 		 * \param i_flags An integer containing the binary boundary and execution flags
 		 *********************************************************************/
-		collocation_chebyshev_implicit_1D (double i_coeff, double i_alpha, int i_n, std::shared_ptr<collocation::chebyshev_grid> i_cheb, double *i_data_in, double *i_rhs, double *i_data_out, int flags = 0x00);
+		collocation_chebyshev_implicit_1D (double i_coeff, int i_n, std::shared_ptr<collocation::chebyshev_grid> i_cheb, double *i_matrix, int flags = 0x00);
 		
 		virtual ~collocation_chebyshev_implicit_1D () {}
 		
@@ -158,32 +158,13 @@ namespace diffusion
 		 *********************************************************************/
 		void execute (double timestep);
 		
-		/*!*******************************************************************
-		 * \brief Build either the implicit or explicit matrix for the equation
-		 * 
-		 * This method takes one of the matrices to be used in calculation and
-		 * computes the correct matrix. Since the matrices need only be updated
-		 * when the timestep changes, there is potential for a speed increase 
-		 * here.
-		 * 
-		 * \param alpha_scalar The quantity that precedes the diffusion term
-		 * \param matrix A double pointer to the matrix to update
-		 *********************************************************************/
-		void matrix (double alpha_scalar, double *matrix);
-		
 	private:
 		double coeff; //!< A double that represents the coefficient in front of the diffusion term in the differential equation
-		double alpha; //!< A double that determines the degree of implicit calculation (0.0 = explicit, 1.0 = implicit, 0.5 recommended)
 		double previous_timestep; //!< A double that records the previous timestep 
 		int n; //!< An integer number of data elements (grid points) that collocation_chebyshev_1D will be built to handle
-		double *data_in; //!< A double pointer to the input data
-		double *data_out; //!< A double pointer to the output data; if data_in == data_out, the operation is done in place (but inefficient)
-		double *rhs; //!< A double pointer to the right-hand-side; if rhs == data_out, the operation is most efficient
+		double *matrix; //!< A double pointer to the input data
 		int flags; //!< An integer containing the binary boundary and execution flags
 		std::vector<double> temp;
-		std::vector<double> diffusion_matrix; //!< A 1D vector to be filled with the implicit matrix equation for the Chebyshev polynomials
-		std::vector<double> pre_matrix; //!< A 1D vector to be filled with the explicit matrix equation for the Chebyshev polynomials
-		std::vector<int> ipiv; //!< An integer vector that contains the reordering for use in the LAPACK routine
 		std::shared_ptr<collocation::chebyshev_grid> cheb; //!< A pointer to a collocation grid that contains the the Chebyshev values
 	};
 } /* diffusion */

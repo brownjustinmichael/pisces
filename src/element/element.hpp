@@ -16,6 +16,7 @@
 #include <fftw3.h>
 #include "../diffusion/diffusion.hpp"
 #include "../io/io.hpp"
+#include "../solver/solver.hpp"
 
 namespace element
 {
@@ -67,8 +68,6 @@ namespace element
 			return scalars [name] [i];
 		}
 		
-
-			
 	protected:
 		int n; //!< The number of elements in each 1D array
 		int n_scalars;
@@ -114,8 +113,11 @@ namespace element
 	private:
 		int flags; //!< Flags for the boundary conditions and evaluation
 		
+		double previous_timestep;
+		std::vector<double> matrix;
 		std::unique_ptr<diffusion::collocation_chebyshev_implicit_1D> implicit_diffusion; //!< The diffusion implementation
 		std::unique_ptr<diffusion::collocation_chebyshev_explicit_1D> explicit_diffusion; //!< The diffusion implementation
+		std::unique_ptr<solver::lapack_solver> matrix_solver;
 		std::unique_ptr<io::incremental_output> angle_stream; //!< An implementation to output in angle space
 		std::unique_ptr<io::simple_output> failsafe_dump; //!< An implementation to dump in case of failure
 		fftw_plan fourier_plan; //!< The fft implementation

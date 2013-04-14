@@ -11,17 +11,21 @@
 #include "../config.hpp"
 #include "element.hpp"
 #include "../io/exceptions.hpp"
+#include "../solver/solver.hpp"
 
 namespace element
 {
 	diffusion_element::diffusion_element (int i_n, int i_flags) : element_1D (i_n) {
 		int i;
 		flags = i_flags;
+		previous_timestep = 0.0;
 		add_scalar (position);
 		add_scalar (velocity);
 		add_scalar (rhs);
 		
 		TRACE ("Initializing...");
+		
+		matrix.resize (i_n * i_n, 0.0);
 		
 		double pioN = std::acos (-1.0) / i_n;
 		for (i = 0; i < i_n; ++i) {
@@ -41,8 +45,9 @@ namespace element
 		failsafe_dump.reset (new io::simple_output ("_dump.dat", i_n));
 		failsafe_dump->append (&(scalars [velocity]) [0]);
 		
-		implicit_diffusion.reset (new diffusion::collocation_chebyshev_implicit_1D (1., 0.5, i_n, grid, &(scalars [velocity]) [0], &(scalars [rhs]) [0], &(scalars [velocity]) [0], i_flags));
-		explicit_diffusion.reset (new diffusion::collocation_chebyshev_explicit_1D (0.5, i_n, grid, &(scalars [velocity]) [0], &(scalars [rhs]) [0], i_flags));
+		implicit_diffusion.reset (new diffusion::collocation_chebyshev_implicit_1D (-5, i_n, grid, &matrix [0], i_flags));
+		explicit_diffusion.reset (new diffusion::collocation_chebyshev_explicit_1D (5, i_n, grid, &(scalars [velocity]) [0], &(scalars [rhs]) [0], i_flags));
+		matrix_solver.reset (new solver::lapack_solver (n, &(scalars [velocity]) [0], &(scalars [rhs]) [0], &matrix [0], &(scalars [velocity]) [0]));
 		fourier_plan = fftw_plan_r2r_1d (i_n, &(scalars [velocity]) [0], &(scalars [velocity]) [0], FFTW_REDFT00, FFTW_ESTIMATE);
 		
 		TRACE ("Initialized.");
@@ -50,6 +55,11 @@ namespace element
 	
 	void diffusion_element::update () {
 		int i;
+		int nn = n * n;
+		int ione = 1;
+		double dpone = 1.e0;
+		std::vector<double> temp (n);
+		std::vector<double> matrix_copy (n * n);
 		
 		TRACE ("Updating...");
 				
@@ -57,48 +67,35 @@ namespace element
 			// Testing
 			// Should be replaced by a CFL check
 			double timestep = 0.01;
+			
+			for (i = 0; i < n; ++i) {
+				(scalars [rhs]) [i] = 0.0;
+			}	
 
 			explicit_diffusion->execute (timestep);
 
 			// Transform backward
 			fftw_execute (fourier_plan);
-					
-			// We rescale the values to account for the factor of 2(N-1) that occurs during FFT
-			for (i = 0; i < n; ++i) {
-				(scalars [velocity]) [i] /= sqrt (2 * (n - 1));
-			}
-			
-			int ione = 1, info, i, j;
-			double dpone = 1.e0, dzero = 0.0;
-			daxpy_ (&n, &dpone, &(scalars [velocity]) [0], &ione, &(scalars [rhs]) [0], &ione);
-		
-			// Calculate the diffusion in Chebyshev space
-			implicit_diffusion->execute (timestep);
-			
-			// Transform forward
-			fftw_execute (fourier_plan);
 			
 			// We rescale the values to account for the factor of 2(N-1) that occurs during FFT
 			for (i = 0; i < n; ++i) {
-				(scalars [velocity]) [i] /= sqrt (2 * (n - 1));
+				(scalars [velocity]) [i] /= sqrt (2.0 * (n - 1));
 			}
-					
+			
 			// Output in angle space
 			angle_stream->to_file ();
-					
-			// Transform backward
-			fftw_execute (fourier_plan);
-		
-			// We rescale the values to account for the factor of 2(N-1) that occurs during FFT
-			for (i = 0; i < n; ++i) {
-				(scalars [velocity]) [i] /= sqrt (2 * (n - 1));
+
+			if (timestep != previous_timestep) {
+				flags &= ~solver::factorized;
+				dcopy_ (&nn, grid->get_data (0), &ione, &matrix [0], &ione);
+				
+				// Calculate the diffusion in Chebyshev space
+				implicit_diffusion->execute (timestep);
 			}
+
+			matrix_solver->solve (&flags);
 			
-			scalars [rhs] [0] = 0.0;
-			scalars [rhs] [n - 1] = 0.0;
-			for (i = 1; i < n - 1; ++i) {
-				scalars [rhs] [i] = 0.0;
-			}
+			previous_timestep = timestep;
 			
 		} catch (io::exceptions::file_exception &io_exception) {
 			ERROR ("Exception caught, failsafe dump to _dump.dat");
