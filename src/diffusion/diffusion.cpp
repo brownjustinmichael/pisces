@@ -71,21 +71,8 @@ namespace diffusion
 		// 	}
 		// 	daxpy_ (&n, &timestep, &rhs [0], &ione, &data_out [0], &ione);
 		// }
-		// 
-				
-		// Set up and evaluate the explicit part of the diffusion equation
-		if (timestep != previous_timestep) {
-			matrix ((1.0 - alpha) * timestep * coeff, &pre_matrix [0]);
-		}
+		// 		
 		
-		double scalar = (1.0 - alpha) * timestep * coeff;
-		
-		dgemv_ (&charN, &n, &n, &dpone, cheb->get_data (2), &n, &data_in [0], &ione, &dzero, &rhs [0], &ione);
-		rhs [0] = 0.0;
-		rhs [n - 1] = 0.0;
-		dscal_ (&n, &scalar, &rhs [0], &ione);
-		dgemv_ (&charN, &n, &n, &dpone, cheb->get_data (0), &n, &data_in [0], &ione, &dpone, &rhs [0], &ione);
-
 		if (rhs != data_out) {
 			dcopy_ (&n, &rhs [0], &ione, &data_out [0], &ione);
 		}
@@ -93,7 +80,7 @@ namespace diffusion
 		// Set up and evaluate the implicit part of the diffusion equation
 		if (timestep != previous_timestep) {
 			matrix (- alpha * timestep * coeff, &diffusion_matrix [0]);
-			dgetrf_ (&n, &n, &diffusion_matrix [0], &n, &ipiv [0], &info);			
+			dgetrf_ (&n, &n, &diffusion_matrix [0], &n, &ipiv [0], &info);
 		}
 				
 		dgetrs_ (&charN, &n, &ione, &diffusion_matrix [0], &n, &ipiv [0], &data_out [0], &n, &info);
@@ -166,14 +153,16 @@ namespace diffusion
 	    int i, ione = 1;
 	    char charN = 'N';
 	    double dpone = 1.0, dzero = 0.0;
-			
+		
 		TRACE ("Operating...");
 		
-		// Set up and evaluate the explicit part of the diffusion equation
-		dgemv_ (&charN, &n, &n, &dpone, cheb->get_data (2), &n, &data_in [0], &ione, &dpone, &data_out [0], &ione);
+		double scalar = coeff * timestep;
 		
+		// Set up and evaluate the explicit part of the diffusion equation
+		dgemv_ (&charN, &n, &n, &dpone, cheb->get_data (2), &n, &data_in [0], &ione, &dzero, &data_out [0], &ione);
 		data_out [0] = 0.0;
 		data_out [n - 1] = 0.0;
+		dscal_ (&n, &scalar, &data_out [0], &ione);
 		
 		TRACE ("Operation complete.");
 

@@ -57,6 +57,20 @@ namespace element
 			// Testing
 			// Should be replaced by a CFL check
 			double timestep = 0.01;
+
+			explicit_diffusion->execute (timestep);
+
+			// Transform backward
+			fftw_execute (fourier_plan);
+					
+			// We rescale the values to account for the factor of 2(N-1) that occurs during FFT
+			for (i = 0; i < n; ++i) {
+				(scalars [velocity]) [i] /= sqrt (2 * (n - 1));
+			}
+			
+			int ione = 1, info, i, j;
+			double dpone = 1.e0, dzero = 0.0;
+			daxpy_ (&n, &dpone, &(scalars [velocity]) [0], &ione, &(scalars [rhs]) [0], &ione);
 		
 			// Calculate the diffusion in Chebyshev space
 			implicit_diffusion->execute (timestep);
