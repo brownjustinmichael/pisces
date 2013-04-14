@@ -29,7 +29,7 @@ public:
 	 * 
 	 * \param timestep A double length of time over which to operate
 	 *********************************************************************/
-	virtual void execute (double timestep) = 0;
+	virtual void execute (double timestep, int *execution_flags = NULL) = 0;
 };
 
 #endif /* end of include guard: PLAN_HPP_S9YPWHOM */

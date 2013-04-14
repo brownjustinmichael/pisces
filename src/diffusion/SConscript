@@ -1,6 +1,8 @@
 Import ("env")
 Import ("objects")
 
-env.Append (LIBS = ["lapack", "blas", "atlas"])
+for lib in ["lapack", "blas", "atlas"]:
+    if lib not in env ['LIBS']:
+        env.Append (LIBS = lib)
 
 objects.append (env.Object ("diffusion.cpp"))

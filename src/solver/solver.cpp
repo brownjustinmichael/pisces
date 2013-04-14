@@ -12,7 +12,7 @@
 namespace solver
 {
 	void lapack_solver::solve (int *flags) {
-		int i, ione = 1, info;
+		int ione = 1, info;
 		double dpone = 1.0;
 		char charN = 'N';
 		

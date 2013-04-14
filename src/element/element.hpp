@@ -14,7 +14,8 @@
 #include <vector>
 #include <map>
 #include <fftw3.h>
-#include "../diffusion/diffusion.hpp"
+#include "../plan.hpp"
+#include "../collocation/collocation.hpp"
 #include "../io/io.hpp"
 #include "../solver/solver.hpp"
 
@@ -83,15 +84,15 @@ namespace element
 	 * element diffusion in 1D. It cannot yet tie to other elements or 
 	 * calculate its own timestep. 
 	 *********************************************************************/
-	class diffusion_element : public element_1D
+	class diffusion_element_1D : public element_1D
 	{
 	public:
 		/*!*******************************************************************
 		 * \param i_n The number of elements in each 1D data array
 		 * \param i_flags Flags for the boundary conditions and evaluation
 		 *********************************************************************/
-		diffusion_element (int i_n, int i_flags);
-		virtual ~diffusion_element () {}
+		diffusion_element_1D (int i_n, int i_flags);
+		virtual ~diffusion_element_1D () {}
 		/*!*******************************************************************
 		 * \brief This calculates diffusion and output for a constant timestep
 		 *********************************************************************/
@@ -115,11 +116,11 @@ namespace element
 		
 		double previous_timestep;
 		std::vector<double> matrix;
-		std::unique_ptr<diffusion::collocation_chebyshev_implicit_1D> implicit_diffusion; //!< The diffusion implementation
-		std::unique_ptr<diffusion::collocation_chebyshev_explicit_1D> explicit_diffusion; //!< The diffusion implementation
-		std::unique_ptr<solver::lapack_solver> matrix_solver;
-		std::unique_ptr<io::incremental_output> angle_stream; //!< An implementation to output in angle space
-		std::unique_ptr<io::simple_output> failsafe_dump; //!< An implementation to dump in case of failure
+		std::unique_ptr<plan> implicit_diffusion; //!< The diffusion implementation
+		std::unique_ptr<plan> explicit_diffusion; //!< The diffusion implementation
+		std::unique_ptr<solver::solver> matrix_solver;
+		std::unique_ptr<io::output> angle_stream; //!< An implementation to output in angle space
+		std::unique_ptr<io::output> failsafe_dump; //!< An implementation to dump in case of failure
 		fftw_plan fourier_plan; //!< The fft implementation
 	};
 } /* element */

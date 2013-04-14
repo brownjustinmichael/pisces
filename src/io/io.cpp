@@ -7,6 +7,8 @@
  ************************************************************************/
 
 #include <cmath>
+#include <iostream>
+#include <fstream>
 #include <sstream>
 #include <iomanip>
 #include "io.hpp"
@@ -62,8 +64,9 @@ namespace io
 		int_ptrs.push_back (data_ptr);
 	}
 	
-	void output::to_file (std::string file_name) {
+	void output::simple_to_file (std::string file_name) {
 		int i, j;
+		std::ofstream file_stream; // A file stream object to be used when writing to file 
 		
 		TRACE ("Beginning output...");		
 		

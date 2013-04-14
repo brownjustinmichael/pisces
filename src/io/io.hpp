@@ -6,8 +6,6 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include <iostream>
-#include <fstream>
 #include <vector>
 #include <string>
 
@@ -99,7 +97,7 @@ namespace io
 		 * 
 		 * \param i_file_name A string containing the file name where the class will output
 		 *********************************************************************/
-		virtual void to_file (std::string i_file_name);
+		virtual void to_file () = 0;
 		
 	protected:
 		int n; //!< An integer number of elements in each array
@@ -107,7 +105,8 @@ namespace io
 		std::vector<double *> double_ptrs; //!< A vector of double pointers to the arrays of data (if an element is NULL, check int_ptrs at the same index instead)
 		std::vector<int *> int_ptrs; //!< A vector of integer pointers to the arrays of data
 		header *header_ptr; //!< A pointer to a header object, which contains the details regarding the construction of the header
-		std::ofstream file_stream; //!< A file stream object to be used when writing to file 
+		
+		void simple_to_file (std::string file_name);
 	};
 	
 	/*!*******************************************************************
@@ -131,7 +130,7 @@ namespace io
 		/*!*******************************************************************
 		 * \brief Outputs to file_name
 		 *********************************************************************/
-		void to_file () {output::to_file (file_name);} 
+		void to_file () {simple_to_file (file_name);} 
 	};
 	
 	/*!*******************************************************************
@@ -164,7 +163,7 @@ namespace io
 		/*!*******************************************************************
 		 * \brief Outputs to file
 		 *********************************************************************/
-		void to_file () {output::to_file (generate_file_name ());} 
+		void to_file () {output::simple_to_file (generate_file_name ());} 
 		
 	private:
 		int n_outputs; //!< An incremental integer that will be appended to the end of each file_base

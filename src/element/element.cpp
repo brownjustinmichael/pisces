@@ -11,11 +11,12 @@
 #include "../config.hpp"
 #include "element.hpp"
 #include "../io/exceptions.hpp"
+#include "../diffusion/diffusion.hpp"
 #include "../solver/solver.hpp"
 
 namespace element
 {
-	diffusion_element::diffusion_element (int i_n, int i_flags) : element_1D (i_n) {
+	diffusion_element_1D::diffusion_element_1D (int i_n, int i_flags) : element_1D (i_n) {
 		int i;
 		flags = i_flags;
 		previous_timestep = 0.0;
@@ -45,19 +46,18 @@ namespace element
 		failsafe_dump.reset (new io::simple_output ("_dump.dat", i_n));
 		failsafe_dump->append (&(scalars [velocity]) [0]);
 		
-		implicit_diffusion.reset (new diffusion::collocation_chebyshev_implicit_1D (-5, i_n, grid, &matrix [0], i_flags));
-		explicit_diffusion.reset (new diffusion::collocation_chebyshev_explicit_1D (5, i_n, grid, &(scalars [velocity]) [0], &(scalars [rhs]) [0], i_flags));
+		implicit_diffusion.reset (new diffusion::implicit_methods::collocation_chebyshev_1D (-5, i_n, grid, &matrix [0], i_flags));
+		explicit_diffusion.reset (new diffusion::explicit_methods::collocation_chebyshev_1D (5, i_n, grid, &(scalars [velocity]) [0], &(scalars [rhs]) [0], i_flags));
 		matrix_solver.reset (new solver::lapack_solver (n, &(scalars [velocity]) [0], &(scalars [rhs]) [0], &matrix [0], &(scalars [velocity]) [0]));
 		fourier_plan = fftw_plan_r2r_1d (i_n, &(scalars [velocity]) [0], &(scalars [velocity]) [0], FFTW_REDFT00, FFTW_ESTIMATE);
 		
 		TRACE ("Initialized.");
 	}
 	
-	void diffusion_element::update () {
+	void diffusion_element_1D::update () {
 		int i;
 		int nn = n * n;
 		int ione = 1;
-		double dpone = 1.e0;
 		std::vector<double> temp (n);
 		std::vector<double> matrix_copy (n * n);
 		
@@ -72,7 +72,7 @@ namespace element
 				(scalars [rhs]) [i] = 0.0;
 			}	
 
-			explicit_diffusion->execute (timestep);
+			explicit_diffusion->execute (timestep, &flags);
 
 			// Transform backward
 			fftw_execute (fourier_plan);
@@ -90,7 +90,7 @@ namespace element
 				dcopy_ (&nn, grid->get_data (0), &ione, &matrix [0], &ione);
 				
 				// Calculate the diffusion in Chebyshev space
-				implicit_diffusion->execute (timestep);
+				implicit_diffusion->execute (timestep, &flags);
 			}
 
 			matrix_solver->solve (&flags);
