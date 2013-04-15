@@ -10,7 +10,6 @@
 #define SOLVER_HPP_N0BUAX6H
 
 #include <vector>
-#include "../plan.hpp"
 
 /*!*******************************************************************
  * \brief Function from BLAS that copies a double array to another in place
@@ -23,20 +22,7 @@
  *********************************************************************/
 extern "C" void dcopy_(int *n, double *x, int *incx, double *y, int *incy);
 
-/*!*******************************************************************
- * \brief Function from BLAS that swaps a double array with another in place
- * 
- * \param n A pointer to an integer number of elements in x to copy to y
- * \param x The array from which the data are copied
- * \param incx A pointer to an integer spacing of elements in x
- * \param y The array to which the data are copied
- * \param incy A pointer to an integer spacing of elements in y
- *********************************************************************/
-extern "C" void dswap_(int *n, double *dx, int *incx, double *dy, int *incy);
-
 extern "C" void daxpy_ (int *n, double *da, double *dx, int *incx, double *y, int *incy);
-
-extern "C" void dscal_ (int *n, double *da, double *dx, int *incx);
 
 /*!*******************************************************************
  * \brief Function from LAPACK that factorizes the matrix a by LU decomposition

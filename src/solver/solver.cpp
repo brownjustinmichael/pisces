@@ -25,7 +25,6 @@ namespace solver
 			daxpy_ (&n, &dpone, &rhs [0], &ione, &data_out [0], &ione);
 		}
 		
-		// Set up and evaluate the implicit part of the diffusion equation
 		if (! (*flags & factorized)) {
 			dgetrf_ (&n, &n, &matrix [0], &n, &ipiv [0], &info);
 			*flags |= factorized; 

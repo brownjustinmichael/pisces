@@ -36,7 +36,7 @@ namespace element
 		scalars [velocity] [0] = 2.0;
 		scalars [velocity] [2] = -1.0;
 		
-		grid.reset (new collocation::chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1))));
+		grid.reset (new collocation::chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0))));
 
 		angle_stream.reset (new io::incremental_output ("../output/test_angle", ".dat", 4, new io::header, i_n));
 		angle_stream->append (&cell [0]);
@@ -46,8 +46,8 @@ namespace element
 		failsafe_dump.reset (new io::simple_output ("_dump.dat", i_n));
 		failsafe_dump->append (&(scalars [velocity]) [0]);
 		
-		implicit_diffusion.reset (new diffusion::implicit_methods::collocation_chebyshev_1D (-5, i_n, grid, &matrix [0], i_flags));
-		explicit_diffusion.reset (new diffusion::explicit_methods::collocation_chebyshev_1D (5, i_n, grid, &(scalars [velocity]) [0], &(scalars [rhs]) [0], i_flags));
+		implicit_diffusion.reset (new diffusion::implicit_methods::collocation_chebyshev_1D (-0, i_n, grid, &matrix [0], i_flags));
+		explicit_diffusion.reset (new diffusion::explicit_methods::collocation_chebyshev_1D (0, i_n, grid, &(scalars [velocity]) [0], &(scalars [rhs]) [0], i_flags));
 		matrix_solver.reset (new solver::lapack_solver (n, &(scalars [velocity]) [0], &(scalars [rhs]) [0], &matrix [0], &(scalars [velocity]) [0]));
 		fourier_plan = fftw_plan_r2r_1d (i_n, &(scalars [velocity]) [0], &(scalars [velocity]) [0], FFTW_REDFT00, FFTW_ESTIMATE);
 		
@@ -66,20 +66,20 @@ namespace element
 		try {
 			// Testing
 			// Should be replaced by a CFL check
-			double timestep = 0.01;
+			double timestep = 0.0001;
 			
 			for (i = 0; i < n; ++i) {
 				(scalars [rhs]) [i] = 0.0;
 			}	
 
-			explicit_diffusion->execute (timestep, &flags);
+			// explicit_diffusion->execute (timestep, &flags);
 
 			// Transform backward
 			fftw_execute (fourier_plan);
 			
 			// We rescale the values to account for the factor of 2(N-1) that occurs during FFT
 			for (i = 0; i < n; ++i) {
-				(scalars [velocity]) [i] /= sqrt (2.0 * (n - 1));
+				(scalars [velocity]) [i] /= sqrt (2.0 * (n - 1.0));
 			}
 			
 			// Output in angle space
@@ -90,11 +90,11 @@ namespace element
 				dcopy_ (&nn, grid->get_data (0), &ione, &matrix [0], &ione);
 				
 				// Calculate the diffusion in Chebyshev space
-				implicit_diffusion->execute (timestep, &flags);
+				// implicit_diffusion->execute (timestep, &flags);
 			}
 
 			matrix_solver->solve (&flags);
-			
+						
 			previous_timestep = timestep;
 			
 		} catch (io::exceptions::file_exception &io_exception) {
