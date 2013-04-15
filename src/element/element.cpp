@@ -13,6 +13,7 @@
 #include "../io/exceptions.hpp"
 #include "../diffusion/diffusion.hpp"
 #include "../solver/solver.hpp"
+#include "../fft/fft.hpp"
 
 namespace element
 {
@@ -51,7 +52,7 @@ namespace element
 		implicit_diffusion.reset (new diffusion::implicit_methods::collocation_chebyshev_1D (- diffusion_coeff * alpha, i_n, grid, &matrix [0], i_flags));
 		explicit_diffusion.reset (new diffusion::explicit_methods::collocation_chebyshev_1D (diffusion_coeff * (1.0 - alpha), i_n, grid, &(scalars [velocity]) [0], &(scalars [rhs]) [0], i_flags));
 		matrix_solver.reset (new solver::lapack_solver (n, &(scalars [velocity]) [0], &(scalars [rhs]) [0], &matrix [0], &(scalars [velocity]) [0]));
-		fourier_plan = fftw_plan_r2r_1d (i_n + 1, &(scalars [velocity]) [0], &(scalars [velocity]) [0], FFTW_REDFT00, FFTW_ESTIMATE);
+		fourier_transform.reset (new fft::fftw_cosine (n, &(scalars [velocity]) [0], &(scalars [velocity]) [0]));
 		
 		TRACE ("Initialized.");
 	}
@@ -63,8 +64,8 @@ namespace element
 		TRACE ("Updating...");
 				
 		try {
-			// // Testing
-			// // Should be replaced by a CFL check
+			// Testing
+			// Should be replaced by a CFL check
 			double timestep = 0.01;
 			
 			for (i = 0; i < n; ++i) {
@@ -73,12 +74,7 @@ namespace element
 
 			explicit_diffusion->execute (timestep, &flags);
 			
-			// Transform forward
-			fftw_execute (fourier_plan);
-			
-			for (i = 0; i < n; ++i) {
-				scalars [velocity] [i] /= sqrt (2.0 * (n - 1));				
-			}
+			fourier_transform->execute (timestep, &flags);
 			
 			// Output in angle space
 			angle_stream->to_file ();

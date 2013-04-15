@@ -13,7 +13,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <fftw3.h>
 #include "../plan.hpp"
 #include "../collocation/collocation.hpp"
 #include "../io/io.hpp"
@@ -121,7 +120,7 @@ namespace element
 		std::unique_ptr<solver::solver> matrix_solver;
 		std::unique_ptr<io::output> angle_stream; //!< An implementation to output in angle space
 		std::unique_ptr<io::output> failsafe_dump; //!< An implementation to dump in case of failure
-		fftw_plan fourier_plan; //!< The fft implementation
+		std::unique_ptr<plan> fourier_transform; //!< The fft implementation
 	};
 } /* element */
 
