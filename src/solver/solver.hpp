@@ -60,22 +60,23 @@ namespace solver
 	{
 	public:
 		virtual ~solver () {}
-		virtual void solve (int *flags = 0x00) = 0;
+		virtual void solve () = 0;
 	};
 
 	class lapack_solver : public solver
 	{
 	public:
-		lapack_solver (int i_n, double *i_data_in, double *i_rhs, double *i_matrix, double *i_data_out) {
+		lapack_solver (int i_n, double *i_data_in, double *i_rhs, double *i_matrix, double *i_data_out, int *i_flags = NULL) {
 			n = i_n;
 			data_in = i_data_in;
 			rhs = i_rhs;
 			matrix = i_matrix;
 			data_out = i_data_out;
+			flags = i_flags;
 			ipiv.resize (i_n, 0);
 		};
 		virtual ~lapack_solver () {}
-		void solve (int *flags = 0x00);
+		void solve ();
 
 	private:
 		int n;
@@ -84,6 +85,7 @@ namespace solver
 		double *matrix;
 		double *data_out;
 		std::vector<int> ipiv;
+		int *flags;
 	};
 } /* solver */
 

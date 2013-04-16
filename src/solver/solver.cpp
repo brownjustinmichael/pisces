@@ -11,7 +11,7 @@
 
 namespace solver
 {
-	void lapack_solver::solve (int *flags) {
+	void lapack_solver::solve () {
 		int ione = 1, info;
 		double dpone = 1.0;
 		char charN = 'N';
@@ -25,7 +25,7 @@ namespace solver
 			daxpy_ (&n, &dpone, &rhs [0], &ione, &data_out [0], &ione);
 		}
 		
-		if (! (*flags & factorized)) {
+		if (! ((*flags) & factorized)) {
 			dgetrf_ (&n, &n, &matrix [0], &n, &ipiv [0], &info);
 			*flags |= factorized; 
 		}

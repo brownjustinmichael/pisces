@@ -19,7 +19,7 @@ namespace fft
 	{
 	public:
 		virtual ~fft () {}
-		virtual void execute (double timestep, int *flags) = 0;
+		virtual void execute () = 0;
 	};
 	
 	class fftw_cosine : public fft
@@ -34,7 +34,7 @@ namespace fft
 		}
 		virtual ~fftw_cosine () {}
 		
-		void execute (double timestep, int *flags) {
+		void execute () {
 			int i;
 			
 			fftw_execute (fourier_plan);

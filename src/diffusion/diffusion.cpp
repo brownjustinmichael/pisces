@@ -19,8 +19,9 @@ namespace diffusion
 {
 	namespace implicit_methods
 	{
-		collocation_chebyshev_1D::collocation_chebyshev_1D (double i_coeff, int i_n, std::shared_ptr<collocation::chebyshev_grid> i_cheb, double *i_matrix, int i_flags) {
+		collocation_chebyshev_1D::collocation_chebyshev_1D (double i_coeff, double *i_timestep_ptr, int i_n, std::shared_ptr<collocation::chebyshev_grid> i_cheb, double *i_matrix, int *i_flags) {
 			coeff = i_coeff;
+			timestep_ptr = i_timestep_ptr;
 			previous_timestep = 0.0;
 			n = i_n;
 			matrix = i_matrix;
@@ -40,27 +41,31 @@ namespace diffusion
 			TRACE ("Instantiation complete.");
 		}
 
-		void collocation_chebyshev_1D::execute (double timestep, int *execution_flags) {
+		void collocation_chebyshev_1D::execute () {
 		    int ione = 1, i, start, len;
 			double scalar;
 			
 			TRACE ("Operating...");
 
-			if (flags & boundary::fixed_upper) {
+			if (!flags) {
+				start = 0;
+			} else if (*flags & boundary::fixed_upper) {
 				// This equation fixes the value at the top boundary
 				start = 1;
 			} else {
 				start = 0;
 			}
 	
-			if (flags & boundary::fixed_lower) {
+			if (!flags) {
+				len = n - start;
+			} else if (*flags & boundary::fixed_lower) {
 				// This equation fixes the value at the bottom boundary
 				len = n - 1 - start;
 			} else {
 				len = n - start;
 			}
 		
-			scalar = coeff * timestep;
+			scalar = coeff * *timestep_ptr;
 	
 			// This is the main loop for setting up the diffusion equation in Chebyshev space
 			for (i = 0; i < n; ++i) {
@@ -68,14 +73,14 @@ namespace diffusion
 			}
 		
 			TRACE ("Operation complete.");
-
 		}
 	} /* implicit */
 
 	namespace explicit_methods
 	{
-		collocation_chebyshev_1D::collocation_chebyshev_1D (double i_coeff, int i_n, std::shared_ptr<collocation::chebyshev_grid> i_cheb, double *i_data_in, double *i_data_out, int i_flags) {
+		collocation_chebyshev_1D::collocation_chebyshev_1D (double i_coeff, double *i_timestep_ptr, int i_n, std::shared_ptr<collocation::chebyshev_grid> i_cheb, double *i_data_in, double *i_data_out, int *i_flags) {
 			coeff = i_coeff;
+			timestep_ptr = i_timestep_ptr;
 			n = i_n;
 			data_in = i_data_in;
 			data_out = i_data_out;
@@ -95,32 +100,31 @@ namespace diffusion
 			TRACE ("Instantiation complete.");
 		}
 
-		void collocation_chebyshev_1D::execute (double timestep, int *execution_flags) {
+		void collocation_chebyshev_1D::execute () {
 		    int ione = 1, len, start;
 		    char charN = 'N';
 		    double dpone = 1.0, scalar;
 		
 			TRACE ("Operating...");
 		
-			scalar = coeff * timestep;
+			scalar = coeff * *timestep_ptr;
 		
-			if (flags & boundary::fixed_upper) {
-				start = 1;
-			} else {
+			if (!flags || ! (*flags & boundary::fixed_upper)) {
 				start = 0;
+			} else {
+				start = 1;
 			}
 		
-			if (flags & boundary::fixed_lower) {
-				len = n - 1 - start;
-			} else {
+			if (!flags || ! (*flags & boundary::fixed_lower)) {
 				len = n - start;
+			} else {
+				len = n - 1 - start;
 			}
 		
 			// Set up and evaluate the explicit part of the diffusion equation
 			dgemv_ (&charN, &len, &n, &scalar, &(cheb->get_data (2) [start]), &n, &data_in [0], &ione, &dpone, &data_out [start], &ione);
 				
 			TRACE ("Operation complete.");
-
 		}
 	} /* explicit */
 } /* diffusion */

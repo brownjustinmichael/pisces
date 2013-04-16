@@ -58,7 +58,7 @@ namespace diffusion
 			 * \param i_data_out A double pointer to the output data (if NULL or the same as i_data_in, the operation occurs in place but uses an additional call of dcopy_)
 			 * \param i_flags An integer containing the binary boundary and execution flags
 			 *********************************************************************/
-			collocation_chebyshev_1D (double i_coeff, int i_n, std::shared_ptr<collocation::chebyshev_grid> i_cheb, double *i_data_in, double *i_data_out, int flags = 0x00);
+			collocation_chebyshev_1D (double i_coeff, double *i_timestep_ptr, int i_n, std::shared_ptr<collocation::chebyshev_grid> i_cheb, double *i_data_in, double *i_data_out, int *flags = NULL);
 		
 			virtual ~collocation_chebyshev_1D () {}
 		
@@ -70,15 +70,16 @@ namespace diffusion
 			 * 
 			 * \param timestep a double duration over which the diffusion step will happen
 			 *********************************************************************/
-			void execute (double timestep, int *execution_flags = NULL);
+			void execute ();
 		
 			private:
 			double coeff; //!< A double that represents the coefficient in front of the diffusion term in the differential equation
+			double *timestep_ptr;
 			double previous_timestep; //!< A double that records the previous timestep 
 			int n; //!< An integer number of data elements (grid points) that collocation_chebyshev_1D will be built to handle
 			double *data_in; //!< A double pointer to the input data
 			double *data_out; //!< A double pointer to the output data; if data_in == data_out, the operation is done in place (but inefficient)
-			int flags; //!< An integer containing the binary boundary and execution flags
+			int *flags; //!< An integer containing the binary boundary and execution flags
 			std::shared_ptr<collocation::chebyshev_grid> cheb; //!< A pointer to a collocation grid that contains the the Chebyshev values
 		};
 	} /* explicit */
@@ -97,7 +98,7 @@ namespace diffusion
 			 * \param i_data_out A double pointer to the output data (if NULL or the same as i_data_in, the operation occurs in place but uses an additional call of dcopy_)
 			 * \param i_flags An integer containing the binary boundary and execution flags
 			 *********************************************************************/
-			collocation_chebyshev_1D (double i_coeff, int i_n, std::shared_ptr<collocation::chebyshev_grid> i_cheb, double *i_matrix, int flags = 0x00);
+			collocation_chebyshev_1D (double i_coeff, double *i_timestep_ptr, int i_n, std::shared_ptr<collocation::chebyshev_grid> i_cheb, double *i_matrix, int *flags = NULL);
 		
 			virtual ~collocation_chebyshev_1D () {}
 		
@@ -109,14 +110,15 @@ namespace diffusion
 			 * 
 			 * \param timestep a double duration over which the diffusion step will happen
 			 *********************************************************************/
-			void execute (double timestep, int *execution_flags);
+			void execute ();
 		
 		private:
 			double coeff; //!< A double that represents the coefficient in front of the diffusion term in the differential equation
-			double previous_timestep; //!< A double that records the previous timestep 
+			double previous_timestep; //!< A double that records the previous timestep
+			double *timestep_ptr;
 			int n; //!< An integer number of data elements (grid points) that collocation_chebyshev_1D will be built to handle
 			double *matrix; //!< A double pointer to the input data
-			int flags; //!< An integer containing the binary boundary and execution flags
+			int *flags; //!< An integer containing the binary boundary and execution flags
 			std::vector<double> temp;
 			std::shared_ptr<collocation::chebyshev_grid> cheb; //!< A pointer to a collocation grid that contains the the Chebyshev values
 		};

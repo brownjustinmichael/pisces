@@ -112,7 +112,7 @@ namespace element
 		
 	private:
 		int flags; //!< Flags for the boundary conditions and evaluation
-		
+		double timestep;
 		double previous_timestep;
 		std::vector<double> matrix;
 		std::unique_ptr<plan> implicit_diffusion; //!< The diffusion implementation

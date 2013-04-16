@@ -49,9 +49,9 @@ namespace element
 		failsafe_dump.reset (new io::simple_output ("_dump.dat", i_n));
 		failsafe_dump->append (&(scalars [velocity]) [0]);
 		
-		implicit_diffusion.reset (new diffusion::implicit_methods::collocation_chebyshev_1D (- diffusion_coeff * alpha, i_n, grid, &matrix [0], i_flags));
-		explicit_diffusion.reset (new diffusion::explicit_methods::collocation_chebyshev_1D (diffusion_coeff * (1.0 - alpha), i_n, grid, &(scalars [velocity]) [0], &(scalars [rhs]) [0], i_flags));
-		matrix_solver.reset (new solver::lapack_solver (n, &(scalars [velocity]) [0], &(scalars [rhs]) [0], &matrix [0], &(scalars [velocity]) [0]));
+		implicit_diffusion.reset (new diffusion::implicit_methods::collocation_chebyshev_1D (- diffusion_coeff * alpha, &timestep, i_n, grid, &matrix [0], &flags));
+		explicit_diffusion.reset (new diffusion::explicit_methods::collocation_chebyshev_1D (diffusion_coeff * (1.0 - alpha), &timestep, i_n, grid, &(scalars [velocity]) [0], &(scalars [rhs]) [0], &flags));
+		matrix_solver.reset (new solver::lapack_solver (n, &(scalars [velocity]) [0], &(scalars [rhs]) [0], &matrix [0], &(scalars [velocity]) [0], &flags));
 		fourier_transform.reset (new fft::fftw_cosine (n, &(scalars [velocity]) [0], &(scalars [velocity]) [0]));
 		
 		TRACE ("Initialized.");
@@ -66,15 +66,15 @@ namespace element
 		try {
 			// Testing
 			// Should be replaced by a CFL check
-			double timestep = 0.01;
+			timestep = 0.01;
 			
 			for (i = 0; i < n; ++i) {
 				scalars [rhs] [i] = 0.0;
 			}
 
-			explicit_diffusion->execute (timestep, &flags);
+			explicit_diffusion->execute ();
 			
-			fourier_transform->execute (timestep, &flags);
+			fourier_transform->execute ();
 			
 			// Output in angle space
 			angle_stream->to_file ();
@@ -84,10 +84,10 @@ namespace element
 				dcopy_ (&nn, grid->get_data (0), &ione, &matrix [0], &ione);
 				flags &= ~solver::factorized;
 
-				implicit_diffusion->execute (timestep, &flags);
+				implicit_diffusion->execute ();
 			}
 		
-			matrix_solver->solve (&flags);
+			matrix_solver->solve ();
 
 			previous_timestep = timestep;
 			
