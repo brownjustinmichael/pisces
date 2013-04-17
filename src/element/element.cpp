@@ -12,16 +12,76 @@
 #include "element.hpp"
 #include "../io/exceptions.hpp"
 #include "../diffusion/diffusion.hpp"
+#include "../advection/advection.h"
+#include "../boundary/boundary.hpp"
 #include "../solver/solver.hpp"
 #include "../fft/fft.hpp"
 
 namespace element
 {
-	diffusion_element_1D::diffusion_element_1D (int i_n, int i_flags) : element_1D (i_n) {
+	void element_1D::calculate () {
 		int i;
-		flags = i_flags;
+		
+		TRACE ("Updating...");
+				
+		try {
+			// Start in grid space
+			// Testing
+			// Should be replaced by a CFL check
+			timestep = 0.01;
+			
+			for (i = 0; i < n_explicit_grid_plans; ++i) {
+				explicit_grid_plans [i]->execute ();
+			}
+			
+			// Switch to normal space
+			if (transform_forward) {
+				transform_forward->execute ();
+			}
+			
+			// Output in angle space
+			if (angle_stream) {
+				angle_stream->to_file ();
+			}
+
+			for (i = 0; i < n_explicit_space_plans; ++i) {
+				explicit_space_plans [i]->execute ();
+			}
+			
+			if (timestep != previous_timestep) {
+				flags &= ~solver::factorized;
+				for (i = 0; i < n_implicit_plans; ++i) {
+					implicit_plans [i]->execute ();
+				}
+			}
+
+			previous_timestep = timestep;
+		} catch (io::exceptions::file_exception &io_exception) {
+			ERROR ("Exception caught, failsafe dump to _dump.dat");
+			failsafe_dump->to_file ();
+			exit (EXIT_FAILURE);
+		}
+	}
+		
+	void element_1D::execute_boundaries () {
+		for (int i = 0; i < n_boundaries; ++i) {
+			boundaries [i]->execute ();
+		}
+	}
+	
+	void element_1D::update () {
+		if (matrix_solver) {
+			matrix_solver->solve ();
+		}
+		
+		TRACE ("Update complete");
+	}
+	
+	diffusion_element_1D::diffusion_element_1D (int i_n, int i_flags) : element_1D (i_n, i_flags) {
+		int i;
 		previous_timestep = 0.0;
 		double diffusion_coeff = 1.0;
+		double advection_coeff = 1.0;
 		double alpha = 0.5;
 		add_scalar (position);
 		add_scalar (velocity);
@@ -49,56 +109,18 @@ namespace element
 		failsafe_dump.reset (new io::simple_output ("_dump.dat", i_n));
 		failsafe_dump->append (&(scalars [velocity]) [0]);
 		
-		implicit_diffusion.reset (new diffusion::implicit_methods::collocation_chebyshev_1D (- diffusion_coeff * alpha, &timestep, i_n, grid, &matrix [0], &flags));
-		explicit_diffusion.reset (new diffusion::explicit_methods::collocation_chebyshev_1D (diffusion_coeff * (1.0 - alpha), &timestep, i_n, grid, &(scalars [velocity]) [0], &(scalars [rhs]) [0], &flags));
+		DEBUG ("scalars [velocity] = " << &(scalars [velocity] [0]) << " [0] = " << scalars [velocity] [0])
+		DEBUG ("scalars [velocity] = " << &(scalars [velocity] [n - 1]) << " [n - 1] = " << scalars [velocity] [n - 1])
+		
+		add_boundary (std::unique_ptr<plan> (new boundary::boundary_1D (0.0, &(scalars [velocity] [0]), 0.0, &(scalars [velocity] [n - 1]))));
+		add_boundary (std::unique_ptr<plan> (new boundary::boundary_1D (0.0, &(scalars [rhs] [0]), 0.0, &(scalars [rhs] [n - 1]))));
+		add_implicit_plan (std::unique_ptr<plan> (new copy (n * n, grid->get_data (0), &matrix [0])));
+		add_implicit_plan (std::unique_ptr<plan> (new diffusion::implicit_methods::collocation_chebyshev_1D (- diffusion_coeff * alpha, &timestep, i_n, grid, &matrix [0], &flags)));
+		add_explicit_grid_plan (std::unique_ptr<plan> (new zero (n, &(scalars [rhs]) [0])));
+		add_explicit_grid_plan (std::unique_ptr<plan> (new diffusion::explicit_methods::collocation_chebyshev_1D (diffusion_coeff * (1.0 - alpha), &timestep, i_n, grid, &(scalars [velocity]) [0], &(scalars [rhs]) [0], &flags)));
+		add_explicit_space_plan (std::unique_ptr<plan> (new advection::advec_1D (n, &timestep, advection_coeff, &(scalars [velocity]) [0], &(scalars [rhs]) [0])));
 		matrix_solver.reset (new solver::lapack_solver (n, &(scalars [velocity]) [0], &(scalars [rhs]) [0], &matrix [0], &(scalars [velocity]) [0], &flags));
-		fourier_transform.reset (new fft::fftw_cosine (n, &(scalars [velocity]) [0], &(scalars [velocity]) [0]));
-		
+		transform_forward.reset (new fft::fftw_cosine (n, &(scalars [velocity]) [0], &(scalars [velocity]) [0]));
 		TRACE ("Initialized.");
-	}
-	
-	void diffusion_element_1D::update () {
-		int nn = n * n;
-		int i, ione = 1;
-		
-		TRACE ("Updating...");
-				
-		try {
-			// Testing
-			// Should be replaced by a CFL check
-			timestep = 0.01;
-			
-			for (i = 0; i < n; ++i) {
-				scalars [rhs] [i] = 0.0;
-			}
-
-			explicit_diffusion->execute ();
-			
-			fourier_transform->execute ();
-			
-			// Output in angle space
-			angle_stream->to_file ();
-
-			// Set up and evaluate the implicit part of the diffusion equation
-			if (timestep != previous_timestep) {
-				dcopy_ (&nn, grid->get_data (0), &ione, &matrix [0], &ione);
-				flags &= ~solver::factorized;
-
-				implicit_diffusion->execute ();
-			}
-		
-			matrix_solver->solve ();
-
-			previous_timestep = timestep;
-			
-		} catch (io::exceptions::file_exception &io_exception) {
-			ERROR ("Exception caught, failsafe dump to _dump.dat");
-			failsafe_dump->to_file ();
-			exit (EXIT_FAILURE);
-		}
-		
-		TRACE ("Update complete");
-	
-
 	}
 } /* element */

@@ -27,10 +27,12 @@ namespace solver
 		
 		if (! ((*flags) & factorized)) {
 			dgetrf_ (&n, &n, &matrix [0], &n, &ipiv [0], &info);
-			*flags |= factorized; 
+			*flags |= factorized;
 		}
 				
 		dgetrs_ (&charN, &n, &ione, &matrix [0], &n, &ipiv [0], &data_out [0], &n, &info);
+		
+		data_out [n - 1] = 0.0;
 		
 		if (info != 0) {
 			ERROR ("Unable to invert matrix");

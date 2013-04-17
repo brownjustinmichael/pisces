@@ -80,6 +80,7 @@ namespace diffusion
 			double *data_in; //!< A double pointer to the input data
 			double *data_out; //!< A double pointer to the output data; if data_in == data_out, the operation is done in place (but inefficient)
 			int *flags; //!< An integer containing the binary boundary and execution flags
+			int default_flags;
 			std::shared_ptr<collocation::chebyshev_grid> cheb; //!< A pointer to a collocation grid that contains the the Chebyshev values
 		};
 	} /* explicit */

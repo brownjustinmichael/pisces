@@ -66,10 +66,12 @@ int main (int argc, char const *argv[])
 
 	TRACE ("main: Entering main loop.");
 	
-	for (i = 0; i < 10; ++i) {
+	for (i = 0; i < 500; ++i) {
 		TRACE ("main: Beginning timestep...");
 		INFO ("main: Timestep: " << i);
 
+		main_element.calculate ();
+		main_element.execute_boundaries ();
 		main_element.update ();
 
 		TRACE ("main: Timestep " << i << " complete.");

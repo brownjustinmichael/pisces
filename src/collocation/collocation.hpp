@@ -103,7 +103,6 @@ namespace collocation
 		 * \return The double value of the index
 		 *********************************************************************/
 		double recursion (int d, int m, int k);
-		
 	};
 } /* collocation */
 

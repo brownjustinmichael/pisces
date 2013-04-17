@@ -69,7 +69,7 @@ namespace diffusion
 	
 			// This is the main loop for setting up the diffusion equation in Chebyshev space
 			for (i = 0; i < n; ++i) {
-			   	daxpy_ (&len, &scalar, &(cheb->get_data (2) [start + i * n]), &ione, &matrix [start + i * n], &ione);
+			   	daxpy_ (&len, &scalar, cheb->get_data (2) + start + i * n, &ione, &matrix [start + i * n], &ione);
 			}
 		
 			TRACE ("Operation complete.");
@@ -85,7 +85,12 @@ namespace diffusion
 			data_in = i_data_in;
 			data_out = i_data_out;
 		
-			flags = i_flags;
+			if (!i_flags) {
+				default_flags = 0x00;
+				flags = &default_flags;
+			} else {
+				flags = i_flags;
+			}
 
 			TRACE ("Instantiating...");
 
@@ -108,21 +113,24 @@ namespace diffusion
 			TRACE ("Operating...");
 		
 			scalar = coeff * *timestep_ptr;
+			
+			// dcopy_ (&nn, grid->get_data (0), &ione, &matrix [0], &ione);
+			// *flags &= ~solver::factorized;
 		
-			if (!flags || ! (*flags & boundary::fixed_upper)) {
-				start = 0;
-			} else {
+			if (*flags & boundary::fixed_upper) {
 				start = 1;
+			} else {
+				start = 0;
 			}
 		
-			if (!flags || ! (*flags & boundary::fixed_lower)) {
-				len = n - start;
-			} else {
+			if (*flags & boundary::fixed_lower) {
 				len = n - 1 - start;
+			} else {
+				len = n - start;
 			}
 		
 			// Set up and evaluate the explicit part of the diffusion equation
-			dgemv_ (&charN, &len, &n, &scalar, &(cheb->get_data (2) [start]), &n, &data_in [0], &ione, &dpone, &data_out [start], &ione);
+			dgemv_ (&charN, &len, &n, &scalar, cheb->get_data (2) + start, &n, data_in, &ione, &dpone, data_out + start, &ione);
 				
 			TRACE ("Operation complete.");
 		}

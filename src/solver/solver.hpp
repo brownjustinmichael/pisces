@@ -10,6 +10,7 @@
 #define SOLVER_HPP_N0BUAX6H
 
 #include <vector>
+#include "../plan.hpp"
 
 /*!*******************************************************************
  * \brief Function from BLAS that copies a double array to another in place
@@ -88,5 +89,44 @@ namespace solver
 		int *flags;
 	};
 } /* solver */
+
+class copy : public plan
+{
+public:
+	copy (int i_n, double *i_data_in, double *i_data_out) {
+		n = i_n;
+		data_in = i_data_in;
+		data_out = i_data_out;
+	}
+	virtual ~copy () {}
+	inline virtual void execute () {
+		int ione = 1;
+		dcopy_ (&n, data_in, &ione, data_out, &ione);
+	}
+
+private:
+	int n;
+	double *data_in;
+	double *data_out;
+};
+
+class zero : public plan
+{
+public:
+	zero (int i_n, double *i_data) {
+		n = i_n;
+		data = i_data;
+	}
+	virtual ~zero () {}
+	inline virtual void execute () {
+		for (int i = 0; i < n; ++i) {
+			data [i] = 0.0;
+		}
+	}
+	
+private:
+	int n;
+	double *data;
+};
 
 #endif /* end of include guard: SOLVER_HPP_N0BUAX6H */
