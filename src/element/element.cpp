@@ -22,33 +22,46 @@ namespace element
 	void element_1D::calculate () {
 		int i;
 		
-		TRACE ("Updating...");
+		TRACE ("Calculating...");
 				
 		try {
 			// Start in grid space
+			
+			TRACE ("Updating timestep...");
+			
 			// Testing
 			// Should be replaced by a CFL check
 			timestep = 0.01;
 			
+			TRACE ("Executing explicit grid plans...");
+			
 			for (i = 0; i < n_explicit_grid_plans; ++i) {
 				explicit_grid_plans [i]->execute ();
 			}
+			
+			TRACE ("Transforming to normal space...");
 			
 			// Switch to normal space
 			if (transform_forward) {
 				transform_forward->execute ();
 			}
 			
+			TRACE ("Writing to file...");
+			
 			// Output in angle space
 			if (angle_stream) {
 				angle_stream->to_file ();
 			}
+			
+			TRACE ("Executing explicit space plans...");
 
 			for (i = 0; i < n_explicit_space_plans; ++i) {
 				explicit_space_plans [i]->execute ();
 			}
 			
 			if (timestep != previous_timestep) {
+				TRACE ("Executing implicit plans...");
+				
 				flags &= ~solver::factorized;
 				for (i = 0; i < n_implicit_plans; ++i) {
 					implicit_plans [i]->execute ();
@@ -61,15 +74,23 @@ namespace element
 			failsafe_dump->to_file ();
 			exit (EXIT_FAILURE);
 		}
+		
+		TRACE ("Calculation complete.");
 	}
 		
 	void element_1D::execute_boundaries () {
+		TRACE ("Executing boundaries...");
+		
 		for (int i = 0; i < n_boundaries; ++i) {
 			boundaries [i]->execute ();
 		}
+		
+		TRACE ("Boundaries executed.");
 	}
 	
 	void element_1D::update () {
+		TRACE ("Updating...");
+		
 		if (matrix_solver) {
 			matrix_solver->solve ();
 		}
@@ -108,9 +129,6 @@ namespace element
 		
 		failsafe_dump.reset (new io::simple_output ("_dump.dat", i_n));
 		failsafe_dump->append (&(scalars [velocity]) [0]);
-		
-		DEBUG ("scalars [velocity] = " << &(scalars [velocity] [0]) << " [0] = " << scalars [velocity] [0])
-		DEBUG ("scalars [velocity] = " << &(scalars [velocity] [n - 1]) << " [n - 1] = " << scalars [velocity] [n - 1])
 		
 		add_boundary (std::unique_ptr<plan> (new boundary::boundary_1D (0.0, &(scalars [velocity] [0]), 0.0, &(scalars [velocity] [n - 1]))));
 		add_boundary (std::unique_ptr<plan> (new boundary::boundary_1D (0.0, &(scalars [rhs] [0]), 0.0, &(scalars [rhs] [n - 1]))));

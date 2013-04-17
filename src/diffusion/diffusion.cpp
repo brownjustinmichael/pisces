@@ -114,24 +114,16 @@ namespace diffusion
 		
 			scalar = coeff * *timestep_ptr;
 			
-			// dcopy_ (&nn, grid->get_data (0), &ione, &matrix [0], &ione);
-			// *flags &= ~solver::factorized;
-		
-			if (*flags & boundary::fixed_upper) {
-				start = 1;
-			} else {
-				start = 0;
-			}
-		
-			if (*flags & boundary::fixed_lower) {
-				len = n - 1 - start;
-			} else {
-				len = n - start;
-			}
-		
+			for (int i = 0; i < n; ++i) {
+				DEBUG ("data [" << i << "] = " << data_out [i]);
+			}		
 			// Set up and evaluate the explicit part of the diffusion equation
-			dgemv_ (&charN, &len, &n, &scalar, cheb->get_data (2) + start, &n, data_in, &ione, &dpone, data_out + start, &ione);
-				
+			dgemv_ (&charN, &n, &n, &scalar, cheb->get_data (2), &n, data_in, &ione, &dpone, data_out, &ione);
+			
+			for (int i = 0; i < n; ++i) {
+				DEBUG ("data [" << i << "] = " << data_out [i]);
+			}
+
 			TRACE ("Operation complete.");
 		}
 	} /* explicit */

@@ -48,12 +48,17 @@ namespace boundary
 		inline virtual void execute () {
 			TRACE ("Executing...");
 			
+			DEBUG ("top = " << data_plus);
+			DEBUG ("bottom = " << data_minus);
+			
 			if (!data_minus) {
 				*data_plus *= alpha_plus;
 			} else if (!data_plus) {
 				*data_minus *= alpha_minus;
 			} else {
+				DEBUG ("before = " << *data_plus);
 				*data_plus = alpha_plus * *data_plus + alpha_minus * *data_minus;
+				DEBUG ("after = " << *data_plus);
 				*data_minus = *data_plus;
 			}
 			

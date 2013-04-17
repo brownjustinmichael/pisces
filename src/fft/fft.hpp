@@ -26,22 +26,28 @@ namespace fft
 	{
 	public:
 		fftw_cosine (int i_n, double *i_data_in, double *i_data_out, int i_fftw_flags = FFTW_ESTIMATE) {
+			TRACE ("Instantiating...");
+			
 			n = i_n,
 			data_out = i_data_out;
 			scalar = 1.0 / sqrt (2.0 * (i_n - 1));
 			
 			fourier_plan = fftw_plan_r2r_1d (i_n + 1, i_data_in, i_data_out, FFTW_REDFT00, i_fftw_flags);
+			
+			TRACE ("Instantiated.")
 		}
 		virtual ~fftw_cosine () {}
 		
 		void execute () {
-			int i;
+			TRACE ("Executing...")
 			
 			fftw_execute (fourier_plan);
 			
-			for (i = 0; i < n; ++i) {
+			for (int i = 0; i < n + 1; ++i) {
 				data_out [i] *= scalar;				
 			}
+			
+			TRACE ("Executed.")
 		}
 	
 	private:

@@ -39,12 +39,12 @@ namespace advection
 	{
 		int i;
 
-		*data_out = 0;																						// Impose left boundary condition
+		*data_out += 0;																						// Impose left boundary condition
 		for (i = 1; i < n - 1; i++)
 		{
 				*(data_out + i) += 0.5 * (*tmstp_ptr) * c * sin_vals [i] * ( *(data_in + i + 1) - *(data_in + i - 1) );			// centered differencing scheme
 		}
-		*(data_out + n - 1) = 0;																			// Impose right boundary condition
+		*(data_out + n - 1) += 0;																			// Impose right boundary condition
 	}
 
 }

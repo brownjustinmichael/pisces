@@ -65,7 +65,7 @@ namespace element
 		virtual ~element_1D () {}
 		
 		inline void add_scalar (int name) {
-			scalars [name].resize (n);
+			scalars [name].resize (n + 1);
 		}
 		
 		inline double index (int name, int i) {

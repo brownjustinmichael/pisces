@@ -53,15 +53,23 @@ namespace io
 	}
 	
 	void output::append (double *data_ptr) {
+		TRACE ("Appending double to output...");
+		
 		++n_data_ptrs;
 		double_ptrs.push_back (data_ptr);
 		int_ptrs.push_back (NULL);
+		
+		TRACE ("Appended.");
 	}
 	
 	void output::append (int *data_ptr) {
+		TRACE ("Appending int to output...");
+		
 		++n_data_ptrs;
 		double_ptrs.push_back (NULL);
 		int_ptrs.push_back (data_ptr);
+		
+		TRACE ("Appended.");
 	}
 	
 	void output::simple_to_file (std::string file_name) {

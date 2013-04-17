@@ -16,23 +16,33 @@ namespace solver
 		double dpone = 1.0;
 		char charN = 'N';
 		
+		TRACE ("Solving...")
+		
+		for (int i = 0; i < n; ++i) {
+			DEBUG ("rhs [" << i << "] = " << rhs [i]);
+		}
+
+		
 		if (data_out == rhs) {
-			daxpy_ (&n, &dpone, &data_in [0], &ione, &data_out [0], &ione);
+			daxpy_ (&n, &dpone, data_in, &ione, data_out, &ione);
 		} else {
 			if (data_in != data_out) {
-				dcopy_ (&n, &data_in [0], &ione, &data_out [0], &ione);
+				dcopy_ (&n, data_in, &ione, data_out, &ione);
 			}
-			daxpy_ (&n, &dpone, &rhs [0], &ione, &data_out [0], &ione);
-		}
-		
-		if (! ((*flags) & factorized)) {
-			dgetrf_ (&n, &n, &matrix [0], &n, &ipiv [0], &info);
-			*flags |= factorized;
+			daxpy_ (&n, &dpone, rhs, &ione, data_out, &ione);
 		}
 				
-		dgetrs_ (&charN, &n, &ione, &matrix [0], &n, &ipiv [0], &data_out [0], &n, &info);
+		if (! ((*flags) & factorized)) {
+			dgetrf_ (&n, &n, matrix, &n, &ipiv [0], &info);
+			*flags |= factorized;
+		}
+		
+		
+		dgetrs_ (&charN, &n, &ione, &matrix [0], &n, &ipiv [0], data_out, &n, &info);
 		
 		data_out [n - 1] = 0.0;
+		
+		TRACE ("Solve complete.")
 		
 		if (info != 0) {
 			ERROR ("Unable to invert matrix");

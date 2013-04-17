@@ -73,7 +73,7 @@ int main (int argc, char const *argv[])
 		main_element.calculate ();
 		main_element.execute_boundaries ();
 		main_element.update ();
-
+		
 		TRACE ("main: Timestep " << i << " complete.");
 	}
 
