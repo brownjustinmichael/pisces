@@ -133,7 +133,7 @@ namespace element
 		add_boundary (std::unique_ptr<plan> (new boundary::boundary_1D (0.0, &(scalars [velocity] [0]), 0.0, &(scalars [velocity] [n - 1]))));
 		add_boundary (std::unique_ptr<plan> (new boundary::boundary_1D (0.0, &(scalars [rhs] [0]), 0.0, &(scalars [rhs] [n - 1]))));
 		add_implicit_plan (std::unique_ptr<plan> (new copy (n * n, grid->get_data (0), &matrix [0])));
-		add_implicit_plan (std::unique_ptr<plan> (new diffusion::implicit_methods::collocation_chebyshev_1D (- diffusion_coeff * alpha, &timestep, i_n, grid, &matrix [0], &flags)));
+		add_implicit_plan (std::unique_ptr<plan> (new diffusion::implicit_methods::collocation_chebyshev_1D (- diffusion_coeff * alpha, 0.0, 0.0, &timestep, i_n, grid, &matrix [0], &flags)));
 		add_explicit_grid_plan (std::unique_ptr<plan> (new zero (n, &(scalars [rhs]) [0])));
 		add_explicit_grid_plan (std::unique_ptr<plan> (new diffusion::explicit_methods::collocation_chebyshev_1D (diffusion_coeff * (1.0 - alpha), &timestep, i_n, grid, &(scalars [velocity]) [0], &(scalars [rhs]) [0], &flags)));
 		add_explicit_space_plan (std::unique_ptr<plan> (new advection::advec_1D (n, &timestep, advection_coeff, &(scalars [velocity]) [0], &(scalars [rhs]) [0])));

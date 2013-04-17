@@ -13,12 +13,7 @@
 #include "../plan.hpp"
 
 namespace boundary
-{
-	enum flags {
-		fixed_upper = 0x01,
-		fixed_lower = 0x02
-	};
-	
+{	
 	class boundary : public plan
 	{
 	public:

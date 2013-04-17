@@ -19,6 +19,9 @@
 class plan
 {
 public:
+	plan () {
+		default_flags = 0x00;
+	}
 	virtual ~plan () {}
 	/*!*******************************************************************
 	 * \brief Operate the plan on the data arrays contained in the class
@@ -30,6 +33,9 @@ public:
 	 * \param timestep A double length of time over which to operate
 	 *********************************************************************/
 	virtual void execute () = 0;
+	
+protected:
+	int default_flags; //!< An integer set of default flags to use in case the user does not specify any flags
 };
 
 #endif /* end of include guard: PLAN_HPP_S9YPWHOM */

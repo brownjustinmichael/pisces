@@ -62,7 +62,7 @@ int main (int argc, char const *argv[])
 	
 	TRACE ("Beginning main...");
 	
-	element::diffusion_element_1D main_element (N, boundary::fixed_upper | boundary::fixed_lower);
+	element::diffusion_element_1D main_element (N, 0x00);
 
 	TRACE ("main: Entering main loop.");
 	
