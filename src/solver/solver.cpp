@@ -18,11 +18,6 @@ namespace solver
 		
 		TRACE ("Solving...")
 		
-		for (int i = 0; i < n; ++i) {
-			DEBUG ("rhs [" << i << "] = " << rhs [i]);
-		}
-
-		
 		if (data_out == rhs) {
 			daxpy_ (&n, &dpone, data_in, &ione, data_out, &ione);
 		} else {
@@ -32,11 +27,10 @@ namespace solver
 			daxpy_ (&n, &dpone, rhs, &ione, data_out, &ione);
 		}
 				
-		if (! ((*flags) & factorized)) {
+		if (! ((*flags_ptr) & factorized)) {
 			dgetrf_ (&n, &n, matrix, &n, &ipiv [0], &info);
-			*flags |= factorized;
+			*flags_ptr |= factorized;
 		}
-		
 		
 		dgetrs_ (&charN, &n, &ione, &matrix [0], &n, &ipiv [0], data_out, &n, &info);
 		

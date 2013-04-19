@@ -10,6 +10,7 @@
 #define SOLVER_HPP_N0BUAX6H
 
 #include <vector>
+#include <memory>
 #include "../plan.hpp"
 
 /*!*******************************************************************
@@ -67,17 +68,21 @@ namespace solver
 	class lapack_solver : public solver
 	{
 	public:
-		lapack_solver (int i_n, double *i_data_in, double *i_rhs, double *i_matrix, double *i_data_out, int *i_flags = NULL) {
+		lapack_solver (int i_n, double *i_data_in, double *i_rhs, double *i_matrix, double *i_data_out, int *i_flags_ptr = NULL) {
 			n = i_n;
 			data_in = i_data_in;
 			rhs = i_rhs;
 			matrix = i_matrix;
 			data_out = i_data_out;
-			flags = i_flags;
+			flags_ptr = i_flags_ptr;
 			ipiv.resize (i_n, 0);
 		};
 		virtual ~lapack_solver () {}
 		void solve ();
+		
+		inline static std::unique_ptr<solver> make_unique (int i_n, double *i_data_in, double *i_rhs, double *i_matrix, double *i_data_out, int *i_flags_ptr = NULL) {
+			return std::unique_ptr<solver> (new lapack_solver (i_n, i_data_in, i_rhs, i_matrix, i_data_out, i_flags_ptr));
+		}
 
 	private:
 		int n;
@@ -86,47 +91,8 @@ namespace solver
 		double *matrix;
 		double *data_out;
 		std::vector<int> ipiv;
-		int *flags;
+		int *flags_ptr;
 	};
 } /* solver */
-
-class copy : public plan
-{
-public:
-	copy (int i_n, double *i_data_in, double *i_data_out) {
-		n = i_n;
-		data_in = i_data_in;
-		data_out = i_data_out;
-	}
-	virtual ~copy () {}
-	inline virtual void execute () {
-		int ione = 1;
-		dcopy_ (&n, data_in, &ione, data_out, &ione);
-	}
-
-private:
-	int n;
-	double *data_in;
-	double *data_out;
-};
-
-class zero : public plan
-{
-public:
-	zero (int i_n, double *i_data) {
-		n = i_n;
-		data = i_data;
-	}
-	virtual ~zero () {}
-	inline virtual void execute () {
-		for (int i = 0; i < n; ++i) {
-			data [i] = 0.0;
-		}
-	}
-	
-private:
-	int n;
-	double *data;
-};
 
 #endif /* end of include guard: SOLVER_HPP_N0BUAX6H */

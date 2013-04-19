@@ -36,41 +36,21 @@ namespace element
 	class element
 	{
 	public:
-		virtual ~element () {}
-		/*!*******************************************************************
-		 * \brief This virtual function should update the element by one step
-		 *********************************************************************/
-		virtual void calculate () = 0;
-		virtual void execute_boundaries () = 0;
-		virtual void update () = 0;
-	};
-	
-	class element_1D : public element
-	{
-	public:
-		element_1D (int i_n, int i_flags) {
-			int i;
-			n = i_n;
+		element (int i_flags) {
 			flags = i_flags;
 			n_explicit_grid_plans = 0;
 			n_explicit_space_plans = 0;
 			n_implicit_plans = 0;
-			
-			cell.resize (i_n);
-			for (i = 0; i < i_n; ++i) {
-				cell [i] = i;
-			}
+			n_boundaries = 0;
+			previous_timestep = 0.0;
 		}
-		
-		virtual ~element_1D () {}
-		
-		inline void add_scalar (int name) {
-			scalars [name].resize (n + 1);
-		}
-		
-		inline double index (int name, int i) {
-			return scalars [name] [i];
-		}
+		virtual ~element () {}
+		/*!*******************************************************************
+		 * \brief This virtual function should update the element by one step
+		 *********************************************************************/
+		virtual void calculate ();
+		virtual void execute_boundaries ();
+		virtual void update ();
 		
 		inline void add_explicit_grid_plan (std::unique_ptr<plan> i_plan) {
 			++n_explicit_grid_plans;
@@ -92,12 +72,7 @@ namespace element
 			boundaries.push_back (std::move (i_plan));
 		}
 		
-		virtual void calculate ();
-		virtual void execute_boundaries ();
-		virtual void update ();
-		
 	protected:
-		int n; //!< The number of elements in each 1D array
 		int flags;
 		int n_explicit_grid_plans;
 		int n_explicit_space_plans;
@@ -106,16 +81,42 @@ namespace element
 		double timestep;
 		double previous_timestep;
 		std::vector<int> cell; //!< An integer array for tracking each cell number for output
-		std::map<int, std::vector<double>> scalars; //!< A vector of scalar vectors
 		std::vector<std::unique_ptr<plan>> explicit_grid_plans;
 		std::vector<std::unique_ptr<plan>> explicit_space_plans;
 		std::vector<std::unique_ptr<plan>> implicit_plans;
 		std::vector<std::unique_ptr<plan>> boundaries;
 		std::unique_ptr<plan> transform_forward;
 		std::unique_ptr<solver::solver> matrix_solver;
-		std::shared_ptr<collocation::chebyshev_grid> grid;
+		std::shared_ptr<collocation::collocation_grid> grid;
 		std::unique_ptr<io::output> angle_stream; //!< An implementation to output in angle space
 		std::unique_ptr<io::output> failsafe_dump; //!< An implementation to dump in case of failure
+	};
+	
+	class element_1D : public element
+	{
+	public:
+		element_1D (int i_n, int i_flags) : element (i_flags) {
+			n = i_n;
+			
+			cell.resize (i_n);
+			for (int i = 0; i < i_n; ++i) {
+				cell [i] = i;
+			}
+		}
+		
+		virtual ~element_1D () {}
+		
+		inline void add_scalar (int name) {
+			scalars [name].resize (n + 1);
+		}
+		
+		inline double index (int name, int i) {
+			return scalars [name] [i];
+		}
+		
+	protected:
+		int n; //!< The number of elements in each 1D array
+		std::map<int, std::vector<double>> scalars; //!< A vector of scalar vectors
 	};
 
 	/*!*******************************************************************
@@ -134,9 +135,6 @@ namespace element
 		 *********************************************************************/
 		diffusion_element_1D (int i_n, int i_flags);
 		virtual ~diffusion_element_1D () {}
-		/*!*******************************************************************
-		 * \brief This calculates diffusion and output for a constant timestep
-		 *********************************************************************/
 		
 		inline double derivative (int name, int deriv, int k) {
 			if (deriv == 0) {

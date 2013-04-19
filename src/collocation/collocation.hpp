@@ -9,6 +9,7 @@
 #ifndef COLLOCATION_HPP_HLJUSAEZ
 #define COLLOCATION_HPP_HLJUSAEZ
 
+#include <memory>
 #include <vector>
 #include <cmath>
 
@@ -31,7 +32,9 @@ namespace collocation
 		 * \param i_cols The integer number of columns in the grid
 		 *********************************************************************/
 		collocation_grid (int i_derivs, int i_rows, int i_cols);
+		
 		virtual ~collocation_grid () {};
+		
 		/*!*******************************************************************
 		 * \brief An indexing operation into the grid, for convenience
 		 * 
@@ -44,6 +47,17 @@ namespace collocation
 		inline double &index (int deriv, int row, int col) {
 			return data [deriv] [row * cols + col];
 		}
+		
+		/*!*******************************************************************
+		 * \brief Get the data array for a given derivative level
+		 * 
+		 * This method is intended for use when a subroutine requires the 
+		 * matrix containing the collocation elements.
+		 * 
+		 * \param deriv An integer derivative level (0 = value, 1 = first derivative, ...)
+		 * 
+		 * \return A pointer to the first element of the double data array
+		 *********************************************************************/
 		inline double *get_data (int deriv) {
 			return &(data [deriv] [0]);
 		}
@@ -71,6 +85,7 @@ namespace collocation
 		 * \param i_N The integer number of collocation points
 		 *********************************************************************/
 		chebyshev_grid (int i_M, int i_N, double i_scale = 1.0);
+		
 		virtual ~chebyshev_grid () {};
 		
 	private:

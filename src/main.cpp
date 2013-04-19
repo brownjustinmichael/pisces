@@ -10,7 +10,7 @@
 #include "boundary/boundary.hpp"
 #include "element/element.hpp"
 
-#define N 128
+#define N 256
 
 int config::severity = 4;  // The default logging severity is 4, errors and fatal messages only.
 

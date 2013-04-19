@@ -11,6 +11,7 @@
 #ifndef advection_H
 #define advection_H
 
+#include <memory>
 #include <vector>
 #include "../plan.hpp"
 
@@ -35,6 +36,10 @@ namespace advection
 		virtual ~advec_1D () {}
 		
 		void execute ();
+		
+		inline static std::unique_ptr<plan> make_unique (int i_n, double *i_tmstp_ptr, double i_c, double *i_data_in, double *i_data_out) {
+			return std::unique_ptr<plan> (new advec_1D (i_n, i_tmstp_ptr, i_c, i_data_in, i_data_out));
+		}
 
 	};
 

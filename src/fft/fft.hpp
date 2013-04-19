@@ -15,9 +15,10 @@
 
 namespace fft
 {
-	class fft : public plan
+	class fft : public explicit_plan
 	{
 	public:
+		fft (int i_n, double *i_data_in, double *i_data_out, int *i_flags_ptr = NULL) : explicit_plan (i_n, i_data_in, i_data_out, i_flags_ptr) {}
 		virtual ~fft () {}
 		virtual void execute () = 0;
 	};
@@ -25,14 +26,14 @@ namespace fft
 	class fftw_cosine : public fft
 	{
 	public:
-		fftw_cosine (int i_n, double *i_data_in, double *i_data_out, int i_fftw_flags = FFTW_ESTIMATE) {
+		fftw_cosine (int i_n, double *i_data_in, double *i_data_out, int *i_flags_ptr = NULL) : fft (i_n, i_data_in, i_data_out, i_flags_ptr) {
 			TRACE ("Instantiating...");
 			
-			n = i_n,
-			data_out = i_data_out;
+			INFO ("FFTW_ESTIMATE = " << FFTW_ESTIMATE);
+			
 			scalar = 1.0 / sqrt (2.0 * (i_n - 1));
 			
-			fourier_plan = fftw_plan_r2r_1d (i_n + 1, i_data_in, i_data_out, FFTW_REDFT00, i_fftw_flags);
+			fourier_plan = fftw_plan_r2r_1d (i_n + 1, i_data_in, i_data_out, FFTW_REDFT00, *flags_ptr);
 			
 			TRACE ("Instantiated.")
 		}
@@ -42,18 +43,21 @@ namespace fft
 			TRACE ("Executing...")
 			
 			fftw_execute (fourier_plan);
+
+			data_out [n] = 0.0;
 			
-			for (int i = 0; i < n + 1; ++i) {
-				data_out [i] *= scalar;				
+			for (int i = 0; i < n; ++i) {
+				data_out [i] *= scalar;
 			}
 			
 			TRACE ("Executed.")
 		}
-	
-	private:
-		int n;
-		double *data_out;
 		
+		inline static std::unique_ptr<plan> make_unique (int i_n, double *i_data_in, double *i_data_out, int *i_flags_ptr = NULL) {
+			return std::unique_ptr<plan> (new fftw_cosine (i_n, i_data_in, i_data_out, i_flags_ptr));
+		}
+	
+	private:		
 		double scalar;
 		fftw_plan fourier_plan;
 	};

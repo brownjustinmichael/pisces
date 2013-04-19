@@ -15,29 +15,27 @@
 #include "../collocation/collocation.hpp"
 #include "../boundary/boundary.hpp"
 
-namespace diffusion
+namespace one_d
 {
-	namespace explicit_methods
+	namespace explicit_plans
 	{
-		collocation_chebyshev_1D::collocation_chebyshev_1D (double i_coeff, double *i_timestep_ptr, int i_n, std::shared_ptr<collocation::chebyshev_grid> i_grid, double *i_data_in, double *i_data_out, int *i_flags) {
+		diffusion::diffusion (double i_coeff, double *i_timestep_ptr, int i_n, std::shared_ptr<collocation::collocation_grid> i_grid, double *i_data_in, double *i_data_out, int *i_flags_ptr) : explicit_plan (i_n, i_data_in, i_data_out) 
+		{
 			coeff = i_coeff;
 			timestep_ptr = i_timestep_ptr;
-			n = i_n;
-			data_in = i_data_in;
-			data_out = i_data_out;
 			
 			TRACE ("Instantiating...");
 		
-			if (!i_flags) {
+			if (!i_flags_ptr) {
 				default_flags = 0x00;
-				flags = &default_flags;
+				flags_ptr = &default_flags;
 			} else {
-				flags = i_flags;
+				flags_ptr = i_flags_ptr;
 			}
 
 			if (!i_grid) {
 				TRACE ("No collocation grid yet, constructing...")
-				grid.reset (new collocation::chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1))));
+				grid = std::make_shared<collocation::collocation_grid> (collocation::collocation_grid (i_n, i_n, sqrt (2.0 / (i_n - 1))));
 			} else {
 				TRACE ("Existing collocation grid, sharing pointer...")
 				grid = i_grid;
@@ -46,24 +44,24 @@ namespace diffusion
 			TRACE ("Instantiation complete.");
 		}
 
-		void collocation_chebyshev_1D::execute () {
-		    int ione = 1;
-		    char charN = 'N';
-		    double dpone = 1.0;
+		void diffusion::execute () {
+			int ione = 1;
+			char charN = 'N';
+			double dpone = 1.0;
 		
 			TRACE ("Operating...");
-		
+			
 			double scalar = coeff * *timestep_ptr;
 			// Set up and evaluate the explicit part of the diffusion equation
 			dgemv_ (&charN, &n, &n, &scalar, grid->get_data (2), &n, data_in, &ione, &dpone, data_out, &ione);
 
 			TRACE ("Operation complete.");
 		}
-	} /* explicit */
+	} /* explicit_plans */
 	
-	namespace implicit_methods
+	namespace implicit_plans
 	{
-		collocation_chebyshev_1D::collocation_chebyshev_1D (double i_coeff, double i_alpha_0, double i_alpha_n, double *i_timestep_ptr, int i_n, std::shared_ptr<collocation::chebyshev_grid> i_grid, double *i_matrix, int *i_flags) {
+		diffusion::diffusion (double i_coeff, double i_alpha_0, double i_alpha_n, double *i_timestep_ptr, int i_n, std::shared_ptr<collocation::collocation_grid> i_grid, double *i_matrix, int *i_flags_ptr) : implicit_plan (i_n, i_matrix) {
 			coeff = i_coeff;
 			alpha_0 = i_alpha_0;
 			alpha_n = i_alpha_n;
@@ -71,13 +69,13 @@ namespace diffusion
 			n = i_n;
 			matrix = i_matrix;
 		
-			flags = i_flags;
+			flags_ptr = i_flags_ptr;
 
 			TRACE ("Instantiating...");
 
 			if (!i_grid) {
 				TRACE ("No collocation grid yet, constructing...")
-				grid.reset (new collocation::chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1))));
+				grid = std::make_shared<collocation::collocation_grid> (collocation::collocation_grid (i_n, i_n, sqrt (2.0 / (i_n - 1))));
 			} else {
 				TRACE ("Existing collocation grid, sharing pointer...")
 				grid = i_grid;
@@ -86,7 +84,7 @@ namespace diffusion
 			TRACE ("Instantiation complete.");
 		}
 
-		void collocation_chebyshev_1D::execute () {			
+		void diffusion::execute () {			
 			TRACE ("Operating...");
 
 			double scalar = coeff * *timestep_ptr * alpha_0;
@@ -103,5 +101,6 @@ namespace diffusion
 		
 			TRACE ("Operation complete.");
 		}
-	} /* implicit */
-} /* diffusion */
+	} /* implicit_plans */
+} /* one_d */
+
