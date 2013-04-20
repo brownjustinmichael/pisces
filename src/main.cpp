@@ -7,12 +7,10 @@
  ************************************************************************/
 
 #include "config.hpp"
-#include "boundary/boundary.hpp"
-#include "element/element.hpp"
-
-#define N 256
+#include "one_d/element.hpp"
 
 int config::severity = 4;  // The default logging severity is 4, errors and fatal messages only.
+int n = 256; //!< The number of grid points
 
 #ifdef __APPLE__
 
@@ -38,6 +36,12 @@ log4cxx::LoggerPtr config::logger (log4cxx::Logger::getLogger ("main"));
  * Possible further reaching goals: 3D, pseudo-incompressible
  *********************************************************************/
 
+/*!*******************************************************************
+ * \brief The main call
+ * 
+ * \param argc The integer number of command line arguments
+ * \param argv The character array of command line arguments
+ *********************************************************************/
 int main (int argc, char const *argv[])
 {	
 	int i;
@@ -62,7 +66,7 @@ int main (int argc, char const *argv[])
 	
 	TRACE ("Beginning main...");
 	
-	element::diffusion_element_1D main_element (N, 0x00);
+	one_d::advection_diffusion_element main_element (n, 0x00);
 
 	TRACE ("main: Entering main loop.");
 	

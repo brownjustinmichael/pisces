@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file solver.cpp
+ * \file one_d/solver.cpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-13.
@@ -9,9 +9,22 @@
 #include "../config.hpp"
 #include "solver.hpp"
 
-namespace solver
+namespace one_d
 {
-	void lapack_solver::solve () {
+	void lapack_solver::i_factorize () {
+		int info;
+		dgetrf_ (&n, &n, matrix, &n, &ipiv [0], &info);
+		
+		if (info != 0) {
+			ERROR ("Unable to invert matrix");
+			throw 0; // For now, kill the program. 
+			/*
+				TODO Replace this with a more useful exception that can be handled
+			*/
+		}
+	}
+
+	void lapack_solver::i_solve () {
 		int ione = 1, info;
 		double dpone = 1.0;
 		char charN = 'N';
@@ -26,24 +39,19 @@ namespace solver
 			}
 			daxpy_ (&n, &dpone, rhs, &ione, data_out, &ione);
 		}
-				
-		if (! ((*flags_ptr) & factorized)) {
-			dgetrf_ (&n, &n, matrix, &n, &ipiv [0], &info);
-			*flags_ptr |= factorized;
-		}
 		
 		dgetrs_ (&charN, &n, &ione, &matrix [0], &n, &ipiv [0], data_out, &n, &info);
 		
 		data_out [n - 1] = 0.0;
-		
-		TRACE ("Solve complete.")
-		
+				
 		if (info != 0) {
-			ERROR ("Unable to invert matrix");
+			ERROR ("Unable to solve factorized matrix equation");
 			throw 0; // For now, kill the program. 
 			/*
 				TODO Replace this with a more useful exception that can be handled
 			*/
 		}
+		
+		TRACE ("Solve complete.")
 	}
-} /* solver */
+} /* one_d */

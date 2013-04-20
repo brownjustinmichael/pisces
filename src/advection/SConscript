@@ -1,4 +1,0 @@
-Import ("env")
-Import ("objects")
-
-objects.append (env.Object ("advection.cpp"))

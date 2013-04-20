@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 //
-//		Filename: advection.h
+//		! \file one_d/advection.h
 //		File type: header
 //		Author: Ryan Moll (ryan.d.moll@gmail.com)
 //		Date created: April 4, 2013
@@ -13,12 +13,12 @@
 
 #include <memory>
 #include <vector>
-#include "../plan.hpp"
+#include "../bases/plan.hpp"
 
-namespace advection
+namespace one_d
 {
 
-	class advec_1D : public plan
+	class advec : public bases::plan
 	{
 	private:
 	
@@ -32,13 +32,13 @@ namespace advection
 
 	public:
 
-		advec_1D (int i_n, double *i_tmstp_ptr, double i_c, double *i_data_in, double *i_data_out);	//constuctor initializes private members to point to input and output vectors
-		virtual ~advec_1D () {}
+		advec (int i_n, double *i_tmstp_ptr, double i_c, double *i_data_in, double *i_data_out);	//constuctor initializes private members to point to input and output vectors
+		virtual ~advec () {}
 		
 		void execute ();
 		
-		inline static std::unique_ptr<plan> make_unique (int i_n, double *i_tmstp_ptr, double i_c, double *i_data_in, double *i_data_out) {
-			return std::unique_ptr<plan> (new advec_1D (i_n, i_tmstp_ptr, i_c, i_data_in, i_data_out));
+		inline static std::unique_ptr<bases::plan> make_unique (int i_n, double *i_tmstp_ptr, double i_c, double *i_data_in, double *i_data_out) {
+			return std::unique_ptr<bases::plan> (new advec (i_n, i_tmstp_ptr, i_c, i_data_in, i_data_out));
 		}
 
 	};

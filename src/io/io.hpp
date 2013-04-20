@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file io.hpp
+ * \file io/io.hpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-08.
@@ -48,10 +48,17 @@ namespace io
 		/*!*******************************************************************
 		 * \param i_n_data_headers An integer number of column headers to be read from i_data_headers
 		 * \param i_data_headers An array of strings that are the column headers
-		 * \param i_comment_char A string that will be used at the beginning of each commented line
+		 * \param i_comment_string The string to be used as the comment before the header lines
 		 *********************************************************************/
 		simple_header (int i_n_data_headers, std::string *i_data_headers, std::string i_comment_string = "#");
-		using header::output_header;
+		
+		virtual ~simple_header () {}
+		
+		/*!*******************************************************************
+		 * \brief Make the header for the output file
+		 * 
+		 * \return The string to be streamed to the output file
+		 *********************************************************************/
 		std::string output_header () {return header_string;}
 
 	private:
@@ -94,8 +101,6 @@ namespace io
 		 * This function should be overwritten by subclasses, though it may 
 		 * contain a call to this function, which will output with default 
 		 * double representation in C++.
-		 * 
-		 * \param i_file_name A string containing the file name where the class will output
 		 *********************************************************************/
 		virtual void to_file () = 0;
 		
@@ -106,7 +111,12 @@ namespace io
 		std::vector<int *> int_ptrs; //!< A vector of integer pointers to the arrays of data
 		header *header_ptr; //!< A pointer to a header object, which contains the details regarding the construction of the header
 		
-		void simple_to_file (std::string file_name);
+		/*!*******************************************************************
+		 * \brief Write all the tracked data to file using standard C conversions
+		 * 
+		 * \param file_name The string name of the file
+		 *********************************************************************/
+		void std_to_file (std::string file_name);
 	};
 	
 	/*!*******************************************************************
@@ -130,7 +140,7 @@ namespace io
 		/*!*******************************************************************
 		 * \brief Outputs to file_name
 		 *********************************************************************/
-		void to_file () {simple_to_file (file_name);} 
+		void to_file () {std_to_file (file_name);} 
 	};
 	
 	/*!*******************************************************************
@@ -163,7 +173,7 @@ namespace io
 		/*!*******************************************************************
 		 * \brief Outputs to file
 		 *********************************************************************/
-		void to_file () {output::simple_to_file (generate_file_name ());} 
+		void to_file () {output::std_to_file (generate_file_name ());} 
 		
 	private:
 		int n_outputs; //!< An incremental integer that will be appended to the end of each file_base

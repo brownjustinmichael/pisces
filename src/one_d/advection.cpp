@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 //
-//		Filename: advection.cpp
+//		! \file one_d/advection.cpp
 //		File type: source
 //		Author: Ryan Moll (ryan.d.moll@gmail.com)
 //		Date created: April 4, 2013
@@ -11,10 +11,10 @@
 #include <cmath>
 #include "advection.h"
 
-namespace advection
+namespace one_d
 {
 	
-	advec_1D::advec_1D (int i_n, double *i_tmstp_ptr, double i_c, double *i_data_in, double *i_data_out)
+	advec::advec (int i_n, double *i_tmstp_ptr, double i_c, double *i_data_in, double *i_data_out)
 	{
 		int i;
 
@@ -35,7 +35,7 @@ namespace advection
 		}
 	}
 
-	void advec_1D::execute()
+	void advec::execute()
 	{
 		int i;
 

@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file exceptions.hpp
+ * \file io/exceptions.hpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-09.
@@ -21,6 +21,9 @@ namespace io
 		class file_exception : public std::exception
 		{
 		public:
+			/*!*******************************************************************
+			 * \brief Describe the nature of the exception
+			 *********************************************************************/
 			inline const char *what () {return "File couldn't be opened";}
 		};
 	} /* exceptions */

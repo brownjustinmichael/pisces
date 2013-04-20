@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file io.cpp
+ * \file io/io.cpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-08.
@@ -72,7 +72,7 @@ namespace io
 		TRACE ("Appended.");
 	}
 	
-	void output::simple_to_file (std::string file_name) {
+	void output::std_to_file (std::string file_name) {
 		int i, j;
 		std::ofstream file_stream; // A file stream object to be used when writing to file 
 		
