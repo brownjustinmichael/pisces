@@ -7,7 +7,7 @@
  ************************************************************************/
 
 #include "../config.hpp"
-#include "solver.hpp"
+#include "solver_one_d.hpp"
 
 namespace one_d
 {

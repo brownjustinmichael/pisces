@@ -11,7 +11,7 @@
 #include <cassert>
 #include <memory>
 #include "../config.hpp"
-#include "diffusion.hpp"
+#include "diffusion_one_d.hpp"
 #include "../collocation/collocation.hpp"
 
 namespace one_d

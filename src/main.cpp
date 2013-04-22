@@ -7,7 +7,7 @@
  ************************************************************************/
 
 #include "config.hpp"
-#include "one_d/element.hpp"
+#include "one_d/one_d_element.hpp"
 
 int config::severity = 4;  // The default logging severity is 4, errors and fatal messages only.
 int n = 256; //!< The number of grid points

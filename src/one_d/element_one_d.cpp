@@ -7,14 +7,14 @@
  ************************************************************************/
 
 #include <cmath>
-#include "element.hpp"
-#include "diffusion.hpp"
+#include "element_one_d.hpp"
+#include "diffusion_one_d.hpp"
 #include "../collocation/collocation.hpp"
-#include "advection.h"
-#include "solver.hpp"
-#include "fftw.hpp"
-#include "lapack.hpp"
-#include "boundary.hpp"
+#include "advection_one_d.h"
+#include "solver_one_d.hpp"
+#include "fftw_one_d.hpp"
+#include "scale_one_d.hpp"
+#include "boundary_one_d.hpp"
 	
 namespace one_d {
 	advection_diffusion_element::advection_diffusion_element (int i_n, int i_flags) : element (i_n, i_flags) {

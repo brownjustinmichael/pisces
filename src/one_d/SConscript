@@ -5,10 +5,10 @@ for lib in ["lapack", "blas", "atlas", "fftw3"]:
     if lib not in env ['LIBS']:
         env.Append (LIBS = lib)
 
-objects.append (env.Object ("element.cpp"))
+objects.append (env.Object ("element_one_d.cpp"))
 
-objects.append (env.Object ("diffusion.cpp"))
+objects.append (env.Object ("diffusion_one_d.cpp"))
 
-objects.append (env.Object ("advection.cpp"))
+objects.append (env.Object ("advection_one_d.cpp"))
 
-objects.append (env.Object ("solver.cpp"))
+objects.append (env.Object ("solver_one_d.cpp"))
