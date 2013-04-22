@@ -16,8 +16,7 @@
 
 namespace one_d
 {
-	explicit_diffusion::explicit_diffusion (double i_coeff, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_data_in, double *i_data_out, int *i_flags_ptr) : bases::explicit_plan (i_n, i_data_in, i_data_out, i_flags_ptr) 
-	{
+	void explicit_diffusion::init (double i_coeff, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_data_in, double *i_data_out, int *i_flags_ptr) {
 		coeff = i_coeff;
 		timestep_ptr = i_timestep_ptr;
 		grid = i_grid;

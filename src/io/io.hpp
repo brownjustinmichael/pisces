@@ -89,11 +89,29 @@ namespace io
 		virtual void append (double *data_ptr);
 		
 		/*!*******************************************************************
+		 * \brief Append a double array to the list to be output
+		 * 
+		 * \param data_ptr A double pointer reference to the data to be the new column
+		 *********************************************************************/
+		virtual void append (double &data_ptr) {
+			append (&data_ptr);
+		}
+		
+		/*!*******************************************************************
 		 * \brief Append an integer array to the list to be output
 		 * 
 		 * \param data_ptr An integer pointer to the data to be the new column
 		 *********************************************************************/
 		virtual void append (int *data_ptr);
+		
+		/*!*******************************************************************
+		 * \brief Append an integer array to the list to be output
+		 * 
+		 * \param data_ptr An integer pointer reference to the data to be the new column
+		 *********************************************************************/
+		virtual void append (int &data_ptr) {
+			append (&data_ptr);
+		}
 		
 		/*!*******************************************************************
 		 * \brief A virtual function to output the data to file

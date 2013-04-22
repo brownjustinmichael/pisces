@@ -6,11 +6,19 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
+#include <cmath>
+#include <vector>
 #include "config.hpp"
-#include "one_d/one_d_element.hpp"
+#include "one_d/element_one_d.hpp"
+#include "one_d/boundary_one_d.hpp"
 
 int config::severity = 4;  // The default logging severity is 4, errors and fatal messages only.
 int n = 256; //!< The number of grid points
+double scale = 1.0;
+double sigma = 0.1;
+
+std::vector<double> initial_conditions;
+std::vector<double> initial_position;
 
 #ifdef __APPLE__
 
@@ -66,7 +74,19 @@ int main (int argc, char const *argv[])
 	
 	TRACE ("Beginning main...");
 	
-	one_d::advection_diffusion_element main_element (n, 0x00);
+	initial_position.resize (n);
+	initial_conditions.resize (n);
+	
+	double pioN = std::acos (-1.0) / n;
+	for (int i = 0; i < n; ++i) {
+		initial_position [i] = std::cos (pioN * i);
+		initial_conditions [i] = scale * std::exp (- initial_position [i] * initial_position [i] / 2.0 / sigma / sigma) - scale * std::exp (- 1.0 / 2.0 / sigma / sigma);
+	}
+	
+	one_d::advection_diffusion_element element_1 (n, &initial_conditions [0], 0x00);
+	// one_d::advection_diffusion_element element_2 (n / 2, &intial_conditions [n / 2], 0x00);
+	// add_boundary (boundary::make_unique (0.0, element_1 [velocity], 0.0, &(scalars [velocity] [n - 1])));
+	// add_boundary (boundary::make_unique (0.0, &(scalars [rhs] [0]), 0.0, &(scalars [rhs] [n - 1])));
 
 	TRACE ("main: Entering main loop.");
 	
@@ -74,9 +94,9 @@ int main (int argc, char const *argv[])
 		TRACE ("main: Beginning timestep...");
 		INFO ("main: Timestep: " << i);
 
-		main_element.calculate ();
-		main_element.execute_boundaries ();
-		main_element.update ();
+		element_1.calculate ();
+		element_1.execute_boundaries ();
+		element_1.update ();
 		
 		TRACE ("main: Timestep " << i << " complete.");
 	}

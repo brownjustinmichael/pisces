@@ -33,11 +33,17 @@ namespace one_d
 	public:
 
 		advec (int i_n, double *i_tmstp_ptr, double i_c, double *i_data_in, double *i_data_out);	//constuctor initializes private members to point to input and output vectors
+		advec (int i_n, double *i_tmstp_ptr, double i_c, double &i_data_in, double &i_data_out);	//constuctor initializes private members to point to input and output vectors
+		
 		virtual ~advec () {}
 		
 		void execute ();
 		
 		inline static std::unique_ptr<bases::plan> make_unique (int i_n, double *i_tmstp_ptr, double i_c, double *i_data_in, double *i_data_out) {
+			return std::unique_ptr<bases::plan> (new advec (i_n, i_tmstp_ptr, i_c, i_data_in, i_data_out));
+		}
+		
+		inline static std::unique_ptr<bases::plan> make_unique (int i_n, double *i_tmstp_ptr, double i_c, double &i_data_in, double &i_data_out) {
 			return std::unique_ptr<bases::plan> (new advec (i_n, i_tmstp_ptr, i_c, i_data_in, i_data_out));
 		}
 

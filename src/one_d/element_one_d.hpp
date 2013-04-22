@@ -49,6 +49,13 @@ namespace one_d
 			scalars [name].resize (n + 1);
 		}
 		
+		/*!*******************************************************************
+		 * \copydoc bases::element::operator[] ()
+		 *********************************************************************/
+		inline double &operator[] (int name) {
+			return scalars [name] [0];
+		}
+		
 	protected:
 		int n; //!< The number of elements in each 1D array
 	   	std::vector<int> cell; //!< An integer array for tracking each cell number for output
@@ -70,7 +77,7 @@ namespace one_d
 		 * \param i_n The number of elements in each 1D data array
 		 * \param i_flags Flags for the boundary conditions and evaluation
 		 *********************************************************************/
-		advection_diffusion_element (int i_n, int i_flags);
+		advection_diffusion_element (int i_n, double *initial_conditions, int i_flags);
 		virtual ~advection_diffusion_element () {}
 		
 	private:

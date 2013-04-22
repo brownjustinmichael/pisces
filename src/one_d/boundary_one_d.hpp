@@ -32,7 +32,15 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::boundary::boundary ()
 		 *********************************************************************/
-		boundary (double i_alpha_plus, double *i_data_plus, double i_alpha_minus = 0, double *i_data_minus = NULL) : bases::boundary (i_alpha_plus, i_data_plus, i_alpha_minus, i_data_minus) {}
+		boundary (double i_alpha_plus, double *i_data_plus, double i_alpha_minus = 0.0, double *i_data_minus = NULL) : bases::boundary (i_alpha_plus, i_data_plus, i_alpha_minus, i_data_minus) {}
+		
+		boundary (double i_alpha_plus, double &i_data_plus, double i_alpha_minus, double &i_data_minus) : bases::boundary (i_alpha_plus, &i_data_plus, i_alpha_minus, &i_data_minus) {}
+
+		boundary (double i_alpha_plus, double &i_data_plus) : bases::boundary (i_alpha_plus, &i_data_plus, 0.0, NULL) {}
+	
+		/*
+			TODO reverse double, double* ordering
+		*/
 	
 		virtual ~boundary () {}
 	
@@ -62,6 +70,10 @@ namespace one_d
 		 * \copydetails boundary::boundary ()
 		 *********************************************************************/
 		inline static std::unique_ptr<plan> make_unique (double i_alpha_plus, double *i_data_plus, double i_alpha_minus, double *i_data_minus) {
+			return std::unique_ptr<plan> (new boundary (i_alpha_plus, i_data_plus, i_alpha_minus, i_data_minus));
+		}
+		
+		inline static std::unique_ptr<plan> make_unique (double i_alpha_plus, double &i_data_plus, double i_alpha_minus, double &i_data_minus) {
 			return std::unique_ptr<plan> (new boundary (i_alpha_plus, i_data_plus, i_alpha_minus, i_data_minus));
 		}
 	};

@@ -26,17 +26,17 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::transform::transform ()
 		 *********************************************************************/
-		fftw_cosine (int i_n, double *i_data_in, double *i_data_out, int *i_flags_ptr = NULL) : bases::transform (i_n, i_data_in, i_data_out, i_flags_ptr) {
-			TRACE ("Instantiating...");
-			
-			INFO ("FFTW_ESTIMATE = " << FFTW_ESTIMATE);
-			
-			scalar = 1.0 / sqrt (2.0 * (i_n - 1));
-			
-			fourier_plan = fftw_plan_r2r_1d (i_n + 1, i_data_in, i_data_out, FFTW_REDFT00, *flags_ptr);
-			
-			TRACE ("Instantiated.")
-		}	
+		fftw_cosine (int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL) : bases::transform (i_n, i_data_in, i_data_out, i_flags_ptr) {
+			init (i_n, i_data_in, i_data_out, i_flags_ptr);
+		}
+		
+		fftw_cosine (int i_n, double &i_data_in, double &i_data_out, int *i_flags_ptr = NULL) : bases::transform (i_n, &i_data_in, &i_data_out, i_flags_ptr) {
+			init (i_n, &i_data_in, &i_data_out, i_flags_ptr);
+		}
+		
+		fftw_cosine (int i_n, double &i_data_in) : bases::transform (i_n, &i_data_in) {
+			init (i_n, &i_data_in);
+		}
 		
 		virtual ~fftw_cosine () {}
 		
@@ -61,13 +61,31 @@ namespace one_d
 		 * \brief Make a unique pointer to a new fftw_cosine object
 		 * \copydetails fftw_cosine ()
 		 *********************************************************************/
-		inline static std::unique_ptr<plan> make_unique (int i_n, double *i_data_in, double *i_data_out, int *i_flags_ptr = NULL) {
+		inline static std::unique_ptr<plan> make_unique (int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL) {
 			return std::unique_ptr<plan> (new fftw_cosine (i_n, i_data_in, i_data_out, i_flags_ptr));
+		}
+	
+		inline static std::unique_ptr<plan> make_unique (int i_n, double &i_data_in, double &i_data_out, int *i_flags_ptr = NULL) {
+			return std::unique_ptr<plan> (new fftw_cosine (i_n, i_data_in, i_data_out, i_flags_ptr));
+		}
+		
+		inline static std::unique_ptr<plan> make_unique (int i_n, double &i_data_in) {
+			return std::unique_ptr<plan> (new fftw_cosine (i_n, i_data_in));
 		}
 	
 	private:		
 		double scalar; //!< The scalar used after the transform (1 / sqrt (2 * (n - 1)))
 		fftw_plan fourier_plan; //!< The fftw_plan object to be executed
+		
+		inline void init (int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL) {
+			TRACE ("Instantiating...");
+			
+			scalar = 1.0 / sqrt (2.0 * (i_n - 1));
+			
+			fourier_plan = fftw_plan_r2r_1d (i_n + 1, data_in, data_out, FFTW_REDFT00, *flags_ptr);
+			
+			TRACE ("Instantiated.")
+		}
 	};
 } /* one_d */
 

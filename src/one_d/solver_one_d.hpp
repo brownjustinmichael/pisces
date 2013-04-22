@@ -81,14 +81,20 @@ namespace one_d
 		 * \param i_data_out The double array of output
 		 * \copydoc bases::solver::solver ()
 		 *********************************************************************/
-		lapack_solver (int i_n, double *i_data_in, double *i_rhs, double *i_matrix, double *i_data_out, int *i_flags_ptr = NULL) : bases::solver (i_flags_ptr) {
-			n = i_n;
-			data_in = i_data_in;
-			rhs = i_rhs;
-			matrix = i_matrix;
-			data_out = i_data_out;
-			flags_ptr = i_flags_ptr;
-			ipiv.resize (i_n, 0);
+		lapack_solver (int i_n, double *i_data_in, double *i_rhs, double *i_matrix, double *i_data_out = NULL, int *i_flags_ptr = NULL) : bases::solver (i_flags_ptr) {
+			init (i_n, i_data_in, i_rhs, i_matrix, i_data_out, i_flags_ptr);
+		};
+		
+		/*
+			TODO change location of matrix in arguments
+		*/
+		
+		lapack_solver (int i_n, double &i_data_in, double &i_rhs, double *i_matrix, double &i_data_out, int *i_flags_ptr = NULL) : bases::solver (i_flags_ptr) {
+			init (i_n, &i_data_in, &i_rhs, i_matrix, &i_data_out, i_flags_ptr);
+		};
+		
+		lapack_solver (int i_n, double &i_data_in, double &i_rhs, double *i_matrix) : bases::solver () {
+			init (i_n, &i_data_in, &i_rhs, i_matrix);
 		};
 		
 		virtual ~lapack_solver () {}
@@ -111,6 +117,14 @@ namespace one_d
 		inline static std::unique_ptr<solver> make_unique (int i_n, double *i_data_in, double *i_rhs, double *i_matrix, double *i_data_out, int *i_flags_ptr = NULL) {
 			return std::unique_ptr<solver> (new lapack_solver (i_n, i_data_in, i_rhs, i_matrix, i_data_out, i_flags_ptr));
 		}
+		
+		inline static std::unique_ptr<solver> make_unique (int i_n, double &i_data_in, double &i_rhs, double *i_matrix, double &i_data_out, int *i_flags_ptr = NULL) {
+			return std::unique_ptr<solver> (new lapack_solver (i_n, i_data_in, i_rhs, i_matrix, i_data_out, i_flags_ptr));
+		}
+		
+		inline static std::unique_ptr<solver> make_unique (int i_n, double &i_data_in, double &i_rhs, double *i_matrix) {
+			return std::unique_ptr<solver> (new lapack_solver (i_n, i_data_in, i_rhs, i_matrix));
+		}
 
 	private:
 		int n; //!< The integer number of elements in the data
@@ -121,6 +135,20 @@ namespace one_d
 		double *data_out; //!< The double array of output
 		
 		std::vector<int> ipiv; //!< A vector of integers needed to calculate the factorization
+		
+		void init (int i_n, double *i_data_in, double *i_rhs, double *i_matrix, double *i_data_out = NULL, int *i_flags_ptr = NULL) {
+			n = i_n;
+			data_in = i_data_in;
+			rhs = i_rhs;
+			matrix = i_matrix;
+			if (i_data_out) {
+				data_out = i_data_out;
+			} else {
+				data_out = i_data_in;
+			}
+			flags_ptr = i_flags_ptr;
+			ipiv.resize (i_n, 0);
+		}
 	};
 } /* one_d */
 

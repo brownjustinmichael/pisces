@@ -38,12 +38,14 @@ namespace bases
 		 * \param i_flags_ptr A pointer to the integer execution flags
 		 *********************************************************************/
 		plan (int *i_flags_ptr = NULL) {
+			TRACE ("Instantiating...");
 			default_flags = 0x00;
 			if (!i_flags_ptr) {
 				flags_ptr = &default_flags;
 			} else {
 				flags_ptr = i_flags_ptr;
 			}
+			TRACE ("Instantiated.");
 		}
 		virtual ~plan () {}
 		
@@ -74,14 +76,16 @@ namespace bases
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
 		explicit_plan (int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL) : plan (i_flags_ptr) {
-		n = i_n;
-		data_in = i_data_in;
-		if (!i_data_out) {
-			data_out = i_data_in;
-		} else {
-			data_out = i_data_out;			
+			TRACE ("Instantiating...");
+			n = i_n;
+			data_in = i_data_in;
+			if (!i_data_out) {
+				data_out = i_data_in;
+			} else {
+				data_out = i_data_out;
+			}
+			TRACE ("Instantiated.");
 		}
-	}
 	
 	virtual ~explicit_plan () {}
 

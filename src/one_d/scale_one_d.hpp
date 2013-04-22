@@ -48,6 +48,14 @@ namespace one_d
 			scalar = i_scalar;
 		}
 		
+		scale (double i_scalar, int i_n, double &i_data_in, double &i_data_out, int *i_flags_ptr = NULL) : bases::explicit_plan (i_n, &i_data_in, &i_data_out, i_flags_ptr) {
+			scalar = i_scalar;
+		}
+		
+		scale (double i_scalar, int i_n, double &i_data_in) : bases::explicit_plan (i_n, &i_data_in, NULL, NULL) {
+			scalar = i_scalar;
+		}
+		
 		virtual ~scale () {}
 		
 		/*!*******************************************************************
@@ -68,6 +76,14 @@ namespace one_d
 		 *********************************************************************/
 		inline static std::unique_ptr<plan> make_unique (double i_scalar, int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL) {
 			return std::unique_ptr<plan> (new scale (i_scalar, i_n, i_data_in, i_data_out, i_flags_ptr));
+		}
+		
+		inline static std::unique_ptr<plan> make_unique (double i_scalar, int i_n, double &i_data_in, double &i_data_out, int *i_flags_ptr = NULL) {
+			return std::unique_ptr<plan> (new scale (i_scalar, i_n, i_data_in, i_data_out, i_flags_ptr));
+		}
+		
+		inline static std::unique_ptr<plan> make_unique (double i_scalar, int i_n, double &i_data_in) {
+			return std::unique_ptr<plan> (new scale (i_scalar, i_n, i_data_in));
 		}
 
 	private:

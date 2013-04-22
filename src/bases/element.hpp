@@ -77,6 +77,19 @@ public:
 		 * \param name The integer name from the index enumeration
 		 *********************************************************************/
 		virtual void add_scalar (int name) = 0;
+		
+		/*!*******************************************************************
+		 * \brief Get the double pointer to the named scalar
+		 * 
+		 * \param name The integer name from the index enumeration
+		 * 
+		 * \return A double pointer to the first element of the named scalar
+		 *********************************************************************/
+		virtual double &operator[] (int name) = 0;
+		
+		virtual double &operator () (int name, int index = 0) {
+			return (&((*this) [name])) [index];
+		}
 	
 		/*!*******************************************************************
 		 * \brief Adds an explicit plan to be evaluated in grid space
