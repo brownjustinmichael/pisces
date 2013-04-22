@@ -21,7 +21,8 @@ namespace one_d
 	 * A 1D implementation of the element base class. This provides the
 	 * storage and indexing facilities. The plans should be added in a 
 	 * further subclass.
-	 * \copybrief bases::element
+	 * 
+	 * \brief \copybrief bases::element
 	 *********************************************************************/
 	class element : public bases::element
 	{

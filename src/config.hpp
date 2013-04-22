@@ -9,7 +9,40 @@
 #ifndef CONFIG_H_95CWOMPS
 #define CONFIG_H_95CWOMPS
 
-#ifdef __APPLE__
+#ifndef __APPLE__
+
+/*!*******************************************************************
+ * \def TRACE(str)
+ * Logs a trace-level logging statement
+ *********************************************************************/
+#define TRACE(str)
+/*!*******************************************************************
+ * \def DEBUG(str)
+ * Logs a debug-level logging statement
+ *********************************************************************/
+#define DEBUG(str)
+/*!*******************************************************************
+ * \def INFO(str)
+ * Logs an info-level logging statement
+ *********************************************************************/
+#define INFO(str)
+/*!*******************************************************************
+ * \def WARN(str)
+ * Logs a warn-level logging statement
+ *********************************************************************/
+#define WARN(str)
+/*!*******************************************************************
+ * \def ERROR(str)
+ * Logs an error-level logging statement
+ *********************************************************************/
+#define ERROR(str)
+/*!*******************************************************************
+ * \def FATAL(str)
+ * Logs a fatal-level logging statement
+ *********************************************************************/
+#define FATAL(str)
+
+#else // __APPLE__
 
 #include <log4cxx/logger.h>
 #include <log4cxx/xml/domconfigurator.h>
@@ -44,39 +77,6 @@
  * Logs a fatal-level logging statement
  *********************************************************************/
 #define FATAL(str) LOG4CXX_FATAL(config::logger,str)
-
-#else // __APPLE__
-
-/*!*******************************************************************
- * \def TRACE(str)
- * To be overwritten with logging implementation
- *********************************************************************/
-#define TRACE(str)
-/*!*******************************************************************
- * \def DEBUG(str)
- * To be overwritten with logging implementation
- *********************************************************************/
-#define DEBUG(str)
-/*!*******************************************************************
- * \def INFO(str)
- * To be overwritten with logging implementation
- *********************************************************************/
-#define INFO(str)
-/*!*******************************************************************
- * \def WARN(str)
- * To be overwritten with logging implementation
- *********************************************************************/
-#define WARN(str)
-/*!*******************************************************************
- * \def ERROR(str)
- * To be overwritten with logging implementation
- *********************************************************************/
-#define ERROR(str)
-/*!*******************************************************************
- * \def FATAL(str)
- * To be overwritten with logging implementation
- *********************************************************************/
-#define FATAL(str)
 
 #endif // __APPLE__
 

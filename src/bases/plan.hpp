@@ -70,13 +70,17 @@ namespace bases
 		/*!*******************************************************************
 		 * \param i_n The integer number of elements in the data
 		 * \param i_data_in The double vector of input
-		 * \param i_data_out The double vector of output
+		 * \param i_data_out The double vector of output (if NULL, use i_data_in)
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		explicit_plan (int i_n, double *i_data_in, double *i_data_out, int *i_flags_ptr = NULL) : plan (i_flags_ptr) {
+		explicit_plan (int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL) : plan (i_flags_ptr) {
 		n = i_n;
 		data_in = i_data_in;
-		data_out = i_data_out;
+		if (!i_data_out) {
+			data_out = i_data_in;
+		} else {
+			data_out = i_data_out;			
+		}
 	}
 	
 	virtual ~explicit_plan () {}
@@ -89,7 +93,7 @@ namespace bases
 	protected:
 		int n; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
 		double *data_in; //!< A double pointer to the input data
-		double *data_out; //!< A double pointer to the output data; if data_in == data_out, the operation is done in place (but inefficient)
+		double *data_out; //!< A double pointer to the output data
 	};
 	
 	/*!*******************************************************************

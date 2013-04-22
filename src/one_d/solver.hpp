@@ -66,7 +66,9 @@ extern "C" void dgetrs_ (char *trans, int *n, int *nrhs, double *a, int *lda, in
 namespace one_d
 {
 	/*!*******************************************************************
-	 * \copybrief bases::solver
+	 * \brief \copybrief bases::solver
+	 * 
+	 * A LAPACK implementation of a matrix solver
 	 *********************************************************************/
 	class lapack_solver : public bases::solver
 	{

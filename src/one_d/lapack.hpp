@@ -20,77 +20,58 @@
  * \param dy The array to which the data are copied
  * \param incy A pointer to an integer spacing of elements in y
  *********************************************************************/
-extern "C" void dcopy_(int *n, double *dx, int *incx, double *dy, int *incy);
+extern "C" void dcopy_ (int *n, double *dx, int *incx, double *dy, int *incy);
+
+/*!*******************************************************************
+ * \brief Function from BLAS that scales a double array
+ * 
+ * \param n A pointer to an integer number of elements in x to copy to y
+ * \param da The double by which to scale the data
+ * \param dx The array from which the data are copied
+ * \param incx A pointer to an integer spacing of elements in x
+ *********************************************************************/
+extern "C" void dscal_ (int *n, double *da, double *dx, int *incx);
 
 namespace one_d
 {
 	/*!*******************************************************************
-	 * \brief A plan that copies one array into another
+	 * \brief A plan that scales an array into another or in place
 	 *********************************************************************/
-	class copy : public bases::explicit_plan
+	class scale : public bases::explicit_plan
 	{
-	public:
+	public:	
 		/*!*******************************************************************
+		 * \param i_scalar The double by which to scale the array
 		 * \copydoc bases::explicit_plan::explicit_plan ()
 		 *********************************************************************/
-		copy (int i_n, double *i_data_in, double *i_data_out, int *i_flags_ptr = NULL) : bases::explicit_plan (i_n, i_data_in, i_data_out, i_flags_ptr) {}
+		scale (double i_scalar, int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL) : bases::explicit_plan (i_n, i_data_in, i_data_out, i_flags_ptr) {
+			scalar = i_scalar;
+		}
 		
-		virtual ~copy () {}
-			
+		virtual ~scale () {}
+		
 		/*!*******************************************************************
 		 * \copydoc bases::explicit_plan::execute ()
 		 *********************************************************************/
 		inline virtual void execute () {
 			int ione = 1;
-			dcopy_ (&n, data_in, &ione, data_out, &ione);
-		}
-
-		/*!*******************************************************************
-		 * \brief Make a unique pointer to a new copy object
-		 * \copydetails copy ()
-		 *********************************************************************/
-		inline static std::unique_ptr<plan> make_unique (int i_n, double *i_data_in, double *i_data_out, int *i_flags_ptr = NULL) {
-			return std::unique_ptr<plan> (new copy (i_n, i_data_in, i_data_out, i_flags_ptr));
-		}
-	};
-
-	/*!*******************************************************************
-	 * \brief A plan that zeroes an array
-	 *********************************************************************/
-	class zero : public bases::plan
-	{
-	public:	
-		/*!*******************************************************************
-		 * \param i_n The integer number of elements in the data
-		 * \param i_data The double array of data
-		 *********************************************************************/
-		zero (int i_n, double *i_data) {
-			n = i_n;
-			data = i_data;
-		}
-		
-		virtual ~zero () {}
-		
-		/*!*******************************************************************
-		 * \copydoc bases::plan::execute ()
-		 *********************************************************************/
-		inline virtual void execute () {
-			for (int i = 0; i < n; ++i) {
-				data [i] = 0.0;
+			if (data_out != data_in) {
+				dcopy_ (&n, data_in, &ione, data_out, &ione);
 			}
+			
+			dscal_ (&n, &scalar, data_in, &ione);
 		}
 		
 		/*!*******************************************************************
-		 * \brief Make a unique pointer to a new zero object
-		 * \copydetails zero ()
+		 * \brief Make a unique pointer to a new scale object
+		 * \copydetails scale ()
 		 *********************************************************************/
-		inline static std::unique_ptr<plan> make_unique (int i_n, double * i_data) {
-			return std::unique_ptr<plan> (new zero (i_n, i_data));
+		inline static std::unique_ptr<plan> make_unique (double i_scalar, int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL) {
+			return std::unique_ptr<plan> (new scale (i_scalar, i_n, i_data_in, i_data_out, i_flags_ptr));
 		}
 
 	private:
-		int n; //!< The integer number of elements in the data
-		double *data; //!< The double array of data
+		double scalar; //!< The double by which to scale the data
 	};
 } /* one_d */
 

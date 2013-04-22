@@ -6,27 +6,27 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#ifndef FFT_HPP_P3TP70YE
-#define FFT_HPP_P3TP70YE
+#ifndef FFTW_HPP_P3TP70YE
+#define FFTW_HPP_P3TP70YE
 
 #include <fftw3.h>
 #include "../config.hpp"
-#include "../bases/fft.hpp"
+#include "../bases/transform.hpp"
 
 namespace one_d
 {		
 	/*!*******************************************************************
-	 * \copybrief bases::fft
+	 * An implementation of the transform class using FFTW3.
 	 * 
-	 * An implementation of the fft class using FFTW3.
+	 * \brief \copybrief bases::transform
 	 *********************************************************************/
-	class fftw_cosine : public bases::fft
+	class fftw_cosine : public bases::transform
 	{
 	public:
 		/*!*******************************************************************
-		 * \copydoc bases::fft::fft ()
+		 * \copydoc bases::transform::transform ()
 		 *********************************************************************/
-		fftw_cosine (int i_n, double *i_data_in, double *i_data_out, int *i_flags_ptr = NULL) : bases::fft (i_n, i_data_in, i_data_out, i_flags_ptr) {
+		fftw_cosine (int i_n, double *i_data_in, double *i_data_out, int *i_flags_ptr = NULL) : bases::transform (i_n, i_data_in, i_data_out, i_flags_ptr) {
 			TRACE ("Instantiating...");
 			
 			INFO ("FFTW_ESTIMATE = " << FFTW_ESTIMATE);
@@ -41,7 +41,7 @@ namespace one_d
 		virtual ~fftw_cosine () {}
 		
 		/*!*******************************************************************
-		 * \copydoc bases::fft::execute ()
+		 * \copydoc bases::transform::execute ()
 		 *********************************************************************/
 		void execute () {
 			TRACE ("Executing...")
@@ -69,6 +69,6 @@ namespace one_d
 		double scalar; //!< The scalar used after the transform (1 / sqrt (2 * (n - 1)))
 		fftw_plan fourier_plan; //!< The fftw_plan object to be executed
 	};
-} /* fft */
+} /* one_d */
 
-#endif /* end of include guard: FFT_HPP_P3TP70YE */
+#endif /* end of include guard: FFTW_HPP_P3TP70YE */

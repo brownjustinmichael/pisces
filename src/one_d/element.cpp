@@ -44,9 +44,9 @@ namespace one_d {
 				
 		add_boundary (boundary::make_unique (0.0, &(scalars [velocity] [0]), 0.0, &(scalars [velocity] [n - 1])));
 		add_boundary (boundary::make_unique (0.0, &(scalars [rhs] [0]), 0.0, &(scalars [rhs] [n - 1])));
-		add_implicit_plan (copy::make_unique (n * n, grid->get_data (0), &matrix [0]));
+		add_implicit_plan (scale::make_unique (1.0, n * n, grid->get_data (0), &matrix [0]));
 		add_implicit_plan (implicit_diffusion::make_unique (- diffusion_coeff * alpha, 0.0, 0.0, &timestep, i_n, grid, &matrix [0], &flags));
-		add_explicit_grid_plan (zero::make_unique (n, &(scalars [rhs]) [0]));
+		add_explicit_grid_plan (scale::make_unique (0.0, n, &(scalars [rhs]) [0]));
 		add_explicit_grid_plan (explicit_diffusion::make_unique (diffusion_coeff * (1.0 - alpha), &timestep, i_n, grid, &(scalars [velocity] [0]), &(scalars [rhs]) [0], &flags));
 		add_explicit_space_plan (advec::make_unique (n, &timestep, advection_coeff, &(scalars [velocity]) [0], &(scalars [rhs]) [0]));
 		matrix_solver = lapack_solver::make_unique (n, &(scalars [velocity]) [0], &(scalars [rhs]) [0], &matrix [0], &(scalars [velocity]) [0], &flags);
