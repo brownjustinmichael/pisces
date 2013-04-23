@@ -13,7 +13,6 @@
 #include "config.hpp"
 #include "one_d/element_one_d.hpp"
 #include "one_d/boundary_one_d.hpp"
-#include <log4cxx/patternlayout.h>
 
 int config::n_loggers = 0;
 int config::n_appenders = 0;
@@ -27,6 +26,8 @@ std::vector<double> initial_conditions;
 std::vector<double> initial_position;
 
 #ifdef __APPLE__
+
+#include <log4cxx/patternlayout.h>
 
 // Set up the logs
 
@@ -73,12 +74,8 @@ int main (int argc, char const *argv[])
 		--argc;
 		++argv;
 	}
-	
-#ifdef __APPLE__
-	
+		
 	config::make_main ();
-
-#endif // __APPLE__
 	
 	MTRACE ("Beginning main...");
 	

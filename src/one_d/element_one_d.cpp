@@ -11,7 +11,7 @@
 #include "../config.hpp"
 #include "element_one_d.hpp"
 #include "diffusion_one_d.hpp"
-#include "../collocation/collocation.hpp"
+#include "../collocation/chebyshev.hpp"
 #include "advection_one_d.h"
 #include "solver_one_d.hpp"
 #include "fftw_one_d.hpp"
@@ -46,11 +46,10 @@ namespace one_d {
 		add_implicit_plan (implicit_diffusion::make_unique (- diffusion_coeff * alpha, 0.0, 0.0, &timestep, i_n, grid, &matrix [0], &flags, logger));
 		add_explicit_grid_plan (scale::make_unique (0.0, n, (*this) (rhs), &flags, logger));
 		add_explicit_grid_plan (explicit_diffusion::make_unique (diffusion_coeff * (1.0 - alpha), &timestep, i_n, grid, (*this) (velocity), (*this) (rhs), &flags, logger));
-		// add_explicit_space_plan (advec::make_unique (n, &timestep, advection_coeff, (*this) (velocity), (*this) (rhs)));
+		add_explicit_space_plan (advec::make_unique (n, &timestep, advection_coeff, (*this) (velocity), (*this) (rhs)));
 		matrix_solver = lapack_solver::make_unique (n, (*this) (velocity), (*this) (rhs), &matrix [0], (*this) (velocity), &flags, logger);
 		transform_forward = fftw_cosine::make_unique (n, (*this) (velocity), &flags, logger);
 		
-		double pioN = std::acos (-1.0) / i_n;
 		for (int i = 0; i < i_n; ++i) {
 			scalars [position] [i] = initial_position [i];
 			scalars [velocity] [i] = initial_velocity [i];

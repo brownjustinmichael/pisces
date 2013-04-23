@@ -1,56 +1,57 @@
-// 
-//! \file config.hpp
-//  src
-//  
-//  Created by Justin Brown on 2013-03-22.
-//  Copyright 2013 Justin Brown. All rights reserved.
-// 
+/*!***********************************************************************
+ * \file config.hpp
+ * Spectral Element
+ * 
+ * Created by Justin Brown on 2013-04-23.
+ * Copyright 2013 Justin Brown. All rights reserved.
+ ************************************************************************/
 
 #ifndef CONFIG_H_95CWOMPS
 #define CONFIG_H_95CWOMPS
 
 #ifndef __APPLE__
 
+#include <iostream>
+
 /*!*******************************************************************
  * \def TRACE(str)
  * Logs a trace-level logging statement
  *********************************************************************/
-#define MTRACE(str)
-#define TRACE(int,str)
+#define MTRACE(str) if(config::severity==0){std::cout<<"TRACE "<<str;}else{}
+#define TRACE(int,str) if(config::severity==0&&int>=0){std::cout<<"element_"<<int<<" TRACE "<<str<<std::endl;}else{}
 /*!*******************************************************************
  * \def DEBUG(str)
  * Logs a debug-level logging statement
  *********************************************************************/
-#define MDEBUG(str)
-#define DEBUG(int,str)
+#define MDEBUG(str) if(config::severity<=1){std::cout<<"DEBUG "<<str;}else{}
+#define DEBUG(int,str) if(config::severity<=1&&int>=0){std::cout<<"element_"<<int<<" DEBUG "<<str<<std::endl;}else{}
 /*!*******************************************************************
  * \def INFO(str)
  * Logs an info-level logging statement
  *********************************************************************/
-#define MINFO(str)
-#define INFO(int,str)
+#define MINFO(str) if(config::severity<=2){std::cout<<"INFO "<<str;}else{}
+#define INFO(int,str) if(config::severity<=2&&int>=0){std::cout<<"element_"<<int<<" INFO "<<str<<std::endl;}else{}
 /*!*******************************************************************
  * \def WARN(str)
  * Logs a warn-level logging statement
  *********************************************************************/
-#define MWARN(str)
-#define WARN(int,str)
+#define MWARN(str) if(config::severity<=3){std::cout<<"WARN "<<str;}else{}
+#define WARN(int,str) if(config::severity<=3&&int>=0){std::cout<<"element_"<<int<<" WARN "<<str<<std::endl;}else{}
 /*!*******************************************************************
  * \def ERROR(str)
  * Logs an error-level logging statement
  *********************************************************************/
-#define MERROR(str)
-#define ERROR(int,str)
+#define MERROR(str) if(config::severity<=4){std::cout<<"ERROR "<<str;}else{}
+#define ERROR(int,str) if(config::severity<=4&&int>=0){std::cout<<"element_"<<int<<" ERROR "<<str<<std::endl;}else{}
 /*!*******************************************************************
  * \def FATAL(str)
  * Logs a fatal-level logging statement
  *********************************************************************/
-#define MFATAL(str)
-#define FATAL(int,str)
+#define MFATAL(str) if(config::severity<=5){std::cout<<"FATAL "<<str;}else{}
+#define FATAL(int,str) if(config::severity<=5&&int>=0){std::cout<<"element_"<<int<<" FATAL "<<str<<std::endl;}else{}
 
 #else // __APPLE__
 
-#include <iostream>
 #include <log4cxx/logger.h>
 #include <log4cxx/xml/domconfigurator.h>
 #include <log4cxx/fileappender.h>
@@ -145,6 +146,10 @@ public:
 	}
 	
 #else
+	
+	static int make_main () {
+		return 0;
+	}
 	
 	static int make_logger () {
 		++n_loggers;

@@ -10,7 +10,7 @@
 #include <exception>
 #include "../config.hpp"
 #include "../bases/collocation.hpp"
-#include "collocation.hpp"
+#include "chebyshev.hpp"
 
 chebyshev_grid::chebyshev_grid (int i_M, int i_N, double i_scale, int i_logger) : bases::collocation_grid (3, i_M, i_N, i_logger) {
 	int d, m, k;

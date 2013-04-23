@@ -12,7 +12,7 @@
 #include <memory>
 #include "../config.hpp"
 #include "diffusion_one_d.hpp"
-#include "../collocation/collocation.hpp"
+#include "../collocation/chebyshev.hpp"
 
 namespace one_d
 {

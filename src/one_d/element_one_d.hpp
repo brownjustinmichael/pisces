@@ -51,6 +51,17 @@ namespace one_d
 			scalars [name].resize (n + 1);
 		}
 		
+		inline void execute_boundaries () {
+			bases::element::execute_boundaries ();
+			
+			MDEBUG ("here");
+			
+			for (int i = 0; i < n; ++i) {
+				DEBUG (logger, "rhs [" << i << "] = " << (*this) (rhs, i));
+			}
+		}
+		
+		
 		/*!*******************************************************************
 		 * \copydoc bases::element::operator[] ()
 		 *********************************************************************/

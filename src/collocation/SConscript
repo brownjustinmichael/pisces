@@ -1,4 +1,4 @@
 Import ("env")
 Import ("objects")
 
-objects.append (env.Object ("collocation.cpp"))
+objects.append (env.Object ("chebyshev.cpp"))
