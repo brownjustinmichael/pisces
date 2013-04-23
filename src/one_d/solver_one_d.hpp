@@ -81,7 +81,7 @@ namespace one_d
 		 * \param i_data_out The double array of output
 		 * \copydoc bases::solver::solver ()
 		 *********************************************************************/
-		lapack_solver (int i_n, double *i_data_in, double *i_rhs, double *i_matrix, double *i_data_out = NULL, int *i_flags_ptr = NULL) : bases::solver (i_flags_ptr) {
+		lapack_solver (int i_n, double *i_data_in, double *i_rhs, double *i_matrix, double *i_data_out = NULL, int *i_flags_ptr = NULL, int i_logger = -1) : bases::solver (i_flags_ptr, i_logger) {
 			init (i_n, i_data_in, i_rhs, i_matrix, i_data_out, i_flags_ptr);
 		};
 		
@@ -89,11 +89,11 @@ namespace one_d
 			TODO change location of matrix in arguments
 		*/
 		
-		lapack_solver (int i_n, double &i_data_in, double &i_rhs, double *i_matrix, double &i_data_out, int *i_flags_ptr = NULL) : bases::solver (i_flags_ptr) {
+		lapack_solver (int i_n, double &i_data_in, double &i_rhs, double *i_matrix, double &i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) : bases::solver (i_flags_ptr, i_logger) {
 			init (i_n, &i_data_in, &i_rhs, i_matrix, &i_data_out, i_flags_ptr);
 		};
 		
-		lapack_solver (int i_n, double &i_data_in, double &i_rhs, double *i_matrix) : bases::solver () {
+		lapack_solver (int i_n, double &i_data_in, double &i_rhs, double *i_matrix, int *i_flags_ptr = NULL, int i_logger = -1) : bases::solver (i_flags_ptr, i_logger) {
 			init (i_n, &i_data_in, &i_rhs, i_matrix);
 		};
 		
@@ -114,16 +114,16 @@ namespace one_d
 		 * 
 		 * \copydetails lapack_solver ()
 		 *********************************************************************/
-		inline static std::unique_ptr<solver> make_unique (int i_n, double *i_data_in, double *i_rhs, double *i_matrix, double *i_data_out, int *i_flags_ptr = NULL) {
-			return std::unique_ptr<solver> (new lapack_solver (i_n, i_data_in, i_rhs, i_matrix, i_data_out, i_flags_ptr));
+		inline static std::unique_ptr<solver> make_unique (int i_n, double *i_data_in, double *i_rhs, double *i_matrix, double *i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) {
+			return std::unique_ptr<solver> (new lapack_solver (i_n, i_data_in, i_rhs, i_matrix, i_data_out, i_flags_ptr, i_logger));
 		}
 		
-		inline static std::unique_ptr<solver> make_unique (int i_n, double &i_data_in, double &i_rhs, double *i_matrix, double &i_data_out, int *i_flags_ptr = NULL) {
-			return std::unique_ptr<solver> (new lapack_solver (i_n, i_data_in, i_rhs, i_matrix, i_data_out, i_flags_ptr));
+		inline static std::unique_ptr<solver> make_unique (int i_n, double &i_data_in, double &i_rhs, double *i_matrix, double &i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) {
+			return std::unique_ptr<solver> (new lapack_solver (i_n, i_data_in, i_rhs, i_matrix, i_data_out, i_flags_ptr, i_logger));
 		}
 		
-		inline static std::unique_ptr<solver> make_unique (int i_n, double &i_data_in, double &i_rhs, double *i_matrix) {
-			return std::unique_ptr<solver> (new lapack_solver (i_n, i_data_in, i_rhs, i_matrix));
+		inline static std::unique_ptr<solver> make_unique (int i_n, double &i_data_in, double &i_rhs, double *i_matrix, int *i_flags_ptr = NULL, int i_logger = -1) {
+			return std::unique_ptr<solver> (new lapack_solver (i_n, i_data_in, i_rhs, i_matrix, i_flags_ptr, i_logger));
 		}
 
 	private:
@@ -146,7 +146,6 @@ namespace one_d
 			} else {
 				data_out = i_data_in;
 			}
-			flags_ptr = i_flags_ptr;
 			ipiv.resize (i_n, 0);
 		}
 	};

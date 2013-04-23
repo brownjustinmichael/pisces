@@ -44,15 +44,15 @@ namespace one_d
 		 * \param i_scalar The double by which to scale the array
 		 * \copydoc bases::explicit_plan::explicit_plan ()
 		 *********************************************************************/
-		scale (double i_scalar, int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL) : bases::explicit_plan (i_n, i_data_in, i_data_out, i_flags_ptr) {
+		scale (double i_scalar, int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL, int i_logger = -1) : bases::explicit_plan (i_n, i_data_in, i_data_out, i_flags_ptr, i_logger) {
 			scalar = i_scalar;
 		}
 		
-		scale (double i_scalar, int i_n, double &i_data_in, double &i_data_out, int *i_flags_ptr = NULL) : bases::explicit_plan (i_n, &i_data_in, &i_data_out, i_flags_ptr) {
+		scale (double i_scalar, int i_n, double &i_data_in, double &i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) : bases::explicit_plan (i_n, &i_data_in, &i_data_out, i_flags_ptr, i_logger) {
 			scalar = i_scalar;
 		}
 		
-		scale (double i_scalar, int i_n, double &i_data_in) : bases::explicit_plan (i_n, &i_data_in, NULL, NULL) {
+		scale (double i_scalar, int i_n, double &i_data_in, int *i_flags_ptr = NULL, int i_logger = -1) : bases::explicit_plan (i_n, &i_data_in, NULL, i_flags_ptr, i_logger) {
 			scalar = i_scalar;
 		}
 		
@@ -74,16 +74,16 @@ namespace one_d
 		 * \brief Make a unique pointer to a new scale object
 		 * \copydetails scale ()
 		 *********************************************************************/
-		inline static std::unique_ptr<plan> make_unique (double i_scalar, int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL) {
-			return std::unique_ptr<plan> (new scale (i_scalar, i_n, i_data_in, i_data_out, i_flags_ptr));
+		inline static std::unique_ptr<plan> make_unique (double i_scalar, int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL, int i_logger = -1) {
+			return std::unique_ptr<plan> (new scale (i_scalar, i_n, i_data_in, i_data_out, i_flags_ptr, i_logger));
 		}
 		
-		inline static std::unique_ptr<plan> make_unique (double i_scalar, int i_n, double &i_data_in, double &i_data_out, int *i_flags_ptr = NULL) {
-			return std::unique_ptr<plan> (new scale (i_scalar, i_n, i_data_in, i_data_out, i_flags_ptr));
+		inline static std::unique_ptr<plan> make_unique (double i_scalar, int i_n, double &i_data_in, double &i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) {
+			return std::unique_ptr<plan> (new scale (i_scalar, i_n, i_data_in, i_data_out, i_flags_ptr, i_logger));
 		}
 		
-		inline static std::unique_ptr<plan> make_unique (double i_scalar, int i_n, double &i_data_in) {
-			return std::unique_ptr<plan> (new scale (i_scalar, i_n, i_data_in));
+		inline static std::unique_ptr<plan> make_unique (double i_scalar, int i_n, double &i_data_in, int *i_flags_ptr = NULL, int i_logger = -1) {
+			return std::unique_ptr<plan> (new scale (i_scalar, i_n, i_data_in, i_flags_ptr, i_logger));
 		}
 
 	private:

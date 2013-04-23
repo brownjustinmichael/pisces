@@ -27,16 +27,16 @@ namespace one_d
 		char charN = 'N';
 		double dpone = 1.0;
 	
-		TRACE ("Operating...");
+		TRACE (logger, "Operating...");
 		
 		double scalar = coeff * *timestep_ptr;
 		// Set up and evaluate the explicit part of the diffusion equation
 		dgemv_ (&charN, &n, &n, &scalar, grid->get_data (2), &n, data_in, &ione, &dpone, data_out, &ione);
 
-		TRACE ("Operation complete.");
+		TRACE (logger, "Operation complete.");
 	}
 
-	implicit_diffusion::implicit_diffusion (double i_coeff, double i_alpha_0, double i_alpha_n, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_matrix, int *i_flags_ptr) : bases::implicit_plan (i_n, i_matrix, i_flags_ptr) {
+	implicit_diffusion::implicit_diffusion (double i_coeff, double i_alpha_0, double i_alpha_n, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_matrix, int *i_flags_ptr, int i_logger) : bases::implicit_plan (i_n, i_matrix, i_flags_ptr, i_logger) {
 		coeff = i_coeff;
 		alpha_0 = i_alpha_0;
 		alpha_n = i_alpha_n;
@@ -47,7 +47,7 @@ namespace one_d
 	}
 
 	void implicit_diffusion::execute () {			
-		TRACE ("Operating...");
+		TRACE (logger, "Operating...");
 
 		double scalar = coeff * *timestep_ptr * alpha_0;
 	   	daxpy_ (&n, &scalar, grid->get_data (2), &n, matrix, &n);
@@ -61,7 +61,7 @@ namespace one_d
 		scalar = coeff * *timestep_ptr * alpha_n;
 	   	daxpy_ (&n, &scalar, grid->get_data (2) + n - 1, &n, matrix + n - 1, &n);
 	
-		TRACE ("Operation complete.");
+		TRACE (logger, "Operation complete.");
 	}
 } /* one_d */
 

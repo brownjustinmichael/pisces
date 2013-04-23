@@ -28,7 +28,8 @@ namespace bases
 		/*!*******************************************************************
 		 * \param i_flags_ptr A pointer to the integer execution flags
 		 *********************************************************************/
-		solver (int *i_flags_ptr = NULL) {
+		solver (int *i_flags_ptr = NULL, int i_logger = -1) {
+			logger = i_logger;
 			if (flags_ptr) {
 				flags_ptr = i_flags_ptr;				
 			} else {
@@ -48,6 +49,7 @@ namespace bases
 		}
 		
 	protected:
+		int logger;
 		int *flags_ptr; //!< A pointer to the integer execution flags
 		int default_flags; //!< Default flags to use if i_flags_ptr is NULL
 		

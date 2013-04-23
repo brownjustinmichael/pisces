@@ -17,10 +17,10 @@
 
 namespace io
 {
-	simple_header::simple_header (int i_n_data_headers, std::string *i_data_headers, std::string i_comment_string) : header () {
+	simple_header::simple_header (int i_n_data_headers, std::string *i_data_headers, std::string i_comment_string, int i_logger) : header (i_logger) {
 		int i;
 
-		TRACE ("Constructing...");
+		TRACE (logger, "Constructing...");
 
 		header_string = i_comment_string;
 			
@@ -32,59 +32,54 @@ namespace io
 		
 		header_string.append ("\n");
 
-		TRACE ("Constructed.");
+		TRACE (logger, "Constructed.");
 	}
 	
-	output::output (header *i_header_ptr, int i_n, int i_n_data_ptrs, double **i_data_ptrs) {
-		int i;
-		n = i_n;
-		n_data_ptrs = i_n_data_ptrs;
-		header_ptr = i_header_ptr;
+	output::output (header *i_header_ptr, int i_n, int i_logger) {
+		logger = i_logger;
 		
-		TRACE ("Constructing...");
+		TRACE (logger, "Instantiating...");
+		
+		n = i_n;
+		n_data_ptrs = 0;
+		header_ptr = i_header_ptr;
 
-		for (i = 0; i < i_n_data_ptrs; ++i)
-		{
-			double_ptrs.push_back (i_data_ptrs [i]);
-			int_ptrs.push_back (NULL);
-		}
-
-		TRACE ("Constructed.");
+		TRACE (logger, "Instantiated.");
 	}
 	
 	void output::append (double *data_ptr) {
-		TRACE ("Appending double to output...");
+		TRACE (logger, "Appending double to output...");
 		
 		++n_data_ptrs;
 		double_ptrs.push_back (data_ptr);
 		int_ptrs.push_back (NULL);
 		
-		TRACE ("Appended.");
+		TRACE (logger, "Appended.");
 	}
 	
 	void output::append (int *data_ptr) {
-		TRACE ("Appending int to output...");
+		TRACE (logger, "Appending int to output...");
 		
 		++n_data_ptrs;
 		double_ptrs.push_back (NULL);
 		int_ptrs.push_back (data_ptr);
 		
-		TRACE ("Appended.");
+		TRACE (logger, "Appended.");
 	}
 	
 	void output::std_to_file (std::string file_name) {
 		int i, j;
 		std::ofstream file_stream; // A file stream object to be used when writing to file 
 		
-		TRACE ("Beginning output...");		
+		TRACE (logger, "Beginning output...");		
 		
-		INFO ("Outputting to file " << file_name << "...");
+		INFO (logger, "Outputting to file " << file_name << "...");
 		
 		file_stream.open (file_name.c_str ());
 		
 		if (! file_stream.is_open ()) {
 			exceptions::file_exception failure;
-			ERROR ("Failed to open file " << file_name);
+			ERROR (logger, "Failed to open file " << file_name);
 			throw failure;
 		}
 		
@@ -106,22 +101,22 @@ namespace io
 				
 		file_stream.close ();
 		
-		TRACE ("Output to file.");
+		TRACE (logger, "Output to file.");
 	}
 	
 	std::string incremental_output::generate_file_name () {
 
-		TRACE ("Generating new file_name...");
+		TRACE (logger, "Generating new file_name...");
 
 		if (n_outputs >= std::pow (10., int_width)) {
-			ERROR ("Exceeded maximum number of outputs")
+			ERROR (logger, "Exceeded maximum number of outputs")
 		}
 		std::ostringstream new_file_name;
 		new_file_name << file_base << std::setfill ('0') << std::setw (int_width) << n_outputs << file_extension;
 
 		++n_outputs;
 
-		TRACE ("New file name is " << new_file_name.str () << ".");
+		TRACE (logger, "New file name is " << new_file_name.str () << ".");
 		
 		return std::string (new_file_name.str ());
 	}

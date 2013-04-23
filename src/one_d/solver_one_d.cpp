@@ -16,7 +16,7 @@ namespace one_d
 		dgetrf_ (&n, &n, matrix, &n, &ipiv [0], &info);
 		
 		if (info != 0) {
-			ERROR ("Unable to invert matrix");
+			ERROR (logger, "Unable to invert matrix");
 			throw 0; // For now, kill the program. 
 			/*
 				TODO Replace this with a more useful exception that can be handled
@@ -29,7 +29,7 @@ namespace one_d
 		double dpone = 1.0;
 		char charN = 'N';
 		
-		TRACE ("Solving...")
+		TRACE (logger, "Solving...")
 		
 		if (data_out == rhs) {
 			daxpy_ (&n, &dpone, data_in, &ione, data_out, &ione);
@@ -45,13 +45,13 @@ namespace one_d
 		data_out [n - 1] = 0.0;
 				
 		if (info != 0) {
-			ERROR ("Unable to solve factorized matrix equation");
+			ERROR (logger, "Unable to solve factorized matrix equation");
 			throw 0; // For now, kill the program. 
 			/*
 				TODO Replace this with a more useful exception that can be handled
 			*/
 		}
 		
-		TRACE ("Solve complete.")
+		TRACE (logger, "Solve complete.")
 	}
 } /* one_d */

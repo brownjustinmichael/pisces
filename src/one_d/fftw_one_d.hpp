@@ -26,15 +26,15 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::transform::transform ()
 		 *********************************************************************/
-		fftw_cosine (int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL) : bases::transform (i_n, i_data_in, i_data_out, i_flags_ptr) {
+		fftw_cosine (int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL, int i_logger = -1) : bases::transform (i_n, i_data_in, i_data_out, i_flags_ptr, i_logger) {
 			init (i_n, i_data_in, i_data_out, i_flags_ptr);
 		}
 		
-		fftw_cosine (int i_n, double &i_data_in, double &i_data_out, int *i_flags_ptr = NULL) : bases::transform (i_n, &i_data_in, &i_data_out, i_flags_ptr) {
+		fftw_cosine (int i_n, double &i_data_in, double &i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) : bases::transform (i_n, &i_data_in, &i_data_out, i_flags_ptr) {
 			init (i_n, &i_data_in, &i_data_out, i_flags_ptr);
 		}
 		
-		fftw_cosine (int i_n, double &i_data_in) : bases::transform (i_n, &i_data_in) {
+		fftw_cosine (int i_n, double &i_data_in, int *i_flags_ptr = NULL, int i_logger = -1) : bases::transform (i_n, &i_data_in, NULL, i_flags_ptr, i_logger) {
 			init (i_n, &i_data_in);
 		}
 		
@@ -44,7 +44,7 @@ namespace one_d
 		 * \copydoc bases::transform::execute ()
 		 *********************************************************************/
 		void execute () {
-			TRACE ("Executing...")
+			TRACE (logger, "Executing...")
 			
 			fftw_execute (fourier_plan);
 
@@ -54,23 +54,23 @@ namespace one_d
 				data_out [i] *= scalar;
 			}
 			
-			TRACE ("Executed.")
+			TRACE (logger, "Executed.")
 		}
 		
 		/*!*******************************************************************
 		 * \brief Make a unique pointer to a new fftw_cosine object
 		 * \copydetails fftw_cosine ()
 		 *********************************************************************/
-		inline static std::unique_ptr<plan> make_unique (int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL) {
-			return std::unique_ptr<plan> (new fftw_cosine (i_n, i_data_in, i_data_out, i_flags_ptr));
+		inline static std::unique_ptr<plan> make_unique (int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL, int i_logger = -1) {
+			return std::unique_ptr<plan> (new fftw_cosine (i_n, i_data_in, i_data_out, i_flags_ptr, i_logger));
 		}
 	
-		inline static std::unique_ptr<plan> make_unique (int i_n, double &i_data_in, double &i_data_out, int *i_flags_ptr = NULL) {
-			return std::unique_ptr<plan> (new fftw_cosine (i_n, i_data_in, i_data_out, i_flags_ptr));
+		inline static std::unique_ptr<plan> make_unique (int i_n, double &i_data_in, double &i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) {
+			return std::unique_ptr<plan> (new fftw_cosine (i_n, i_data_in, i_data_out, i_flags_ptr, i_logger));
 		}
 		
-		inline static std::unique_ptr<plan> make_unique (int i_n, double &i_data_in) {
-			return std::unique_ptr<plan> (new fftw_cosine (i_n, i_data_in));
+		inline static std::unique_ptr<plan> make_unique (int i_n, double &i_data_in, int *i_flags_ptr = NULL, int i_logger = -1) {
+			return std::unique_ptr<plan> (new fftw_cosine (i_n, i_data_in, i_flags_ptr, i_logger));
 		}
 	
 	private:		
@@ -78,13 +78,13 @@ namespace one_d
 		fftw_plan fourier_plan; //!< The fftw_plan object to be executed
 		
 		inline void init (int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL) {
-			TRACE ("Instantiating...");
+			TRACE (logger, "Instantiating...");
 			
 			scalar = 1.0 / sqrt (2.0 * (i_n - 1));
 			
 			fourier_plan = fftw_plan_r2r_1d (i_n + 1, data_in, data_out, FFTW_REDFT00, *flags_ptr);
 			
-			TRACE ("Instantiated.")
+			TRACE (logger, "Instantiated.")
 		}
 	};
 } /* one_d */

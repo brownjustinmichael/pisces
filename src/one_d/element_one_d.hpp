@@ -10,8 +10,10 @@
 #define ELEMENT_HPP_3SURDTOH
 
 #include <memory>
+#include <string>
 #include <vector>
 #include <map>
+#include "../config.hpp"
 #include "../bases/element.hpp"
 #include "../bases/plan.hpp"
 	
@@ -77,7 +79,7 @@ namespace one_d
 		 * \param i_n The number of elements in each 1D data array
 		 * \param i_flags Flags for the boundary conditions and evaluation
 		 *********************************************************************/
-		advection_diffusion_element (int i_n, double *initial_conditions, int i_flags);
+		advection_diffusion_element (std::string name, int i_n, double *initial_position, double *intial_velocity, int i_flags);
 		virtual ~advection_diffusion_element () {}
 		
 	private:

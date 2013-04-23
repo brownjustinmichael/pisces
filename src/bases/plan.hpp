@@ -37,15 +37,16 @@ namespace bases
 		/*!*******************************************************************
 		 * \param i_flags_ptr A pointer to the integer execution flags
 		 *********************************************************************/
-		plan (int *i_flags_ptr = NULL) {
-			TRACE ("Instantiating...");
+		plan (int *i_flags_ptr = NULL, int i_logger = -1) {
+			logger = i_logger;
+			TRACE (logger, "Instantiating...");
 			default_flags = 0x00;
 			if (!i_flags_ptr) {
 				flags_ptr = &default_flags;
 			} else {
 				flags_ptr = i_flags_ptr;
 			}
-			TRACE ("Instantiated.");
+			TRACE (logger, "Instantiated.");
 		}
 		virtual ~plan () {}
 		
@@ -57,6 +58,7 @@ namespace bases
 		virtual void execute () = 0;
 	
 	protected:
+		int logger;
 		int default_flags; //!< An integer set of default flags to use in case the user does not specify any flags
 		int *flags_ptr; //!< A pointer to the integer execution flags
 	};
@@ -75,8 +77,8 @@ namespace bases
 		 * \param i_data_out The double vector of output (if NULL, use i_data_in)
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		explicit_plan (int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL) : plan (i_flags_ptr) {
-			TRACE ("Instantiating...");
+		explicit_plan (int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL, int i_logger = -1) : plan (i_flags_ptr, i_logger) {
+			TRACE (logger, "Instantiating...");
 			n = i_n;
 			data_in = i_data_in;
 			if (!i_data_out) {
@@ -84,7 +86,7 @@ namespace bases
 			} else {
 				data_out = i_data_out;
 			}
-			TRACE ("Instantiated.");
+			TRACE (logger, "Instantiated.");
 		}
 	
 	virtual ~explicit_plan () {}
@@ -114,7 +116,7 @@ namespace bases
 		 * 
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		implicit_plan (int i_n, double *i_matrix, int *i_flags_ptr = NULL) : plan (i_flags_ptr) {
+		implicit_plan (int i_n, double *i_matrix, int *i_flags_ptr = NULL, int i_logger = -1) : plan (i_flags_ptr, i_logger) {
 			n = i_n;
 			matrix = i_matrix;
 		}

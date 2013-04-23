@@ -13,6 +13,7 @@
 #include "solver.hpp"
 #include "../io/io.hpp"
 #include "collocation.hpp"
+#include "../config.hpp"
 
 /*!*******************************************************************
  * \brief A set of indices to be used with the element scalars for convenience
@@ -46,6 +47,7 @@ public:
 		*********************************************************************/
 		element (int i_flags) {
 			flags = i_flags;
+			logger = config::make_logger ();
 		
 			n_explicit_grid_plans = 0;
 			n_explicit_space_plans = 0;
@@ -133,6 +135,7 @@ public:
 	
 protected:
 	int flags; //!< An integer set of execution flags
+	int logger;
 	int n_explicit_grid_plans; //!< The number of explicit grid plans to execute
 	int n_explicit_space_plans; //!< The number of explicit space plans to execute
 	int n_implicit_plans; //!< The number of implicit plans to execute

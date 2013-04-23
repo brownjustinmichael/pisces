@@ -32,11 +32,11 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::boundary::boundary ()
 		 *********************************************************************/
-		boundary (double i_alpha_plus, double *i_data_plus, double i_alpha_minus = 0.0, double *i_data_minus = NULL) : bases::boundary (i_alpha_plus, i_data_plus, i_alpha_minus, i_data_minus) {}
+		boundary (double i_alpha_plus, double *i_data_plus, double i_alpha_minus = 0.0, double *i_data_minus = NULL, int *i_flags_ptr = NULL, int i_logger = -1) : bases::boundary (i_alpha_plus, i_data_plus, i_alpha_minus, i_data_minus, i_flags_ptr, i_logger) {}
 		
-		boundary (double i_alpha_plus, double &i_data_plus, double i_alpha_minus, double &i_data_minus) : bases::boundary (i_alpha_plus, &i_data_plus, i_alpha_minus, &i_data_minus) {}
+		boundary (double i_alpha_plus, double &i_data_plus, double i_alpha_minus, double &i_data_minus, int *i_flags_ptr = NULL, int i_logger = -1) : bases::boundary (i_alpha_plus, &i_data_plus, i_alpha_minus, &i_data_minus, i_flags_ptr, i_logger) {}
 
-		boundary (double i_alpha_plus, double &i_data_plus) : bases::boundary (i_alpha_plus, &i_data_plus, 0.0, NULL) {}
+		boundary (double i_alpha_plus, double &i_data_plus, int *i_flags_ptr = NULL, int i_logger = -1) : bases::boundary (i_alpha_plus, &i_data_plus, 0.0, NULL, i_flags_ptr, i_logger) {}
 	
 		/*
 			TODO reverse double, double* ordering
@@ -48,20 +48,18 @@ namespace one_d
 		 * \copydoc bases::boundary::execute ()
 		 *********************************************************************/
 		inline virtual void execute () {
-			TRACE ("Executing...");
+			TRACE (logger, "Executing...");
 		
 			if (!data_minus) {
 				*data_plus *= alpha_plus;
 			} else if (!data_plus) {
 				*data_minus *= alpha_minus;
 			} else {
-				DEBUG ("before = " << *data_plus);
 				*data_plus = alpha_plus * *data_plus + alpha_minus * *data_minus;
-				DEBUG ("after = " << *data_plus);
 				*data_minus = *data_plus;
 			}
 		
-			TRACE ("Executed.")
+			TRACE (logger, "Executed.")
 		}
 	
 		/*!*******************************************************************
@@ -69,12 +67,16 @@ namespace one_d
 		 * 
 		 * \copydetails boundary::boundary ()
 		 *********************************************************************/
-		inline static std::unique_ptr<plan> make_unique (double i_alpha_plus, double *i_data_plus, double i_alpha_minus, double *i_data_minus) {
-			return std::unique_ptr<plan> (new boundary (i_alpha_plus, i_data_plus, i_alpha_minus, i_data_minus));
+		inline static std::unique_ptr<plan> make_unique (double i_alpha_plus, double *i_data_plus, double i_alpha_minus, double *i_data_minus, int *i_flags_ptr = NULL, int i_logger = -1) {
+			return std::unique_ptr<plan> (new boundary (i_alpha_plus, i_data_plus, i_alpha_minus, i_data_minus, i_flags_ptr, i_logger));
 		}
 		
-		inline static std::unique_ptr<plan> make_unique (double i_alpha_plus, double &i_data_plus, double i_alpha_minus, double &i_data_minus) {
-			return std::unique_ptr<plan> (new boundary (i_alpha_plus, i_data_plus, i_alpha_minus, i_data_minus));
+		inline static std::unique_ptr<plan> make_unique (double i_alpha_plus, double &i_data_plus, double i_alpha_minus, double &i_data_minus, int *i_flags_ptr = NULL, int i_logger = -1) {
+			return std::unique_ptr<plan> (new boundary (i_alpha_plus, i_data_plus, i_alpha_minus, i_data_minus, i_flags_ptr, i_logger));
+		}
+		
+		inline static std::unique_ptr<plan> make_unique (double i_alpha_plus, double &i_data_plus, int *i_flags_ptr = NULL, int i_logger = -1) {
+			return std::unique_ptr<plan> (new boundary (i_alpha_plus, i_data_plus, i_flags_ptr, i_logger));
 		}
 	};
 } /* one_d */

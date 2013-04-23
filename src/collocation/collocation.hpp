@@ -14,6 +14,10 @@
 #include <cmath>
 #include "../bases/collocation.hpp"
 
+/*
+	TODO change file name to avoid collisions
+*/
+
 /*!*******************************************************************
  * \brief A collocation grid for Chebyshev polynomials
  * 
@@ -28,7 +32,7 @@ public:
 	 * \param i_N The integer number of collocation points
 	 * \param i_scale A double by which the grid should be scaled
 	 *********************************************************************/
-	chebyshev_grid (int i_M, int i_N, double i_scale = 1.0);
+	chebyshev_grid (int i_M, int i_N, double i_scale = 1.0, int i_logger = -1);
 	
 	virtual ~chebyshev_grid () {};
 	
