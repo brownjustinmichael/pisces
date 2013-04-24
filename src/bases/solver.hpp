@@ -8,6 +8,8 @@
 
 #ifndef SOLVER_HPP_BDH126SH
 #define SOLVER_HPP_BDH126SH
+
+#include "transform.hpp"
 	
 /*!*******************************************************************
  * \brief Execution flags used by the solver class
@@ -30,8 +32,8 @@ namespace bases
 		 *********************************************************************/
 		solver (int *i_flags_ptr = NULL, int i_logger = -1) {
 			logger = i_logger;
-			if (flags_ptr) {
-				flags_ptr = i_flags_ptr;				
+			if (i_flags_ptr) {
+				flags_ptr = i_flags_ptr;
 			} else {
 				default_flags = never_factorized;
 				flags_ptr = &default_flags;
@@ -46,6 +48,7 @@ namespace bases
 		virtual void solve () {
 			factorize ();
 			i_solve ();
+			*flags_ptr |= transformed;
 		}
 		
 	protected:

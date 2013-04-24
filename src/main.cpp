@@ -86,17 +86,17 @@ int main (int argc, char const *argv[])
 	for (int i = 0; i < n / 2; ++i) {
 		initial_position [i] = std::cos (pioN * 2.0 * i) + 1.0;
 		initial_position [i + n / 2] = std::cos (pioN * 2.0 * i) - 1.0;
-		initial_conditions [i] = scale * std::exp (- (initial_position [i] - 1.0) * (initial_position [i] - 1.0) / 2.0 / sigma / sigma) - scale * std::exp (- 1.0 / 2.0 / sigma / sigma);
-		initial_conditions [i + n / 2] = 0.0;
+		initial_conditions [i] = scale * std::exp (- (initial_position [i] - 0.0) * (initial_position [i] - 0.0) / 2.0 / sigma / sigma) - scale * std::exp (- 1.0 / 2.0 / sigma / sigma);
+		initial_conditions [i + n / 2] = scale * std::exp (- (initial_position [i + n / 2] - 0.0) * (initial_position [i + n / 2] - 0.0) / 2.0 / sigma / sigma) - scale * std::exp (- 1.0 / 2.0 / sigma / sigma);
 	}
 	
-	one_d::advection_diffusion_element element_1 ("_1_", n / 2, &initial_position [0], &initial_conditions [0], 0x00);
-	one_d::advection_diffusion_element element_2 ("_2_", n / 2, &initial_position [n / 2], &initial_conditions [n / 2], 0x00);
-	element_1.add_boundary (one_d::boundary::make_unique (0.0, element_1 (velocity)));
+	one_d::advection_diffusion_element element_1 ("_1_", 0.0, 0.0, n / 2, &initial_position [0], &initial_conditions [0], 0x00);
+	one_d::advection_diffusion_element element_2 ("_2_", 0.0, 0.0, n / 2, &initial_position [n / 2], &initial_conditions [n / 2], 0x00);
 	element_1.add_boundary (one_d::boundary::make_unique (0.0, element_1 (rhs)));
-	element_2.add_boundary (one_d::boundary::make_unique (0.0, element_2 (velocity, n / 2 - 1)));
+	element_1.add_boundary (one_d::boundary::make_unique (0.0, element_1 (rhs, n / 2 - 1)));
+	element_2.add_boundary (one_d::boundary::make_unique (0.0, element_2 (rhs)));
 	element_2.add_boundary (one_d::boundary::make_unique (0.0, element_2 (rhs, n / 2 - 1)));
-	element_1.add_boundary (one_d::boundary::make_unique (0.0, element_1 (rhs, n / 2 - 1), 1.0, element_2 (rhs)));
+	// element_1.add_boundary (one_d::boundary::make_unique (0.5, element_1 (rhs, n / 2 - 1), 0.5, element_2 (rhs)));
 
 	MTRACE ("main: Entering main loop.");
 	

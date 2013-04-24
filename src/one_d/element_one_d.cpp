@@ -19,11 +19,13 @@
 #include "boundary_one_d.hpp"
 	
 namespace one_d {
-	advection_diffusion_element::advection_diffusion_element (std::string name, int i_n, double *initial_position, double *initial_velocity, int i_flags) : element (i_n, i_flags) {
+	advection_diffusion_element::advection_diffusion_element (std::string name, double i_alpha_plus, double i_alpha_minus, int i_n, double *initial_position, double *initial_velocity, int i_flags) : element (i_n, i_flags) {
 		previous_timestep = 0.0;
-		double diffusion_coeff = 1.0;
-		double advection_coeff = -10.0;
+		double diffusion_coeff = 0.0;
+		double advection_coeff = -0.0;
 		double alpha = 0.5;
+		alpha_plus = i_alpha_plus;
+		alpha_minus = i_alpha_minus;
 		add_scalar (position);
 		add_scalar (velocity);
 		add_scalar (rhs);
@@ -43,10 +45,10 @@ namespace one_d {
 		failsafe_dump->append ((*this) [velocity]);
 		
 		add_implicit_plan (scale::make_unique (1.0, n * n, grid->get_data (0), &matrix [0], &flags, logger));
-		add_implicit_plan (implicit_diffusion::make_unique (- diffusion_coeff * alpha, 0.0, 0.0, &timestep, i_n, grid, &matrix [0], &flags, logger));
+		add_implicit_plan (implicit_diffusion::make_unique (- diffusion_coeff * alpha, alpha_plus, alpha_minus, &timestep, i_n, grid, &matrix [0], &flags, logger));
 		add_explicit_grid_plan (scale::make_unique (0.0, n, (*this) (rhs), &flags, logger));
 		add_explicit_grid_plan (explicit_diffusion::make_unique (diffusion_coeff * (1.0 - alpha), &timestep, i_n, grid, (*this) (velocity), (*this) (rhs), &flags, logger));
-		add_explicit_space_plan (advec::make_unique (n, &timestep, advection_coeff, (*this) (velocity), (*this) (rhs)));
+		// add_explicit_space_plan (advec::make_unique (n, &timestep, advection_coeff, (*this) (velocity), (*this) (rhs)));
 		matrix_solver = lapack_solver::make_unique (n, (*this) (velocity), (*this) (rhs), &matrix [0], (*this) (velocity), &flags, logger);
 		transform_forward = fftw_cosine::make_unique (n, (*this) (velocity), &flags, logger);
 		
@@ -55,7 +57,12 @@ namespace one_d {
 			scalars [velocity] [i] = initial_velocity [i];
 		}
 		
+		MDEBUG ("transformed? " << (flags & transformed));
+		
 		transform_forward->execute ();
+		
+		MDEBUG ("now transformed? " << (flags & transformed));
+		
 		TRACE (logger, "Initialized.");
 	}
 } /* one_d */

@@ -52,13 +52,15 @@ namespace one_d
 		}
 		
 		inline void execute_boundaries () {
+			// for (int i = 0; i < n; ++i) {
+			// 	DEBUG (logger, "rhs [" << i << "] = " << (*this) (rhs, i));
+			// }
+
 			bases::element::execute_boundaries ();
 			
-			MDEBUG ("here");
-			
-			for (int i = 0; i < n; ++i) {
-				DEBUG (logger, "rhs [" << i << "] = " << (*this) (rhs, i));
-			}
+			// for (int i = 0; i < n; ++i) {
+			// 	DEBUG (logger, "rhs [" << i << "] = " << (*this) (rhs, i));
+			// }
 		}
 		
 		
@@ -90,10 +92,12 @@ namespace one_d
 		 * \param i_n The number of elements in each 1D data array
 		 * \param i_flags Flags for the boundary conditions and evaluation
 		 *********************************************************************/
-		advection_diffusion_element (std::string name, int i_n, double *initial_position, double *intial_velocity, int i_flags);
+		advection_diffusion_element (std::string name, double i_alpha_plus, double i_alpha_minus, int i_n, double *initial_position, double *intial_velocity, int i_flags);
 		virtual ~advection_diffusion_element () {}
 		
 	private:
+		double alpha_plus;
+		double alpha_minus;
 		std::vector<double> matrix; //!< A vector containing the double matrix used in the implicit solver
 	};
 } /* one_d */

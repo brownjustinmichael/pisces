@@ -46,11 +46,22 @@ namespace one_d
 		void execute () {
 			TRACE (logger, "Executing...")
 			
-			fftw_execute (fourier_plan);
-
-			data_out [n] = 0.0;
+			MDEBUG ("flags " << *flags_ptr)
+		
+			if (*flags_ptr & transformed) {
+				data_out [n] = 0.0;
+				*flags_ptr &= ~transformed;
+			} else {
+				*flags_ptr |= transformed;
+			}
 			
-			for (int i = 0; i < n; ++i) {
+			fftw_execute (fourier_plan);
+			
+			if (*flags_ptr & transformed) {
+				data_out [n] = 0.0;
+			}
+
+			for (int i = 0; i < n + 1; ++i) {
 				data_out [i] *= scalar;
 			}
 			
@@ -76,9 +87,12 @@ namespace one_d
 	private:		
 		double scalar; //!< The scalar used after the transform (1 / sqrt (2 * (n - 1)))
 		fftw_plan fourier_plan; //!< The fftw_plan object to be executed
+		int runs;
 		
 		inline void init (int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL) {
 			TRACE (logger, "Instantiating...");
+			
+			runs = 0;
 			
 			scalar = 1.0 / sqrt (2.0 * (i_n - 1));
 			

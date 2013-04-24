@@ -6,9 +6,11 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
+#include <cassert>
 #include "element.hpp"
 #include "../config.hpp"
 #include "solver.hpp"
+#include "transform.hpp"
 
 namespace bases
 {
@@ -38,7 +40,7 @@ namespace bases
 			} else {
 				WARN (logger, "Transform not defined. It is likely the element was not set up correctly.")
 			}
-			
+
 			TRACE (logger, "Writing to file...");
 			
 			// Output in angle space
@@ -83,6 +85,8 @@ namespace bases
 	
 	void element::update () {
 		TRACE (logger, "Updating...");
+		
+		// assert (!(flags & transformed));
 		
 		if (matrix_solver) {
 			matrix_solver->solve ();

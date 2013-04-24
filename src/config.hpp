@@ -68,7 +68,7 @@
  * Logs a debug-level logging statement
  *********************************************************************/
 #define MDEBUG(str) LOG4CXX_DEBUG(config::loggers[0],str)
-#define DEBUG(int,str) if(int>=0){LOG4CXX_TRACE(config::loggers[int],str)}else{}
+#define DEBUG(int,str) if(int>=0){LOG4CXX_DEBUG(config::loggers[int],str)}else{}
 /*!*******************************************************************
  * \def INFO(str)
  * Logs an info-level logging statement
@@ -138,6 +138,7 @@ public:
 		int i = n_loggers++;
 		int j = n_appenders++;
 		loggers.push_back (log4cxx::LoggerPtr (log4cxx::Logger::getLogger ("element_" + std::to_string (i))));
+		MDEBUG ("severity "<<severity)
 		loggers [i]->setLevel (config::int_to_severity (severity));
 		
 		appenders.push_back (new log4cxx::FileAppender (layout, "element_" + std::to_string (i) + ".log", false));

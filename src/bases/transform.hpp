@@ -11,6 +11,10 @@
 
 #include "plan.hpp"
 
+enum transform_flags {
+	transformed = 0x10
+};
+
 namespace bases
 {
 	/*!*******************************************************************
