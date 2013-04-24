@@ -51,17 +51,7 @@ namespace one_d
 			scalars [name].resize (n + 1);
 		}
 		
-		inline void execute_boundaries () {
-			// for (int i = 0; i < n; ++i) {
-			// 	DEBUG (logger, "rhs [" << i << "] = " << (*this) (rhs, i));
-			// }
-
-			bases::element::execute_boundaries ();
-			
-			// for (int i = 0; i < n; ++i) {
-			// 	DEBUG (logger, "rhs [" << i << "] = " << (*this) (rhs, i));
-			// }
-		}
+		void calculate ();
 		
 		
 		/*!*******************************************************************

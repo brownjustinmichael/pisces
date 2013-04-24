@@ -79,16 +79,18 @@ int main (int argc, char const *argv[])
 	
 	MTRACE ("Beginning main...");
 	
-	initial_position.resize (n);
-	initial_conditions.resize (n);
+	initial_position.resize (n + 1);
+	initial_conditions.resize (n + 1);
 	
-	double pioN = std::acos (-1.0) / n;
+	double pioN = std::acos (-1.0) / (n / 2 - 1);
 	for (int i = 0; i < n / 2; ++i) {
-		initial_position [i] = std::cos (pioN * 2.0 * i) + 1.0;
-		initial_position [i + n / 2] = std::cos (pioN * 2.0 * i) - 1.0;
+		initial_position [i] = std::cos (pioN * i) + 1.0;
+		initial_position [i + n / 2] = std::cos (pioN * i) - 1.0;
 		initial_conditions [i] = scale * std::exp (- (initial_position [i] - 0.0) * (initial_position [i] - 0.0) / 2.0 / sigma / sigma) - scale * std::exp (- 1.0 / 2.0 / sigma / sigma);
 		initial_conditions [i + n / 2] = scale * std::exp (- (initial_position [i + n / 2] - 0.0) * (initial_position [i + n / 2] - 0.0) / 2.0 / sigma / sigma) - scale * std::exp (- 1.0 / 2.0 / sigma / sigma);
 	}
+	initial_position [n] = -2.0;
+	initial_conditions [n] = 0.0;
 	
 	one_d::advection_diffusion_element element_1 ("_1_", 0.0, 0.0, n / 2, &initial_position [0], &initial_conditions [0], 0x00);
 	one_d::advection_diffusion_element element_2 ("_2_", 0.0, 0.0, n / 2, &initial_position [n / 2], &initial_conditions [n / 2], 0x00);

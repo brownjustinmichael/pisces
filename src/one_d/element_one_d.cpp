@@ -19,9 +19,68 @@
 #include "boundary_one_d.hpp"
 	
 namespace one_d {
+	void element::calculate () {		
+		TRACE (logger, "Calculating...");
+				
+		try {
+			// Start in grid space
+			
+			TRACE (logger, "Updating timestep...");
+			
+			// Testing
+			// Should be replaced by a CFL check
+			timestep = 0.001;
+			
+			TRACE (logger, "Executing explicit grid plans...");
+			
+			for (int i = 0; i < n_explicit_grid_plans; ++i) {
+				explicit_grid_plans [i]->execute ();
+			}
+			
+			TRACE (logger, "Transforming to normal space...");
+			
+			// Switch to normal space
+			if (transform_forward) {
+				transform_forward->execute ();
+			} else {
+				WARN (logger, "Transform not defined. It is likely the element was not set up correctly.")
+			}
+
+			TRACE (logger, "Writing to file...");
+			
+			// Output in angle space
+			if (angle_stream) {
+				angle_stream->to_file ();
+			}
+			
+			TRACE (logger, "Executing explicit space plans...");
+
+			for (int i = 0; i < n_explicit_space_plans; ++i) {
+				explicit_space_plans [i]->execute ();
+			}
+			
+			if (timestep != previous_timestep) {
+				TRACE (logger, "Executing implicit plans...");
+				
+				flags &= ~factorized;
+				for (int i = 0; i < n_implicit_plans; ++i) {
+					implicit_plans [i]->execute ();
+				}
+			}
+
+			previous_timestep = timestep;
+		} catch (...) {
+			ERROR (logger, "Exception caught, failsafe dump to _dump.dat");
+			failsafe_dump->to_file ();
+			exit (EXIT_FAILURE);
+		}
+		
+		TRACE (logger, "Calculation complete.");
+	}
+	
 	advection_diffusion_element::advection_diffusion_element (std::string name, double i_alpha_plus, double i_alpha_minus, int i_n, double *initial_position, double *initial_velocity, int i_flags) : element (i_n, i_flags) {
 		previous_timestep = 0.0;
-		double diffusion_coeff = 0.0;
+		double diffusion_coeff = 0.1;
 		double advection_coeff = -0.0;
 		double alpha = 0.5;
 		alpha_plus = i_alpha_plus;
@@ -52,17 +111,13 @@ namespace one_d {
 		matrix_solver = lapack_solver::make_unique (n, (*this) (velocity), (*this) (rhs), &matrix [0], (*this) (velocity), &flags, logger);
 		transform_forward = fftw_cosine::make_unique (n, (*this) (velocity), &flags, logger);
 		
-		for (int i = 0; i < i_n; ++i) {
+		for (int i = 0; i < i_n + 1; ++i) {
 			scalars [position] [i] = initial_position [i];
 			scalars [velocity] [i] = initial_velocity [i];
 		}
 		
-		MDEBUG ("transformed? " << (flags & transformed));
-		
 		transform_forward->execute ();
-		
-		MDEBUG ("now transformed? " << (flags & transformed));
-		
+
 		TRACE (logger, "Initialized.");
 	}
 } /* one_d */

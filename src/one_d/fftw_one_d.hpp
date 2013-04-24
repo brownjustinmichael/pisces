@@ -46,7 +46,15 @@ namespace one_d
 		void execute () {
 			TRACE (logger, "Executing...")
 			
+			for (int i = 0; i < n; ++i) {
+				DEBUG (logger, "in [" << i << "] = " << data_in [i]);
+			}
+			
 			fftw_execute (fourier_plan);
+			
+			for (int i = 0; i < n; ++i) {
+				DEBUG (logger, "out [" << i << "] = " << data_out [i]);
+			}
 			
 			if (*flags_ptr & transformed) {
 				data_out [n] = 0.0;
