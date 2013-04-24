@@ -46,8 +46,8 @@ namespace one_d
 		void execute () {
 			TRACE (logger, "Executing...")
 			
-			MDEBUG ("flags " << *flags_ptr)
-		
+			fftw_execute (fourier_plan);
+			
 			if (*flags_ptr & transformed) {
 				data_out [n] = 0.0;
 				*flags_ptr &= ~transformed;
@@ -55,12 +55,6 @@ namespace one_d
 				*flags_ptr |= transformed;
 			}
 			
-			fftw_execute (fourier_plan);
-			
-			if (*flags_ptr & transformed) {
-				data_out [n] = 0.0;
-			}
-
 			for (int i = 0; i < n + 1; ++i) {
 				data_out [i] *= scalar;
 			}
