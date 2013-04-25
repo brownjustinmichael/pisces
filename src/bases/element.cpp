@@ -20,11 +20,18 @@ namespace bases
 		try {
 			// Start in grid space
 			
+			TRACE (logger, "Writing to file...");
+			
+			// Output in transform space
+			if (transform_stream) {
+				transform_stream->to_file ();
+			}
+			
 			TRACE (logger, "Updating timestep...");
 			
 			// Testing
 			// Should be replaced by a CFL check
-			timestep = 0.001;
+			timestep = 0.0001;
 			
 			TRACE (logger, "Executing explicit grid plans...");
 			
@@ -39,13 +46,6 @@ namespace bases
 				transform_forward->execute ();
 			} else {
 				WARN (logger, "Transform not defined. It is likely the element was not set up correctly.")
-			}
-
-			TRACE (logger, "Writing to file...");
-			
-			// Output in angle space
-			if (angle_stream) {
-				angle_stream->to_file ();
 			}
 			
 			TRACE (logger, "Executing explicit space plans...");
@@ -62,7 +62,7 @@ namespace bases
 					implicit_plans [i]->execute ();
 				}
 			}
-
+			
 			previous_timestep = timestep;
 		} catch (...) {
 			ERROR (logger, "Exception caught, failsafe dump to _dump.dat");
@@ -78,6 +78,13 @@ namespace bases
 		
 		for (int i = 0; i < n_boundaries; ++i) {
 			boundaries [i]->execute ();
+		}
+		
+		TRACE (logger, "Writing to file...");
+		
+		// Output in normal space
+		if (normal_stream) {
+			normal_stream->to_file ();
 		}
 		
 		TRACE (logger, "Boundaries executed.");

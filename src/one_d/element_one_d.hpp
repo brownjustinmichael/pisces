@@ -36,13 +36,33 @@ namespace one_d
 		element (int i_n, int i_flags) : bases::element (i_flags) {
 			n = i_n;
 			
-			cell.resize (i_n);
-			for (int i = 0; i < i_n; ++i) {
+			cell.resize (i_n + 1);
+			for (int i = 0; i < i_n + 1; ++i) {
 				cell [i] = i;
 			}
 		}
 		
 		virtual ~element () {}
+		
+		inline void execute_boundaries () {
+			for (int i = 0; i < n; ++i) {
+				DEBUG (logger, "rhs [" << i << "] = " << (*this) (rhs, i));
+			}
+			
+			bases::element::execute_boundaries ();
+		}
+		
+		inline void update () {
+			for (int i = 0; i < n; ++i) {
+				DEBUG (logger, "rhs [" << i << "] = " << (*this) (rhs, i));
+			}
+			
+			for (int i = 0; i < n; ++i) {
+				DEBUG (logger, "vel [" << i << "] = " << (*this) (vel, i));
+			}
+			
+			bases::element::update ();
+		}
 		
 		/*!*******************************************************************
 		 * \copydoc bases::element::add_scalar ()
@@ -50,9 +70,6 @@ namespace one_d
 		inline void add_scalar (int name) {
 			scalars [name].resize (n + 1);
 		}
-		
-		void calculate ();
-		
 		
 		/*!*******************************************************************
 		 * \copydoc bases::element::operator[] ()
@@ -82,12 +99,12 @@ namespace one_d
 		 * \param i_n The number of elements in each 1D data array
 		 * \param i_flags Flags for the boundary conditions and evaluation
 		 *********************************************************************/
-		advection_diffusion_element (std::string name, double i_alpha_plus, double i_alpha_minus, int i_n, double *initial_position, double *intial_velocity, int i_flags);
+		advection_diffusion_element (std::string name, double i_alpha_0, double i_alpha_n, int i_n, double initial_position, double *intial_velocity, int i_flags);
 		virtual ~advection_diffusion_element () {}
 		
 	private:
-		double alpha_plus;
-		double alpha_minus;
+		double alpha_0;
+		double alpha_n;
 		std::vector<double> matrix; //!< A vector containing the double matrix used in the implicit solver
 	};
 } /* one_d */

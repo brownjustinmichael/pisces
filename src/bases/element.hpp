@@ -22,7 +22,7 @@ enum index {
 	position = 00, x_position = 00, x_pos = 00,
 	y_position = 01, y_pos = 01, 
 	z_position = 02, z_pos = 02,
-	velocity = 10, x_velocity = 10, x_vel = 10,
+	velocity = 10, vel = 10, x_velocity = 10, x_vel = 10,
 	y_velocity = 11, y_vel = 11,
 	z_velocity = 12, z_vel = 12,
 	pressure = 20, pres = 20,
@@ -148,7 +148,8 @@ protected:
 	
 	std::unique_ptr<plan> transform_forward; //!< A unique pointer to the forward transform
 	std::unique_ptr<solver> matrix_solver; //!< A unique pointer to the matrix solver
-	std::unique_ptr<io::output> angle_stream; //!< An implementation to output in angle space
+	std::unique_ptr<io::output> normal_stream; //!< An implementation to output in normal space
+	std::unique_ptr<io::output> transform_stream; //!< An implementation to output in transform space
 	std::unique_ptr<io::output> failsafe_dump; //!< An implementation to dump in case of failure
 		
 	std::vector<std::unique_ptr<plan>> explicit_grid_plans; //!< A vector of unique pointers to explicit grid plans to be executed

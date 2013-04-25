@@ -44,30 +44,31 @@ namespace one_d
 		 * \copydoc bases::transform::execute ()
 		 *********************************************************************/
 		void execute () {
-			TRACE (logger, "Executing...")
+			TRACE (logger, "Executing...");
 			
-			for (int i = 0; i < n; ++i) {
-				DEBUG (logger, "in [" << i << "] = " << data_in [i]);
+			if (!(*flags_ptr & transformed) && data_out [n] == 0.0) {
+				data_out [n] = data_out [n - 1];
+			}
+			
+			if (*flags_ptr & transformed) {
+				data_in [n] = 0.0;
+				*flags_ptr &= ~transformed;
+			} else {
+				*flags_ptr |= transformed;
 			}
 			
 			fftw_execute (fourier_plan);
 			
-			for (int i = 0; i < n; ++i) {
-				DEBUG (logger, "out [" << i << "] = " << data_out [i]);
-			}
-			
 			if (*flags_ptr & transformed) {
-				data_out [n] = 0.0;
-				*flags_ptr &= ~transformed;
-			} else {
-				*flags_ptr |= transformed;
+				data_in [n] = 0.0;
+				data_in [n - 1] = 0.0;
 			}
 			
 			for (int i = 0; i < n + 1; ++i) {
 				data_out [i] *= scalar;
 			}
 			
-			TRACE (logger, "Executed.")
+			TRACE (logger, "Executed.");
 		}
 		
 		/*!*******************************************************************

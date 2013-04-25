@@ -63,16 +63,16 @@ namespace one_d
 		* 
 		* \copydetails bases::explicit_plan::explicit_plan ()
 		*********************************************************************/
-		explicit_diffusion (double i_coeff, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL, int i_logger = -1) : bases::explicit_plan (i_n, i_data_in, i_data_out, i_flags_ptr, i_logger) {
-			init (i_coeff, i_timestep_ptr, i_n, i_grid, i_data_in, i_data_out, i_flags_ptr);
+		explicit_diffusion (double i_coeff, double i_alpha_0, double i_alpha_n, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL, int i_logger = -1) : bases::explicit_plan (i_n, i_data_in, i_data_out, i_flags_ptr, i_logger) {
+			init (i_coeff, i_alpha_0, i_alpha_n, i_timestep_ptr, i_n, i_grid, i_data_in, i_data_out, i_flags_ptr);
 		}
 		
-		explicit_diffusion (double i_coeff, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double &i_data_in, double &i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) : bases::explicit_plan (i_n, &i_data_in, &i_data_out, i_flags_ptr, i_logger) {
-			init (i_coeff, i_timestep_ptr, i_n, i_grid, &i_data_in, &i_data_out, i_flags_ptr);
+		explicit_diffusion (double i_coeff, double i_alpha_0, double i_alpha_n, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double &i_data_in, double &i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) : bases::explicit_plan (i_n, &i_data_in, &i_data_out, i_flags_ptr, i_logger) {
+			init (i_coeff, i_alpha_0, i_alpha_n, i_timestep_ptr, i_n, i_grid, &i_data_in, &i_data_out, i_flags_ptr);
 		}
 		
-		explicit_diffusion (double i_coeff, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double &i_data_in, int *i_flags_ptr = NULL, int i_logger = -1) : bases::explicit_plan (i_n, &i_data_in, NULL, i_flags_ptr, i_logger) {
-			init (i_coeff, i_timestep_ptr, i_n, i_grid, &i_data_in);
+		explicit_diffusion (double i_coeff, double i_alpha_0, double i_alpha_n, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double &i_data_in, int *i_flags_ptr = NULL, int i_logger = -1) : bases::explicit_plan (i_n, &i_data_in, NULL, i_flags_ptr, i_logger) {
+			init (i_coeff, i_alpha_0, i_alpha_n, i_timestep_ptr, i_n, i_grid, &i_data_in);
 		}
 
 		virtual ~explicit_diffusion () {}
@@ -87,25 +87,27 @@ namespace one_d
 		* 
 		* \copydetails explicit_diffusion ()
 		*********************************************************************/
-		inline static std::unique_ptr<plan> make_unique (double i_coeff, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_data_in, double *i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) {
-		return std::unique_ptr<plan> (new explicit_diffusion (i_coeff, i_timestep_ptr, i_n, i_grid, i_data_in, i_data_out, i_flags_ptr, i_logger));
+		inline static std::unique_ptr<plan> make_unique (double i_coeff, double i_alpha_0, double i_alpha_n, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_data_in, double *i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) {
+		return std::unique_ptr<plan> (new explicit_diffusion (i_coeff, i_alpha_0, i_alpha_n, i_timestep_ptr, i_n, i_grid, i_data_in, i_data_out, i_flags_ptr, i_logger));
 		}
 		
-		inline static std::unique_ptr<plan> make_unique (double i_coeff, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double &i_data_in, double &i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) {
-		return std::unique_ptr<plan> (new explicit_diffusion (i_coeff, i_timestep_ptr, i_n, i_grid, i_data_in, i_data_out, i_flags_ptr, i_logger));
+		inline static std::unique_ptr<plan> make_unique (double i_coeff, double i_alpha_0, double i_alpha_n, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double &i_data_in, double &i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) {
+		return std::unique_ptr<plan> (new explicit_diffusion (i_coeff, i_alpha_0, i_alpha_n, i_timestep_ptr, i_n, i_grid, i_data_in, i_data_out, i_flags_ptr, i_logger));
 		}
 		
-		inline static std::unique_ptr<plan> make_unique (double i_coeff, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double &i_data_in, int *i_flags_ptr = NULL, int i_logger = -1) {
-		return std::unique_ptr<plan> (new explicit_diffusion (i_coeff, i_timestep_ptr, i_n, i_grid, i_data_in, i_flags_ptr, i_logger));
+		inline static std::unique_ptr<plan> make_unique (double i_coeff, double i_alpha_0, double i_alpha_n, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double &i_data_in, int *i_flags_ptr = NULL, int i_logger = -1) {
+		return std::unique_ptr<plan> (new explicit_diffusion (i_coeff, i_alpha_0, i_alpha_n, i_timestep_ptr, i_n, i_grid, i_data_in, i_flags_ptr, i_logger));
 		}
 
 	private:
 		double coeff; //!< A double that represents the coefficient in front of the diffusion term in the differential equation
+		double alpha_0;
+		double alpha_n;
 		double *timestep_ptr;
 		int *flags_ptr; //!< A pointer to an integer containing the binary boundary and execution flags
 		std::shared_ptr<bases::collocation_grid> grid; //!< A pointer to a collocation grid that contains the the Chebyshev values
 		
-		void init (double i_coeff, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL);
+		void init (double i_coeff, double i_alpha_0, double i_alpha_n, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL);
 	};
 
 	/*!*******************************************************************
