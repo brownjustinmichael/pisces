@@ -19,9 +19,9 @@ int config::n_loggers = 0;
 int config::n_appenders = 0;
 int config::severity = 4;  // The default logging severity is 4, errors and fatal messages only.
 std::string config::config_file = "../input/Log4cxxConfig.xml";
-int n = 64; //!< The number of grid points
+int n = 66; //!< The number of grid points
 double scale = 1.0;
-double sigma = 0.1;
+double sigma = 0.2;
 
 std::vector<double> initial_conditions;
 std::vector<double> initial_position;
@@ -91,13 +91,13 @@ int main (int argc, char const *argv[])
 		initial_conditions [i + n / 2 - 1] = scale * std::exp (- (initial_position [i + n / 2 - 1] - 0.0) * (initial_position [i + n / 2 - 1] - 0.0) / 2.0 / sigma / sigma) - scale * std::exp (- 4.0 / 2.0 / sigma / sigma);
 	}
 	
-	one_d::advection_diffusion_element element_1 ("_1_", 0.0, 0.0, n / 2, 1.0, &initial_conditions [0], 0x00);
-	one_d::advection_diffusion_element element_2 ("_2_", 0.0, 0.0, n / 2, -1.0, &initial_conditions [n / 2 - 1], 0x00);
-	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_1 (rhs))));
-	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_1 (velocity))));
-	element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_2 (velocity, n / 2 - 1))));
-	element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_2 (rhs, n / 2 - 1))));
-	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_1 (rhs, n / 2 - 1), 0.0, element_2 (rhs))));
+	one_d::advection_diffusion_element element_1 ("_1_", 1.0, 1.0, n / 2, 1.0, &initial_conditions [0], 0x00);
+	one_d::advection_diffusion_element element_2 ("_2_", 1.0, 1.0, n / 2, -1.0, &initial_conditions [n / 2 - 1], 0x00);
+	// element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_1 (rhs))));
+	// element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_1 (velocity))));
+	// element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_2 (velocity, n / 2 - 1))));
+	// element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_2 (rhs, n / 2 - 1))));
+	// element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (1.0, element_1 (rhs, n / 2 - 1), 1.0, element_2 (rhs))));
 
 	MTRACE ("main: Entering main loop.");
 	

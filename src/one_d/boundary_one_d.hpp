@@ -56,9 +56,7 @@ namespace one_d
 				*data_minus *= alpha_minus;
 			} else {
 				*data_plus = alpha_plus * *data_plus + alpha_minus * *data_minus;
-				data_plus [-1] = 0.25 * data_plus [-2] + 0.25 * data_plus [0] + 0.5 * data_plus [-1];
 				*data_minus = *data_plus;
-				data_minus [1] = 0.25 * data_minus [2] + 0.25 * data_minus [0] + 0.5 * data_minus [1];
 			}
 		
 			TRACE (logger, "Executed.")

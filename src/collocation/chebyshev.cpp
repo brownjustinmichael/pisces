@@ -22,17 +22,12 @@ chebyshev_grid::chebyshev_grid (int i_M, int i_N, double i_scale, int i_logger) 
 	
 	TRACE (logger, "Instantiating...");
 	
-	for (m = 0; m < i_M; ++m) {
-		index (0, m, 0) = scale;
-		index (0, m, i_N - 1) = scale * std::pow (-1.0, m % 2);
-		index (1, m, 0) = m * m * index (0, m, 0);
-		index (1, m, i_N - 1) = - m * m * index (0, m, i_N - 1);
-		index (2, m, 0) = (m * m - 1.0) / 3.0 * index (1, m, 0);
-		index (2, m, i_N - 1) = - (m * m - 1.0) / 3.0 * index (1, m, i_N - 1);
-		for (k = 1; k < i_N - 1; ++k) {
-			index (0, m, k) = scale * std::cos (m * k * pioN);
-			index (1, m, k) = scale * m * std::sin (m * k * pioN) / std::sin (k * pioN);
-			index (2, m, k) = scale * (m * k * pioN * std::sin (m * k * pioN) - m * m * std::sin (k * pioN) * std::cos (m * k * pioN)) / std::sin (k * pioN) / std::sin (k * pioN) / std::sin (k * pioN);
+	for (d = 0; d < 3; ++d) {
+		for (k = 0; k < i_N; ++k) {
+			for (m = 0; m < i_M; ++m) {
+				index (d, m, k) = recursion (d, m, k);
+				exists (d, m, k) = true;
+			}
 		}
 	}
 	
@@ -40,12 +35,6 @@ chebyshev_grid::chebyshev_grid (int i_M, int i_N, double i_scale, int i_logger) 
 		for (k = 0; k < i_N; ++k) {
 			index (d, 0, k) /= 2.0;
 			index (d, i_M - 1, k) /= 2.0;
-		}
-	}
-	
-	for (int i = 0; i < i_M; ++i) {
-		for (int j = 0; j < i_N; ++j) {
-			MDEBUG ("cheb [" << i << ", " << j << "] = " << std::setprecision (10) << index (2, i, j));
 		}
 	}
 	

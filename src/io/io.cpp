@@ -17,6 +17,35 @@
 
 namespace io
 {
+	/****************** BEGIN: read_parameter *******************/
+
+	read_params_txt::read_params_txt (std::string i_filename)
+	{
+		std::string temp;
+		filename = i_filename;
+
+		std::ifstream input_stream (filename);
+
+		if (input_stream.is_open())
+		{
+			input_stream >> temp;
+			input_stream >> inputParam[temp].asDouble;		//diffusion_coeff 
+			input_stream >> temp;
+			input_stream >> inputParam[temp].asDouble;		//advection_coeff
+			input_stream >> temp; 
+			input_stream >> inputParam[temp].asInt;			//timesteps
+			input_stream >> temp;
+			input_stream >> inputParam[temp].asInt;			//gridpoints
+
+			input_stream.close();
+		}
+		else
+		{
+			std::cout << "Cannot open parameter file!" << std::endl;
+		}
+	}
+	/****************** END: read_parameter *********************/
+	
 	simple_header::simple_header (int i_n_data_headers, std::string *i_data_headers, std::string i_comment_string, int i_logger) : header (i_logger) {
 		int i;
 
@@ -71,8 +100,8 @@ namespace io
 		int i, j;
 		std::ofstream file_stream; // A file stream object to be used when writing to file 
 		
-		TRACE (logger, "Beginning output...");		
-		
+		TRACE (logger, "Beginning output...");	
+				
 		INFO (logger, "Outputting to file " << file_name << "...");
 		
 		file_stream.open (file_name.c_str ());
@@ -82,7 +111,7 @@ namespace io
 			ERROR (logger, "Failed to open file " << file_name);
 			throw failure;
 		}
-		
+				
 		file_stream << header_ptr->output_header ();
 						
 		for (i = 0; i < n; ++i)
@@ -107,11 +136,12 @@ namespace io
 	std::string incremental_output::generate_file_name () {
 
 		TRACE (logger, "Generating new file_name...");
-
+		
 		if (n_outputs >= std::pow (10., int_width)) {
 			ERROR (logger, "Exceeded maximum number of outputs")
 		}
 		std::ostringstream new_file_name;
+		
 		new_file_name << file_base << std::setfill ('0') << std::setw (int_width) << n_outputs << file_extension;
 
 		++n_outputs;

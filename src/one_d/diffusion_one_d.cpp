@@ -25,7 +25,7 @@ namespace one_d
 	}
 
 	void explicit_diffusion::execute () {
-		int ione = 1, nm1 = n - 1;
+		int ione = 1, nm2 = n - 2;
 		char charN = 'N';
 		double dpone = 1.0;
 		
@@ -37,7 +37,7 @@ namespace one_d
 		
 		scalar = coeff * *timestep_ptr;
 		// Set up and evaluate the explicit part of the diffusion equation
-		dgemv_ (&charN, &n, &n, &scalar, grid->get_data (2) + 1, &n, data_in, &ione, &dpone, data_out + 1, &ione);
+		dgemv_ (&charN, &nm2, &n, &scalar, grid->get_data (2) + 1, &n, data_in, &ione, &dpone, data_out + 1, &ione);
 
 		scalar = coeff * *timestep_ptr * alpha_n;
 		data_out [n - 1] += scalar * ddot_ (&n, grid->get_data (2) + n - 1, &n, data_in, &ione);
@@ -59,6 +59,7 @@ namespace one_d
 		TRACE (logger, "Operating...");
 
 		double scalar = coeff * *timestep_ptr * alpha_0;
+		
 	   	daxpy_ (&n, &scalar, grid->get_data (2), &n, matrix, &n);
 
 		scalar = coeff * *timestep_ptr;

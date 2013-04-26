@@ -45,22 +45,10 @@ namespace one_d
 		virtual ~element () {}
 		
 		inline void execute_boundaries () {
-			for (int i = 0; i < n; ++i) {
-				DEBUG (logger, "rhs [" << i << "] = " << (*this) (rhs, i));
-			}
-			
 			bases::element::execute_boundaries ();
 		}
 		
-		inline void update () {
-			for (int i = 0; i < n; ++i) {
-				DEBUG (logger, "rhs [" << i << "] = " << (*this) (rhs, i));
-			}
-			
-			for (int i = 0; i < n; ++i) {
-				DEBUG (logger, "vel [" << i << "] = " << (*this) (vel, i));
-			}
-			
+		inline void update () {			
 			bases::element::update ();
 		}
 		
@@ -68,7 +56,7 @@ namespace one_d
 		 * \copydoc bases::element::add_scalar ()
 		 *********************************************************************/
 		inline void add_scalar (int name) {
-			scalars [name].resize (n);
+			scalars [name].resize (n + 1);
 		}
 		
 		/*!*******************************************************************
@@ -101,6 +89,10 @@ namespace one_d
 		 *********************************************************************/
 		advection_diffusion_element (std::string name, double i_alpha_0, double i_alpha_n, int i_n, double initial_position, double *intial_velocity, int i_flags);
 		virtual ~advection_diffusion_element () {}
+		
+		inline void update () {			
+			element::update ();
+		}
 		
 	private:
 		double alpha_0;

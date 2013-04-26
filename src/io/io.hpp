@@ -7,13 +7,53 @@
  ************************************************************************/
 
 #include <vector>
+#include <map>
 #include <string>
+#include <iostream>
 
 #ifndef IO_HPP_C1E9B6EF
 #define IO_HPP_C1E9B6EF
 
 namespace io
 {
+	/*!*******************************************************************
+	 * \brief A class for reading experiment parameters out of a parameter file
+	 * 
+	 *********************************************************************/
+	union types
+	{
+		unsigned long asULong;
+		int asInt;
+		double asDouble;
+
+		types () {asULong = 0;}
+		types (int in) {asInt = in;}
+		types (double in) {asDouble = in;}
+
+		operator int() {return asInt;}
+		operator double() {return asDouble;}
+	};
+
+	class read_params_txt
+	{
+	private:
+		std::string filename;
+
+		double diffusion_coeff;
+		double advection_coeff;
+		int timesteps;
+		int gridpoints;
+		std::vector<std::string> val_names;
+		std::map<std::string, types> inputParam;
+
+	public:
+
+		read_params_txt (std::string i_filename);
+		virtual ~read_params_txt () {}
+
+		std::map<std::string, types> load_params () {return inputParam;}
+	};	
+
 	/*!*******************************************************************
 	 * \brief A base class that is essentially a null header
 	 * 
@@ -185,7 +225,7 @@ namespace io
 		 * \param i_n_data_ptrs The number double pointers in i_data_ptrs
 		 * \param i_data_ptrs An array of double pointers to data arrays to be output
 		 *********************************************************************/
-		incremental_output (std::string i_file_base, std::string i_file_extension, int i_int_width, header *i_header_ptr, int i_n, int i_logger = -1) : output (i_header_ptr, i_n, i_logger) {n_outputs = 0; int_width = i_int_width, file_base = i_file_base; file_extension = i_file_extension;}
+		incremental_output (std::string i_file_base, std::string i_file_extension, int i_int_width, header *i_header_ptr, int i_n, int i_logger = -1) : output (i_header_ptr, i_n, i_logger) {n_outputs = 0; int_width = i_int_width; file_base = i_file_base; file_extension = i_file_extension;}
 		
 		/*!*******************************************************************
 		 * \brief Generates the next file name in the sequence

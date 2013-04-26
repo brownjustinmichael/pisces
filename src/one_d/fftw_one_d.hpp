@@ -54,7 +54,11 @@ namespace one_d
 			
 			fftw_execute (fourier_plan);
 			
-			for (int i = 0; i < n + 1; ++i) {
+			if (*flags_ptr & transformed) {
+				// data_out [n - 1] = 0.0;
+			}
+			
+			for (int i = 0; i < n; ++i) {
 				data_out [i] *= scalar;
 			}
 			
@@ -69,7 +73,7 @@ namespace one_d
 		inline void init (int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL) {
 			TRACE (logger, "Instantiating...");
 						
-			scalar = 1.0 / sqrt (2.0 * (i_n - 1.0));
+			scalar = 1.0 / sqrt (2.0 * (i_n - 1));
 			
 			fourier_plan = fftw_plan_r2r_1d (i_n, data_in, data_out, FFTW_REDFT00, *flags_ptr);
 			
