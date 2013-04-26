@@ -14,10 +14,6 @@
 #include <cmath>
 #include "../bases/collocation.hpp"
 
-/*
-	TODO change file name to avoid collisions
-*/
-
 /*!*******************************************************************
  * \brief A collocation grid for Chebyshev polynomials
  * 

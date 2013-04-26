@@ -17,6 +17,8 @@
 #include "../bases/plan.hpp"
 #include "../bases/collocation.hpp"
 
+extern "C" double ddot_ (int *n, double *dx, int *incx, double *dy, int *incy);
+
 /*!*******************************************************************
  * \brief Function from BLAS for vector-vector addition (dy = da * dx + dy)
  * 
@@ -81,23 +83,6 @@ namespace one_d
 		* \copydoc bases::explicit_plan::execute ()
 		*********************************************************************/
 		void execute ();
-	
-		/*!*******************************************************************
-		* \brief Make a unique pointer to a new collocation object
-		* 
-		* \copydetails explicit_diffusion ()
-		*********************************************************************/
-		inline static std::unique_ptr<plan> make_unique (double i_coeff, double i_alpha_0, double i_alpha_n, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_data_in, double *i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) {
-		return std::unique_ptr<plan> (new explicit_diffusion (i_coeff, i_alpha_0, i_alpha_n, i_timestep_ptr, i_n, i_grid, i_data_in, i_data_out, i_flags_ptr, i_logger));
-		}
-		
-		inline static std::unique_ptr<plan> make_unique (double i_coeff, double i_alpha_0, double i_alpha_n, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double &i_data_in, double &i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) {
-		return std::unique_ptr<plan> (new explicit_diffusion (i_coeff, i_alpha_0, i_alpha_n, i_timestep_ptr, i_n, i_grid, i_data_in, i_data_out, i_flags_ptr, i_logger));
-		}
-		
-		inline static std::unique_ptr<plan> make_unique (double i_coeff, double i_alpha_0, double i_alpha_n, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double &i_data_in, int *i_flags_ptr = NULL, int i_logger = -1) {
-		return std::unique_ptr<plan> (new explicit_diffusion (i_coeff, i_alpha_0, i_alpha_n, i_timestep_ptr, i_n, i_grid, i_data_in, i_flags_ptr, i_logger));
-		}
 
 	private:
 		double coeff; //!< A double that represents the coefficient in front of the diffusion term in the differential equation
@@ -135,15 +120,6 @@ namespace one_d
 		 * \copydoc bases::implicit_plan::execute ()
 		 *********************************************************************/
 		void execute ();
-	
-		/*!*******************************************************************
-		 * \brief Make a unique pointer pointing to a new instance of collocation
-		 * 
-		 * \copydetails implicit_diffusion ()
-		 *********************************************************************/
-		inline static std::unique_ptr<plan> make_unique (double i_coeff, double i_alpha_0, double i_alpha_n, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_matrix, int *i_flags_ptr = NULL, int i_logger = -1) {
-			return std::unique_ptr<plan> (new implicit_diffusion (i_coeff, i_alpha_0, i_alpha_n, i_timestep_ptr, i_n, i_grid, i_matrix, i_flags_ptr, i_logger));
-		}
 
 	private:
 		double coeff; //!< A double that represents the coefficient in front of the diffusion term in the differential equation

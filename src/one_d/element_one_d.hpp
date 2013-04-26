@@ -36,8 +36,8 @@ namespace one_d
 		element (int i_n, int i_flags) : bases::element (i_flags) {
 			n = i_n;
 			
-			cell.resize (i_n + 1);
-			for (int i = 0; i < i_n + 1; ++i) {
+			cell.resize (i_n);
+			for (int i = 0; i < i_n; ++i) {
 				cell [i] = i;
 			}
 		}
@@ -68,7 +68,7 @@ namespace one_d
 		 * \copydoc bases::element::add_scalar ()
 		 *********************************************************************/
 		inline void add_scalar (int name) {
-			scalars [name].resize (n + 1);
+			scalars [name].resize (n);
 		}
 		
 		/*!*******************************************************************

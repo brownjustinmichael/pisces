@@ -69,22 +69,6 @@ namespace one_d
 			
 			dscal_ (&n, &scalar, data_in, &ione);
 		}
-		
-		/*!*******************************************************************
-		 * \brief Make a unique pointer to a new scale object
-		 * \copydetails scale ()
-		 *********************************************************************/
-		inline static std::unique_ptr<plan> make_unique (double i_scalar, int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL, int i_logger = -1) {
-			return std::unique_ptr<plan> (new scale (i_scalar, i_n, i_data_in, i_data_out, i_flags_ptr, i_logger));
-		}
-		
-		inline static std::unique_ptr<plan> make_unique (double i_scalar, int i_n, double &i_data_in, double &i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) {
-			return std::unique_ptr<plan> (new scale (i_scalar, i_n, i_data_in, i_data_out, i_flags_ptr, i_logger));
-		}
-		
-		inline static std::unique_ptr<plan> make_unique (double i_scalar, int i_n, double &i_data_in, int *i_flags_ptr = NULL, int i_logger = -1) {
-			return std::unique_ptr<plan> (new scale (i_scalar, i_n, i_data_in, i_flags_ptr, i_logger));
-		}
 
 	private:
 		double scalar; //!< The double by which to scale the data

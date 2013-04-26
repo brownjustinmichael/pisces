@@ -31,7 +31,7 @@ namespace bases
 			
 			// Testing
 			// Should be replaced by a CFL check
-			timestep = 0.0001;
+			timestep = 0.001;
 			
 			TRACE (logger, "Executing explicit grid plans...");
 			

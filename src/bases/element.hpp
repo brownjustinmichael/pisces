@@ -96,9 +96,9 @@ public:
 		/*!*******************************************************************
 		 * \brief Adds an explicit plan to be evaluated in grid space
 		 * 
-		 * \param i_plan A unique pointer to the plan to add
+		 * \param i_plan A shared pointer to the plan to add
 		 *********************************************************************/
-		inline void add_explicit_grid_plan (std::unique_ptr<plan> i_plan) {
+		inline void add_explicit_grid_plan (std::shared_ptr<plan> i_plan) {
 			++n_explicit_grid_plans;
 			explicit_grid_plans.push_back (std::move (i_plan));
 		}
@@ -106,9 +106,9 @@ public:
 		/*!*******************************************************************
 		 * \brief Adds an explicit plan to be evaluated in normal space
 		 * 
-		 * \param i_plan A unique pointer to the plan to add
+		 * \param i_plan A shared pointer to the plan to add
 		 *********************************************************************/	
-		inline void add_explicit_space_plan (std::unique_ptr<plan> i_plan) {
+		inline void add_explicit_space_plan (std::shared_ptr<plan> i_plan) {
 			++n_explicit_space_plans;
 			explicit_space_plans.push_back (std::move (i_plan));
 		}
@@ -116,9 +116,9 @@ public:
 		/*!*******************************************************************
 		 * \brief Adds an implicit plan to be evaluated
 		 * 
-		 * \param i_plan A unique pointer to the plan to add
+		 * \param i_plan A shared pointer to the plan to add
 		 *********************************************************************/
-		inline void add_implicit_plan (std::unique_ptr<plan> i_plan) {
+		inline void add_implicit_plan (std::shared_ptr<plan> i_plan) {
 			++n_implicit_plans;
 			implicit_plans.push_back (std::move (i_plan));
 		}
@@ -126,9 +126,9 @@ public:
 		/*!*******************************************************************
 		 * \brief Adds a boundary condition to execute in normal space
 		 * 
-		 * \param i_plan A unique pointer to the plan to add
+		 * \param i_plan A shared pointer to the plan to add
 		 *********************************************************************/
-		inline void add_boundary (std::unique_ptr<plan> i_plan) {
+		inline void add_boundary (std::shared_ptr<plan> i_plan) {
 			++n_boundaries;
 			boundaries.push_back (std::move (i_plan));
 		}
@@ -146,16 +146,16 @@ protected:
 
 	std::shared_ptr<collocation_grid> grid; //!< A shared pointer to the collocation grid
 	
-	std::unique_ptr<plan> transform_forward; //!< A unique pointer to the forward transform
-	std::unique_ptr<solver> matrix_solver; //!< A unique pointer to the matrix solver
-	std::unique_ptr<io::output> normal_stream; //!< An implementation to output in normal space
-	std::unique_ptr<io::output> transform_stream; //!< An implementation to output in transform space
-	std::unique_ptr<io::output> failsafe_dump; //!< An implementation to dump in case of failure
+	std::shared_ptr<plan> transform_forward; //!< A shared pointer to the forward transform
+	std::shared_ptr<solver> matrix_solver; //!< A shared pointer to the matrix solver
+	std::shared_ptr<io::output> normal_stream; //!< An implementation to output in normal space
+	std::shared_ptr<io::output> transform_stream; //!< An implementation to output in transform space
+	std::shared_ptr<io::output> failsafe_dump; //!< An implementation to dump in case of failure
 		
-	std::vector<std::unique_ptr<plan>> explicit_grid_plans; //!< A vector of unique pointers to explicit grid plans to be executed
-	std::vector<std::unique_ptr<plan>> explicit_space_plans; //!< A vector of unique pointers to explicit space plans to be executed
-	std::vector<std::unique_ptr<plan>> implicit_plans; //!< A vector of unique pointers to implicit plans to be executed
-	std::vector<std::unique_ptr<plan>> boundaries; //!< A vector of unique pointers to boundary conditions to be executed
+	std::vector<std::shared_ptr<plan>> explicit_grid_plans; //!< A vector of shared pointers to explicit grid plans to be executed
+	std::vector<std::shared_ptr<plan>> explicit_space_plans; //!< A vector of shared pointers to explicit space plans to be executed
+	std::vector<std::shared_ptr<plan>> implicit_plans; //!< A vector of shared pointers to implicit plans to be executed
+	std::vector<std::shared_ptr<plan>> boundaries; //!< A vector of shared pointers to boundary conditions to be executed
 };
 } /* bases */
 

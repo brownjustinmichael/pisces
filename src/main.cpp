@@ -9,6 +9,7 @@
 #include <iostream>
 #include <cmath>
 #include <string>
+#include <memory>
 #include <vector>
 #include "config.hpp"
 #include "one_d/element_one_d.hpp"
@@ -80,23 +81,23 @@ int main (int argc, char const *argv[])
 	MTRACE ("Beginning main...");
 	
 	initial_position.resize (n + 1);
-	initial_conditions.resize (n + 1);
+	initial_conditions.resize (n + 1, 0.0);
 	
 	double pioN = std::acos (-1.0) / (n / 2 - 1);
 	for (int i = 0; i < n / 2; ++i) {
 		initial_position [i] = std::cos (pioN * i) + 1.0;
 		initial_position [i + n / 2 - 1] = std::cos (pioN * i) - 1.0;
-		initial_conditions [i] = scale * std::exp (- (initial_position [i] - 0.0) * (initial_position [i] - 0.0) / 2.0 / sigma / sigma) - scale * std::exp (- 1.0 / 2.0 / sigma / sigma);
-		initial_conditions [i + n / 2 - 1] = scale * std::exp (- (initial_position [i + n / 2 - 1] - 0.0) * (initial_position [i + n / 2 - 1] - 0.0) / 2.0 / sigma / sigma) - scale * std::exp (- 1.0 / 2.0 / sigma / sigma);
+		initial_conditions [i] = scale * std::exp (- (initial_position [i] - 0.0) * (initial_position [i] - 0.0) / 2.0 / sigma / sigma) - scale * std::exp (- 4.0 / 2.0 / sigma / sigma);
+		initial_conditions [i + n / 2 - 1] = scale * std::exp (- (initial_position [i + n / 2 - 1] - 0.0) * (initial_position [i + n / 2 - 1] - 0.0) / 2.0 / sigma / sigma) - scale * std::exp (- 4.0 / 2.0 / sigma / sigma);
 	}
 	
 	one_d::advection_diffusion_element element_1 ("_1_", 0.0, 0.0, n / 2, 1.0, &initial_conditions [0], 0x00);
 	one_d::advection_diffusion_element element_2 ("_2_", 0.0, 0.0, n / 2, -1.0, &initial_conditions [n / 2 - 1], 0x00);
-	element_1.add_boundary (one_d::boundary::make_unique (0.0, element_1 (rhs)));
-	element_1.add_boundary (one_d::boundary::make_unique (0.0, element_1 (velocity)));
-	element_2.add_boundary (one_d::boundary::make_unique (0.0, element_2 (velocity, n / 2 - 1)));
-	element_2.add_boundary (one_d::boundary::make_unique (0.0, element_2 (rhs, n / 2 - 1)));
-	element_1.add_boundary (one_d::boundary::make_unique (0.0, element_1 (rhs, n / 2 - 1), 0.0, element_2 (rhs)));
+	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_1 (rhs))));
+	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_1 (velocity))));
+	element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_2 (velocity, n / 2 - 1))));
+	element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_2 (rhs, n / 2 - 1))));
+	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_1 (rhs, n / 2 - 1), 0.0, element_2 (rhs))));
 
 	MTRACE ("main: Entering main loop.");
 	

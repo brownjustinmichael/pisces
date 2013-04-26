@@ -108,23 +108,6 @@ namespace one_d
 		 * \copydoc bases::solver::i_solve ()
 		 *********************************************************************/
 		void i_solve ();
-		
-		/*!*******************************************************************
-		 * \brief Make a unique pointer to a new lapack_solver object
-		 * 
-		 * \copydetails lapack_solver ()
-		 *********************************************************************/
-		inline static std::unique_ptr<solver> make_unique (int i_n, double *i_data_in, double *i_rhs, double *i_matrix, double *i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) {
-			return std::unique_ptr<solver> (new lapack_solver (i_n, i_data_in, i_rhs, i_matrix, i_data_out, i_flags_ptr, i_logger));
-		}
-		
-		inline static std::unique_ptr<solver> make_unique (int i_n, double &i_data_in, double &i_rhs, double *i_matrix, double &i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) {
-			return std::unique_ptr<solver> (new lapack_solver (i_n, i_data_in, i_rhs, i_matrix, i_data_out, i_flags_ptr, i_logger));
-		}
-		
-		inline static std::unique_ptr<solver> make_unique (int i_n, double &i_data_in, double &i_rhs, double *i_matrix, int *i_flags_ptr = NULL, int i_logger = -1) {
-			return std::unique_ptr<solver> (new lapack_solver (i_n, i_data_in, i_rhs, i_matrix, i_flags_ptr, i_logger));
-		}
 
 	private:
 		int n; //!< The integer number of elements in the data

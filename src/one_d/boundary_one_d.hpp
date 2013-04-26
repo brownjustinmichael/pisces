@@ -56,27 +56,12 @@ namespace one_d
 				*data_minus *= alpha_minus;
 			} else {
 				*data_plus = alpha_plus * *data_plus + alpha_minus * *data_minus;
+				data_plus [-1] = 0.25 * data_plus [-2] + 0.25 * data_plus [0] + 0.5 * data_plus [-1];
 				*data_minus = *data_plus;
+				data_minus [1] = 0.25 * data_minus [2] + 0.25 * data_minus [0] + 0.5 * data_minus [1];
 			}
 		
 			TRACE (logger, "Executed.")
-		}
-	
-		/*!*******************************************************************
-		 * \brief Make a unique pointer to a new boundary instance
-		 * 
-		 * \copydetails boundary::boundary ()
-		 *********************************************************************/
-		inline static std::unique_ptr<plan> make_unique (double i_alpha_plus, double *i_data_plus, double i_alpha_minus, double *i_data_minus, int *i_flags_ptr = NULL, int i_logger = -1) {
-			return std::unique_ptr<plan> (new boundary (i_alpha_plus, i_data_plus, i_alpha_minus, i_data_minus, i_flags_ptr, i_logger));
-		}
-		
-		inline static std::unique_ptr<plan> make_unique (double i_alpha_plus, double &i_data_plus, double i_alpha_minus, double &i_data_minus, int *i_flags_ptr = NULL, int i_logger = -1) {
-			return std::unique_ptr<plan> (new boundary (i_alpha_plus, i_data_plus, i_alpha_minus, i_data_minus, i_flags_ptr, i_logger));
-		}
-		
-		inline static std::unique_ptr<plan> make_unique (double i_alpha_plus, double &i_data_plus, int *i_flags_ptr = NULL, int i_logger = -1) {
-			return std::unique_ptr<plan> (new boundary (i_alpha_plus, i_data_plus, i_flags_ptr, i_logger));
 		}
 	};
 } /* one_d */

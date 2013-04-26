@@ -42,8 +42,6 @@ namespace one_d
 		
 		dgetrs_ (&charN, &n, &ione, &matrix [0], &n, &ipiv [0], data_out, &n, &info);
 		
-		data_out [n - 1] = 0.0;
-				
 		if (info != 0) {
 			ERROR (logger, "Unable to solve factorized matrix equation");
 			throw 0; // For now, kill the program. 
