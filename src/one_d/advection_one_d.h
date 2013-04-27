@@ -25,15 +25,15 @@ namespace one_d
 		int n;							// number of grid points
 		double c;
 		double fac;
-		double *tmstp_ptr;
+		double &timestep;
 		double *data_in;				// double pointer to input data
 		double *data_out;				// double pointer to output data
 		std::vector<double> sin_vals;	// double vector of sine values
 
 	public:
 
-		advec (int i_n, double *i_tmstp_ptr, double i_c, double *i_data_in, double *i_data_out);	//constuctor initializes private members to point to input and output vectors
-		advec (int i_n, double *i_tmstp_ptr, double i_c, double& i_data_in, double& i_data_out);	//constuctor initializes private members to point to input and output vectors
+		advec (int i_n, double& i_timestep, double i_c, double *i_data_in, double *i_data_out);	//constuctor initializes private members to point to input and output vectors
+		advec (int i_n, double & i_timestep, double i_c, double& i_data_in, double& i_data_out);	//constuctor initializes private members to point to input and output vectors
 		
 		virtual ~advec () {}
 		

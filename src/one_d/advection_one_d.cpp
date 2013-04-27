@@ -14,13 +14,12 @@
 namespace one_d
 {
 	
-	advec::advec (int i_n, double *i_tmstp_ptr, double i_c, double *i_data_in, double *i_data_out)
+	advec::advec (int i_n, double &i_timestep, double i_c, double *i_data_in, double *i_data_out) : timestep (i_timestep)
 	{
 		int i;
 
 		n = i_n;				// initialize number of grid points
 		c = i_c;
-		tmstp_ptr = i_tmstp_ptr;
 		fac = (n - 1) / acos(-1.0);
 		data_in = i_data_in;	// initialize pointer to input data
 		data_out = i_data_out;	// initialize pointer to output data
@@ -35,13 +34,12 @@ namespace one_d
 		}
 	}
 	
-	advec::advec (int i_n, double *i_tmstp_ptr, double i_c, double& i_data_in, double& i_data_out)
+	advec::advec (int i_n, double &i_timestep, double i_c, double& i_data_in, double& i_data_out) : timestep (i_timestep)
 	{
 		int i;
 
 		n = i_n;				// initialize number of grid points
 		c = i_c;
-		tmstp_ptr = i_tmstp_ptr;
 		fac = (n - 1) / acos(-1.0);
 		data_in = &i_data_in;	// initialize pointer to input data
 		data_out = &i_data_out;	// initialize pointer to output data
@@ -62,12 +60,12 @@ namespace one_d
 	{
 		int i;
 
-		*data_out += (*tmstp_ptr) * c * sin_vals [0] * ( *(data_in + 1) - *data_in );																						// Impose left boundary condition
+		*data_out += (timestep) * c * sin_vals [0] * ( *(data_in + 1) - *data_in );																						// Impose left boundary condition
 		for (i = 1; i < n - 1; i++)
 		{
-				*(data_out + i) += 0.5 * (*tmstp_ptr) * c * sin_vals [i] * ( *(data_in + i + 1) - *(data_in + i - 1) );			// centered differencing scheme
+				*(data_out + i) += 0.5 * (timestep) * c * sin_vals [i] * ( *(data_in + i + 1) - *(data_in + i - 1) );			// centered differencing scheme
 		}
-		*(data_out + n - 1) += (*tmstp_ptr) * c * sin_vals [n - 1] * ( *(data_in + n - 1) - *(data_in + n - 2));																			// Impose right boundary condition
+		*(data_out + n - 1) += (timestep) * c * sin_vals [n - 1] * ( *(data_in + n - 1) - *(data_in + n - 2));																			// Impose right boundary condition
 	}
 
 }

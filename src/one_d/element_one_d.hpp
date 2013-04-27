@@ -33,11 +33,11 @@ namespace one_d
 		 * \param i_n The number of data elements in each scalar
 		 * \copydoc bases::element::element ()
 		 *********************************************************************/
-		element (int i_n, int i_flags) : bases::element (i_flags) {
+		element (unsigned int i_n, int i_flags) : bases::element (i_flags) {
 			n = i_n;
 			
 			cell.resize (i_n);
-			for (int i = 0; i < i_n; ++i) {
+			for (unsigned int i = 0; i < i_n; ++i) {
 				cell [i] = i;
 			}
 		}
@@ -53,21 +53,17 @@ namespace one_d
 		}
 		
 		/*!*******************************************************************
-		 * \copydoc bases::element::add_scalar ()
-		 *********************************************************************/
-		inline void add_scalar (int name) {
-			scalars [name].resize (n + 1);
-		}
-		
-		/*!*******************************************************************
 		 * \copydoc bases::element::operator[] ()
 		 *********************************************************************/
 		inline double& operator[] (int name) {
+			if (scalars [name].size () != n) {
+				scalars [name].resize (n);
+			}
 			return scalars [name] [0];
 		}
 		
 	protected:
-		int n; //!< The number of elements in each 1D array
+		unsigned int n; //!< The number of elements in each 1D array
 	   	std::vector<int> cell; //!< An integer array for tracking each cell number for output
 
 		std::map<int, std::vector<double>> scalars; //!< A vector of scalar vectors
@@ -87,7 +83,7 @@ namespace one_d
 		 * \param i_n The number of elements in each 1D data array
 		 * \param i_flags Flags for the boundary conditions and evaluation
 		 *********************************************************************/
-		advection_diffusion_element (std::string name, double i_alpha_0, double i_alpha_n, int i_n, double initial_position, double *intial_velocity, int i_flags);
+		advection_diffusion_element (std::string name, double i_alpha_0, double i_alpha_n, unsigned int i_n, double initial_position, double *intial_velocity, int i_flags);
 		virtual ~advection_diffusion_element () {}
 		
 		inline void update () {			

@@ -74,13 +74,6 @@ public:
 		virtual void update ();
 		
 		/*!*******************************************************************
-		 * \brief Add a scalar to the element
-		 * 
-		 * \param name The integer name from the index enumeration
-		 *********************************************************************/
-		virtual void add_scalar (int name) = 0;
-		
-		/*!*******************************************************************
 		 * \brief Get the double pointer to the named scalar
 		 * 
 		 * \param name The integer name from the index enumeration
