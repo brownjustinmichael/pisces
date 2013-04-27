@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file io/io.hpp
+ * \file utilities/io.hpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-08.
@@ -138,7 +138,7 @@ namespace io
 		 * 
 		 * \param data_ptr A double pointer reference to the data to be the new column
 		 *********************************************************************/
-		virtual void append (double &data_ptr) {
+		virtual void append (double& data_ptr) {
 			append (&data_ptr);
 		}
 		

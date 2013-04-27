@@ -29,9 +29,7 @@ namespace bases
 			
 			TRACE (logger, "Updating timestep...");
 			
-			// Testing
-			// Should be replaced by a CFL check
-			timestep = 0.001;
+			timestep_plan->execute ();
 			
 			TRACE (logger, "Executing explicit grid plans...");
 			

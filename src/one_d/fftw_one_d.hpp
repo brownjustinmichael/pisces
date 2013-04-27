@@ -30,11 +30,11 @@ namespace one_d
 			init (i_n, i_data_in, i_data_out, i_flags_ptr);
 		}
 		
-		fftw_cosine (int i_n, double &i_data_in, double &i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) : bases::transform (i_n, &i_data_in, &i_data_out, i_flags_ptr) {
+		fftw_cosine (int i_n, double& i_data_in, double& i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) : bases::transform (i_n, &i_data_in, &i_data_out, i_flags_ptr) {
 			init (i_n, &i_data_in, &i_data_out, i_flags_ptr);
 		}
 		
-		fftw_cosine (int i_n, double &i_data_in, int *i_flags_ptr = NULL, int i_logger = -1) : bases::transform (i_n, &i_data_in, NULL, i_flags_ptr, i_logger) {
+		fftw_cosine (int i_n, double& i_data_in, int *i_flags_ptr = NULL, int i_logger = -1) : bases::transform (i_n, &i_data_in, NULL, i_flags_ptr, i_logger) {
 			init (i_n, &i_data_in);
 		}
 		

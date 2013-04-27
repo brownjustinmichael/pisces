@@ -60,21 +60,21 @@ namespace one_d
 	public:
 		/*!*******************************************************************
 		* \param i_coeff A double containing the coefficient in front of the diffusion term in the differential equation
-		* \param i_timestep_ptr A pointer to the double current timestep duration
+		* \param i_timestep A pointer to the double current timestep duration
 		* \param i_grid a shared pointer to the collocation_grid, which must be defined for the second derivative
 		* 
 		* \copydetails bases::explicit_plan::explicit_plan ()
 		*********************************************************************/
-		explicit_diffusion (double i_coeff, double i_alpha_0, double i_alpha_n, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL, int i_logger = -1) : bases::explicit_plan (i_n, i_data_in, i_data_out, i_flags_ptr, i_logger) {
-			init (i_coeff, i_alpha_0, i_alpha_n, i_timestep_ptr, i_n, i_grid, i_data_in, i_data_out, i_flags_ptr);
+		explicit_diffusion (double i_coeff, double i_alpha_0, double i_alpha_n, double& i_timestep, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL, int i_logger = -1) : bases::explicit_plan (i_n, i_data_in, i_data_out, i_flags_ptr, i_logger), timestep (i_timestep) {
+			init (i_coeff, i_alpha_0, i_alpha_n, i_timestep, i_n, i_grid, i_data_in, i_data_out, i_flags_ptr);
 		}
 		
-		explicit_diffusion (double i_coeff, double i_alpha_0, double i_alpha_n, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double &i_data_in, double &i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) : bases::explicit_plan (i_n, &i_data_in, &i_data_out, i_flags_ptr, i_logger) {
-			init (i_coeff, i_alpha_0, i_alpha_n, i_timestep_ptr, i_n, i_grid, &i_data_in, &i_data_out, i_flags_ptr);
+		explicit_diffusion (double i_coeff, double i_alpha_0, double i_alpha_n, double& i_timestep, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double& i_data_in, double& i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) : bases::explicit_plan (i_n, &i_data_in, &i_data_out, i_flags_ptr, i_logger), timestep (i_timestep) {
+			init (i_coeff, i_alpha_0, i_alpha_n, i_timestep, i_n, i_grid, &i_data_in, &i_data_out, i_flags_ptr);
 		}
 		
-		explicit_diffusion (double i_coeff, double i_alpha_0, double i_alpha_n, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double &i_data_in, int *i_flags_ptr = NULL, int i_logger = -1) : bases::explicit_plan (i_n, &i_data_in, NULL, i_flags_ptr, i_logger) {
-			init (i_coeff, i_alpha_0, i_alpha_n, i_timestep_ptr, i_n, i_grid, &i_data_in);
+		explicit_diffusion (double i_coeff, double i_alpha_0, double i_alpha_n, double& i_timestep, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double& i_data_in, int *i_flags_ptr = NULL, int i_logger = -1) : bases::explicit_plan (i_n, &i_data_in, NULL, i_flags_ptr, i_logger), timestep (i_timestep) {
+			init (i_coeff, i_alpha_0, i_alpha_n, i_timestep, i_n, i_grid, &i_data_in);
 		}
 
 		virtual ~explicit_diffusion () {}
@@ -88,11 +88,11 @@ namespace one_d
 		double coeff; //!< A double that represents the coefficient in front of the diffusion term in the differential equation
 		double alpha_0;
 		double alpha_n;
-		double *timestep_ptr;
+		double& timestep;
 		int *flags_ptr; //!< A pointer to an integer containing the binary boundary and execution flags
 		std::shared_ptr<bases::collocation_grid> grid; //!< A pointer to a collocation grid that contains the the Chebyshev values
 		
-		void init (double i_coeff, double i_alpha_0, double i_alpha_n, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL);
+		void init (double i_coeff, double i_alpha_0, double i_alpha_n, double& i_timestep, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL);
 	};
 
 	/*!*******************************************************************
@@ -107,12 +107,12 @@ namespace one_d
 		 * \param i_coeff A double containing the coefficient in front of the diffusion term in the differential equation
 		 * \param i_alpha_0 A double that determines the multiplier on the top boundary
 		 * \param i_alpha_n A double that determines the multiplier on the bottom boundary
-		 * \param i_timestep_ptr A pointer to the double current timestep duration
+		 * \param i_timestep A pointer to the double current timestep duration
 		 * \param i_grid a shared pointer to the collocation_grid, which must be defined for the second derivative
 		 * 
 		 * \copydetails bases::implicit_plan::implicit_plan ()
 		 *********************************************************************/
-		implicit_diffusion (double i_coeff, double i_alpha_0, double i_alpha_n, double *i_timestep_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_matrix, int *i_flags_ptr = NULL, int i_logger = -1);
+		implicit_diffusion (double i_coeff, double i_alpha_0, double i_alpha_n, double& i_timestep, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_matrix, int *i_flags_ptr = NULL, int i_logger = -1);
 
 		virtual ~implicit_diffusion () {}
 
@@ -125,7 +125,7 @@ namespace one_d
 		double coeff; //!< A double that represents the coefficient in front of the diffusion term in the differential equation
 		double alpha_0;
 		double alpha_n;
-		double *timestep_ptr;
+		double& timestep;
 		int *flags_ptr; //!< A pointer to an integer containing the binary boundary and execution flags
 		std::vector<double> temp;
 		std::shared_ptr<bases::collocation_grid> grid; //!< A pointer to a collocation grid that contains the the Chebyshev values

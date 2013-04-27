@@ -42,7 +42,7 @@ namespace bases
 		 * 
 		 * \return The double value at the index
 		 *********************************************************************/
-		inline double &index (int deriv, int row, int col) {
+		inline double& index (int deriv, int row, int col) {
 			return data [deriv] [row * cols + col];
 		}
 	

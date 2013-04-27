@@ -48,11 +48,11 @@ namespace one_d
 			scalar = i_scalar;
 		}
 		
-		scale (double i_scalar, int i_n, double &i_data_in, double &i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) : bases::explicit_plan (i_n, &i_data_in, &i_data_out, i_flags_ptr, i_logger) {
+		scale (double i_scalar, int i_n, double& i_data_in, double& i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) : bases::explicit_plan (i_n, &i_data_in, &i_data_out, i_flags_ptr, i_logger) {
 			scalar = i_scalar;
 		}
 		
-		scale (double i_scalar, int i_n, double &i_data_in, int *i_flags_ptr = NULL, int i_logger = -1) : bases::explicit_plan (i_n, &i_data_in, NULL, i_flags_ptr, i_logger) {
+		scale (double i_scalar, int i_n, double& i_data_in, int *i_flags_ptr = NULL, int i_logger = -1) : bases::explicit_plan (i_n, &i_data_in, NULL, i_flags_ptr, i_logger) {
 			scalar = i_scalar;
 		}
 		

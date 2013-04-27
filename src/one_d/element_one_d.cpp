@@ -10,9 +10,10 @@
 #include <string>
 #include <memory>
 #include "../config.hpp"
+#include "../bases/timestep.hpp"
+#include "../utilities/chebyshev.hpp"
 #include "element_one_d.hpp"
 #include "diffusion_one_d.hpp"
-#include "../collocation/chebyshev.hpp"
 #include "advection_one_d.h"
 #include "solver_one_d.hpp"
 #include "fftw_one_d.hpp"
@@ -24,7 +25,7 @@ namespace one_d {
 		previous_timestep = 0.0;
 		double diffusion_coeff = 1.0;
 		double advection_coeff = -0.0;
-		double alpha = 0.5;
+		double alpha = 1.0;
 		alpha_0 = i_alpha_0;
 		alpha_n = i_alpha_n;
 		add_scalar (position);
@@ -34,7 +35,7 @@ namespace one_d {
 		TRACE (logger, "Initializing...");
 		
 		matrix.resize (i_n * i_n, 0.0);
-		
+				
 		grid = std::make_shared<bases::collocation_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), logger));
 
 		transform_stream = std::make_shared <io::incremental_output> (io::incremental_output ("../output/test_cheb" + name, ".dat", 4, new io::header, i_n, logger));
@@ -50,14 +51,17 @@ namespace one_d {
 		failsafe_dump = std::make_shared <io::simple_output> (io::simple_output ("dump" + name + ".dat", i_n, logger));
 		failsafe_dump->append ((*this) [velocity]);
 		
+		timestep_plan = std::make_shared<bases::calculate_timestep> (bases::calculate_timestep (0.01, timestep));
+		
 		add_implicit_plan (std::make_shared <scale> (scale (1.0, n * n, grid->get_data (0), &matrix [0], &flags, logger)));
+		add_implicit_plan (std::make_shared <implicit_diffusion> (implicit_diffusion (- diffusion_coeff * alpha, 0.0, 0.0, timestep, i_n, grid, &matrix [0], &flags, logger)));
 		
-		add_implicit_plan (std::make_shared <implicit_diffusion> (implicit_diffusion (- diffusion_coeff * alpha, alpha_0 * alpha, alpha_n * alpha, &timestep, i_n, grid, &matrix [0], &flags, logger)));
 		add_explicit_grid_plan (std::make_shared <scale> (scale (0.0, n, (*this) (rhs), &flags, logger)));
-		add_explicit_grid_plan (std::make_shared <explicit_diffusion> (explicit_diffusion (diffusion_coeff * (1.0 - alpha), alpha_0 * (1.0 - alpha), alpha_n * (1.0 - alpha), &timestep, i_n, grid, (*this) (velocity), (*this) (rhs), &flags, logger)));
+		add_explicit_grid_plan (std::make_shared <explicit_diffusion> (explicit_diffusion (diffusion_coeff * (1.0 - alpha), alpha_0, alpha_n, timestep, i_n, grid, (*this) (velocity), (*this) (rhs), &flags, logger)));
+		// add_explicit_space_plan (advec::make_shared (n, timestep, advection_coeff, (*this) (velocity), (*this) (rhs)));
 		
-		// add_explicit_space_plan (advec::make_shared (n, &timestep, advection_coeff, (*this) (velocity), (*this) (rhs)));
 		matrix_solver = std::make_shared <lapack_solver> (lapack_solver (n, (*this) (velocity), (*this) (rhs), &matrix [0], (*this) (velocity), &flags, logger));
+		
 		transform_forward = std::make_shared <fftw_cosine> (fftw_cosine (n, (*this) (velocity), &flags, logger));
 		
 		double pioN = std::acos (-1.0) / (n - 1);

@@ -62,7 +62,7 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::element::operator[] ()
 		 *********************************************************************/
-		inline double &operator[] (int name) {
+		inline double& operator[] (int name) {
 			return scalars [name] [0];
 		}
 		

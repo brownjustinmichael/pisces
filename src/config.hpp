@@ -138,7 +138,6 @@ public:
 		int i = n_loggers++;
 		int j = n_appenders++;
 		loggers.push_back (log4cxx::LoggerPtr (log4cxx::Logger::getLogger ("element_" + std::to_string (i))));
-		MDEBUG ("severity "<<severity)
 		loggers [i]->setLevel (config::int_to_severity (severity));
 		
 		appenders.push_back (new log4cxx::FileAppender (layout, "element_" + std::to_string (i) + ".log", false));

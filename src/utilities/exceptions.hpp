@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file io/exceptions.hpp
+ * \file utilities/exceptions.hpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-09.

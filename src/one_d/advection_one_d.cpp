@@ -35,7 +35,7 @@ namespace one_d
 		}
 	}
 	
-	advec::advec (int i_n, double *i_tmstp_ptr, double i_c, double &i_data_in, double &i_data_out)
+	advec::advec (int i_n, double *i_tmstp_ptr, double i_c, double& i_data_in, double& i_data_out)
 	{
 		int i;
 

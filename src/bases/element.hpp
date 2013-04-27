@@ -11,7 +11,7 @@
 
 #include "plan.hpp"
 #include "solver.hpp"
-#include "../io/io.hpp"
+#include "../utilities/io.hpp"
 #include "collocation.hpp"
 #include "../config.hpp"
 
@@ -87,9 +87,9 @@ public:
 		 * 
 		 * \return A double pointer to the first element of the named scalar
 		 *********************************************************************/
-		virtual double &operator[] (int name) = 0;
+		virtual double& operator[] (int name) = 0;
 		
-		virtual double &operator () (int name, int index = 0) {
+		virtual double& operator () (int name, int index = 0) {
 			return (&((*this) [name])) [index];
 		}
 	
@@ -146,6 +146,7 @@ protected:
 
 	std::shared_ptr<collocation_grid> grid; //!< A shared pointer to the collocation grid
 	
+	std::shared_ptr<plan> timestep_plan;
 	std::shared_ptr<plan> transform_forward; //!< A shared pointer to the forward transform
 	std::shared_ptr<solver> matrix_solver; //!< A shared pointer to the matrix solver
 	std::shared_ptr<io::output> normal_stream; //!< An implementation to output in normal space

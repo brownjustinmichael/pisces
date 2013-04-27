@@ -33,7 +33,7 @@ namespace one_d
 	public:
 
 		advec (int i_n, double *i_tmstp_ptr, double i_c, double *i_data_in, double *i_data_out);	//constuctor initializes private members to point to input and output vectors
-		advec (int i_n, double *i_tmstp_ptr, double i_c, double &i_data_in, double &i_data_out);	//constuctor initializes private members to point to input and output vectors
+		advec (int i_n, double *i_tmstp_ptr, double i_c, double& i_data_in, double& i_data_out);	//constuctor initializes private members to point to input and output vectors
 		
 		virtual ~advec () {}
 		

@@ -89,11 +89,11 @@ namespace one_d
 			TODO change location of matrix in arguments
 		*/
 		
-		lapack_solver (int i_n, double &i_data_in, double &i_rhs, double *i_matrix, double &i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) : bases::solver (i_flags_ptr, i_logger) {
+		lapack_solver (int i_n, double& i_data_in, double& i_rhs, double *i_matrix, double& i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) : bases::solver (i_flags_ptr, i_logger) {
 			init (i_n, &i_data_in, &i_rhs, i_matrix, &i_data_out, i_flags_ptr);
 		};
 		
-		lapack_solver (int i_n, double &i_data_in, double &i_rhs, double *i_matrix, int *i_flags_ptr = NULL, int i_logger = -1) : bases::solver (i_flags_ptr, i_logger) {
+		lapack_solver (int i_n, double& i_data_in, double& i_rhs, double *i_matrix, int *i_flags_ptr = NULL, int i_logger = -1) : bases::solver (i_flags_ptr, i_logger) {
 			init (i_n, &i_data_in, &i_rhs, i_matrix);
 		};
 		
