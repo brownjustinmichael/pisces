@@ -100,14 +100,14 @@ namespace one_d
 		virtual ~lapack_solver () {}
 		
 		/*!*******************************************************************
-		 * \copydoc bases::solver::i_factorize ()
+		 * \copydoc bases::solver::_factorize ()
 		 *********************************************************************/
-		void i_factorize ();
+		void _factorize ();
 		
 		/*!*******************************************************************
-		 * \copydoc bases::solver::i_solve ()
+		 * \copydoc bases::solver::_solve ()
 		 *********************************************************************/
-		void i_solve ();
+		void _solve ();
 
 	private:
 		int n; //!< The integer number of elements in the data

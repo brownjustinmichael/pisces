@@ -47,7 +47,7 @@ namespace bases
 		 *********************************************************************/
 		virtual void solve () {
 			factorize ();
-			i_solve ();
+			_solve ();
 			*flags_ptr |= transformed;
 		}
 		
@@ -59,12 +59,12 @@ namespace bases
 		/*!*******************************************************************
 		 * \brief The implementation for factorizing the matrix equation
 		 *********************************************************************/
-		virtual void i_factorize () = 0;
+		virtual void _factorize () = 0;
 	
 		/*!*******************************************************************
 		 * \brief The implementation for solving a factorized matrix equation
 		 *********************************************************************/
-		virtual void i_solve () = 0;
+		virtual void _solve () = 0;
 		
 	private:
 		/*!*******************************************************************
@@ -76,7 +76,7 @@ namespace bases
 		 *********************************************************************/
 		virtual void factorize () {
 			if ((! (*flags_ptr & factorized)) || (*flags_ptr & never_factorized)) {
-				i_factorize ();
+				_factorize ();
 				*flags_ptr |= factorized;
 			}
 		}

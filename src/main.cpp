@@ -91,8 +91,8 @@ int main (int argc, char const *argv[])
 		// initial_conditions [i + n / 2 - 1] = scale * std::exp (- (initial_position [i + n / 2 - 1] - 1.) * (initial_position [i + n / 2 - 1] - 0.) / 1.0 / sigma / sigma) - scale * std::exp (- 1.0 / 2.0 / sigma / sigma);
 	}
 	
-	one_d::advection_diffusion_element element_1 ("_1_", 0.0, 1.0, n / 2, 1.0, &initial_conditions [0], 0x00);
-	one_d::advection_diffusion_element element_2 ("_2_", 1.0, 0.0, n / 2, -1.0, &initial_conditions [n / 2 - 1], 0x00);
+	one_d::chebyshev::advection_diffusion_element element_1 ("_1_", 0.0, 1.0, n / 2, 1.0, &initial_conditions [0], 0x00);
+	one_d::chebyshev::advection_diffusion_element element_2 ("_2_", 1.0, 0.0, n / 2, -1.0, &initial_conditions [n / 2 - 1], 0x00);
 	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_1 (rhs))));
 	// element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_1 (velocity))));
 	// element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_2 (velocity, n / 2 - 1))));

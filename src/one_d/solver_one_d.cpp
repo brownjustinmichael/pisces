@@ -11,7 +11,7 @@
 
 namespace one_d
 {
-	void lapack_solver::i_factorize () {
+	void lapack_solver::_factorize () {
 		int info;
 		dgetrf_ (&n, &n, matrix, &n, &ipiv [0], &info);
 		
@@ -26,7 +26,7 @@ namespace one_d
 		}
 	}
 
-	void lapack_solver::i_solve () {
+	void lapack_solver::_solve () {
 		int ione = 1, info;
 		double dpone = 1.0;
 		char charN = 'N';

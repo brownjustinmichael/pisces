@@ -64,11 +64,13 @@ namespace one_d
 		
 	protected:
 		unsigned int n; //!< The number of elements in each 1D array
-	   	std::vector<int> cell; //!< An integer array for tracking each cell number for output
+		std::vector<int> cell; //!< An integer array for tracking each cell number for output
 
 		std::map<int, std::vector<double>> scalars; //!< A vector of scalar vectors
 	};
 
+	namespace chebyshev
+	{
 	/*!*******************************************************************
 	 * \brief A simple implementation of the element class with diffusion
 	 * 
@@ -95,6 +97,7 @@ namespace one_d
 		double alpha_n;
 		std::vector<double> matrix; //!< A vector containing the double matrix used in the implicit solver
 	};
+	} /* chebyshev */
 } /* one_d */
 
 #endif /* end of include guard: ELEMENT_HPP_3SURDTOH */
