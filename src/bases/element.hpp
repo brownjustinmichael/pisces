@@ -9,6 +9,7 @@
 #ifndef ELEMENT_HPP_IUTSU4TQ
 #define ELEMENT_HPP_IUTSU4TQ
 
+#include <string>
 #include "plan.hpp"
 #include "solver.hpp"
 #include "../utils/io.hpp"
@@ -48,7 +49,8 @@ public:
 		/*!*******************************************************************
 		* \param i_flags An integer set of execution flags
 		*********************************************************************/
-		element (int i_flags) {
+		element (std::string i_name, int i_flags) {
+			name = i_name;
 			flags = i_flags;
 			logger = config::make_logger ();
 		
@@ -75,6 +77,10 @@ public:
 		 * \brief Update the element
 		 *********************************************************************/
 		virtual void update ();
+		
+		inline virtual void failsafe () {
+			failsafe_dump->to_file ();
+		}
 		
 		/*!*******************************************************************
 		 * \brief Get the double pointer to the named scalar
@@ -139,6 +145,8 @@ public:
 		}
 	
 	protected:
+		std::string name;
+		
 		int flags; //!< An integer set of execution flags
 		int logger;
 		int n_explicit_grid_plans; //!< The number of explicit grid plans to execute

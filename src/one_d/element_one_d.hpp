@@ -22,7 +22,7 @@ namespace one_d
 {
 	/*!*******************************************************************
 	 * A 1D implementation of the element base class. This provides the
-	 * storage and indexing facilities. The plans should be added in a 
+	 * storage, indexing facilities, and failsafe_dump output. The plans should be added in a 
 	 * further subclass.
 	 * 
 	 * \brief \copybrief bases::element
@@ -34,13 +34,16 @@ namespace one_d
 		 * \param i_n The number of data elements in each scalar
 		 * \copydoc bases::element::element ()
 		 *********************************************************************/
-		element (int i_n, int i_flags) : bases::element (i_flags) {
+		element (std::string i_name, int i_n, int i_flags) : bases::element (i_name, i_flags) {
 			n = i_n;
 			
 			cell.resize (i_n);
 			for (int i = 0; i < i_n; ++i) {
 				cell [i] = i;
 			}
+			
+			failsafe_dump = std::make_shared <io::simple_output> (io::simple_output ("dump_" + name + ".dat", n, logger));
+			failsafe_dump->append (&cell [0]);
 		}
 		
 		virtual ~element () {}
@@ -67,11 +70,13 @@ namespace one_d
 			if (name < 0) {
 				if (resettables [name].size () != (unsigned int) n) {
 					resettables [name].resize (n);
+					failsafe_dump->append ((*this) [name]);
 				}
 				return resettables [name] [0];
 			} else {
 				if (scalars [name].size () != (unsigned int) n) {
 					scalars [name].resize (n);
+					failsafe_dump->append ((*this) [name]);
 				}
 				return scalars [name] [0];
 			}
@@ -101,7 +106,7 @@ namespace one_d
 		 * \param i_n The number of elements in each 1D data array
 		 * \param i_flags Flags for the boundary conditions and evaluation
 		 *********************************************************************/
-		advection_diffusion_element (std::string name, int i_n, double initial_position, double *intial_velocity, int i_flags);
+		advection_diffusion_element (std::string i_name, int i_n, double initial_position, double *intial_velocity, int i_flags);
 		virtual ~advection_diffusion_element () {}
 		
 		inline void reset () {

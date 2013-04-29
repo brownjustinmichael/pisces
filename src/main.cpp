@@ -91,11 +91,9 @@ int main (int argc, char const *argv[])
 		// initial_conditions [i + n / 2 - 1] = scale * std::exp (- (initial_position [i + n / 2 - 1] - 1.) * (initial_position [i + n / 2 - 1] - 0.) / 1.0 / sigma / sigma) - scale * std::exp (- 1.0 / 2.0 / sigma / sigma);
 	}
 	
-	one_d::chebyshev::advection_diffusion_element element_1 ("_1_", n / 2, 1.0, &initial_conditions [0], 0x00);
-	one_d::chebyshev::advection_diffusion_element element_2 ("_2_", n / 2, -1.0, &initial_conditions [n / 2 - 1], 0x00);
+	one_d::chebyshev::advection_diffusion_element element_1 ("1", n / 2, 1.0, &initial_conditions [0], 0x00);
+	one_d::chebyshev::advection_diffusion_element element_2 ("2", n / 2, -1.0, &initial_conditions [n / 2 - 1], 0x00);
 	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_1 (rhs))));
-	// element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_1 (velocity))));
-	// element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_2 (velocity, n / 2 - 1))));
 	element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_2 (rhs, n / 2 - 1))));
 	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.5, element_1 (rhs, n / 2 - 1), 0.5, element_2 (rhs))));
 
@@ -104,13 +102,19 @@ int main (int argc, char const *argv[])
 	for (i = 0; i < 400; ++i) {
 		MTRACE ("main: Beginning timestep...");
 		MINFO ("main: Timestep: " << i);
-
-		element_1.calculate ();
-		element_2.calculate ();
-		element_1.execute_boundaries ();
-		element_2.execute_boundaries ();
-		element_1.update ();
-		element_2.update ();
+		
+		try {
+			element_1.calculate ();
+			element_2.calculate ();
+			element_1.execute_boundaries ();
+			element_2.execute_boundaries ();
+			element_1.update ();
+			element_2.update ();
+		} catch (...) {
+			element_1.failsafe ();
+			element_2.failsafe ();
+			exit (EXIT_FAILURE);
+		}
 		
 		MTRACE ("main: Timestep " << i << " complete.");
 	}

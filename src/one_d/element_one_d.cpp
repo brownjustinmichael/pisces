@@ -23,8 +23,7 @@ namespace one_d
 {
 	namespace chebyshev
 	{
-		advection_diffusion_element::advection_diffusion_element (std::string name, int i_n, double initial_position, double *initial_velocity, int i_flags) : element (i_n, i_flags) {
-			previous_timestep = 0.0;
+		advection_diffusion_element::advection_diffusion_element (std::string i_name, int i_n, double initial_position, double *initial_velocity, int i_flags) : element (i_name, i_n, i_flags) {
 			double diffusion_coeff = 10.0;
 			double advection_coeff = -10.0;
 			double alpha = 0.5;
@@ -32,21 +31,14 @@ namespace one_d
 			TRACE (logger, "Initializing...");
 		
 			matrix.resize (i_n * i_n, 0.0);
-				
-			grid = std::make_shared<bases::collocation_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), logger));
-
-			transform_stream = std::make_shared <io::incremental_output> (io::incremental_output ("../output/test_cheb" + name, ".dat", 4, new io::header, i_n, logger));
-			transform_stream->append (cell [0]);
-			transform_stream->append ((*this) [velocity]);
-		
-			normal_stream = std::make_shared <io::incremental_output> (io::incremental_output ("../output/test_angle" + name, ".dat", 4, new io::header, i_n, logger));
+			
+			normal_stream = std::make_shared <io::incremental_output> (io::incremental_output ("../output/test_angle_" + name + "_", ".dat", 4, new io::header, i_n, logger));
 			normal_stream->append (cell [0]);
 			normal_stream->append ((*this) [position]);
 			normal_stream->append ((*this) [velocity]);
 			normal_stream->append ((*this) [rhs]);
-		
-			failsafe_dump = std::make_shared <io::simple_output> (io::simple_output ("dump" + name + ".dat", i_n, logger));
-			failsafe_dump->append ((*this) [velocity]);
+						
+			grid = std::make_shared<bases::collocation_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), logger));
 		
 			timestep_plan = std::make_shared<bases::calculate_timestep> (bases::calculate_timestep (0.001, timestep));
 		
