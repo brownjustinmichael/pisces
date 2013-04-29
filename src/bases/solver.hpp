@@ -15,7 +15,7 @@
  * \brief Execution flags used by the solver class
  *********************************************************************/
 enum solver_flags {
-	factorized = 0x02,
+	factorized = 0x08,
 	never_factorized = 0x04
 };
 

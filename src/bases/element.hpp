@@ -17,6 +17,8 @@
 
 /*!*******************************************************************
  * \brief A set of indices to be used with the element scalars for convenience
+ * 
+ * Indices less than zero are "resettable"
  *********************************************************************/
 enum index {
 	position = 00, x_position = 00, x_pos = 00,
@@ -28,7 +30,8 @@ enum index {
 	pressure = 20, pres = 20,
 	temperature = 21, temp = 21,
 	composition = 22, comp = 22,
-	rhs = 30
+	
+	rhs = -01
 };
 
 namespace bases
@@ -85,6 +88,11 @@ public:
 		virtual double& operator () (int name, int index = 0) {
 			return (&((*this) [name])) [index];
 		}
+		
+		/*!*******************************************************************
+		 * \brief Reset every index < 0
+		 *********************************************************************/
+		virtual void reset () = 0;
 	
 		/*!*******************************************************************
 		 * \brief Adds an explicit plan to be evaluated in grid space
@@ -126,31 +134,31 @@ public:
 			boundaries.push_back (std::move (i_plan));
 		}
 	
-protected:
-	int flags; //!< An integer set of execution flags
-	int logger;
-	int n_explicit_grid_plans; //!< The number of explicit grid plans to execute
-	int n_explicit_space_plans; //!< The number of explicit space plans to execute
-	int n_implicit_plans; //!< The number of implicit plans to execute
-	int n_boundaries; //!< The number of boundary conditions to execute
+	protected:
+		int flags; //!< An integer set of execution flags
+		int logger;
+		int n_explicit_grid_plans; //!< The number of explicit grid plans to execute
+		int n_explicit_space_plans; //!< The number of explicit space plans to execute
+		int n_implicit_plans; //!< The number of implicit plans to execute
+		int n_boundaries; //!< The number of boundary conditions to execute
 	
-	double timestep; //!< The double timestep length
-	double previous_timestep; //!< The double duration of the previous timestep
+		double timestep; //!< The double timestep length
+		double previous_timestep; //!< The double duration of the previous timestep
 
-	std::shared_ptr<collocation_grid> grid; //!< A shared pointer to the collocation grid
+		std::shared_ptr<collocation_grid> grid; //!< A shared pointer to the collocation grid
 	
-	std::shared_ptr<plan> timestep_plan;
-	std::shared_ptr<plan> transform_forward; //!< A shared pointer to the forward transform
-	std::shared_ptr<solver> matrix_solver; //!< A shared pointer to the matrix solver
-	std::shared_ptr<io::output> normal_stream; //!< An implementation to output in normal space
-	std::shared_ptr<io::output> transform_stream; //!< An implementation to output in transform space
-	std::shared_ptr<io::output> failsafe_dump; //!< An implementation to dump in case of failure
+		std::shared_ptr<plan> timestep_plan;
+		std::shared_ptr<plan> transform_forward; //!< A shared pointer to the forward transform
+		std::shared_ptr<solver> matrix_solver; //!< A shared pointer to the matrix solver
+		std::shared_ptr<io::output> normal_stream; //!< An implementation to output in normal space
+		std::shared_ptr<io::output> transform_stream; //!< An implementation to output in transform space
+		std::shared_ptr<io::output> failsafe_dump; //!< An implementation to dump in case of failure
 		
-	std::vector<std::shared_ptr<plan>> explicit_grid_plans; //!< A vector of shared pointers to explicit grid plans to be executed
-	std::vector<std::shared_ptr<plan>> explicit_space_plans; //!< A vector of shared pointers to explicit space plans to be executed
-	std::vector<std::shared_ptr<plan>> implicit_plans; //!< A vector of shared pointers to implicit plans to be executed
-	std::vector<std::shared_ptr<plan>> boundaries; //!< A vector of shared pointers to boundary conditions to be executed
-};
+		std::vector<std::shared_ptr<plan>> explicit_grid_plans; //!< A vector of shared pointers to explicit grid plans to be executed
+		std::vector<std::shared_ptr<plan>> explicit_space_plans; //!< A vector of shared pointers to explicit space plans to be executed
+		std::vector<std::shared_ptr<plan>> implicit_plans; //!< A vector of shared pointers to implicit plans to be executed
+		std::vector<std::shared_ptr<plan>> boundaries; //!< A vector of shared pointers to boundary conditions to be executed
+	};
 } /* bases */
 
 #endif /* end of include guard: ELEMENT_HPP_IUTSU4TQ */

@@ -59,7 +59,7 @@ namespace one_d
 				*data_minus = *data_plus;
 			}
 		
-			TRACE (logger, "Executed.")
+			TRACE (logger, "executed.")
 		}
 	};
 } /* one_d */

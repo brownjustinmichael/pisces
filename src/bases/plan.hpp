@@ -13,14 +13,29 @@
 #define PLAN_HPP_S9YPWHOM
 
 #include <memory>
+#include "collocation.hpp"
 #include "../config.hpp"
 
 /*!*******************************************************************
- * \brief Execution flags used by the plan classes
+ * \brief Function from BLAS that copies a double array to another in place
+ * 
+ * \param n A pointer to an integer number of elements in x to copy to y
+ * \param dx The array from which the data are copied
+ * \param incx A pointer to an integer spacing of elements in x
+ * \param dy The array to which the data are copied
+ * \param incy A pointer to an integer spacing of elements in y
  *********************************************************************/
-enum plan_flags {
-	reset = 0x01
-};
+extern "C" void dcopy_ (int *n, double *dx, int *incx, double *dy, int *incy);
+
+/*!*******************************************************************
+ * \brief Function from BLAS that scales a double array
+ * 
+ * \param n A pointer to an integer number of elements in x to copy to y
+ * \param da The double by which to scale the data
+ * \param dx The array from which the data are copied
+ * \param incx A pointer to an integer spacing of elements in x
+ *********************************************************************/
+extern "C" void dscal_ (int *n, double *da, double *dx, int *incx);
 
 namespace bases
 {
@@ -55,8 +70,8 @@ namespace bases
 		* 
 		* The plan class serves as a wrapper for this function.
 		*********************************************************************/
-		virtual void execute () = 0;
-	
+		virtual void execute () {}
+			
 	protected:
 		int logger;
 		int default_flags; //!< An integer set of default flags to use in case the user does not specify any flags
@@ -90,11 +105,10 @@ namespace bases
 		}
 	
 	virtual ~explicit_plan () {}
-
-	/*!*******************************************************************
-	 * \copydoc plan::execute ()
-	 *********************************************************************/
-	virtual void execute () = 0;
+	
+	virtual void execute () {
+		plan::execute ();
+	}
 
 	protected:
 		int n; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
@@ -116,20 +130,22 @@ namespace bases
 		 * 
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		implicit_plan (int i_n, double *i_matrix, int *i_flags_ptr = NULL, int i_logger = -1) : plan (i_flags_ptr, i_logger) {
+		implicit_plan (int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_matrix, int *i_flags_ptr = NULL, int i_logger = -1) : plan (i_flags_ptr, i_logger) {
 			n = i_n;
+			grid = i_grid;
 			matrix = i_matrix;
 		}
 
-		virtual ~implicit_plan () {}	
+		virtual ~implicit_plan () {}
 		
-		/*!*******************************************************************
-		 * \copydoc plan::execute ()
-		 *********************************************************************/
-		virtual void execute () = 0;
+		virtual void execute () {
+			plan::execute ();
+		}
+		
 
 	protected:
 		int n; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
+		std::shared_ptr <bases::collocation_grid> grid;
 		double *matrix; //!< A double pointer to the input data
 	};
 } /* bases */

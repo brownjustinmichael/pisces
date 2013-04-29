@@ -18,6 +18,12 @@ namespace bases
 		TRACE (logger, "Calculating...");
 				
 		try {
+			TRACE (logger, "Updating timestep...");
+			
+			timestep_plan->execute ();
+			
+			reset ();
+			
 			// Start in grid space
 			
 			TRACE (logger, "Writing to file...");
@@ -26,11 +32,7 @@ namespace bases
 			if (transform_stream) {
 				transform_stream->to_file ();
 			}
-			
-			TRACE (logger, "Updating timestep...");
-			
-			timestep_plan->execute ();
-			
+
 			TRACE (logger, "Executing explicit grid plans...");
 			
 			for (int i = 0; i < n_explicit_grid_plans; ++i) {

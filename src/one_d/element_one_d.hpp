@@ -33,11 +33,11 @@ namespace one_d
 		 * \param i_n The number of data elements in each scalar
 		 * \copydoc bases::element::element ()
 		 *********************************************************************/
-		element (unsigned int i_n, int i_flags) : bases::element (i_flags) {
+		element (int i_n, int i_flags) : bases::element (i_flags) {
 			n = i_n;
 			
 			cell.resize (i_n);
-			for (unsigned int i = 0; i < i_n; ++i) {
+			for (int i = 0; i < i_n; ++i) {
 				cell [i] = i;
 			}
 		}
@@ -52,21 +52,39 @@ namespace one_d
 			bases::element::update ();
 		}
 		
+		inline void reset () {
+			int ione = 1;
+			double dzero = 0.0;
+			
+			std::map <int, std::vector <double>>::iterator iter;
+			for (iter = resettables.begin (); iter != resettables.end (); ++iter) {
+				dscal_ (&n, &dzero, &(iter->second) [0], &ione);
+			}
+		}
+		
 		/*!*******************************************************************
 		 * \copydoc bases::element::operator[] ()
 		 *********************************************************************/
 		inline double& operator[] (int name) {
-			if (scalars [name].size () != n) {
-				scalars [name].resize (n);
+			if (name < 0) {
+				if (resettables [name].size () != (unsigned int) n) {
+					resettables [name].resize (n);
+				}
+				return resettables [name] [0];
+			} else {
+				if (scalars [name].size () != (unsigned int) n) {
+					scalars [name].resize (n);
+				}
+				return scalars [name] [0];
 			}
-			return scalars [name] [0];
 		}
 		
 	protected:
-		unsigned int n; //!< The number of elements in each 1D array
+		int n; //!< The number of elements in each 1D array
 		std::vector<int> cell; //!< An integer array for tracking each cell number for output
 
-		std::map<int, std::vector<double>> scalars; //!< A vector of scalar vectors
+		std::map <int, std::vector <double>> scalars; //!< A vector of scalar vectors
+		std::map <int, std::vector <double>> resettables; //!< A vector of scalar vectors
 	};
 
 	namespace chebyshev
@@ -85,16 +103,25 @@ namespace one_d
 		 * \param i_n The number of elements in each 1D data array
 		 * \param i_flags Flags for the boundary conditions and evaluation
 		 *********************************************************************/
-		advection_diffusion_element (std::string name, double i_alpha_0, double i_alpha_n, unsigned int i_n, double initial_position, double *intial_velocity, int i_flags);
+		advection_diffusion_element (std::string name, int i_n, double initial_position, double *intial_velocity, int i_flags);
 		virtual ~advection_diffusion_element () {}
+		
+		inline void reset () {
+			int ione = 1;
+			int nn = n * n;
+			
+			element::reset ();
+			
+			if (timestep != previous_timestep) {
+				dcopy_ (&nn, grid->get_data (0), &ione, &matrix [0], &ione);
+			}
+		}
 		
 		inline void update () {			
 			element::update ();
 		}
 		
 	private:
-		double alpha_0;
-		double alpha_n;
 		std::vector<double> matrix; //!< A vector containing the double matrix used in the implicit solver
 	};
 	} /* chebyshev */

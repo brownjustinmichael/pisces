@@ -46,6 +46,8 @@ namespace one_d
 		void execute () {
 			TRACE (logger, "Executing...");
 			
+			bases::explicit_plan::execute ();
+			
 			if (*flags_ptr & transformed) {
 				*flags_ptr &= ~transformed;
 			} else {
@@ -62,7 +64,7 @@ namespace one_d
 				data_out [i] *= scalar;
 			}
 			
-			TRACE (logger, "Executed.");
+			TRACE (logger, "executed.");
 		}
 	
 	private:		
