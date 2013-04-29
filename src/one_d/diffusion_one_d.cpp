@@ -12,7 +12,9 @@
 #include <memory>
 #include "../config.hpp"
 #include "diffusion_one_d.hpp"
-#include "../utilities/chebyshev.hpp"
+#include "../utils/chebyshev.hpp"
+#include "../utils/utils.hpp"
+#include "../utils/lapack.hpp"
 
 namespace one_d
 {
@@ -24,9 +26,7 @@ namespace one_d
 		}
 
 		void explicit_diffusion::execute () {
-			int ione = 1, nm2 = n - 2;
-			char charN = 'N';
-			double dpone = 1.0;
+			int ione = 1;
 			double scalar = coeff * timestep;
 			
 			bases::explicit_plan::execute ();
@@ -36,7 +36,7 @@ namespace one_d
 			data_out [0] += scalar * ddot_ (&n, grid->get_data (2), &n, data_in, &ione);
 		
 			// Set up and evaluate the explicit part of the diffusion equation
-			dgemv_ (&charN, &nm2, &n, &scalar, grid->get_data (2) + 1, &n, data_in, &ione, &dpone, data_out + 1, &ione);
+			utils::matrix_vector_multiply (n - 2, n, scalar, grid->get_data (2) + 1, data_in, 1.0, data_out + 1, n);
 
 			data_out [n - 1] += scalar * ddot_ (&n, grid->get_data (2) + n - 1, &n, data_in, &ione);
 
@@ -59,7 +59,7 @@ namespace one_d
 			double scalar = coeff * timestep;
 			// This is the main loop for setting up the diffusion equation in Chebyshev space
 			for (int i = 1; i < n - 1; ++i) {
-			   	daxpy_ (&n, &scalar, grid->get_data (2) + i, &n, matrix + i, &n);
+			   	utils::add_scaled (n, scalar, grid->get_data (2) + i, matrix + i, n, n);
 			}
 	
 			TRACE (logger, "Operation complete.");

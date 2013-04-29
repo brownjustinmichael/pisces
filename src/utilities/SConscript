@@ -1,6 +1,0 @@
-Import ("env")
-Import ("objects")
-
-objects.append (env.Object ("chebyshev.cpp"))
-
-objects.append (env.Object ("io.cpp"))

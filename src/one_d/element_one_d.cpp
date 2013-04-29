@@ -11,13 +11,12 @@
 #include <memory>
 #include "../config.hpp"
 #include "../bases/timestep.hpp"
-#include "../utilities/chebyshev.hpp"
+#include "../utils/chebyshev.hpp"
 #include "element_one_d.hpp"
 #include "diffusion_one_d.hpp"
 #include "advection_one_d.h"
 #include "solver_one_d.hpp"
 #include "fftw_one_d.hpp"
-#include "scale_one_d.hpp"
 #include "boundary_one_d.hpp"
 	
 namespace one_d

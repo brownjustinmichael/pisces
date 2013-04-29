@@ -16,27 +16,6 @@
 #include "collocation.hpp"
 #include "../config.hpp"
 
-/*!*******************************************************************
- * \brief Function from BLAS that copies a double array to another in place
- * 
- * \param n A pointer to an integer number of elements in x to copy to y
- * \param dx The array from which the data are copied
- * \param incx A pointer to an integer spacing of elements in x
- * \param dy The array to which the data are copied
- * \param incy A pointer to an integer spacing of elements in y
- *********************************************************************/
-extern "C" void dcopy_ (int *n, double *dx, int *incx, double *dy, int *incy);
-
-/*!*******************************************************************
- * \brief Function from BLAS that scales a double array
- * 
- * \param n A pointer to an integer number of elements in x to copy to y
- * \param da The double by which to scale the data
- * \param dx The array from which the data are copied
- * \param incx A pointer to an integer spacing of elements in x
- *********************************************************************/
-extern "C" void dscal_ (int *n, double *da, double *dx, int *incx);
-
 namespace bases
 {
 	/*!*******************************************************************

@@ -16,37 +16,7 @@
 #include <vector>
 #include "../bases/plan.hpp"
 #include "../bases/collocation.hpp"
-
-extern "C" double ddot_ (int *n, double *dx, int *incx, double *dy, int *incy);
-
-/*!*******************************************************************
- * \brief Function from BLAS for vector-vector addition (dy = da * dx + dy)
- * 
- * \param n A pointer to the integer number of values in dy
- * \param da A pointer to the double da
- * \param dx The double vector dx
- * \param incx A pointer to the integer spacing of elements in dx
- * \param dy The double vector dy
- * \param incy A pointer to the integer spacing of elements in dy
- *********************************************************************/
-extern "C" void daxpy_ (int *n, double *da, double *dx, int *incx, double *dy, int *incy);
-
-/*!*******************************************************************
- * \brief Function from BLAS for matrix-vector multiplication (y = alpha * a * x + beta * y)
- * 
- * \param trans A pointer to transposition character ("N" for not transposed, "T" for transposed)
- * \param m A pointer to the number of rows in a
- * \param n A pointer to the number of columns in a
- * \param alpha A pointer to the double multiplier on a
- * \param a The double matrix a
- * \param lda A pointer to the integer number of leading dimension of a
- * \param x The double vector x
- * \param incx A pointer to an integer spacing of elements in x
- * \param beta A pointer to the double multiplier on y
- * \param y The double vector y, overwritten with the solution
- * \param incy A pointer to an integer spacing of elements in y
- *********************************************************************/
-extern "C" void dgemv_ (char *trans, int *m, int *n, double *alpha, double *a, int *lda, double *x, int *incx, double *beta, double *y, int *incy);
+#include "../utils/utils.hpp"
 
 namespace one_d
 {

@@ -8,12 +8,16 @@
 
 #include "../config.hpp"
 #include "solver_one_d.hpp"
+#include "../utils/utils.hpp"
 
 namespace one_d
 {
-	void lapack_solver::_factorize () {
+	void lapack_solver::factorize () {
 		int info;
-		dgetrf_ (&n, &n, matrix, &n, &ipiv [0], &info);
+		
+		bases::solver::factorize ();
+		
+		utils::matrix_factorize (n, n, matrix, &ipiv [0], &info);
 		
 		MDEBUG ("factorize");
 		
@@ -26,23 +30,23 @@ namespace one_d
 		}
 	}
 
-	void lapack_solver::_solve () {
-		int ione = 1, info;
-		double dpone = 1.0;
-		char charN = 'N';
+	void lapack_solver::solve () {
+		int info;
+		
+		bases::solver::solve ();
 		
 		TRACE (logger, "Solving...")
 		
 		if (data_out == rhs) {
-			daxpy_ (&n, &dpone, data_in, &ione, data_out, &ione);
+			utils::add_scaled (n, 1.0, data_in, data_out);
 		} else {
 			if (data_in != data_out) {
-				dcopy_ (&n, data_in, &ione, data_out, &ione);
+				utils::copy (n, data_in, data_out);
 			}
-			daxpy_ (&n, &dpone, rhs, &ione, data_out, &ione);
+			utils::add_scaled (n, 1.0, rhs, data_out);
 		}
 		
-		dgetrs_ (&charN, &n, &ione, &matrix [0], &n, &ipiv [0], data_out, &n, &info);
+		utils::matrix_solve (n, &matrix [0], &ipiv [0], data_out, &info);
 		
 		if (info != 0) {
 			ERROR (logger, "Unable to solve factorized matrix equation");

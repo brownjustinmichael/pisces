@@ -11,7 +11,7 @@
 
 #include "plan.hpp"
 #include "solver.hpp"
-#include "../utilities/io.hpp"
+#include "../utils/io.hpp"
 #include "collocation.hpp"
 #include "../config.hpp"
 
@@ -92,7 +92,11 @@ public:
 		/*!*******************************************************************
 		 * \brief Reset every index < 0
 		 *********************************************************************/
-		virtual void reset () = 0;
+		virtual void reset () {
+			if (previous_timestep != timestep) {
+				flags &= ~factorized;
+			}
+		}
 	
 		/*!*******************************************************************
 		 * \brief Adds an explicit plan to be evaluated in grid space

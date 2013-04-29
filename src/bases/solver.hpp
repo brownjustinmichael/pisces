@@ -8,8 +8,6 @@
 
 #ifndef SOLVER_HPP_BDH126SH
 #define SOLVER_HPP_BDH126SH
-
-#include "transform.hpp"
 	
 /*!*******************************************************************
  * \brief Execution flags used by the solver class
@@ -46,9 +44,9 @@ namespace bases
 		 * \brief Solve the matrix equation
 		 *********************************************************************/
 		virtual void solve () {
-			factorize ();
-			_solve ();
-			*flags_ptr |= transformed;
+			if ((! (*flags_ptr & factorized)) || (*flags_ptr & never_factorized)) {
+				factorize ();
+			}
 		}
 		
 	protected:
@@ -57,17 +55,6 @@ namespace bases
 		int default_flags; //!< Default flags to use if i_flags_ptr is NULL
 		
 		/*!*******************************************************************
-		 * \brief The implementation for factorizing the matrix equation
-		 *********************************************************************/
-		virtual void _factorize () = 0;
-	
-		/*!*******************************************************************
-		 * \brief The implementation for solving a factorized matrix equation
-		 *********************************************************************/
-		virtual void _solve () = 0;
-		
-	private:
-		/*!*******************************************************************
 		 * \brief Factorize the matrix equation
 		 * 
 		 * This method checks first whether the matrix has been factorized, 
@@ -75,10 +62,7 @@ namespace bases
 		 * execution flags that the matrix has been factorized.
 		 *********************************************************************/
 		virtual void factorize () {
-			if ((! (*flags_ptr & factorized)) || (*flags_ptr & never_factorized)) {
-				_factorize ();
-				*flags_ptr |= factorized;
-			}
+			*flags_ptr |= factorized;
 		}
 	};
 } /* bases */

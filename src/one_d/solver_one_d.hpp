@@ -12,56 +12,7 @@
 #include <vector>
 #include <memory>
 #include "../bases/solver.hpp"
-
-/*!*******************************************************************
- * \brief Function from BLAS that copies a double array to another in place
- * 
- * \param n A pointer to an integer number of elements in dx to copy to dy
- * \param dx The array from which the data are copied
- * \param incx A pointer to an integer spacing of elements in dx
- * \param dy The array to which the data are copied
- * \param incy A pointer to an integer spacing of elements in dy
- *********************************************************************/
-extern "C" void dcopy_(int *n, double *dx, int *incx, double *dy, int *incy);
-
-/*!*******************************************************************
- * \brief Function from BLAS that solves dy = da * dx + dy
- * 
- * \param n A pointer to an integer number of elements in dy to add
- * \param da The double da
- * \param dx The double array dx
- * \param incx A pointer to an integer spacing of elements in dx
- * \param dy The double array dy
- * \param incy A pointer to an integer spacing of elements in dy
- *********************************************************************/
-extern "C" void daxpy_ (int *n, double *da, double *dx, int *incx, double *dy, int *incy);
-
-/*!*******************************************************************
- * \brief Function from LAPACK that factorizes the matrix a by LU decomposition
- * 
- * \param m A pointer to the number of rows in a
- * \param n A pointer to the number of columns in a
- * \param a A double matrix to be overwritten with its LU decomposition
- * \param lda A double pointer to the integer leading dimension of a
- * \param ipiv An integer array to contain the pivot indices
- * \param info A pointer to an integer indicating success (0 for successful exit)
- *********************************************************************/
-extern "C" void dgetrf_ (int *m, int *n, double *a, int *lda, int *ipiv, int *info);
-
-/*!*******************************************************************
- * \brief Function from LAPACK that solves a factorized matrix equation
- * 
- * \param trans A pointer to transposition character ("N" for not transposed, "T" for transposed)
- * \param n A pointer to the number of columns in a
- * \param nrhs A pointer to the number of right hand sides
- * \param a A double matrix to be overwritten with its LU decomposition
- * \param lda A pointer to the integer number of leading dimension of a
- * \param ipiv An integer array to contain the pivot indices
- * \param b The double right hand side array, overwritten with solution
- * \param ldb A pointer to the integer number of leading dimension of b
- * \param info A pointer to an integer indicating success (0 for successful exit)
- *********************************************************************/
-extern "C" void dgetrs_ (char *trans, int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info);
+#include "../utils/utils.hpp"
 
 namespace one_d
 {
@@ -100,14 +51,14 @@ namespace one_d
 		virtual ~lapack_solver () {}
 		
 		/*!*******************************************************************
-		 * \copydoc bases::solver::_factorize ()
+		 * \copydoc bases::solver::factorize ()
 		 *********************************************************************/
-		void _factorize ();
+		void factorize ();
 		
 		/*!*******************************************************************
-		 * \copydoc bases::solver::_solve ()
+		 * \copydoc bases::solver::solve ()
 		 *********************************************************************/
-		void _solve ();
+		void solve ();
 
 	private:
 		int n; //!< The integer number of elements in the data

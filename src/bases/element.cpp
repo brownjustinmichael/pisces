@@ -54,10 +54,9 @@ namespace bases
 				explicit_space_plans [i]->execute ();
 			}
 			
-			if (timestep != previous_timestep) {
+			if (!(flags & factorized)) {
 				TRACE (logger, "Executing implicit plans...");
 				
-				flags &= ~factorized;
 				for (int i = 0; i < n_implicit_plans; ++i) {
 					implicit_plans [i]->execute ();
 				}

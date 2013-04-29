@@ -16,6 +16,7 @@
 #include "../config.hpp"
 #include "../bases/element.hpp"
 #include "../bases/plan.hpp"
+#include "../utils/utils.hpp"
 	
 namespace one_d
 {
@@ -53,12 +54,9 @@ namespace one_d
 		}
 		
 		inline void reset () {
-			int ione = 1;
-			double dzero = 0.0;
-			
 			std::map <int, std::vector <double>>::iterator iter;
 			for (iter = resettables.begin (); iter != resettables.end (); ++iter) {
-				dscal_ (&n, &dzero, &(iter->second) [0], &ione);
+				utils::scale (n, 0.0, &(iter->second) [0]);
 			}
 		}
 		
@@ -107,13 +105,10 @@ namespace one_d
 		virtual ~advection_diffusion_element () {}
 		
 		inline void reset () {
-			int ione = 1;
-			int nn = n * n;
-			
 			element::reset ();
 			
-			if (timestep != previous_timestep) {
-				dcopy_ (&nn, grid->get_data (0), &ione, &matrix [0], &ione);
+			if (!(flags & factorized)) {
+				utils::copy (n * n, grid->get_data (0), &matrix [0]);
 			}
 		}
 		
