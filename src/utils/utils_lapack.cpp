@@ -21,7 +21,7 @@ namespace utils
 	}
 	
 	double dot (int n, double* dx, double* dy, int incx, int incy) {
-		ddot_ (&n, dx, &incx, dy, &incy);
+		return ddot_ (&n, dx, &incx, dy, &incy);
 	}	
 	
 	void add_scaled (int n, double da, double *dx, double *dy, int incx, int incy) {

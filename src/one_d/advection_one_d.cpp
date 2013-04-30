@@ -65,18 +65,18 @@ namespace one_d
 
 	void advec::execute()
 	{
-		double scalar = c * timestep;
+		double scalar = -c * timestep;
 
-		// utils::matrix_vector_multiply (n - 2, n, scalar, grid->get_data (1) + 1, data_in, 1.0, data_out + 1, n);
+		utils::matrix_vector_multiply (n - 2, n, scalar, grid->get_data (1) + 1, data_in, 1.0, data_out + 1, n);
 		
 		
-		*data_out += (timestep) * c * sin_vals [0] * ( *(data_in + 1) - *data_in);																											// Impose left boundary condition
-		for (int i = 1; i < (n-1); i++)
-		{
-				*(data_out + i) += 0.5 * (timestep) * c * sin_vals [i] * ( *(data_in + i + 1) - *(data_in + i - 1) );			// centered differencing scheme
-		}
-		*(data_out + n - 1) += (timestep) * c * sin_vals [n-1] * ( *(data_in + n - 1) - *(data_in + n - 2));																								// Impose right boundary condition
-		
+		// *data_out += (timestep) * c * sin_vals [0] * ( *(data_in + 1) - *data_in);																											// Impose left boundary condition
+		// for (int i = 1; i < (n-1); i++)
+		// {
+		// 		*(data_out + i) += 0.5 * (timestep) * c * sin_vals [i] * ( *(data_in + i + 1) - *(data_in + i - 1) );			// centered differencing scheme
+		// }
+		// *(data_out + n - 1) += (timestep) * c * sin_vals [n-1] * ( *(data_in + n - 1) - *(data_in + n - 2));																								// Impose right boundary condition
+		// 
 	}
 
 }

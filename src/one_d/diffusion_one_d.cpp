@@ -27,16 +27,11 @@ namespace one_d
 
 		void explicit_diffusion::execute () {
 			double scalar = coeff * timestep;
-			double dy0, dyn;
 			
 			bases::explicit_plan::execute ();
 		
 			TRACE (logger, "Operating...");
-		
-			// dy0 = scalar * utils::dot (n, grid->get_data (1) + 1, data_in, n);
-			// data_out [0] += dy0;
-			// dyn = scalar * utils::dot (n, grid->get_data (0) + n - 1, data_in, n);
-			// data_out [n - 1] += dyn;
+			
 			data_out [0] += scalar * utils::dot (n, grid->get_data (2), data_in, n);
 			
 			// Set up and evaluate the explicit part of the diffusion equation
@@ -57,14 +52,18 @@ namespace one_d
 
 		void implicit_diffusion::execute () {
 			bases::implicit_plan::execute ();
-						
-			TRACE (logger, "Operating...");
-					
 			double scalar = coeff * timestep;
+			
+			TRACE (logger, "Operating...");
+			
+		   	// utils::add_scaled (n, scalar, grid->get_data (2), matrix, n, n);
+			
 			// This is the main loop for setting up the diffusion equation in Chebyshev space
 			for (int i = 1; i < n - 1; ++i) {
 			   	utils::add_scaled (n, scalar, grid->get_data (2) + i, matrix + i, n, n);
 			}
+	
+		   	// utils::add_scaled (n, scalar, grid->get_data (2) + n - 1, matrix + n - 1, n, n);
 	
 			TRACE (logger, "Operation complete.");
 		}
