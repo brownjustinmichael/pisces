@@ -32,11 +32,11 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::boundary::boundary ()
 		 *********************************************************************/
-		boundary (double *i_data_plus, double i_alpha_plus = 0.0, double *i_data_minus = NULL, double i_alpha_minus = 0.0, int *i_flags_ptr = NULL, int i_logger = -1) : bases::boundary (i_data_plus, i_alpha_plus, i_data_minus, i_alpha_minus, i_flags_ptr, i_logger) {}
+		boundary (double *i_data_plus, double i_alpha_plus = 0.0, double *i_data_minus = NULL, double i_alpha_minus = 0.0, bool i_one_way = false, int *i_flags_ptr = NULL, int i_logger = -1) : bases::boundary (i_data_plus, i_alpha_plus, i_data_minus, i_alpha_minus, i_flags_ptr, i_logger) {one_way = i_one_way;}
 		
-		boundary (double& i_data_plus, double i_alpha_plus, double& i_data_minus, double i_alpha_minus = 0.0, int *i_flags_ptr = NULL, int i_logger = -1) : bases::boundary (&i_data_plus, i_alpha_plus, &i_data_minus, i_alpha_minus, i_flags_ptr, i_logger) {}
+		boundary (double& i_data_plus, double i_alpha_plus, double& i_data_minus, double i_alpha_minus = 0.0, bool i_one_way = false, int *i_flags_ptr = NULL, int i_logger = -1) : bases::boundary (&i_data_plus, i_alpha_plus, &i_data_minus, i_alpha_minus, i_flags_ptr, i_logger) {one_way = i_one_way;}
 
-		boundary (double& i_data_plus, double i_alpha_plus = 0.0, int *i_flags_ptr = NULL, int i_logger = -1) : bases::boundary (&i_data_plus, i_alpha_plus, NULL, 0.0, i_flags_ptr, i_logger) {}
+		boundary (double& i_data_plus, double i_alpha_plus = 0.0, int *i_flags_ptr = NULL, int i_logger = -1) : bases::boundary (&i_data_plus, i_alpha_plus, NULL, 0.0, i_flags_ptr, i_logger) {one_way = false;}
 	
 		virtual ~boundary () {}
 	
@@ -51,12 +51,16 @@ namespace one_d
 			} else if (!data_plus) {
 				*data_minus *= alpha_minus;
 			} else {
-				*data_plus = alpha_plus * *data_plus + alpha_minus * *data_minus;
-				*data_minus = *data_plus;
+				*data_minus = alpha_plus * *data_plus + alpha_minus * *data_minus;
+				if (!one_way) {
+					*data_plus = *data_minus;					
+				}
 			}
 		
 			TRACE (logger, "executed.")
 		}
+	private:
+		bool one_way;
 	};
 } /* one_d */
 

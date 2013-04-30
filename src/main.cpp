@@ -97,7 +97,12 @@ int main (int argc, char const *argv[])
 	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_1 (vel))));
 	element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_2 (rhs, n / 2 - 1))));
 	element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_2 (vel, n / 2 - 1))));
-	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_1 (rhs, n / 2 - 1), 0.5, element_2 (rhs), 0.5)));
+	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_1 (vel, n / 2 - 2), 2.0 / (element_1 (position, n / 2 - 2) - element_1 (position, n / 2 - 1)) / (element_1 (position, n / 2 - 2) - element_2 (position, 1)), element_1 (rhs, n / 2 - 1), 0.0, true)));
+	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_1 (vel, n / 2 - 1), 1.0 / (element_1 (position, n / 2 - 1) - element_1 (position, n / 2 - 2)) / (element_1 (position, n / 2 - 1) - element_2 (position, 1)), element_1 (rhs, n / 2 - 1), 1.0, true)));
+	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_2 (vel), 1.0 / (element_2 (position) - element_1 (position, n / 2 - 2)) / (element_2 (position) - element_2 (position, 1)), element_1 (rhs, n / 2 - 1), 1.0, true)));
+	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_2 (vel, 1), 2.0 / (element_2 (position, 1) - element_1 (position, n / 2 - 2)) / (element_2 (position, 1) - element_2 (position)), element_1 (rhs, n / 2 - 1), 1.0, true)));
+	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_1 (rhs, n / 2 - 1), 2.0 * 0.00001, element_2 (rhs), 0.0)));
+	// element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_1 (rhs, n / 2 - 1), 0.5, element_2 (rhs), 0.5)));
 	// element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (2.0 / (initial_position [n / 2 - 2] - initial_position [n / 2]), element_1 (rhs, n / 2 - 1), -2.0 / (initial_position [n / 2 - 2] - initial_position [n / 2]), element_2 (rhs))));
 
 	MTRACE ("main: Entering main loop.");

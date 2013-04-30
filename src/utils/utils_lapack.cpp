@@ -6,6 +6,7 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
+#include <cassert>
 #include "utils.hpp"
 #include "lapack.hpp"
 
@@ -29,6 +30,8 @@ namespace utils
 	
 	void matrix_vector_multiply (int m, int n, double alpha, double *a, double *x, double beta, double *y, int lda, int incx, int incy) {
 		char charN = 'N';
+		
+		assert (x != y);
 		
 		if (lda == -1) {
 			lda = m;
