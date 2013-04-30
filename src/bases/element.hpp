@@ -32,7 +32,8 @@ enum index {
 	temperature = 21, temp = 21,
 	composition = 22, comp = 22,
 	
-	rhs = -01
+	rhs = -01,
+	rhsd2 = -02
 };
 
 namespace bases

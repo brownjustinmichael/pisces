@@ -24,8 +24,8 @@ namespace one_d
 	namespace chebyshev
 	{
 		advection_diffusion_element::advection_diffusion_element (std::string i_name, int i_n, double initial_position, double *initial_velocity, int i_flags) : element (i_name, i_n, i_flags) {
-			double diffusion_coeff = 10.0;
-			double advection_coeff = -10.0;
+			double diffusion_coeff = 1.0;
+			double advection_coeff = 10.0;
 			double alpha = 0.5;
 		
 			TRACE (logger, "Initializing...");
@@ -40,11 +40,11 @@ namespace one_d
 						
 			grid = std::make_shared<bases::collocation_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), logger));
 		
-			timestep_plan = std::make_shared<bases::calculate_timestep> (bases::calculate_timestep (0.001, timestep));
+			timestep_plan = std::make_shared<bases::calculate_timestep> (bases::calculate_timestep (0.00001, timestep));
 		
 			add_implicit_plan (std::make_shared <implicit_diffusion> (implicit_diffusion (- diffusion_coeff * alpha, timestep, i_n, grid, &matrix [0], &flags, logger)));
 		
-			add_explicit_grid_plan (std::make_shared <explicit_diffusion> (explicit_diffusion (diffusion_coeff * (1.0 - alpha), timestep, i_n, grid, (*this) (velocity), (*this) (rhs), &flags, logger)));
+			add_explicit_grid_plan (std::make_shared <explicit_diffusion> (explicit_diffusion (diffusion_coeff * (1.0 - alpha), timestep, i_n, grid, (*this) (velocity), (*this) (position), (*this) (rhs), &flags, logger)));
 			add_explicit_space_plan (std::make_shared <advec> (advec (n, timestep, advection_coeff, (*this) (velocity), (*this) (rhs))));
 		
 			matrix_solver = std::make_shared <lapack_solver> (lapack_solver (n, (*this) (velocity), (*this) (rhs), &matrix [0], (*this) (velocity), &flags, logger));

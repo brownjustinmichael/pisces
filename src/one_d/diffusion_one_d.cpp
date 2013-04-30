@@ -14,31 +14,35 @@
 #include "diffusion_one_d.hpp"
 #include "../utils/chebyshev.hpp"
 #include "../utils/utils.hpp"
-#include "../utils/lapack.hpp"
 
 namespace one_d
 {
 	namespace chebyshev
 	{
-		void explicit_diffusion::init (double i_coeff, double& i_timestep, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_data_in, double *i_data_out, int *i_flags_ptr) {
+		void explicit_diffusion::init (double i_coeff, std::shared_ptr<bases::collocation_grid> i_grid, double* i_position) {
 			coeff = i_coeff;
 			grid = i_grid;
+			position = i_position;
 		}
 
 		void explicit_diffusion::execute () {
-			int ione = 1;
 			double scalar = coeff * timestep;
+			double dy0, dyn;
 			
 			bases::explicit_plan::execute ();
 		
 			TRACE (logger, "Operating...");
 		
-			data_out [0] += scalar * ddot_ (&n, grid->get_data (2), &n, data_in, &ione);
-		
+			// dy0 = scalar * utils::dot (n, grid->get_data (1) + 1, data_in, n);
+			// data_out [0] += dy0;
+			// dyn = scalar * utils::dot (n, grid->get_data (0) + n - 1, data_in, n);
+			// data_out [n - 1] += dyn;
+			data_out [0] += scalar * utils::dot (n, grid->get_data (2), data_in, n);
+			
 			// Set up and evaluate the explicit part of the diffusion equation
 			utils::matrix_vector_multiply (n - 2, n, scalar, grid->get_data (2) + 1, data_in, 1.0, data_out + 1, n);
 
-			data_out [n - 1] += scalar * ddot_ (&n, grid->get_data (2) + n - 1, &n, data_in, &ione);
+			data_out [n - 1] += scalar * utils::dot (n, grid->get_data (2) + n - 1, data_in, n);
 
 			TRACE (logger, "Operation complete.");
 		}

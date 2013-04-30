@@ -21,7 +21,7 @@ int config::severity = 4;  // The default logging severity is 4, errors and fata
 std::string config::config_file = "../input/Log4cxxConfig.xml";
 unsigned int n = 66; //!< The number of grid points
 double scale = 1.0;
-double sigma = 0.2;
+double sigma = 0.1;
 
 std::vector<double> initial_conditions;
 std::vector<double> initial_position;
@@ -87,19 +87,22 @@ int main (int argc, char const *argv[])
 	for (unsigned int i = 0; i < n / 2; ++i) {
 		initial_position [i] = std::cos (pioN * i) + 1.0;
 		initial_position [i + n / 2 - 1] = std::cos (pioN * i) - 1.0;
-		initial_conditions [i] = scale * std::exp (- (initial_position [i] - 1.) * (initial_position [i] - 1.) / 2.0 / sigma / sigma) - scale * std::exp (- 1.0 / 2.0 / sigma / sigma);
-		// initial_conditions [i + n / 2 - 1] = scale * std::exp (- (initial_position [i + n / 2 - 1] - 1.) * (initial_position [i + n / 2 - 1] - 0.) / 1.0 / sigma / sigma) - scale * std::exp (- 1.0 / 2.0 / sigma / sigma);
+		initial_conditions [i] = scale * std::exp (- (initial_position [i] - 0.) * (initial_position [i] - 0.) / 2.0 / sigma / sigma) - scale * std::exp (- 4.0 / 2.0 / sigma / sigma);
+		initial_conditions [i + n / 2 - 1] = scale * std::exp (- (initial_position [i + n / 2 - 1] - 0.) * (initial_position [i + n / 2 - 1] - 0.) / 2.0 / sigma / sigma) - scale * std::exp (- 4.0 / 2.0 / sigma / sigma);
 	}
 	
 	one_d::chebyshev::advection_diffusion_element element_1 ("1", n / 2, 1.0, &initial_conditions [0], 0x00);
 	one_d::chebyshev::advection_diffusion_element element_2 ("2", n / 2, -1.0, &initial_conditions [n / 2 - 1], 0x00);
-	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_1 (rhs))));
-	element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.0, element_2 (rhs, n / 2 - 1))));
-	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (0.5, element_1 (rhs, n / 2 - 1), 0.5, element_2 (rhs))));
+	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_1 (rhs))));
+	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_1 (vel))));
+	element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_2 (rhs, n / 2 - 1))));
+	element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_2 (vel, n / 2 - 1))));
+	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_1 (rhs, n / 2 - 1), 0.5, element_2 (rhs), 0.5)));
+	// element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (2.0 / (initial_position [n / 2 - 2] - initial_position [n / 2]), element_1 (rhs, n / 2 - 1), -2.0 / (initial_position [n / 2 - 2] - initial_position [n / 2]), element_2 (rhs))));
 
 	MTRACE ("main: Entering main loop.");
 	
-	for (i = 0; i < 400; ++i) {
+	for (i = 0; i < 10000; ++i) {
 		MTRACE ("main: Beginning timestep...");
 		MINFO ("main: Timestep: " << i);
 		

@@ -32,15 +32,11 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::boundary::boundary ()
 		 *********************************************************************/
-		boundary (double i_alpha_plus, double *i_data_plus, double i_alpha_minus = 0.0, double *i_data_minus = NULL, int *i_flags_ptr = NULL, int i_logger = -1) : bases::boundary (i_alpha_plus, i_data_plus, i_alpha_minus, i_data_minus, i_flags_ptr, i_logger) {}
+		boundary (double *i_data_plus, double i_alpha_plus = 0.0, double *i_data_minus = NULL, double i_alpha_minus = 0.0, int *i_flags_ptr = NULL, int i_logger = -1) : bases::boundary (i_data_plus, i_alpha_plus, i_data_minus, i_alpha_minus, i_flags_ptr, i_logger) {}
 		
-		boundary (double i_alpha_plus, double& i_data_plus, double i_alpha_minus, double& i_data_minus, int *i_flags_ptr = NULL, int i_logger = -1) : bases::boundary (i_alpha_plus, &i_data_plus, i_alpha_minus, &i_data_minus, i_flags_ptr, i_logger) {}
+		boundary (double& i_data_plus, double i_alpha_plus, double& i_data_minus, double i_alpha_minus = 0.0, int *i_flags_ptr = NULL, int i_logger = -1) : bases::boundary (&i_data_plus, i_alpha_plus, &i_data_minus, i_alpha_minus, i_flags_ptr, i_logger) {}
 
-		boundary (double i_alpha_plus, double& i_data_plus, int *i_flags_ptr = NULL, int i_logger = -1) : bases::boundary (i_alpha_plus, &i_data_plus, 0.0, NULL, i_flags_ptr, i_logger) {}
-	
-		/*
-			TODO reverse double, double* ordering
-		*/
+		boundary (double& i_data_plus, double i_alpha_plus = 0.0, int *i_flags_ptr = NULL, int i_logger = -1) : bases::boundary (&i_data_plus, i_alpha_plus, NULL, 0.0, i_flags_ptr, i_logger) {}
 	
 		virtual ~boundary () {}
 	

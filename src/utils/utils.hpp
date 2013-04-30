@@ -16,6 +16,8 @@ namespace utils
 	void copy (int n, double* dx, double* dy, int incx = 1, int incy = 1);
 	
 	void scale (int n, double da, double* dx, int incx = 1);
+
+	double dot (int n, double* dx, double* dy, int incx = 1, int incy = 1);
 	
 	void add_scaled (int n, double da, double *dx, double *dy, int incx = 1, int incy = 1);
 	

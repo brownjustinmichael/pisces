@@ -29,7 +29,7 @@ namespace bases
 		 * \param i_alpha_minus A double coefficient for the contribution from the negative boudary
 		 * \param i_data_minus A pointer to the double first element of the negative boundary
 		 *********************************************************************/
-		boundary (double i_alpha_plus, double *i_data_plus, double i_alpha_minus, double *i_data_minus, int *i_flags_ptr = NULL, int i_logger = -1) : plan (i_flags_ptr, i_logger) {
+		boundary (double *i_data_plus, double i_alpha_plus = 0.0, double *i_data_minus = NULL, double i_alpha_minus = 0.0, int *i_flags_ptr = NULL, int i_logger = -1) : plan (i_flags_ptr, i_logger) {
 			alpha_plus = i_alpha_plus;
 			alpha_minus = i_alpha_minus;
 			data_plus = i_data_plus;
