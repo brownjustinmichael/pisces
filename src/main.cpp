@@ -93,17 +93,11 @@ int main (int argc, char const *argv[])
 	
 	one_d::chebyshev::advection_diffusion_element element_1 ("1", n / 2, 1.0, &initial_conditions [0], 0x00);
 	one_d::chebyshev::advection_diffusion_element element_2 ("2", n / 2, -1.0, &initial_conditions [n / 2 - 1], 0x00);
-	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_1 (rhs))));
-	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_1 (vel))));
-	element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_2 (rhs, n / 2 - 1))));
-	element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_2 (vel, n / 2 - 1))));
-	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_1 (vel, n / 2 - 2), 2.0 / (element_1 (position, n / 2 - 2) - element_1 (position, n / 2 - 1)) / (element_1 (position, n / 2 - 2) - element_2 (position, 1)), element_1 (rhs, n / 2 - 1), 0.0, true)));
-	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_1 (vel, n / 2 - 1), 1.0 / (element_1 (position, n / 2 - 1) - element_1 (position, n / 2 - 2)) / (element_1 (position, n / 2 - 1) - element_2 (position, 1)), element_1 (rhs, n / 2 - 1), 1.0, true)));
-	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_2 (vel), 1.0 / (element_2 (position) - element_1 (position, n / 2 - 2)) / (element_2 (position) - element_2 (position, 1)), element_1 (rhs, n / 2 - 1), 1.0, true)));
-	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_2 (vel, 1), 2.0 / (element_2 (position, 1) - element_1 (position, n / 2 - 2)) / (element_2 (position, 1) - element_2 (position)), element_1 (rhs, n / 2 - 1), 1.0, true)));
-	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_1 (rhs, n / 2 - 1), 2.0 * 0.00001, element_2 (rhs), 0.0)));
-	// element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (element_1 (rhs, n / 2 - 1), 0.5, element_2 (rhs), 0.5)));
-	// element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (2.0 / (initial_position [n / 2 - 2] - initial_position [n / 2]), element_1 (rhs, n / 2 - 1), -2.0 / (initial_position [n / 2 - 2] - initial_position [n / 2]), element_2 (rhs))));
+	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (rhs, element_1)));
+	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (vel, element_1)));
+	element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (rhs, element_2, n / 2 - 1)));
+	element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (vel, element_2, n / 2 - 1)));
+	element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (rhs, element_2, 0, 0.5, element_1, n / 2 - 1, 0.5), 0.5)));
 
 	MTRACE ("main: Entering main loop.");
 	

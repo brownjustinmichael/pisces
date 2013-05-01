@@ -38,15 +38,17 @@ enum index {
 
 namespace bases
 {	
-/*!*******************************************************************
- * \brief This is the basic class of the code
- * 
- * A true run will contain multiple elements tied together at the 
- * boundaries.
- *********************************************************************/
-class element
-{
-public:
+	/*!*******************************************************************
+	 * \brief This is the basic class of the code
+	 * 
+	 * A true run will contain multiple elements tied together at the 
+	 * boundaries.
+	 *********************************************************************/
+	class element
+	{
+	public:
+		int flags; //!< An integer set of execution flags
+	
 		/*!*******************************************************************
 		* \param i_flags An integer set of execution flags
 		*********************************************************************/
@@ -93,6 +95,7 @@ public:
 		virtual double& operator[] (int name) = 0;
 		
 		virtual double& operator () (int name, int index = 0) {
+			if (name not in )
 			return (&((*this) [name])) [index];
 		}
 		
@@ -144,11 +147,10 @@ public:
 			++n_boundaries;
 			boundaries.push_back (std::move (i_plan));
 		}
-	
+		
 	protected:
 		std::string name;
 		
-		int flags; //!< An integer set of execution flags
 		int logger;
 		int n_explicit_grid_plans; //!< The number of explicit grid plans to execute
 		int n_explicit_space_plans; //!< The number of explicit space plans to execute
@@ -173,5 +175,9 @@ public:
 		std::vector<std::shared_ptr<plan>> boundaries; //!< A vector of shared pointers to boundary conditions to be executed
 	};
 } /* bases */
+
+/*
+	TODO Add abstract element_iterator
+*/
 
 #endif /* end of include guard: ELEMENT_HPP_IUTSU4TQ */

@@ -10,6 +10,12 @@
 #define BOUNDARY_HPP_70XV2K58
 
 #include "plan.hpp"
+#include "element.hpp"
+
+enum boundary_flags {
+	fixed_0 = 0x20,
+	fixed_n = 0x21
+}
 
 namespace bases
 {
@@ -29,11 +35,7 @@ namespace bases
 		 * \param i_alpha_minus A double coefficient for the contribution from the negative boudary
 		 * \param i_data_minus A pointer to the double first element of the negative boundary
 		 *********************************************************************/
-		boundary (double *i_data_plus, double i_alpha_plus = 0.0, double *i_data_minus = NULL, double i_alpha_minus = 0.0, int *i_flags_ptr = NULL, int i_logger = -1) : plan (i_flags_ptr, i_logger) {
-			alpha_plus = i_alpha_plus;
-			alpha_minus = i_alpha_minus;
-			data_plus = i_data_plus;
-			data_minus = i_data_minus;
+		boundary (int *i_flags_ptr = NULL, int i_logger = -1) : plan (i_flags_ptr, i_logger) {
 		}
 	
 		virtual ~boundary () {}
@@ -41,13 +43,12 @@ namespace bases
 		/*!*******************************************************************
 		 * \copydoc plan::execute ()
 		 *********************************************************************/
-		virtual void execute () = 0;
+		virtual void execute () {
+			
+		}
 
 	protected:
-		double alpha_plus; //!< A double coefficient for the contribution from the positive boundary
-		double alpha_minus; //!< A double coefficient for the contribution from the negative boudary
-		double *data_plus; //!< A pointer to the double first element of the positive boundary
-		double *data_minus; //!< A pointer to the double first element of the negative boundary
+
 	};
 } /* bases */
 

@@ -15,6 +15,7 @@
 
 #include <memory>
 #include "../bases/boundary.hpp"
+#include "element.hpp"
 #include "../config.hpp"
 
 namespace one_d
@@ -32,11 +33,31 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::boundary::boundary ()
 		 *********************************************************************/
-		boundary (double *i_data_plus, double i_alpha_plus = 0.0, double *i_data_minus = NULL, double i_alpha_minus = 0.0, bool i_one_way = false, int *i_flags_ptr = NULL, int i_logger = -1) : bases::boundary (i_data_plus, i_alpha_plus, i_data_minus, i_alpha_minus, i_flags_ptr, i_logger) {one_way = i_one_way;}
-		
-		boundary (double& i_data_plus, double i_alpha_plus, double& i_data_minus, double i_alpha_minus = 0.0, bool i_one_way = false, int *i_flags_ptr = NULL, int i_logger = -1) : bases::boundary (&i_data_plus, i_alpha_plus, &i_data_minus, i_alpha_minus, i_flags_ptr, i_logger) {one_way = i_one_way;}
-
-		boundary (double& i_data_plus, double i_alpha_plus = 0.0, int *i_flags_ptr = NULL, int i_logger = -1) : bases::boundary (&i_data_plus, i_alpha_plus, NULL, 0.0, i_flags_ptr, i_logger) {one_way = false;}
+		boundary (element* i_element_plus, bool i_plus_n, double i_alpha_plus = 0.0, element* i_element_minus = NULL, bool i_minus_n, double i_alpha_minus = 0.0, int *i_flags_ptr = NULL, int i_logger = -1) : bases::boundary (i_flags_ptr, i_logger) {
+			alpha_plus = i_alpha_plus;
+			alpha_minus = i_alpha_minus;
+			element_plus = i_element_plus;
+			element_minus = i_element_minus;
+			
+			plus_n = i_plus_n;
+			minus_n = i_minus_n;
+			
+			if (plus_n) {
+				element_plus->flags |= fixed_n;
+				index_plus = (*element_plus).n - 1;
+			} else {
+				element_plus->flags |= fixed_0;
+				index_plus = 0;
+			}
+			
+			if (minus_n) {
+				element_minus->flags |= fixed_n;
+				index_minus = (*element_minus).n - 1;
+			} else {
+				element_minus->flags |= fixed_0;
+				index_minus = 0;
+			}
+		}
 	
 		virtual ~boundary () {}
 	
@@ -46,21 +67,36 @@ namespace one_d
 		inline virtual void execute () {
 			TRACE (logger, "Executing...");
 		
-			if (!data_minus) {
-				*data_plus *= alpha_plus;
-			} else if (!data_plus) {
-				*data_minus *= alpha_minus;
-			} else {
-				*data_minus = alpha_plus * *data_plus + alpha_minus * *data_minus;
-				if (!one_way) {
-					*data_plus = *data_minus;					
+			for (element_plus->iterator iter = element_plus->begin (); iter != element_plus->end (); ++iter) {
+				if (!element_minus) {
+					(*element_plus) (iter->first, index_plus) = alpha_plus;
+				} else if (!element_plus) {
+					(*element_minus) (iter->first, index_minus) = alpha_minus;
+				} else {
+					*data_minus = alpha_plus * *data_plus + alpha_minus * *data_minus;
+					if (!one_way) {
+						*data_plus = *data_minus;					
+					}
 				}
 			}
+			
+			/*
+				TODO Make implementation more general
+			*/
+			
+
 		
 			TRACE (logger, "executed.")
 		}
 	private:
-		bool one_way;
+		double alpha_plus; //!< A double coefficient for the contribution from the positive boundary
+		double alpha_minus; //!< A double coefficient for the contribution from the negative boudary
+		element* element_plus; //!< A pointer to the double first element of the positive boundary
+		element* element_minus; //!< A pointer to the double first element of the positive boundary
+		bool plus_n;
+		bool minus_n;
+		int index_plus;
+		int index_minus;
 	};
 } /* one_d */
 

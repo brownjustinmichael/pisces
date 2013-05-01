@@ -10,6 +10,7 @@
 #include <cmath>
 #include <cassert>
 #include <memory>
+#include "../bases/boundary.hpp"
 #include "../config.hpp"
 #include "diffusion_one_d.hpp"
 #include "../utils/chebyshev.hpp"
@@ -55,15 +56,19 @@ namespace one_d
 			double scalar = coeff * timestep;
 			
 			TRACE (logger, "Operating...");
-			
-		   	// utils::add_scaled (n, scalar, grid->get_data (2), matrix, n, n);
+
+			if (!(*flags_ptr & fixed_0)) {
+			   	utils::add_scaled (n, scalar, grid->get_data (2), matrix, n, n);
+			}
 			
 			// This is the main loop for setting up the diffusion equation in Chebyshev space
 			for (int i = 1; i < n - 1; ++i) {
 			   	utils::add_scaled (n, scalar, grid->get_data (2) + i, matrix + i, n, n);
 			}
 	
-		   	// utils::add_scaled (n, scalar, grid->get_data (2) + n - 1, matrix + n - 1, n, n);
+			if (!(*flags_ptr & fixed_n)) {
+			   	utils::add_scaled (n, scalar, grid->get_data (2) + n - 1, matrix + n - 1, n, n);
+			}
 	
 			TRACE (logger, "Operation complete.");
 		}

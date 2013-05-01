@@ -9,6 +9,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 
 #include <cmath>
+#include "../bases/boundary.hpp"
 #include "advection_one_d.h"
 #include "../utils/utils.hpp"
 
@@ -32,9 +33,6 @@ namespace one_d
 		for (i = 1; i < (n-1); i++)
 		{
 			sin_vals [i] = fac / sin (i/fac);
-			// sin_vals [i] = 0;
-			// sin_vals [i] = fac;
-			// sin_vals [i] = fac / (cos ((n - i - 2)/fac) - cos ((n - i)/fac));
 		}
 		sin_vals [n-1] = fac / sin ((n-1.5)/fac);
 	}
@@ -56,9 +54,6 @@ namespace one_d
 		for (i = 1; i < (n-1); i++)
 		{
 			sin_vals [i] = fac / sin (i/fac);
-			// sin_vals [i] = 0;
-			// sin_vals [i] = fac;
-			//sin_vals [i] = fac / (cos ((n - i - 2)/fac) - cos ((n - i)/fac));
 		}
 		sin_vals [n-1] = fac / sin ((n-1.5)/fac);
 	}
@@ -67,8 +62,15 @@ namespace one_d
 	{
 		double scalar = -c * timestep;
 
+		if (!(*flags_ptr & fixed_0)) {
+			data_out [0] += scalar * utils::dot (n, grid->get_data (1), data_in, n);
+		}
+
 		utils::matrix_vector_multiply (n - 2, n, scalar, grid->get_data (1) + 1, data_in, 1.0, data_out + 1, n);
 		
+		if (!(*flags_ptr & fixed_n)) {
+			data_out [n - 1] += scalar * utils::dot (n, grid->get_data (1) + n - 1, data_in, n);
+		}
 		
 		// *data_out += (timestep) * c * sin_vals [0] * ( *(data_in + 1) - *data_in);																											// Impose left boundary condition
 		// for (int i = 1; i < (n-1); i++)

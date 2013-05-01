@@ -57,9 +57,10 @@ namespace one_d
 		}
 		
 		inline void reset () {
-			std::map <int, std::vector <double>>::iterator iter;
-			for (iter = resettables.begin (); iter != resettables.end (); ++iter) {
-				utils::scale (n, 0.0, &(iter->second) [0]);
+			for (iterator iter = begin (); iter != end (); ++iter) {
+				if (iter->first < 0) {
+					utils::scale (n, 0.0, &(iter->second) [0]);
+				}
 			}
 		}
 		
@@ -67,27 +68,35 @@ namespace one_d
 		 * \copydoc bases::element::operator[] ()
 		 *********************************************************************/
 		inline double& operator[] (int name) {
-			if (name < 0) {
-				if (resettables [name].size () != (unsigned int) n) {
-					resettables [name].resize (n);
-					failsafe_dump->append ((*this) [name]);
-				}
-				return resettables [name] [0];
-			} else {
+			// if (name < 0) {
+			// 	if (resettables [name].size () != (unsigned int) n) {
+			// 		resettables [name].resize (n);
+			// 		failsafe_dump->append ((*this) [name]);
+			// 	}
+			// 	return resettables [name] [0];
+			// } else {
 				if (scalars [name].size () != (unsigned int) n) {
 					scalars [name].resize (n);
 					failsafe_dump->append ((*this) [name]);
 				}
 				return scalars [name] [0];
-			}
+			// }
 		}
+		
+		friend class boundary;
+		
+		typedef std::map <int, std::vector <double>>::iterator iterator;
+		
+		iterator begin () {return scalars.begin ()}
+		
+		iterator end () {return scalars.end ()}
 		
 	protected:
 		int n; //!< The number of elements in each 1D array
 		std::vector<int> cell; //!< An integer array for tracking each cell number for output
 
 		std::map <int, std::vector <double>> scalars; //!< A vector of scalar vectors
-		std::map <int, std::vector <double>> resettables; //!< A vector of scalar vectors
+		// std::map <int, std::vector <double>> resettables; //!< A vector of scalar vectors
 	};
 
 	namespace chebyshev
