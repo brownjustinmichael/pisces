@@ -47,7 +47,7 @@ namespace one_d
 			add_explicit_grid_plan (std::make_shared <explicit_diffusion> (explicit_diffusion (diffusion_coeff * (1.0 - alpha), timestep, i_n, grid, velocity, position, rhs)));
 			add_explicit_space_plan (std::make_shared <advec> (advec (n, timestep, advection_coeff, (*this) (velocity), (*this) (rhs), grid)));
 		
-			set_solver (std::make_shared <lapack_solver> (lapack_solver (n, (*this) (velocity), (*this) (rhs), &matrix [0], (*this) (velocity), &flags, logger)));
+			set_solver (std::make_shared <solver> (solver (n, &matrix [0], velocity, rhs)));
 		
 			set_transform (std::make_shared <fftw_cosine> (fftw_cosine (n, velocity)));
 		

@@ -85,8 +85,9 @@ public:
 			grid = i_grid;
 		}
 		
-		inline void set_solver (std::shared_ptr<solver> i_solver) {
-			matrix_solver = i_solver;
+		inline void set_solver (std::shared_ptr<plan> i_plan) {
+			i_plan->associate (this);
+			matrix_solver = i_plan;
 		}
 		
 		inline void set_timestep (std::shared_ptr<plan> i_plan) {
@@ -178,7 +179,7 @@ public:
 		double previous_timestep; //!< The double duration of the previous timestep
 	
 		std::shared_ptr<plan> timestep_plan;
-		std::shared_ptr<solver> matrix_solver; //!< A shared pointer to the matrix solver
+		std::shared_ptr<plan> matrix_solver; //!< A shared pointer to the matrix solver
 		
 		std::vector<std::shared_ptr<plan>> explicit_grid_plans; //!< A vector of shared pointers to explicit grid plans to be executed
 		std::vector<std::shared_ptr<plan>> explicit_space_plans; //!< A vector of shared pointers to explicit space plans to be executed

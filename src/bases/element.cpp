@@ -87,7 +87,7 @@ namespace bases
 		TRACE (logger, "Updating...");
 
 		if (matrix_solver) {
-			matrix_solver->solve ();
+			matrix_solver->execute ();
 		} else {
 			WARN (logger, "No matrix solver defined. It is likely the element was not set up correctly.")
 		}
