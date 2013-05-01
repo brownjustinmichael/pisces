@@ -16,8 +16,33 @@
 #include "collocation.hpp"
 #include "../config.hpp"
 
+/*!*******************************************************************
+ * \brief A set of indices to be used with the element scalars for convenience
+ * 
+ * Indices less than zero are "resettable." The null index is 
+ * equivalent to a NULL pointer.
+ *********************************************************************/
+enum index {
+	null = 00,
+	
+	position = 01, x_position = 01, x_pos = 01,
+	y_position = 02, y_pos = 02, 
+	z_position = 03, z_pos = 03,
+	velocity = 11, vel = 11, x_velocity = 11, x_vel = 11,
+	y_velocity = 12, y_vel = 12,
+	z_velocity = 13, z_vel = 13,
+	pressure = 20, pres = 20,
+	temperature = 21, temp = 21,
+	composition = 22, comp = 22,
+	
+	rhs = -01,
+	rhsd2 = -02
+};
+
 namespace bases
 {
+	class element;
+
 	/*!*******************************************************************
 	* \brief The basic functional unit, containing a recipe for execution
 	* 
@@ -31,30 +56,32 @@ namespace bases
 		/*!*******************************************************************
 		 * \param i_flags_ptr A pointer to the integer execution flags
 		 *********************************************************************/
-		plan (int *i_flags_ptr = NULL, int i_logger = -1) {
-			logger = i_logger;
-			TRACE (logger, "Instantiating...");
-			default_flags = 0x00;
-			if (!i_flags_ptr) {
-				flags_ptr = &default_flags;
-			} else {
-				flags_ptr = i_flags_ptr;
-			}
-			TRACE (logger, "Instantiated.");
+		plan () {
+			MTRACE ("Instantiating...");
+			element_ptr = NULL;
+			MTRACE ("Instantiated.");
 		}
+		
 		virtual ~plan () {}
+		
+		virtual void associate (element* i_element_ptr);
 		
 		/*!*******************************************************************
 		* \brief Operate the plan on the data arrays contained in the class
 		* 
 		* The plan class serves as a wrapper for this function.
 		*********************************************************************/
-		virtual void execute () {}
+		virtual void execute () {
+			if (!element_ptr) {
+				MERROR ("Plan not initialized completely.");
+			}
+		}
 			
 	protected:
 		int logger;
 		int default_flags; //!< An integer set of default flags to use in case the user does not specify any flags
 		int *flags_ptr; //!< A pointer to the integer execution flags
+		element* element_ptr;
 	};
 
 	/*!*******************************************************************
@@ -71,28 +98,32 @@ namespace bases
 		 * \param i_data_out The double vector of output (if NULL, use i_data_in)
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		explicit_plan (int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL, int i_logger = -1) : plan (i_flags_ptr, i_logger) {
-			TRACE (logger, "Instantiating...");
+		explicit_plan (int i_n, int i_name_in, int i_name_out = null) : plan () {
+			MTRACE ("Instantiating...");
 			n = i_n;
-			data_in = i_data_in;
-			if (!i_data_out) {
-				data_out = i_data_in;
+			name_in = i_name_in;
+			if (!i_name_out) {
+				name_out = i_name_in;
 			} else {
-				data_out = i_data_out;
+				name_out = i_name_out;
 			}
-			TRACE (logger, "Instantiated.");
+			MTRACE ("Instantiated.");
 		}
 	
-	virtual ~explicit_plan () {}
+		virtual ~explicit_plan () {}
 	
-	virtual void execute () {
-		plan::execute ();
-	}
+		virtual void associate (element* i_element_ptr);
+	
+		virtual void execute () {
+			plan::execute ();
+		}
 
 	protected:
 		int n; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
-		double *data_in; //!< A double pointer to the input data
-		double *data_out; //!< A double pointer to the output data
+		int name_in; //!< A double pointer to the input data
+		int name_out; //!< A double pointer to the output data
+		double* data_in;
+		double* data_out;
 	};
 	
 	/*!*******************************************************************
@@ -109,7 +140,7 @@ namespace bases
 		 * 
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		implicit_plan (int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_matrix, int *i_flags_ptr = NULL, int i_logger = -1) : plan (i_flags_ptr, i_logger) {
+		implicit_plan (int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_matrix) : plan () {
 			n = i_n;
 			grid = i_grid;
 			matrix = i_matrix;

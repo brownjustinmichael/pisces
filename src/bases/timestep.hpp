@@ -7,6 +7,7 @@
  ************************************************************************/
 
 #include "plan.hpp"
+#include "../config.hpp"
 
 namespace bases
 {
@@ -14,8 +15,10 @@ namespace bases
 	{
 	public:
 		calculate_timestep (double i_initial_timestep, double& i_timestep) : timestep (i_timestep) {
+			MTRACE ("Instantiating...");
 			initial_timestep = i_initial_timestep;
 			timestep = i_initial_timestep;
+			MTRACE ("Instantiated.");
 		}
 		virtual ~calculate_timestep () {}
 		

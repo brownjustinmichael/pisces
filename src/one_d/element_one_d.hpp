@@ -48,6 +48,21 @@ namespace one_d
 		
 		virtual ~element () {}
 		
+		/*!*******************************************************************
+		 * \copydoc bases::element::operator[] ()
+		 *********************************************************************/
+		inline double& operator[] (int name) {
+			if (scalars [name].size () != (unsigned int) n) {
+				scalars [name].resize (n, 0.0);
+				failsafe_dump->append ((*this) [name]);
+			}
+			return scalars [name] [0];
+		}
+		
+		virtual double& operator () (int name, int index = 0) {
+			return (&((*this) [name])) [index];
+		}
+		
 		inline void execute_boundaries () {
 			bases::element::execute_boundaries ();
 		}
@@ -58,27 +73,10 @@ namespace one_d
 		
 		inline void reset () {
 			std::map <int, std::vector <double>>::iterator iter;
-			for (iter = resettables.begin (); iter != resettables.end (); ++iter) {
-				utils::scale (n, 0.0, &(iter->second) [0]);
-			}
-		}
-		
-		/*!*******************************************************************
-		 * \copydoc bases::element::operator[] ()
-		 *********************************************************************/
-		inline double& operator[] (int name) {
-			if (name < 0) {
-				if (resettables [name].size () != (unsigned int) n) {
-					resettables [name].resize (n);
-					failsafe_dump->append ((*this) [name]);
+			for (iter = scalars.begin (); iter != scalars.end (); ++iter) {
+				if (iter->first < 0) {
+					utils::scale (n, 0.0, &(iter->second) [0]);					
 				}
-				return resettables [name] [0];
-			} else {
-				if (scalars [name].size () != (unsigned int) n) {
-					scalars [name].resize (n);
-					failsafe_dump->append ((*this) [name]);
-				}
-				return scalars [name] [0];
 			}
 		}
 		
@@ -87,7 +85,6 @@ namespace one_d
 		std::vector<int> cell; //!< An integer array for tracking each cell number for output
 
 		std::map <int, std::vector <double>> scalars; //!< A vector of scalar vectors
-		std::map <int, std::vector <double>> resettables; //!< A vector of scalar vectors
 	};
 
 	namespace chebyshev

@@ -26,19 +26,17 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::transform::transform ()
 		 *********************************************************************/
-		fftw_cosine (int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL, int i_logger = -1) : bases::transform (i_n, i_data_in, i_data_out, i_flags_ptr, i_logger) {
-			init (i_n, i_data_in, i_data_out, i_flags_ptr);
-		}
-		
-		fftw_cosine (int i_n, double& i_data_in, double& i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) : bases::transform (i_n, &i_data_in, &i_data_out, i_flags_ptr) {
-			init (i_n, &i_data_in, &i_data_out, i_flags_ptr);
-		}
-		
-		fftw_cosine (int i_n, double& i_data_in, int *i_flags_ptr = NULL, int i_logger = -1) : bases::transform (i_n, &i_data_in, NULL, i_flags_ptr, i_logger) {
-			init (i_n, &i_data_in);
-		}
+		fftw_cosine (int i_n, int i_name_in, int i_name_out = null) : bases::transform (i_n, i_name_in, i_name_out) {}
 		
 		virtual ~fftw_cosine () {}
+		
+		virtual void associate (bases::element* i_element_ptr) {
+			bases::transform::associate (i_element_ptr);
+			
+			scalar = 1.0 / sqrt (2.0 * (n - 1));
+			
+			fourier_plan = fftw_plan_r2r_1d (n, data_in, data_out, FFTW_REDFT00, FFTW_ESTIMATE);
+		}
 		
 		/*!*******************************************************************
 		 * \copydoc bases::transform::execute ()
@@ -70,17 +68,6 @@ namespace one_d
 	private:		
 		double scalar; //!< The scalar used after the transform (1 / sqrt (2 * (n - 1)))
 		fftw_plan fourier_plan; //!< The fftw_plan object to be executed
-		int runs;
-		
-		inline void init (int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL) {
-			TRACE (logger, "Instantiating...");
-						
-			scalar = 1.0 / sqrt (2.0 * (i_n - 1));
-			
-			fourier_plan = fftw_plan_r2r_1d (i_n, data_in, data_out, FFTW_REDFT00, *flags_ptr);
-			
-			TRACE (logger, "Instantiated.")
-		}
 	};
 } /* one_d */
 

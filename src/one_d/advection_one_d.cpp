@@ -10,6 +10,7 @@
 
 #include <cmath>
 #include "advection_one_d.h"
+#include "../bases/plan.hpp"
 #include "../utils/utils.hpp"
 
 namespace one_d
@@ -66,6 +67,8 @@ namespace one_d
 	void advec::execute()
 	{
 		double scalar = c * timestep;
+		
+		bases::plan::execute ();
 
 		// utils::matrix_vector_multiply (n - 2, n, scalar, grid->get_data (1) + 1, data_in, 1.0, data_out + 1, n);
 		

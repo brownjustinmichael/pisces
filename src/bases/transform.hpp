@@ -26,7 +26,7 @@ namespace bases
 		/*!*******************************************************************
 		 * \copydoc bases::explicit_plan::explicit_plan ()
 		 *********************************************************************/
-		transform (int i_n, double *i_data_in, double *i_data_out = NULL, int *i_flags_ptr = NULL, int i_logger = -1) : bases::explicit_plan (i_n, i_data_in, i_data_out, i_flags_ptr, i_logger) {}
+		transform (int i_n, int i_name_in, int i_name_out = null) : bases::explicit_plan (i_n, i_name_in, i_name_out) {}
 		
 		virtual ~transform () {}
 		

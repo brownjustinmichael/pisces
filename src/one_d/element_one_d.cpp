@@ -28,28 +28,28 @@ namespace one_d
 			double advection_coeff = 10.0;
 			double alpha = 0.5;
 		
-			TRACE (logger, "Initializing...");
+			TRACE (logger, "Initializing..." << logger);
 		
 			matrix.resize (i_n * i_n, 0.0);
 			
-			normal_stream = std::make_shared <io::incremental_output> (io::incremental_output ("../output/test_angle_" + name + "_", ".dat", 4, new io::header, i_n, logger));
+			normal_stream = std::make_shared <io::incremental_output> (io::incremental_output ("../output/test_angle_" + name + "_", ".dat", 4, new io::header, i_n));
 			normal_stream->append (cell [0]);
 			normal_stream->append ((*this) [position]);
 			normal_stream->append ((*this) [velocity]);
 			normal_stream->append ((*this) [rhs]);
-						
-			grid = std::make_shared<bases::collocation_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), logger));
+									
+			set_grid (std::make_shared<bases::collocation_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), logger)));
+			
+			set_timestep (std::make_shared<bases::calculate_timestep> (bases::calculate_timestep (0.00001, timestep)));
 		
-			timestep_plan = std::make_shared<bases::calculate_timestep> (bases::calculate_timestep (0.00001, timestep));
-		
-			add_implicit_plan (std::make_shared <implicit_diffusion> (implicit_diffusion (- diffusion_coeff * alpha, timestep, i_n, grid, &matrix [0], &flags, logger)));
-		
-			add_explicit_grid_plan (std::make_shared <explicit_diffusion> (explicit_diffusion (diffusion_coeff * (1.0 - alpha), timestep, i_n, grid, (*this) (velocity), (*this) (position), (*this) (rhs), &flags, logger)));
+			add_implicit_plan (std::make_shared <implicit_diffusion> (implicit_diffusion (- diffusion_coeff * alpha, timestep, i_n, grid, &matrix [0])));
+			
+			add_explicit_grid_plan (std::make_shared <explicit_diffusion> (explicit_diffusion (diffusion_coeff * (1.0 - alpha), timestep, i_n, grid, velocity, position, rhs)));
 			add_explicit_space_plan (std::make_shared <advec> (advec (n, timestep, advection_coeff, (*this) (velocity), (*this) (rhs), grid)));
 		
-			matrix_solver = std::make_shared <lapack_solver> (lapack_solver (n, (*this) (velocity), (*this) (rhs), &matrix [0], (*this) (velocity), &flags, logger));
+			set_solver (std::make_shared <lapack_solver> (lapack_solver (n, (*this) (velocity), (*this) (rhs), &matrix [0], (*this) (velocity), &flags, logger)));
 		
-			transform_forward = std::make_shared <fftw_cosine> (fftw_cosine (n, (*this) (velocity), &flags, logger));
+			set_transform (std::make_shared <fftw_cosine> (fftw_cosine (n, velocity)));
 		
 			double pioN = std::acos (-1.0) / (n - 1);
 			for (int i = 0; i < i_n; ++i) {
