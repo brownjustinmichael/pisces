@@ -20,7 +20,7 @@ namespace one_d
 {
 	namespace chebyshev
 	{
-		void explicit_diffusion::init (double i_coeff, std::shared_ptr<bases::collocation_grid> i_grid, double* i_position) {
+		void explicit_diffusion::init (double i_coeff, std::shared_ptr<bases::collocation_grid> i_grid, int i_position) {
 			coeff = i_coeff;
 			grid = i_grid;
 			position = i_position;
@@ -32,7 +32,7 @@ namespace one_d
 			bases::explicit_plan::execute ();
 		
 			TRACE (logger, "Operating...");
-			
+
 			data_out [0] += scalar * utils::dot (n, grid->get_data (2), data_in, n);
 			
 			// Set up and evaluate the explicit part of the diffusion equation
@@ -43,7 +43,7 @@ namespace one_d
 			TRACE (logger, "Operation complete.");
 		}
 
-		implicit_diffusion::implicit_diffusion (double i_coeff, double& i_timestep, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_matrix, int *i_flags_ptr, int i_logger) : bases::implicit_plan (i_n, i_grid, i_matrix, i_flags_ptr, i_logger), timestep (i_timestep) {
+		implicit_diffusion::implicit_diffusion (double i_coeff, double& i_timestep, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_matrix) : bases::implicit_plan (i_n, i_grid, i_matrix), timestep (i_timestep) {
 			coeff = i_coeff;
 			timestep = i_timestep;
 			n = i_n;

@@ -9,6 +9,8 @@
 #ifndef SOLVER_HPP_BDH126SH
 #define SOLVER_HPP_BDH126SH
 	
+#include "plan.hpp"
+
 /*!*******************************************************************
  * \brief Execution flags used by the solver class
  *********************************************************************/
@@ -22,38 +24,27 @@ namespace bases
 	/*!*******************************************************************
 	 * \brief A class designed to solve a matrix equation
 	 *********************************************************************/
-	class solver
+	class solver : public explicit_plan
 	{
 	public:
 		/*!*******************************************************************
 		 * \param i_flags_ptr A pointer to the integer execution flags
 		 *********************************************************************/
-		solver (int *i_flags_ptr = NULL, int i_logger = -1) {
-			logger = i_logger;
-			if (i_flags_ptr) {
-				flags_ptr = i_flags_ptr;
-			} else {
-				default_flags = never_factorized;
-				flags_ptr = &default_flags;
-			}
-		}
+		solver (int i_n, int i_name_in, int i_name_out) : explicit_plan (i_n, i_name_in, i_name_out) {}
 		
 		virtual ~solver () {}
 			
 		/*!*******************************************************************
 		 * \brief Solve the matrix equation
 		 *********************************************************************/
-		virtual void solve () {
-			if ((! (*flags_ptr & factorized)) || (*flags_ptr & never_factorized)) {
+		virtual void execute () {
+			explicit_plan::execute ();
+			if ((!(*flags_ptr & factorized)) || (*flags_ptr & never_factorized)) {
 				factorize ();
 			}
 		}
 		
-	protected:
-		int logger;
-		int *flags_ptr; //!< A pointer to the integer execution flags
-		int default_flags; //!< Default flags to use if i_flags_ptr is NULL
-		
+	protected:		
 		/*!*******************************************************************
 		 * \brief Factorize the matrix equation
 		 * 

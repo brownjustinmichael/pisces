@@ -35,7 +35,12 @@ namespace bases
 		 * \param i_alpha_minus A double coefficient for the contribution from the negative boudary
 		 * \param i_data_minus A pointer to the double first element of the negative boundary
 		 *********************************************************************/
-		boundary (int *i_flags_ptr = NULL, int i_logger = -1) : plan (i_flags_ptr, i_logger) {
+		boundary (int i_edge = fixed_0, double i_alpha = 0.0, bases::element* i_ext_element_ptr = NULL, int i_ext_edge = fixed_0, double i_ext_alpha = 0.0) : plan () {
+			edge = i_edge;
+			ext_edge = i_ext_edge;
+			alpha = i_alpha;
+			ext_alpha = i_ext_alpha;
+			ext_element_ptr = i_ext_element_ptr;
 		}
 	
 		virtual ~boundary () {}
@@ -48,7 +53,11 @@ namespace bases
 		}
 
 	protected:
-
+		int edge;
+		int ext_edge;
+		double alpha;
+		double ext_alpha;
+		bases::element* ext_element_ptr;
 	};
 } /* bases */
 

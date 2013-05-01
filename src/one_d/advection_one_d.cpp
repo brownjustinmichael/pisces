@@ -11,6 +11,7 @@
 #include <cmath>
 #include "../bases/boundary.hpp"
 #include "advection_one_d.h"
+#include "../bases/plan.hpp"
 #include "../utils/utils.hpp"
 
 namespace one_d
@@ -61,6 +62,8 @@ namespace one_d
 	void advec::execute()
 	{
 		double scalar = -c * timestep;
+		
+		bases::plan::execute ();
 
 		if (!(*flags_ptr & fixed_0)) {
 			data_out [0] += scalar * utils::dot (n, grid->get_data (1), data_in, n);

@@ -33,31 +33,7 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::boundary::boundary ()
 		 *********************************************************************/
-		boundary (element* i_element_plus, bool i_plus_n, double i_alpha_plus = 0.0, element* i_element_minus = NULL, bool i_minus_n, double i_alpha_minus = 0.0, int *i_flags_ptr = NULL, int i_logger = -1) : bases::boundary (i_flags_ptr, i_logger) {
-			alpha_plus = i_alpha_plus;
-			alpha_minus = i_alpha_minus;
-			element_plus = i_element_plus;
-			element_minus = i_element_minus;
-			
-			plus_n = i_plus_n;
-			minus_n = i_minus_n;
-			
-			if (plus_n) {
-				element_plus->flags |= fixed_n;
-				index_plus = (*element_plus).n - 1;
-			} else {
-				element_plus->flags |= fixed_0;
-				index_plus = 0;
-			}
-			
-			if (minus_n) {
-				element_minus->flags |= fixed_n;
-				index_minus = (*element_minus).n - 1;
-			} else {
-				element_minus->flags |= fixed_0;
-				index_minus = 0;
-			}
-		}
+		boundary (int i_edge = fixed_0, double i_alpha = 0.0, bases::element* i_ext_element_ptr = NULL, int i_ext_edge = fixed_0, double i_ext_alpha = 0.0) : bases::boundary (i_edge, i_alpha, i_ext_element_ptr, i_ext_edge, i_ext_alpha) {}
 	
 		virtual ~boundary () {}
 	
@@ -68,8 +44,8 @@ namespace one_d
 			TRACE (logger, "Executing...");
 		
 			for (element_plus->iterator iter = element_plus->begin (); iter != element_plus->end (); ++iter) {
-				if (!element_minus) {
-					(*element_plus) (iter->first, index_plus) = alpha_plus;
+				if (!ext_element_ptr) {
+					(*ext_element_ptr) (iter->first, index_plus) = alpha_plus;
 				} else if (!element_plus) {
 					(*element_minus) (iter->first, index_minus) = alpha_minus;
 				} else {

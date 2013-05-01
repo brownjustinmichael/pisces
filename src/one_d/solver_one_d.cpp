@@ -9,10 +9,16 @@
 #include "../config.hpp"
 #include "solver_one_d.hpp"
 #include "../utils/utils.hpp"
+#include "../bases/element.hpp"
 
 namespace one_d
 {
-	void lapack_solver::factorize () {
+	void solver::associate (bases::element* i_element_ptr) {
+		bases::solver::associate (i_element_ptr);
+		rhs = &((*i_element_ptr) [name_rhs]);
+	}
+	
+	void solver::factorize () {
 		int info;
 		
 		bases::solver::factorize ();
@@ -30,10 +36,10 @@ namespace one_d
 		}
 	}
 
-	void lapack_solver::solve () {
+	void solver::execute () {
 		int info;
 		
-		bases::solver::solve ();
+		bases::solver::execute ();
 		
 		TRACE (logger, "Solving...")
 		

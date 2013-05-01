@@ -21,7 +21,7 @@ namespace one_d
 	 * 
 	 * A LAPACK implementation of a matrix solver
 	 *********************************************************************/
-	class lapack_solver : public bases::solver
+	class solver : public bases::solver
 	{
 	public:
 		/*!*******************************************************************
@@ -32,56 +32,33 @@ namespace one_d
 		 * \param i_data_out The double array of output
 		 * \copydoc bases::solver::solver ()
 		 *********************************************************************/
-		lapack_solver (int i_n, double *i_data_in, double *i_rhs, double *i_matrix, double *i_data_out = NULL, int *i_flags_ptr = NULL, int i_logger = -1) : bases::solver (i_flags_ptr, i_logger) {
-			init (i_n, i_data_in, i_rhs, i_matrix, i_data_out, i_flags_ptr);
-		};
+		solver (int i_n, double *i_matrix, int i_name_in, int i_name_rhs, int i_name_out = null) : bases::solver (i_n, i_name_in, i_name_out) {
+			name_rhs = i_name_rhs;
+			matrix = i_matrix;
+			ipiv.resize (n, 0);
+		}
 		
-		/*
-			TODO change location of matrix in arguments
-		*/
+		virtual ~solver () {}
 		
-		lapack_solver (int i_n, double& i_data_in, double& i_rhs, double *i_matrix, double& i_data_out, int *i_flags_ptr = NULL, int i_logger = -1) : bases::solver (i_flags_ptr, i_logger) {
-			init (i_n, &i_data_in, &i_rhs, i_matrix, &i_data_out, i_flags_ptr);
-		};
+		virtual void associate (bases::element* i_element_ptr);
 		
-		lapack_solver (int i_n, double& i_data_in, double& i_rhs, double *i_matrix, int *i_flags_ptr = NULL, int i_logger = -1) : bases::solver (i_flags_ptr, i_logger) {
-			init (i_n, &i_data_in, &i_rhs, i_matrix);
-		};
+		/*!*******************************************************************
+		 * \copydoc bases::solver::solve ()
+		 *********************************************************************/
+		void execute ();
+
+	protected:
+		int name_rhs;
 		
-		virtual ~lapack_solver () {}
+		double *rhs; //!< The double array of the right-hand-side of the matrix equation
+		double *matrix; //!< The double matrix to be factorized
+		
+		std::vector<int> ipiv; //!< A vector of integers needed to calculate the factorization
 		
 		/*!*******************************************************************
 		 * \copydoc bases::solver::factorize ()
 		 *********************************************************************/
 		void factorize ();
-		
-		/*!*******************************************************************
-		 * \copydoc bases::solver::solve ()
-		 *********************************************************************/
-		void solve ();
-
-	private:
-		int n; //!< The integer number of elements in the data
-		
-		double *data_in; //!< The double array of input
-		double *rhs; //!< The double array of the right-hand-side of the matrix equation
-		double *matrix; //!< The double matrix to be factorized
-		double *data_out; //!< The double array of output
-		
-		std::vector<int> ipiv; //!< A vector of integers needed to calculate the factorization
-		
-		void init (int i_n, double *i_data_in, double *i_rhs, double *i_matrix, double *i_data_out = NULL, int *i_flags_ptr = NULL) {
-			n = i_n;
-			data_in = i_data_in;
-			rhs = i_rhs;
-			matrix = i_matrix;
-			if (i_data_out) {
-				data_out = i_data_out;
-			} else {
-				data_out = i_data_in;
-			}
-			ipiv.resize (i_n, 0);
-		}
 	};
 } /* one_d */
 
