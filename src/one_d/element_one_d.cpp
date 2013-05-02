@@ -7,6 +7,7 @@
  ************************************************************************/
 
 #include <cmath>
+#include <cassert>
 #include <string>
 #include <memory>
 #include "../config.hpp"
@@ -23,10 +24,13 @@ namespace one_d
 {
 	namespace chebyshev
 	{
-		advection_diffusion_element::advection_diffusion_element (std::string i_name, int i_n, double initial_position, double *initial_velocity, int i_flags) : element (i_name, i_n, i_flags) {
-			double diffusion_coeff = 1.0;
-			double advection_coeff = 10.0;
+		advection_diffusion_element::advection_diffusion_element (std::string i_name, int i_n, double initial_position, double *initial_velocity, int i_flags,std::map<std::string,io::types>& inputParams) : element (i_name, i_n, i_flags) {
+			double delta_t = inputParams["time_step_size"].asDouble; 
+			double diffusion_coeff = inputParams["diffusion_coeff"].asDouble;
+			double advection_coeff = inputParams["advection_coeff"].asDouble; 
 			double alpha = 0.5;
+		
+			assert (n > 0);
 		
 			TRACE (logger, "Initializing..." << logger);
 		
@@ -40,7 +44,7 @@ namespace one_d
 									
 			set_grid (std::make_shared<bases::collocation_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), logger)));
 			
-			set_timestep (std::make_shared<bases::calculate_timestep> (bases::calculate_timestep (0.00001, timestep)));
+			set_timestep (std::make_shared<bases::calculate_timestep> (bases::calculate_timestep (delta_t, timestep)));
 		
 			add_implicit_plan (std::make_shared <implicit_diffusion> (implicit_diffusion (- diffusion_coeff * alpha, timestep, i_n, grid, &matrix [0])));
 			

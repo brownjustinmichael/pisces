@@ -32,8 +32,8 @@ std::vector<double> initial_position;
 
 // Set up the logs
 
-log4cxx::LayoutPtr config::console_layout = new log4cxx::PatternLayout ("%-5p %c{2} (%C%M %L) - %m%n");
-log4cxx::LayoutPtr config::layout = new log4cxx::PatternLayout ("%d %-5p %c{2} (%C%M %L) - %m%n");
+log4cxx::LayoutPtr config::console_layout = new log4cxx::PatternLayout ("%-5p %c{2}: %C (%M %L) - %m%n");
+log4cxx::LayoutPtr config::layout = new log4cxx::PatternLayout ("%d %-5p %c{2}: %C (%M %L) - %m%n");
 std::vector<log4cxx::LoggerPtr> config::loggers;
 std::vector<log4cxx::AppenderPtr> config::appenders;
 
@@ -62,9 +62,7 @@ std::vector<log4cxx::AppenderPtr> config::appenders;
  * \param argv The character array of command line arguments
  *********************************************************************/
 int main (int argc, char const *argv[])
-{	
-	int i;
-	
+{
 	// The program runs through the execution flags.
 	while ((argc > 1) && (argv [1] [0] == '-')) {
 		switch (argv [1] [1]) {
@@ -78,28 +76,40 @@ int main (int argc, char const *argv[])
 		
 	config::make_main ();
 	
-	MTRACE ("Beginning main...");
+	// Read experiment parameters out of text file
+	std::string filename = "../input/parameters.txt";
+	std::map<std::string,io::types> inputParams;
+	io::read_params_txt parameters (filename);
+	inputParams = parameters.load_params();
+
+	// Inialize some experiment variables
+	const int n = inputParams["gridpoints"].asInt;
+	const int tsteps = inputParams["timesteps"].asInt;
+	const double scale = inputParams["init_cond_scale"].asDouble;
+	const double sigma = inputParams["init_cond_sigma"].asDouble;
+	
+	MTRACE ("Beginning main..." << n);
 	
 	initial_position.resize (n + 1);
 	initial_conditions.resize (n + 1, 0.0);
 	
 	double pioN = std::acos (-1.0) / (n / 2 - 1);
-	for (unsigned int i = 0; i < n / 2; ++i) {
+	for (int i = 0; i < n / 2; ++i) {
 		initial_position [i] = std::cos (pioN * i) + 1.0;
 		initial_position [i + n / 2 - 1] = std::cos (pioN * i) - 1.0;
 		initial_conditions [i] = scale * std::exp (- (initial_position [i] - 0.) * (initial_position [i] - 0.) / 2.0 / sigma / sigma) - scale * std::exp (- 4.0 / 2.0 / sigma / sigma);
 		initial_conditions [i + n / 2 - 1] = scale * std::exp (- (initial_position [i + n / 2 - 1] - 0.) * (initial_position [i + n / 2 - 1] - 0.) / 2.0 / sigma / sigma) - scale * std::exp (- 4.0 / 2.0 / sigma / sigma);
 	}
 	
-	one_d::chebyshev::advection_diffusion_element element_1 ("1", n / 2, 1.0, &initial_conditions [0], 0x00);
-	one_d::chebyshev::advection_diffusion_element element_2 ("2", n / 2, -1.0, &initial_conditions [n / 2 - 1], 0x00);
+	one_d::chebyshev::advection_diffusion_element element_1 ("1", n / 2, 1.0, &initial_conditions [0], 0x00, inputParams);
+	one_d::chebyshev::advection_diffusion_element element_2 ("2", n / 2, -1.0, &initial_conditions [n / 2 - 1], 0x00, inputParams);
 	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary ()));
 	element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (fixed_n)));
 	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (fixed_n, &element_2)));
 
 	MTRACE ("main: Entering main loop.");
 	
-	for (i = 0; i < 10000; ++i) {
+	for (int i = 0; i < tsteps; ++i) {
 		MTRACE ("main: Beginning timestep...");
 		MINFO ("main: Timestep: " << i);
 		

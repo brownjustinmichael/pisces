@@ -21,7 +21,7 @@ namespace bases
 		} else {
 			*flags_ptr |= edge;
 		}
-		MTRACE ("Associated.");
+		MTRACE ("Associated." << (*element_ptr) [0]);
 	}
 
 	void boundary::execute () {

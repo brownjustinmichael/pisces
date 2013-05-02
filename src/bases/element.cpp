@@ -19,8 +19,6 @@ namespace bases
 				
 		TRACE (logger, "Updating timestep...");
 		
-		MDEBUG ("flags " << (flags & transformed));
-		
 		timestep_plan->execute ();
 		
 		reset ();
@@ -34,17 +32,11 @@ namespace bases
 			transform_stream->to_file ();
 		}
 
-		MDEBUG ("flags " << (flags & transformed));
-
-
 		TRACE (logger, "Executing explicit grid plans...");
 		
 		for (int i = 0; i < n_explicit_grid_plans; ++i) {
 			explicit_grid_plans [i]->execute ();
 		}
-		
-		MDEBUG ("flags " << (flags & transformed));
-		
 		
 		TRACE (logger, "Transforming to normal space...");
 		
@@ -55,17 +47,11 @@ namespace bases
 			WARN (logger, "Transform not defined. It is likely the element was not set up correctly.")
 		}
 		
-		MDEBUG ("flags " << (flags & transformed));
-		
-		
 		TRACE (logger, "Executing explicit space plans...");
 
 		for (int i = 0; i < n_explicit_space_plans; ++i) {
 			explicit_space_plans [i]->execute ();
 		}
-		
-		
-		MDEBUG ("flags " << (flags & transformed));
 		
 		if (!(flags & factorized)) {
 			TRACE (logger, "Executing implicit plans...");
@@ -99,18 +85,12 @@ namespace bases
 	
 	void element::update () {
 		TRACE (logger, "Updating...");
-
-		MDEBUG ("flags " << (flags & transformed));
-
-
+		
 		if (matrix_solver) {
 			matrix_solver->execute ();
 		} else {
 			WARN (logger, "No matrix solver defined. It is likely the element was not set up correctly.")
 		}
-	
-		MDEBUG ("flags " << (flags & transformed));
-	
 	
 		TRACE (logger, "Update complete");
 	}

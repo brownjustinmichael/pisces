@@ -53,7 +53,7 @@ namespace one_d
 		 * \copydoc bases::element::operator[] ()
 		 *********************************************************************/
 		inline double& operator[] (int name) {
-			if (scalars [name].size () != (unsigned int) n) {
+			if (scalars [name].size () == (unsigned int) 0) {
 				scalars [name].resize (n, 0.0);
 				failsafe_dump->append ((*this) [name]);
 			}
@@ -123,7 +123,7 @@ namespace one_d
 		 * \param i_n The number of elements in each 1D data array
 		 * \param i_flags Flags for the boundary conditions and evaluation
 		 *********************************************************************/
-		advection_diffusion_element (std::string i_name, int i_n, double initial_position, double *intial_velocity, int i_flags);
+		advection_diffusion_element (std::string i_name, int i_n, double initial_position, double *intial_velocity, int i_flags,std::map<std::string,io::types>& inputParams);
 		virtual ~advection_diffusion_element () {}
 		
 		inline void reset () {
