@@ -58,8 +58,6 @@ namespace one_d
 				
 				(&((*element_ptr) [name_out])) [index] += coeff * timestep * 2.0 * ((&((*element_ptr) [name_in])) [index - 1] * x12 - (&((*element_ptr) [name_in])) [index] * x02 + (&((*ext_element_ptr) [name_in])) [ext_index + 1] * x01) / x01 / x02 / x12;
 				(&((*ext_element_ptr) [name_out])) [ext_index] += (&((*element_ptr) [name_out])) [index];
-				// (&((*element_ptr) [name_in])) [index] += (&((*element_ptr) [name_in])) [index] * 0.5 + (&((*ext_element_ptr) [name_in])) [ext_index] * 0.5;
-				// (&((*ext_element_ptr) [name_in])) [ext_index] += (&((*element_ptr) [name_in])) [index];
 			}
 		}
 

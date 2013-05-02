@@ -23,9 +23,7 @@ namespace one_d
 	private:
 	
 		double c;
-		double fac;
 		double& timestep;
-		std::vector<double> sin_vals;	// double vector of sine values
 		std::shared_ptr<bases::collocation_grid> grid;
 
 	public:
@@ -36,7 +34,6 @@ namespace one_d
 		
 		void execute ();
 	};
-
 }
 
 #endif

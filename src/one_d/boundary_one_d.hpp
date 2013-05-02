@@ -61,6 +61,13 @@ namespace one_d
 				}
 			}
 			
+			if (ext_element_ptr) {
+				for (bases::element::iterator iter = element_ptr->begin (); iter != element_ptr->end (); ++iter) {
+					(&((*element_ptr) [iter->first])) [index] = 0.5 * (&((*element_ptr) [iter->first])) [index] + 0.5 * (&((*ext_element_ptr) [iter->first])) [ext_index];
+					(&((*ext_element_ptr) [iter->first])) [ext_index] = (&((*element_ptr) [iter->first])) [index];
+				}	
+			}
+			
 			/*
 				TODO Make implementation more general
 			*/
