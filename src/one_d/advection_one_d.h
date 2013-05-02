@@ -16,28 +16,21 @@
 #include "../bases/collocation.hpp"
 #include "../bases/plan.hpp"
 
-extern "C" void dgemv_ (char *trans, int *m, int *n, double *alpha, double *a, int *lda, double *x, int *incx, double *beta, double *y, int *incy);
-
 namespace one_d
 {
-
-	class advec : public bases::plan
+	class advec : public bases::explicit_plan
 	{
 	private:
 	
-		int n;							// number of grid points
 		double c;
 		double fac;
 		double& timestep;
-		double *data_in;				// double pointer to input data
-		double *data_out;				// double pointer to output data
 		std::vector<double> sin_vals;	// double vector of sine values
 		std::shared_ptr<bases::collocation_grid> grid;
 
 	public:
 
-		advec (int i_n, double& i_timestep, double i_c, double *i_data_in, double *i_data_out, std::shared_ptr<bases::collocation_grid> i_grid);	//constuctor initializes private members to point to input and output vectors
-		advec (int i_n, double& i_timestep, double i_c, double &i_data_in, double &i_data_out, std::shared_ptr<bases::collocation_grid> i_grid);	//constuctor initializes private members to point to input and output vectors
+		advec (int i_n, double& i_timestep, double i_c, int i_name_in, int i_name_out, std::shared_ptr<bases::collocation_grid> i_grid);	//constuctor initializes private members to point to input and output vectors
 		
 		virtual ~advec () {}
 		

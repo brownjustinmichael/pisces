@@ -9,16 +9,18 @@
 #ifndef BOUNDARY_HPP_70XV2K58
 #define BOUNDARY_HPP_70XV2K58
 
+#include "../config.hpp"
 #include "plan.hpp"
-#include "element.hpp"
 
 enum boundary_flags {
 	fixed_0 = 0x20,
 	fixed_n = 0x21
-}
+};
 
 namespace bases
 {
+	class element;
+	
    /*!*******************************************************************
     * \brief An abstract plan class to handle boundary conditions
     * 
@@ -35,28 +37,32 @@ namespace bases
 		 * \param i_alpha_minus A double coefficient for the contribution from the negative boudary
 		 * \param i_data_minus A pointer to the double first element of the negative boundary
 		 *********************************************************************/
-		boundary (int i_edge = fixed_0, double i_alpha = 0.0, bases::element* i_ext_element_ptr = NULL, int i_ext_edge = fixed_0, double i_ext_alpha = 0.0) : plan () {
+		boundary (int i_edge, bases::element* i_ext_element_ptr, int i_ext_edge) : plan () {
+			MTRACE ("Instantiating...");
 			edge = i_edge;
 			ext_edge = i_ext_edge;
-			alpha = i_alpha;
-			ext_alpha = i_ext_alpha;
 			ext_element_ptr = i_ext_element_ptr;
+			MTRACE ("Instantiated.");
 		}
 	
 		virtual ~boundary () {}
-	
+		
+		virtual void associate (bases::element* i_element_ptr);
+		
+		virtual void fix_edge (int name) = 0;
+		
 		/*!*******************************************************************
 		 * \copydoc plan::execute ()
 		 *********************************************************************/
-		virtual void execute () {
-			
-		}
+		virtual void execute ();
+		
+		friend class element;
 
 	protected:
 		int edge;
 		int ext_edge;
-		double alpha;
-		double ext_alpha;
+		int index;
+		int ext_index;
 		bases::element* ext_element_ptr;
 	};
 } /* bases */

@@ -10,6 +10,7 @@
 #define SOLVER_HPP_BDH126SH
 	
 #include "plan.hpp"
+#include "transform.hpp"
 
 /*!*******************************************************************
  * \brief Execution flags used by the solver class
@@ -42,6 +43,7 @@ namespace bases
 			if ((!(*flags_ptr & factorized)) || (*flags_ptr & never_factorized)) {
 				factorize ();
 			}
+			*flags_ptr |= transformed;
 		}
 		
 	protected:		

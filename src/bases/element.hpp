@@ -11,7 +11,9 @@
 
 #include <string>
 #include "plan.hpp"
+#include "boundary.hpp"
 #include "solver.hpp"
+#include "transform.hpp"
 #include "../utils/io.hpp"
 #include "collocation.hpp"
 #include "../config.hpp"
@@ -77,9 +79,12 @@ namespace bases
 		/*!*******************************************************************
 		 * \brief Reset every index < 0
 		 *********************************************************************/
-		virtual void reset () {
+		virtual void reset () {			
 			if (previous_timestep != timestep) {
 				flags &= ~factorized;
+			}
+			if (!(flags & transformed)) {
+				transform_forward->execute ();
 			}
 		}
 		
@@ -107,7 +112,7 @@ namespace bases
 		 * 
 		 * \param i_plan A shared pointer to the plan to add
 		 *********************************************************************/
-		inline void add_explicit_grid_plan (std::shared_ptr<plan> i_plan) {
+		inline void add_explicit_grid_plan (std::shared_ptr<explicit_plan> i_plan) {
 			TRACE (logger, "Adding explicit grid plan...");
 			++n_explicit_grid_plans;
 			i_plan->associate (this);
@@ -120,7 +125,7 @@ namespace bases
 		 * 
 		 * \param i_plan A shared pointer to the plan to add
 		 *********************************************************************/	
-		inline void add_explicit_space_plan (std::shared_ptr<plan> i_plan) {
+		inline void add_explicit_space_plan (std::shared_ptr<explicit_plan> i_plan) {
 			TRACE (logger, "Adding explicit space plan...");
 			++n_explicit_space_plans;
 			i_plan->associate (this);
@@ -133,7 +138,7 @@ namespace bases
 		 * 
 		 * \param i_plan A shared pointer to the plan to add
 		 *********************************************************************/
-		inline void add_implicit_plan (std::shared_ptr<plan> i_plan) {
+		inline void add_implicit_plan (std::shared_ptr<implicit_plan> i_plan) {
 			TRACE (logger, "Adding implicit plan...");
 			++n_implicit_plans;
 			i_plan->associate (this);
@@ -146,15 +151,32 @@ namespace bases
 		 * 
 		 * \param i_plan A shared pointer to the plan to add
 		 *********************************************************************/
-		inline void add_boundary (std::shared_ptr<plan> i_plan) {
+		inline void add_boundary (std::shared_ptr<boundary> i_boundary) {
 			TRACE (logger, "Adding boundary...");
 			++n_boundaries;
-			i_plan->associate (this);
-			boundaries.push_back (std::move (i_plan));
+			i_boundary->associate (this);
+
+			if (!i_boundary->ext_element_ptr) {
+				for (iterator iter = begin (); iter != end (); ++iter) {
+					i_boundary->fix_edge (iter->first);
+				}
+			}
+
+			boundaries.push_back (std::move (i_boundary));
 			TRACE (logger, "Added.");
 		}
+		
+		virtual int get_boundary_index (int edge) = 0;
+		
+		typedef std::map <int, std::vector <double>>::iterator iterator;
+		
+		virtual iterator begin () = 0;
+		
+		virtual iterator end () = 0;
 
 		friend class plan;
+		
+		friend class boundary;
 	
 	protected:
 		std::string name;
@@ -182,10 +204,10 @@ namespace bases
 		std::shared_ptr<plan> timestep_plan;
 		std::shared_ptr<plan> matrix_solver; //!< A shared pointer to the matrix solver
 		
-		std::vector<std::shared_ptr<plan>> explicit_grid_plans; //!< A vector of shared pointers to explicit grid plans to be executed
-		std::vector<std::shared_ptr<plan>> explicit_space_plans; //!< A vector of shared pointers to explicit space plans to be executed
-		std::vector<std::shared_ptr<plan>> implicit_plans; //!< A vector of shared pointers to implicit plans to be executed
-		std::vector<std::shared_ptr<plan>> boundaries; //!< A vector of shared pointers to boundary conditions to be executed
+		std::vector<std::shared_ptr<explicit_plan>> explicit_grid_plans; //!< A vector of shared pointers to explicit grid plans to be executed
+		std::vector<std::shared_ptr<explicit_plan>> explicit_space_plans; //!< A vector of shared pointers to explicit space plans to be executed
+		std::vector<std::shared_ptr<implicit_plan>> implicit_plans; //!< A vector of shared pointers to implicit plans to be executed
+		std::vector<std::shared_ptr<boundary>> boundaries; //!< A vector of shared pointers to boundary conditions to be executed
 	};
 } /* bases */
 

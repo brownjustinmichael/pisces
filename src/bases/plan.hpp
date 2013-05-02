@@ -113,10 +113,8 @@ namespace bases
 		virtual ~explicit_plan () {}
 	
 		virtual void associate (element* i_element_ptr);
-	
-		virtual void execute () {
-			plan::execute ();
-		}
+		
+		virtual void boundary (int edge, element* ext_element_ptr, int ext_edge) {}
 
 	protected:
 		int n; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
@@ -148,10 +146,7 @@ namespace bases
 
 		virtual ~implicit_plan () {}
 		
-		virtual void execute () {
-			plan::execute ();
-		}
-		
+		virtual void boundary (int edge, element* ext_element_ptr, int ext_edge) {}
 
 	protected:
 		int n; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle

@@ -32,8 +32,8 @@ std::vector<double> initial_position;
 
 // Set up the logs
 
-log4cxx::LayoutPtr config::console_layout = new log4cxx::PatternLayout ("%-5p %c{2} (%C::%M %L) - %m%n");
-log4cxx::LayoutPtr config::layout = new log4cxx::PatternLayout ("%d %-5p %c{2} (%C::%M %L) - %m%n");
+log4cxx::LayoutPtr config::console_layout = new log4cxx::PatternLayout ("%-5p %c{2} (%C%M %L) - %m%n");
+log4cxx::LayoutPtr config::layout = new log4cxx::PatternLayout ("%d %-5p %c{2} (%C%M %L) - %m%n");
 std::vector<log4cxx::LoggerPtr> config::loggers;
 std::vector<log4cxx::AppenderPtr> config::appenders;
 
@@ -93,11 +93,9 @@ int main (int argc, char const *argv[])
 	
 	one_d::chebyshev::advection_diffusion_element element_1 ("1", n / 2, 1.0, &initial_conditions [0], 0x00);
 	one_d::chebyshev::advection_diffusion_element element_2 ("2", n / 2, -1.0, &initial_conditions [n / 2 - 1], 0x00);
-	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (rhs, element_1)));
-	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (vel, element_1)));
-	element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (rhs, element_2, n / 2 - 1)));
-	element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (vel, element_2, n / 2 - 1)));
-	element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (rhs, element_2, 0, 0.5, element_1, n / 2 - 1, 0.5), 0.5)));
+	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary ()));
+	element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (fixed_n)));
+	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (fixed_n, &element_2)));
 
 	MTRACE ("main: Entering main loop.");
 	

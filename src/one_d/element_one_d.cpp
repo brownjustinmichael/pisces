@@ -25,7 +25,7 @@ namespace one_d
 	{
 		advection_diffusion_element::advection_diffusion_element (std::string i_name, int i_n, double initial_position, double *initial_velocity, int i_flags) : element (i_name, i_n, i_flags) {
 			double diffusion_coeff = 1.0;
-			double advection_coeff = 10.0;
+			double advection_coeff = 0.0;
 			double alpha = 0.5;
 		
 			TRACE (logger, "Initializing..." << logger);
@@ -45,7 +45,7 @@ namespace one_d
 			add_implicit_plan (std::make_shared <implicit_diffusion> (implicit_diffusion (- diffusion_coeff * alpha, timestep, i_n, grid, &matrix [0])));
 			
 			add_explicit_grid_plan (std::make_shared <explicit_diffusion> (explicit_diffusion (diffusion_coeff * (1.0 - alpha), timestep, i_n, grid, velocity, position, rhs)));
-			add_explicit_space_plan (std::make_shared <advec> (advec (n, timestep, advection_coeff, (*this) (velocity), (*this) (rhs), grid)));
+			add_explicit_space_plan (std::make_shared <advec> (advec (n, timestep, advection_coeff, velocity, rhs, grid)));
 		
 			set_solver (std::make_shared <solver> (solver (n, &matrix [0], velocity, rhs)));
 		
@@ -56,8 +56,6 @@ namespace one_d
 				(*this) (position, i) = std::cos (i * pioN) + initial_position;
 				(*this) (velocity, i) = initial_velocity [i];
 			}
-		
-			transform_forward->execute ();
 
 			TRACE (logger, "Initialized.");
 		}

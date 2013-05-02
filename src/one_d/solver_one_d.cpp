@@ -6,6 +6,7 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
+#include <cmath>
 #include "../config.hpp"
 #include "solver_one_d.hpp"
 #include "../utils/utils.hpp"
@@ -53,6 +54,12 @@ namespace one_d
 		}
 		
 		utils::matrix_solve (n, &matrix [0], &ipiv [0], data_out, &info);
+		
+		for (int i = 0; i < n; ++i) {
+			if (std::isnan (data_out [i])) {
+				info = -1;
+			}
+		}
 		
 		if (info != 0) {
 			ERROR (logger, "Unable to solve factorized matrix equation");

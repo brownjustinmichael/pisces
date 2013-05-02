@@ -17,16 +17,14 @@
 namespace one_d
 {
 	
-	advec::advec (int i_n, double& i_timestep, double i_c, double *i_data_in, double *i_data_out, std::shared_ptr<bases::collocation_grid> i_grid) : timestep (i_timestep)
+	advec::advec (int i_n, double& i_timestep, double i_c, int i_name_in, int i_name_out, std::shared_ptr<bases::collocation_grid> i_grid) : bases::explicit_plan (i_n, i_name_in, i_name_out), timestep (i_timestep)
 	{
+		MTRACE ("Instantiating...");
 		int i;
 		grid = i_grid;
-		n = i_n;				// initialize number of grid points
 		c = i_c;
 		timestep = i_timestep;
 		fac = (n - 1) / acos(-1.0);
-		data_in = i_data_in;	// initialize pointer to input data
-		data_out = i_data_out;	// initialize pointer to output data
 
 		sin_vals.resize(n, 0.0);
 
@@ -36,27 +34,7 @@ namespace one_d
 			sin_vals [i] = fac / sin (i/fac);
 		}
 		sin_vals [n-1] = fac / sin ((n-1.5)/fac);
-	}
-	
-	advec::advec (int i_n, double& i_timestep, double i_c, double &i_data_in, double &i_data_out, std::shared_ptr<bases::collocation_grid> i_grid) : timestep (i_timestep)
-	{
-		int i;
-		grid = i_grid;
-		n = i_n;				// initialize number of grid points
-		c = i_c;
-		timestep = i_timestep;
-		fac = (n - 1) / acos(-1.0);
-		data_in = &i_data_in;	// initialize pointer to input data
-		data_out = &i_data_out;	// initialize pointer to output data
-
-		sin_vals.resize(n, 0.0);
-
-		sin_vals [0] = fac / sin (.5/fac);
-		for (i = 1; i < (n-1); i++)
-		{
-			sin_vals [i] = fac / sin (i/fac);
-		}
-		sin_vals [n-1] = fac / sin ((n-1.5)/fac);
+		MTRACE ("Instantiated.");
 	}
 
 	void advec::execute()
@@ -65,15 +43,15 @@ namespace one_d
 		
 		bases::plan::execute ();
 
-		if (!(*flags_ptr & fixed_0)) {
-			data_out [0] += scalar * utils::dot (n, grid->get_data (1), data_in, n);
-		}
+		// if (!(*flags_ptr & fixed_0)) {
+		// 	data_out [0] += scalar * utils::dot (n, grid->get_data (1), data_in, n);
+		// }
 
 		utils::matrix_vector_multiply (n - 2, n, scalar, grid->get_data (1) + 1, data_in, 1.0, data_out + 1, n);
 		
-		if (!(*flags_ptr & fixed_n)) {
-			data_out [n - 1] += scalar * utils::dot (n, grid->get_data (1) + n - 1, data_in, n);
-		}
+		// if (!(*flags_ptr & fixed_n)) {
+		// 	data_out [n - 1] += scalar * utils::dot (n, grid->get_data (1) + n - 1, data_in, n);
+		// }
 		
 		// *data_out += (timestep) * c * sin_vals [0] * ( *(data_in + 1) - *data_in);																											// Impose left boundary condition
 		// for (int i = 1; i < (n-1); i++)

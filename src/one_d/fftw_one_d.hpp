@@ -54,10 +54,6 @@ namespace one_d
 			
 			fftw_execute (fourier_plan);
 			
-			if (*flags_ptr & transformed) {
-				// data_out [n - 1] = 0.0;
-			}
-			
 			for (int i = 0; i < n; ++i) {
 				data_out [i] *= scalar;
 			}

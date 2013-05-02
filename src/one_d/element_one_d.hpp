@@ -14,6 +14,7 @@
 #include <vector>
 #include <map>
 #include "../config.hpp"
+#include "../bases/boundary.hpp"
 #include "../bases/element.hpp"
 #include "../bases/plan.hpp"
 #include "../utils/utils.hpp"
@@ -72,6 +73,7 @@ namespace one_d
 		}
 		
 		inline void reset () {
+			bases::element::reset ();
 			std::map <int, std::vector <double>>::iterator iter;
 			for (iter = scalars.begin (); iter != scalars.end (); ++iter) {
 				if (iter->first < 0) {
@@ -80,13 +82,23 @@ namespace one_d
 			}
 		}
 		
+		inline int get_boundary_index (int edge) {
+			MTRACE ("Getting boundary index...");
+			if (edge == fixed_0) {
+				return 0;
+			} else if (edge == fixed_n) {
+				return n - 1;
+			} else {
+				FATAL (logger, "Edge is not a one_d edge index.");
+				throw 0;
+			}
+		}
+		
 		friend class boundary;
 		
-		typedef std::map <int, std::vector <double>>::iterator iterator;
+		bases::element::iterator begin () {return scalars.begin ();}
 		
-		iterator begin () {return scalars.begin ()}
-		
-		iterator end () {return scalars.end ()}
+		bases::element::iterator end () {return scalars.end ();}
 		
 	protected:
 		int n; //!< The number of elements in each 1D array
