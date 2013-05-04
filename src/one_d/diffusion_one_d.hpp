@@ -37,7 +37,7 @@ namespace one_d
 			* 
 			* \copydetails bases::explicit_plan::explicit_plan ()
 			*********************************************************************/
-			explicit_diffusion (double i_coeff, double& i_timestep, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, int i_name_in, int i_position, int i_name_out = null);
+			explicit_diffusion (double i_coeff, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, int i_name_in, int i_position, int i_name_out = null);
 
 			virtual ~explicit_diffusion () {}
 
@@ -50,7 +50,6 @@ namespace one_d
 
 		private:
 			double coeff; //!< A double that represents the coefficient in front of the diffusion term in the differential equation
-			double& timestep;
 			int position;
 			std::shared_ptr<bases::collocation_grid> grid; //!< A pointer to a collocation grid that contains the the Chebyshev values
 		};
@@ -72,7 +71,7 @@ namespace one_d
 			 * 
 			 * \copydetails bases::implicit_plan::implicit_plan ()
 			 *********************************************************************/
-			implicit_diffusion (double i_coeff, double& i_timestep, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_matrix);
+			implicit_diffusion (double i_coeff, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_matrix);
 
 			virtual ~implicit_diffusion () {}
 
@@ -83,7 +82,6 @@ namespace one_d
 
 		private:
 			double coeff; //!< A double that represents the coefficient in front of the diffusion term in the differential equation
-			double& timestep;
 			std::vector<double> temp;
 		};
 	} /* chebyshev */

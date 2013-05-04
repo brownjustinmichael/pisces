@@ -24,6 +24,10 @@ namespace one_d
 		
 		bases::solver::factorize ();
 		
+		utils::scale (n * n, timestep, matrix);
+		
+		utils::add_scaled (n * n, 1.0, default_matrix, matrix);
+		
 		utils::matrix_factorize (n, n, matrix, &ipiv [0], &info);
 		
 		MDEBUG ("factorize");
@@ -45,12 +49,12 @@ namespace one_d
 		TRACE (logger, "Solving...")
 		
 		if (data_out == rhs) {
-			utils::add_scaled (n, 1.0, data_in, data_out);
+			utils::add_scaled (n, timestep, data_in, data_out);
 		} else {
 			if (data_in != data_out) {
 				utils::copy (n, data_in, data_out);
 			}
-			utils::add_scaled (n, 1.0, rhs, data_out);
+			utils::add_scaled (n, timestep, rhs, data_out);
 		}
 		
 		utils::matrix_solve (n, &matrix [0], &ipiv [0], data_out, &info);

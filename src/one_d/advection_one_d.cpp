@@ -17,7 +17,7 @@
 namespace one_d
 {
 	
-	advec::advec (int i_n, double& i_timestep, double i_c, int i_name_in, int i_name_out, std::shared_ptr<bases::collocation_grid> i_grid) : bases::explicit_plan (i_n, i_name_in, i_name_out), timestep (i_timestep)
+	advec::advec (int i_n, double i_c, int i_name_in, int i_name_out, std::shared_ptr<bases::collocation_grid> i_grid) : bases::explicit_plan (i_n, i_name_in, i_name_out)
 	{
 		MTRACE ("Instantiating...");
 		int i;
@@ -28,19 +28,18 @@ namespace one_d
 
 	void advec::execute()
 	{
-		double scalar = -c * timestep;
 		double temp;
 		
 		bases::plan::execute ();
 
 		if (!(*flags_ptr & fixed_0)) {
-			data_out [0] += scalar * utils::dot (n, grid->get_data (1), data_in, n);
+			data_out [0] -= c * utils::dot (n, grid->get_data (1), data_in, n);
 		}
 
-		utils::matrix_vector_multiply (n - 2, n, scalar, grid->get_data (1) + 1, data_in, 1.0, data_out + 1, n);
+		utils::matrix_vector_multiply (n - 2, n, -c, grid->get_data (1) + 1, data_in, 1.0, data_out + 1, n);
 		
 		if (!(*flags_ptr & fixed_n)) {
-			data_out [n - 1] += scalar * utils::dot (n, grid->get_data (1) + n - 1, data_in, n);
+			data_out [n - 1] -= c * utils::dot (n, grid->get_data (1) + n - 1, data_in, n);
 		}
 	}
 }

@@ -32,8 +32,9 @@ namespace one_d
 		 * \param i_data_out The double array of output
 		 * \copydoc bases::solver::solver ()
 		 *********************************************************************/
-		solver (int i_n, double *i_matrix, int i_name_in, int i_name_rhs, int i_name_out = null) : bases::solver (i_n, i_name_in, i_name_out) {
+		solver (int i_n, double& i_timestep, double *i_default_matrix, double *i_matrix, int i_name_in, int i_name_rhs, int i_name_out = null) : bases::solver (i_n, i_name_in, i_name_out), timestep (i_timestep) {
 			name_rhs = i_name_rhs;
+			default_matrix = i_default_matrix;
 			matrix = i_matrix;
 			ipiv.resize (n, 0);
 		}
@@ -50,7 +51,10 @@ namespace one_d
 	protected:
 		int name_rhs;
 		
+		double& timestep;
+		
 		double *rhs; //!< The double array of the right-hand-side of the matrix equation
+		double* default_matrix;
 		double *matrix; //!< The double matrix to be factorized
 		
 		std::vector<int> ipiv; //!< A vector of integers needed to calculate the factorization

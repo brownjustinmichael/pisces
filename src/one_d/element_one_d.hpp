@@ -72,8 +72,8 @@ namespace one_d
 			bases::element::update ();
 		}
 		
-		inline void reset () {
-			bases::element::reset ();
+		inline void explicit_reset () {
+			bases::element::explicit_reset ();
 			std::map <int, std::vector <double>>::iterator iter;
 			for (iter = scalars.begin (); iter != scalars.end (); ++iter) {
 				if (iter->first < 0) {
@@ -126,11 +126,11 @@ namespace one_d
 		advection_diffusion_element (std::string i_name, int i_n, double initial_position, double *intial_velocity, int i_flags,std::map<std::string,io::types>& inputParams);
 		virtual ~advection_diffusion_element () {}
 		
-		inline void reset () {
-			element::reset ();
+		inline void implicit_reset () {
+			element::implicit_reset ();
 			
 			if (!(flags & factorized)) {
-				utils::copy (n * n, grid->get_data (0), &matrix [0]);
+				utils::scale (n * n, 0.0, &matrix [0]);
 			}
 		}
 		

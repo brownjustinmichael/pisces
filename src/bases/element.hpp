@@ -79,14 +79,14 @@ namespace bases
 		/*!*******************************************************************
 		 * \brief Reset every index < 0
 		 *********************************************************************/
-		virtual void reset () {			
-			if (previous_timestep != timestep) {
-				flags &= ~factorized;
-			}
+		virtual void explicit_reset () {
 			if (!(flags & transformed)) {
 				transform_forward->execute ();
 			}
 		}
+		
+		virtual void implicit_reset () {};
+		
 		
 		inline void set_grid (std::shared_ptr<collocation_grid> i_grid) {
 			grid = i_grid;

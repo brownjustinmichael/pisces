@@ -42,16 +42,16 @@ namespace one_d
 			normal_stream->append ((*this) [velocity]);
 			normal_stream->append ((*this) [rhs]);
 									
-			set_grid (std::make_shared<bases::collocation_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), logger)));
+			set_grid (std::make_shared<chebyshev_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), logger)));
 			
-			set_timestep (std::make_shared<bases::calculate_timestep> (bases::calculate_timestep (delta_t, timestep)));
+			set_timestep (std::make_shared<constant_timestep> (constant_timestep (delta_t, timestep)));
 		
-			add_implicit_plan (std::make_shared <implicit_diffusion> (implicit_diffusion (- diffusion_coeff * alpha, timestep, i_n, grid, &matrix [0])));
+			add_implicit_plan (std::make_shared <implicit_diffusion> (implicit_diffusion (- diffusion_coeff * alpha, i_n, grid, &matrix [0])));
 			
-			add_explicit_grid_plan (std::make_shared <explicit_diffusion> (explicit_diffusion (diffusion_coeff * (1.0 - alpha), timestep, i_n, grid, velocity, position, rhs)));
-			add_explicit_grid_plan (std::make_shared <advec> (advec (n, timestep, advection_coeff, velocity, rhs, grid)));
+			add_explicit_grid_plan (std::make_shared <explicit_diffusion> (explicit_diffusion (diffusion_coeff * (1.0 - alpha), i_n, grid, velocity, position, rhs)));
+			add_explicit_grid_plan (std::make_shared <advec> (advec (n, advection_coeff, velocity, rhs, grid)));
 		
-			set_solver (std::make_shared <solver> (solver (n, &matrix [0], velocity, rhs)));
+			set_solver (std::make_shared <solver> (solver (n, timestep, grid->get_data (0), &matrix [0], velocity, rhs)));
 		
 			set_transform (std::make_shared <fftw_cosine> (fftw_cosine (n, velocity)));
 		

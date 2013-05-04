@@ -23,12 +23,11 @@ namespace one_d
 	private:
 	
 		double c;
-		double& timestep;
 		std::shared_ptr<bases::collocation_grid> grid;
 
 	public:
 
-		advec (int i_n, double& i_timestep, double i_c, int i_name_in, int i_name_out, std::shared_ptr<bases::collocation_grid> i_grid);	//constuctor initializes private members to point to input and output vectors
+		advec (int i_n, double i_c, int i_name_in, int i_name_out, std::shared_ptr<bases::collocation_grid> i_grid);	//constuctor initializes private members to point to input and output vectors
 		
 		virtual ~advec () {}
 		

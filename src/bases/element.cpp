@@ -17,11 +17,7 @@ namespace bases
 	void element::calculate () {		
 		TRACE (logger, "Calculating...");
 				
-		TRACE (logger, "Updating timestep...");
-		
-		timestep_plan->execute ();
-		
-		reset ();
+		explicit_reset ();
 		
 		// Start in grid space
 		
@@ -53,8 +49,19 @@ namespace bases
 			explicit_space_plans [i]->execute ();
 		}
 		
+		TRACE (logger, "Updating timestep...");
+		
+		timestep_plan->execute ();
+		
+		TRACE (logger, "Check that the timestep hasn't changed");
+		
+		if (previous_timestep != timestep) {
+			flags &= ~factorized;
+		}
+		
 		if (!(flags & factorized)) {
 			TRACE (logger, "Executing implicit plans...");
+			implicit_reset ();
 			
 			for (int i = 0; i < n_implicit_plans; ++i) {
 				implicit_plans [i]->execute ();
