@@ -18,6 +18,8 @@
 #include "collocation.hpp"
 #include "../config.hpp"
 
+#include "mpi.h"
+
 namespace bases
 {	
 	/*!*******************************************************************
