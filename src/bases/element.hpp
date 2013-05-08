@@ -18,7 +18,7 @@
 #include "collocation.hpp"
 #include "../config.hpp"
 
-#include "mpi.h"
+// #include "mpi.h"
 
 namespace bases
 {	
@@ -40,13 +40,8 @@ namespace bases
 			name = i_name;
 			flags = i_flags;
 			logger = config::make_logger ();
-		
-			n_explicit_grid_plans = 0;
-			n_explicit_space_plans = 0;
-			n_implicit_plans = 0;
+			
 			n_boundaries = 0;
-		
-			previous_timestep = 0.0;
 		}
 		
 		virtual ~element () {}
@@ -99,52 +94,45 @@ namespace bases
 			matrix_solver = i_plan;
 		}
 		
-		inline void set_timestep (std::shared_ptr<plan> i_plan) {
-			i_plan->associate (this);
-			timestep_plan = i_plan;
-		}
-		
 		inline void set_transform (std::shared_ptr<plan> i_plan) {
 			i_plan->associate (this);
 			transform_forward = i_plan;
+			add_plan (transform_forward);
 		}
 	
 		/*!*******************************************************************
-		 * \brief Adds an explicit plan to be evaluated in grid space
+		 * \brief Adds a plan to be executed in order
 		 * 
 		 * \param i_plan A shared pointer to the plan to add
 		 *********************************************************************/
-		inline void add_explicit_grid_plan (std::shared_ptr<explicit_plan> i_plan) {
-			TRACE (logger, "Adding explicit grid plan...");
-			++n_explicit_grid_plans;
+		inline void add_plan (std::shared_ptr <plan> i_plan) {
+			TRACE (logger, "Adding plan...");
 			i_plan->associate (this);
-			explicit_grid_plans.push_back (std::move (i_plan));
+			plans.push_back (std::move (i_plan));
 			TRACE (logger, "Added.");
 		}
+		
+		/*!*******************************************************************
+		 * \brief Adds a boundary condition to execute in normal space
+		 * 
+		 * \param i_plan A shared pointer to the plan to add
+		 *********************************************************************/
+		inline void add_passive_boundary (std::shared_ptr<boundary> i_boundary) {
+			TRACE (logger, "Adding boundary...");
+			++n_boundaries;
+			i_boundary->associate (this);
 
-		/*!*******************************************************************
-		 * \brief Adds an explicit plan to be evaluated in normal space
-		 * 
-		 * \param i_plan A shared pointer to the plan to add
-		 *********************************************************************/	
-		inline void add_explicit_space_plan (std::shared_ptr<explicit_plan> i_plan) {
-			TRACE (logger, "Adding explicit space plan...");
-			++n_explicit_space_plans;
-			i_plan->associate (this);
-			explicit_space_plans.push_back (std::move (i_plan));
-			TRACE (logger, "Added.");
-		}
-	
-		/*!*******************************************************************
-		 * \brief Adds an implicit plan to be evaluated
-		 * 
-		 * \param i_plan A shared pointer to the plan to add
-		 *********************************************************************/
-		inline void add_implicit_plan (std::shared_ptr<implicit_plan> i_plan) {
-			TRACE (logger, "Adding implicit plan...");
-			++n_implicit_plans;
-			i_plan->associate (this);
-			implicit_plans.push_back (std::move (i_plan));
+			if (!i_boundary->ext_element_ptr) {
+				for (iterator iter = begin (); iter != end (); ++iter) {
+					i_boundary->fix_edge (*iter);
+				}
+			}
+			
+			for (int i = 0; i < (int) plans.size (); ++i) {
+				plans [i]->setup_boundary (i_boundary.get ());
+			}
+
+			boundaries.push_back (std::move (i_boundary));
 			TRACE (logger, "Added.");
 		}
 	
@@ -153,15 +141,19 @@ namespace bases
 		 * 
 		 * \param i_plan A shared pointer to the plan to add
 		 *********************************************************************/
-		inline void add_boundary (std::shared_ptr<boundary> i_boundary) {
+		inline void add_active_boundary (std::shared_ptr<active_boundary> i_boundary) {
 			TRACE (logger, "Adding boundary...");
 			++n_boundaries;
 			i_boundary->associate (this);
 
 			if (!i_boundary->ext_element_ptr) {
 				for (iterator iter = begin (); iter != end (); ++iter) {
-					i_boundary->fix_edge (iter->first);
+					i_boundary->fix_edge (*iter);
 				}
+			}
+			
+			for (int i = 0; i < (int) plans.size (); ++i) {
+				plans [i]->setup_boundary (i_boundary.get ());
 			}
 
 			boundaries.push_back (std::move (i_boundary));
@@ -170,15 +162,20 @@ namespace bases
 		
 		virtual int get_boundary_index (int edge) = 0;
 		
-		typedef std::map <int, std::vector <double>>::iterator iterator;
+		typedef std::vector <int>::iterator iterator;
 		
-		virtual iterator begin () = 0;
+		virtual iterator begin () {
+			return names.begin ();
+		}
 		
-		virtual iterator end () = 0;
+		virtual iterator end () {
+			return names.end ();
+		}
 
 		friend class plan;
 		
 		friend class boundary;
+		friend class active_boundary;
 	
 	protected:
 		std::string name;
@@ -186,6 +183,8 @@ namespace bases
 		int logger;
 
 		double timestep; //!< The double timestep length
+
+		std::vector <int> names;
 		
 		std::shared_ptr<collocation_grid> grid; //!< A shared pointer to the collocation grid
 		
@@ -196,25 +195,14 @@ namespace bases
 		std::shared_ptr<io::output> transform_stream; //!< An implementation to output in transform space
 
 	private:
-		int n_explicit_grid_plans; //!< The number of explicit grid plans to execute
-		int n_explicit_space_plans; //!< The number of explicit space plans to execute
-		int n_implicit_plans; //!< The number of implicit plans to execute
 		int n_boundaries; //!< The number of boundary conditions to execute
 		
-		double previous_timestep; //!< The double duration of the previous timestep
-	
-		std::shared_ptr<plan> timestep_plan;
 		std::shared_ptr<plan> matrix_solver; //!< A shared pointer to the matrix solver
 		
-		std::vector<std::shared_ptr<explicit_plan>> explicit_grid_plans; //!< A vector of shared pointers to explicit grid plans to be executed
-		std::vector<std::shared_ptr<explicit_plan>> explicit_space_plans; //!< A vector of shared pointers to explicit space plans to be executed
-		std::vector<std::shared_ptr<implicit_plan>> implicit_plans; //!< A vector of shared pointers to implicit plans to be executed
+		std::vector <std::shared_ptr <plan>> plans;
+		
 		std::vector<std::shared_ptr<boundary>> boundaries; //!< A vector of shared pointers to boundary conditions to be executed
 	};
 } /* bases */
-
-/*
-	TODO Add abstract element_iterator
-*/
 
 #endif /* end of include guard: ELEMENT_HPP_IUTSU4TQ */

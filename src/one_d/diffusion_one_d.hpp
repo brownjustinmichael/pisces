@@ -46,6 +46,12 @@ namespace one_d
 			*********************************************************************/
 			void execute ();
 			
+			void setup_boundary (bases::boundary* i_boundary) {
+				i_boundary->increase_n (2);
+				i_boundary->add_plan (this);
+				MINFO ("Adding...")
+			}
+			
 			void boundary (int edge, bases::element* ext_element_ptr, int ext_edge);
 
 		private:

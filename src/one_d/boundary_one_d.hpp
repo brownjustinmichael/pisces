@@ -28,13 +28,23 @@ namespace one_d
 	 * average of the edges of two elements. It can also be used to zero 
 	 * a boundary.
 	 *********************************************************************/
-	class boundary : public bases::boundary
+	class boundary : public bases::active_boundary
 	{
 	public:
 		/*!*******************************************************************
 		 * \copydoc bases::boundary::boundary ()
 		 *********************************************************************/
-		boundary (int i_edge = fixed_0, bases::element* i_ext_element_ptr = NULL, int i_ext_edge = fixed_0) : bases::boundary (i_edge, i_ext_element_ptr, i_ext_edge) {}
+		boundary (int i_edge = fixed_0, bases::element* i_ext_element_ptr = NULL, int i_ext_edge = fixed_0) : bases::active_boundary (2, get_to_next (i_edge), i_edge, i_ext_element_ptr, i_ext_edge) {}
+		
+		int get_to_next (int i_edge) {
+			if (i_edge == fixed_0) {
+				return 1;
+			} else if (i_edge == fixed_n) {
+				return -1;
+			} else {
+				throw 0;
+			}
+		}
 	
 		virtual ~boundary () {}
 		
@@ -52,7 +62,7 @@ namespace one_d
 		inline virtual void execute () {
 			TRACE (logger, "Executing...");
 			
-			bases::boundary::execute ();
+			bases::active_boundary::execute ();
 			
 			for (std::map <int, double>::iterator iter = fixed_points.begin (); iter != fixed_points.end (); ++iter) {
 				(&((*element_ptr) [iter->first])) [index] = iter->second;
@@ -63,8 +73,8 @@ namespace one_d
 			
 			if (ext_element_ptr) {
 				for (bases::element::iterator iter = element_ptr->begin (); iter != element_ptr->end (); ++iter) {
-					(&((*element_ptr) [iter->first])) [index] = 0.5 * (&((*element_ptr) [iter->first])) [index] + 0.5 * (&((*ext_element_ptr) [iter->first])) [ext_index];
-					(&((*ext_element_ptr) [iter->first])) [ext_index] = (&((*element_ptr) [iter->first])) [index];
+					(&((*element_ptr) [*iter])) [index] = 0.5 * (&((*element_ptr) [*iter])) [index] + 0.5 * (&((*ext_element_ptr) [*iter])) [ext_index];
+					(&((*ext_element_ptr) [*iter])) [ext_index] = (&((*element_ptr) [*iter])) [index];
 				}	
 			}
 			

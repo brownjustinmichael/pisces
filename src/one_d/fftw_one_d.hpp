@@ -44,7 +44,7 @@ namespace one_d
 		void execute () {
 			TRACE (logger, "Executing...");
 			
-			bases::explicit_plan::execute ();
+			bases::transform::execute ();
 			
 			if (*flags_ptr & transformed) {
 				*flags_ptr &= ~transformed;

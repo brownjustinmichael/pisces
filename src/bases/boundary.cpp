@@ -16,7 +16,7 @@ namespace bases
 		bases::plan::associate (i_element_ptr);
 		MTRACE ("Associating...");
 		index = element_ptr->get_boundary_index (edge);
-		if (ext_index) {
+		if (ext_element_ptr) {
 			ext_index = ext_element_ptr->get_boundary_index (ext_edge);
 		} else {
 			*flags_ptr |= edge;
@@ -24,21 +24,35 @@ namespace bases
 		MTRACE ("Associated." << (*element_ptr) [0]);
 	}
 
-	void boundary::execute () {
-		plan::execute ();
-	
-		for (int i = 0; i < element_ptr->n_explicit_grid_plans; ++i) {
-			element_ptr->explicit_grid_plans [i]->boundary (index, ext_element_ptr, ext_index);
-		}
-
-		for (int i = 0; i < element_ptr->n_explicit_space_plans; ++i) {
-			element_ptr->explicit_space_plans [i]->boundary (index, ext_element_ptr, ext_index);
-		}
-
-		if (!(*flags_ptr & factorized)) {
-			for (int i = 0; i < element_ptr->n_implicit_plans; ++i) {
-				element_ptr->implicit_plans [i]->boundary (index, ext_element_ptr, ext_index);
+	void boundary::send () {
+		int j;
+		j = 0;
+		send_buffer.resize (n * (*element_ptr).names.size ());
+		for (bases::element::iterator iter = (*element_ptr).begin (); iter != (*element_ptr).end (); ++iter) {
+			for (int i = 0; i < n; ++i) {
+				send_buffer [i + n * j] = (&((*element_ptr) [*iter])) [index + i * to_next];
 			}
+			++j;
+		}
+	}
+	
+	void boundary::recv () {
+		int j;
+		j = 0;
+		recv_buffer.resize (n * (*element_ptr).names.size ());
+		for (bases::element::iterator iter = (*element_ptr).begin (); iter != (*element_ptr).end (); ++iter) {
+			for (int i = 0; i < n; ++i) {
+				recv_buffer [i + n * j] = ext_buffer [i + n * j];
+			}
+			++j;
+		}
+	}
+	
+	void active_boundary::execute () {
+		plan::execute ();
+		
+		for (int i = 0; i < n_plans; ++i) {
+			plans [i]->boundary (index, ext_element_ptr, ext_index);
 		}
 	}
 } /* bases */

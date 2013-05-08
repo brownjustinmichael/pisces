@@ -17,9 +17,8 @@ namespace bases
 	void element::calculate () {		
 		TRACE (logger, "Calculating...");
 				
-		explicit_reset ();
-		
-		// Start in grid space
+		flags &= ~implicit_started;
+		flags &= ~explicit_started;
 		
 		TRACE (logger, "Writing to file...");
 		
@@ -27,48 +26,10 @@ namespace bases
 		if (transform_stream) {
 			transform_stream->to_file ();
 		}
-
-		TRACE (logger, "Executing explicit grid plans...");
 		
-		for (int i = 0; i < n_explicit_grid_plans; ++i) {
-			explicit_grid_plans [i]->execute ();
+		for (int i = 0; i < (int) plans.size (); ++i) {
+			plans [i]->execute ();
 		}
-		
-		TRACE (logger, "Transforming to normal space...");
-		
-		// Switch to normal space
-		if (transform_forward) {
-			transform_forward->execute ();
-		} else {
-			WARN (logger, "Transform not defined. It is likely the element was not set up correctly.")
-		}
-		
-		TRACE (logger, "Executing explicit space plans...");
-
-		for (int i = 0; i < n_explicit_space_plans; ++i) {
-			explicit_space_plans [i]->execute ();
-		}
-		
-		TRACE (logger, "Updating timestep...");
-		
-		timestep_plan->execute ();
-		
-		TRACE (logger, "Check that the timestep hasn't changed");
-		
-		if (previous_timestep != timestep) {
-			flags &= ~factorized;
-		}
-		
-		if (!(flags & factorized)) {
-			TRACE (logger, "Executing implicit plans...");
-			implicit_reset ();
-			
-			for (int i = 0; i < n_implicit_plans; ++i) {
-				implicit_plans [i]->execute ();
-			}
-		}
-		
-		previous_timestep = timestep;
 		
 		TRACE (logger, "Calculation complete.");
 	}

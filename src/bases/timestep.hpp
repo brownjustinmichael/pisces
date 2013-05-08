@@ -8,6 +8,7 @@
 
 #include "plan.hpp"
 #include "../config.hpp"
+#include "solver.hpp"
 
 namespace bases
 {
@@ -15,14 +16,22 @@ namespace bases
 	{
 	public:
 		calculate_timestep (double& i_timestep) : timestep (i_timestep) {
+			previous_timestep = 0.0;
 			MTRACE ("Instantiated.");
 		}
 		virtual ~calculate_timestep () {}
 		
-		virtual void execute () = 0;
+		virtual void execute () {
+			plan::execute ();
+			if (timestep != previous_timestep) {
+				*flags_ptr &= ~factorized;
+			}
+			previous_timestep = timestep;
+		};
 
 	protected:
 		double& timestep;
+		double previous_timestep;
 	};
 } /* bases */
 
@@ -37,6 +46,7 @@ public:
 	
 	virtual void execute () {
 		timestep = initial_timestep;
+		bases::calculate_timestep::execute ();
 	}
 
 private:

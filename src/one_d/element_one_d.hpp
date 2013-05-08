@@ -55,6 +55,7 @@ namespace one_d
 		inline double& operator[] (int name) {
 			if (scalars [name].size () == (unsigned int) 0) {
 				scalars [name].resize (n, 0.0);
+				names.push_back (name);
 				failsafe_dump->append ((*this) [name]);
 			}
 			return scalars [name] [0];
@@ -74,10 +75,10 @@ namespace one_d
 		
 		inline void explicit_reset () {
 			bases::element::explicit_reset ();
-			std::map <int, std::vector <double>>::iterator iter;
-			for (iter = scalars.begin (); iter != scalars.end (); ++iter) {
-				if (iter->first < 0) {
-					utils::scale (n, 0.0, &(iter->second) [0]);					
+			bases::element::iterator iter;
+			for (iter = begin (); iter != end (); ++iter) {
+				if (*iter < 0) {
+					utils::scale (n, 0.0, &((*this) [*iter]));
 				}
 			}
 		}
@@ -95,10 +96,6 @@ namespace one_d
 		}
 		
 		friend class boundary;
-		
-		bases::element::iterator begin () {return scalars.begin ();}
-		
-		bases::element::iterator end () {return scalars.end ();}
 		
 	protected:
 		int n; //!< The number of elements in each 1D array

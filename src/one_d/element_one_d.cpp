@@ -44,16 +44,19 @@ namespace one_d
 									
 			set_grid (std::make_shared<chebyshev_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), logger)));
 			
-			set_timestep (std::make_shared<constant_timestep> (constant_timestep (delta_t, timestep)));
-		
-			add_implicit_plan (std::make_shared <implicit_diffusion> (implicit_diffusion (- diffusion_coeff * alpha, i_n, grid, &matrix [0])));
+			add_plan (std::make_shared <explicit_diffusion> (explicit_diffusion (diffusion_coeff * (1.0 - alpha), i_n, grid, velocity, position, rhs)));
+			if (advection_coeff != 0.0) {
+				add_plan (std::make_shared <advec> (advec (n, advection_coeff, velocity, rhs, grid)));				
+			}
 			
-			add_explicit_grid_plan (std::make_shared <explicit_diffusion> (explicit_diffusion (diffusion_coeff * (1.0 - alpha), i_n, grid, velocity, position, rhs)));
-			add_explicit_grid_plan (std::make_shared <advec> (advec (n, advection_coeff, velocity, rhs, grid)));
+			set_transform (std::make_shared <fftw_cosine> (fftw_cosine (n, velocity)));
+
+			add_plan (std::make_shared<constant_timestep> (constant_timestep (delta_t, timestep)));
+		
+			add_plan (std::make_shared <implicit_diffusion> (implicit_diffusion (- diffusion_coeff * alpha, i_n, grid, &matrix [0])));
 		
 			set_solver (std::make_shared <solver> (solver (n, timestep, grid->get_data (0), &matrix [0], velocity, rhs)));
 		
-			set_transform (std::make_shared <fftw_cosine> (fftw_cosine (n, velocity)));
 		
 			double pioN = std::acos (-1.0) / (n - 1);
 			for (int i = 0; i < i_n; ++i) {

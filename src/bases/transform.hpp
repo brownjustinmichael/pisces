@@ -33,7 +33,7 @@ namespace bases
 		/*!*******************************************************************
 		 * \copybrief bases::explicit_plan::execute ()
 		 *********************************************************************/
-		virtual void execute () = 0;
+		virtual void execute () {}
 	};
 } /* bases */
 

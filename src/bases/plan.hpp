@@ -39,9 +39,16 @@ enum index {
 	rhsd2 = -02
 };
 
+enum plan_flags {
+	implicit_started = 0x100,
+	explicit_started = 0x200
+};
+
 namespace bases
 {
 	class element;
+	
+	class boundary;
 
 	/*!*******************************************************************
 	* \brief The basic functional unit, containing a recipe for execution
@@ -66,6 +73,10 @@ namespace bases
 		
 		virtual void associate (element* i_element_ptr);
 		
+		virtual void setup_boundary (boundary* i_boundary) {}
+		
+		virtual void boundary (int edge, element* ext_element_ptr, int ext_edge) {}
+		
 		/*!*******************************************************************
 		* \brief Operate the plan on the data arrays contained in the class
 		* 
@@ -74,6 +85,7 @@ namespace bases
 		virtual void execute () {
 			if (!element_ptr) {
 				MERROR ("Plan not initialized completely.");
+				throw 0;
 			}
 		}
 			
@@ -114,8 +126,8 @@ namespace bases
 	
 		virtual void associate (element* i_element_ptr);
 		
-		virtual void boundary (int edge, element* ext_element_ptr, int ext_edge) {}
-
+		virtual void execute ();
+		
 	protected:
 		int n; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
 		int name_in; //!< A double pointer to the input data
@@ -146,8 +158,8 @@ namespace bases
 
 		virtual ~implicit_plan () {}
 		
-		virtual void boundary (int edge, element* ext_element_ptr, int ext_edge) {}
-
+		virtual void execute ();
+		
 	protected:
 		int n; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
 		std::shared_ptr <bases::collocation_grid> grid;

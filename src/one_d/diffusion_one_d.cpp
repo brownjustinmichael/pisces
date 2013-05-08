@@ -55,10 +55,11 @@ namespace one_d
 				double x02 = ((&((*element_ptr) [position])) [index - 1] - (&((*ext_element_ptr) [position])) [ext_index + 1]);
 				double x12 = ((&((*element_ptr) [position])) [index] - (&((*ext_element_ptr) [position])) [ext_index + 1]);
 				
-				(&((*element_ptr) [name_out])) [index] += coeff * 2.0 * ((&((*element_ptr) [name_in])) [index - 1] * x12 - (&((*element_ptr) [name_in])) [index] * x02 + (&((*ext_element_ptr) [name_in])) [ext_index + 1] * x01) / x01 / x02 / x12;
+				(&((*element_ptr) [name_out])) [index] += 2.0 * coeff * 2.0 * ((&((*element_ptr) [name_in])) [index - 1] * x12 - (&((*element_ptr) [name_in])) [index] * x02 + (&((*ext_element_ptr) [name_in])) [ext_index + 1] * x01) / x01 / x02 / x12;
 				(&((*ext_element_ptr) [name_out])) [ext_index] += (&((*element_ptr) [name_out])) [index];
 			}
 		}
+		
 
 		implicit_diffusion::implicit_diffusion (double i_coeff, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_matrix) : bases::implicit_plan (i_n, i_grid, i_matrix) {
 			coeff = i_coeff;
@@ -68,24 +69,23 @@ namespace one_d
 		}
 
 		void implicit_diffusion::execute () {
-			bases::implicit_plan::execute ();
+			if (!(*flags_ptr & factorized)) {
+				TRACE (logger, "Operating...");
+				bases::implicit_plan::execute ();
+				// if (!(*flags_ptr & fixed_0)) {
+				   	// utils::add_scaled (n, coeff, grid->get_data (2), matrix, n, n);
+				// }
 			
-			TRACE (logger, "Operating...");
+				// This is the main loop for setting up the diffusion equation in Chebyshev space
+				for (int i = 1; i < n - 1; ++i) {
+				   	utils::add_scaled (n, coeff, grid->get_data (2) + i, matrix + i, n, n);
+				}
 			
-			// if (!(*flags_ptr & fixed_0)) {
-			   	utils::add_scaled (n, coeff, grid->get_data (2), matrix, n, n);
-			// }
-			
-			// This is the main loop for setting up the diffusion equation in Chebyshev space
-			for (int i = 1; i < n - 1; ++i) {
-			   	utils::add_scaled (n, coeff, grid->get_data (2) + i, matrix + i, n, n);
+				// if (!(*flags_ptr & fixed_n)) {
+				   	// utils::add_scaled (n, coeff, grid->get_data (2) + n - 1, matrix + n - 1, n, n);
+				// }
+				TRACE (logger, "Operation complete.");
 			}
-			
-			// if (!(*flags_ptr & fixed_n)) {
-			   	utils::add_scaled (n, coeff, grid->get_data (2) + n - 1, matrix + n - 1, n, n);
-			// }
-	
-			TRACE (logger, "Operation complete.");
 		}
 	} /* chebyshev */
 } /* one_d */

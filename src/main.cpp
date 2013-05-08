@@ -15,7 +15,7 @@
 #include "one_d/element_one_d.hpp"
 #include "one_d/boundary_one_d.hpp"
 
-#include "mpi.h"
+// #include "mpi.h"
 
 int config::n_loggers = 0;
 int config::n_appenders = 0;
@@ -65,14 +65,14 @@ std::vector<log4cxx::AppenderPtr> config::appenders;
  *********************************************************************/
 int main (int argc, char const *argv[])
 {
-	int id,
-	int p,
+	int id;
+	int p;
 	
-	// Initialize mpi
-	MPI::Init (argc, argv);
-	
-	// Get the number of processes
-	p = MPI::COMM_WORLD.Get_size ();
+	// // Initialize mpi
+	// MPI::Init (argc, argv);
+	// 
+	// // Get the number of processes
+	// p = MPI::COMM_WORLD.Get_size ();
 	
 	// The program runs through the execution flags.
 	while ((argc > 1) && (argv [1] [0] == '-')) {
@@ -87,7 +87,7 @@ int main (int argc, char const *argv[])
 		
 	config::make_main ();
 	
-	if (id == 0) {
+	// if (id == 0) {
 		// Read experiment parameters out of text file
 		std::string filename = "../input/parameters.txt";
 		std::map<std::string,io::types> inputParams;
@@ -112,13 +112,13 @@ int main (int argc, char const *argv[])
 			initial_conditions [i] = scale * std::exp (- (initial_position [i] - 0.) * (initial_position [i] - 0.) / 2.0 / sigma / sigma) - scale * std::exp (- 4.0 / 2.0 / sigma / sigma);
 			initial_conditions [i + n / 2 - 1] = scale * std::exp (- (initial_position [i + n / 2 - 1] - 0.) * (initial_position [i + n / 2 - 1] - 0.) / 2.0 / sigma / sigma) - scale * std::exp (- 4.0 / 2.0 / sigma / sigma);
 		}
-	}
+	// }
 	
 	one_d::chebyshev::advection_diffusion_element element_1 ("1", n / 2, 1.0, &initial_conditions [0], 0x00, inputParams);
 	one_d::chebyshev::advection_diffusion_element element_2 ("2", n / 2, -1.0, &initial_conditions [n / 2 - 1], 0x00, inputParams);
-	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary ()));
-	element_2.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (fixed_n)));
-	element_1.add_boundary (std::make_shared <one_d::boundary> (one_d::boundary (fixed_n, &element_2)));
+	element_1.add_active_boundary (std::make_shared <one_d::boundary> (one_d::boundary ()));
+	element_2.add_active_boundary (std::make_shared <one_d::boundary> (one_d::boundary (fixed_n)));
+	element_1.add_active_boundary (std::make_shared <one_d::boundary> (one_d::boundary (fixed_n, &element_2)));
 
 	MTRACE ("main: Entering main loop.");
 	
@@ -144,7 +144,7 @@ int main (int argc, char const *argv[])
 
 	MTRACE ("main: End of main.");
 	
-	MPI::Finalize ();
+	// MPI::Finalize ();
 
 	return 0;
 }
