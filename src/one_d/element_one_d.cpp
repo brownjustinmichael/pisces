@@ -57,12 +57,8 @@ namespace one_d
 		
 			set_solver (std::make_shared <solver> (solver (n, timestep, grid->get_data (0), &matrix [0], velocity, rhs)));
 		
-		
-			double pioN = std::acos (-1.0) / (n - 1);
-			for (int i = 0; i < i_n; ++i) {
-				(*this) (position, i) = std::cos (i * pioN) + initial_position;
-				(*this) (velocity, i) = initial_velocity [i];
-			}
+			initialize_position (position, initial_position);
+			initialize (velocity, initial_velocity);
 
 			TRACE (logger, "Initialized.");
 		}

@@ -75,7 +75,7 @@ namespace bases
 		
 		virtual void setup_boundary (boundary* i_boundary) {}
 		
-		virtual void boundary (int edge, element* ext_element_ptr, int ext_edge) {}
+		virtual void boundary (boundary* i_boundary) {}
 		
 		/*!*******************************************************************
 		* \brief Operate the plan on the data arrays contained in the class

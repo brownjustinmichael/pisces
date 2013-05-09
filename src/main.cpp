@@ -10,6 +10,7 @@
 #include <cmath>
 #include <string>
 #include <memory>
+#include <map>
 #include <vector>
 #include "config.hpp"
 #include "one_d/element_one_d.hpp"
@@ -65,9 +66,9 @@ std::vector<log4cxx::AppenderPtr> config::appenders;
  *********************************************************************/
 int main (int argc, char const *argv[])
 {
-	int id;
-	int p;
-	
+	// int id;
+	// int p;
+	// 
 	// // Initialize mpi
 	// MPI::Init (argc, argv);
 	// 
@@ -116,9 +117,11 @@ int main (int argc, char const *argv[])
 	
 	one_d::chebyshev::advection_diffusion_element element_1 ("1", n / 2, 1.0, &initial_conditions [0], 0x00, inputParams);
 	one_d::chebyshev::advection_diffusion_element element_2 ("2", n / 2, -1.0, &initial_conditions [n / 2 - 1], 0x00, inputParams);
-	element_1.add_active_boundary (std::make_shared <one_d::boundary> (one_d::boundary ()));
-	element_2.add_active_boundary (std::make_shared <one_d::boundary> (one_d::boundary (fixed_n)));
-	element_1.add_active_boundary (std::make_shared <one_d::boundary> (one_d::boundary (fixed_n, &element_2)));
+	
+	std::vector <double> buffer_1 (n / 2), buffer_2 (n / 2);
+	
+	element_1.add_boundary (std::make_shared <one_d::diffusive_boundary> (one_d::diffusive_boundary (linked_n, inputParams["diffusion_coeff"].asDouble, position, velocity, rhs, &buffer_1 [0], &buffer_2 [0])));
+	element_2.add_boundary (std::make_shared <one_d::diffusive_boundary> (one_d::diffusive_boundary (linked_0, inputParams["diffusion_coeff"].asDouble, position, velocity, rhs, &buffer_2 [0], &buffer_1 [0])));
 
 	MTRACE ("main: Entering main loop.");
 	
@@ -129,6 +132,10 @@ int main (int argc, char const *argv[])
 		try {
 			element_1.calculate ();
 			element_2.calculate ();
+			element_1.send ();
+			element_2.send ();
+			element_1.recv ();
+			element_2.recv ();
 			element_1.execute_boundaries ();
 			element_2.execute_boundaries ();
 			element_1.update ();

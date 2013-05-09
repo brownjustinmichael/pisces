@@ -35,32 +35,20 @@ namespace one_d
 		
 			TRACE (logger, "Operating...");
 			
-			if (!(*flags_ptr & fixed_0)) {
+			if (*flags_ptr & linked_0) {
 				data_out [0] += coeff * utils::dot (n, grid->get_data (2), data_in, n);
 			}
 			
 			// Set up and evaluate the explicit part of the diffusion equation
 			utils::matrix_vector_multiply (n - 2, n, coeff, grid->get_data (2) + 1, data_in, 1.0, data_out + 1, n);
 
-			if (!(*flags_ptr & fixed_n)) {
+			if (*flags_ptr & linked_n) {
 				data_out [n - 1] += coeff * utils::dot (n, grid->get_data (2) + n - 1, data_in, n);
 			}
 
 			TRACE (logger, "Operation complete.");
 		}
 		
-		void explicit_diffusion::boundary (int index, bases::element* ext_element_ptr, int ext_index) {
-			if (element_ptr && ext_element_ptr) {
-				double x01 = ((&((*element_ptr) [position])) [index - 1] - (&((*element_ptr) [position])) [index]);
-				double x02 = ((&((*element_ptr) [position])) [index - 1] - (&((*ext_element_ptr) [position])) [ext_index + 1]);
-				double x12 = ((&((*element_ptr) [position])) [index] - (&((*ext_element_ptr) [position])) [ext_index + 1]);
-				
-				(&((*element_ptr) [name_out])) [index] += 2.0 * coeff * 2.0 * ((&((*element_ptr) [name_in])) [index - 1] * x12 - (&((*element_ptr) [name_in])) [index] * x02 + (&((*ext_element_ptr) [name_in])) [ext_index + 1] * x01) / x01 / x02 / x12;
-				(&((*ext_element_ptr) [name_out])) [ext_index] += (&((*element_ptr) [name_out])) [index];
-			}
-		}
-		
-
 		implicit_diffusion::implicit_diffusion (double i_coeff, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_matrix) : bases::implicit_plan (i_n, i_grid, i_matrix) {
 			coeff = i_coeff;
 			n = i_n;
@@ -72,7 +60,7 @@ namespace one_d
 			if (!(*flags_ptr & factorized)) {
 				TRACE (logger, "Operating...");
 				bases::implicit_plan::execute ();
-				// if (!(*flags_ptr & fixed_0)) {
+				// if (*flags_ptr & linked_0) {
 				   	// utils::add_scaled (n, coeff, grid->get_data (2), matrix, n, n);
 				// }
 			
@@ -81,7 +69,7 @@ namespace one_d
 				   	utils::add_scaled (n, coeff, grid->get_data (2) + i, matrix + i, n, n);
 				}
 			
-				// if (!(*flags_ptr & fixed_n)) {
+				// if (*flags_ptr & linked_n) {
 				   	// utils::add_scaled (n, coeff, grid->get_data (2) + n - 1, matrix + n - 1, n, n);
 				// }
 				TRACE (logger, "Operation complete.");

@@ -32,13 +32,13 @@ namespace one_d
 		
 		bases::plan::execute ();
 
-		if (!(*flags_ptr & fixed_0)) {
+		if (*flags_ptr & linked_0) {
 			data_out [0] -= c * utils::dot (n, grid->get_data (1), data_in, n);
 		}
 
 		utils::matrix_vector_multiply (n - 2, n, -c, grid->get_data (1) + 1, data_in, 1.0, data_out + 1, n);
 		
-		if (!(*flags_ptr & fixed_n)) {
+		if (*flags_ptr & linked_n) {
 			data_out [n - 1] -= c * utils::dot (n, grid->get_data (1) + n - 1, data_in, n);
 		}
 	}

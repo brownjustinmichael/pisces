@@ -33,6 +33,26 @@ namespace bases
 		
 		TRACE (logger, "Calculation complete.");
 	}
+	
+	void element::send () {
+		TRACE (logger, "Sending information...");
+		
+		for (int i = 0; i < n_boundaries; ++i) {
+			boundaries [i]->send ();
+		}
+		
+		TRACE (logger, "Information sent.");
+	}
+	
+	void element::recv () {
+		TRACE (logger, "Receiving information...");
+		
+		for (int i = 0; i < n_boundaries; ++i) {
+			boundaries [i]->recv ();
+		}
+		
+		TRACE (logger, "Information received.");
+	}
 		
 	void element::execute_boundaries () {
 		TRACE (logger, "Executing boundaries...");

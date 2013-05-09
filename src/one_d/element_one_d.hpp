@@ -54,23 +54,31 @@ namespace one_d
 		 *********************************************************************/
 		inline double& operator[] (int name) {
 			if (scalars [name].size () == (unsigned int) 0) {
-				scalars [name].resize (n, 0.0);
-				names.push_back (name);
-				failsafe_dump->append ((*this) [name]);
+				initialize (name);
 			}
 			return scalars [name] [0];
 		}
 		
-		virtual double& operator () (int name, int index = 0) {
-			return (&((*this) [name])) [index];
+		virtual void initialize_position (int name, double initial_position = 0.0, double scale = 1.0) {
+			double pioN = std::acos (-1.0) / (n - 1);
+			std::vector <double> positions (n);
+			for (int i = 0; i < n; ++i) {
+				positions [i] = scale * std::cos (i * pioN) + initial_position;
+			}
+			initialize (name, &positions [0]);
 		}
 		
-		inline void execute_boundaries () {
-			bases::element::execute_boundaries ();
-		}
-		
-		inline void update () {			
-			bases::element::update ();
+		virtual void initialize (int name, double* initial_conditions = NULL) {
+			if (scalars [name].size () == (unsigned int) 0) {
+				names.push_back (name);
+				scalars [name].resize (n, 0.0);
+			}
+			if (initial_conditions) {
+				utils::copy (n, initial_conditions, &(scalars [name]) [0]);
+			}
+			fixed_points_0 [name] = scalars [name] [0];
+			fixed_points_n [name] = scalars [name] [n - 1];
+			failsafe_dump->append (&(scalars [name]) [0]);
 		}
 		
 		inline void explicit_reset () {
@@ -83,11 +91,25 @@ namespace one_d
 			}
 		}
 		
+		inline void execute_boundaries () {
+			bases::element::execute_boundaries ();
+			if (!(flags & linked_0)) {
+				for (iterator iter = begin (); iter != end (); ++iter) {
+					(*this) (*iter, 0) = fixed_points_0 [*iter];
+				}
+			}
+			if (!(flags & linked_n)) {
+				for (iterator iter = begin (); iter != end (); ++iter) {
+					(*this) (*iter, n - 1) = fixed_points_n [*iter];
+				}
+			}
+		}
+		
 		inline int get_boundary_index (int edge) {
 			MTRACE ("Getting boundary index...");
-			if (edge == fixed_0) {
+			if (edge == linked_0) {
 				return 0;
-			} else if (edge == fixed_n) {
+			} else if (edge == linked_n) {
 				return n - 1;
 			} else {
 				FATAL (logger, "Edge is not a one_d edge index.");
@@ -95,13 +117,25 @@ namespace one_d
 			}
 		}
 		
-		friend class boundary;
+		inline int get_boundary_increment (int edge) {
+			MTRACE ("Getting boundary increment...");
+			if (edge == linked_0) {
+				return 1;
+			} else if (edge == linked_n) {
+				return -1;
+			} else {
+				FATAL (logger, "Edge is not a one_d edge index.");
+				throw 0;
+			}
+		}
 		
 	protected:
 		int n; //!< The number of elements in each 1D array
 		std::vector<int> cell; //!< An integer array for tracking each cell number for output
 
 		std::map <int, std::vector <double>> scalars; //!< A vector of scalar vectors
+		std::map <int, double> fixed_points_0;
+		std::map <int, double> fixed_points_n;
 	};
 
 	namespace chebyshev
@@ -129,10 +163,6 @@ namespace one_d
 			if (!(flags & factorized)) {
 				utils::scale (n * n, 0.0, &matrix [0]);
 			}
-		}
-		
-		inline void update () {			
-			element::update ();
 		}
 		
 	private:

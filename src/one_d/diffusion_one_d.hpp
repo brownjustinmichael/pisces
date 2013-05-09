@@ -45,14 +45,6 @@ namespace one_d
 			* \copydoc bases::explicit_plan::execute ()
 			*********************************************************************/
 			void execute ();
-			
-			void setup_boundary (bases::boundary* i_boundary) {
-				i_boundary->increase_n (2);
-				i_boundary->add_plan (this);
-				MINFO ("Adding...")
-			}
-			
-			void boundary (int edge, bases::element* ext_element_ptr, int ext_edge);
 
 		private:
 			double coeff; //!< A double that represents the coefficient in front of the diffusion term in the differential equation

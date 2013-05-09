@@ -49,6 +49,10 @@ namespace bases
 		 * \brief Calculate the matrix terms to be used in update
 		 *********************************************************************/
 		virtual void calculate ();
+		
+		virtual void send ();
+		
+		virtual void recv ();
 	
 		/*!*******************************************************************
 		 * \brief Execute the boundary conditions
@@ -72,6 +76,10 @@ namespace bases
 		 * \return A double pointer to the first element of the named scalar
 		 *********************************************************************/
 		virtual double& operator[] (int name) = 0;
+		
+		virtual double& operator () (int name, int index = 0) {
+			return (&((*this) [name])) [index];
+		}
 		
 		/*!*******************************************************************
 		 * \brief Reset every index < 0
@@ -117,52 +125,20 @@ namespace bases
 		 * 
 		 * \param i_plan A shared pointer to the plan to add
 		 *********************************************************************/
-		inline void add_passive_boundary (std::shared_ptr<boundary> i_boundary) {
+		inline void add_boundary (std::shared_ptr<boundary> i_boundary) {
 			TRACE (logger, "Adding boundary...");
 			++n_boundaries;
 			i_boundary->associate (this);
-
-			if (!i_boundary->ext_element_ptr) {
-				for (iterator iter = begin (); iter != end (); ++iter) {
-					i_boundary->fix_edge (*iter);
-				}
-			}
-			
-			for (int i = 0; i < (int) plans.size (); ++i) {
-				plans [i]->setup_boundary (i_boundary.get ());
-			}
-
-			boundaries.push_back (std::move (i_boundary));
-			TRACE (logger, "Added.");
-		}
-	
-		/*!*******************************************************************
-		 * \brief Adds a boundary condition to execute in normal space
-		 * 
-		 * \param i_plan A shared pointer to the plan to add
-		 *********************************************************************/
-		inline void add_active_boundary (std::shared_ptr<active_boundary> i_boundary) {
-			TRACE (logger, "Adding boundary...");
-			++n_boundaries;
-			i_boundary->associate (this);
-
-			if (!i_boundary->ext_element_ptr) {
-				for (iterator iter = begin (); iter != end (); ++iter) {
-					i_boundary->fix_edge (*iter);
-				}
-			}
-			
-			for (int i = 0; i < (int) plans.size (); ++i) {
-				plans [i]->setup_boundary (i_boundary.get ());
-			}
-
 			boundaries.push_back (std::move (i_boundary));
 			TRACE (logger, "Added.");
 		}
 		
 		virtual int get_boundary_index (int edge) = 0;
 		
+		virtual int get_boundary_increment (int edge) = 0;
+		
 		typedef std::vector <int>::iterator iterator;
+		typedef std::vector <std::shared_ptr <plan>>::iterator iterator_plans;
 		
 		virtual iterator begin () {
 			return names.begin ();
@@ -170,6 +146,14 @@ namespace bases
 		
 		virtual iterator end () {
 			return names.end ();
+		}
+		
+		virtual iterator_plans begin_plans () {
+			return plans.begin ();
+		}
+		
+		virtual iterator_plans end_plans () {
+			return plans.end ();
 		}
 
 		friend class plan;
@@ -200,7 +184,6 @@ namespace bases
 		std::shared_ptr<plan> matrix_solver; //!< A shared pointer to the matrix solver
 		
 		std::vector <std::shared_ptr <plan>> plans;
-		
 		std::vector<std::shared_ptr<boundary>> boundaries; //!< A vector of shared pointers to boundary conditions to be executed
 	};
 } /* bases */
