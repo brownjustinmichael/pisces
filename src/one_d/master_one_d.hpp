@@ -26,8 +26,8 @@ namespace one_d
 				if (i != 0) {
 					buffers1 [i - 1].resize (100);
 					buffers2 [i - 1].resize (100);
-					elements [i - 1]->add_boundary (std::make_shared <Tboundary> (Tboundary (linked_0, diffusion_coeff, position, velocity, rhs, &(buffers1 [i - 1] [0]), &(buffers2 [i - 1] [0]))));
-					elements [i]->add_boundary (std::make_shared <Tboundary> (Tboundary (linked_n, diffusion_coeff, position, velocity, rhs, &(buffers2 [i - 1] [0]), &(buffers1 [i - 1] [0]))));
+					elements [i - 1]->add_boundary (std::make_shared <Tboundary> (Tboundary (linked_0, diffusion_coeff, position, velocity, rhs, 2 * (i - 1) + 1, 2 * (i - 1) + 2)));
+					elements [i]->add_boundary (std::make_shared <Tboundary> (Tboundary (linked_n, diffusion_coeff, position, velocity, rhs, 2 * (i - 1) + 2, 2 * (i - 1) + 1)));
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 import os
-env = Environment (ENV = os.environ)
+env = Environment (ENV = os.environ, CXX = "/opt/local/lib/openmpi/bin/mpic++")
 env.Append (CPPFLAGS = ["-Wall", "-g", "-std=c++0x"])
 env.Append (LIBPATH = ["/opt/local/lib/"])
 

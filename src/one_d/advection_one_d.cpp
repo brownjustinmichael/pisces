@@ -20,7 +20,6 @@ namespace one_d
 	advec::advec (int i_n, double i_c, int i_name_in, int i_name_out, std::shared_ptr<bases::collocation_grid> i_grid) : bases::explicit_plan (i_n, i_name_in, i_name_out)
 	{
 		MTRACE ("Instantiating...");
-		int i;
 		grid = i_grid;
 		c = i_c;
 		MTRACE ("Instantiated.");
@@ -28,8 +27,6 @@ namespace one_d
 
 	void advec::execute()
 	{
-		double temp;
-		
 		bases::plan::execute ();
 
 		if (*flags_ptr & linked_0) {

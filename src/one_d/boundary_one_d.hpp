@@ -39,7 +39,7 @@ namespace one_d
 		 * \param i_alpha_minus A double coefficient for the contribution from the negative boudary
 		 * \param i_data_minus A pointer to the double first element of the negative boundary
 		 *********************************************************************/
-		link_boundary (int i_n, int i_edge, double* i_ext_send, double* i_ext_recv) : bases::boundary (i_edge) {
+		link_boundary (int i_n, int i_edge, int i_ext_send, int i_ext_recv) : bases::boundary (i_edge) {
 			MTRACE ("Instantiating...");
 			n = i_n;
 			ext_send = i_ext_send;
@@ -51,10 +51,14 @@ namespace one_d
 		
 		virtual void associate (bases::element* element_ptr) {
 			bases::boundary::associate (element_ptr);
+			int j = 0;
 			for (bases::element::iterator iter = element_ptr->begin (); iter != element_ptr->end (); ++iter) {
 				send_buffer [*iter].resize (n);
 				recv_buffer [*iter].resize (n);
+				++j;
 			}
+			to_send.resize (n * j);
+			to_recv.resize (n * j);
 		}
 		
 		virtual void send ();
@@ -75,8 +79,11 @@ namespace one_d
 	protected:
 		int n;
 
-		double* ext_send;
-		double* ext_recv;
+		int ext_send;
+		int ext_recv;
+		
+		std::vector <double> to_send;
+		std::vector <double> to_recv;
 		
 		buffer send_buffer;
 		buffer recv_buffer;
@@ -95,7 +102,7 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::link_boundary::link_boundary ()
 		 *********************************************************************/
-		diffusive_boundary (int i_edge, double i_coeff, int i_position, int i_name_in, int i_name_out, double* i_ext_send, double* i_ext_recv) : link_boundary (2, i_edge, i_ext_send, i_ext_recv) {
+		diffusive_boundary (int i_edge, double i_coeff, int i_position, int i_name_in, int i_name_out, int i_ext_send, int i_ext_recv) : link_boundary (2, i_edge, i_ext_send, i_ext_recv) {
 			coeff = i_coeff;
 			position = i_position;
 			name_in = i_name_in;
