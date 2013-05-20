@@ -30,7 +30,6 @@ namespace one_d
 		}
 
 		void explicit_diffusion::execute () {
-			
 			bases::explicit_plan::execute ();
 		
 			TRACE (logger, "Operating...");

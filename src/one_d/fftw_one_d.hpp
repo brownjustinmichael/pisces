@@ -26,7 +26,8 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::transform::transform ()
 		 *********************************************************************/
-		fftw_cosine (int i_n, int i_name_in, int i_name_out = null) : bases::transform (i_n, i_name_in, i_name_out) {}
+		fftw_cosine (int i_n, int i_name_in, int i_name_out = null) : bases::transform (i_n, i_name_in, i_name_out) {
+		}
 		
 		virtual ~fftw_cosine () {}
 		
@@ -58,7 +59,6 @@ namespace one_d
 				data_out [i] *= scalar;
 			}
 			
-			TRACE (logger, "executed.");
 		}
 	
 	private:		

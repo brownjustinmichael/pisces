@@ -52,7 +52,9 @@ namespace io
 		virtual ~read_params_txt () {}
 
 		std::map<std::string, types> load_params () {return inputParam;}
-	};	
+	};
+	
+	typedef std::map<std::string,io::types> parameter_map;
 
 	/*!*******************************************************************
 	 * \brief A base class that is essentially a null header

@@ -27,6 +27,8 @@ namespace bases
 			transform_stream->to_file ();
 		}
 		
+		TRACE (logger, "Executing plans...");
+		
 		for (int i = 0; i < (int) plans.size (); ++i) {
 			plans [i]->execute ();
 		}

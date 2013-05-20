@@ -30,6 +30,10 @@ namespace bases
 		
 		virtual ~transform () {}
 		
+		virtual void associate (element* i_element_ptr) {
+			explicit_plan::associate (i_element_ptr);
+		}
+		
 		/*!*******************************************************************
 		 * \copybrief bases::explicit_plan::execute ()
 		 *********************************************************************/

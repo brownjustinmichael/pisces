@@ -35,8 +35,10 @@ namespace one_d
 		 * \param i_n The number of data elements in each scalar
 		 * \copydoc bases::element::element ()
 		 *********************************************************************/
-		element (std::string i_name, int i_n, int i_flags) : bases::element (i_name, i_flags) {
+		element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& inputParams,  int i_flags) : bases::element (i_name, inputParams, i_flags) {
 			n = i_n;
+			position_0 = i_position_0;
+			position_n = i_position_n;
 			
 			cell.resize (i_n);
 			for (int i = 0; i < i_n; ++i) {
@@ -57,15 +59,6 @@ namespace one_d
 				initialize (name);
 			}
 			return scalars [name] [0];
-		}
-		
-		virtual void initialize_position (int name, double initial_position = 0.0, double scale = 1.0) {
-			double pioN = std::acos (-1.0) / (n - 1);
-			std::vector <double> positions (n);
-			for (int i = 0; i < n; ++i) {
-				positions [i] = scale * std::cos (i * pioN) + initial_position;
-			}
-			initialize (name, &positions [0]);
 		}
 		
 		virtual void initialize (int name, double* initial_conditions = NULL) {
@@ -131,6 +124,8 @@ namespace one_d
 		
 	protected:
 		int n; //!< The number of elements in each 1D array
+		double position_0;
+		double position_n;
 		std::vector<int> cell; //!< An integer array for tracking each cell number for output
 
 		std::map <int, std::vector <double>> scalars; //!< A vector of scalar vectors
@@ -140,34 +135,70 @@ namespace one_d
 
 	namespace chebyshev
 	{
-	/*!*******************************************************************
-	 * \brief A simple implementation of the element class with diffusion
-	 * 
-	 * This class contains a full element's capacity to run a single 
-	 * element diffusion in 1D. It cannot yet tie to other elements or 
-	 * calculate its own timestep. 
-	 *********************************************************************/
-	class advection_diffusion_element : public element
-	{
-	public:
-		/*!*******************************************************************
-		 * \param i_n The number of elements in each 1D data array
-		 * \param i_flags Flags for the boundary conditions and evaluation
-		 *********************************************************************/
-		advection_diffusion_element (std::string i_name, int i_n, double initial_position, double *intial_velocity, int i_flags,std::map<std::string,io::types>& inputParams);
-		virtual ~advection_diffusion_element () {}
-		
-		inline void implicit_reset () {
-			element::implicit_reset ();
-			
-			if (!(flags & factorized)) {
-				utils::scale (n * n, 0.0, &matrix [0]);
+		class element : public one_d::element
+		{
+		public:
+			element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& inputParams, int i_flags) : one_d::element (i_n, i_position_0, i_position_n, i_name, inputParams, i_flags) {
+				initialize (position);
 			}
-		}
+			virtual ~element () {}
+			
+			virtual void initialize (int name, double* initial_conditions = NULL) {
+				TRACE (logger, "Initializing " << name);
+				if (name == position && !initial_conditions) {
+					double pioN = std::acos (-1.0) / (n - 1);
+					double initial_position = (position_0 + position_n) / 2.0;
+					double scale = (position_n - position_0) / 2.0;
+					std::vector <double> init (n);
+					for (int i = 0; i < n; ++i) {
+						init [i] = scale * std::cos (i * pioN) + initial_position;
+					}
+					one_d::element::initialize (name, &init [0]);
+				} else if (name == velocity && !initial_conditions){
+					double scale = inputParams["init_cond_scale"].asDouble;
+					double width = inputParams["init_cond_width"].asDouble;
+					double mean = inputParams["init_cond_mean"].asDouble;
+					double sigma = inputParams["init_cond_sigma"].asDouble;
+					std::vector <double> init (n);
+					for (int i = 0; i < n; ++i) {
+						init [i] = scale * std::exp (- ((*this) (position, i) - mean) * ((*this) (position, i) - mean) / 2.0 / sigma / sigma) - scale * std::exp (- width * width / 2.0 / sigma / sigma);
+					}
+					one_d::element::initialize (name, &init [0]);
+				} else {
+					one_d::element::initialize (name, initial_conditions);
+				}
+				TRACE (logger, "Initialized.");
+			}
+		};
 		
-	private:
-		std::vector<double> matrix; //!< A vector containing the double matrix used in the implicit solver
-	};
+		/*!*******************************************************************
+		 * \brief A simple implementation of the element class with diffusion
+		 * 
+		 * This class contains a full element's capacity to run a single 
+		 * element diffusion in 1D. It cannot yet tie to other elements or 
+		 * calculate its own timestep. 
+		 *********************************************************************/
+		class advection_diffusion_element : public element
+		{
+		public:
+			/*!*******************************************************************
+			 * \param i_n The number of elements in each 1D data array
+			 * \param i_flags Flags for the boundary conditions and evaluation
+			 *********************************************************************/
+			advection_diffusion_element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& inputParams, int i_flags);
+			virtual ~advection_diffusion_element () {}
+		
+			inline void implicit_reset () {
+				element::implicit_reset ();
+			
+				if (!(flags & factorized)) {
+					utils::scale (n * n, 0.0, &matrix [0]);
+				}
+			}
+		
+		private:
+			std::vector<double> matrix; //!< A vector containing the double matrix used in the implicit solver
+		};
 	} /* chebyshev */
 } /* one_d */
 

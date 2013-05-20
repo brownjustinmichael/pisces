@@ -67,6 +67,7 @@ namespace one_d
 		virtual void execute () {
 			bases::boundary::execute ();
 			for (bases::element::iterator iter = element_ptr->begin (); iter != element_ptr->end (); ++iter) {
+				MDEBUG ("" << *iter << " send: " << send_buffer [*iter] [0] << " recv: " << recv_buffer [*iter] [0]);
 				(*element_ptr) (*iter, index) = 0.5 * send_buffer [*iter] [0] + 0.5 * recv_buffer [*iter] [0];
 			}	
 		}

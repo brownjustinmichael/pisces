@@ -15,6 +15,7 @@
 #include "config.hpp"
 #include "one_d/element_one_d.hpp"
 #include "one_d/boundary_one_d.hpp"
+#include "one_d/master_one_d.hpp"
 
 // #include "mpi.h"
 
@@ -88,68 +89,66 @@ int main (int argc, char const *argv[])
 		
 	config::make_main ();
 	
+	std::vector <int> n_grid (2, 32);
+	std::vector <double> position_grid (3, 0.0);
+	position_grid [0] = 2.0;
+	position_grid [2] = -2.0;
+	std::vector <std::string> name_grid (2);
+	name_grid [0] = "1";
+	name_grid [1] = "2";
+	
+	one_d::master <one_d::chebyshev::advection_diffusion_element, one_d::diffusive_boundary> master_process (1, "../input/parameters.txt", 2, &n_grid [0], &position_grid [0], &name_grid [0]);
+	
+	master_process.run ();
+	
 	// if (id == 0) {
 		// Read experiment parameters out of text file
-		std::string filename = "../input/parameters.txt";
-		std::map<std::string,io::types> inputParams;
-		io::read_params_txt parameters (filename);
-		inputParams = parameters.load_params();
-
-		// Inialize some experiment variables
-		const int n = inputParams["gridpoints"].asInt;
-		const int tsteps = inputParams["timesteps"].asInt;
-		const double scale = inputParams["init_cond_scale"].asDouble;
-		const double sigma = inputParams["init_cond_sigma"].asDouble;
-	
-		MTRACE ("Beginning main..." << n);
-	
-		initial_position.resize (n + 1);
-		initial_conditions.resize (n + 1, 0.0);
-	
-		double pioN = std::acos (-1.0) / (n / 2 - 1);
-		for (int i = 0; i < n / 2; ++i) {
-			initial_position [i] = std::cos (pioN * i) + 1.0;
-			initial_position [i + n / 2 - 1] = std::cos (pioN * i) - 1.0;
-			initial_conditions [i] = scale * std::exp (- (initial_position [i] - 0.) * (initial_position [i] - 0.) / 2.0 / sigma / sigma) - scale * std::exp (- 4.0 / 2.0 / sigma / sigma);
-			initial_conditions [i + n / 2 - 1] = scale * std::exp (- (initial_position [i + n / 2 - 1] - 0.) * (initial_position [i + n / 2 - 1] - 0.) / 2.0 / sigma / sigma) - scale * std::exp (- 4.0 / 2.0 / sigma / sigma);
-		}
+		// std::string filename = "../input/parameters.txt";
+		// io::parameter_map inputParams;
+		// io::read_params_txt parameters (filename);
+		// inputParams = parameters.load_params();
+		// 
+		// // Inialize some experiment variables
+		// const int tsteps = inputParams["timesteps"].asInt;
+		// 	
+		// MTRACE ("Beginning main..." << n);
 	// }
 	
-	one_d::chebyshev::advection_diffusion_element element_1 ("1", n / 2, 1.0, &initial_conditions [0], 0x00, inputParams);
-	one_d::chebyshev::advection_diffusion_element element_2 ("2", n / 2, -1.0, &initial_conditions [n / 2 - 1], 0x00, inputParams);
-	
-	std::vector <double> buffer_1 (n / 2), buffer_2 (n / 2);
-	
-	element_1.add_boundary (std::make_shared <one_d::diffusive_boundary> (one_d::diffusive_boundary (linked_n, inputParams["diffusion_coeff"].asDouble, position, velocity, rhs, &buffer_1 [0], &buffer_2 [0])));
-	element_2.add_boundary (std::make_shared <one_d::diffusive_boundary> (one_d::diffusive_boundary (linked_0, inputParams["diffusion_coeff"].asDouble, position, velocity, rhs, &buffer_2 [0], &buffer_1 [0])));
-
-	MTRACE ("main: Entering main loop.");
-	
-	for (int i = 0; i < tsteps; ++i) {
-		MTRACE ("main: Beginning timestep...");
-		MINFO ("main: Timestep: " << i);
-		
-		try {
-			element_1.calculate ();
-			element_2.calculate ();
-			element_1.send ();
-			element_2.send ();
-			element_1.recv ();
-			element_2.recv ();
-			element_1.execute_boundaries ();
-			element_2.execute_boundaries ();
-			element_1.update ();
-			element_2.update ();
-		} catch (...) {
-			element_1.failsafe ();
-			element_2.failsafe ();
-			exit (EXIT_FAILURE);
-		}
-		
-		MTRACE ("main: Timestep " << i << " complete.");
-	}
-
-	MTRACE ("main: End of main.");
+	// one_d::chebyshev::advection_diffusion_element element_1 (n / 2, 0.0, 2.0, "1", inputParams, 0x00);
+	// one_d::chebyshev::advection_diffusion_element element_2 (n / 2, -2.0, 0.0, "2", inputParams, 0x00);
+	// 
+	// std::vector <double> buffer_1 (n / 2), buffer_2 (n / 2);
+	// 
+	// element_1.add_boundary (std::make_shared <one_d::diffusive_boundary> (one_d::diffusive_boundary (linked_n, inputParams["diffusion_coeff"].asDouble, position, velocity, rhs, &buffer_1 [0], &buffer_2 [0])));
+	// element_2.add_boundary (std::make_shared <one_d::diffusive_boundary> (one_d::diffusive_boundary (linked_0, inputParams["diffusion_coeff"].asDouble, position, velocity, rhs, &buffer_2 [0], &buffer_1 [0])));
+	// 
+	// MTRACE ("main: Entering main loop.");
+	// 
+	// for (int i = 0; i < tsteps; ++i) {
+	// 	MTRACE ("main: Beginning timestep...");
+	// 	MINFO ("main: Timestep: " << i);
+	// 	
+	// 	try {
+	// 		element_1.calculate ();
+	// 		element_2.calculate ();
+	// 		element_1.send ();
+	// 		element_2.send ();
+	// 		element_1.recv ();
+	// 		element_2.recv ();
+	// 		element_1.execute_boundaries ();
+	// 		element_2.execute_boundaries ();
+	// 		element_1.update ();
+	// 		element_2.update ();
+	// 	} catch (...) {
+	// 		element_1.failsafe ();
+	// 		element_2.failsafe ();
+	// 		exit (EXIT_FAILURE);
+	// 	}
+	// 	
+	// 	MTRACE ("main: Timestep " << i << " complete.");
+	// }
+	// 
+	// MTRACE ("main: End of main.");
 	
 	// MPI::Finalize ();
 

@@ -15,6 +15,7 @@ namespace one_d
 		for (bases::element::iterator iter = (*element_ptr).begin (); iter != (*element_ptr).end (); ++iter) {
 			for (int i = 0; i < n; ++i) {
 				ext_send [i + n * j] = send_buffer [*iter] [i] = (&((*element_ptr) [*iter])) [index + i * increment];
+				MDEBUG ("" << (i + n * j) << " " << ext_send [i+n*j]);
 			}
 			++j;
 		}
@@ -25,6 +26,7 @@ namespace one_d
 		for (bases::element::iterator iter = (*element_ptr).begin (); iter != (*element_ptr).end (); ++iter) {
 			for (int i = 0; i < n; ++i) {
 				recv_buffer [*iter] [i] = ext_recv [i + n * j];
+				MDEBUG ("" << (i + n * j) << " " << ext_recv [i+n*j]);
 			}
 			++j;
 		}

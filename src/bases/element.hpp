@@ -36,8 +36,9 @@ namespace bases
 		/*!*******************************************************************
 		* \param i_flags An integer set of execution flags
 		*********************************************************************/
-		element (std::string i_name, int i_flags) {
+		element (std::string i_name, io::parameter_map& i_inputParams, int i_flags) : inputParams (i_inputParams) {
 			name = i_name;
+			inputParams = i_inputParams;
 			flags = i_flags;
 			logger = config::make_logger ();
 			
@@ -103,7 +104,6 @@ namespace bases
 		}
 		
 		inline void set_transform (std::shared_ptr<plan> i_plan) {
-			i_plan->associate (this);
 			transform_forward = i_plan;
 			add_plan (transform_forward);
 		}
@@ -114,9 +114,9 @@ namespace bases
 		 * \param i_plan A shared pointer to the plan to add
 		 *********************************************************************/
 		inline void add_plan (std::shared_ptr <plan> i_plan) {
-			TRACE (logger, "Adding plan...");
+			TRACE (logger, "Adding plan..." << this);
 			i_plan->associate (this);
-			plans.push_back (std::move (i_plan));
+			plans.push_back (i_plan);
 			TRACE (logger, "Added.");
 		}
 		
@@ -163,6 +163,7 @@ namespace bases
 	
 	protected:
 		std::string name;
+		io::parameter_map& inputParams;
 		
 		int logger;
 

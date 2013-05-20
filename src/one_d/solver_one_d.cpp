@@ -30,8 +30,6 @@ namespace one_d
 		
 		utils::matrix_factorize (n, n, matrix, &ipiv [0], &info);
 		
-		MDEBUG ("factorize");
-		
 		if (info != 0) {
 			ERROR (logger, "Unable to invert matrix");
 			throw 0; // For now, kill the program. 

@@ -41,6 +41,10 @@ namespace io
 			input_stream >> temp;
 			input_stream >> inputParam[temp].asDouble;		// init_cond_scale
 			input_stream >> temp;
+			input_stream >> inputParam[temp].asDouble;		// init_cond_width
+			input_stream >> temp;
+			input_stream >> inputParam[temp].asDouble;		// init_cond_mean
+			input_stream >> temp;
 			input_stream >> inputParam[temp].asDouble;		// init_cond_sigma
 
 			input_stream.close();
@@ -48,6 +52,7 @@ namespace io
 		else
 		{
 			std::cout << "Cannot open parameter file!" << std::endl;
+			throw 0;
 		}
 	}
 	/****************** END: read_parameter *********************/
