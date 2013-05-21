@@ -57,6 +57,8 @@ namespace one_d
 		
 			// Set up solver
 			set_solver (std::make_shared <solver> (solver (n, timestep, grid->get_data (0), &matrix [0], velocity, rhs)));
+			
+			normal_stream->to_file ();
 		
 			TRACE (logger, "Initialized.");
 		}

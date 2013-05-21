@@ -27,8 +27,9 @@ namespace bases
 	class boundary : public plan
 	{
 	public:
-		boundary (int i_edge) : plan () {
+		boundary (int i_edge, int i_process) : plan () {
 			edge = i_edge;
+			process = i_process;
 		}
 		
 		virtual ~boundary () {}
@@ -43,6 +44,7 @@ namespace bases
 		int edge;
 		int index;
 		int increment;
+		int process;
 	};
 } /* bases */
 

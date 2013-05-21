@@ -16,11 +16,10 @@ namespace one_d
 		for (bases::element::iterator iter = (*element_ptr).begin (); iter != (*element_ptr).end (); ++iter) {
 			for (int i = 0; i < n; ++i) {
 				to_send [i + n * j] = send_buffer [*iter] [i] = (&((*element_ptr) [*iter])) [index + i * increment];
-				MDEBUG ("send " << *iter << " " << i << " " << send_buffer [*iter] [i]);
 			}
 			++j;
 		}
-		MPI::COMM_WORLD.Send (&to_send [0], (j + 1) * n, MPI::REAL, 0, ext_send);
+		MPI::COMM_WORLD.Send (&to_send [0], (j + 1) * n, MPI::REAL, process, ext_send);
 	}
 
 	void link_boundary::recv () {
@@ -28,12 +27,11 @@ namespace one_d
 		for (bases::element::iterator iter = (*element_ptr).begin (); iter != (*element_ptr).end (); ++iter) {
 			++j;
 		}
-		MPI::COMM_WORLD.Recv (&to_recv [0], (j + 1) * n, MPI::REAL, 0, ext_recv);
+		MPI::COMM_WORLD.Recv (&to_recv [0], (j + 1) * n, MPI::REAL, process, ext_recv);
 		j = 0;
 		for (bases::element::iterator iter = (*element_ptr).begin (); iter != (*element_ptr).end (); ++iter) {
 			for (int i = 0; i < n; ++i) {
 				recv_buffer [*iter] [i] = to_recv [i + n * j];
-				MDEBUG ("recv " << *iter << " " << i << " " << recv_buffer [*iter] [i]);
 			}
 			++j;
 		}

@@ -56,6 +56,8 @@
 #include <log4cxx/xml/domconfigurator.h>
 #include <log4cxx/fileappender.h>
 #include <log4cxx/consoleappender.h>
+
+#include "mpi.h"
 	
 /*!*******************************************************************
  * \def TRACE(str)
@@ -119,13 +121,13 @@ public:
 	 *********************************************************************/
 	static log4cxx::LevelPtr int_to_severity (int severity_index);
 	
-	static int make_main () {
+	static int make_main (int p) {
 		int i = n_loggers++;
-		loggers.push_back (log4cxx::Logger::getLogger ("main"));
+		loggers.push_back (log4cxx::Logger::getLogger ("main_" + std::to_string (p)));
 		loggers [i]->setLevel (config::int_to_severity (severity));
 		
 		int j = n_appenders++;
-		appenders.push_back (new log4cxx::FileAppender (layout, "main.log", false));
+		appenders.push_back (new log4cxx::FileAppender (layout, "main_" + std::to_string (p) + ".log", false));
 		loggers [i]->addAppender (appenders [j]);
 		
 		j = n_appenders++;

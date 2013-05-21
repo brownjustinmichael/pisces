@@ -36,7 +36,7 @@ namespace bases
 		virtual void run () {
 			MTRACE ("Beginning main...");
 			for (int i = 0; i < tsteps; ++i) {
-				MINFO ("Processor " << id << ": Timestep " << i);
+				MINFO ("Timestep " << i);
 				for (int j = 0; j < (int) elements.size (); ++j) {
 					elements [j]->calculate ();
 				}

@@ -39,7 +39,7 @@ namespace one_d
 		 * \param i_alpha_minus A double coefficient for the contribution from the negative boudary
 		 * \param i_data_minus A pointer to the double first element of the negative boundary
 		 *********************************************************************/
-		link_boundary (int i_n, int i_edge, int i_ext_send, int i_ext_recv) : bases::boundary (i_edge) {
+		link_boundary (int i_n, int i_edge, int i_ext_send, int i_ext_recv, int i_process) : bases::boundary (i_edge, i_process) {
 			MTRACE ("Instantiating...");
 			n = i_n;
 			ext_send = i_ext_send;
@@ -71,7 +71,6 @@ namespace one_d
 		virtual void execute () {
 			bases::boundary::execute ();
 			for (bases::element::iterator iter = element_ptr->begin (); iter != element_ptr->end (); ++iter) {
-				MDEBUG ("" << *iter << " send: " << send_buffer [*iter] [0] << " recv: " << recv_buffer [*iter] [0]);
 				(*element_ptr) (*iter, index) = 0.5 * send_buffer [*iter] [0] + 0.5 * recv_buffer [*iter] [0];
 			}	
 		}
@@ -102,11 +101,11 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::link_boundary::link_boundary ()
 		 *********************************************************************/
-		diffusive_boundary (int i_edge, double i_coeff, int i_position, int i_name_in, int i_name_out, int i_ext_send, int i_ext_recv) : link_boundary (2, i_edge, i_ext_send, i_ext_recv) {
-			coeff = i_coeff;
-			position = i_position;
-			name_in = i_name_in;
-			name_out = i_name_out;
+		diffusive_boundary (int i_edge, int i_ext_send, int i_ext_recv, int i_process) : link_boundary (2, i_edge, i_ext_send, i_ext_recv, i_process) {}
+	
+		void associate (bases::element* i_element_ptr) {
+			link_boundary::associate (i_element_ptr);
+			coeff = element_ptr->get_dparam ("diffusion_coeff");
 		}
 	
 		virtual ~diffusive_boundary () {}
@@ -120,17 +119,14 @@ namespace one_d
 			double x02 = (send_buffer [position] [1] - recv_buffer [position] [1]);
 			double x12 = (send_buffer [position] [0] - recv_buffer [position] [1]);
 			
-			send_buffer [name_out] [0] += 2.0 * coeff * 2.0 * (send_buffer [name_in] [1] * x12 - send_buffer [name_in] [0] * x02 + recv_buffer [velocity] [1] * x01) / x01 / x02 / x12;
-			recv_buffer [name_out] [0] += send_buffer [name_in] [0];
+			send_buffer [rhs] [0] += 2.0 * coeff * 2.0 * (send_buffer [velocity] [1] * x12 - send_buffer [velocity] [0] * x02 + recv_buffer [velocity] [1] * x01) / x01 / x02 / x12;
+			recv_buffer [rhs] [0] += send_buffer [rhs] [0];
 			
 			link_boundary::execute ();
 			TRACE (logger, "executed.")
 		}
 		
 	protected:
-		int position;
-		int name_in;
-		int name_out;
 		double coeff;
 	};
 } /* one_d */

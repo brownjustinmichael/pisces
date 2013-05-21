@@ -148,7 +148,7 @@ namespace one_d
 				if (name == position && !initial_conditions) {
 					double pioN = std::acos (-1.0) / (n - 1);
 					double initial_position = (position_0 + position_n) / 2.0;
-					double scale = (position_n - position_0) / 2.0;
+					double scale = (position_0 - position_n) / 2.0;
 					std::vector <double> init (n);
 					for (int i = 0; i < n; ++i) {
 						init [i] = scale * std::cos (i * pioN) + initial_position;

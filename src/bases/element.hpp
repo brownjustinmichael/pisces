@@ -65,6 +65,14 @@ namespace bases
 		 *********************************************************************/
 		virtual void update ();
 		
+		double get_dparam (std::string name) {
+			return inputParams [name].asDouble;
+		}
+		
+		int get_iparam (std::string name) {
+			return inputParams [name].asInt;
+		}
+		
 		inline virtual void failsafe () {
 			failsafe_dump->to_file ();
 		}

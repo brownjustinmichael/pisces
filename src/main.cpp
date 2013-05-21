@@ -87,22 +87,53 @@ int main (int argc, char *argv[])
 		--argc;
 		++argv;
 	}
-		
-	config::make_main ();
 	
-	int n = 3;
+	config::make_main (id);
+	
+	int n_total = 3;
+	int n;
+	int n_masters;
+	int index;
 	std::vector <int> n_grid (3, 16);
 	std::vector <double> position_grid (4, 0.0);
-	position_grid [0] = 2.0;
-	position_grid [1] = 2.0 / 3.0;
-	position_grid [2] = -2.0 / 3.0;
-	position_grid [3] = -2.0;
+	position_grid [0] = -2.0;
+	position_grid [1] = -2.0 / 3.0;
+	position_grid [2] = 2.0 / 3.0;
+	position_grid [3] = 2.0;
 	std::vector <std::string> name_grid (3);
 	name_grid [0] = "1";
 	name_grid [1] = "2";
 	name_grid [2] = "3";
 	
-	one_d::master <one_d::chebyshev::advection_diffusion_element, one_d::diffusive_boundary> master_process (id, "../input/parameters.txt", n, &n_grid [0], &position_grid [0], &name_grid [0]);
+	if (id >= n_total % p) {
+		n = n_total / p;
+		index = n * id + n_total % p;
+	} else {
+		n = n_total / p + 1;
+		index = n * id;
+	}
+
+	if (id >= n_total) {
+		MPI::Finalize ();
+		return 0;
+	} else {
+		if (p > n_total) {
+			n_masters = n_total;
+		} else {
+			n_masters = p;
+		}
+	}
+	
+	one_d::master <one_d::chebyshev::advection_diffusion_element, one_d::diffusive_boundary> master_process (id, "../input/parameters.txt", n, &n_grid [index], &position_grid [index], &name_grid [index]);
+	
+	if (id != 0) {
+		MDEBUG ("Adding boundary to " << 0 << " at 0 at processor " << id - 1);
+		master_process.add_boundary (0, linked_0, 1, 2, id - 1);
+	}
+	if (id != n_masters - 1) {
+		MDEBUG ("Adding boundary to " << n - 1 << " at n - 1 at processor " << id + 1);
+		master_process.add_boundary (n - 1, linked_n, 2, 1, id + 1);
+	}
 	
 	master_process.run ();
 	
