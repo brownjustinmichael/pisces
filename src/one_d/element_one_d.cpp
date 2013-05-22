@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file one_d/element.cpp
+ * \file element_one_d.cpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-08.
@@ -43,8 +43,6 @@ namespace one_d
 			normal_stream->append ((*this) [position]);
 			normal_stream->append ((*this) [velocity]);
 			normal_stream->append ((*this) [rhs]);
-									
-			set_grid (std::make_shared<chebyshev_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), logger)));
 			
 			// Set up plans in order
 			add_plan (std::make_shared <explicit_diffusion> (explicit_diffusion (diffusion_coeff * (1.0 - alpha), i_n, grid, velocity, position, rhs)));

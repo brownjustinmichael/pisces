@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file one_d/diffusion.cpp
+ * \file diffusion_one_d.cpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-08.

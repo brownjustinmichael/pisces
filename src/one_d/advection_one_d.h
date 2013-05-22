@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 //
-//		! \file one_d/advection.h
+//		! \file advection_one_d.h
 //		File type: header
 //		Author: Ryan Moll (ryan.d.moll@gmail.com)
 //		Date created: April 4, 2013

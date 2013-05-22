@@ -29,7 +29,7 @@ namespace bases
 	{
 	public:
 		/*!*******************************************************************
-		 * \param i_flags_ptr A pointer to the integer execution flags
+		 * \copydoc explicit_plan::explicit_plan ()
 		 *********************************************************************/
 		solver (int i_n, int i_name_in, int i_name_out) : explicit_plan (i_n, i_name_in, i_name_out) {}
 		

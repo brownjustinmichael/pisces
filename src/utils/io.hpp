@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file utilities/io.hpp
+ * \file io.hpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-08.
@@ -54,6 +54,9 @@ namespace io
 		std::map<std::string, types> load_params () {return inputParam;}
 	};
 	
+	/*!*******************************************************************
+	 * \brief The parameter map object, which has string keys and various types of values
+	 *********************************************************************/
 	typedef std::map<std::string,io::types> parameter_map;
 
 	/*!*******************************************************************
@@ -66,6 +69,9 @@ namespace io
 	class header
 	{
 	public:
+		/*!*******************************************************************
+		 * \param i_logger The integer representation of the logger object
+		 *********************************************************************/
 		header (int i_logger = -1) {logger = i_logger;}
 		
 		virtual ~header () {}
@@ -80,7 +86,7 @@ namespace io
 		virtual std::string output_header () {return std::string ("");}
 		
 	protected:
-		int logger;
+		int logger; //!< The integer representation of the logger object
 	};
 	
 	/*!*******************************************************************
@@ -96,6 +102,7 @@ namespace io
 		 * \param i_n_data_headers An integer number of column headers to be read from i_data_headers
 		 * \param i_data_headers An array of strings that are the column headers
 		 * \param i_comment_string The string to be used as the comment before the header lines
+		 * \copydoc header::header ()
 		 *********************************************************************/
 		simple_header (int i_n_data_headers, std::string *i_data_headers, std::string i_comment_string = "#", int i_logger = -1);
 		
@@ -121,8 +128,7 @@ namespace io
 		/*!*******************************************************************
 		 * \param i_header_ptr A pointer to the header object
 		 * \param i_n The integer number of points in the data
-		 * \param i_n_data_ptrs The integer number of pointers in i_data_ptrs
-		 * \param i_data_ptrs A pointer to double pointers of data to output
+		 * \param i_logger The integer representation of the logger
 		 *********************************************************************/
 		output (header *i_header_ptr, int i_n, int i_logger = -1);
 		
@@ -170,7 +176,7 @@ namespace io
 		virtual void to_file () = 0;
 		
 	protected:
-		int logger;
+		int logger; //!< The integer representation of the logger
 		int n; //!< An integer number of elements in each array
 		int n_data_ptrs; //!< An integer number of arrays to output
 		std::vector<double *> double_ptrs; //!< A vector of double pointers to the arrays of data (if an element is NULL, check int_ptrs at the same index instead)
@@ -198,8 +204,7 @@ namespace io
 		/*!*******************************************************************
 		 * \param i_file_name A string of the file to which the data will be output
 		 * \param i_n An integer number of data points contained within each array
-		 * \param i_n_data_ptrs The number of double pointers in i_data_ptrs
-		 * \param i_data_ptrs An array of double pointers to data arrays to be output
+		 * \param i_logger The integer representation of the logger
 		 *********************************************************************/
 		simple_output (std::string i_file_name, int i_n, int i_logger = -1) : output (new header, i_n, i_logger) {file_name = i_file_name;}
 		
@@ -224,8 +229,7 @@ namespace io
 		 * \param i_int_width The total number of characters the integer in the file name can have
 		 * \param i_header_ptr A pointer to the header object
 		 * \param i_n The integer number of points in the data
-		 * \param i_n_data_ptrs The number double pointers in i_data_ptrs
-		 * \param i_data_ptrs An array of double pointers to data arrays to be output
+		 * \param i_logger The integer representation of the logger
 		 *********************************************************************/
 		incremental_output (std::string i_file_base, std::string i_file_extension, int i_int_width, header *i_header_ptr, int i_n, int i_logger = -1) : output (i_header_ptr, i_n, i_logger) {n_outputs = 0; int_width = i_int_width; file_base = i_file_base; file_extension = i_file_extension;}
 		

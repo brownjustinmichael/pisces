@@ -11,10 +11,15 @@
 #ifndef LAPACK_HPP_MEIP1OZM
 #define LAPACK_HPP_MEIP1OZM
 
-/*
-	TODO Make copy, scale, daxpy, etc functions that can be more easily overwritten
-*/
-
+/*!*******************************************************************
+ * \brief Function from BLAS that calculates a dot product
+ * 
+ * \param n A pointer to an integer number of elements in dx and dy to dot
+ * \param dx The first double array of data
+ * \param incx A pointer to an integer spacing of elements in dx
+ * \param dy The second double array of data
+ * \param incy A pointer to an integer spacing of elements in dy
+ *********************************************************************/
 extern "C" double ddot_ (int *n, double *dx, int *incx, double *dy, int *incy);
 
 /*!*******************************************************************

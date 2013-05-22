@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file one_d/boundary.hpp
+ * \file boundary_one_d.hpp
  * Spectral Element
  * 
  * This file provides the implementation for the boundary base class. 
@@ -22,11 +22,9 @@
 namespace one_d
 {
    /*!*******************************************************************
-    * \brief An abstract plan class to handle boundary conditions
+    * \brief An abstract plan class to handle 1D boundary conditions
     * 
-    * This class contains the necessary coefficients and pointers to 
-    * handle boundary conditions. The implementation will depend on the 
-    * number of dimensions.
+    * This class implements boundary conditions in 1D with OpenMPI
     *********************************************************************/
 	class link_boundary : public bases::boundary
 	{
@@ -34,10 +32,10 @@ namespace one_d
 		typedef std::map <int, std::vector <double>> buffer;
 		
 		/*!*******************************************************************
-		 * \param i_alpha_plus A double coefficient for the contribution from the positive boundary
-		 * \param i_data_plus A pointer to the double first element of the positive boundary
-		 * \param i_alpha_minus A double coefficient for the contribution from the negative boudary
-		 * \param i_data_minus A pointer to the double first element of the negative boundary
+		 * \param i_n The integer width of the boundary
+		 * \param i_ext_send The integer send tag
+		 * \param i_ext_recv The integer recv tag
+		 * \copydoc bases::boundary::boundary ()
 		 *********************************************************************/
 		link_boundary (int i_n, int i_edge, int i_ext_send, int i_ext_recv, int i_process) : bases::boundary (i_edge, i_process) {
 			MTRACE ("Instantiating...");
@@ -49,6 +47,9 @@ namespace one_d
 	
 		virtual ~link_boundary () {}
 		
+		/*!*******************************************************************
+		 * \copydoc bases::boundary::associate ()
+		 *********************************************************************/
 		virtual void associate (bases::element* element_ptr) {
 			bases::boundary::associate (element_ptr);
 			int j = 0;
@@ -61,12 +62,18 @@ namespace one_d
 			to_recv.resize (n * j);
 		}
 		
+		/*!*******************************************************************
+		 * \copydoc bases::boundary::send ()
+		 *********************************************************************/
 		virtual void send ();
 		
+		/*!*******************************************************************
+		 * \copydoc bases::boundary::recv ()
+		 *********************************************************************/
 		virtual void recv ();
 				
 		/*!*******************************************************************
-		 * \copydoc plan::execute ()
+		 * \copydoc bases::boundary::execute ()
 		 *********************************************************************/
 		virtual void execute () {
 			bases::boundary::execute ();
@@ -76,24 +83,27 @@ namespace one_d
 		}
 		
 	protected:
-		int n;
+		int n; //!< The integer width of the boundary
 
-		int ext_send;
-		int ext_recv;
+		int ext_send; //!< The integer send tag
+		int ext_recv; //!< The integer recv tag
 		
-		std::vector <double> to_send;
-		std::vector <double> to_recv;
+		std::vector <double> to_send; //!< The serialized vector containing the data to send
+		std::vector <double> to_recv; //!< The serialized vector to contain the received data
 		
-		buffer send_buffer;
-		buffer recv_buffer;
+		buffer send_buffer; //!< The buffer that contains the data to send
+		buffer recv_buffer; //!< The buffer that contains the received data
+		
+		/*
+			TODO We have a redundancy here that should be fixed.
+		*/
 	};
 	
 	/*!*******************************************************************
-	 * \brief An implementation of the boundary class in 1D
+	 * \brief An implementation of the boundary class in 1D for boundaries with viscosity
 	 * 
-	 * This class handles the single point boundary by taking a weighted 
-	 * average of the edges of two elements. It can also be used to zero 
-	 * a boundary.
+	 * This class handles the single point boundary by using Lagrange 
+	 * interpolation using two points from each element.
 	 *********************************************************************/
 	class diffusive_boundary : public link_boundary
 	{
@@ -103,6 +113,9 @@ namespace one_d
 		 *********************************************************************/
 		diffusive_boundary (int i_edge, int i_ext_send, int i_ext_recv, int i_process) : link_boundary (2, i_edge, i_ext_send, i_ext_recv, i_process) {}
 	
+		/*!*******************************************************************
+		 * \copydoc bases::link_boundary::associate ()
+		 *********************************************************************/
 		void associate (bases::element* i_element_ptr) {
 			link_boundary::associate (i_element_ptr);
 			coeff = element_ptr->get_dparam ("diffusion_coeff");
@@ -127,7 +140,7 @@ namespace one_d
 		}
 		
 	protected:
-		double coeff;
+		double coeff; //!< The double diffusion coefficient
 	};
 } /* one_d */
 

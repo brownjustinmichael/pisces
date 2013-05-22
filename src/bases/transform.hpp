@@ -11,6 +11,9 @@
 
 #include "plan.hpp"
 
+/*!*******************************************************************
+ * \brief An enumeration containing the flags for the transform class
+ *********************************************************************/
 enum transform_flags {
 	transformed = 0x10
 };
@@ -30,6 +33,9 @@ namespace bases
 		
 		virtual ~transform () {}
 		
+		/*!*******************************************************************
+		 * \copydoc bases::explicit_plan::associate ()
+		 *********************************************************************/
 		virtual void associate (element* i_element_ptr) {
 			explicit_plan::associate (i_element_ptr);
 		}

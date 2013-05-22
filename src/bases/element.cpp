@@ -39,7 +39,7 @@ namespace bases
 	void element::send () {
 		TRACE (logger, "Sending information...");
 		
-		for (int i = 0; i < n_boundaries; ++i) {
+		for (int i = 0; i < (int) boundaries.size (); ++i) {
 			boundaries [i]->send ();
 		}
 		
@@ -49,7 +49,7 @@ namespace bases
 	void element::recv () {
 		TRACE (logger, "Receiving information...");
 		
-		for (int i = 0; i < n_boundaries; ++i) {
+		for (int i = 0; i < (int) boundaries.size (); ++i) {
 			boundaries [i]->recv ();
 		}
 		
@@ -59,7 +59,7 @@ namespace bases
 	void element::execute_boundaries () {
 		TRACE (logger, "Executing boundaries...");
 		
-		for (int i = 0; i < n_boundaries; ++i) {
+		for (int i = 0; i < (int) boundaries.size (); ++i) {
 			boundaries [i]->execute ();
 		}
 	

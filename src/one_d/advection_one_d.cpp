@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 //
-//		! \file one_d/advection.cpp
+//		! \file advection_one_d.cpp
 //		File type: source
 //		Author: Ryan Moll (ryan.d.moll@gmail.com)
 //		Date created: April 4, 2013

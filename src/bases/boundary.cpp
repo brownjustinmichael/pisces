@@ -15,8 +15,7 @@ namespace bases
 	void boundary::associate (element* i_element_ptr) {
 		plan::associate (i_element_ptr);
 		MTRACE ("Associating...");
-		index = element_ptr->get_boundary_index (edge);
-		increment = element_ptr->get_boundary_increment (edge);
+		element_ptr->get_boundary_info (edge, index, increment);
 		*flags_ptr |= edge;
 		MTRACE ("Associated.");
 	}

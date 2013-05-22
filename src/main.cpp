@@ -23,12 +23,6 @@ int config::n_loggers = 0;
 int config::n_appenders = 0;
 int config::severity = 4;  // The default logging severity is 4, errors and fatal messages only.
 std::string config::config_file = "../input/Log4cxxConfig.xml";
-unsigned int n = 66; //!< The number of grid points
-double scale = 1.0;
-double sigma = 0.1;
-
-std::vector<double> initial_conditions;
-std::vector<double> initial_position;
 
 #ifdef __APPLE__
 
@@ -57,6 +51,42 @@ std::vector<log4cxx::AppenderPtr> config::appenders;
  * equation for a constant background flow.
  *
  * Possible further reaching goals: 3D, pseudo-incompressible
+ *********************************************************************/
+
+/*!*******************************************************************
+ * \namespace bases
+ * 
+ * \brief A namespace containing the base classes of the code
+ *********************************************************************/
+
+/*!*******************************************************************
+ * \namespace io
+ * 
+ * \brief A namespace containing all the input and output classes of the code
+ *********************************************************************/
+
+/*!*******************************************************************
+ * \namespace utils
+ * 
+ * \brief A namespace containing the various utilities needed in the code, such as linear algebra
+ *********************************************************************/
+
+/*!*******************************************************************
+ * \namespace one_d
+ * 
+ * \brief A namespace containing all the 1D pieces of the code
+ *********************************************************************/
+
+/*!*******************************************************************
+ * \namespace chebyshev
+ * 
+ * \brief A namespace containing the 1D Chebyshev pieces of the code
+ *********************************************************************/
+
+/*!*******************************************************************
+ * \namespace two_d
+ * 
+ * \brief A namespace containing all the 2D pieces of the code
  *********************************************************************/
 
 /*!*******************************************************************

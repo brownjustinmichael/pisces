@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file collocation/collocation.cpp
+ * \file chebyshev.cpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-08.

@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file collocation/collocation.hpp
+ * \file chebyshev.hpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-08.
@@ -27,6 +27,7 @@ public:
 	 * \param i_M The integer max order of Chebyshev polynomial
 	 * \param i_N The integer number of collocation points
 	 * \param i_scale A double by which the grid should be scaled
+	 * \param i_logger The integer representation of the logger object
 	 *********************************************************************/
 	chebyshev_grid (int i_M, int i_N, double i_scale = 1.0, int i_logger = -1);
 	

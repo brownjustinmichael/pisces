@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file one_d/diffusion.hpp
+ * \file diffusion_one_d.hpp
  * Spectral Element
  * 
  * This file provides several implementations of implicit and explicit 
@@ -32,10 +32,8 @@ namespace one_d
 		public:
 			/*!*******************************************************************
 			* \param i_coeff A double containing the coefficient in front of the diffusion term in the differential equation
-			* \param i_timestep A pointer to the double current timestep duration
 			* \param i_grid a shared pointer to the collocation_grid, which must be defined for the second derivative
-			* 
-			* \copydetails bases::explicit_plan::explicit_plan ()
+			* \copydoc bases::explicit_plan::explicit_plan ()
 			*********************************************************************/
 			explicit_diffusion (double i_coeff, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, int i_name_in, int i_position, int i_name_out = null);
 

@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file one_d/element.hpp
+ * \file element_one_d.hpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-08.
@@ -18,6 +18,7 @@
 #include "../bases/element.hpp"
 #include "../bases/plan.hpp"
 #include "../utils/utils.hpp"
+#include "../utils/chebyshev.hpp"
 	
 namespace one_d
 {
@@ -33,9 +34,11 @@ namespace one_d
 	public:	
 		/*!*******************************************************************
 		 * \param i_n The number of data elements in each scalar
+		 * \param i_position_0 The double position of index 0
+		 * \param i_position_n The double position of index n - 1
 		 * \copydoc bases::element::element ()
 		 *********************************************************************/
-		element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& inputParams,  int i_flags) : bases::element (i_name, inputParams, i_flags) {
+		element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& i_inputParams,  int i_flags) : bases::element (i_name, i_inputParams, i_flags) {
 			n = i_n;
 			position_0 = i_position_0;
 			position_n = i_position_n;
@@ -50,17 +53,10 @@ namespace one_d
 		}
 		
 		virtual ~element () {}
-		
+	
 		/*!*******************************************************************
-		 * \copydoc bases::element::operator[] ()
+		 * \copydoc bases::element::initialize ()
 		 *********************************************************************/
-		inline double& operator[] (int name) {
-			if (scalars [name].size () == (unsigned int) 0) {
-				initialize (name);
-			}
-			return scalars [name] [0];
-		}
-		
 		virtual void initialize (int name, double* initial_conditions = NULL) {
 			if (scalars [name].size () == (unsigned int) 0) {
 				names.push_back (name);
@@ -73,7 +69,37 @@ namespace one_d
 			fixed_points_n [name] = scalars [name] [n - 1];
 			failsafe_dump->append (&(scalars [name]) [0]);
 		}
+	
+		/*!*******************************************************************
+		 * \copydoc bases::element::operator[] ()
+		 *********************************************************************/
+		inline double& operator[] (int name) {
+			if (scalars [name].size () == (unsigned int) 0) {
+				initialize (name);
+			}
+			return scalars [name] [0];
+		}
 		
+		/*!*******************************************************************
+		 * \copydoc bases::element::get_boundary_info ()
+		 *********************************************************************/
+		inline void get_boundary_info (int edge, int& index, int& increment) {
+			MTRACE ("Getting boundary index...");
+			if (edge == linked_0) {
+				index = 0;
+				increment = 1;
+			} else if (edge == linked_n) {
+				index = n - 1;
+				increment = -1;
+			} else {
+				FATAL (logger, "Edge is not a one_d edge index.");
+				throw 0;
+			}
+		}
+		
+		/*!*******************************************************************
+		 * \copydoc bases::element::explicit_reset ()
+		 *********************************************************************/
 		inline void explicit_reset () {
 			bases::element::explicit_reset ();
 			bases::element::iterator iter;
@@ -84,6 +110,9 @@ namespace one_d
 			}
 		}
 		
+		/*!*******************************************************************
+		 * \copydoc bases::element::execute_boundaries ()
+		 *********************************************************************/
 		inline void execute_boundaries () {
 			bases::element::execute_boundaries ();
 			if (!(flags & linked_0)) {
@@ -98,51 +127,41 @@ namespace one_d
 			}
 		}
 		
-		inline int get_boundary_index (int edge) {
-			MTRACE ("Getting boundary index...");
-			if (edge == linked_0) {
-				return 0;
-			} else if (edge == linked_n) {
-				return n - 1;
-			} else {
-				FATAL (logger, "Edge is not a one_d edge index.");
-				throw 0;
-			}
-		}
-		
-		inline int get_boundary_increment (int edge) {
-			MTRACE ("Getting boundary increment...");
-			if (edge == linked_0) {
-				return 1;
-			} else if (edge == linked_n) {
-				return -1;
-			} else {
-				FATAL (logger, "Edge is not a one_d edge index.");
-				throw 0;
-			}
-		}
-		
 	protected:
 		int n; //!< The number of elements in each 1D array
-		double position_0;
-		double position_n;
+		double position_0; //!< The double position of index 0
+		double position_n; //!< The double position of index n - 1
 		std::vector<int> cell; //!< An integer array for tracking each cell number for output
 
 		std::map <int, std::vector <double>> scalars; //!< A vector of scalar vectors
-		std::map <int, double> fixed_points_0;
-		std::map <int, double> fixed_points_n;
+		std::map <int, double> fixed_points_0; //!< The initial values of the scalars at index 0
+		std::map <int, double> fixed_points_n; //!< The initial values of the scalars at index n - 1
+		
+		/*
+			TODO Perhaps there's a better way to handle the fixed points
+		*/
 	};
 
 	namespace chebyshev
 	{
+		/*!*******************************************************************
+		 * \brief A Chebyshev implementation of the 1D element class
+		 *********************************************************************/
 		class element : public one_d::element
 		{
 		public:
-			element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& inputParams, int i_flags) : one_d::element (i_n, i_position_0, i_position_n, i_name, inputParams, i_flags) {
+			/*!*******************************************************************
+			 * \copydoc one_d::element::element ()
+			 *********************************************************************/
+			element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& i_inputParams, int i_flags) : one_d::element (i_n, i_position_0, i_position_n, i_name, i_inputParams, i_flags) {
 				initialize (position);
+				set_grid (std::make_shared<chebyshev_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), logger)));
 			}
 			virtual ~element () {}
-			
+				
+			/*!*******************************************************************
+			 * \copydoc one_d::element::initialize ()
+			 *********************************************************************/
 			virtual void initialize (int name, double* initial_conditions = NULL) {
 				TRACE (logger, "Initializing " << name);
 				if (name == position && !initial_conditions) {
@@ -175,19 +194,21 @@ namespace one_d
 		 * \brief A simple implementation of the element class with diffusion
 		 * 
 		 * This class contains a full element's capacity to run a single 
-		 * element diffusion in 1D. It cannot yet tie to other elements or 
-		 * calculate its own timestep. 
+		 * element diffusion in 1D with constant timestep.
 		 *********************************************************************/
 		class advection_diffusion_element : public element
 		{
 		public:
 			/*!*******************************************************************
-			 * \param i_n The number of elements in each 1D data array
-			 * \param i_flags Flags for the boundary conditions and evaluation
+			 * \copydoc element::element ()
 			 *********************************************************************/
-			advection_diffusion_element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& inputParams, int i_flags);
+			advection_diffusion_element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& i_inputParams, int i_flags);
+			
 			virtual ~advection_diffusion_element () {}
 		
+			/*!*******************************************************************
+			 * \copydoc element::implicit_reset ()
+			 *********************************************************************/
 			inline void implicit_reset () {
 				element::implicit_reset ();
 			

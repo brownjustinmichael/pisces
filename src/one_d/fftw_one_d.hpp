@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file one_d/fftw.hpp
+ * \file fftw_one_d.hpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-15.
