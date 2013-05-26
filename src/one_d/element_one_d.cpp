@@ -38,7 +38,7 @@ namespace one_d
 			matrix.resize (i_n * i_n, 0.0);
 			
 			// Set up output
-			normal_stream = std::make_shared <io::incremental_output> (io::incremental_output ("../output/test_angle_" + name + "_", ".dat", 4, new io::header, i_n));
+			normal_stream = std::make_shared <io::incremental_output> (io::incremental_output ("../output/test_angle_" + name + "_", ".dat", 4, new io::header, i_n, inputParams["output_every"].asInt));
 			normal_stream->append (cell [0]);
 			normal_stream->append ((*this) [position]);
 			normal_stream->append ((*this) [velocity]);
@@ -46,11 +46,12 @@ namespace one_d
 			
 			// Set up plans in order
 			add_plan (std::make_shared <explicit_diffusion> (explicit_diffusion (diffusion_coeff * (1.0 - alpha), i_n, grid, velocity, position, rhs)));
+
+			set_transform (std::make_shared <fftw_cosine> (fftw_cosine (n, velocity)));
 			if (advection_coeff != 0.0) {
 				add_plan (std::make_shared <advec> (advec (n, advection_coeff, velocity, rhs, grid)));
 			}
-			set_transform (std::make_shared <fftw_cosine> (fftw_cosine (n, velocity)));
-			add_plan (std::make_shared<constant_timestep> (constant_timestep (delta_t, timestep)));
+			// add_plan (std::make_shared<constant_timestep> (constant_timestep (delta_t, timestep)));
 			add_plan (std::make_shared <implicit_diffusion> (implicit_diffusion (- diffusion_coeff * alpha, i_n, grid, &matrix [0])));
 		
 			// Set up solver
@@ -59,6 +60,10 @@ namespace one_d
 			normal_stream->to_file ();
 		
 			TRACE (logger, "Initialized.");
+		}
+		
+		double advection_diffusion_element::calculate_timestep () {
+			return inputParams["time_step_size"].asDouble;
 		}
 	} /* chebyshev */
 } /* one_d */

@@ -50,6 +50,7 @@ namespace bases
 			name = i_name;
 			inputParams = i_inputParams;
 			flags = i_flags;
+			timestep = 0.0;
 			logger = config::make_logger ();
 		}
 		
@@ -257,6 +258,8 @@ namespace bases
 		 * In general, this should not be overwritten in subclasses.
 		 *********************************************************************/
 		virtual void update ();
+		
+		virtual double calculate_timestep () = 0;
 
 		/*!*******************************************************************
 		 * \brief Output all information to a dump file in the current directory

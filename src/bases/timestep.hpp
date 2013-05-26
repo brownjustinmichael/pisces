@@ -37,6 +37,8 @@ namespace bases
 			plan::execute ();
 			if (timestep != previous_timestep) {
 				*flags_ptr &= ~factorized;
+			} else {
+				*flags_ptr |= factorized;
 			}
 			previous_timestep = timestep;
 		};

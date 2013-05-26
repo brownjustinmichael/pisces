@@ -56,7 +56,7 @@ namespace one_d
 		}
 
 		void implicit_diffusion::execute () {
-			if (!(*flags_ptr & factorized)) {
+			if (!(*flags_ptr & unchanged_timestep)) {
 				TRACE (logger, "Operating...");
 				bases::implicit_plan::execute ();
 				// if (*flags_ptr & linked_0) {

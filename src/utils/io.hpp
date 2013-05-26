@@ -10,6 +10,7 @@
 #include <map>
 #include <string>
 #include <iostream>
+#include "../config.hpp"
 
 #ifndef IO_HPP_C1E9B6EF
 #define IO_HPP_C1E9B6EF
@@ -199,6 +200,8 @@ namespace io
 	class simple_output : public output
 	{
 	private:
+		int output_count;
+		int output_every;
 		std::string file_name; //!< A string containing the file name where the class should output
 	public:
 		/*!*******************************************************************
@@ -206,12 +209,21 @@ namespace io
 		 * \param i_n An integer number of data points contained within each array
 		 * \param i_logger The integer representation of the logger
 		 *********************************************************************/
-		simple_output (std::string i_file_name, int i_n, int i_logger = -1) : output (new header, i_n, i_logger) {file_name = i_file_name;}
+		simple_output (std::string i_file_name, int i_n, int i_output_every = 1, int i_logger = -1) : output (new header, i_n, i_logger) {
+			file_name = i_file_name;
+			output_count = 0;
+			output_every = i_output_every;
+		}
 		
 		/*!*******************************************************************
 		 * \brief Outputs to file_name
 		 *********************************************************************/
-		void to_file () {std_to_file (file_name);} 
+		void to_file () {
+			if (output_count % output_every == 0) {
+				std_to_file (file_name);
+			}
+			++output_count;
+		} 
 	};
 	
 	/*!*******************************************************************
@@ -231,7 +243,13 @@ namespace io
 		 * \param i_n The integer number of points in the data
 		 * \param i_logger The integer representation of the logger
 		 *********************************************************************/
-		incremental_output (std::string i_file_base, std::string i_file_extension, int i_int_width, header *i_header_ptr, int i_n, int i_logger = -1) : output (i_header_ptr, i_n, i_logger) {n_outputs = 0; int_width = i_int_width; file_base = i_file_base; file_extension = i_file_extension;}
+		incremental_output (std::string i_file_base, std::string i_file_extension, int i_int_width, header *i_header_ptr, int i_n, int i_output_every, int i_logger = -1) : output (i_header_ptr, i_n, i_logger) {
+			output_count = 0;
+			output_every = i_output_every;
+			int_width = i_int_width;
+			file_base = i_file_base;
+			file_extension = i_file_extension;
+		}
 		
 		/*!*******************************************************************
 		 * \brief Generates the next file name in the sequence
@@ -243,10 +261,17 @@ namespace io
 		/*!*******************************************************************
 		 * \brief Outputs to file
 		 *********************************************************************/
-		void to_file () {output::std_to_file (generate_file_name ());} 
+		void to_file () {
+			if (output_count % output_every == 0) {
+				MDEBUG ("Outputting");
+				output::std_to_file (generate_file_name ());
+			}
+			++output_count;
+		} 
 		
 	private:
-		int n_outputs; //!< An incremental integer that will be appended to the end of each file_base
+		int output_count;
+		int output_every;
 		int int_width; //!< The total number of characters the integer in the file name can have
 		std::string file_base; //!< A string containing the file name base (the string before the numbers, including the path)
 		std::string file_extension; //!< A string containing the file name extension (the string after the numbers, including the '.')

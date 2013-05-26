@@ -33,7 +33,11 @@ namespace io
 			input_stream >> temp;
 			input_stream >> inputParam[temp].asDouble;		// advection_coeff
 			input_stream >> temp; 
+			input_stream >> inputParam[temp].asDouble;		// courant_factor
+			input_stream >> temp; 
 			input_stream >> inputParam[temp].asInt;			// timesteps
+			input_stream >> temp;
+			input_stream >> inputParam[temp].asInt;			// output_every
 			input_stream >> temp;
 			input_stream >> inputParam[temp].asInt;			// gridpoints
 			input_stream >> temp;
@@ -148,14 +152,12 @@ namespace io
 
 		TRACE (logger, "Generating new file_name...");
 		
-		if (n_outputs >= std::pow (10., int_width)) {
+		if (output_count / output_every >= std::pow (10., int_width)) {
 			ERROR (logger, "Exceeded maximum number of outputs")
 		}
 		std::ostringstream new_file_name;
 		
-		new_file_name << file_base << std::setfill ('0') << std::setw (int_width) << n_outputs << file_extension;
-
-		++n_outputs;
+		new_file_name << file_base << std::setfill ('0') << std::setw (int_width) << output_count / output_every << file_extension;
 
 		TRACE (logger, "New file name is " << new_file_name.str () << ".");
 		

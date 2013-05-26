@@ -23,6 +23,7 @@ namespace one_d
 	private:
 	
 		double c;
+		std::vector<double> fac;
 		std::shared_ptr<bases::collocation_grid> grid;
 
 	public:

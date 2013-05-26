@@ -120,20 +120,22 @@ int main (int argc, char *argv[])
 	
 	config::make_main (id);
 	
-	int n_total = 3;
+	const int n_total = 4;
 	int n;
 	int n_masters;
 	int index;
-	std::vector <int> n_grid (3, 16);
-	std::vector <double> position_grid (4, 0.0);
-	position_grid [0] = -2.0;
-	position_grid [1] = -2.0 / 3.0;
-	position_grid [2] = 2.0 / 3.0;
-	position_grid [3] = 2.0;
-	std::vector <std::string> name_grid (3);
+	std::vector <int> n_grid (n_total, 8);
+	std::vector <double> position_grid (n_total + 1, 0.0);
+	position_grid [0] = -1.0;
+	position_grid [1] = -0.5;
+	position_grid [2] = 0.0;
+	position_grid [3] = 0.5;
+	position_grid [4] = 1.0;
+	std::vector <std::string> name_grid (n_total);
 	name_grid [0] = "1";
 	name_grid [1] = "2";
 	name_grid [2] = "3";
+	name_grid [3] = "4";
 	
 	if (id >= n_total % p) {
 		n = n_total / p;

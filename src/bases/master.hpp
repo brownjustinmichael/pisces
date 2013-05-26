@@ -84,6 +84,7 @@ namespace bases
 				for (int j = 0; j < (int) elements.size (); ++j) {
 					elements [j]->update ();
 				}
+				
 			}
 		}
 
