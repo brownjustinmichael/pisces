@@ -75,15 +75,17 @@ namespace bases
 	
 	void element::update () {
 		TRACE (logger, "Updating...");
-		
-		double new_timestep = calculate_timestep ();
-		
+
 		if (matrix_solver) {
 			matrix_solver->execute ();
 		} else {
 			WARN (logger, "No matrix solver defined. It is likely the element was not set up correctly.")
 		}
+	}
 		
+	void element::update_timestep (double new_timestep) {
+		duration += timestep;
+		MINFO ("TOTAL TIME: " << duration);
 		if (new_timestep != timestep) {
 			flags &= ~unchanged_timestep;
 			flags &= ~factorized;

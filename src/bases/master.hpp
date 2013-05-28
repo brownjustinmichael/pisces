@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
 #include "element.hpp"
 #include "../utils/io.hpp"
 
@@ -32,10 +33,12 @@ namespace bases
 		 * \param i_n_elements The number of elements in the process
 		 * \param parameter_filename The string location of the parameter file
 		 *********************************************************************/
-		master (int i_id, int i_n_elements, std::string parameter_filename) {
+		master (int i_id, int i_p, int i_n_elements, std::string parameter_filename) {
 			// Read experiment parameters out of text file
 			io::read_params_txt parameters (parameter_filename);
 			inputParams = parameters.load_params();
+			inputParams ["process_id"].asInt = i_id;
+			inputParams ["total_processes"].asInt = i_p;
 
 			// Inialize some experiment variables
 			id = i_id;
@@ -66,6 +69,8 @@ namespace bases
 		 *********************************************************************/
 		virtual void run () {
 			MTRACE ("Beginning main...");
+			double t_timestep;
+			std::vector <double> timesteps (inputParams ["total_processes"].asInt, 0.0);
 			for (int i = 0; i < tsteps; ++i) {
 				MINFO ("Timestep " << i);
 				for (int j = 0; j < (int) elements.size (); ++j) {
@@ -74,17 +79,36 @@ namespace bases
 				for (int j = 0; j < (int) elements.size (); ++j) {
 					elements [j]->send ();
 				}
+				MPI::COMM_WORLD.Barrier ();
 				for (int j = 0; j < (int) elements.size (); ++j) {
 					elements [j]->recv ();
 				}
+				MPI::COMM_WORLD.Barrier ();
 				for (int j = 0; j < (int) elements.size (); ++j) {
 					elements [j]->execute_boundaries ();
+				}
+				for (int j = 0; j < (int) elements.size (); ++j) {
+					if (j == 0) {
+						t_timestep = elements [j]->calculate_timestep ();
+					} else {
+						t_timestep = std::min (t_timestep, elements [j]->calculate_timestep ());
+					}
+				}
+				if (inputParams ["total_processes"].asInt != 1) {
+					MPI::COMM_WORLD.Gather (&t_timestep, 1, MPI_DOUBLE, &timesteps [0], 1, MPI_DOUBLE, 0);
+					if (id == 0) {
+						t_timestep = *std::min_element (timesteps.begin (), timesteps.end ());
+					}
+					MPI::COMM_WORLD.Bcast (&t_timestep, 1, MPI_DOUBLE, 0);
+					MDEBUG ("t after " << t_timestep);
 				}
 				MTRACE ("Updating...");
 				for (int j = 0; j < (int) elements.size (); ++j) {
 					elements [j]->update ();
 				}
-				
+				for (int j = 0; j < (int) elements.size (); ++j) {
+					elements [j]->update_timestep (t_timestep);
+				}
 			}
 		}
 

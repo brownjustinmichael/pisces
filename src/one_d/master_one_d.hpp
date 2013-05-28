@@ -14,10 +14,11 @@ namespace one_d
 	class master : public bases::master
 	{
 	public:
-		master (int i_id, std::string parameter_filename, int i_n_elements, int* n_grid, double* position_grid, std::string* name_grid) : bases::master (i_id, i_n_elements, parameter_filename) {
+		master (int i_id, int i_p, std::string parameter_filename, int i_n_elements, int* n_grid, double* position_grid, std::string* name_grid) : bases::master (i_id, i_p, i_n_elements, parameter_filename) {
 			MTRACE ("Initializing...")
 			for (int i = 0; i < i_n_elements; ++i) {
 				MTRACE ("Adding element " << name_grid [i]);
+				MDEBUG ("positions " << position_grid [i] << " " << position_grid [i + 1]);
 				elements [i].reset (new Telement (n_grid [i] + 1, position_grid [i], position_grid [i + 1], name_grid [i], this->get_params (), 0x00));
 				if (i != 0) {
 					MTRACE ("Linking element " << name_grid [i - 1] << " at n - 1 with element " << name_grid [i] << " at 0");

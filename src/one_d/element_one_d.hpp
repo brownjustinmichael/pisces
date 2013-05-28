@@ -156,6 +156,9 @@ namespace one_d
 			element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& i_inputParams, int i_flags) : one_d::element (i_n, i_position_0, i_position_n, i_name, i_inputParams, i_flags) {
 				initialize (position);
 				set_grid (std::make_shared<chebyshev_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), logger)));
+				/*
+					TODO Grid may need to be rescaled due to scaling of position
+				*/
 			}
 			virtual ~element () {}
 				

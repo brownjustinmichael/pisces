@@ -51,6 +51,7 @@ namespace bases
 			inputParams = i_inputParams;
 			flags = i_flags;
 			timestep = 0.0;
+			duration = 0.0;
 			logger = config::make_logger ();
 		}
 		
@@ -259,8 +260,10 @@ namespace bases
 		 *********************************************************************/
 		virtual void update ();
 		
+		virtual void update_timestep (double new_timestep);
+		
 		virtual double calculate_timestep () = 0;
-
+		
 		/*!*******************************************************************
 		 * \brief Output all information to a dump file in the current directory
 		 * 
@@ -278,6 +281,7 @@ namespace bases
 		int flags; //!< An integer set of execution flags
 		int logger; //!< An integer representation of the logger, which is interpreted by the config class
 
+		double duration;
 		double timestep; //!< The double timestep length
 
 		std::vector <int> names; //!< A vector of integer name indices of the contained scalars

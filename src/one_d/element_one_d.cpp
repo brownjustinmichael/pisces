@@ -9,6 +9,7 @@
 #include <cmath>
 #include <cassert>
 #include <string>
+#include <algorithm>
 #include <memory>
 #include "../config.hpp"
 #include "../bases/timestep.hpp"
@@ -25,7 +26,6 @@ namespace one_d
 	namespace chebyshev
 	{
 		advection_diffusion_element::advection_diffusion_element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& inputParams, int i_flags) : element (i_n, i_position_0, i_position_n, i_name, inputParams, i_flags) {
-			double delta_t = inputParams["time_step_size"].asDouble; 
 			double diffusion_coeff = inputParams["diffusion_coeff"].asDouble;
 			double advection_coeff = inputParams["advection_coeff"].asDouble; 
 			double alpha = 0.5;
@@ -51,7 +51,6 @@ namespace one_d
 			if (advection_coeff != 0.0) {
 				add_plan (std::make_shared <advec> (advec (n, advection_coeff, velocity, rhs, grid)));
 			}
-			// add_plan (std::make_shared<constant_timestep> (constant_timestep (delta_t, timestep)));
 			add_plan (std::make_shared <implicit_diffusion> (implicit_diffusion (- diffusion_coeff * alpha, i_n, grid, &matrix [0])));
 		
 			// Set up solver
@@ -63,7 +62,12 @@ namespace one_d
 		}
 		
 		double advection_diffusion_element::calculate_timestep () {
-			return inputParams["time_step_size"].asDouble;
+			double t_timestep;
+			t_timestep = ((*this) (position, 1) - (*this) (position, 0)) * ((*this) (position, 1) - (*this) (position, 0)) / inputParams["diffusion_coeff"].asDouble;
+			for (int i = 1; i < n - 1; ++i) {
+				t_timestep = std::min (t_timestep, std::abs (((*this) (position, i - 1) - (*this) (position, i + 1)) / (*this) (velocity, i)));
+			}
+			return t_timestep * inputParams["courant_factor"].asDouble;
 		}
 	} /* chebyshev */
 } /* one_d */
