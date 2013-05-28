@@ -100,7 +100,6 @@ namespace bases
 						t_timestep = *std::min_element (timesteps.begin (), timesteps.end ());
 					}
 					MPI::COMM_WORLD.Bcast (&t_timestep, 1, MPI_DOUBLE, 0);
-					MDEBUG ("t after " << t_timestep);
 				}
 				MTRACE ("Updating...");
 				for (int j = 0; j < (int) elements.size (); ++j) {

@@ -85,7 +85,7 @@ namespace bases
 		
 	void element::update_timestep (double new_timestep) {
 		duration += timestep;
-		MINFO ("TOTAL TIME: " << duration);
+		INFO (logger, "TOTAL TIME: " << duration);
 		if (new_timestep != timestep) {
 			flags &= ~unchanged_timestep;
 			flags &= ~factorized;

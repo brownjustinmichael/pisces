@@ -29,12 +29,13 @@ public:
 	 * \param i_scale A double by which the grid should be scaled
 	 * \param i_logger The integer representation of the logger object
 	 *********************************************************************/
-	chebyshev_grid (int i_M, int i_N, double i_scale = 1.0, int i_logger = -1);
+	chebyshev_grid (int i_M, int i_N, double i_scale = 1.0, double i_width = 2.0, int i_logger = -1);
 	
 	virtual ~chebyshev_grid () {};
 	
 private:
 	double scale;
+	double width;
 	std::vector<bool> exists_array; //!< A bool vector containing whether the points exist
 	double pioN; //!< The double 3.14159.../N, for use in calculations
 	

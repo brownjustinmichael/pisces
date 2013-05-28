@@ -14,9 +14,10 @@
 #include "../bases/collocation.hpp"
 #include "chebyshev.hpp"
 
-chebyshev_grid::chebyshev_grid (int i_M, int i_N, double i_scale, int i_logger) : bases::collocation_grid (3, i_M, i_N, i_logger) {
+chebyshev_grid::chebyshev_grid (int i_M, int i_N, double i_scale, double i_width, int i_logger) : bases::collocation_grid (3, i_M, i_N, i_logger) {
 	int d, m, k;
 	scale = i_scale;
+	width = i_width;
 	pioN = std::acos (-1.0) / (i_N - 1);
 	exists_array.resize (i_M * i_N * 3, false);
 	
@@ -28,6 +29,13 @@ chebyshev_grid::chebyshev_grid (int i_M, int i_N, double i_scale, int i_logger) 
 				index (d, m, k) = recursion (d, m, k);
 				exists (d, m, k) = true;
 			}
+		}
+	}
+	
+	for (k = 0; k < i_N; ++k) {
+		for (m = 0; m < i_M; ++m) {
+			index (1, m, k) *= 2.0 / width;
+			index (2, m, k) *= 2.0 / width * 2.0 / width;
 		}
 	}
 	

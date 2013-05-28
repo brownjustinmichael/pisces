@@ -120,7 +120,7 @@ int main (int argc, char *argv[])
 	
 	config::make_main (id);
 	
-	const int n_total = 2 * p;
+	const int n_total = p;
 	int n;
 	int n_masters;
 	int index;

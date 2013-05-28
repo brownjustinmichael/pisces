@@ -52,7 +52,7 @@ namespace bases
 			flags = i_flags;
 			timestep = 0.0;
 			duration = 0.0;
-			logger = config::make_logger ();
+			logger = config::make_logger (name);
 		}
 		
 		virtual ~element () {}
@@ -207,7 +207,7 @@ namespace bases
 		 * \param i_plan A shared pointer to the plan to add
 		 *********************************************************************/
 		inline void add_plan (std::shared_ptr <plan> i_plan) {
-			TRACE (logger, "Adding plan..." << this);
+			TRACE (logger, "Adding plan...");
 			i_plan->associate (this);
 			plans.push_back (i_plan);
 			TRACE (logger, "Added.");
