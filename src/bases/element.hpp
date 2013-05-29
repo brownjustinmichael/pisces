@@ -209,7 +209,7 @@ namespace bases
 		inline void add_plan (std::shared_ptr <plan> i_plan) {
 			TRACE (logger, "Adding plan...");
 			i_plan->associate (this);
-			plans.push_back (i_plan);
+			plans.push_back (std::move (i_plan));
 			TRACE (logger, "Added.");
 		}
 	
@@ -219,10 +219,10 @@ namespace bases
 		 * \param i_boundary A shared pointer to the boundary plan to add
 		 *********************************************************************/
 		inline void add_boundary (std::shared_ptr<boundary> i_boundary) {
-			TRACE (logger, "Adding boundary...");
+			TRACE (logger, "Adding boundary..." << &*i_boundary);
 			i_boundary->associate (this);
 			boundaries.push_back (std::move (i_boundary));
-			TRACE (logger, "Added.");
+			TRACE (logger, "Added." << boundaries.size () - 1 << " " << &*boundaries [boundaries.size () - 1]);
 		}
 		
 		/*!*******************************************************************

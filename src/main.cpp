@@ -120,15 +120,19 @@ int main (int argc, char *argv[])
 	
 	config::make_main (id);
 	
+	io::parameter_map inputParams;
+	io::read_params_txt parameters ("../input/parameters.txt");
+	inputParams = parameters.load_params();
+	
 	const int n_total = p;
 	int n;
 	int n_masters;
 	int index;
-	std::vector <int> n_grid (n_total, 64 / n_total);
+	std::vector <int> n_grid (n_total, inputParams ["gridpoints"].asInt / n_total);
 	std::vector <double> position_grid (n_total + 1, 0.0);
-	position_grid [0] = (double) (-n_total);
+	position_grid [0] = -1.0;
 	for (int i = 1; i < n_total + 1; ++i) {
-		position_grid [i] = position_grid [i - 1] + 2.0;
+		position_grid [i] = position_grid [i - 1] + 2.0 / n_total;
 	}
 	std::vector <std::string> name_grid (n_total);
 	for (int i = 0; i < n_total; ++i) {

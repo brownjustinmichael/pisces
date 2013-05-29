@@ -18,7 +18,6 @@ namespace one_d
 			MTRACE ("Initializing...")
 			for (int i = 0; i < i_n_elements; ++i) {
 				MTRACE ("Adding element " << name_grid [i]);
-				MDEBUG ("positions " << position_grid [i] << " " << position_grid [i + 1]);
 				elements [i].reset (new Telement (n_grid [i] + 1, position_grid [i], position_grid [i + 1], name_grid [i], this->get_params (), 0x00));
 				if (i != 0) {
 					MTRACE ("Linking element " << name_grid [i - 1] << " at n - 1 with element " << name_grid [i] << " at 0");

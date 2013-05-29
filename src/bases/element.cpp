@@ -60,6 +60,7 @@ namespace bases
 		TRACE (logger, "Executing boundaries...");
 		
 		for (int i = 0; i < (int) boundaries.size (); ++i) {
+			MDEBUG ("boundary ptr " << &*boundaries [i]);
 			boundaries [i]->execute ();
 		}
 	

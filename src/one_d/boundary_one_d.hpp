@@ -111,7 +111,8 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::link_boundary::link_boundary ()
 		 *********************************************************************/
-		diffusive_boundary (int i_edge, int i_ext_send, int i_ext_recv, int i_process) : link_boundary (2, i_edge, i_ext_send, i_ext_recv, i_process) {}
+		diffusive_boundary (int i_edge, int i_ext_send, int i_ext_recv, int i_process) : link_boundary (2, i_edge, i_ext_send, i_ext_recv, i_process) {
+		}
 	
 		/*!*******************************************************************
 		 * \copydoc bases::link_boundary::associate ()
