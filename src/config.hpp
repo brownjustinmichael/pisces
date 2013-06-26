@@ -173,7 +173,6 @@ public:
 	 * \return The integer representation of the new logger
 	 *********************************************************************/
 	static int make_logger (std::string name) {
-		MDEBUG ("Making logger.");
 		int i = n_loggers++;
 		int j = n_appenders++;
 		loggers.push_back (log4cxx::LoggerPtr (log4cxx::Logger::getLogger ("element_" + name)));

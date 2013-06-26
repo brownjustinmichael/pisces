@@ -60,11 +60,10 @@ namespace bases
 		TRACE (logger, "Executing boundaries...");
 		
 		for (int i = 0; i < (int) boundaries.size (); ++i) {
-			MDEBUG ("boundary ptr " << &*boundaries [i]);
 			boundaries [i]->execute ();
 		}
 	
-		TRACE (logger, "Writing to file...");
+		TRACE (logger, "Writing to file..." << &*normal_stream);
 	
 		// Output in normal space
 		if (normal_stream) {
@@ -82,6 +81,8 @@ namespace bases
 		} else {
 			WARN (logger, "No matrix solver defined. It is likely the element was not set up correctly.")
 		}
+		
+		TRACE (logger, "Updated.");
 	}
 		
 	void element::update_timestep (double new_timestep) {

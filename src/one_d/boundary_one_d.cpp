@@ -20,20 +20,23 @@ namespace one_d
 			}
 			++j;
 		}
-		MPI::COMM_WORLD.Send (&to_send [0], (j + 1) * n, MPI::DOUBLE, process, ext_send);
+		MPI::COMM_WORLD.Send (&to_send [0], j * n, MPI::DOUBLE, process, ext_send);
 		TRACE (logger, "Sent.")
 	}
 
 	void link_boundary::recv () {
 		int j = 0;
-		TRACE (logger, "Recving Tag: " << ext_recv << " from Process: " << process);
+		TRACE (logger, "Recving Tag: " << ext_recv << " from Process: " << process << " ptr " << &to_recv [0] << " " << &to_recv [n * j]);
 		for (bases::element::iterator iter = (*element_ptr).begin (); iter != (*element_ptr).end (); ++iter) {
 			++j;
 		}
-		MPI::COMM_WORLD.Recv (&to_recv [0], (j + 1) * n, MPI::DOUBLE, process, ext_recv);
+		TRACE (logger, "here")
+		MPI::COMM_WORLD.Recv (&to_recv [0], j * n, MPI::DOUBLE, process, ext_recv);
 		j = 0;
+		TRACE (logger, "here")
 		for (bases::element::iterator iter = (*element_ptr).begin (); iter != (*element_ptr).end (); ++iter) {
 			for (int i = 0; i < n; ++i) {
+				TRACE (logger, "ptr " << &recv_buffer [*iter] [0]);
 				recv_buffer [*iter] [i] = to_recv [i + n * j];
 			}
 			++j;

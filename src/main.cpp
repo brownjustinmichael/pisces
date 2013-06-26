@@ -138,7 +138,6 @@ int main (int argc, char *argv[])
 	for (int i = 0; i < n_total; ++i) {
 		name_grid [i] = std::to_string (i + 1);
 	}
-
 	
 	if (id >= n_total % p) {
 		n = n_total / p;
@@ -159,16 +158,14 @@ int main (int argc, char *argv[])
 		}
 	}
 	
-	MDEBUG ("index " << position_grid [index] << " " << position_grid [index + 1]);
-	
 	one_d::master <one_d::chebyshev::advection_diffusion_element, one_d::diffusive_boundary> master_process (id, n_masters, "../input/parameters.txt", n, &n_grid [index], &position_grid [index], &name_grid [index]);
 	
 	if (id != 0) {
-		MDEBUG ("Adding boundary to " << 0 << " at 0 at processor " << id - 1);
+		MTRACE ("Adding boundary to " << 0 << " at 0 at processor " << id - 1);
 		master_process.add_boundary (0, linked_0, 1, 2, id - 1);
 	}
 	if (id != n_masters - 1) {
-		MDEBUG ("Adding boundary to " << n - 1 << " at n - 1 at processor " << id + 1);
+		MTRACE ("Adding boundary to " << n - 1 << " at n - 1 at processor " << id + 1);
 		master_process.add_boundary (n - 1, linked_n, 2, 1, id + 1);
 	}
 	

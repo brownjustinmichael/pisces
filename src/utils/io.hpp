@@ -263,7 +263,6 @@ namespace io
 		 *********************************************************************/
 		void to_file () {
 			if (output_count % output_every == 0) {
-				MDEBUG ("Outputting");
 				output::std_to_file (generate_file_name ());
 			}
 			++output_count;
