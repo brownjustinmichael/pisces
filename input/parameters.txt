@@ -1,8 +1,10 @@
 diffusion_coeff 1.0
-advection_coeff 10.0
-timesteps 9999
+advection_coeff 0.0
+courant_factor 0.2
+timesteps 1000
+output_every 100
 gridpoints 66
-time_step_size 0.00001
+time_step_size 0.0001
 init_cond_scale 1.0
 init_cond_width 2.0
 init_cond_mean 0.0
