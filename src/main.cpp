@@ -124,7 +124,7 @@ int main (int argc, char *argv[])
 	io::read_params_txt parameters ("../input/parameters.txt");
 	inputParams = parameters.load_params();
 	
-	const int n_total = p;
+	const int n_total = inputParams ["n_elements"].asInt;
 	int n;
 	int n_masters;
 	int index;
