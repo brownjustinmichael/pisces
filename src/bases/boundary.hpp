@@ -61,14 +61,15 @@ namespace bases
 		/*!*******************************************************************
 		 * \brief Send the boundary information to the linked processor
 		 *********************************************************************/
-		virtual void send () {}
+		virtual void send (int name) {}
 		
 		/*!*******************************************************************
 		 * \brief Receive the boundary information from the linked processor
 		 *********************************************************************/
-		virtual void recv () {}
+		virtual void recv (int name) {}
 	
 	protected:
+		int n;
 		int edge; //!< An integer flag that specifies which boundary to use
 		int index; //!< The integer index to the boundary in the element
 		int increment; //!< The integer increment to the next most inward index

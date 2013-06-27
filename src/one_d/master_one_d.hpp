@@ -7,10 +7,11 @@
  ************************************************************************/
 
 #include "../bases/master.hpp"
+#include "boundary_one_d.hpp"
 
 namespace one_d
 {
-	template <class Telement, class Tboundary>
+	template <class Telement>
 	class master : public bases::master
 	{
 	public:
@@ -33,7 +34,7 @@ namespace one_d
 			if (process == -1) {
 				process = id;
 			}
-			elements [index]->add_boundary (std::make_shared <Tboundary> (Tboundary (edge, send_id, recv_id, process)));
+			elements [index]->add_boundary (std::make_shared <mpi_boundary> (mpi_boundary (edge, send_id, recv_id, process)));
 		}
 	};
 } /* one_d */

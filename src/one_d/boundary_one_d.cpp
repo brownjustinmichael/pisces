@@ -11,36 +11,17 @@
 
 namespace one_d
 {
-	void link_boundary::send () {
-		int j = 0;
+	void mpi_boundary::send (int name) {
 		TRACE (logger, "Sending Tag: " << ext_send << " to Process: " << process);
-		for (bases::element::iterator iter = (*element_ptr).begin (); iter != (*element_ptr).end (); ++iter) {
-			for (int i = 0; i < n; ++i) {
-				to_send [i + n * j] = send_buffer [*iter] [i] = (&((*element_ptr) [*iter])) [index + i * increment];
-			}
-			++j;
-		}
-		MPI::COMM_WORLD.Send (&to_send [0], j * n, MPI::DOUBLE, process, ext_send);
+		buffer = (&((*element_ptr) [name])) [index];
+		MPI::COMM_WORLD.Send (&buffer, 1, MPI::DOUBLE, process, ext_send);
 		TRACE (logger, "Sent.")
 	}
 
-	void link_boundary::recv () {
-		int j = 0;
-		TRACE (logger, "Recving Tag: " << ext_recv << " from Process: " << process << " ptr " << &to_recv [0] << " " << &to_recv [n * j]);
-		for (bases::element::iterator iter = (*element_ptr).begin (); iter != (*element_ptr).end (); ++iter) {
-			++j;
-		}
-		TRACE (logger, "here")
-		MPI::COMM_WORLD.Recv (&to_recv [0], j * n, MPI::DOUBLE, process, ext_recv);
-		j = 0;
-		TRACE (logger, "here")
-		for (bases::element::iterator iter = (*element_ptr).begin (); iter != (*element_ptr).end (); ++iter) {
-			for (int i = 0; i < n; ++i) {
-				TRACE (logger, "ptr " << &recv_buffer [*iter] [0]);
-				recv_buffer [*iter] [i] = to_recv [i + n * j];
-			}
-			++j;
-		}
+	void mpi_boundary::recv (int name) {
+		TRACE (logger, "Recving Tag: " << ext_recv << " from Process: " << process);
+		MPI::COMM_WORLD.Recv (&buffer, 1, MPI::DOUBLE, process, ext_recv);
+		(&((*element_ptr) [name])) [index] = 0.5 * (&((*element_ptr) [name])) [index] + 0.5 * buffer;
 		TRACE (logger, "Recved.")
 	}
 } /* one_d */

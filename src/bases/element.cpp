@@ -40,7 +40,9 @@ namespace bases
 		TRACE (logger, "Sending information...");
 		
 		for (int i = 0; i < (int) boundaries.size (); ++i) {
-			boundaries [i]->send ();
+			for (iterator iter = begin (); iter != end (); ++iter) {
+				boundaries [i]->send (*iter);
+			}
 		}
 		
 		TRACE (logger, "Information sent.");
@@ -50,7 +52,9 @@ namespace bases
 		TRACE (logger, "Receiving information...");
 		
 		for (int i = 0; i < (int) boundaries.size (); ++i) {
-			boundaries [i]->recv ();
+			for (iterator iter = begin (); iter != end (); ++iter) {
+				boundaries [i]->recv (*iter);
+			}
 		}
 		
 		TRACE (logger, "Information received.");
