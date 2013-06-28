@@ -12,7 +12,6 @@
 #include <algorithm>
 #include <memory>
 #include "../config.hpp"
-#include "../bases/timestep.hpp"
 #include "../utils/chebyshev.hpp"
 #include "element_one_d.hpp"
 #include "diffusion_one_d.hpp"
@@ -63,9 +62,10 @@ namespace one_d
 		
 		double advection_diffusion_element::calculate_timestep () {
 			double t_timestep;
-			t_timestep = ((*this) (position, 1) - (*this) (position, 0)) * ((*this) (position, 1) - (*this) (position, 0)) / inputParams["diffusion_coeff"].asDouble;
+			// t_timestep = ((*this) (position, 1) - (*this) (position, 0)) * ((*this) (position, 1) - (*this) (position, 0)) /inputParams["diffusion_coeff"].asDouble;
+			t_timestep = inputParams["time_step_size"].asDouble;
 			for (int i = 1; i < n - 1; ++i) {
-				t_timestep = std::min (t_timestep, std::abs (((*this) (position, i - 1) - (*this) (position, i + 1)) / (*this) (velocity, i)));
+				t_timestep = std::min (t_timestep, std::abs (((*this) (position, i - 1) - (*this) (position, i + 1)) / (*this) (velocity, i)) / inputParams["advection_coeff"].asDouble);
 			}
 			return t_timestep * inputParams["courant_factor"].asDouble;
 		}
