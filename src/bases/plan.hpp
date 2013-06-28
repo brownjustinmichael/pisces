@@ -51,8 +51,7 @@ enum plan_flags {
 namespace bases
 {
 	class element;
-	class boundary;
-
+	
 	/*!*******************************************************************
 	* \brief The basic functional unit, containing a recipe for execution
 	* 
@@ -63,20 +62,9 @@ namespace bases
 	class plan
 	{
 	public:
-		plan () {
-			MTRACE ("Instantiating...");
-			element_ptr = NULL;
-			MTRACE ("Instantiated.");
-		}
+		plan (element* i_element_ptr);
 		
 		virtual ~plan () {}
-		
-		/*!*******************************************************************
-		 * \brief Associate the plan with the element that contains it
-		 * 
-		 * \param i_element_ptr A pointer to an element
-		 *********************************************************************/
-		virtual void associate (element* i_element_ptr);
 		
 		/*!*******************************************************************
 		* \brief Operate the plan on the data arrays contained in the class
@@ -110,25 +98,10 @@ namespace bases
 		 * \param i_name_in The integer scalar index of the input
 		 * \param i_name_out The integer scalar index of the output
 		 *********************************************************************/
-		explicit_plan (int i_n, int i_name_in, int i_name_out = null) : plan () {
-			MTRACE ("Instantiating...");
-			n = i_n;
-			name_in = i_name_in;
-			if (!i_name_out) {
-				name_out = i_name_in;
-			} else {
-				name_out = i_name_out;
-			}
-			MTRACE ("Instantiated.");
-		}
+		explicit_plan (element* i_element_ptr, int i_n, int i_name_in, int i_name_out = null);
 	
 		virtual ~explicit_plan () {}
 	
-		/*!*******************************************************************
-		 * \copydoc plan::associate ()
-		 *********************************************************************/
-		virtual void associate (element* i_element_ptr);
-		
 		/*!*******************************************************************
 		 * \copydoc plan::execute ()
 		 *********************************************************************/
@@ -136,8 +109,6 @@ namespace bases
 		
 	protected:
 		int n; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
-		int name_in; //!< The integer scalar index of the input
-		int name_out; //!< The integer scalar index of the output
 		double* data_in; //!< A double pointer to the input data
 		double* data_out; //!< A double pointer to the output data
 	};
@@ -155,7 +126,7 @@ namespace bases
 		 * \param i_grid A shared pointer to the collocation grid object
 		 * \param i_matrix The double matrix to be updated
 		 *********************************************************************/
-		implicit_plan (int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_matrix) : plan () {
+		implicit_plan (element* i_element_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_matrix) : plan (i_element_ptr) {
 			n = i_n;
 			grid = i_grid;
 			matrix = i_matrix;

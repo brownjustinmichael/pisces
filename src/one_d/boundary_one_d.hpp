@@ -19,6 +19,11 @@
 #include "../bases/element.hpp"
 #include "../config.hpp"
 
+namespace bases
+{
+	class element;
+} /* bases */
+
 namespace one_d
 {
    /*!*******************************************************************
@@ -35,11 +40,10 @@ namespace one_d
 		 * \param i_ext_recv The integer recv tag
 		 * \copydoc bases::boundary::boundary ()
 		 *********************************************************************/
-		mpi_boundary (int i_edge, int i_ext_send, int i_ext_recv, int i_process) : bases::boundary (i_edge, i_process) {
+		mpi_boundary (bases::element* i_element_ptr, int i_edge, int i_ext_send, int i_ext_recv, int i_process) : bases::boundary (i_element_ptr, i_edge, i_process) {
 			MTRACE ("Instantiating...");
 			ext_send = i_ext_send;
 			ext_recv = i_ext_recv;
-			
 			MTRACE ("Instantiated.");
 		}
 	

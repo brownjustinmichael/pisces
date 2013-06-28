@@ -34,7 +34,7 @@ namespace one_d
 			if (process == -1) {
 				process = id;
 			}
-			elements [index]->add_boundary (std::make_shared <mpi_boundary> (mpi_boundary (edge, send_id, recv_id, process)));
+			elements [index]->add_boundary (std::make_shared <mpi_boundary> (mpi_boundary (elements [index].get (), edge, send_id, recv_id, process)));
 		}
 	};
 } /* one_d */

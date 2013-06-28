@@ -187,7 +187,6 @@ namespace bases
 		 * TODO This assumes 1 equation. It should be generalized for multiple equations.
 		 *********************************************************************/
 		inline void set_solver (std::shared_ptr<plan> i_plan) {
-			i_plan->associate (this);
 			matrix_solver = i_plan;
 		}
 	
@@ -208,7 +207,6 @@ namespace bases
 		 *********************************************************************/
 		inline void add_plan (std::shared_ptr <plan> i_plan) {
 			TRACE (logger, "Adding plan...");
-			i_plan->associate (this);
 			plans.push_back (std::move (i_plan));
 			TRACE (logger, "Added.");
 		}
@@ -220,7 +218,6 @@ namespace bases
 		 *********************************************************************/
 		inline void add_boundary (std::shared_ptr<boundary> i_boundary) {
 			TRACE (logger, "Adding boundary..." << &*i_boundary);
-			i_boundary->associate (this);
 			boundaries.push_back (std::move (i_boundary));
 			TRACE (logger, "Added." << boundaries.size () - 1 << " " << &*boundaries [boundaries.size () - 1]);
 		}

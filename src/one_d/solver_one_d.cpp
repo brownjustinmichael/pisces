@@ -14,9 +14,11 @@
 
 namespace one_d
 {
-	void solver::associate (bases::element* i_element_ptr) {
-		bases::solver::associate (i_element_ptr);
-		rhs = &((*i_element_ptr) [name_rhs]);
+	solver::solver (bases::element* i_element_ptr, int i_n, double& i_timestep, double *i_default_matrix, double *i_matrix, int i_name_in, int i_name_rhs, int i_name_out) : bases::solver (i_element_ptr, i_n, i_name_in, i_name_out), timestep (i_timestep) {
+		rhs = &((*element_ptr) [i_name_rhs]);
+		default_matrix = i_default_matrix;
+		matrix = i_matrix;
+		ipiv.resize (n, 0);
 	}
 	
 	void solver::factorize () {

@@ -46,17 +46,9 @@ namespace bases
 		 * \param i_edge An integer flag that specifies which boundary flag to use
 		 * \param i_process The integer process id destination for send and recv
 		 *********************************************************************/
-		boundary (int i_edge, int i_process) : plan () {
-			edge = i_edge;
-			process = i_process;
-		}
+		boundary (element* i_element_ptr, int i_edge, int i_process);
 		
 		virtual ~boundary () {}
-		
-		/*!*******************************************************************
-		 * \copydoc plan::associate ()
-		 *********************************************************************/
-		virtual void associate (element* i_element_ptr);
 		
 		/*!*******************************************************************
 		 * \brief Send the boundary information to the linked processor

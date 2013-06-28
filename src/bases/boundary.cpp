@@ -12,11 +12,10 @@
 
 namespace bases
 {
-	void boundary::associate (element* i_element_ptr) {
-		plan::associate (i_element_ptr);
-		MTRACE ("Associating...");
+	boundary::boundary (element* i_element_ptr, int i_edge, int i_process) : plan (i_element_ptr) {
+		edge = i_edge;
+		process = i_process;
 		element_ptr->get_boundary_info (edge, index, increment);
 		*flags_ptr |= edge;
-		MTRACE ("Associated.");
 	}
 } /* bases */

@@ -15,6 +15,8 @@
  *********************************************************************/
 namespace bases
 {
+	class element;
+	
 	/*!*******************************************************************
 	 * \brief A plan that calculates the next timestep
 	 *********************************************************************/
@@ -24,7 +26,7 @@ namespace bases
 		/*!*******************************************************************
 		 * \param i_timestep The double reference to the timestep
 		 *********************************************************************/
-		calculate_timestep (double& i_timestep) : timestep (i_timestep) {
+		calculate_timestep (element* i_element_ptr, double& i_timestep) : plan (i_element_ptr), timestep (i_timestep) {
 			previous_timestep = 0.0;
 			MTRACE ("Instantiated.");
 		}
@@ -59,7 +61,7 @@ public:
 	 * \param i_initial_timestep The double timestep constant value
 	 * \copydoc bases::calculate_timestep::calculate_timestep ()
 	 *********************************************************************/
-	constant_timestep (double i_initial_timestep, double& i_timestep) : calculate_timestep (i_timestep) {
+	constant_timestep (bases::element* i_element_ptr, double i_initial_timestep, double& i_timestep) : calculate_timestep (i_element_ptr, i_timestep) {
 		initial_timestep = i_initial_timestep;
 	}
 	

@@ -12,18 +12,24 @@
 
 namespace bases
 {
-	void plan::associate (element* i_element_ptr) {
-		MTRACE ("Associating...");
+	plan::plan (element* i_element_ptr) {
+		MTRACE ("Instantiating...");
 		element_ptr = i_element_ptr;
 		logger = element_ptr->logger;
 		flags_ptr = &(element_ptr->flags);
-		MTRACE ("Associated.")
+		MTRACE ("Instantiated.");
 	}
 	
-	void explicit_plan::associate (element* i_element_ptr) {
-		plan::associate (i_element_ptr);
-		data_in = &((*i_element_ptr) [name_in]);
-		data_out = &((*i_element_ptr) [name_out]);
+	explicit_plan::explicit_plan (element* i_element_ptr, int i_n, int i_name_in, int i_name_out) : plan (i_element_ptr) {
+		MTRACE ("Instantiating...");
+		n = i_n;
+		data_in = &((*i_element_ptr) [i_name_in]);
+		if (i_name_out == null) {
+			data_out = &((*i_element_ptr) [i_name_in]);
+		} else {
+			data_out = &((*i_element_ptr) [i_name_out]);
+		}
+		MTRACE ("Instantiated.");
 	}
 	
 	void explicit_plan::execute () {

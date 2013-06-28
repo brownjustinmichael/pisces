@@ -13,6 +13,11 @@
 #include "../config.hpp"
 #include "../bases/transform.hpp"
 
+namespace bases
+{
+	class element;
+} /* bases */
+
 namespace one_d
 {		
 	/*!*******************************************************************
@@ -26,18 +31,12 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::transform::transform ()
 		 *********************************************************************/
-		fftw_cosine (int i_n, int i_name_in, int i_name_out = null) : bases::transform (i_n, i_name_in, i_name_out) {
+		fftw_cosine (bases::element* i_element_ptr, int i_n, int i_name_in, int i_name_out = null) : bases::transform (i_element_ptr, i_n, i_name_in, i_name_out) {
+			scalar = 1.0 / sqrt (2.0 * (n - 1));
+			fourier_plan = fftw_plan_r2r_1d (n, data_in, data_out, FFTW_REDFT00, FFTW_ESTIMATE);
 		}
 		
 		virtual ~fftw_cosine () {}
-		
-		virtual void associate (bases::element* i_element_ptr) {
-			bases::transform::associate (i_element_ptr);
-			
-			scalar = 1.0 / sqrt (2.0 * (n - 1));
-			
-			fourier_plan = fftw_plan_r2r_1d (n, data_in, data_out, FFTW_REDFT00, FFTW_ESTIMATE);
-		}
 		
 		/*!*******************************************************************
 		 * \copydoc bases::transform::execute ()

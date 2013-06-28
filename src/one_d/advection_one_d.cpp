@@ -14,11 +14,11 @@
 #include "../bases/transform.hpp"
 #include "../bases/plan.hpp"
 #include "../utils/utils.hpp"
+#include "../bases/element.hpp"
 
 namespace one_d
 {
-	
-	advec::advec (int i_n, double i_c, int i_name_in, int i_name_out, std::shared_ptr<bases::collocation_grid> i_grid) : bases::explicit_plan (i_n, i_name_in, i_name_out)
+	advec::advec (bases::element* i_element_ptr, int i_n, double i_c, int i_name_in, int i_name_out, std::shared_ptr<bases::collocation_grid> i_grid) : bases::explicit_plan (i_element_ptr, i_n, i_name_in, i_name_out)
 	{
 		MTRACE ("Instantiating...");
 		grid = i_grid;

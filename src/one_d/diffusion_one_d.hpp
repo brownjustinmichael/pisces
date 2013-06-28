@@ -18,6 +18,11 @@
 #include "../bases/collocation.hpp"
 #include "../utils/utils.hpp"
 
+namespace bases
+{
+	class element;
+} /* bases */
+
 namespace one_d
 {
 	namespace chebyshev
@@ -35,7 +40,7 @@ namespace one_d
 			* \param i_grid a shared pointer to the collocation_grid, which must be defined for the second derivative
 			* \copydoc bases::explicit_plan::explicit_plan ()
 			*********************************************************************/
-			explicit_diffusion (double i_coeff, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, int i_name_in, int i_position, int i_name_out = null);
+			explicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, int i_name_in, int i_position, int i_name_out = null);
 
 			virtual ~explicit_diffusion () {}
 
@@ -67,7 +72,7 @@ namespace one_d
 			 * 
 			 * \copydetails bases::implicit_plan::implicit_plan ()
 			 *********************************************************************/
-			implicit_diffusion (double i_coeff, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_matrix);
+			implicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_matrix);
 
 			virtual ~implicit_diffusion () {}
 

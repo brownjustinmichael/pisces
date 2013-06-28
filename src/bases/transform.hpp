@@ -20,6 +20,8 @@ enum transform_flags {
 
 namespace bases
 {
+	class element;
+	
 	/*!*******************************************************************
 	 * \brief An explicit plan that operates a transform
 	 *********************************************************************/
@@ -29,16 +31,9 @@ namespace bases
 		/*!*******************************************************************
 		 * \copydoc bases::explicit_plan::explicit_plan ()
 		 *********************************************************************/
-		transform (int i_n, int i_name_in, int i_name_out = null) : bases::explicit_plan (i_n, i_name_in, i_name_out) {}
+		transform (element* i_element_ptr, int i_n, int i_name_in, int i_name_out = null) : bases::explicit_plan (i_element_ptr, i_n, i_name_in, i_name_out) {}
 		
 		virtual ~transform () {}
-		
-		/*!*******************************************************************
-		 * \copydoc bases::explicit_plan::associate ()
-		 *********************************************************************/
-		virtual void associate (element* i_element_ptr) {
-			explicit_plan::associate (i_element_ptr);
-		}
 		
 		/*!*******************************************************************
 		 * \copybrief bases::explicit_plan::execute ()
