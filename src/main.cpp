@@ -14,7 +14,6 @@
 #include <vector>
 #include "config.hpp"
 #include "one_d/element_one_d.hpp"
-#include "one_d/boundary_one_d.hpp"
 #include "one_d/master_one_d.hpp"
 
 #include "mpi.h"
@@ -97,16 +96,9 @@ std::vector<log4cxx::AppenderPtr> config::appenders;
  *********************************************************************/
 int main (int argc, char *argv[])
 {
-	int id;
-	int p;
-	
-	// Initialize mpi
-	MPI::Init (argc, argv);
-	
-	// Get the number of processes
-	p = MPI::COMM_WORLD.Get_size ();
-	id = MPI::COMM_WORLD.Get_rank ();
-	
+	// Initialize messenger
+	utils::messenger process_messenger (&argc, &argv);
+
 	// The program runs through the execution flags.
 	while ((argc > 1) && (argv [1] [0] == '-')) {
 		switch (argv [1] [1]) {
@@ -118,7 +110,7 @@ int main (int argc, char *argv[])
 		++argv;
 	}
 	
-	config::make_main (id);
+	config::make_main (process_messenger.get_id ());
 	
 	io::parameter_map inputParams;
 	io::read_params_txt parameters ("../input/parameters.txt");
@@ -139,39 +131,36 @@ int main (int argc, char *argv[])
 		name_grid [i] = std::to_string (i + 1);
 	}
 	
-	if (id >= n_total % p) {
-		n = n_total / p;
-		index = n * id + n_total % p;
+	if (process_messenger.get_id () >= n_total % process_messenger.get_np ()) {
+		n = n_total / process_messenger.get_np ();
+		index = n * process_messenger.get_id () + n_total % process_messenger.get_np ();
 	} else {
-		n = n_total / p + 1;
-		index = n * id;
+		n = n_total / process_messenger.get_np () + 1;
+		index = n * process_messenger.get_id ();
 	}
 
-	if (id >= n_total) {
-		MPI::Finalize ();
+	if (process_messenger.get_id () >= n_total) {
 		return 0;
 	} else {
-		if (p > n_total) {
+		if (process_messenger.get_np () > n_total) {
 			n_masters = n_total;
 		} else {
-			n_masters = p;
+			n_masters = process_messenger.get_np ();
 		}
 	}
 	
-	one_d::master <one_d::chebyshev::advection_diffusion_element> master_process (id, n_masters, "../input/parameters.txt", n, &n_grid [index], &position_grid [index], &name_grid [index]);
+	one_d::master <one_d::chebyshev::advection_diffusion_element> master_process (process_messenger.get_id (), n_masters, "../input/parameters.txt", n, &n_grid [index], &position_grid [index], &name_grid [index], &process_messenger);
 	
-	if (id != 0) {
-		MTRACE ("Adding boundary to " << 0 << " at 0 at processor " << id - 1);
-		master_process.add_boundary (0, linked_0, 1, 2, id - 1);
+	if (process_messenger.get_id () != 0) {
+		MTRACE ("Adding boundary to " << 0 << " at 0 at processor " << process_messenger.get_id () - 1);
+		master_process.add_boundary (0, one_d::edge_0, 1, 2, process_messenger.get_id () - 1);
 	}
-	if (id != n_masters - 1) {
-		MTRACE ("Adding boundary to " << n - 1 << " at n - 1 at processor " << id + 1);
-		master_process.add_boundary (n - 1, linked_n, 2, 1, id + 1);
+	if (process_messenger.get_id () != n_masters - 1) {
+		MTRACE ("Adding boundary to " << n - 1 << " at n - 1 at processor " << process_messenger.get_id () + 1);
+		master_process.add_boundary (n - 1, one_d::edge_n, 2, 1, process_messenger.get_id () + 1);
 	}
 	
 	master_process.run ();
 	
-	MPI::Finalize ();
-
 	return 0;
 }

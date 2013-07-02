@@ -37,24 +37,32 @@ namespace bases
 	}
 	
 	void element::send () {
+		for (int i = 0; i < (int) boundary_bools.size (); ++i) {
+			send (i);
+		}
+	}
+	
+	void element::send (int edge) {
 		TRACE (logger, "Sending information...");
 		
-		for (int i = 0; i < (int) boundaries.size (); ++i) {
-			for (iterator iter = begin (); iter != end (); ++iter) {
-				boundaries [i]->send (*iter);
-			}
+		for (iterator iter = begin (); iter != end (); ++iter) {
+			send (edge, *iter);
 		}
 		
 		TRACE (logger, "Information sent.");
 	}
 	
 	void element::recv () {
+		for (int i = 0; i < (int) boundary_bools.size (); ++i) {
+			recv (i);
+		}
+	}
+
+	void element::recv (int edge) {
 		TRACE (logger, "Receiving information...");
 		
-		for (int i = 0; i < (int) boundaries.size (); ++i) {
-			for (iterator iter = begin (); iter != end (); ++iter) {
-				boundaries [i]->recv (*iter);
-			}
+		for (iterator iter = begin (); iter != end (); ++iter) {
+			recv (edge, *iter);
 		}
 		
 		TRACE (logger, "Information received.");
@@ -62,12 +70,8 @@ namespace bases
 		
 	void element::execute_boundaries () {
 		TRACE (logger, "Executing boundaries...");
-		
-		for (int i = 0; i < (int) boundaries.size (); ++i) {
-			boundaries [i]->execute ();
-		}
 	
-		TRACE (logger, "Writing to file..." << &*normal_stream);
+		TRACE (logger, "Writing to file...");
 	
 		// Output in normal space
 		if (normal_stream) {

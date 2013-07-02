@@ -18,13 +18,12 @@
 #include "advection_one_d.h"
 #include "solver_one_d.hpp"
 #include "fftw_one_d.hpp"
-#include "boundary_one_d.hpp"
 	
 namespace one_d
 {
 	namespace chebyshev
 	{
-		advection_diffusion_element::advection_diffusion_element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& inputParams, int i_flags) : element (i_n, i_position_0, i_position_n, i_name, inputParams, i_flags) {
+		advection_diffusion_element::advection_diffusion_element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& inputParams, utils::messenger* i_messenger_ptr, int i_flags) : element (i_n, i_position_0, i_position_n, i_name, inputParams, i_messenger_ptr, i_flags) {
 			double diffusion_coeff = inputParams["diffusion_coeff"].asDouble;
 			double advection_coeff = inputParams["advection_coeff"].asDouble; 
 			double alpha = 0.5;

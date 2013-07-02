@@ -11,7 +11,6 @@
 #include <cassert>
 #include <memory>
 #include "../bases/element.hpp"
-#include "../bases/boundary.hpp"
 #include "../config.hpp"
 #include "diffusion_one_d.hpp"
 #include "../utils/chebyshev.hpp"

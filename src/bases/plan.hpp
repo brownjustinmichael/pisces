@@ -64,7 +64,9 @@ namespace bases
 	public:
 		plan (element* i_element_ptr);
 		
-		virtual ~plan () {}
+		virtual ~plan () {
+			TRACE (logger, "Calling destructor.");
+		}
 		
 		/*!*******************************************************************
 		* \brief Operate the plan on the data arrays contained in the class
@@ -100,7 +102,9 @@ namespace bases
 		 *********************************************************************/
 		explicit_plan (element* i_element_ptr, int i_n, int i_name_in, int i_name_out = null);
 	
-		virtual ~explicit_plan () {}
+		virtual ~explicit_plan () {
+			TRACE (logger, "Calling destructor.");
+		}
 	
 		/*!*******************************************************************
 		 * \copydoc plan::execute ()
@@ -132,7 +136,9 @@ namespace bases
 			matrix = i_matrix;
 		}
 
-		virtual ~implicit_plan () {}
+		virtual ~implicit_plan () {
+			TRACE (logger, "Calling destructor.");
+		}
 		
 		/*!*******************************************************************
 		 * \copydoc plan::execute ()

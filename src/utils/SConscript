@@ -5,6 +5,8 @@ for lib in ["lapack", "blas", "atlas"]:
     if lib not in env ['LIBS']:
         env.Append (LIBS = lib)
 
+objects.append (env.Object ("utils_mpi.cpp"))
+
 objects.append (env.Object ("utils_lapack.cpp"))
 
 objects.append (env.Object ("chebyshev.cpp"))

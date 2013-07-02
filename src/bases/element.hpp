@@ -14,12 +14,21 @@
 
 #include <string>
 #include "plan.hpp"
-#include "boundary.hpp"
 #include "solver.hpp"
 #include "transform.hpp"
 #include "../utils/io.hpp"
+#include "../utils/messenger.hpp"
 #include "collocation.hpp"
 #include "../config.hpp"
+
+enum element_flags {
+	recv_first = 0x800
+};
+
+enum boundary_flags {
+	linked_0 = 0x20,
+	linked_n = 0x40
+};
 
 namespace bases
 {	
@@ -46,16 +55,23 @@ namespace bases
 		* \param i_inputParams The parameter object that contains the input parameters of the run
 		* \param i_flags An integer set of execution flags
 		*********************************************************************/
-		element (std::string i_name, io::parameter_map& i_inputParams, int i_flags) : inputParams (i_inputParams) {
+		element (std::string i_name, int n_boundaries, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : inputParams (i_inputParams) {
 			name = i_name;
+			boundary_bools.resize (n_boundaries);
+			boundary_processes.resize (n_boundaries);
+			boundary_send_tags.resize (n_boundaries);
+			boundary_recv_tags.resize (n_boundaries);
 			inputParams = i_inputParams;
+			messenger_ptr = i_messenger_ptr;
 			flags = i_flags;
 			timestep = 0.0;
 			duration = 0.0;
 			logger = config::make_logger (name);
 		}
 		
-		virtual ~element () {}
+		virtual ~element () {
+			TRACE (logger, "Calling destructor.");
+		}
 		
 		/*!*******************************************************************
 		 * \brief Get the named integer parameter from the input parameter map
@@ -138,17 +154,6 @@ namespace bases
 		}
 		
 		/*!*******************************************************************
-		 * \brief Get the boundary information given an edge
-		 * 
-		 * \param edge The integer boundary flag for identifying the boundary
-		 * \param index The integer reference to the output index of the boundary
-		 * \param increment The integer reference to the output increment to the next-most inner index
-		 * 
-		 * To be overwritten when dimension is known.
-		 *********************************************************************/
-		virtual void get_boundary_info (int edge, int& index, int& increment) = 0;
-		
-		/*!*******************************************************************
 		 * \brief Reset every scalar index < 0 and converts to spectral space
 		 * 
 		 * At the beginning of each timestep, all scalars with index < 0 should
@@ -210,16 +215,13 @@ namespace bases
 			plans.push_back (std::move (i_plan));
 			TRACE (logger, "Added.");
 		}
-	
-		/*!*******************************************************************
-		 * \brief Adds a boundary condition to execute in normal space
-		 * 
-		 * \param i_boundary A shared pointer to the boundary plan to add
-		 *********************************************************************/
-		inline void add_boundary (std::shared_ptr<boundary> i_boundary) {
-			TRACE (logger, "Adding boundary..." << &*i_boundary);
-			boundaries.push_back (std::move (i_boundary));
-			TRACE (logger, "Added." << boundaries.size () - 1 << " " << &*boundaries [boundaries.size () - 1]);
+		
+		inline void add_boundary (int edge, int send_tag, int recv_tag, int process) {
+			TRACE (logger, "Adding boundary, new...");
+			boundary_bools [edge] = true;
+			boundary_send_tags [edge] = send_tag;
+			boundary_recv_tags [edge] = recv_tag;
+			boundary_processes [edge] = process;
 		}
 		
 		/*!*******************************************************************
@@ -235,6 +237,8 @@ namespace bases
 		 * In general, this should not be overwritten in subclasses.
 		 *********************************************************************/
 		virtual void send ();
+		virtual void send (int edge);
+		virtual void send (int edge, int name) = 0;
 		
 		/*!*******************************************************************
 		 * \brief Receive all relevant boundary data from adjacent elements
@@ -242,7 +246,9 @@ namespace bases
 		 * In general, this should not be overwritten in subclasses.
 		 *********************************************************************/
 		virtual void recv ();
-	
+		virtual void recv (int edge);
+		virtual void recv (int edge, int name) = 0;
+		
 		/*!*******************************************************************
 		 * \brief Execute the boundary conditions
 		 * 
@@ -274,6 +280,7 @@ namespace bases
 	protected:
 		std::string name; //!< A string representation of the element, to be used in file output
 		io::parameter_map& inputParams; //!< The map that contains the input parameters
+		utils::messenger* messenger_ptr;
 		
 		int flags; //!< An integer set of execution flags
 		int logger; //!< An integer representation of the logger, which is interpreted by the config class
@@ -291,11 +298,15 @@ namespace bases
 		std::shared_ptr<io::output> normal_stream; //!< An implementation to output in normal space
 		std::shared_ptr<io::output> transform_stream; //!< An implementation to output in transform space
 
+		std::vector <bool> boundary_bools;
+		std::vector <int> boundary_send_tags;
+		std::vector <int> boundary_recv_tags;
+		std::vector <int> boundary_processes;
+
 	private:
 		std::shared_ptr<plan> matrix_solver; //!< A shared pointer to the matrix solver
 		
 		std::vector <std::shared_ptr <plan>> plans; //!< A vector of shared pointers of plans to be executed
-		std::vector<std::shared_ptr<boundary>> boundaries; //!< A vector of shared pointers to boundary conditions to be executed
 	};
 } /* bases */
 

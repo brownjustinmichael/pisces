@@ -10,6 +10,7 @@
 #define COLLOCATION_HPP_3FRTUK5Z
 
 #include <vector>
+#include "../config.hpp"
 
 namespace bases
 {
@@ -32,7 +33,9 @@ namespace bases
 		 *********************************************************************/
 		collocation_grid (int i_derivs, int i_rows, int i_cols, int i_logger = -1);
 	
-		virtual ~collocation_grid () {};
+		virtual ~collocation_grid () {
+			MTRACE ("Calling destructor.");
+		};
 	
 		/*!*******************************************************************
 		 * \brief An indexing operation into the grid, for convenience

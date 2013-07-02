@@ -3,8 +3,6 @@ Import ("objects")
 
 objects.append (env.Object ("plan.cpp"))
 
-objects.append (env.Object ("boundary.cpp"))
-
 objects.append (env.Object ("element.cpp"))
 
 objects.append (env.Object ("collocation.cpp"))

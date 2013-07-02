@@ -35,7 +35,9 @@ namespace one_d
 
 		advec (bases::element* i_element_ptr, int i_n, double i_c, int i_name_in, int i_name_out, std::shared_ptr<bases::collocation_grid> i_grid);	//constuctor initializes private members to point to input and output vectors
 		
-		virtual ~advec () {}
+		virtual ~advec () {
+			TRACE (logger, "Calling destructor.");
+		}
 		
 		void execute ();
 	};

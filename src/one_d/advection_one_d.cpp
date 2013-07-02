@@ -9,7 +9,6 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 
 #include <cmath>
-#include "../bases/boundary.hpp"
 #include "advection_one_d.h"
 #include "../bases/transform.hpp"
 #include "../bases/plan.hpp"

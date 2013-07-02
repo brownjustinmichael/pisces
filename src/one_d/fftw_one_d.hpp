@@ -36,7 +36,9 @@ namespace one_d
 			fourier_plan = fftw_plan_r2r_1d (n, data_in, data_out, FFTW_REDFT00, FFTW_ESTIMATE);
 		}
 		
-		virtual ~fftw_cosine () {}
+		virtual ~fftw_cosine () {
+			TRACE (logger, "Calling destructor.");
+		}
 		
 		/*!*******************************************************************
 		 * \copydoc bases::transform::execute ()

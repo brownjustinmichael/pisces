@@ -14,7 +14,6 @@
 #include <vector>
 #include <map>
 #include "../config.hpp"
-#include "../bases/boundary.hpp"
 #include "../bases/element.hpp"
 #include "../bases/plan.hpp"
 #include "../utils/utils.hpp"
@@ -22,6 +21,11 @@
 	
 namespace one_d
 {
+	enum edges {
+		edge_0 = 0,
+		edge_n = 1
+	};
+	
 	/*!*******************************************************************
 	 * A 1D implementation of the element base class. This provides the
 	 * storage, indexing facilities, and failsafe_dump output. The plans should be added in a 
@@ -38,7 +42,7 @@ namespace one_d
 		 * \param i_position_n The double position of index n - 1
 		 * \copydoc bases::element::element ()
 		 *********************************************************************/
-		element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& i_inputParams,  int i_flags) : bases::element (i_name, i_inputParams, i_flags) {
+		element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : bases::element (i_name, 2, i_inputParams, i_messenger_ptr, i_flags) {
 			n = i_n;
 			position_0 = i_position_0;
 			position_n = i_position_n;
@@ -52,7 +56,9 @@ namespace one_d
 			failsafe_dump->append (&cell [0]);
 		}
 		
-		virtual ~element () {}
+		virtual ~element () {
+			TRACE (logger, "Calling destructor.");
+		}
 	
 		/*!*******************************************************************
 		 * \copydoc bases::element::initialize ()
@@ -83,14 +89,12 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::element::get_boundary_info ()
 		 *********************************************************************/
-		inline void get_boundary_info (int edge, int& index, int& increment) {
-			MTRACE ("Getting boundary index...");
-			if (edge == linked_0) {
-				index = 0;
-				increment = 1;
-			} else if (edge == linked_n) {
-				index = n - 1;
-				increment = -1;
+		inline int get_boundary_index (int edge) {
+			TRACE (logger, "Getting boundary index...");
+			if (edge == edge_0) {
+				return 0;
+			} else if (edge == edge_n) {
+				return n - 1;
 			} else {
 				FATAL (logger, "Edge is not a one_d edge index.");
 				throw 0;
@@ -110,17 +114,27 @@ namespace one_d
 			}
 		}
 		
+		inline void send (int edge, int name) {
+			buffer = (*this) (name, get_boundary_index (edge)) * 0.5;
+			messenger_ptr->send (&buffer, boundary_processes [edge], boundary_send_tags [edge]);
+		}
+		
+		inline void recv (int edge, int name) {
+			messenger_ptr->recv (&buffer, boundary_processes [edge], boundary_recv_tags [edge]);
+			(*this) (name, get_boundary_index (edge)) = (*this) (name, get_boundary_index (edge)) * 0.5 + buffer;
+		}
+		
 		/*!*******************************************************************
 		 * \copydoc bases::element::execute_boundaries ()
 		 *********************************************************************/
 		inline void execute_boundaries () {
 			bases::element::execute_boundaries ();
-			if (!(flags & linked_0)) {
+			if (!(boundary_bools [edge_0])) {
 				for (iterator iter = begin (); iter != end (); ++iter) {
 					(*this) (*iter, 0) = fixed_points_0 [*iter];
 				}
 			}
-			if (!(flags & linked_n)) {
+			if (!(boundary_bools [edge_n])) {
 				for (iterator iter = begin (); iter != end (); ++iter) {
 					(*this) (*iter, n - 1) = fixed_points_n [*iter];
 				}
@@ -132,6 +146,7 @@ namespace one_d
 		double position_0; //!< The double position of index 0
 		double position_n; //!< The double position of index n - 1
 		std::vector<int> cell; //!< An integer array for tracking each cell number for output
+		double buffer;
 
 		std::map <int, std::vector <double>> scalars; //!< A vector of scalar vectors
 		std::map <int, double> fixed_points_0; //!< The initial values of the scalars at index 0
@@ -153,11 +168,13 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc one_d::element::element ()
 			 *********************************************************************/
-			element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& i_inputParams, int i_flags) : one_d::element (i_n, i_position_0, i_position_n, i_name, i_inputParams, i_flags) {
+			element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : one_d::element (i_n, i_position_0, i_position_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				initialize (position);
 				set_grid (std::make_shared<chebyshev_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), position_0 - position_n, logger)));
 			}
-			virtual ~element () {}
+			virtual ~element () {
+				TRACE (logger, "Calling destructor.");
+			}
 				
 			/*!*******************************************************************
 			 * \copydoc one_d::element::initialize ()
@@ -202,9 +219,11 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc element::element ()
 			 *********************************************************************/
-			advection_diffusion_element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& i_inputParams, int i_flags);
+			advection_diffusion_element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags);
 			
-			virtual ~advection_diffusion_element () {}
+			virtual ~advection_diffusion_element () {
+				TRACE (logger, "Calling destructor.");
+			}
 		
 			/*!*******************************************************************
 			 * \copydoc element::implicit_reset ()

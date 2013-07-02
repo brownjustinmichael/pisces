@@ -51,7 +51,9 @@ namespace bases
 			elements.resize (i_n_elements);
 		}
 		
-		virtual ~master () {}
+		virtual ~master () {
+			MTRACE ("Calling destructor.");
+		}
 		
 		/*!*******************************************************************
 		 * \brief Get the parameter map object associated with the master object
@@ -79,11 +81,9 @@ namespace bases
 				for (int j = 0; j < (int) elements.size (); ++j) {
 					elements [j]->send ();
 				}
-				MPI::COMM_WORLD.Barrier ();
 				for (int j = 0; j < (int) elements.size (); ++j) {
 					elements [j]->recv ();
 				}
-				MPI::COMM_WORLD.Barrier ();
 				for (int j = 0; j < (int) elements.size (); ++j) {
 					elements [j]->execute_boundaries ();
 				}
