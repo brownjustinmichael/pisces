@@ -9,6 +9,8 @@
 #ifndef MESSENGER_HPP_JNOTV271
 #define MESSENGER_HPP_JNOTV271
 
+#include <vector>
+
 namespace utils
 {	
 	/*!***********************************************************************
@@ -24,9 +26,13 @@ namespace utils
 		
 		virtual ~messenger ();
 		
+		virtual double& operator[] (int i);
+		
 		virtual void send (double* data, int process, int tag, int size = 1);
 		
-		virtual void recv (double* data, int process, int tag, int size = 1);
+		virtual void recv (int process, int tag, int size = 1);
+		
+		virtual void min (double* data);
 		
 		int get_np () {
 			return np;
@@ -39,6 +45,8 @@ namespace utils
 	private:
 		int np;
 		int id;
+		
+		std::vector <double> buffer;
 	};
 } /* utils */
 

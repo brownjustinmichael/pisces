@@ -15,6 +15,7 @@
 #include <algorithm>
 #include "element.hpp"
 #include "../utils/io.hpp"
+#include "../utils/messenger.hpp"
 
 namespace bases
 {
@@ -33,9 +34,10 @@ namespace bases
 		 * \param i_n_elements The number of elements in the process
 		 * \param parameter_filename The string location of the parameter file
 		 *********************************************************************/
-		master (int i_id, int i_p, int i_n_elements, std::string parameter_filename) {
+		master (int i_id, int i_p, int i_n_elements, std::string parameter_filename, utils::messenger* i_messenger_ptr) {
 			// Read experiment parameters out of text file
 			io::read_params_txt parameters (parameter_filename);
+			messenger_ptr = i_messenger_ptr;
 			inputParams = parameters.load_params();
 			inputParams ["process_id"].asInt = i_id;
 			inputParams ["total_processes"].asInt = i_p;
@@ -94,13 +96,7 @@ namespace bases
 						t_timestep = std::min (t_timestep, elements [j]->calculate_timestep ());
 					}
 				}
-				if (inputParams ["total_processes"].asInt != 1) {
-					MPI::COMM_WORLD.Gather (&t_timestep, 1, MPI_DOUBLE, &timesteps [0], 1, MPI_DOUBLE, 0);
-					if (id == 0) {
-						t_timestep = *std::min_element (timesteps.begin (), timesteps.end ());
-					}
-					MPI::COMM_WORLD.Bcast (&t_timestep, 1, MPI_DOUBLE, 0);
-				}
+				messenger_ptr->min (&t_timestep);
 				MTRACE ("Updating...");
 				for (int j = 0; j < (int) elements.size (); ++j) {
 					elements [j]->update ();
@@ -117,5 +113,6 @@ namespace bases
 		
 		std::vector <std::shared_ptr <element>> elements; //!< A vector containing shared pointers to the contained elements
 		io::parameter_map inputParams; //!< The parameter map object containing the input parameters
+		utils::messenger* messenger_ptr;
 	};
 } /* bases */

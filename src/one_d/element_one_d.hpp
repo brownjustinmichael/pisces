@@ -120,8 +120,8 @@ namespace one_d
 		}
 		
 		inline void recv (int edge, int name) {
-			messenger_ptr->recv (&buffer, boundary_processes [edge], boundary_recv_tags [edge]);
-			(*this) (name, get_boundary_index (edge)) = (*this) (name, get_boundary_index (edge)) * 0.5 + buffer;
+			messenger_ptr->recv (boundary_processes [edge], boundary_recv_tags [edge]);
+			(*this) (name, get_boundary_index (edge)) = (*this) (name, get_boundary_index (edge)) * 0.5 + (*messenger_ptr) [0];
 		}
 		
 		/*!*******************************************************************

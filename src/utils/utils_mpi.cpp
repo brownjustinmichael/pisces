@@ -8,6 +8,7 @@
 
 #include "messenger.hpp"
 #include "../config.hpp"
+#include <algorithm>
 #include "mpi.h"
 
 namespace utils
@@ -23,12 +24,31 @@ namespace utils
 		MPI::Finalize ();
 	}
 	
+	double& messenger::operator[] (int i) {
+		return buffer [i]; 
+	}
+	
 	void messenger::send (double* data, int process, int tag, int size) {
 		MPI::COMM_WORLD.Send (data, size, MPI::DOUBLE, process, tag);
 	}
 
-	void messenger::recv (double* data, int process, int tag, int size) {
-		MPI::COMM_WORLD.Recv (data, size, MPI::DOUBLE, process, tag);
+	void messenger::recv (int process, int tag, int size) {
+		if (size > (int) buffer.size ()) {
+			buffer.resize (size);
+		}
+		MPI::COMM_WORLD.Recv (&buffer [0], size, MPI::DOUBLE, process, tag);
 	}
-
+	
+	void messenger::min (double* data) {
+		if (np != 1) {
+			if (np > (int) buffer.size ()) {
+				buffer.resize (np);
+			}
+			MPI::COMM_WORLD.Gather (data, 1, MPI_DOUBLE, &buffer [0], 1, MPI_DOUBLE, 0);
+			if (id == 0) {
+				*data = *std::min_element (buffer.begin (), buffer.end ());
+			}
+			MPI::COMM_WORLD.Bcast (data, 1, MPI_DOUBLE, 0);
+		}
+	}
 } /* utils */
