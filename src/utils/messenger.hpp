@@ -28,9 +28,9 @@ namespace utils
 		
 		virtual double& operator[] (int i);
 		
-		virtual void send (double* data, int process, int tag, int size = 1);
+		virtual void send (double* data, int process, int tag, double weight = 1.0, int size = 1);
 		
-		virtual void recv (int process, int tag, int size = 1);
+		virtual void recv (double* data, int process, int tag, double weight = 0.0, int size = 1);
 		
 		virtual void min (double* data);
 		

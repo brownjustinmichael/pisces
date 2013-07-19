@@ -36,6 +36,7 @@ namespace bases
 		TRACE (logger, "Calculation complete.");
 	}
 	
+/*
 	void element::send () {
 		for (int i = 0; i < (int) boundary_bools.size (); ++i) {
 			send (i);
@@ -66,7 +67,8 @@ namespace bases
 		}
 		
 		TRACE (logger, "Information received.");
-	}
+	}*/
+
 		
 	void element::execute_boundaries () {
 		TRACE (logger, "Executing boundaries...");
@@ -86,6 +88,7 @@ namespace bases
 
 		if (matrix_solver) {
 			matrix_solver->execute ();
+			matrix_solver->update ();
 		} else {
 			WARN (logger, "No matrix solver defined. It is likely the element was not set up correctly.")
 		}

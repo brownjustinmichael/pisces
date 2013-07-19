@@ -55,20 +55,16 @@ namespace one_d
 		}
 
 		void implicit_diffusion::execute () {
+			/*
+				TODO In general, the matrix does not need to be reset every time the timestep changes. This could be a minor speed increase
+			*/
 			if (!(*flags_ptr & unchanged_timestep)) {
 				TRACE (logger, "Operating...");
 				bases::implicit_plan::execute ();
-				if (*flags_ptr & linked_0) {
-				   	utils::add_scaled (n, coeff, grid->get_data (2), matrix, n, n);
-				}
 			
 				// This is the main loop for setting up the diffusion equation in Chebyshev space
-				for (int i = 1; i < n - 1; ++i) {
+				for (int i = 0; i < n; ++i) {
 				   	utils::add_scaled (n, coeff, grid->get_data (2) + i, matrix + i, n, n);
-				}
-			
-				if (*flags_ptr & linked_n) {
-				   	utils::add_scaled (n, coeff, grid->get_data (2) + n - 1, matrix + n - 1, n, n);
 				}
 				TRACE (logger, "Operation complete.");
 			}

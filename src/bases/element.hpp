@@ -60,6 +60,7 @@ namespace bases
 			boundary_bools.resize (n_boundaries);
 			boundary_processes.resize (n_boundaries);
 			boundary_send_tags.resize (n_boundaries);
+			boundary_weights.resize (n_boundaries);
 			boundary_recv_tags.resize (n_boundaries);
 			inputParams = i_inputParams;
 			messenger_ptr = i_messenger_ptr;
@@ -164,8 +165,12 @@ namespace bases
 		 *********************************************************************/
 		virtual void explicit_reset () {
 			if (!(flags & transformed)) {
-				transform_forward->execute ();
+				transform ();
 			}
+		}
+		
+		virtual void transform () {
+			transform_forward->execute ();
 		}
 	
 		/*!*******************************************************************
@@ -191,7 +196,7 @@ namespace bases
 		 * 
 		 * TODO This assumes 1 equation. It should be generalized for multiple equations.
 		 *********************************************************************/
-		inline void set_solver (std::shared_ptr<plan> i_plan) {
+		inline void set_solver (std::shared_ptr<solver> i_plan) {
 			matrix_solver = i_plan;
 		}
 	
@@ -236,18 +241,30 @@ namespace bases
 		 * 
 		 * In general, this should not be overwritten in subclasses.
 		 *********************************************************************/
-		virtual void send ();
-		virtual void send (int edge);
-		virtual void send (int edge, int name) = 0;
-		
+/*		virtual void send ();*/
+/*		virtual void send (int edge);*/
+/*		virtual void send (int edge, int name) = 0;*/
+		virtual void send (int n, double* value, int edge) {
+			messenger_ptr->send (value, boundary_processes [edge], boundary_send_tags [edge], boundary_weights [edge], n);
+		}
+		virtual void send (int n, double* value, int edge, double weight) {
+			messenger_ptr->send (value, boundary_processes [edge], boundary_send_tags [edge], weight, n);
+		}
+		//
 		/*!*******************************************************************
 		 * \brief Receive all relevant boundary data from adjacent elements
 		 * 
 		 * In general, this should not be overwritten in subclasses.
 		 *********************************************************************/
-		virtual void recv ();
-		virtual void recv (int edge);
-		virtual void recv (int edge, int name) = 0;
+/*		virtual void recv ();*/
+/*		virtual void recv (int edge);*/
+/*		virtual void recv (int edge, int name) = 0;*/
+		virtual void recv (int n, double* value, int edge) {
+			messenger_ptr->recv (value, boundary_processes [edge], boundary_recv_tags [edge], boundary_weights [edge], n);
+		}
+		virtual void recv (int n, double* value, int edge, double weight) {
+			messenger_ptr->recv (value, boundary_processes [edge], boundary_recv_tags [edge], weight, n);
+		}
 		
 		/*!*******************************************************************
 		 * \brief Execute the boundary conditions
@@ -255,7 +272,7 @@ namespace bases
 		 * In general, this should not be overwritten in subclasses.
 		 *********************************************************************/
 		virtual void execute_boundaries ();
-	
+
 		/*!*******************************************************************
 		 * \brief Update the element
 		 * 
@@ -302,9 +319,10 @@ namespace bases
 		std::vector <int> boundary_send_tags;
 		std::vector <int> boundary_recv_tags;
 		std::vector <int> boundary_processes;
+		std::vector <double> boundary_weights;
 
 	private:
-		std::shared_ptr<plan> matrix_solver; //!< A shared pointer to the matrix solver
+		std::shared_ptr<solver> matrix_solver; //!< A shared pointer to the matrix solver
 		
 		std::vector <std::shared_ptr <plan>> plans; //!< A vector of shared pointers of plans to be executed
 	};

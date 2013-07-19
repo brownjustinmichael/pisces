@@ -52,7 +52,7 @@ namespace one_d
 			add_plan (std::make_shared <implicit_diffusion> (implicit_diffusion (this, - diffusion_coeff * alpha, i_n, grid, &matrix [0])));
 		
 			// Set up solver
-			set_solver (std::make_shared <solver> (solver (this, n, timestep, grid->get_data (0), &matrix [0], velocity, rhs)));
+			set_solver (std::make_shared <solver> (solver (this, n, timestep, boundary_weights [edge_0], boundary_weights [edge_n], grid->get_data (0), &matrix [0], velocity, rhs)));
 			
 			normal_stream->to_file ();
 		

@@ -46,6 +46,8 @@ namespace one_d
 			n = i_n;
 			position_0 = i_position_0;
 			position_n = i_position_n;
+			boundary_weights [edge_0] = 0.5;
+			boundary_weights [edge_n] = 0.5;
 			
 			cell.resize (i_n);
 			for (int i = 0; i < i_n; ++i) {
@@ -114,15 +116,31 @@ namespace one_d
 			}
 		}
 		
-		inline void send (int edge, int name) {
-			buffer = (*this) (name, get_boundary_index (edge)) * 0.5;
+/*		inline void send (int edge, int name) {
+			double temp;
+			if (edge == edge_0) {
+				temp = boundary_weights [edge_0];
+			} else if (edge == edge_n) {
+				temp = boundary_weights [edge_n];
+			} else {
+				throw 0;
+			}
+			buffer = (*this) (name, get_boundary_index (edge)) * temp;
 			messenger_ptr->send (&buffer, boundary_processes [edge], boundary_send_tags [edge]);
 		}
 		
 		inline void recv (int edge, int name) {
+			double temp;
+			if (edge == edge_0) {
+				temp = boundary_weights [edge_0];
+			} else if (edge == edge_n) {
+				temp = boundary_weights [edge_n];
+			} else {
+				throw 0;
+			}
 			messenger_ptr->recv (boundary_processes [edge], boundary_recv_tags [edge]);
-			(*this) (name, get_boundary_index (edge)) = (*this) (name, get_boundary_index (edge)) * 0.5 + (*messenger_ptr) [0];
-		}
+			(*this) (name, get_boundary_index (edge)) = (*this) (name, get_boundary_index (edge)) * temp + (*messenger_ptr) [0];
+		}*/
 		
 		/*!*******************************************************************
 		 * \copydoc bases::element::execute_boundaries ()

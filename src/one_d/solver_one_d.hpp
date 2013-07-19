@@ -37,7 +37,7 @@ namespace one_d
 		 * \param i_data_out The double array of output
 		 * \copydoc bases::solver::solver ()
 		 *********************************************************************/
-		solver (bases::element* i_element_ptr, int i_n, double& i_timestep, double *i_default_matrix, double *i_matrix, int i_name_in, int i_name_rhs, int i_name_out = null);
+		solver (bases::element* i_element_ptr, int i_n, double& i_timestep, double& i_alpha_0, double& i_alpha_n, double *i_default_matrix, double *i_matrix, int i_name_in, int i_name_rhs, int i_name_out = null);
 		
 		virtual ~solver () {
 			TRACE (logger, "Calling destructor.");
@@ -47,14 +47,22 @@ namespace one_d
 		 * \copydoc bases::solver::solve ()
 		 *********************************************************************/
 		void execute ();
+		
+		void calculate_error ();
+		
+		void update ();
 
 	protected:
 		double& timestep;
+		double& alpha_0;
+		double& alpha_n;
 		
 		double *rhs; //!< The double array of the right-hand-side of the matrix equation
 		double* default_matrix;
 		double *matrix; //!< The double matrix to be factorized
 		
+		std::vector <double> error;
+		std::vector <double> factorized_matrix;
 		std::vector<int> ipiv; //!< A vector of integers needed to calculate the factorization
 		
 		/*!*******************************************************************

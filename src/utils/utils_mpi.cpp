@@ -10,6 +10,7 @@
 #include "../config.hpp"
 #include <algorithm>
 #include "mpi.h"
+#include "utils.hpp"
 
 namespace utils
 {
@@ -28,15 +29,30 @@ namespace utils
 		return buffer [i]; 
 	}
 	
-	void messenger::send (double* data, int process, int tag, int size) {
-		MPI::COMM_WORLD.Send (data, size, MPI::DOUBLE, process, tag);
+	void messenger::send (double* data, int process, int tag, double weight, int size) {
+		if (weight != 1.0) {
+			if (size > (int) buffer.size ()) {
+				buffer.resize (size);
+			}
+			utils::scale (size, 0.0, &buffer [0]);
+			utils::add_scaled (size, weight, data, &buffer [0]);
+			MPI::COMM_WORLD.Send (&buffer [0], size, MPI::DOUBLE, process, tag);
+		} else {
+			MPI::COMM_WORLD.Send (data, size, MPI::DOUBLE, process, tag);
+		}
 	}
 
-	void messenger::recv (int process, int tag, int size) {
-		if (size > (int) buffer.size ()) {
-			buffer.resize (size);
+	void messenger::recv (double* data, int process, int tag, double weight, int size) {
+		if (weight != 0.0) {
+			if (size > (int) buffer.size ()) {
+				buffer.resize (size);
+			}
+			MPI::COMM_WORLD.Recv (&buffer [0], size, MPI::DOUBLE, process, tag);
+			utils::scale (size, weight, data);
+			utils::add_scaled (size, 1.0, &buffer [0], data);
+		} else {
+			MPI::COMM_WORLD.Recv (data, size, MPI::DOUBLE, process, tag);
 		}
-		MPI::COMM_WORLD.Recv (&buffer [0], size, MPI::DOUBLE, process, tag);
 	}
 	
 	void messenger::min (double* data) {

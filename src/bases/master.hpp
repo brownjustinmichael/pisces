@@ -79,17 +79,7 @@ namespace bases
 				MINFO ("Timestep " << i);
 				for (int j = 0; j < (int) elements.size (); ++j) {
 					elements [j]->calculate ();
-				}
-				for (int j = 0; j < (int) elements.size (); ++j) {
-					elements [j]->send ();
-				}
-				for (int j = 0; j < (int) elements.size (); ++j) {
-					elements [j]->recv ();
-				}
-				for (int j = 0; j < (int) elements.size (); ++j) {
 					elements [j]->execute_boundaries ();
-				}
-				for (int j = 0; j < (int) elements.size (); ++j) {
 					if (j == 0) {
 						t_timestep = elements [j]->calculate_timestep ();
 					} else {
@@ -100,8 +90,6 @@ namespace bases
 				MTRACE ("Updating...");
 				for (int j = 0; j < (int) elements.size (); ++j) {
 					elements [j]->update ();
-				}
-				for (int j = 0; j < (int) elements.size (); ++j) {
 					elements [j]->update_timestep (t_timestep);
 				}
 			}
