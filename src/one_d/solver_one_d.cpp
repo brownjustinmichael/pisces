@@ -17,6 +17,7 @@ namespace one_d
 {
 	solver::solver (bases::element* i_element_ptr, int i_n, double& i_timestep, double& i_alpha_0, double& i_alpha_n, double *i_default_matrix, double *i_matrix, int i_name_in, int i_name_rhs, int i_name_out) : bases::solver (i_element_ptr, i_n, i_name_in, i_name_out), timestep (i_timestep), alpha_0 (i_alpha_0), alpha_n (i_alpha_n) {
 		error.resize (2, 0.0);
+		data_temp.resize (n, 0.0);
 		rhs = &((*element_ptr) [i_name_rhs]);
 		default_matrix = i_default_matrix;
 		matrix = i_matrix;
@@ -55,21 +56,17 @@ namespace one_d
 		
 		TRACE (logger, "Solving...");
 		
-		if (data_out == rhs) {
-			utils::add_scaled (n, timestep, data_in, data_out);
-		} else {
-			if (data_in != data_out) {
-				utils::copy (n, data_in, data_out);
-			}
-			data_out [0] += alpha_0 * timestep * rhs [0] + error [edge_0];
-			data_out [n - 1] += alpha_n * timestep * rhs [n - 1] + error [edge_n];
-			utils::add_scaled (n - 2, timestep, rhs + 1, data_out + 1);
-		}
+		MDEBUG ("error " << error [edge_0] << " " << error [edge_n]);
 		
-		utils::matrix_solve (n, &factorized_matrix [0], &ipiv [0], data_out, &info);
+		utils::copy (n, data_in, &data_temp [0]);
+		data_temp [0] += alpha_0 * timestep * rhs [0] + error [edge_0];
+		data_temp [n - 1] += alpha_n * timestep * rhs [n - 1] + error [edge_n];
+		utils::add_scaled (n - 2, timestep, rhs + 1, &data_temp [1]);
+		
+		utils::matrix_solve (n, &factorized_matrix [0], &ipiv [0], &data_temp [0], &info);
 		
 		for (int i = 0; i < n; ++i) {
-			if (std::isnan (data_out [i])) {
+			if (std::isnan (data_temp [i])) {
 				info = -1;
 			}
 		}
@@ -84,41 +81,48 @@ namespace one_d
 		TRACE (logger, "Solve complete.")
 	}
 	
-	void solver::calculate_error () {
-/*
-		double data_0, data_n;
-		double prev_data_0, prev_data_n;
-		
-		data_0 = utils::dot (n, default_matrix, data_out, n);
-		data_n = utils::dot (n, default_matrix + n - 1, data_out, n);
+	void solver::calculate_bounds () {
+		data_0 = utils::dot (n, default_matrix, &data_temp [0], n);
+		data_n = utils::dot (n, default_matrix + n - 1, &data_temp [0], n);
 		prev_data_0 = data_0;
 		prev_data_n = data_n;
-		
-		MDEBUG ("Before: " << data_0 << " " << data_n);
-		
+	}
+	
+	void solver::send_bounds () {
 		element_ptr->send (1, &data_0, edge_0);
 		element_ptr->send (1, &data_n, edge_n);
-		
+	}
+	
+	void solver::recv_bounds () {
 		element_ptr->recv (1, &data_0, edge_0);
 		element_ptr->recv (1, &data_n, edge_n);
+	}
+	
+	void solver::calculate_error () {
+		MDEBUG ("data " << data_0 << " " << prev_data_0);
 		
-		MDEBUG ("After: " << data_0 << " " << data_n);
+		for (int i = 0; i < n; i++) {
+			data_temp [i] += matrix [i] * (data_0 - prev_data_0) * timestep;
+			data_temp [i] += matrix [(n - 1) * n + i] * (data_n - prev_data_n) * timestep;
+		}
 		
-		std::vector <double> temp (n, 0);
-		
-		data_out [i] += matrix [i] * (boundary_value - boundary_value_0);
-		
-		new_bit = utils::dot (n, matrix, data_out, n) - rhs [0] * alpha_0;*/
-
-		
-		// Send new_bit to adjacent element and subtract it from rhs
-		
-		// Recalculate data_out using new rhs
-		
-		// Possible: Add new_bit top and bottom arguments to solve so sending can be handled externally
+		error [edge_0] = timestep * (rhs [0] - utils::dot (n, matrix, &data_temp [0], n));
+		error [edge_n] = timestep * (rhs [n - 1] - utils::dot (n, matrix + n - 1, &data_temp [0], n));
+	}
+	
+	void solver::send_error () {
+		element_ptr->send (1, &error [edge_0], edge_0);
+		element_ptr->send (1, &error [edge_n], edge_n);
+	}
+	
+	void solver::recv_error () {
+		element_ptr->recv (1, &error [edge_0], edge_0, 0.0);
+		element_ptr->recv (1, &error [edge_n], edge_n, 0.0);
 	}
 	
 	void solver::update () {
-		utils::copy (n, data_out, data_in);
+		error [edge_0] = 0.0;
+		error [edge_n] = 0.0;
+		utils::copy (n, &data_temp [0], data_out);
 	}
 } /* one_d */

@@ -33,16 +33,16 @@ namespace one_d
 		
 			TRACE (logger, "Operating...");
 			
-			if (*flags_ptr & linked_0) {
-				data_out [0] += coeff * utils::dot (n, grid->get_data (2), data_in, n);
-			}
+			// if (*flags_ptr & linked_0) {
+			// 	data_out [0] += coeff * utils::dot (n, grid->get_data (2), data_in, n);
+			// }
 			
 			// Set up and evaluate the explicit part of the diffusion equation
-			utils::matrix_vector_multiply (n - 2, n, coeff, grid->get_data (2) + 1, data_in, 1.0, data_out + 1, n);
+			utils::matrix_vector_multiply (n, n, coeff, grid->get_data (2), data_in, 1.0, data_out, n);
 
-			if (*flags_ptr & linked_n) {
-				data_out [n - 1] += coeff * utils::dot (n, grid->get_data (2) + n - 1, data_in, n);
-			}
+			// if (*flags_ptr & linked_n) {
+			// 	data_out [n - 1] += coeff * utils::dot (n, grid->get_data (2) + n - 1, data_in, n);
+			// }
 
 			TRACE (logger, "Operation complete.");
 		}

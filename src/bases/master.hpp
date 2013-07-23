@@ -79,7 +79,7 @@ namespace bases
 				MINFO ("Timestep " << i);
 				for (int j = 0; j < (int) elements.size (); ++j) {
 					elements [j]->calculate ();
-					elements [j]->execute_boundaries ();
+					elements [j]->output ();
 					if (j == 0) {
 						t_timestep = elements [j]->calculate_timestep ();
 					} else {
@@ -88,7 +88,25 @@ namespace bases
 				}
 				messenger_ptr->min (&t_timestep);
 				MTRACE ("Updating...");
+				for (int k = 0; k < 1; ++k) {
+					for (int j = 0; j < (int) elements.size (); ++j) {
+						elements [j]->attempt_update ();
+						elements [j]->calculate_bounds ();
+						elements [j]->send_bounds ();
+					}
+					for (int j = 0; j < (int) elements.size (); ++j) {
+						elements [j]->recv_bounds ();
+						elements [j]->calculate_error ();
+					}
+					for (int j = 0; j < (int) elements.size (); ++j) {
+						elements [j]->send_error ();
+					}
+					for (int j = 0; j < (int) elements.size (); ++j) {
+						elements [j]->recv_error ();
+					}
+				}
 				for (int j = 0; j < (int) elements.size (); ++j) {
+					elements [j]->attempt_update ();
 					elements [j]->update ();
 					elements [j]->update_timestep (t_timestep);
 				}
@@ -99,6 +117,8 @@ namespace bases
 		int id; //!< The integer processor id
 		int tsteps; //!< The integer total number of timesteps to take
 		
+		std::vector <double> global_matrix;
+		std::vector <double> global_rhs;
 		std::vector <std::shared_ptr <element>> elements; //!< A vector containing shared pointers to the contained elements
 		io::parameter_map inputParams; //!< The parameter map object containing the input parameters
 		utils::messenger* messenger_ptr;

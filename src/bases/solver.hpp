@@ -18,7 +18,6 @@
 enum solver_flags {
 	factorized = 0x08,
 	never_factorized = 0x04,
-	first_solve_complete = 0x1000
 };
 
 namespace bases
@@ -49,7 +48,17 @@ namespace bases
 			*flags_ptr |= transformed;
 		}
 		
+		virtual void calculate_bounds () = 0;
+
+		virtual void send_bounds () = 0;
+		
+		virtual void recv_bounds () = 0;
+		
 		virtual void calculate_error () = 0;
+		
+		virtual void send_error () = 0;
+		
+		virtual void recv_error () = 0;
 		
 		virtual void update () = 0;
 		

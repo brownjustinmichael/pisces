@@ -34,6 +34,8 @@ namespace utils
 		
 		virtual void min (double* data);
 		
+		virtual bool bool_and (bool boolean);
+		
 		int get_np () {
 			return np;
 		}
@@ -47,6 +49,7 @@ namespace utils
 		int id;
 		
 		std::vector <double> buffer;
+		std::vector <int> int_buffer;
 	};
 } /* utils */
 

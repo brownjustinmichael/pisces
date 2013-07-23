@@ -61,11 +61,11 @@ namespace one_d
 			throw 0;
 		}
 		
-		data_out [0] = (scalar/fac [0])*(data_in [1] - data_in [0])*data_in [0];
+		data_out [0] += (scalar/fac [0])*(data_in [1] - data_in [0])*data_in [0];
 		for (int i = 1; i < (n - 1); i++)
 		{
-			data_out [i] = .5*(scalar/fac [i])*(data_in [i + 1] - data_in [i - 1])*data_in [i];
+			data_out [i] += .5*(scalar/fac [i])*(data_in [i + 1] - data_in [i - 1])*data_in [i];
 		}
-		data_out [n - 1] = (scalar/fac [n - 1])*(data_in [n - 1] - data_in [n - 2])*data_in [n - 1];
+		data_out [n - 1] += (scalar/fac [n - 1])*(data_in [n - 1] - data_in [n - 2])*data_in [n - 1];
 	}
 }

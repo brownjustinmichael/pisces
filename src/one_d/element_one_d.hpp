@@ -46,8 +46,8 @@ namespace one_d
 			n = i_n;
 			position_0 = i_position_0;
 			position_n = i_position_n;
-			boundary_weights [edge_0] = 0.5;
-			boundary_weights [edge_n] = 0.5;
+			boundary_weights [edge_0] = 0.0;
+			boundary_weights [edge_n] = 0.0;
 			
 			cell.resize (i_n);
 			for (int i = 0; i < i_n; ++i) {

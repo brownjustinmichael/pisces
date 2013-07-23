@@ -224,6 +224,7 @@ namespace bases
 		inline void add_boundary (int edge, int send_tag, int recv_tag, int process) {
 			TRACE (logger, "Adding boundary, new...");
 			boundary_bools [edge] = true;
+			boundary_weights [edge] = 0.5;
 			boundary_send_tags [edge] = send_tag;
 			boundary_recv_tags [edge] = recv_tag;
 			boundary_processes [edge] = process;
@@ -245,10 +246,14 @@ namespace bases
 /*		virtual void send (int edge);*/
 /*		virtual void send (int edge, int name) = 0;*/
 		virtual void send (int n, double* value, int edge) {
-			messenger_ptr->send (value, boundary_processes [edge], boundary_send_tags [edge], boundary_weights [edge], n);
+			if (boundary_bools [edge]) {
+				messenger_ptr->send (value, boundary_processes [edge], boundary_send_tags [edge], boundary_weights [edge], n);
+			}
 		}
 		virtual void send (int n, double* value, int edge, double weight) {
-			messenger_ptr->send (value, boundary_processes [edge], boundary_send_tags [edge], weight, n);
+			if (boundary_bools [edge]) {
+				messenger_ptr->send (value, boundary_processes [edge], boundary_send_tags [edge], weight, n);
+			}
 		}
 		//
 		/*!*******************************************************************
@@ -260,10 +265,16 @@ namespace bases
 /*		virtual void recv (int edge);*/
 /*		virtual void recv (int edge, int name) = 0;*/
 		virtual void recv (int n, double* value, int edge) {
-			messenger_ptr->recv (value, boundary_processes [edge], boundary_recv_tags [edge], boundary_weights [edge], n);
+			if (boundary_bools [edge]) {
+				messenger_ptr->recv (value, boundary_processes [edge], boundary_recv_tags [edge], boundary_weights [edge], n);
+			}
 		}
 		virtual void recv (int n, double* value, int edge, double weight) {
-			messenger_ptr->recv (value, boundary_processes [edge], boundary_recv_tags [edge], weight, n);
+			if (boundary_bools [edge]) {
+				messenger_ptr->recv (value, boundary_processes [edge], boundary_recv_tags [edge], weight, n);
+			} else {
+				*value *= weight;
+			}
 		}
 		
 		/*!*******************************************************************
@@ -271,13 +282,27 @@ namespace bases
 		 * 
 		 * In general, this should not be overwritten in subclasses.
 		 *********************************************************************/
-		virtual void execute_boundaries ();
+		virtual void output ();
 
 		/*!*******************************************************************
 		 * \brief Update the element
 		 * 
 		 * In general, this should not be overwritten in subclasses.
 		 *********************************************************************/
+		virtual void attempt_update ();
+		
+		virtual void calculate_bounds ();
+		
+		virtual void send_bounds ();
+		
+		virtual void recv_bounds ();
+		
+		virtual void calculate_error ();
+		
+		virtual void send_error ();
+		
+		virtual void recv_error ();
+		
 		virtual void update ();
 		
 		virtual void update_timestep (double new_timestep);

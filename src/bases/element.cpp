@@ -70,30 +70,53 @@ namespace bases
 	}*/
 
 		
-	void element::execute_boundaries () {
-		TRACE (logger, "Executing boundaries...");
-	
+	void element::output () {
 		TRACE (logger, "Writing to file...");
 	
 		// Output in normal space
 		if (normal_stream) {
 			normal_stream->to_file ();
 		}
-	
-		TRACE (logger, "Boundaries executed.");
 	}
 	
-	void element::update () {
+	void element::attempt_update () {
 		TRACE (logger, "Updating...");
 
 		if (matrix_solver) {
 			matrix_solver->execute ();
-			matrix_solver->update ();
 		} else {
 			WARN (logger, "No matrix solver defined. It is likely the element was not set up correctly.")
 		}
 		
 		TRACE (logger, "Updated.");
+	}
+	
+	void element::calculate_bounds () {
+		matrix_solver->calculate_bounds ();
+	}
+	
+	void element::send_bounds () {
+		matrix_solver->send_bounds ();
+	}
+	
+	void element::recv_bounds () {
+		matrix_solver->recv_bounds ();
+	}
+	
+	void element::calculate_error () {
+		matrix_solver->calculate_error ();
+	}
+	
+	void element::send_error () {
+		matrix_solver->send_error ();
+	}
+	
+	void element::recv_error () {
+		matrix_solver->recv_error ();
+	}
+	
+	void element::update () {
+		matrix_solver->update ();
 	}
 		
 	void element::update_timestep (double new_timestep) {

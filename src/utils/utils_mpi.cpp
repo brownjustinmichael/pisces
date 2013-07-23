@@ -57,14 +57,43 @@ namespace utils
 	
 	void messenger::min (double* data) {
 		if (np != 1) {
-			if (np > (int) buffer.size ()) {
+			if (id == 0 && np > (int) buffer.size ()) {
 				buffer.resize (np);
 			}
-			MPI::COMM_WORLD.Gather (data, 1, MPI_DOUBLE, &buffer [0], 1, MPI_DOUBLE, 0);
+			MPI::COMM_WORLD.Gather (data, 1, MPI::DOUBLE, &buffer [0], 1, MPI::DOUBLE, 0);
 			if (id == 0) {
 				*data = *std::min_element (buffer.begin (), buffer.end ());
 			}
-			MPI::COMM_WORLD.Bcast (data, 1, MPI_DOUBLE, 0);
+			MPI::COMM_WORLD.Bcast (data, 1, MPI::DOUBLE, 0);
+		}
+	}
+	
+	bool messenger::bool_and (bool boolean) {
+		int temp;
+		if (boolean) {
+			temp = 1;
+		} else {
+			temp = 0;
+		}
+		if (np != 1) {
+			if (id == 0 && np > (int) int_buffer.size ()) {
+				int_buffer.resize (np);
+			}
+			MPI::COMM_WORLD.Gather (&temp, 1, MPI::INT, &int_buffer [0], 1, MPI::INT, 0);
+			if (id == 0) {
+				for (int i = 0; i < np; i++) {
+					if (!int_buffer [i]) {
+						temp = 0;
+						break;
+					}
+				}
+				MPI::COMM_WORLD.Bcast (&temp, 1, MPI::INT, 0);
+			}
+		}
+		if (temp) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 } /* utils */

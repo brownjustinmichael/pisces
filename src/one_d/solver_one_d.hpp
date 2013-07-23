@@ -48,7 +48,17 @@ namespace one_d
 		 *********************************************************************/
 		void execute ();
 		
+		void calculate_bounds ();
+		
+		void send_bounds ();
+		
+		void recv_bounds ();
+		
 		void calculate_error ();
+		
+		void send_error ();
+		
+		void recv_error ();
 		
 		void update ();
 
@@ -56,12 +66,15 @@ namespace one_d
 		double& timestep;
 		double& alpha_0;
 		double& alpha_n;
+		double data_0, data_n;
+		double prev_data_0, prev_data_n;
 		
 		double *rhs; //!< The double array of the right-hand-side of the matrix equation
 		double* default_matrix;
 		double *matrix; //!< The double matrix to be factorized
 		
 		std::vector <double> error;
+		std::vector <double> data_temp;
 		std::vector <double> factorized_matrix;
 		std::vector<int> ipiv; //!< A vector of integers needed to calculate the factorization
 		
