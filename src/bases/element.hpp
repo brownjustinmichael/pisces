@@ -64,6 +64,7 @@ namespace bases
 			boundary_weights.resize (n_boundaries);
 			boundary_recv_tags.resize (n_boundaries);
 			boundary_index.resize (n_boundaries);
+			excesses.resize (n_boundaries);
 			inputParams = i_inputParams;
 			messenger_ptr = i_messenger_ptr;
 			flags = i_flags;
@@ -97,6 +98,10 @@ namespace bases
 		
 		int get_boundary_index (int edge) {
 			return boundary_index [edge];
+		}
+		
+		int get_excess (int edge) {
+			return excesses [edge];
 		}
 		
 		/*!*******************************************************************
@@ -365,6 +370,7 @@ namespace bases
 		std::vector <int> boundary_processes;
 		std::vector <int> boundary_index;
 		std::vector <double> boundary_weights;
+		std::vector <int> excesses;
 
 	private:
 		std::shared_ptr<solver> matrix_solver; //!< A shared pointer to the matrix solver

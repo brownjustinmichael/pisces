@@ -53,6 +53,8 @@ namespace one_d
 		int my_index = element_ptr->get_index ();
 		int boundary_0 = element_ptr->get_boundary_index (edge_0);
 		int boundary_n = element_ptr->get_boundary_index (edge_n);
+		int excess_0 = element_ptr->get_excess (edge_0);
+		int excess_n = element_ptr->get_excess (edge_n);
 		switch (*status) {
 			case 0:
 				for (int i = 0; i < n; ++i) {

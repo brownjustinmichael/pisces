@@ -12,14 +12,25 @@
 namespace one_d
 {
 	template <class Telement>
-	class master : public bases::master
+	class master : public bases::master <bases::element>
 	{
 	public:
-		master (int i_id, int i_p, std::string parameter_filename, int i_n_elements, int* n_grid, double* position_grid, utils::messenger* i_messenger_ptr) : bases::master (i_id, i_p, i_n_elements, parameter_filename, i_messenger_ptr) {
+		master (int i_id, int i_p, std::string parameter_filename, int i_n_elements, int* n_grid, double* position_grid, utils::messenger* i_messenger_ptr) : bases::master <bases::element> (i_id, i_p, i_n_elements, parameter_filename, i_messenger_ptr) {
 			MTRACE ("Initializing...");
+			int excess_0, excess_n;
 			for (int i = 0; i < i_n_elements; ++i) {
 				MTRACE ("Adding element " << i);
-				elements [i].reset (new Telement (n_grid [i] + 1, position_grid [i], position_grid [i + 1], 0, 0, count, i_id * i_n_elements + i, this->get_params (), i_messenger_ptr, 0x00));
+				if (i == 0) {
+					excess_0 = 0;
+				} else {
+					excess_0 = 1;
+				}
+				if (i == i_n_elements - 1) {
+					excess_n = 0;
+				} else {
+					excess_n = 1;
+				}
+				elements [i].reset (new Telement (n_grid [i] + 1, position_grid [i], position_grid [i + 1], excess_0, excess_n, count, i_id * i_n_elements + i, this->get_params (), i_messenger_ptr, 0x00));
 				if (i != 0) {
 					MTRACE ("Linking element " << i - 1 << " at n - 1 with element " << i << " at 0");
 					add_boundary (i - 1, edge_n, 2 * (i - 1) + 1, 2 * (i - 1) + 2, elements [i]->get_index ());

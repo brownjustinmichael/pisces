@@ -71,4 +71,25 @@ namespace utils
 		
 		dgetrs_ (&charN, &n, &nrhs, a, &lda, ipiv, b, &ldb, info);
 	}
+	
+	double interpolate (int n, double* dx, double* dy, double x) {
+		int i = 1;
+		/*
+			TODO Allow for reverse dx as well
+		*/
+		if (x < dx [0] || x > dx [n - 1]) {
+			throw 0;
+			/*
+				TODO better exception?
+			*/
+		}
+		while (x < dx [i]) {
+			++i;
+		}
+		if (x == dx [i]) {
+			return dy [i];
+		} else {
+			return (dy [i] - dy [i - 1]) / (dx [i] - dx [i - 1]) * (x - dx [i]) + dy [i];
+		}
+	}
 } /* utils */

@@ -27,6 +27,7 @@ namespace bases
 	 * Generally, the master will take care of the administrative details
 	 * where the slaves will mostly just run linear algebra.
 	 *********************************************************************/
+	template <class Telement>
 	class master
 	{
 	public:
@@ -152,7 +153,7 @@ namespace bases
 		std::vector <double> global_matrix;
 		std::vector <double> global_rhs;
 		std::vector <int> ipiv;
-		std::vector <std::shared_ptr <element>> elements; //!< A vector containing shared pointers to the contained elements
+		std::vector <std::shared_ptr <Telement>> elements; //!< A vector containing shared pointers to the contained elements
 		io::parameter_map inputParams; //!< The parameter map object containing the input parameters
 		utils::messenger* messenger_ptr;
 	};

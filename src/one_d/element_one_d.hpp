@@ -46,8 +46,8 @@ namespace one_d
 			n = i_n;
 			position_0 = i_position_0;
 			position_n = i_position_n;
-			excess_0 = i_excess_0;
-			excess_n = i_excess_n;
+			excesses [edge_0] = i_excess_0;
+			excesses [edge_n] = i_excess_n;
 			boundary_weights [edge_0] = 0.0;
 			boundary_weights [edge_n] = 0.0;
 			
@@ -88,6 +88,10 @@ namespace one_d
 				initialize (name);
 			}
 			return scalars [name] [0];
+		}
+		
+		inline double interpolate (int name, double i_position) {
+			return utils::interpolate (n - excesses [edge_0] - excesses [edge_n], &((*this) [position]), &((*this) [name]), i_position);
 		}
 		
 		/*!*******************************************************************
@@ -136,7 +140,6 @@ namespace one_d
 		
 	protected:
 		int n; //!< The number of elements in each 1D array
-		int excess_0, excess_n;
 		double position_0; //!< The double position of index 0
 		double position_n; //!< The double position of index n - 1
 		std::vector<int> cell; //!< An integer array for tracking each cell number for output
@@ -177,8 +180,8 @@ namespace one_d
 				TRACE (logger, "Initializing " << name);
 				if (name == position && !initial_conditions) {
 					double pioN = std::acos (-1.0) / (n - 1);
-					double initial_position = (position_0 + position_n) / 2.0;
-					double scale = (position_0 - position_n) / 2.0;
+					double scale = (position_0 - position_n) / (std::cos (excesses [edge_0] * pioN) - std::cos ((n - 1 - excesses [edge_n]) * pioN));
+					double initial_position = position_0 - scale * std::cos (excesses [edge_0] * pioN);
 					std::vector <double> init (n);
 					for (int i = 0; i < n; ++i) {
 						init [i] = scale * std::cos (i * pioN) + initial_position;
