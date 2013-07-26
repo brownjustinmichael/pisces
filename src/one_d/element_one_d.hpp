@@ -42,10 +42,12 @@ namespace one_d
 		 * \param i_position_n The double position of index n - 1
 		 * \copydoc bases::element::element ()
 		 *********************************************************************/
-		element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : bases::element (i_name, 2, i_inputParams, i_messenger_ptr, i_flags) {
+		element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_index, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : bases::element (i_index, i_name, 2, i_inputParams, i_messenger_ptr, i_flags) {
 			n = i_n;
 			position_0 = i_position_0;
 			position_n = i_position_n;
+			excess_0 = i_excess_0;
+			excess_n = i_excess_n;
 			boundary_weights [edge_0] = 0.0;
 			boundary_weights [edge_n] = 0.0;
 			
@@ -54,7 +56,7 @@ namespace one_d
 				cell [i] = i;
 			}
 			
-			failsafe_dump = std::make_shared <io::simple_output> (io::simple_output ("dump_" + name + ".dat", n, logger));
+			failsafe_dump = std::make_shared <io::simple_output> (io::simple_output ("dump_" + std::to_string (name) + ".dat", n, logger));
 			failsafe_dump->append (&cell [0]);
 		}
 		
@@ -116,37 +118,10 @@ namespace one_d
 			}
 		}
 		
-/*		inline void send (int edge, int name) {
-			double temp;
-			if (edge == edge_0) {
-				temp = boundary_weights [edge_0];
-			} else if (edge == edge_n) {
-				temp = boundary_weights [edge_n];
-			} else {
-				throw 0;
-			}
-			buffer = (*this) (name, get_boundary_index (edge)) * temp;
-			messenger_ptr->send (&buffer, boundary_processes [edge], boundary_send_tags [edge]);
-		}
-		
-		inline void recv (int edge, int name) {
-			double temp;
-			if (edge == edge_0) {
-				temp = boundary_weights [edge_0];
-			} else if (edge == edge_n) {
-				temp = boundary_weights [edge_n];
-			} else {
-				throw 0;
-			}
-			messenger_ptr->recv (boundary_processes [edge], boundary_recv_tags [edge]);
-			(*this) (name, get_boundary_index (edge)) = (*this) (name, get_boundary_index (edge)) * temp + (*messenger_ptr) [0];
-		}*/
-		
 		/*!*******************************************************************
 		 * \copydoc bases::element::execute_boundaries ()
 		 *********************************************************************/
 		inline void execute_boundaries () {
-			bases::element::execute_boundaries ();
 			if (!(boundary_bools [edge_0])) {
 				for (iterator iter = begin (); iter != end (); ++iter) {
 					(*this) (*iter, 0) = fixed_points_0 [*iter];
@@ -161,6 +136,7 @@ namespace one_d
 		
 	protected:
 		int n; //!< The number of elements in each 1D array
+		int excess_0, excess_n;
 		double position_0; //!< The double position of index 0
 		double position_n; //!< The double position of index n - 1
 		std::vector<int> cell; //!< An integer array for tracking each cell number for output
@@ -186,7 +162,7 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc one_d::element::element ()
 			 *********************************************************************/
-			element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : one_d::element (i_n, i_position_0, i_position_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
+			element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_index, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : one_d::element (i_n, i_position_0, i_position_n, i_excess_0, i_excess_n, i_index, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				initialize (position);
 				set_grid (std::make_shared<chebyshev_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), position_0 - position_n, logger)));
 			}
@@ -214,8 +190,15 @@ namespace one_d
 					double mean = inputParams["init_cond_mean"].asDouble;
 					double sigma = inputParams["init_cond_sigma"].asDouble;
 					std::vector <double> init (n);
+					double height, temp;
+					height = std::max (scale * std::exp (- (width / 2.0 - mean) * (width / 2.0 - mean) / 2.0 / sigma / sigma), scale * std::exp (- (- width / 2.0 - mean) * (- width / 2.0 - mean) / 2.0 / sigma / sigma));
 					for (int i = 0; i < n; ++i) {
-						init [i] = scale * std::exp (- ((*this) (position, i) - mean) * ((*this) (position, i) - mean) / 2.0 / sigma / sigma) - scale * std::exp (- width * width / 2.0 / sigma / sigma);
+						temp = scale * std::exp (- ((*this) (position, i) - mean) * ((*this) (position, i) - mean) / 2.0 / sigma / sigma) - height;
+						if (temp > 0.0) {
+							init [i] = temp;
+						} else {
+							init [i] = 0.0;
+						}
 					}
 					one_d::element::initialize (name, &init [0]);
 				} else {
@@ -237,7 +220,7 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc element::element ()
 			 *********************************************************************/
-			advection_diffusion_element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags);
+			advection_diffusion_element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_index, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags);
 			
 			virtual ~advection_diffusion_element () {
 				TRACE (logger, "Calling destructor.");

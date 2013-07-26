@@ -48,6 +48,10 @@ namespace bases
 			*flags_ptr |= transformed;
 		}
 		
+		virtual void update_globals (int N, double* global_matrix, double* global_rhs, int* status) = 0;
+		
+		virtual void update_from_globals (double* global_out) = 0;
+		
 		virtual void calculate_bounds () = 0;
 
 		virtual void send_bounds () = 0;

@@ -29,27 +29,27 @@ namespace utils
 		return buffer [i]; 
 	}
 	
-	void messenger::send (double* data, int process, int tag, double weight, int size) {
-		if (weight != 1.0) {
+	void messenger::send (double* data, int process, int tag, double weight, int size, int inc) {
+		if (weight != 1.0 || inc != 1) {
 			if (size > (int) buffer.size ()) {
 				buffer.resize (size);
 			}
 			utils::scale (size, 0.0, &buffer [0]);
-			utils::add_scaled (size, weight, data, &buffer [0]);
+			utils::add_scaled (size, weight, data, &buffer [0], inc);
 			MPI::COMM_WORLD.Send (&buffer [0], size, MPI::DOUBLE, process, tag);
 		} else {
 			MPI::COMM_WORLD.Send (data, size, MPI::DOUBLE, process, tag);
 		}
 	}
 
-	void messenger::recv (double* data, int process, int tag, double weight, int size) {
-		if (weight != 0.0) {
+	void messenger::recv (double* data, int process, int tag, double weight, int size, int inc) {
+		if (weight != 0.0 || inc != 1) {
 			if (size > (int) buffer.size ()) {
 				buffer.resize (size);
 			}
 			MPI::COMM_WORLD.Recv (&buffer [0], size, MPI::DOUBLE, process, tag);
-			utils::scale (size, weight, data);
-			utils::add_scaled (size, 1.0, &buffer [0], data);
+			utils::scale (size, weight, data, inc);
+			utils::add_scaled (size, 1.0, &buffer [0], data, 1, inc);
 		} else {
 			MPI::COMM_WORLD.Recv (data, size, MPI::DOUBLE, process, tag);
 		}

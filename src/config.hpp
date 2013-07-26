@@ -172,13 +172,13 @@ public:
 	 * 
 	 * \return The integer representation of the new logger
 	 *********************************************************************/
-	static int make_logger (std::string name) {
+	static int make_logger (int name) {
 		int i = n_loggers++;
 		int j = n_appenders++;
-		loggers.push_back (log4cxx::LoggerPtr (log4cxx::Logger::getLogger ("element_" + name)));
+		loggers.push_back (log4cxx::LoggerPtr (log4cxx::Logger::getLogger ("element_" + std::to_string (name))));
 		loggers [i]->setLevel (config::int_to_severity (severity));
 		
-		appenders.push_back (new log4cxx::FileAppender (layout, "element_" + name + ".log", false));
+		appenders.push_back (new log4cxx::FileAppender (layout, "element_" + std::to_string (name) + ".log", false));
 		loggers [i]->addAppender (appenders [j]);
 		return i;
 	}

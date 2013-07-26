@@ -21,9 +21,10 @@
 	
 namespace one_d
 {
+	
 	namespace chebyshev
 	{
-		advection_diffusion_element::advection_diffusion_element (int i_n, double i_position_0, double i_position_n, std::string i_name, io::parameter_map& inputParams, utils::messenger* i_messenger_ptr, int i_flags) : element (i_n, i_position_0, i_position_n, i_name, inputParams, i_messenger_ptr, i_flags) {
+		advection_diffusion_element::advection_diffusion_element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_index, int i_name, io::parameter_map& inputParams, utils::messenger* i_messenger_ptr, int i_flags) : element (i_n, i_position_0, i_position_n, i_excess_0, i_excess_n, i_index, i_name, inputParams, i_messenger_ptr, i_flags) {
 			double diffusion_coeff = inputParams["diffusion_coeff"].asDouble;
 			double advection_coeff = inputParams["advection_coeff"].asDouble; 
 			double alpha = 0.5;
@@ -36,7 +37,7 @@ namespace one_d
 			matrix.resize (i_n * i_n, 0.0);
 			
 			// Set up output
-			normal_stream = std::make_shared <io::incremental_output> (io::incremental_output ("../output/test_angle_" + name + "_", ".dat", 4, new io::header, i_n, inputParams["output_every"].asInt));
+			normal_stream = std::make_shared <io::incremental_output> (io::incremental_output ("../output/test_angle_" + std::to_string (name) + "_", ".dat", 4, new io::header, i_n, inputParams["output_every"].asInt));
 			normal_stream->append (cell [0]);
 			normal_stream->append ((*this) [position]);
 			normal_stream->append ((*this) [velocity]);

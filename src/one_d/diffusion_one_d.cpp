@@ -63,6 +63,8 @@ namespace one_d
 				bases::implicit_plan::execute ();
 			
 				// This is the main loop for setting up the diffusion equation in Chebyshev space
+			   	// utils::add_scaled (n, coeff / 1.0, grid->get_data (2) + 0, matrix + 0, n, n);
+			   	// utils::add_scaled (n, coeff / 1.0, grid->get_data (2) + n - 1, matrix + n - 1, n, n);
 				for (int i = 0; i < n; ++i) {
 				   	utils::add_scaled (n, coeff, grid->get_data (2) + i, matrix + i, n, n);
 				}

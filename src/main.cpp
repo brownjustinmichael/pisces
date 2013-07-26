@@ -149,7 +149,7 @@ int main (int argc, char *argv[])
 		}
 	}
 	
-	one_d::master <one_d::chebyshev::advection_diffusion_element> master_process (process_messenger.get_id (), n_masters, "../input/parameters.txt", n, &n_grid [index], &position_grid [index], &name_grid [index], &process_messenger);
+	one_d::master <one_d::chebyshev::advection_diffusion_element> master_process (process_messenger.get_id (), n_masters, "../input/parameters.txt", n, &n_grid [index], &position_grid [index], &process_messenger);
 	
 	if (process_messenger.get_id () != 0) {
 		MTRACE ("Adding boundary to " << 0 << " at 0 at processor " << process_messenger.get_id () - 1);

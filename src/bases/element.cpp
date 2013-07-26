@@ -11,6 +11,7 @@
 #include "../config.hpp"
 #include "solver.hpp"
 #include "transform.hpp"
+#include "../utils/utils.hpp"
 
 namespace bases
 {
@@ -77,6 +78,17 @@ namespace bases
 		if (normal_stream) {
 			normal_stream->to_file ();
 		}
+	}
+	
+	void element::update_globals (int N, double* global_matrix, double* global_rhs, int* status) {
+		DEBUG (logger, "flags " << flags);
+		matrix_solver->update_globals (N, global_matrix, global_rhs, status);
+	}
+	
+	void element::update_from_globals (double* global_out) {
+		DEBUG (logger, "flags " << flags);
+		flags |= transformed;
+		matrix_solver->update_from_globals (global_out);
 	}
 	
 	void element::attempt_update () {

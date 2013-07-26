@@ -55,13 +55,15 @@ namespace bases
 		* \param i_inputParams The parameter object that contains the input parameters of the run
 		* \param i_flags An integer set of execution flags
 		*********************************************************************/
-		element (std::string i_name, int n_boundaries, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : inputParams (i_inputParams) {
+		element (int i_index, int i_name, int n_boundaries, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : inputParams (i_inputParams) {
+			index = i_index;
 			name = i_name;
 			boundary_bools.resize (n_boundaries);
 			boundary_processes.resize (n_boundaries);
 			boundary_send_tags.resize (n_boundaries);
 			boundary_weights.resize (n_boundaries);
 			boundary_recv_tags.resize (n_boundaries);
+			boundary_index.resize (n_boundaries);
 			inputParams = i_inputParams;
 			messenger_ptr = i_messenger_ptr;
 			flags = i_flags;
@@ -83,6 +85,18 @@ namespace bases
 		 *********************************************************************/
 		int get_iparam (std::string name) {
 			return inputParams [name].asInt;
+		}
+		
+		int get_index () {
+			return index;
+		}
+		
+		bool is_linked (int edge) {
+			return boundary_bools [edge];
+		}
+		
+		int get_boundary_index (int edge) {
+			return boundary_index [edge];
 		}
 		
 		/*!*******************************************************************
@@ -221,13 +235,18 @@ namespace bases
 			TRACE (logger, "Added.");
 		}
 		
-		inline void add_boundary (int edge, int send_tag, int recv_tag, int process) {
+		inline void add_boundary (int edge, int send_tag, int recv_tag, int process, int global_index) {
 			TRACE (logger, "Adding boundary, new...");
 			boundary_bools [edge] = true;
+			/*
+				TODO When ready to fix, set boundary_bools [edge] = true;
+			*/
+			boundary_index [edge] = global_index;
 			boundary_weights [edge] = 0.5;
 			boundary_send_tags [edge] = send_tag;
 			boundary_recv_tags [edge] = recv_tag;
 			boundary_processes [edge] = process;
+			TRACE (logger, "Added.");
 		}
 		
 		/*!*******************************************************************
@@ -237,41 +256,38 @@ namespace bases
 		 *********************************************************************/
 		virtual void calculate ();
 		
+		virtual void update_globals (int N, double* global_matrix, double* global_rhs, int* status);
+		
+		virtual void update_from_globals (double* global_out);
+		
 		/*!*******************************************************************
 		 * \brief Send all relevant boundary data to adjacent elements
 		 * 
 		 * In general, this should not be overwritten in subclasses.
 		 *********************************************************************/
-/*		virtual void send ();*/
-/*		virtual void send (int edge);*/
-/*		virtual void send (int edge, int name) = 0;*/
-		virtual void send (int n, double* value, int edge) {
+		virtual void send (int n, double* value, int edge, int inc = 1) {
 			if (boundary_bools [edge]) {
-				messenger_ptr->send (value, boundary_processes [edge], boundary_send_tags [edge], boundary_weights [edge], n);
+				messenger_ptr->send (value, boundary_processes [edge], boundary_send_tags [edge], boundary_weights [edge], n, inc);
 			}
 		}
-		virtual void send (int n, double* value, int edge, double weight) {
+		virtual void send (int n, double* value, int edge, double weight, int inc = 1) {
 			if (boundary_bools [edge]) {
-				messenger_ptr->send (value, boundary_processes [edge], boundary_send_tags [edge], weight, n);
+				messenger_ptr->send (value, boundary_processes [edge], boundary_send_tags [edge], weight, n, inc);
 			}
 		}
-		//
 		/*!*******************************************************************
 		 * \brief Receive all relevant boundary data from adjacent elements
 		 * 
 		 * In general, this should not be overwritten in subclasses.
 		 *********************************************************************/
-/*		virtual void recv ();*/
-/*		virtual void recv (int edge);*/
-/*		virtual void recv (int edge, int name) = 0;*/
-		virtual void recv (int n, double* value, int edge) {
+		virtual void recv (int n, double* value, int edge, int inc = 1) {
 			if (boundary_bools [edge]) {
-				messenger_ptr->recv (value, boundary_processes [edge], boundary_recv_tags [edge], boundary_weights [edge], n);
+				messenger_ptr->recv (value, boundary_processes [edge], boundary_recv_tags [edge], boundary_weights [edge], n, inc);
 			}
 		}
-		virtual void recv (int n, double* value, int edge, double weight) {
+		virtual void recv (int n, double* value, int edge, double weight, int inc = 1) {
 			if (boundary_bools [edge]) {
-				messenger_ptr->recv (value, boundary_processes [edge], boundary_recv_tags [edge], weight, n);
+				messenger_ptr->recv (value, boundary_processes [edge], boundary_recv_tags [edge], weight, n, inc);
 			} else {
 				*value *= weight;
 			}
@@ -282,6 +298,8 @@ namespace bases
 		 * 
 		 * In general, this should not be overwritten in subclasses.
 		 *********************************************************************/
+		virtual void execute_boundaries () = 0;
+		
 		virtual void output ();
 
 		/*!*******************************************************************
@@ -320,7 +338,8 @@ namespace bases
 		}
 		
 	protected:
-		std::string name; //!< A string representation of the element, to be used in file output
+		int index;
+		int name; //!< A string representation of the element, to be used in file output
 		io::parameter_map& inputParams; //!< The map that contains the input parameters
 		utils::messenger* messenger_ptr;
 		
@@ -344,6 +363,7 @@ namespace bases
 		std::vector <int> boundary_send_tags;
 		std::vector <int> boundary_recv_tags;
 		std::vector <int> boundary_processes;
+		std::vector <int> boundary_index;
 		std::vector <double> boundary_weights;
 
 	private:

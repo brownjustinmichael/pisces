@@ -48,7 +48,59 @@ namespace one_d
 			*/
 		}
 	}
-
+	
+	void solver::update_globals (int N, double* global_matrix, double* global_rhs, int* status) {
+		int my_index = element_ptr->get_index ();
+		int boundary_0 = element_ptr->get_boundary_index (edge_0);
+		int boundary_n = element_ptr->get_boundary_index (edge_n);
+		switch (*status) {
+			case 0:
+				for (int i = 0; i < n; ++i) {
+					utils::copy (n, default_matrix + i * n, global_matrix + my_index * (N + 1) + i * N);
+				}
+				utils::add_scaled (n, alpha_0 * timestep, matrix, global_matrix + my_index * (N + 1), n, N);
+				for (int i = 1; i < n - 1; ++i) {
+					utils::add_scaled (n, timestep, matrix + i, global_matrix + my_index * (N + 1) + i, n, N);
+				}
+				utils::add_scaled (n, alpha_n * timestep, matrix + n - 1, global_matrix + my_index * (N + 1) + n - 1, n, N);
+				if (element_ptr->is_linked (edge_0)) {
+					element_ptr->send (n, matrix, edge_0, alpha_0 * timestep, n);
+				}
+				if (element_ptr->is_linked (edge_n)) {
+					element_ptr->send (n, matrix + n - 1, edge_n, alpha_n * timestep, n);
+				}
+				*status = -1;
+				break;
+			case -1:
+				if (element_ptr->is_linked (edge_0)) {
+					element_ptr->recv (n, global_matrix + N * boundary_0 + my_index, edge_0, 0.0, N);
+				}
+				if (element_ptr->is_linked (edge_n)) {
+					element_ptr->recv (n, global_matrix + N * boundary_n + my_index + n - 1, edge_n, 0.0, N);
+				}
+				*status = -2;
+				break;
+			case -2:
+				utils::copy (n, data_in, global_rhs + my_index);
+				utils::add_scaled (n, timestep, rhs, global_rhs + my_index);
+				element_ptr->send (1, global_rhs + my_index, edge_0);
+				element_ptr->send (1, global_rhs + my_index + n - 1, edge_n);
+				*status = -3;
+				break;
+			case -3:
+				element_ptr->recv (1, global_rhs + my_index, edge_0);
+				element_ptr->recv (1, global_rhs + my_index + n - 1, edge_n);
+				*status = 1;
+				break;
+			default:
+				break;
+		}
+	}
+	
+	void solver::update_from_globals (double* global_out) {
+		utils::copy (n, global_out + element_ptr->get_index (), data_out);
+	}
+		
 	void solver::execute () {
 		int info;
 		
