@@ -97,17 +97,18 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::element::get_boundary_info ()
 		 *********************************************************************/
-		inline int get_boundary_index (int edge) {
-			TRACE (logger, "Getting boundary index...");
-			if (edge == edge_0) {
-				return 0;
-			} else if (edge == edge_n) {
-				return n - 1;
-			} else {
-				FATAL (logger, "Edge is not a one_d edge index.");
-				throw 0;
-			}
-		}
+		// inline int get_boundary_index (int edge) {
+		// 	TRACE (logger, "Getting boundary index...");
+		// 	MDEBUG ("edge " << edge);
+		// 	if (edge == edge_0) {
+		// 		return excesses [edge_0];
+		// 	} else if (edge == edge_n) {
+		// 		return n - 1 - excesses [edge_n];
+		// 	} else {
+		// 		FATAL (logger, "Edge is not a one_d edge index.");
+		// 		throw 0;
+		// 	}
+		// }
 		
 		/*!*******************************************************************
 		 * \copydoc bases::element::explicit_reset ()

@@ -115,6 +115,14 @@ namespace bases
 						}
 					}
 				}
+				std::stringstream out_stream;
+				for (int j = 0; j < count; ++j) {
+					out_stream.str ("");
+					for (int k = 0; k < count; ++k) {
+						out_stream << std::scientific << std::setw (13) << global_matrix [k * count + j] << " ";
+					}
+					MDEBUG (out_stream.str ());
+				}
 				utils::matrix_factorize (count, count, &global_matrix [0], &ipiv [0], &info);
 				utils::matrix_solve (count, &global_matrix [0], &ipiv [0], &global_rhs [0], &info);
 				for (int j = 0; j < (int) elements.size (); ++j) {

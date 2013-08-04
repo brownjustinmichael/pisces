@@ -30,13 +30,13 @@ namespace one_d
 				} else {
 					excess_n = 1;
 				}
-				elements [i].reset (new Telement (n_grid [i] + 1, position_grid [i], position_grid [i + 1], excess_0, excess_n, count, i_id * i_n_elements + i, this->get_params (), i_messenger_ptr, 0x00));
+				elements [i].reset (new Telement (n_grid [i], position_grid [i], position_grid [i + 1], excess_0, excess_n, count, i_id * i_n_elements + i, this->get_params (), i_messenger_ptr, 0x00));
 				if (i != 0) {
 					MTRACE ("Linking element " << i - 1 << " at n - 1 with element " << i << " at 0");
 					add_boundary (i - 1, edge_n, 2 * (i - 1) + 1, 2 * (i - 1) + 2, elements [i]->get_index ());
 					add_boundary (i, edge_0, 2 * (i - 1) + 2, 2 * (i - 1) + 1, elements [i - 1]->get_index ());
 				}
-				count += n_grid [i] + 1;
+				count += n_grid [i];
 			}
 			global_matrix.resize (count * count, 0.0);
 			global_rhs.resize (count, 0.0);

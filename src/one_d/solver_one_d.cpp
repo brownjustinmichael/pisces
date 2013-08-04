@@ -23,6 +23,8 @@ namespace one_d
 		matrix = i_matrix;
 		factorized_matrix.resize (n * n);
 		ipiv.resize (n, 0);
+		expected_excess_0 = 0;
+		expected_excess_n = 0;
 	}
 	
 	void solver::factorize () {
@@ -53,45 +55,69 @@ namespace one_d
 		int my_index = element_ptr->get_index ();
 		int boundary_0 = element_ptr->get_boundary_index (edge_0);
 		int boundary_n = element_ptr->get_boundary_index (edge_n);
+		MDEBUG ("boundaries " << boundary_0 << " " << boundary_n);
 		int excess_0 = element_ptr->get_excess (edge_0);
 		int excess_n = element_ptr->get_excess (edge_n);
 		switch (*status) {
 			case 0:
-				for (int i = 0; i < n; ++i) {
-					utils::copy (n, default_matrix + i * n, global_matrix + my_index * (N + 1) + i * N);
+				for (int i = excess_0; i < n - excess_n; ++i) {
+					utils::copy (n, default_matrix + i, global_matrix + my_index * (N + 1) + i, n, N);
 				}
-				utils::add_scaled (n, alpha_0 * timestep, matrix, global_matrix + my_index * (N + 1), n, N);
-				for (int i = 1; i < n - 1; ++i) {
+				utils::add_scaled (n, alpha_0 * timestep, matrix + excess_0, global_matrix + my_index * (N + 1) + excess_0, n, N);
+				for (int i = 1 + excess_0; i < n - 1 - excess_n; ++i) {
 					utils::add_scaled (n, timestep, matrix + i, global_matrix + my_index * (N + 1) + i, n, N);
 				}
-				utils::add_scaled (n, alpha_n * timestep, matrix + n - 1, global_matrix + my_index * (N + 1) + n - 1, n, N);
+				utils::add_scaled (n, alpha_n * timestep, matrix + n - 1 - excess_n, global_matrix + my_index * (N + 1) + n - 1 - excess_n, n, N);
 				if (element_ptr->is_linked (edge_0)) {
-					element_ptr->send (n, matrix, edge_0, alpha_0 * timestep, n);
+					element_ptr->send (n, alpha_0 * timestep, matrix + excess_0, edge_0, n);
 				}
 				if (element_ptr->is_linked (edge_n)) {
-					element_ptr->send (n, matrix + n - 1, edge_n, alpha_n * timestep, n);
+					element_ptr->send (n, alpha_n * timestep, matrix + n - 1 - excess_n, edge_n, n);
 				}
 				*status = -1;
 				break;
 			case -1:
 				if (element_ptr->is_linked (edge_0)) {
-					element_ptr->recv (n, global_matrix + N * boundary_0 + my_index, edge_0, 0.0, N);
+					element_ptr->recv (n, 0.0, global_matrix + N * boundary_0 + my_index + excess_0, edge_0, N);
 				}
 				if (element_ptr->is_linked (edge_n)) {
-					element_ptr->recv (n, global_matrix + N * boundary_n + my_index + n - 1, edge_n, 0.0, N);
+					element_ptr->recv (n, 0.0, global_matrix + N * boundary_n + my_index + n - 1 - excess_n, edge_n, N);
 				}
-				*status = -2;
+				*status = -6;
 				break;
+			case -6:
+			element_ptr->send (1, &excess_0, edge_0);
+			element_ptr->send (1, &excess_n, edge_n);
+			*status = -7;
+			break;
+			case -7:
+			element_ptr->recv (1, 0, &expected_excess_0, edge_0);
+			positions_0.resize (expected_excess_0);
+			element_ptr->recv (1, 0, &expected_excess_n, edge_n);
+			positions_n.resize (expected_excess_n);
+			*status = -8;
+			break;
+			case -8:
+			element_ptr->send (excess_0, 1.0, &((*element_ptr) (position)), edge_0);
+			element_ptr->send (excess_n, 1.0, &((*element_ptr) (position, n - 1 - excess_n)), edge_n);
+			element_ptr->recv (expected_excess_0, 0.0, &positions_0 [0], edge_0);
+			element_ptr->recv (expected_excess_n, 0.0, &positions_n [0], edge_n)
+			// Create matrix of summed interpolated position and derivative values
+			// Create rhs of interpolated rhs
+			// Send matrix
+			// Recv matrix
+			// Send rhs
+			// Recv rhs
 			case -2:
 				utils::copy (n, data_in, global_rhs + my_index);
 				utils::add_scaled (n, timestep, rhs, global_rhs + my_index);
-				element_ptr->send (1, global_rhs + my_index, edge_0);
-				element_ptr->send (1, global_rhs + my_index + n - 1, edge_n);
+				element_ptr->send (1, global_rhs + my_index + excess_0, edge_0);
+				element_ptr->send (1, global_rhs + my_index + n - 1 - excess_n, edge_n);
 				*status = -3;
 				break;
 			case -3:
-				element_ptr->recv (1, global_rhs + my_index, edge_0);
-				element_ptr->recv (1, global_rhs + my_index + n - 1, edge_n);
+				element_ptr->recv (1, global_rhs + my_index + excess_0, edge_0);
+				element_ptr->recv (1, global_rhs + my_index + n - 1 - excess_n, edge_n);
 				*status = 1;
 				break;
 			default:

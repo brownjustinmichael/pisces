@@ -72,6 +72,7 @@ namespace one_d
 		double& alpha_n;
 		double data_0, data_n;
 		double prev_data_0, prev_data_n;
+		int expected_excess_0, expected_excess_n;
 		
 		double *rhs; //!< The double array of the right-hand-side of the matrix equation
 		double* default_matrix;
@@ -79,6 +80,8 @@ namespace one_d
 		
 		std::vector <double> error;
 		std::vector <double> data_temp;
+		std::vector <double> positions_0;
+		std::vector <double> positions_n;
 		std::vector <double> factorized_matrix;
 		std::vector<int> ipiv; //!< A vector of integers needed to calculate the factorization
 		

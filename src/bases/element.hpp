@@ -275,7 +275,17 @@ namespace bases
 				messenger_ptr->send (value, boundary_processes [edge], boundary_send_tags [edge], boundary_weights [edge], n, inc);
 			}
 		}
-		virtual void send (int n, double* value, int edge, double weight, int inc = 1) {
+		virtual void send (int n, double weight, double* value, int edge, int inc = 1) {
+			if (boundary_bools [edge]) {
+				messenger_ptr->send (value, boundary_processes [edge], boundary_send_tags [edge], weight, n, inc);
+			}
+		}
+		virtual void send (int n, int* value, int edge, int inc = 1) {
+			if (boundary_bools [edge]) {
+				messenger_ptr->send (value, boundary_processes [edge], boundary_send_tags [edge], boundary_weights [edge], n, inc);
+			}
+		}
+		virtual void send (int n, int weight, int* value, int edge, int inc = 1) {
 			if (boundary_bools [edge]) {
 				messenger_ptr->send (value, boundary_processes [edge], boundary_send_tags [edge], weight, n, inc);
 			}
@@ -290,7 +300,19 @@ namespace bases
 				messenger_ptr->recv (value, boundary_processes [edge], boundary_recv_tags [edge], boundary_weights [edge], n, inc);
 			}
 		}
-		virtual void recv (int n, double* value, int edge, double weight, int inc = 1) {
+		virtual void recv (int n, double weight, double* value, int edge, int inc = 1) {
+			if (boundary_bools [edge]) {
+				messenger_ptr->recv (value, boundary_processes [edge], boundary_recv_tags [edge], weight, n, inc);
+			} else {
+				*value *= weight;
+			}
+		}
+		virtual void recv (int n, int* value, int edge, int inc = 1) {
+			if (boundary_bools [edge]) {
+				messenger_ptr->recv (value, boundary_processes [edge], boundary_recv_tags [edge], boundary_weights [edge], n, inc);
+			}
+		}
+		virtual void recv (int n, int weight, int* value, int edge, int inc = 1) {
 			if (boundary_bools [edge]) {
 				messenger_ptr->recv (value, boundary_processes [edge], boundary_recv_tags [edge], weight, n, inc);
 			} else {

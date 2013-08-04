@@ -54,6 +54,34 @@ namespace utils
 			MPI::COMM_WORLD.Recv (data, size, MPI::DOUBLE, process, tag);
 		}
 	}
+
+	void messenger::send (int* data, int process, int tag, int weight, int size, int inc) {
+		if (weight != 1 || inc != 1) {
+			if (size > (int) int_buffer.size ()) {
+				int_buffer.resize (size);
+			}
+			for (int i = 0; i < size; ++i) {
+				int_buffer [i] = weight * data [i];
+			}
+			MPI::COMM_WORLD.Send (&int_buffer [0], size, MPI::INT, process, tag);
+		} else {
+			MPI::COMM_WORLD.Send (data, size, MPI::INT, process, tag);
+		}
+	}
+
+	void messenger::recv (int* data, int process, int tag, int weight, int size, int inc) {
+		if (weight != 0 || inc != 1) {
+			if (size > (int) int_buffer.size ()) {
+				int_buffer.resize (size);
+			}
+			MPI::COMM_WORLD.Recv (&int_buffer [0], size, MPI::INT, process, tag);
+			for (int i = 0; i < size; ++i) {
+				data [i] = weight * data [i] + int_buffer [i];
+			}
+		} else {
+			MPI::COMM_WORLD.Recv (data, size, MPI::INT, process, tag);
+		}
+	}
 	
 	void messenger::min (double* data) {
 		if (np != 1) {

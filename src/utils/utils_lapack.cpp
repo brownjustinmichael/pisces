@@ -92,4 +92,30 @@ namespace utils
 			return (dy [i] - dy [i - 1]) / (dx [i] - dx [i - 1]) * (x - dx [i]) + dy [i];
 		}
 	}
+	
+	void matrix_interpolate (int n, double* dx, int m, double* dy, int incy, double* douty, double x) {
+		int i = 1;
+		/*
+			TODO Allow for reverse dx as well
+		*/
+		if (x < dx [0] || x > dx [n - 1]) {
+			throw 0;
+			/*
+				TODO better exception?
+			*/
+		}
+		while (x < dx [i]) {
+			++i;
+		}
+		if (x == dx [i]) {
+			for (int j = 0; j < m; ++j) {
+				douty [j * incy] = dy [j * m + i];
+			}
+		} else {
+			for (int j = 0; j < m; ++j) {
+				douty [j * incy] = (dy [j * m + i] - dy [j * m + i - 1]) / (dx [i] - dx [i - 1]) * (x - dx [i]) + dy [j * m + i];
+			}
+		}
+	}
+	
 } /* utils */

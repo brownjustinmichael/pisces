@@ -102,6 +102,8 @@ namespace utils
 	void matrix_solve (int n, double* a, int* ipiv, double* b, int *info = NULL, int nrhs = 1, int lda = -1, int ldb = -1);
 
 	double interpolate (int n, double* dx, double* dy, double x);
+	
+	void matrix_interpolate (int n, double* dx, int m, double* dy, int incy, double* douty, double x);
 } /* utils */
 
 #endif /* end of include guard: UTILS_HPP_OOQZAQJE */
