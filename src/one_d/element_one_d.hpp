@@ -18,6 +18,7 @@
 #include "../bases/plan.hpp"
 #include "../utils/utils.hpp"
 #include "../utils/chebyshev.hpp"
+#include "../utils/interpolate.hpp"
 	
 namespace one_d
 {

@@ -20,7 +20,18 @@
  * \param dy The second double array of data
  * \param incy A pointer to an integer spacing of elements in dy
  *********************************************************************/
-extern "C" double ddot_ (int *n, double *dx, int *incx, double *dy, int *incy);
+extern "C" double ddot_ (int *n, double *x, int *incx, double *y, int *incy);
+
+/*!*******************************************************************
+ * \brief Function from BLAS that copies a float array to another in place
+ * 
+ * \param n A pointer to an integer number of elements in x to copy to y
+ * \param dx The array from which the data are copied
+ * \param incx A pointer to an integer spacing of elements in x
+ * \param dy The array to which the data are copied
+ * \param incy A pointer to an integer spacing of elements in y
+ *********************************************************************/
+extern "C" void scopy_ (int *n, float *x, int *incx, float *y, int *incy);
 
 /*!*******************************************************************
  * \brief Function from BLAS that copies a double array to another in place
@@ -31,7 +42,17 @@ extern "C" double ddot_ (int *n, double *dx, int *incx, double *dy, int *incy);
  * \param dy The array to which the data are copied
  * \param incy A pointer to an integer spacing of elements in y
  *********************************************************************/
-extern "C" void dcopy_ (int *n, double *dx, int *incx, double *dy, int *incy);
+extern "C" void dcopy_ (int *n, double *x, int *incx, double *y, int *incy);
+
+/*!*******************************************************************
+ * \brief Function from BLAS that scales a float array
+ * 
+ * \param n A pointer to an integer number of elements in x to copy to y
+ * \param da The float by which to scale the data
+ * \param dx The array from which the data are copied
+ * \param incx A pointer to an integer spacing of elements in x
+ *********************************************************************/
+extern "C" void sscal_ (int *n, float *a, float *x, int *incx);
 
 /*!*******************************************************************
  * \brief Function from BLAS that scales a double array
@@ -41,7 +62,7 @@ extern "C" void dcopy_ (int *n, double *dx, int *incx, double *dy, int *incy);
  * \param dx The array from which the data are copied
  * \param incx A pointer to an integer spacing of elements in x
  *********************************************************************/
-extern "C" void dscal_ (int *n, double *da, double *dx, int *incx);
+extern "C" void dscal_ (int *n, double *a, double *x, int *incx);
 
 /*!*******************************************************************
  * \brief Function from BLAS for vector-vector addition (dy = da * dx + dy)

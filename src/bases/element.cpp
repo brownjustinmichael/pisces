@@ -81,12 +81,10 @@ namespace bases
 	}
 	
 	void element::update_globals (int N, double* global_matrix, double* global_rhs, int* status) {
-		DEBUG (logger, "flags " << flags);
 		matrix_solver->update_globals (N, global_matrix, global_rhs, status);
 	}
 	
 	void element::update_from_globals (double* global_out) {
-		DEBUG (logger, "flags " << flags);
 		flags |= transformed;
 		matrix_solver->update_from_globals (global_out);
 	}
@@ -97,7 +95,7 @@ namespace bases
 		if (matrix_solver) {
 			matrix_solver->execute ();
 		} else {
-			WARN (logger, "No matrix solver defined. It is likely the element was not set up correctly.")
+			WARN (logger, "No matrix solver defined. It is likely the element was not set up correctly.");
 		}
 		
 		TRACE (logger, "Updated.");

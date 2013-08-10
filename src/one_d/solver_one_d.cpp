@@ -10,6 +10,8 @@
 #include "../config.hpp"
 #include "solver_one_d.hpp"
 #include "../utils/utils.hpp"
+#include "../utils/solver_utils.hpp"
+#include "../utils/interpolate.hpp"
 #include "../bases/element.hpp"
 #include "element_one_d.hpp"
 
@@ -25,6 +27,8 @@ namespace one_d
 		ipiv.resize (n, 0);
 		expected_excess_0 = 0;
 		expected_excess_n = 0;
+		excess_0 = element_ptr->get_excess (edge_0);
+		excess_n = element_ptr->get_excess (edge_n);
 	}
 	
 	void solver::factorize () {
@@ -34,8 +38,8 @@ namespace one_d
 		
 		utils::copy (n * n, default_matrix, &factorized_matrix [0]);
 		
-		utils::add_scaled (n, alpha_0 * timestep, matrix + 0, &factorized_matrix [0] + 0, n, n);	
-		for (int i = 1; i < n - 1; ++i) {
+		utils::add_scaled (n, alpha_0 * timestep, matrix + excess_0, &factorized_matrix [excess_0], n, n);	
+		for (int i = excess_0; i < n - excess_n; ++i) {
 			utils::add_scaled (n, timestep, matrix + i, &factorized_matrix [0] + i, n, n);	
 		}
 		utils::add_scaled (n, alpha_n * timestep, matrix + n - 1, &factorized_matrix [0] + n - 1, n, n);
@@ -55,13 +59,20 @@ namespace one_d
 		int my_index = element_ptr->get_index ();
 		int boundary_0 = element_ptr->get_boundary_index (edge_0);
 		int boundary_n = element_ptr->get_boundary_index (edge_n);
-		MDEBUG ("boundaries " << boundary_0 << " " << boundary_n);
 		int excess_0 = element_ptr->get_excess (edge_0);
 		int excess_n = element_ptr->get_excess (edge_n);
+		std::vector <double> rhs_0 (expected_excess_0, 0.0);
+		std::vector <double> rhs_n (expected_excess_n, 0.0);
+		std::vector <double> matrix_0 (expected_excess_0 * n, 0.0);
+		std::vector <double> matrix_n (expected_excess_n * n, 0.0);
 		switch (*status) {
 			case 0:
-				for (int i = excess_0; i < n - excess_n; ++i) {
-					utils::copy (n, default_matrix + i, global_matrix + my_index * (N + 1) + i, n, N);
+				for (int i = 0; i < n; ++i) {
+					if (i < excess_0 || i >= n - excess_n) {
+						utils::add_scaled (n, -1.0, default_matrix + i, global_matrix + my_index * (N + 1) + i, n, N);
+					} else {
+						utils::copy (n, default_matrix + i, global_matrix + my_index * (N + 1) + i, n, N);
+					}
 				}
 				utils::add_scaled (n, alpha_0 * timestep, matrix + excess_0, global_matrix + my_index * (N + 1) + excess_0, n, N);
 				for (int i = 1 + excess_0; i < n - 1 - excess_n; ++i) {
@@ -86,31 +97,94 @@ namespace one_d
 				*status = -6;
 				break;
 			case -6:
-			element_ptr->send (1, &excess_0, edge_0);
-			element_ptr->send (1, &excess_n, edge_n);
-			*status = -7;
-			break;
+				element_ptr->send (1, 1, &excess_0, edge_0);
+				element_ptr->send (1, 1, &excess_n, edge_n);
+				*status = -7;
+				break;
 			case -7:
-			element_ptr->recv (1, 0, &expected_excess_0, edge_0);
-			positions_0.resize (expected_excess_0);
-			element_ptr->recv (1, 0, &expected_excess_n, edge_n);
-			positions_n.resize (expected_excess_n);
-			*status = -8;
-			break;
+				element_ptr->recv (1, 0, &expected_excess_0, edge_0);
+				element_ptr->recv (1, 0, &expected_excess_n, edge_n);
+				*status = -8;
+				break;
 			case -8:
-			element_ptr->send (excess_0, 1.0, &((*element_ptr) (position)), edge_0);
-			element_ptr->send (excess_n, 1.0, &((*element_ptr) (position, n - 1 - excess_n)), edge_n);
-			element_ptr->recv (expected_excess_0, 0.0, &positions_0 [0], edge_0);
-			element_ptr->recv (expected_excess_n, 0.0, &positions_n [0], edge_n)
-			// Create matrix of summed interpolated position and derivative values
-			// Create rhs of interpolated rhs
-			// Send matrix
-			// Recv matrix
-			// Send rhs
-			// Recv rhs
+				if (element_ptr->is_linked (edge_0)) {
+					element_ptr->send (excess_0, 1.0, &((*element_ptr) (position)), edge_0);
+				}
+				if (element_ptr->is_linked (edge_n)) {
+					element_ptr->send (excess_n, 1.0, &((*element_ptr) (position, n - excess_n)), edge_n);
+				}
+				*status = -9;
+				break;
+			case -9:
+				if (element_ptr->is_linked (edge_0)) {
+					positions_0.resize (expected_excess_0);
+					element_ptr->recv (expected_excess_0, 0.0, &positions_0 [0], edge_0);
+				}
+				if (element_ptr->is_linked (edge_n)) {
+					positions_n.resize (expected_excess_n);
+					element_ptr->recv (expected_excess_n, 0.0, &positions_n [0], edge_n);
+				}
+				*status = -12;
+				break;
+			// case -10:
+			// 	for (int i = 0; i < expected_excess_0; ++i) {
+			// 		rhs_0 [i] = utils::interpolate (n, &((*element_ptr) (position)), data_in, positions_0 [i]);
+			// 		rhs_0 [i] += utils::interpolate (n, &((*element_ptr) (position)), rhs, positions_0 [i]);
+			// 	}
+			// 	for (int i = 0; i < expected_excess_n; ++i) {
+			// 		rhs_n [i] = utils::interpolate (n, &((*element_ptr) (position)), data_in, positions_n [i]);
+			// 		rhs_n [i] += utils::interpolate (n, &((*element_ptr) (position)), rhs, positions_n [i]);
+			// 	}
+			// 	if (element_ptr->is_linked (edge_0)) {
+			// 		element_ptr->send (expected_excess_0, 1.0, &rhs_0 [0], edge_0);
+			// 	}
+			// 	if (element_ptr->is_linked (edge_n)) {
+			// 		element_ptr->send (expected_excess_n, 1.0, &rhs_n [0], edge_n);
+			// 	}
+			// 	*status = -11;
+			// 	break;
+			// case -11:
+			// 	if (element_ptr->is_linked (edge_0)) {
+			// 		element_ptr->recv (excess_0, 0.0, global_rhs + my_index, edge_0);
+			// 	}
+			// 	if (element_ptr->is_linked (edge_n)) {
+			// 		element_ptr->recv (excess_n, 0.0, global_rhs + my_index + n - excess_n, edge_n);
+			// 	}
+			// 	*status = -12;
+			// 	break;
+			case -12:
+				for (int i = 0; i < expected_excess_0; ++i) {
+					utils::matrix_interpolate (n, &((*element_ptr) (position)), n, default_matrix, 0.0, expected_excess_0, &matrix_0 [0], positions_0 [i]);
+					// utils::matrix_interpolate (n, &((*element_ptr) (position)), n, matrix, 1.0, expected_excess_0, &matrix_0 [0], positions_0 [i]);
+				}
+				for (int i = 0; i < expected_excess_n; ++i) {
+					utils::matrix_interpolate (n, &((*element_ptr) (position)), n, default_matrix, 0.0, expected_excess_n, &matrix_n [0], positions_n [i]);
+					// utils::matrix_interpolate (n, &((*element_ptr) (position)), n, matrix, 1.0, expected_excess_n, &matrix_n [0], positions_n [i]);
+				}
+				element_ptr->send (expected_excess_0 * n, 1.0, &matrix_0 [0], edge_0);
+				element_ptr->send (expected_excess_n * n, 1.0, &matrix_n [0], edge_n);
+				*status = -13;
+				break;
+			case -13:
+				if (element_ptr->is_linked (edge_0)) {
+					element_ptr->recv (excess_0 * n, 0.0, &matrix_0 [0], edge_0);
+				}
+				if (element_ptr->is_linked (edge_n)) {
+					element_ptr->recv (excess_n * n, 0.0, &matrix_n [0], edge_n);
+				}
+				for (int i = 0; i < excess_0; ++i) {
+					utils::copy (n, &matrix_0 [i * n], global_matrix + my_index + i + boundary_0 * N, 1, N);
+				}
+				for (int i = 0; i < excess_n; ++i) {
+					utils::copy (n, &matrix_n [i * n], global_matrix + my_index + n - excess_n + i + boundary_n * N, 1, N);
+				}
+				*status = -2;
+				/*
+					TODO Adjacent elements must have the same number of indices, make more general
+				*/
 			case -2:
-				utils::copy (n, data_in, global_rhs + my_index);
-				utils::add_scaled (n, timestep, rhs, global_rhs + my_index);
+				utils::copy (n - excess_0 - excess_n, data_in + excess_0, global_rhs + my_index + excess_0);
+				utils::add_scaled (n - excess_0 - excess_n, timestep, rhs + excess_0, global_rhs + my_index + excess_0);
 				element_ptr->send (1, global_rhs + my_index + excess_0, edge_0);
 				element_ptr->send (1, global_rhs + my_index + n - 1 - excess_n, edge_n);
 				*status = -3;

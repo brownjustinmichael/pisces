@@ -15,6 +15,7 @@
 #include <iomanip>
 #include <algorithm>
 #include "element.hpp"
+#include "../utils/solver_utils.hpp"
 #include "../utils/io.hpp"
 #include "../utils/messenger.hpp"
 
@@ -95,59 +96,66 @@ namespace bases
 				}
 				messenger_ptr->min (&t_timestep);
 				MTRACE ("Updating...");
-				status = 0;
-				for (int j = 0; j < (int) elements.size (); ++j) {
-					stati [j] = 0;
-				}
-				utils::scale (count * count, 0.0, &global_matrix [0]);
-				for (int j = 0; j < count; ++j) {
-					ipiv [j] = 0;
-				}
-				while (status != 1) {
-					for (int j = 0; j < (int) elements.size (); ++j) {
-						elements [j]->update_globals (count, &global_matrix [0], &global_rhs [0], &stati [j]);
-						if (status == 0) {
-							if (j == 0 && stati [0] == 1) {
-								status = 1;
-							}
-						} else if (status == 1 && stati [j] != 1) {
-							status = 0;
-						}
-					}
-				}
-				std::stringstream out_stream;
-				for (int j = 0; j < count; ++j) {
-					out_stream.str ("");
-					for (int k = 0; k < count; ++k) {
-						out_stream << std::scientific << std::setw (13) << global_matrix [k * count + j] << " ";
-					}
-					MDEBUG (out_stream.str ());
-				}
-				utils::matrix_factorize (count, count, &global_matrix [0], &ipiv [0], &info);
-				utils::matrix_solve (count, &global_matrix [0], &ipiv [0], &global_rhs [0], &info);
-				for (int j = 0; j < (int) elements.size (); ++j) {
-					elements [j]->update_from_globals (&global_rhs [0]);
-				}
-				// for (int k = 0; k < 2; ++k) {
-				// 	for (int j = 0; j < (int) elements.size (); ++j) {
-				// 		elements [j]->attempt_update ();
-				// 		elements [j]->calculate_bounds ();
-				// 		elements [j]->send_bounds ();
-				// 	}
-				// 	for (int j = 0; j < (int) elements.size (); ++j) {
-				// 		elements [j]->recv_bounds ();
-				// 		elements [j]->calculate_error ();
-				// 	}
-				// 	for (int j = 0; j < (int) elements.size (); ++j) {
-				// 		elements [j]->send_error ();
-				// 	}
-				// 	for (int j = 0; j < (int) elements.size (); ++j) {
-				// 		elements [j]->recv_error ();
+				// status = 0;
+				// for (int j = 0; j < (int) elements.size (); ++j) {
+				// 	stati [j] = 0;
+				// }
+				// utils::scale (count * count, 0.0, &global_matrix [0]);
+				// for (int j = 0; j < count; ++j) {
+				// 	ipiv [j] = 0;
+				// }
+				// for (int j = 0; j < count; ++j) {
+				// 	global_rhs [j] = 0.0;
+				// 	for (int k = 0; k < count; ++k) {
+				// 		global_matrix [j + k * count] = 0.0;
 				// 	}
 				// }
+				// while (status != 1) {
+					// std::stringstream out_stream;
+					// for (int j = 0; j < (int) elements.size (); ++j) {
+					// 	elements [j]->update_globals (count, &global_matrix [0], &global_rhs [0], &stati [j]);
+					// 	if (status == 0) {
+					// 		if (j == 0 && stati [0] == 1) {
+					// 			status = 1;
+					// 		}
+					// 	} else if (status == 1 && stati [j] != 1) {
+					// 		status = 0;
+					// 	}
+					// }
+					// for (int j = 0; j < count; ++j) {
+					// 	out_stream.str ("");
+					// 	for (int k = 0; k < count; ++k) {
+					// 		out_stream << std::scientific << std::setw (13) << global_matrix [k * count + j] << " ";
+					// 	}
+					// 	MDEBUG (out_stream.str ());
+					// 	MDEBUG (global_rhs [j]);
+					// }
+				// }
+				// utils::matrix_factorize (count, count, &global_matrix [0], &ipiv [0], &info);
+				// utils::matrix_solve (count, &global_matrix [0], &ipiv [0], &global_rhs [0], &info);
+				// for (int j = 0; j < (int) elements.size (); ++j) {
+				// 	elements [j]->update_from_globals (&global_rhs [0]);
+				// }
+				for (int k = 0; k < 2; ++k) {
+					for (int j = 0; j < (int) elements.size (); ++j) {
+						elements [j]->attempt_update ();
+						elements [j]->calculate_bounds ();
+						elements [j]->send_bounds ();
+					}
+					for (int j = 0; j < (int) elements.size (); ++j) {
+						elements [j]->recv_bounds ();
+						elements [j]->calculate_error ();
+					}
+					for (int j = 0; j < (int) elements.size (); ++j) {
+						elements [j]->send_error ();
+					}
+					for (int j = 0; j < (int) elements.size (); ++j) {
+						elements [j]->recv_error ();
+					}
+				}
 				for (int j = 0; j < (int) elements.size (); ++j) {
-				// 	elements [j]->attempt_update ();
-				// 	elements [j]->update ();
+					elements [j]->attempt_update ();
+					elements [j]->update ();
 					elements [j]->update_timestep (t_timestep);
 				}
 			}

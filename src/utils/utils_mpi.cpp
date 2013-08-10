@@ -12,6 +12,8 @@
 #include "mpi.h"
 #include "utils.hpp"
 
+#define OPENMPI
+
 namespace utils
 {
 	messenger::messenger (int* argc, char*** argv) {
@@ -56,6 +58,7 @@ namespace utils
 	}
 
 	void messenger::send (int* data, int process, int tag, int weight, int size, int inc) {
+		MTRACE ("Sending...");
 		if (weight != 1 || inc != 1) {
 			if (size > (int) int_buffer.size ()) {
 				int_buffer.resize (size);
@@ -70,6 +73,7 @@ namespace utils
 	}
 
 	void messenger::recv (int* data, int process, int tag, int weight, int size, int inc) {
+		MTRACE ("Recving...");
 		if (weight != 0 || inc != 1) {
 			if (size > (int) int_buffer.size ()) {
 				int_buffer.resize (size);

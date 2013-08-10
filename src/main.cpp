@@ -98,6 +98,11 @@ int main (int argc, char *argv[])
 {
 	// Initialize messenger
 	utils::messenger process_messenger (&argc, &argv);
+	
+	// Initialize CUBLAS
+#ifdef CUBLAS
+	cublasInit ();
+#endif
 
 	// The program runs through the execution flags.
 	while ((argc > 1) && (argv [1] [0] == '-')) {

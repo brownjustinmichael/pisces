@@ -9,6 +9,10 @@ objects.append (env.Object ("utils_mpi.cpp"))
 
 objects.append (env.Object ("utils_lapack.cpp"))
 
+objects.append (env.Object ("interpolate.cpp"))
+
+objects.append (env.Object ("solver_lapack.cpp"))
+
 objects.append (env.Object ("chebyshev.cpp"))
 
 objects.append (env.Object ("io.cpp"))
