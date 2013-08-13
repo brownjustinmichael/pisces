@@ -104,6 +104,13 @@ namespace bases
 			return excesses [edge];
 		}
 		
+		int get_expected_excess (int edge) {
+			return excesses [edge];
+			/*
+				TODO Add ability to have different incoming and outgoing excess
+			*/
+		}
+		
 		/*!*******************************************************************
 		 * \brief Get the named double parameter from the input parameter map
 		 * 
@@ -345,6 +352,10 @@ namespace bases
 		virtual void attempt_update ();
 		
 		virtual void calculate_bounds ();
+		
+		virtual void send_positions ();
+		
+		virtual void recv_positions ();
 		
 		virtual void send_bounds ();
 		

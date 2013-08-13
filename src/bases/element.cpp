@@ -105,6 +105,14 @@ namespace bases
 		matrix_solver->calculate_bounds ();
 	}
 	
+	void element::send_positions () {
+		matrix_solver->send_positions ();
+	}
+	
+	void element::recv_positions () {
+		matrix_solver->recv_positions ();
+	}
+	
 	void element::send_bounds () {
 		matrix_solver->send_bounds ();
 	}

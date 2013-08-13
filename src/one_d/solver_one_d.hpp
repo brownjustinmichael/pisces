@@ -54,6 +54,10 @@ namespace one_d
 		
 		void calculate_bounds ();
 		
+		void send_positions ();
+		
+		void recv_positions ();
+		
 		void send_bounds ();
 		
 		void recv_bounds ();
@@ -73,12 +77,14 @@ namespace one_d
 		double data_0, data_n;
 		double prev_data_0, prev_data_n;
 		int expected_excess_0, expected_excess_n;
+		int excess_0, excess_n;
 		
 		double *rhs; //!< The double array of the right-hand-side of the matrix equation
 		double* default_matrix;
 		double *matrix; //!< The double matrix to be factorized
 		
-		std::vector <double> error;
+		std::vector <double> error_0;
+		std::vector <double> error_n;
 		std::vector <double> data_temp;
 		std::vector <double> positions_0;
 		std::vector <double> positions_n;

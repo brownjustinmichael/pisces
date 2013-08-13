@@ -15,6 +15,8 @@ namespace utils
 	
 	void matrix_interpolate (int n, double* dx, int m, double* dy, double da, int incy, double* douty, double x);
 	
+	double dot_interpolate (int n, double* dx, int m, double* dy, double* df, double x);
+	
 } /* utils */
 
 #endif /* end of include guard: INTERPOLATE_HPP_IZNK7T4T */

@@ -78,9 +78,9 @@ namespace bases
 		virtual void run () {
 			MTRACE ("Beginning main...");
 			double t_timestep;
-			int info;
-			int status;
-			std::vector <int> stati ((int) elements.size (), 0);
+			// int info;
+			// int status;
+			// std::vector <int> stati ((int) elements.size (), 0);
 			std::vector <double> timesteps (inputParams ["total_processes"].asInt, 0.0);
 			for (int i = 0; i < tsteps; ++i) {
 				MINFO ("Timestep " << i);
@@ -138,20 +138,26 @@ namespace bases
 				// }
 				for (int k = 0; k < 2; ++k) {
 					for (int j = 0; j < (int) elements.size (); ++j) {
+						elements [j]->send_positions ();
+					}
+					for (int j = 0; j < (int) elements.size (); ++j) {
+						elements [j]->recv_positions ();
+					}
+					for (int j = 0; j < (int) elements.size (); ++j) {
 						elements [j]->attempt_update ();
 						elements [j]->calculate_bounds ();
 						elements [j]->send_bounds ();
 					}
 					for (int j = 0; j < (int) elements.size (); ++j) {
 						elements [j]->recv_bounds ();
-						elements [j]->calculate_error ();
+						// elements [j]->calculate_error ();
 					}
-					for (int j = 0; j < (int) elements.size (); ++j) {
-						elements [j]->send_error ();
-					}
-					for (int j = 0; j < (int) elements.size (); ++j) {
-						elements [j]->recv_error ();
-					}
+					// for (int j = 0; j < (int) elements.size (); ++j) {
+					// 	elements [j]->send_error ();
+					// }
+					// for (int j = 0; j < (int) elements.size (); ++j) {
+					// 	elements [j]->recv_error ();
+					// }
 				}
 				for (int j = 0; j < (int) elements.size (); ++j) {
 					elements [j]->attempt_update ();

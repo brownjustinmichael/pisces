@@ -54,6 +54,10 @@ namespace bases
 		
 		virtual void calculate_bounds () = 0;
 
+		virtual void send_positions () = 0;
+		
+		virtual void recv_positions () = 0;
+
 		virtual void send_bounds () = 0;
 		
 		virtual void recv_bounds () = 0;
