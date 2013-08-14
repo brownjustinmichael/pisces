@@ -69,7 +69,7 @@
 #include <log4cxx/fileappender.h>
 #include <log4cxx/consoleappender.h>
 
-#include "mpi.h"
+// #include "mpi.h"
 	
 /*!*******************************************************************
  * \def MTRACE(str)

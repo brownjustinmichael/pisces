@@ -98,11 +98,6 @@ int main (int argc, char *argv[])
 {
 	// Initialize messenger
 	utils::messenger process_messenger (&argc, &argv);
-	
-	// Initialize CUBLAS
-#ifdef CUBLAS
-	cublasInit ();
-#endif
 
 	// The program runs through the execution flags.
 	while ((argc > 1) && (argv [1] [0] == '-')) {
@@ -121,7 +116,7 @@ int main (int argc, char *argv[])
 	io::read_params_txt parameters ("../input/parameters.txt");
 	inputParams = parameters.load_params();
 	
-	const int n_total = inputParams ["n_elements"].asInt;
+	const int n_total = inputParams ["n_elements"].asInt * process_messenger.get_np;
 	int n;
 	int n_masters;
 	int index;
