@@ -56,7 +56,7 @@ namespace one_d
 		utils::matrix_factorize (n, n, &factorized_matrix [0], &ipiv [0], &info);
 		
 		if (info != 0) {
-			ERROR (logger, "Unable to invert matrix");
+			ERROR ("Unable to invert matrix");
 			throw 0; // For now, kill the program. 
 			/*
 				TODO Replace this with a more useful exception that can be handled
@@ -69,9 +69,9 @@ namespace one_d
 		
 		bases::solver::execute ();
 		
-		TRACE (logger, "Solving...");
+		TRACE ("Solving...");
 		
-		MDEBUG ("error " << error_0 [0] << " " << error_n [0]);
+		DEBUG ("error " << error_0 [0] << " " << error_n [0]);
 		
 		utils::copy (n, data_in, &data_temp [0]);
 		
@@ -94,7 +94,7 @@ namespace one_d
 		}
 		
 		if (info != 0) {
-			ERROR (logger, "Unable to solve factorized matrix equation");
+			ERROR ("Unable to solve factorized matrix equation");
 			throw 0; // For now, kill the program. 
 			/*
 				TODO Replace this with a more useful exception that can be handled
@@ -122,11 +122,11 @@ namespace one_d
 			error_n [i + 1] -= data_in [n - excess_n + i];
 		}
 		
-		TRACE (logger, "Solve complete.")
+		TRACE ("Solve complete.")
 	}
 	
 	void solver::send_positions () {
-		TRACE (logger, "Sending positions...");
+		TRACE ("Sending positions...");
 		
 		if (excess_0 != 0 && (int) positions_0.size () == 0) {
 			element_ptr->send (excess_0, 1.0, &((*element_ptr) (position)), edge_0);
@@ -137,7 +137,7 @@ namespace one_d
 	}
 	
 	void solver::recv_positions () {
-		TRACE (logger, "Recving positions...");
+		TRACE ("Recving positions...");
 		
 		if (expected_excess_0 != 0 && (int) positions_0.size () == 0) {
 			positions_0.resize (expected_excess_0);
@@ -150,7 +150,7 @@ namespace one_d
 	}
 	
 	void solver::update () {
-		TRACE (logger, "Updating...");
+		TRACE ("Updating...");
 		utils::copy (n, &data_temp [0], data_out);
 	}
 } /* one_d */

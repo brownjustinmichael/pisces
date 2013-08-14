@@ -14,13 +14,12 @@
 
 namespace bases
 {
-	collocation_grid::collocation_grid (int i_derivs, int i_rows, int i_cols, int i_logger) {
-		logger = i_logger;
+	collocation_grid::collocation_grid (int i_derivs, int i_rows, int i_cols) {
 		rows = i_rows;
 		cols = i_cols;
 		derivs = i_derivs;
 
-		TRACE (logger, "Instantiating...")
+		TRACE ("Instantiating...")
 
 		data.resize (derivs);
 
@@ -28,7 +27,7 @@ namespace bases
 			data [i].resize (i_rows * i_cols);
 		}
 
-		TRACE (logger, "Instantiated...")
+		TRACE ("Instantiated...")
 	}
 } /* bases */
 

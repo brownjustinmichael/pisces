@@ -32,7 +32,7 @@ namespace one_d
 		
 			assert (n > 0);
 		
-			TRACE (logger, "Initializing..." << logger);
+			TRACE ("Initializing...");
 		
 			matrix.resize (i_n * i_n, 0.0);
 			
@@ -57,7 +57,7 @@ namespace one_d
 			
 			normal_stream->to_file ();
 		
-			TRACE (logger, "Initialized.");
+			TRACE ("Initialized.");
 		}
 		
 		double advection_diffusion_element::calculate_timestep () {

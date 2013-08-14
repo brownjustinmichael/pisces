@@ -17,24 +17,6 @@
 
 #include "mpi.h"
 
-int config::n_loggers = 0;
-int config::n_appenders = 0;
-int config::severity = 4;  // The default logging severity is 4, errors and fatal messages only.
-std::string config::config_file = "../input/Log4cxxConfig.xml";
-
-#ifdef __APPLE__
-
-#include <log4cxx/patternlayout.h>
-
-// Set up the logs
-
-log4cxx::LayoutPtr config::console_layout = new log4cxx::PatternLayout ("%-5p %c{2}: %C (%M %L) - %m%n");
-log4cxx::LayoutPtr config::layout = new log4cxx::PatternLayout ("%d %-5p %c{2}: %C (%M %L) - %m%n");
-std::vector<log4cxx::LoggerPtr> config::loggers;
-std::vector<log4cxx::AppenderPtr> config::appenders;
-
-#endif // __APPLE__
-
 /*!*******************************************************************
  * \mainpage
  *
@@ -98,25 +80,28 @@ int main (int argc, char *argv[])
 	// Initialize messenger
 	utils::messenger process_messenger (&argc, &argv);
 
+	int id = process_messenger.get_id ();
+	int n_elements = process_messenger.get_np ();
+
+	log_config::update_name (id);
+
 	// The program runs through the execution flags.
 	while ((argc > 1) && (argv [1] [0] == '-')) {
 		switch (argv [1] [1]) {
 			// Debug switch
 			case 'D':
-				config::severity = atoi (&(argv [1] [2])); break;
+				log_config::update_severity (atoi (&(argv [1] [2])));
+				break;
 		}
 		--argc;
 		++argv;
 	}
 	
-	config::make_main (process_messenger.get_id ());
-	
 	io::parameter_map inputParams;
 	io::read_params_txt parameters ("../input/parameters.txt");
 	inputParams = parameters.load_params();
 	
-	int id = process_messenger.get_id ();
-	int n_elements = process_messenger.get_np ();
+
 	int n = inputParams ["gridpoints"].asInt / n_elements;
 	double position_0 = -1.0 + 2.0 / n_elements * id;
 	double position_n = -1.0 + 2.0 / n_elements * (id + 1);
@@ -137,32 +122,35 @@ int main (int argc, char *argv[])
 	one_d::chebyshev::advection_diffusion_element element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
 	
 	if (id != 0) {
-		MTRACE ("Adding boundary to " << name << " at 0 at processor " << id - 1);
+		TRACE ("Adding boundary to " << name << " at 0 at processor " << id - 1);
 		element.add_boundary (one_d::edge_0, 1, 2, id - 1);
 	}
 	if (id != n_elements - 1) {
-		MTRACE ("Adding boundary to " << name << " at n - 1 at processor " << id + 1);
+		TRACE ("Adding boundary to " << name << " at n - 1 at processor " << id + 1);
 		element.add_boundary (one_d::edge_n, 2, 1, id + 1);
 	}
+
+	element.send_positions ();
+	element.recv_positions ();
 	
 	double t_timestep;
 	for (int i = 0; i < inputParams ["timesteps"].asInt; ++i) {
-		MINFO ("Timestep " << i);
+		INFO ("Timestep " << i);
 		element.calculate ();
 		element.output ();
 		element.execute_boundaries ();
 		t_timestep = element.calculate_timestep ();
 		process_messenger.min (&t_timestep);
-		MTRACE ("Updating...");
+		TRACE ("Updating...");
 		for (int k = 0; k < 2; ++k) {
-			element.send_positions ();
-			element.recv_positions ();
 			element.attempt_update ();
 		}
 		element.attempt_update ();
 		element.update ();
 		element.update_timestep (t_timestep);
 	}
+	
+	INFO ("Main complete.");
 	
 	return 0;
 }

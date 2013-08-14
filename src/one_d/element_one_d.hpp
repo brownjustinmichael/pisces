@@ -57,13 +57,11 @@ namespace one_d
 				cell [i] = i;
 			}
 			
-			failsafe_dump = std::make_shared <io::simple_output> (io::simple_output ("dump_" + std::to_string (name) + ".dat", n, logger));
+			failsafe_dump = std::make_shared <io::simple_output> (io::simple_output ("dump_" + std::to_string (name) + ".dat", n));
 			failsafe_dump->append (&cell [0]);
 		}
 		
-		virtual ~element () {
-			TRACE (logger, "Calling destructor.");
-		}
+		virtual ~element () {}
 	
 		/*!*******************************************************************
 		 * \copydoc bases::element::initialize ()
@@ -99,14 +97,14 @@ namespace one_d
 		 * \copydoc bases::element::get_boundary_info ()
 		 *********************************************************************/
 		// inline int get_boundary_index (int edge) {
-		// 	TRACE (logger, "Getting boundary index...");
-		// 	MDEBUG ("edge " << edge);
+		// 	TRACE ("Getting boundary index...");
+		// 	DEBUG ("edge " << edge);
 		// 	if (edge == edge_0) {
 		// 		return excesses [edge_0];
 		// 	} else if (edge == edge_n) {
 		// 		return n - 1 - excesses [edge_n];
 		// 	} else {
-		// 		FATAL (logger, "Edge is not a one_d edge index.");
+		// 		FATAL ("Edge is not a one_d edge index.");
 		// 		throw 0;
 		// 	}
 		// }
@@ -169,17 +167,15 @@ namespace one_d
 			 *********************************************************************/
 			element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : one_d::element (i_n, i_position_0, i_position_n, i_excess_0, i_excess_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				initialize (position);
-				set_grid (std::make_shared<chebyshev_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), position_0 - position_n, logger)));
+				set_grid (std::make_shared<chebyshev_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), position_0 - position_n)));
 			}
-			virtual ~element () {
-				TRACE (logger, "Calling destructor.");
-			}
+			virtual ~element () {}
 				
 			/*!*******************************************************************
 			 * \copydoc one_d::element::initialize ()
 			 *********************************************************************/
 			virtual void initialize (int name, double* initial_conditions = NULL) {
-				TRACE (logger, "Initializing " << name);
+				TRACE ("Initializing " << name);
 				if (name == position && !initial_conditions) {
 					double pioN = std::acos (-1.0) / (n - 1);
 					double scale = (position_0 - position_n) / (std::cos (excesses [edge_0] * pioN) - std::cos ((n - 1 - excesses [edge_n]) * pioN));
@@ -209,7 +205,7 @@ namespace one_d
 				} else {
 					one_d::element::initialize (name, initial_conditions);
 				}
-				TRACE (logger, "Initialized.");
+				TRACE ("Initialized.");
 			}
 		};
 		
@@ -227,9 +223,7 @@ namespace one_d
 			 *********************************************************************/
 			advection_diffusion_element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags);
 			
-			virtual ~advection_diffusion_element () {
-				TRACE (logger, "Calling destructor.");
-			}
+			virtual ~advection_diffusion_element () {}
 		
 			/*!*******************************************************************
 			 * \copydoc element::implicit_reset ()

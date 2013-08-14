@@ -31,11 +31,9 @@ namespace bases
 		 * \param i_cols The integer number of columns in the grid
 		 * \param i_logger The integer representation of the logger object
 		 *********************************************************************/
-		collocation_grid (int i_derivs, int i_rows, int i_cols, int i_logger = -1);
+		collocation_grid (int i_derivs, int i_rows, int i_cols);
 	
-		virtual ~collocation_grid () {
-			MTRACE ("Calling destructor.");
-		};
+		virtual ~collocation_grid () {}
 	
 		/*!*******************************************************************
 		 * \brief An indexing operation into the grid, for convenience
@@ -65,7 +63,6 @@ namespace bases
 		}
 	
 	protected:
-		int logger; //!< The integer representation of the logger object
 		int rows; //!< The integer number of rows in the grid
 		int cols; //!< The integer number of columns in the grid
 		int derivs; //!< The integer number of derivatives deep the collocation grid runs

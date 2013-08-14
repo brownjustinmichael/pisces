@@ -29,7 +29,7 @@ public:
 	 * \param i_scale A double by which the grid should be scaled
 	 * \param i_logger The integer representation of the logger object
 	 *********************************************************************/
-	chebyshev_grid (int i_M, int i_N, double i_scale = 1.0, double i_width = 2.0, int i_logger = -1);
+	chebyshev_grid (int i_M, int i_N, double i_scale = 1.0, double i_width = 2.0);
 	
 	virtual ~chebyshev_grid () {};
 	

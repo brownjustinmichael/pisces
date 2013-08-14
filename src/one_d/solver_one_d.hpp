@@ -39,9 +39,7 @@ namespace one_d
 		 *********************************************************************/
 		solver (bases::element* i_element_ptr, int i_n, double& i_timestep, double& i_alpha_0, double& i_alpha_n, double *i_default_matrix, double *i_matrix, int i_name_in, int i_name_rhs, int i_name_out = null);
 		
-		virtual ~solver () {
-			TRACE (logger, "Calling destructor.");
-		}
+		virtual ~solver () {}
 		
 		/*!*******************************************************************
 		 * \copydoc bases::solver::solve ()

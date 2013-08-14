@@ -42,9 +42,7 @@ namespace one_d
 			*********************************************************************/
 			explicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, int i_name_in, int i_position, int i_name_out = null);
 
-			virtual ~explicit_diffusion () {
-				TRACE (logger, "Calling destructor.");
-			}
+			virtual ~explicit_diffusion () {}
 
 			/*!*******************************************************************
 			* \copydoc bases::explicit_plan::execute ()
@@ -76,9 +74,7 @@ namespace one_d
 			 *********************************************************************/
 			implicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_matrix);
 
-			virtual ~implicit_diffusion () {
-				TRACE (logger, "Calling destructor.");
-			}
+			virtual ~implicit_diffusion () {}
 
 			/*!*******************************************************************
 			 * \copydoc bases::implicit_plan::execute ()

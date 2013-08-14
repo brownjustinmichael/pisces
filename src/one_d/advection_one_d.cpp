@@ -19,7 +19,7 @@ namespace one_d
 {
 	advec::advec (bases::element* i_element_ptr, int i_n, double i_c, int i_name_in, int i_name_out, std::shared_ptr<bases::collocation_grid> i_grid) : bases::explicit_plan (i_element_ptr, i_n, i_name_in, i_name_out)
 	{
-		MTRACE ("Instantiating...");
+		TRACE ("Instantiating...");
 		grid = i_grid;
 		double pi = std::acos(-1.0);
 		c = i_c;
@@ -32,7 +32,7 @@ namespace one_d
 			fac [i] = std::sin(((n - i - 1)*pi)/(n-1));
 		}
 		fac [n - 1] = std::sin((.5*pi)/(n-1));
-		MTRACE ("Instantiated.");
+		TRACE ("Instantiated.");
 	}
 
 	void advec::execute()
@@ -42,7 +42,7 @@ namespace one_d
 		bases::plan::execute ();
 
 		// if (!(*flags_ptr | transformed)) {
-		// 		MFATAL ("Linear Advection attempted in physical space.")
+		// 		FATAL ("Linear Advection attempted in physical space.")
 		// 		throw 0;
 		// 	}
 		//  
@@ -57,7 +57,7 @@ namespace one_d
 		// }
 		
 		if (*flags_ptr & transformed) {
-			MFATAL ("Nonlinear advection attempted in Chebyshev space.")
+			FATAL ("Nonlinear advection attempted in Chebyshev space.")
 			throw 0;
 		}
 		

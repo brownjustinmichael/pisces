@@ -64,9 +64,7 @@ namespace bases
 	public:
 		plan (element* i_element_ptr);
 		
-		virtual ~plan () {
-			TRACE (logger, "Calling destructor.");
-		}
+		virtual ~plan () {}
 		
 		/*!*******************************************************************
 		* \brief Operate the plan on the data arrays contained in the class
@@ -75,13 +73,12 @@ namespace bases
 		*********************************************************************/
 		virtual void execute () {
 			if (!element_ptr) {
-				MERROR ("Plan not initialized completely.");
+				ERROR ("Plan not initialized completely.");
 				throw 0;
 			}
 		}
 			
 	protected:
-		int logger; //!< The integer representation of the logger
 		int default_flags; //!< An integer set of default flags to use in case the user does not specify any flags
 		int *flags_ptr; //!< A pointer to the integer execution flags
 		element* element_ptr; //!< A pointer to the element with which the plan is associated
@@ -102,9 +99,7 @@ namespace bases
 		 *********************************************************************/
 		explicit_plan (element* i_element_ptr, int i_n, int i_name_in, int i_name_out = null);
 	
-		virtual ~explicit_plan () {
-			TRACE (logger, "Calling destructor.");
-		}
+		virtual ~explicit_plan () {}
 	
 		/*!*******************************************************************
 		 * \copydoc plan::execute ()
@@ -136,9 +131,7 @@ namespace bases
 			matrix = i_matrix;
 		}
 
-		virtual ~implicit_plan () {
-			TRACE (logger, "Calling destructor.");
-		}
+		virtual ~implicit_plan () {}
 		
 		/*!*******************************************************************
 		 * \copydoc plan::execute ()

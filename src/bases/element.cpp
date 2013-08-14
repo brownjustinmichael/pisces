@@ -16,29 +16,29 @@
 namespace bases
 {
 	void element::calculate () {		
-		TRACE (logger, "Calculating...");
+		TRACE ("Calculating...");
 				
 		flags &= ~implicit_started;
 		flags &= ~explicit_started;
 		
-		TRACE (logger, "Writing to file...");
+		TRACE ("Writing to file...");
 		
 		// Output in transform space
 		if (transform_stream) {
 			transform_stream->to_file ();
 		}
 		
-		TRACE (logger, "Executing plans...");
+		TRACE ("Executing plans...");
 		
 		for (int i = 0; i < (int) plans.size (); ++i) {
 			plans [i]->execute ();
 		}
 		
-		TRACE (logger, "Calculation complete.");
+		TRACE ("Calculation complete.");
 	}
 	
 	void element::output () {
-		TRACE (logger, "Writing to file...");
+		TRACE ("Writing to file...");
 	
 		// Output in normal space
 		if (normal_stream) {
@@ -47,15 +47,15 @@ namespace bases
 	}
 	
 	void element::attempt_update () {
-		TRACE (logger, "Updating...");
+		TRACE ("Updating...");
 
 		if (matrix_solver) {
 			matrix_solver->execute ();
 		} else {
-			WARN (logger, "No matrix solver defined. It is likely the element was not set up correctly.");
+			WARN ("No matrix solver defined. It is likely the element was not set up correctly.");
 		}
 		
-		TRACE (logger, "Updated.");
+		TRACE ("Updated.");
 	}
 	
 	void element::send_positions () {
@@ -72,7 +72,7 @@ namespace bases
 		
 	void element::update_timestep (double new_timestep) {
 		duration += timestep;
-		INFO (logger, "TOTAL TIME: " << duration);
+		INFO ("TOTAL TIME: " << duration);
 		if (new_timestep != timestep) {
 			flags &= ~unchanged_timestep;
 			flags &= ~factorized;
@@ -81,6 +81,6 @@ namespace bases
 		}
 		timestep = new_timestep;
 		
-		TRACE (logger, "Update complete");
+		TRACE ("Update complete");
 	}
 } /* bases */

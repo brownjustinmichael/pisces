@@ -68,23 +68,9 @@ namespace bases
 			flags = i_flags;
 			timestep = 0.0;
 			duration = 0.0;
-			logger = config::make_logger (name);
 		}
 		
-		virtual ~element () {
-			TRACE (logger, "Calling destructor.");
-		}
-		
-		/*!*******************************************************************
-		 * \brief Get the named integer parameter from the input parameter map
-		 * 
-		 * \param name The string name of the relevant parameter
-		 * 
-		 * \return The integer named parameter from the input parameter map
-		 *********************************************************************/
-		int get_iparam (std::string name) {
-			return inputParams [name].asInt;
-		}
+		virtual ~element () {}
 		
 		bool is_linked (int edge) {
 			return boundary_bools [edge];
@@ -99,17 +85,6 @@ namespace bases
 			/*
 				TODO Add ability to have different incoming and outgoing excess
 			*/
-		}
-		
-		/*!*******************************************************************
-		 * \brief Get the named double parameter from the input parameter map
-		 * 
-		 * \param name The string name of the relevant parameter
-		 * 
-		 * \return The double named parameter from the input parameter map
-		 *********************************************************************/
-		double get_dparam (std::string name) {
-			return inputParams [name].asDouble;
 		}
 		
 		/*!*******************************************************************
@@ -232,13 +207,13 @@ namespace bases
 		 * \param i_plan A shared pointer to the plan to add
 		 *********************************************************************/
 		inline void add_plan (std::shared_ptr <plan> i_plan) {
-			TRACE (logger, "Adding plan...");
+			TRACE ("Adding plan...");
 			plans.push_back (std::move (i_plan));
-			TRACE (logger, "Added.");
+			TRACE ("Added.");
 		}
 		
 		inline void add_boundary (int edge, int send_tag, int recv_tag, int process) {
-			TRACE (logger, "Adding boundary, new...");
+			TRACE ("Adding boundary, new...");
 			boundary_bools [edge] = true;
 			/*
 				TODO When ready to fix, set boundary_bools [edge] = true;
@@ -247,7 +222,7 @@ namespace bases
 			boundary_send_tags [edge] = send_tag;
 			boundary_recv_tags [edge] = recv_tag;
 			boundary_processes [edge] = process;
-			TRACE (logger, "Added.");
+			TRACE ("Added.");
 		}
 		
 		/*!*******************************************************************
@@ -263,13 +238,13 @@ namespace bases
 		 * In general, this should not be overwritten in subclasses.
 		 *********************************************************************/
 		virtual void send (int n, double weight, double* value, int edge, int inc = 1) {
-			TRACE (logger, "Sending...");
+			TRACE ("Sending...");
 			if (boundary_bools [edge]) {
 				messenger_ptr->send (value, boundary_processes [edge], boundary_send_tags [edge], weight, n, inc);
 			}
 		}
 		virtual void send (int n, int weight, int* value, int edge, int inc = 1) {
-			TRACE (logger, "Sending...");
+			TRACE ("Sending...");
 			if (boundary_bools [edge]) {
 				messenger_ptr->send (value, boundary_processes [edge], boundary_send_tags [edge], weight, n, inc);
 			}
@@ -280,7 +255,7 @@ namespace bases
 		 * In general, this should not be overwritten in subclasses.
 		 *********************************************************************/
 		virtual void recv (int n, double weight, double* value, int edge, int inc = 1) {
-			TRACE (logger, "Recving...");
+			TRACE ("Recving...");
 			if (boundary_bools [edge]) {
 				messenger_ptr->recv (value, boundary_processes [edge], boundary_recv_tags [edge], weight, n, inc);
 			} else {
@@ -288,7 +263,7 @@ namespace bases
 			}
 		}
 		virtual void recv (int n, int weight, int* value, int edge, int inc = 1) {
-			TRACE (logger, "Recving...");
+			TRACE ("Recving...");
 			if (boundary_bools [edge]) {
 				messenger_ptr->recv (value, boundary_processes [edge], boundary_recv_tags [edge], weight, n, inc);
 			} else {
@@ -338,7 +313,6 @@ namespace bases
 		utils::messenger* messenger_ptr;
 		
 		int flags; //!< An integer set of execution flags
-		int logger; //!< An integer representation of the logger, which is interpreted by the config class
 
 		double duration;
 		double timestep; //!< The double timestep length

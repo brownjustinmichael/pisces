@@ -14,14 +14,14 @@
 #include "../bases/collocation.hpp"
 #include "chebyshev.hpp"
 
-chebyshev_grid::chebyshev_grid (int i_M, int i_N, double i_scale, double i_width, int i_logger) : bases::collocation_grid (3, i_M, i_N, i_logger) {
+chebyshev_grid::chebyshev_grid (int i_M, int i_N, double i_scale, double i_width) : bases::collocation_grid (3, i_M, i_N) {
 	int d, m, k;
 	scale = i_scale;
 	width = i_width;
 	pioN = std::acos (-1.0) / (i_N - 1);
 	exists_array.resize (i_M * i_N * 3, false);
 	
-	TRACE (logger, "Instantiating...");
+	TRACE ("Instantiating...");
 	
 	for (d = 0; d < 3; ++d) {
 		for (k = 0; k < i_N; ++k) {
@@ -46,7 +46,7 @@ chebyshev_grid::chebyshev_grid (int i_M, int i_N, double i_scale, double i_width
 		}
 	}
 	
-	TRACE (logger, "Instantiated...");
+	TRACE ("Instantiated...");
 }
 
 double chebyshev_grid::recursion (int d, int m, int k) {		
@@ -79,7 +79,7 @@ double chebyshev_grid::recursion (int d, int m, int k) {
 		return 4.0 * recursion (1, m - 1, k) + 2.0 * std::cos (pioN * k) * recursion (2, m - 1, k) - recursion (2, m - 2, k);
 	} else {
 		// There's been a bad index, kill the program
-		FATAL (logger, "Bad index")
+		FATAL ("Bad index")
 		throw 0;
 	}
 }

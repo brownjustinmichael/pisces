@@ -12,7 +12,7 @@
 namespace utils
 {
 	double interpolate (int n, double* dx, double* dy, double x) {
-		MTRACE ("Interpolating...");
+		TRACE ("Interpolating...");
 		int i = 1;
 		/*
 			TODO Allow for reverse dx as well
@@ -34,7 +34,7 @@ namespace utils
 	}
 	
 	void matrix_interpolate (int n, double* dx, int m, double* dy, double da, int incy, double* douty, double x) {
-		MTRACE ("Interpolating matrices...");
+		TRACE ("Interpolating matrices...");
 		int i = 1;
 		/*
 			TODO Allow for reverse dx as well
@@ -60,7 +60,7 @@ namespace utils
 	}
 	
 	double dot_interpolate (int n, double* dx, int m, double* dy, double* df, double x) {
-		MTRACE ("Interpolating matrices...");
+		TRACE ("Interpolating matrices...");
 		int i = 1;
 		double running_sum = 0.0;
 		/*

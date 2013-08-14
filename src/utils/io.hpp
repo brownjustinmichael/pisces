@@ -70,11 +70,6 @@ namespace io
 	class header
 	{
 	public:
-		/*!*******************************************************************
-		 * \param i_logger The integer representation of the logger object
-		 *********************************************************************/
-		header (int i_logger = -1) {logger = i_logger;}
-		
 		virtual ~header () {}
 		/*!*******************************************************************
 		 * \brief Method that generates the header for an output object
@@ -85,9 +80,6 @@ namespace io
 		 * \return A string which will be used as the header in the associated output
 		 *********************************************************************/
 		virtual std::string output_header () {return std::string ("");}
-		
-	protected:
-		int logger; //!< The integer representation of the logger object
 	};
 	
 	/*!*******************************************************************
@@ -105,7 +97,7 @@ namespace io
 		 * \param i_comment_string The string to be used as the comment before the header lines
 		 * \copydoc header::header ()
 		 *********************************************************************/
-		simple_header (int i_n_data_headers, std::string *i_data_headers, std::string i_comment_string = "#", int i_logger = -1);
+		simple_header (int i_n_data_headers, std::string *i_data_headers, std::string i_comment_string = "#");
 		
 		virtual ~simple_header () {}
 		
@@ -131,7 +123,7 @@ namespace io
 		 * \param i_n The integer number of points in the data
 		 * \param i_logger The integer representation of the logger
 		 *********************************************************************/
-		output (header *i_header_ptr, int i_n, int i_logger = -1);
+		output (header *i_header_ptr, int i_n);
 		
 		virtual ~output () {}
 		
@@ -177,7 +169,6 @@ namespace io
 		virtual void to_file () = 0;
 		
 	protected:
-		int logger; //!< The integer representation of the logger
 		int n; //!< An integer number of elements in each array
 		int n_data_ptrs; //!< An integer number of arrays to output
 		std::vector<double *> double_ptrs; //!< A vector of double pointers to the arrays of data (if an element is NULL, check int_ptrs at the same index instead)
@@ -209,7 +200,7 @@ namespace io
 		 * \param i_n An integer number of data points contained within each array
 		 * \param i_logger The integer representation of the logger
 		 *********************************************************************/
-		simple_output (std::string i_file_name, int i_n, int i_output_every = 1, int i_logger = -1) : output (new header, i_n, i_logger) {
+		simple_output (std::string i_file_name, int i_n, int i_output_every = 1) : output (new header, i_n) {
 			file_name = i_file_name;
 			output_count = 0;
 			output_every = i_output_every;
@@ -243,7 +234,7 @@ namespace io
 		 * \param i_n The integer number of points in the data
 		 * \param i_logger The integer representation of the logger
 		 *********************************************************************/
-		incremental_output (std::string i_file_base, std::string i_file_extension, int i_int_width, header *i_header_ptr, int i_n, int i_output_every, int i_logger = -1) : output (i_header_ptr, i_n, i_logger) {
+		incremental_output (std::string i_file_base, std::string i_file_extension, int i_int_width, header *i_header_ptr, int i_n, int i_output_every) : output (i_header_ptr, i_n) {
 			output_count = 0;
 			output_every = i_output_every;
 			int_width = i_int_width;
