@@ -116,51 +116,57 @@ int main (int argc, char *argv[])
 	io::read_params_txt parameters ("../input/parameters.txt");
 	inputParams = parameters.load_params();
 	
-	const int n_total = inputParams ["n_elements"].asInt * process_messenger.get_np;
-	int n;
-	int n_masters;
-	int index;
-	std::vector <int> n_grid (n_total, inputParams ["gridpoints"].asInt / n_total);
-	std::vector <double> position_grid (n_total + 1, 0.0);
-	position_grid [0] = -1.0;
-	for (int i = 1; i < n_total + 1; ++i) {
-		position_grid [i] = position_grid [i - 1] + 2.0 / n_total;
+	int id = process_messenger.get_id ();
+	int n_elements = process_messenger.get_np ();
+	int n = inputParams ["gridpoints"].asInt / n_elements;
+	double position_0 = -1.0 + 2.0 / n_elements * id;
+	double position_n = -1.0 + 2.0 / n_elements * (id + 1);
+	int excess_0;
+	int excess_n;
+	if (id == 0) {
+		excess_0 = 0;
+	} else {
+		excess_0 = 1;
 	}
-	std::vector <std::string> name_grid (n_total);
-	for (int i = 0; i < n_total; ++i) {
-		name_grid [i] = std::to_string (i + 1);
+	if (id == n_elements - 1) {
+		excess_n = 0;
+	} else {
+		excess_n = 1;
+	}
+	int name = id;
+	
+	one_d::chebyshev::advection_diffusion_element element (n, position_0, position_n, excess_0, excess_n, 0, name, inputParams, &process_messenger, 0x00);
+	
+	if (id != 0) {
+		MTRACE ("Adding boundary to " << name << " at 0 at processor " << id - 1);
+		element.add_boundary (one_d::edge_0, 1, 2, id - 1, 0);
+	}
+	if (id != n_elements - 1) {
+		MTRACE ("Adding boundary to " << name << " at n - 1 at processor " << id + 1);
+		element.add_boundary (one_d::edge_n, 2, 1, id + 1, 0);
 	}
 	
-	if (process_messenger.get_id () >= n_total % process_messenger.get_np ()) {
-		n = n_total / process_messenger.get_np ();
-		index = n * process_messenger.get_id () + n_total % process_messenger.get_np ();
-	} else {
-		n = n_total / process_messenger.get_np () + 1;
-		index = n * process_messenger.get_id ();
-	}
-
-	if (process_messenger.get_id () >= n_total) {
-		return 0;
-	} else {
-		if (process_messenger.get_np () > n_total) {
-			n_masters = n_total;
-		} else {
-			n_masters = process_messenger.get_np ();
+	double t_timestep;
+	for (int i = 0; i < inputParams ["timesteps"].asInt; ++i) {
+		MINFO ("Timestep " << i);
+		element.calculate ();
+		element.output ();
+		element.execute_boundaries ();
+		t_timestep = element.calculate_timestep ();
+		process_messenger.min (&t_timestep);
+		MTRACE ("Updating...");
+		for (int k = 0; k < 2; ++k) {
+			element.send_positions ();
+			element.recv_positions ();
+			element.attempt_update ();
+			element.calculate_bounds ();
+			element.send_bounds ();
+			element.recv_bounds ();
 		}
+		element.attempt_update ();
+		element.update ();
+		element.update_timestep (t_timestep);
 	}
-	
-	one_d::master <one_d::chebyshev::advection_diffusion_element> master_process (process_messenger.get_id (), n_masters, "../input/parameters.txt", n, &n_grid [index], &position_grid [index], &process_messenger);
-	
-	if (process_messenger.get_id () != 0) {
-		MTRACE ("Adding boundary to " << 0 << " at 0 at processor " << process_messenger.get_id () - 1);
-		master_process.add_boundary (0, one_d::edge_0, 1, 2, process_messenger.get_id () - 1);
-	}
-	if (process_messenger.get_id () != n_masters - 1) {
-		MTRACE ("Adding boundary to " << n - 1 << " at n - 1 at processor " << process_messenger.get_id () + 1);
-		master_process.add_boundary (n - 1, one_d::edge_n, 2, 1, process_messenger.get_id () + 1);
-	}
-	
-	master_process.run ();
 	
 	return 0;
 }
