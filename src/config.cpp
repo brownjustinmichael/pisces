@@ -27,6 +27,8 @@ log4cxx::LevelPtr log_config::int_to_severity (int severity_index) {
 	}
 }
 
+#endif // #ifdef __APPLE__
+
 void log_config::update_severity (int severity_index) {
 	severity = severity_index;
 
@@ -48,7 +50,9 @@ void log_config::update_name (int id) {
 }
 
 int log_config::severity;
+
+#ifdef __APPLE__
 log4cxx::LoggerPtr log_config::logger = log4cxx::Logger::getLogger ("log");
 log_config log_config_instance (2);
+#endif // __APPLE__
 
-#endif // #ifdef __APPLE__

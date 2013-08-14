@@ -142,14 +142,13 @@ public:
 	 * \return The corresponding LevelPtr object for the logger
 	 *********************************************************************/
 	static log4cxx::LevelPtr int_to_severity (int severity_index);
+
+#endif // __APPLE__
 	
 	static void update_severity (int severity_index);
 	
 	static void update_name (int id);
-	
-#else
 
-#endif // __APPLE__
 };
 
 #endif /* end of include guard: CONFIG_H_95CWOMPS */

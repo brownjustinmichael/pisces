@@ -10,11 +10,7 @@ int main (int argc, char const *argv[])
 		a [i] = i;
 	}
 	
-	try {
-		utils::scale (100, 2.0, a);
-	} catch (...) {
-		printf ("Something broke.\n");
-	}
+	utils::scale (100, 2.0, a);
 	
 	for (int i = 0; i < 100; ++i) {
 		printf ("Final %d: %f\n", i, a [i]);

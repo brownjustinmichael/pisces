@@ -1,8 +1,8 @@
-/*!***********************************************************************
- * \file main.cpp
- * Spectral Element
+/*!**********************************************************************
+ * \file main_cuda.cpp
+ * /Users/justinbrown/Dropbox/spectral_element
  * 
- * Created by Justin Brown on 2013-04-08.
+ * Created by Justin Brown on 2013-08-14.
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
@@ -115,7 +115,7 @@ int main (int argc, char *argv[])
 	}
 	int name = id;
 	
-	one_d::chebyshev::cuda_element element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
+	one_d::chebyshev::advection_diffusion_element element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
 	
 	if (id != 0) {
 		TRACE ("Adding boundary to " << name << " at 0 at processor " << id - 1);
