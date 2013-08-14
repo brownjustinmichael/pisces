@@ -48,10 +48,6 @@ namespace one_d
 		 *********************************************************************/
 		void execute ();
 		
-		virtual void update_globals (int N, double* global_matrix, double* global_rhs, int* status);
-		
-		virtual void update_from_globals (double* global_out);
-		
 		void calculate_bounds ();
 		
 		void send_positions ();
@@ -61,12 +57,6 @@ namespace one_d
 		void send_bounds ();
 		
 		void recv_bounds ();
-		
-		void calculate_error ();
-		
-		void send_error ();
-		
-		void recv_error ();
 		
 		void update ();
 

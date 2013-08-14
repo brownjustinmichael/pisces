@@ -268,10 +268,6 @@ namespace bases
 		 *********************************************************************/
 		virtual void calculate ();
 		
-		virtual void update_globals (int N, double* global_matrix, double* global_rhs, int* status);
-		
-		virtual void update_from_globals (double* global_out);
-		
 		/*!*******************************************************************
 		 * \brief Send all relevant boundary data to adjacent elements
 		 * 
@@ -360,12 +356,6 @@ namespace bases
 		virtual void send_bounds ();
 		
 		virtual void recv_bounds ();
-		
-		virtual void calculate_error ();
-		
-		virtual void send_error ();
-		
-		virtual void recv_error ();
 		
 		virtual void update ();
 		

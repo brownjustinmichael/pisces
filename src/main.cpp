@@ -14,7 +14,6 @@
 #include <vector>
 #include "config.hpp"
 #include "one_d/element_one_d.hpp"
-#include "one_d/master_one_d.hpp"
 
 #include "mpi.h"
 

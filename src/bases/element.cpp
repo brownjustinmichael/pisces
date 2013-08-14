@@ -80,15 +80,6 @@ namespace bases
 		}
 	}
 	
-	void element::update_globals (int N, double* global_matrix, double* global_rhs, int* status) {
-		matrix_solver->update_globals (N, global_matrix, global_rhs, status);
-	}
-	
-	void element::update_from_globals (double* global_out) {
-		flags |= transformed;
-		matrix_solver->update_from_globals (global_out);
-	}
-	
 	void element::attempt_update () {
 		TRACE (logger, "Updating...");
 
@@ -119,18 +110,6 @@ namespace bases
 	
 	void element::recv_bounds () {
 		matrix_solver->recv_bounds ();
-	}
-	
-	void element::calculate_error () {
-		matrix_solver->calculate_error ();
-	}
-	
-	void element::send_error () {
-		matrix_solver->send_error ();
-	}
-	
-	void element::recv_error () {
-		matrix_solver->recv_error ();
 	}
 	
 	void element::update () {
