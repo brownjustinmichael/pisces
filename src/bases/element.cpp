@@ -37,40 +37,6 @@ namespace bases
 		TRACE (logger, "Calculation complete.");
 	}
 	
-/*
-	void element::send () {
-		for (int i = 0; i < (int) boundary_bools.size (); ++i) {
-			send (i);
-		}
-	}
-	
-	void element::send (int edge) {
-		TRACE (logger, "Sending information...");
-		
-		for (iterator iter = begin (); iter != end (); ++iter) {
-			send (edge, *iter);
-		}
-		
-		TRACE (logger, "Information sent.");
-	}
-	
-	void element::recv () {
-		for (int i = 0; i < (int) boundary_bools.size (); ++i) {
-			recv (i);
-		}
-	}
-
-	void element::recv (int edge) {
-		TRACE (logger, "Receiving information...");
-		
-		for (iterator iter = begin (); iter != end (); ++iter) {
-			recv (edge, *iter);
-		}
-		
-		TRACE (logger, "Information received.");
-	}*/
-
-		
 	void element::output () {
 		TRACE (logger, "Writing to file...");
 	
@@ -92,24 +58,12 @@ namespace bases
 		TRACE (logger, "Updated.");
 	}
 	
-	void element::calculate_bounds () {
-		matrix_solver->calculate_bounds ();
-	}
-	
 	void element::send_positions () {
 		matrix_solver->send_positions ();
 	}
 	
 	void element::recv_positions () {
 		matrix_solver->recv_positions ();
-	}
-	
-	void element::send_bounds () {
-		matrix_solver->send_bounds ();
-	}
-	
-	void element::recv_bounds () {
-		matrix_solver->recv_bounds ();
 	}
 	
 	void element::update () {

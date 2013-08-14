@@ -100,6 +100,28 @@ namespace one_d
 				TODO Replace this with a more useful exception that can be handled
 			*/
 		}
+		
+		error_0 [0] = (alpha_0 * timestep) * (rhs [excess_0] - utils::dot (n, matrix + excess_0, &data_temp [0], n));
+		error_n [0] = (alpha_n * timestep) * (rhs [n - 1 - excess_n] - utils::dot (n, matrix + n - 1 - excess_n, &data_temp [0], n));
+		for (int i = 0; i < excess_0; ++i) {
+			error_0 [i + 1] = utils::dot_interpolate (n, &((*element_ptr) (position)), n, default_matrix, &data_temp [0], positions_0 [i]);
+		}
+		for (int i = 0; i < excess_n; ++i) {
+			error_n [i + 1] = utils::dot_interpolate (n, &((*element_ptr) (position)), n, default_matrix, &data_temp [0], positions_n [i]);
+		}
+		
+		element_ptr->send (expected_excess_0 + 1, 1.0, &error_0 [0], edge_0);
+		element_ptr->send (expected_excess_n + 1, 1.0, &error_n [0], edge_n);
+		
+		element_ptr->recv (excess_0 + 1, 0.0, &error_0 [0], edge_0);
+		element_ptr->recv (excess_n + 1, 0.0, &error_n [0], edge_n);
+		for (int i = 0; i < excess_0; ++i) {
+			error_0 [i + 1] -= data_in [excess_0 - 1 - i];
+		}
+		for (int i = 0; i < excess_n; ++i) {
+			error_n [i + 1] -= data_in [n - excess_n + i];
+		}
+		
 		TRACE (logger, "Solve complete.")
 	}
 	
@@ -119,51 +141,11 @@ namespace one_d
 		
 		if (expected_excess_0 != 0 && (int) positions_0.size () == 0) {
 			positions_0.resize (expected_excess_0);
-			element_ptr->recv (expected_excess_0, &positions_0 [0], edge_0);
+			element_ptr->recv (expected_excess_0, 0.0, &positions_0 [0], edge_0);
 		}
 		if (expected_excess_n != 0 && (int) positions_n.size () == 0) {
 			positions_n.resize (expected_excess_n);
-			element_ptr->recv (expected_excess_n, &positions_n [0], edge_n);
-		}
-	}
-	
-	void solver::calculate_bounds () {
-		TRACE (logger, "Calculating bounds...");
-		
-		error_0 [0] = (alpha_0 * timestep) * (rhs [excess_0] - utils::dot (n, matrix + excess_0, &data_temp [0], n));
-		error_n [0] = (alpha_n * timestep) * (rhs [n - 1 - excess_n] - utils::dot (n, matrix + n - 1 - excess_n, &data_temp [0], n));
-		for (int i = 0; i < excess_0; ++i) {
-			error_0 [i + 1] = utils::dot_interpolate (n, &((*element_ptr) (position)), n, default_matrix, &data_temp [0], positions_0 [i]);
-			MDEBUG ("CALC_0 " << error_0 [i + 1]);
-		}
-		for (int i = 0; i < excess_n; ++i) {
-			error_n [i + 1] = utils::dot_interpolate (n, &((*element_ptr) (position)), n, default_matrix, &data_temp [0], positions_n [i]);
-			MDEBUG ("CALC_N " << error_n [i + 1]);
-		}
-	}
-	
-	void solver::send_bounds () {
-		TRACE (logger, "Sending bounds...");
-		
-		element_ptr->send (expected_excess_0 + 1, 1.0, &error_0 [0], edge_0);
-		element_ptr->send (expected_excess_n + 1, 1.0, &error_n [0], edge_n);
-	}
-	
-	void solver::recv_bounds () {
-		TRACE (logger, "Recving bounds...");
-		
-		element_ptr->recv (excess_0 + 1, 0.0, &error_0 [0], edge_0);
-		element_ptr->recv (excess_n + 1, 0.0, &error_n [0], edge_n);
-		MDEBUG ("ERROR_0 " << error_0 [0]);
-		for (int i = 0; i < excess_0; ++i) {
-			MDEBUG ("before " << error_0 [i + 1]);
-			error_0 [i + 1] -= data_in [excess_0 - 1 - i];
-			MDEBUG (error_0 [i + 1]);
-		}
-		MDEBUG ("ERROR_N " << error_n [0]);
-		for (int i = 0; i < excess_n; ++i) {
-			error_n [i + 1] -= data_in [n - excess_n + i];
-			MDEBUG (error_n [i + 1]);
+			element_ptr->recv (expected_excess_n, 0.0, &positions_n [0], edge_n);
 		}
 	}
 	

@@ -43,7 +43,7 @@ namespace one_d
 		 * \param i_position_n The double position of index n - 1
 		 * \copydoc bases::element::element ()
 		 *********************************************************************/
-		element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_index, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : bases::element (i_index, i_name, 2, i_inputParams, i_messenger_ptr, i_flags) {
+		element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : bases::element (i_name, 2, i_inputParams, i_messenger_ptr, i_flags) {
 			n = i_n;
 			position_0 = i_position_0;
 			position_n = i_position_n;
@@ -167,7 +167,7 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc one_d::element::element ()
 			 *********************************************************************/
-			element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_index, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : one_d::element (i_n, i_position_0, i_position_n, i_excess_0, i_excess_n, i_index, i_name, i_inputParams, i_messenger_ptr, i_flags) {
+			element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : one_d::element (i_n, i_position_0, i_position_n, i_excess_0, i_excess_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				initialize (position);
 				set_grid (std::make_shared<chebyshev_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), position_0 - position_n, logger)));
 			}
@@ -225,7 +225,7 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc element::element ()
 			 *********************************************************************/
-			advection_diffusion_element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_index, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags);
+			advection_diffusion_element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags);
 			
 			virtual ~advection_diffusion_element () {
 				TRACE (logger, "Calling destructor.");

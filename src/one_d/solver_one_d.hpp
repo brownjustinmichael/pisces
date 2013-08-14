@@ -48,15 +48,9 @@ namespace one_d
 		 *********************************************************************/
 		void execute ();
 		
-		void calculate_bounds ();
-		
 		void send_positions ();
 		
 		void recv_positions ();
-		
-		void send_bounds ();
-		
-		void recv_bounds ();
 		
 		void update ();
 

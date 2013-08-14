@@ -134,15 +134,15 @@ int main (int argc, char *argv[])
 	}
 	int name = id;
 	
-	one_d::chebyshev::advection_diffusion_element element (n, position_0, position_n, excess_0, excess_n, 0, name, inputParams, &process_messenger, 0x00);
+	one_d::chebyshev::advection_diffusion_element element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
 	
 	if (id != 0) {
 		MTRACE ("Adding boundary to " << name << " at 0 at processor " << id - 1);
-		element.add_boundary (one_d::edge_0, 1, 2, id - 1, 0);
+		element.add_boundary (one_d::edge_0, 1, 2, id - 1);
 	}
 	if (id != n_elements - 1) {
 		MTRACE ("Adding boundary to " << name << " at n - 1 at processor " << id + 1);
-		element.add_boundary (one_d::edge_n, 2, 1, id + 1, 0);
+		element.add_boundary (one_d::edge_n, 2, 1, id + 1);
 	}
 	
 	double t_timestep;
@@ -158,9 +158,6 @@ int main (int argc, char *argv[])
 			element.send_positions ();
 			element.recv_positions ();
 			element.attempt_update ();
-			element.calculate_bounds ();
-			element.send_bounds ();
-			element.recv_bounds ();
 		}
 		element.attempt_update ();
 		element.update ();
