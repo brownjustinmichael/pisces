@@ -9,7 +9,9 @@
 #include "config.hpp"
 #include "one_d/element_one_d.hpp"
 
+#ifdef _MPI
 #include "mpi.h"
+#endif // _MPI
 
 /*!*******************************************************************
  * \mainpage
@@ -36,13 +38,15 @@
 /*!*******************************************************************
  * \namespace io
  * 
- * \brief A namespace containing all the input and output classes of the code
+ * \brief A namespace containing all the input and output classes of 
+ * the code
  *********************************************************************/
 
 /*!*******************************************************************
  * \namespace utils
  * 
- * \brief A namespace containing the various utilities needed in the code, such as linear algebra
+ * \brief A namespace containing the various utilities needed in the 
+ * code, such as linear algebra
  *********************************************************************/
 
 /*!*******************************************************************
@@ -71,13 +75,15 @@
  *********************************************************************/
 int main (int argc, char *argv[])
 {
-	int id, n_elements;
+	int id = 0, n_elements = 1;
 	
+#if _MPI
 	// Initialize messenger
 	utils::messenger process_messenger (&argc, &argv);
 
 	id = process_messenger.get_id ();
 	n_elements = process_messenger.get_np ();
+#endif // _MPI
 
 	log_config::update_name (id);
 
@@ -115,7 +121,7 @@ int main (int argc, char *argv[])
 	}
 	int name = id;
 	
-	one_d::chebyshev::cuda_element element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
+	one_d::chebyshev::advection_diffusion_element element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
 	
 	if (id != 0) {
 		TRACE ("Adding boundary to " << name << " at 0 at processor " << id - 1);
@@ -129,22 +135,7 @@ int main (int argc, char *argv[])
 	element.send_positions ();
 	element.recv_positions ();
 	
-	double t_timestep;
-	for (int i = 0; i < inputParams ["timesteps"].asInt; ++i) {
-		INFO ("Timestep " << i);
-		element.calculate ();
-		element.output ();
-		element.execute_boundaries ();
-		t_timestep = element.calculate_timestep ();
-		process_messenger.min (&t_timestep);
-		TRACE ("Updating...");
-		for (int k = 0; k < 2; ++k) {
-			element.attempt_update ();
-		}
-		element.attempt_update ();
-		element.update ();
-		element.update_timestep (t_timestep);
-	}
+	element.run ();
 	
 	INFO ("Main complete.");
 	

@@ -52,6 +52,7 @@ namespace bases
 		
 		/*!*******************************************************************
 		* \param i_name The string representation of the element
+		* \param n_boundaries 
 		* \param i_inputParams The parameter object that contains the input parameters of the run
 		* \param i_flags An integer set of execution flags
 		*********************************************************************/
@@ -306,6 +307,8 @@ namespace bases
 		inline virtual void failsafe () {
 			failsafe_dump->to_file ();
 		}
+		
+		virtual void run ();
 		
 	protected:
 		int name; //!< A string representation of the element, to be used in file output

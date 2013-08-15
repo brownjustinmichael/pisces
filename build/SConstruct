@@ -1,9 +1,21 @@
 import os
+import SCons.Conftest
 
-env = Environment (ENV = os.environ, CXX = "mpic++")
+env = Environment (ENV = os.environ)
+
+OCXX = env ["CXX"]
+env ["CXX"] = "mpic++"
+
+conf = Configure (env)
+
+if not conf.CheckCXX ():
+    env ["CXX"] = OCXX
+else:
+    env.Append (CPPFLAGS = ["-D_MPI"])
+
+conf.Finish ()
+
 # env = Environment (ENV = os.environ, CXX = "g++")
 env.Append (CPPFLAGS = ["-Wall", "-g", "-std=c++0x"])
-env.Append (LIBPATH = ["/opt/local/lib/"])
-env.Append (LIBPATH = ["/usr/lib64/"])
 
 env.SConscript ("../src/SConscript", variant_dir = ".", duplicate = 0, exports = {"env": env})

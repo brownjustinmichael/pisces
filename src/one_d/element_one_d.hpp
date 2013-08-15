@@ -39,11 +39,14 @@ namespace one_d
 	public:	
 		/*!*******************************************************************
 		 * \param i_n The number of data elements in each scalar
-		 * \param i_position_0 The double position of index 0
-		 * \param i_position_n The double position of index n - 1
+		 * \param i_position_0 The double position of index excess_0
+		 * \param i_position_n The double position of index n - 1 - excess_n
+		 * \param i_excess_0 The integer number of points evaluated in the adjacent element
+		 * \param i_excess_n The integer number of points evaluated in the adjacent element
 		 * \copydoc bases::element::element ()
 		 *********************************************************************/
-		element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : bases::element (i_name, 2, i_inputParams, i_messenger_ptr, i_flags) {
+		element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : 
+		bases::element (i_name, 2, i_inputParams, i_messenger_ptr, i_flags) {
 			n = i_n;
 			position_0 = i_position_0;
 			position_n = i_position_n;
@@ -89,26 +92,6 @@ namespace one_d
 			return scalars [name] [0];
 		}
 		
-		inline double interpolate (int name, double i_position) {
-			return utils::interpolate (n - excesses [edge_0] - excesses [edge_n], &((*this) [position]), &((*this) [name]), i_position);
-		}
-		
-		/*!*******************************************************************
-		 * \copydoc bases::element::get_boundary_info ()
-		 *********************************************************************/
-		// inline int get_boundary_index (int edge) {
-		// 	TRACE ("Getting boundary index...");
-		// 	DEBUG ("edge " << edge);
-		// 	if (edge == edge_0) {
-		// 		return excesses [edge_0];
-		// 	} else if (edge == edge_n) {
-		// 		return n - 1 - excesses [edge_n];
-		// 	} else {
-		// 		FATAL ("Edge is not a one_d edge index.");
-		// 		throw 0;
-		// 	}
-		// }
-		
 		/*!*******************************************************************
 		 * \copydoc bases::element::explicit_reset ()
 		 *********************************************************************/
@@ -143,7 +126,6 @@ namespace one_d
 		double position_0; //!< The double position of index 0
 		double position_n; //!< The double position of index n - 1
 		std::vector<int> cell; //!< An integer array for tracking each cell number for output
-		double buffer;
 
 		std::map <int, std::vector <double>> scalars; //!< A vector of scalar vectors
 		std::map <int, double> fixed_points_0; //!< The initial values of the scalars at index 0
@@ -237,6 +219,23 @@ namespace one_d
 			}
 			
 			virtual double calculate_timestep ();
+		
+		private:
+			std::vector<double> matrix; //!< A vector containing the double matrix used in the implicit solver
+		};
+		
+		class cuda_element : public element
+		{
+		public:
+			cuda_element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_input_Params, utils::messenger* i_messenger_ptr, int i_flags);
+			
+			virtual ~cuda_element () {}
+		
+			inline void implicit_reset () {
+				if (!(flags & factorized)) {
+					utils::scale (n * n, 0.0, &matrix [0]);
+				}
+			}
 		
 		private:
 			std::vector<double> matrix; //!< A vector containing the double matrix used in the implicit solver

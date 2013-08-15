@@ -1,0 +1,520 @@
+file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+scons: Configure: ".sconf_temp/conftest_0.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_0.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_0.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_0.o -c -Wall -g -std=c++0x .sconf_temp/conftest_0.c
+  |
+scons: Configure: ".sconf_temp/conftest_0" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_0 .sconf_temp/conftest_0.o -llog4cxx
+  |
+scons: Configure: (cached) yes
+
+file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+.sconf_temp/conftest_1.c <-
+  |
+  |
+  |
+  |int
+  |main() {
+  |  
+  |return 0;
+  |}
+  |
+gcc -o .sconf_temp/conftest_1.o -c -Wall -g -std=c++0x .sconf_temp/conftest_1.c
+cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C [enabled by default]
+gcc -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -llog4cxx
+scons: Configure: yes
+
+file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+scons: Configure: ".sconf_temp/conftest_1.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_1.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+gcc -o .sconf_temp/conftest_1.o -c -D_MPI -Wall -g -std=c++0x .sconf_temp/conftest_1.c
+cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C [enabled by default]
+scons: Configure: ".sconf_temp/conftest_1" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -llog4cxx
+  |
+scons: Configure: yes
+
+file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+scons: Configure: ".sconf_temp/conftest_1.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_1.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_1.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1.o -c -D_MPI -Wall -g -std=c++0x .sconf_temp/conftest_1.c
+  |
+scons: Configure: ".sconf_temp/conftest_1" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -llog4cxx
+  |
+scons: Configure: (cached) yes
+
+file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+scons: Configure: ".sconf_temp/conftest_1.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_1.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_1.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1.o -c -D_MPI -Wall -g -std=c++0x .sconf_temp/conftest_1.c
+  |
+scons: Configure: ".sconf_temp/conftest_1" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -llog4cxx
+  |
+scons: Configure: (cached) yes
+
+file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+scons: Configure: ".sconf_temp/conftest_1.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_1.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_1.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1.o -c -D_MPI -Wall -g -std=c++0x .sconf_temp/conftest_1.c
+  |
+scons: Configure: ".sconf_temp/conftest_1" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -llog4cxx
+  |
+scons: Configure: (cached) yes
+
+file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+scons: Configure: ".sconf_temp/conftest_1.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_1.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+gcc -o .sconf_temp/conftest_1.o -c -Wall -g -std=c++0x .sconf_temp/conftest_1.c
+gcc: error: .sconf_temp/conftest_1.c: No such file or directory
+gcc: fatal error: no input files
+compilation terminated.
+scons: Configure: no
+
+file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+scons: Configure: ".sconf_temp/conftest_1.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_1.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: Building ".sconf_temp/conftest_1.o" failed in a previous run and all its sources are up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1.o -c -Wall -g -std=c++0x .sconf_temp/conftest_1.c
+  |
+scons: Configure: (cached) no
+
+file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+.sconf_temp/conftest_1.c <-
+  |
+  |
+  |
+  |int
+  |main() {
+  |  
+  |return 0;
+  |}
+  |
+gcc -o .sconf_temp/conftest_1.o -c -D_MPI -Wall -g -std=c++0x .sconf_temp/conftest_1.c
+cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C [enabled by default]
+gcc -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -llog4cxx
+scons: Configure: yes
+
+file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+scons: Configure: ".sconf_temp/conftest_1.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_1.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_1.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1.o -c -D_MPI -Wall -g -std=c++0x .sconf_temp/conftest_1.c
+  |
+scons: Configure: ".sconf_temp/conftest_1" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -llog4cxx
+  |
+scons: Configure: (cached) yes
+
+file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+scons: Configure: ".sconf_temp/conftest_1.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_1.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_1.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1.o -c -D_MPI -Wall -g -std=c++0x .sconf_temp/conftest_1.c
+  |
+scons: Configure: ".sconf_temp/conftest_1" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -llog4cxx
+  |
+scons: Configure: (cached) yes
+
+file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+scons: Configure: ".sconf_temp/conftest_1.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_1.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_1.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1.o -c -D_MPI -Wall -g -std=c++0x .sconf_temp/conftest_1.c
+  |
+scons: Configure: ".sconf_temp/conftest_1" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -llog4cxx
+  |
+scons: Configure: (cached) yes
+
+file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+scons: Configure: ".sconf_temp/conftest_1.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_1.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_1.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1.o -c -D_MPI -Wall -g -std=c++0x .sconf_temp/conftest_1.c
+  |
+scons: Configure: ".sconf_temp/conftest_1" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -llog4cxx
+  |
+scons: Configure: (cached) yes
+
+file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+scons: Configure: ".sconf_temp/conftest_1.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_1.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_1.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1.o -c -D_MPI -Wall -g -std=c++0x .sconf_temp/conftest_1.c
+  |
+scons: Configure: ".sconf_temp/conftest_1" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -llog4cxx
+  |
+scons: Configure: (cached) yes
+
+file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+scons: Configure: ".sconf_temp/conftest_1.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_1.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_1.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1.o -c -D_MPI -Wall -g -std=c++0x .sconf_temp/conftest_1.c
+  |
+scons: Configure: ".sconf_temp/conftest_1" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -llog4cxx
+  |
+scons: Configure: (cached) yes
+
+file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+scons: Configure: ".sconf_temp/conftest_1.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_1.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_1.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1.o -c -D_MPI -Wall -g -std=c++0x .sconf_temp/conftest_1.c
+  |
+scons: Configure: ".sconf_temp/conftest_1" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -llog4cxx
+  |
+scons: Configure: (cached) yes
+
+file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+scons: Configure: ".sconf_temp/conftest_1.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_1.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_1.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1.o -c -D_MPI -Wall -g -std=c++0x .sconf_temp/conftest_1.c
+  |
+scons: Configure: ".sconf_temp/conftest_1" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -llog4cxx
+  |
+scons: Configure: (cached) yes
+
+file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+scons: Configure: ".sconf_temp/conftest_1.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_1.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_1.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1.o -c -D_MPI -Wall -g -std=c++0x .sconf_temp/conftest_1.c
+  |
+scons: Configure: ".sconf_temp/conftest_1" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -llog4cxx
+  |
+scons: Configure: (cached) yes
+
+file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+scons: Configure: ".sconf_temp/conftest_1.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_1.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_1.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1.o -c -D_MPI -Wall -g -std=c++0x .sconf_temp/conftest_1.c
+  |
+scons: Configure: ".sconf_temp/conftest_1" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -llog4cxx
+  |
+scons: Configure: (cached) yes
+
+file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+scons: Configure: ".sconf_temp/conftest_1.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_1.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_1.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1.o -c -D_MPI -Wall -g -std=c++0x .sconf_temp/conftest_1.c
+  |
+scons: Configure: ".sconf_temp/conftest_1" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -llog4cxx
+  |
+scons: Configure: (cached) yes
+
+file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+scons: Configure: ".sconf_temp/conftest_1.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_1.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_1.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1.o -c -D_MPI -Wall -g -std=c++0x .sconf_temp/conftest_1.c
+  |
+scons: Configure: ".sconf_temp/conftest_1" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -llog4cxx
+  |
+scons: Configure: (cached) yes
+

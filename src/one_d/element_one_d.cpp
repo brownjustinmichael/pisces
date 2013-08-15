@@ -69,5 +69,27 @@ namespace one_d
 			}
 			return t_timestep * inputParams["courant_factor"].asDouble;
 		}
+		
+		cuda_element::cuda_element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& inputParams, utils::messenger* i_messenger_ptr, int i_flags) : element (i_n, i_position_0, i_position_n, i_excess_0, i_excess_n, i_name, inputParams, i_messenger_ptr, i_flags) {
+			TRACE ("Initializing...");
+		
+			matrix.resize (i_n * i_n, 0.0);
+			
+			// Set up output
+			normal_stream = std::make_shared <io::incremental_output> (io::incremental_output ("../output/test_angle_" + std::to_string (name) + "_", ".dat", 4, new io::header, i_n, inputParams["output_every"].asInt));
+			normal_stream->append (cell [0]);
+			normal_stream->append ((*this) [position]);
+			normal_stream->append ((*this) [velocity]);
+			normal_stream->append ((*this) [rhs]);
+			
+			set_transform (std::make_shared <fftw_cosine> (fftw_cosine (this, n, velocity)));
+		
+			// Set up solver
+			set_solver (std::make_shared <solver> (solver (this, n, timestep, boundary_weights [edge_0], boundary_weights [edge_n], grid->get_data (0), &matrix [0], velocity, rhs)));
+			
+			normal_stream->to_file ();
+		
+			TRACE ("Initialized.");
+		}
 	} /* chebyshev */
 } /* one_d */

@@ -5,9 +5,10 @@ conf = Configure (env)
 
 objects = []
 if conf.CheckLib ("log4cxx"):
-	env.Append (LIBS = ["log4cxx"])
+    env.Append (LIBS = ["log4cxx"])
+    env.Append (CPPFLAGS = ["-D_LOG4CXX"])
 else:
-	print ("WARNING. Library log4cxx not installed. Be certain that the system knows to use alternate logger.")
+    print ("WARNING. Library log4cxx not installed. Be certain that the system knows to use alternate logger.")
 
 path = os.path.dirname (inspect.getfile (inspect.currentframe ()))
 
@@ -18,3 +19,5 @@ for dirname, dirnames, filenames in os.walk (path):
 objects.append (env.Object ("config.cpp"))
 
 env.Default (env.Program(target = "../run/main", source = (["main.cpp"] + objects)))
+
+env.Default (env.Program(target = "../run/main_cuda", source = (["main_cuda.cpp"] + objects)))

@@ -8,7 +8,7 @@
 
 #include "config.hpp"
 
-#ifdef __APPLE__
+#ifdef _LOG4CXX
 
 log4cxx::LevelPtr log_config::int_to_severity (int severity_index) {
 	switch (severity_index) {
@@ -27,18 +27,18 @@ log4cxx::LevelPtr log_config::int_to_severity (int severity_index) {
 	}
 }
 
-#endif // #ifdef __APPLE__
+#endif // _LOG4CXX
 
 void log_config::update_severity (int severity_index) {
 	severity = severity_index;
 
-#ifdef __APPLE__
+#ifdef _LOG4CXX
 		logger->setLevel (int_to_severity (severity));
-#endif // __APPLE__
+#endif // _LOG4CXX
 }
 
 void log_config::update_name (int id) {
-#ifdef __APPLE__
+#ifdef _LOG4CXX
 		
 		logger = log4cxx::Logger::getLogger ("element_" + std::to_string (id));
 		logger->setLevel (int_to_severity (severity));
@@ -46,13 +46,15 @@ void log_config::update_name (int id) {
 		logger->addAppender (new log4cxx::ConsoleAppender (new log4cxx::PatternLayout ("%-5p %c{2}: %C (%M %L) - %m%n")));
 		logger->addAppender (new log4cxx::FileAppender (new log4cxx::PatternLayout ("%d %-5p %c{2}: %C (%M %L) - %m%n"), "element_" + std::to_string (id) + ".log", false));
 		
-#endif // __APPLE__
+#endif // _LOG4CXX
 }
 
-int log_config::severity;
+int log_config::severity = 2;
 
-#ifdef __APPLE__
+#ifdef _LOG4CXX
+
 log4cxx::LoggerPtr log_config::logger = log4cxx::Logger::getLogger ("log");
-log_config log_config_instance (2);
-#endif // __APPLE__
+log_config log_config_instance;
+
+#endif // _LOG4CXX
 

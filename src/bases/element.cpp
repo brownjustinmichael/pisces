@@ -76,11 +76,31 @@ namespace bases
 		if (new_timestep != timestep) {
 			flags &= ~unchanged_timestep;
 			flags &= ~factorized;
+			INFO ("Updating timestep: " << timestep);
 		} else {
 			flags |= unchanged_timestep;
 		}
 		timestep = new_timestep;
 		
 		TRACE ("Update complete");
+	}
+	
+	void element::run () {
+		double t_timestep;
+		for (int i = 0; i < inputParams ["timesteps"].asInt; ++i) {
+			INFO ("Timestep " << i);
+			calculate ();
+			output ();
+			execute_boundaries ();
+			t_timestep = calculate_timestep ();
+			messenger_ptr->min (&t_timestep);
+			TRACE ("Updating...");
+			for (int k = 0; k < 2; ++k) {
+				attempt_update ();
+			}
+			attempt_update ();
+			update ();
+			update_timestep (t_timestep);
+		}
 	}
 } /* bases */

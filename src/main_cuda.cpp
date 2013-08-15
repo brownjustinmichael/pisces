@@ -6,6 +6,7 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
+#include "utils/utils.hpp"
 #include "config.hpp"
 #include "one_d/element_one_d.hpp"
 
@@ -93,60 +94,57 @@ int main (int argc, char *argv[])
 		++argv;
 	}
 	
-	io::parameter_map inputParams;
-	io::read_params_txt parameters ("../input/parameters.txt");
-	inputParams = parameters.load_params();
+	// io::parameter_map inputParams;
+	// io::read_params_txt parameters ("../input/parameters.txt");
+	// inputParams = parameters.load_params();
+	// 
+	// 
+	// int n = inputParams ["gridpoints"].asInt / n_elements;
+	// double position_0 = -1.0 + 2.0 / n_elements * id;
+	// double position_n = -1.0 + 2.0 / n_elements * (id + 1);
+	// int excess_0;
+	// int excess_n;
+	// if (id == 0) {
+	// 	excess_0 = 0;
+	// } else {
+	// 	excess_0 = 1;
+	// }
+	// if (id == n_elements - 1) {
+	// 	excess_n = 0;
+	// } else {
+	// 	excess_n = 1;
+	// }
+	// int name = id;
 	
-
-	int n = inputParams ["gridpoints"].asInt / n_elements;
-	double position_0 = -1.0 + 2.0 / n_elements * id;
-	double position_n = -1.0 + 2.0 / n_elements * (id + 1);
-	int excess_0;
-	int excess_n;
-	if (id == 0) {
-		excess_0 = 0;
-	} else {
-		excess_0 = 1;
-	}
-	if (id == n_elements - 1) {
-		excess_n = 0;
-	} else {
-		excess_n = 1;
-	}
-	int name = id;
+	float a [100], b [100];
 	
-	one_d::chebyshev::advection_diffusion_element element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
-	
-	if (id != 0) {
-		TRACE ("Adding boundary to " << name << " at 0 at processor " << id - 1);
-		element.add_boundary (one_d::edge_0, 1, 2, id - 1);
-	}
-	if (id != n_elements - 1) {
-		TRACE ("Adding boundary to " << name << " at n - 1 at processor " << id + 1);
-		element.add_boundary (one_d::edge_n, 2, 1, id + 1);
-	}
-
-	element.send_positions ();
-	element.recv_positions ();
-	
-	double t_timestep;
-	for (int i = 0; i < inputParams ["timesteps"].asInt; ++i) {
-		INFO ("Timestep " << i);
-		element.calculate ();
-		element.output ();
-		element.execute_boundaries ();
-		t_timestep = element.calculate_timestep ();
-		process_messenger.min (&t_timestep);
-		TRACE ("Updating...");
-		for (int k = 0; k < 2; ++k) {
-			element.attempt_update ();
-		}
-		element.attempt_update ();
-		element.update ();
-		element.update_timestep (t_timestep);
+	for (int i = 0; i < 100; ++i) {
+		a [i] = i;
 	}
 	
-	INFO ("Main complete.");
+	utils::scale (100, 2.0, a);
 	
+	for (int i = 0; i < 100; ++i) {
+		printf ("Final %d: %f\n", i, a [i]);
+	}
+	
+	// one_d::chebyshev::cuda_element element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
+	// 
+	// if (id != 0) {
+	// 	TRACE ("Adding boundary to " << name << " at 0 at processor " << id - 1);
+	// 	element.add_boundary (one_d::edge_0, 1, 2, id - 1);
+	// }
+	// if (id != n_elements - 1) {
+	// 	TRACE ("Adding boundary to " << name << " at n - 1 at processor " << id + 1);
+	// 	element.add_boundary (one_d::edge_n, 2, 1, id + 1);
+	// }
+	// 
+	// element.send_positions ();
+	// element.recv_positions ();
+	// 
+	// element.run ();
+	// 
+	// INFO ("Main complete.");
+	// 
 	return 0;
 }

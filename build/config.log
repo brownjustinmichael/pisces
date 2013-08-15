@@ -1,0 +1,20 @@
+file /Users/justinbrown/Dropbox/spectral_element/build/SConstruct,line 9:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking whether the C++ compiler works
+scons: Configure: ".sconf_temp/conftest_0.cpp" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_0.cpp <-
+  |  |
+  |  |int main()
+  |  |{
+  |  |    return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_0.o" is up to date.
+scons: Configure: The original builder output was:
+  |mpic++ -o .sconf_temp/conftest_0.o -c .sconf_temp/conftest_0.cpp
+  |
+scons: Configure: (cached) yes
+
+
