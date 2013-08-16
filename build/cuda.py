@@ -60,18 +60,18 @@ def add_common_nvcc_variables(env):
   are used by multiple builders.
   """
 
-  # "NVCC common command line"
-  # if not env.has_key('_NVCCCOMCOM'):
-  #   # nvcc needs '-I' prepended before each include path, regardless of platform
-  #   env['_NVCCWRAPCPPPATH'] = '${_concat("-I ", CPPPATH, "", __env__)}'
-  #   # prepend -Xcompiler before each flag
-  #   env['_NVCCWRAPCFLAGS'] =     '${_concat("-Xcompiler ", CFLAGS,     "", __env__)}'
-  #   env['_NVCCWRAPSHCFLAGS'] =   '${_concat("-Xcompiler ", SHCFLAGS,   "", __env__)}'
-  #   env['_NVCCWRAPCCFLAGS'] =   '${_concat("-Xcompiler ", CCFLAGS,   "", __env__)}'
-  #   env['_NVCCWRAPSHCCFLAGS'] = '${_concat("-Xcompiler ", SHCCFLAGS, "", __env__)}'
-  #   # assemble the common command line
-  #   # env['_NVCCCOMCOM'] = '${_concat("-Xcompiler ", CPPFLAGS, "", __env__)} $_CPPDEFFLAGS $_NVCCWRAPCPPPATH'
-  #   env['_NVCCCOMCOM'] = '${_concat("-Xcompiler ", NVCCFLAGS, "", __env__)} $_CPPDEFFLAGS $_NVCCWRAPCPPPATH'
+  "NVCC common command line"
+  if not env.has_key('_NVCCCOMCOM'):
+    # nvcc needs '-I' prepended before each include path, regardless of platform
+    env['_NVCCWRAPCPPPATH'] = '${_concat("-I ", CPPPATH, "", __env__)}'
+    # prepend -Xcompiler before each flag
+    env['_NVCCWRAPCFLAGS'] =     '${_concat("-Xcompiler ", CFLAGS,     "", __env__)}'
+    env['_NVCCWRAPSHCFLAGS'] =   '${_concat("-Xcompiler ", SHCFLAGS,   "", __env__)}'
+    env['_NVCCWRAPCCFLAGS'] =   '${_concat("-Xcompiler ", CCFLAGS,   "", __env__)}'
+    env['_NVCCWRAPSHCCFLAGS'] = '${_concat("-Xcompiler ", SHCCFLAGS, "", __env__)}'
+    # assemble the common command line
+    # env['_NVCCCOMCOM'] = '${_concat("-Xcompiler ", CPPFLAGS, "", __env__)} $_CPPDEFFLAGS $_NVCCWRAPCPPPATH'
+    env['_NVCCCOMCOM'] = '${_concat("-Xcompiler ", NVCCFLAGS, "", __env__)} $_CPPDEFFLAGS $_NVCCWRAPCPPPATH'
 
 def generate(env):
   """
