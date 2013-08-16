@@ -14,6 +14,7 @@
 
 #include <string>
 #include <cassert>
+#include <memory>
 #include "plan.hpp"
 #include "solver.hpp"
 #include "transform.hpp"

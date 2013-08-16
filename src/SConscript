@@ -17,8 +17,6 @@ for dirname, dirnames, filenames in os.walk (path):
 
 objects.append (env.Object ("config.cpp"))
 
-objects.append (env.Object ("test.cu"))
-
 env.Default (env.Program(target = "../run/main", source = (["main.cpp"] + objects)))
 
 env.Default (env.Program(target = "../run/main_cuda", source = (["main_cuda.cpp"] + objects)))

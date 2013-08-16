@@ -18,6 +18,7 @@
 #include "advection_one_d.h"
 #include "solver_one_d.hpp"
 #include "fftw_one_d.hpp"
+#include "fftw_one_d_cuda.hpp"
 	
 namespace one_d
 {
@@ -50,13 +51,13 @@ namespace one_d
 			normal_stream->append ((*this) [rhs]);
 			
 			// Set up plans in order
-			add_plan (std::make_shared <explicit_diffusion> (explicit_diffusion (this, diffusion_coeff * (1.0 - alpha), i_n, grid, velocity, position, rhs)));
+			add_plan (std::make_shared <explicit_diffusion> (explicit_diffusion (this, diffusion_coeff * (1.0 - alpha), i_n, &*grid, velocity, position, rhs)));
 
 			set_transform (std::make_shared <fftw_cosine> (fftw_cosine (this, n, velocity)));
 			if (advection_coeff != 0.0) {
 				add_plan (std::make_shared <advec> (advec (this, n, advection_coeff, velocity, rhs, grid)));
 			}
-			add_plan (std::make_shared <implicit_diffusion> (implicit_diffusion (this, - diffusion_coeff * alpha, i_n, grid, &matrix [0])));
+			add_plan (std::make_shared <implicit_diffusion> (implicit_diffusion (this, - diffusion_coeff * alpha, i_n, &*grid, &matrix [0])));
 		
 			// Set up solver
 			set_solver (std::make_shared <solver> (solver (this, n, i_excess_0, i_excess_n, timestep, boundary_weights [edge_0], boundary_weights [edge_n], grid->get_data (0), &matrix [0], velocity, rhs)));
@@ -92,7 +93,7 @@ namespace one_d
 			normal_stream->append ((*this) [velocity]);
 			normal_stream->append ((*this) [rhs]);
 
-			set_transform (std::make_shared <fftw_cosine> (fftw_cosine (this, n, velocity)));
+			set_transform (std::make_shared <cuda::fftw_cosine> (cuda::fftw_cosine (this, n, velocity)));
 					
 			// Set up solver
 			set_solver (std::make_shared <solver> (solver (this, n, i_excess_0, i_excess_n, timestep, boundary_weights [edge_0], boundary_weights [edge_n], grid->get_data (0), &matrix [0], velocity, rhs)));

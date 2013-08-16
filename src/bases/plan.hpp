@@ -12,7 +12,6 @@
 #ifndef PLAN_HPP_S9YPWHOM
 #define PLAN_HPP_S9YPWHOM
 
-#include <memory>
 #include "collocation.hpp"
 #include "../config.hpp"
 
@@ -123,7 +122,7 @@ namespace bases
 		 * \param i_grid A shared pointer to the collocation grid object
 		 * \param i_matrix The double matrix to be updated
 		 *********************************************************************/
-		implicit_plan (element* i_element_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_matrix) : plan (i_element_ptr) {
+		implicit_plan (element* i_element_ptr, int i_n, bases::collocation_grid* i_grid, double *i_matrix) : plan (i_element_ptr) {
 			n = i_n;
 			grid = i_grid;
 			matrix = i_matrix;
@@ -138,7 +137,7 @@ namespace bases
 		
 	protected:
 		int n; //!< An integer number of data elements
-		std::shared_ptr <bases::collocation_grid> grid; //!< A shared pointer to the grid
+		bases::collocation_grid* grid; //!< A shared pointer to the grid
 		double *matrix; //!< A double pointer to the input data
 	};
 } /* bases */

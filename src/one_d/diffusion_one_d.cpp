@@ -9,7 +9,6 @@
 #include <iostream>
 #include <cmath>
 #include <cassert>
-#include <memory>
 #include "../bases/element.hpp"
 #include "../config.hpp"
 #include "diffusion_one_d.hpp"
@@ -20,7 +19,7 @@ namespace one_d
 {
 	namespace chebyshev
 	{
-		explicit_diffusion::explicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, int i_name_in, int i_position, int i_name_out) : bases::explicit_plan (i_element_ptr, i_n, i_name_in, i_name_out) {
+		explicit_diffusion::explicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, bases::collocation_grid* i_grid, int i_name_in, int i_position, int i_name_out) : bases::explicit_plan (i_element_ptr, i_n, i_name_in, i_name_out) {
 			TRACE ("Initializing...");
 			coeff = i_coeff;
 			grid = i_grid;
@@ -47,7 +46,7 @@ namespace one_d
 			TRACE ("Operation complete.");
 		}
 		
-		implicit_diffusion::implicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_matrix) : bases::implicit_plan (i_element_ptr, i_n, i_grid, i_matrix) {
+		implicit_diffusion::implicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, bases::collocation_grid* i_grid, double *i_matrix) : bases::implicit_plan (i_element_ptr, i_n, i_grid, i_matrix) {
 			coeff = i_coeff;
 			n = i_n;
 			grid = i_grid;
