@@ -45,13 +45,11 @@ namespace one_d
 		 * \param i_excess_n The integer number of points evaluated in the adjacent element
 		 * \copydoc bases::element::element ()
 		 *********************************************************************/
-		element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : 
+		element (int i_n, double i_position_0, double i_position_n, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : 
 		bases::element (i_name, 2, i_inputParams, i_messenger_ptr, i_flags) {
 			n = i_n;
 			position_0 = i_position_0;
 			position_n = i_position_n;
-			excesses [edge_0] = i_excess_0;
-			excesses [edge_n] = i_excess_n;
 			boundary_weights [edge_0] = 0.0;
 			boundary_weights [edge_n] = 0.0;
 			
@@ -147,7 +145,7 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc one_d::element::element ()
 			 *********************************************************************/
-			element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : one_d::element (i_n, i_position_0, i_position_n, i_excess_0, i_excess_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
+			element (int i_n, double i_position_0, double i_position_n, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : one_d::element (i_n, i_position_0, i_position_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				initialize (position);
 				set_grid (std::make_shared<chebyshev_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), position_0 - position_n)));
 			}
@@ -160,8 +158,8 @@ namespace one_d
 				TRACE ("Initializing " << name);
 				if (name == position && !initial_conditions) {
 					double pioN = std::acos (-1.0) / (n - 1);
-					double scale = (position_0 - position_n) / (std::cos (excesses [edge_0] * pioN) - std::cos ((n - 1 - excesses [edge_n]) * pioN));
-					double initial_position = position_0 - scale * std::cos (excesses [edge_0] * pioN);
+					double scale = (position_0 - position_n) / 2.0;
+					double initial_position = (position_0 + position_n) / 2.0;
 					std::vector <double> init (n);
 					for (int i = 0; i < n; ++i) {
 						init [i] = scale * std::cos (i * pioN) + initial_position;

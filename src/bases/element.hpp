@@ -63,7 +63,6 @@ namespace bases
 			boundary_send_tags.resize (n_boundaries);
 			boundary_weights.resize (n_boundaries);
 			boundary_recv_tags.resize (n_boundaries);
-			excesses.resize (n_boundaries);
 			inputParams = i_inputParams;
 			messenger_ptr = i_messenger_ptr;
 			flags = i_flags;
@@ -73,29 +72,6 @@ namespace bases
 		
 		virtual ~element () {}
 		
-		bool is_linked (int edge) {
-			return boundary_bools [edge];
-		}
-		
-		int get_excess (int edge) {
-			return excesses [edge];
-		}
-		
-		int get_expected_excess (int edge) {
-			return excesses [edge];
-			/*
-				TODO Add ability to have different incoming and outgoing excess
-			*/
-		}
-		
-		/*!*******************************************************************
-		 * \brief Initialize the scalar name
-		 * 
-		 * \param name The integer name index to be initialized
-		 * \param initial_conditions The double array of initial conditions
-		 *********************************************************************/
-		virtual void initialize (int name, double* initial_conditions = NULL) = 0;
-
 		/*!*******************************************************************
 		 * \brief Get the double reference to the named scalar
 		 * 
@@ -147,34 +123,6 @@ namespace bases
 		}
 		
 		/*!*******************************************************************
-		 * \brief Reset every scalar index < 0 and converts to spectral space
-		 * 
-		 * At the beginning of each timestep, all scalars with index < 0 should
-		 * be reset (e.g. the right hand sides of equations have index < 0). 
-		 * This must be overwritten in a subclass, which should likely call
-		 * the base method. The base method converts from normal space to 
-		 * spectral space if necessary.
-		 *********************************************************************/
-		virtual void explicit_reset () {
-			if (!(flags & transformed)) {
-				transform ();
-			}
-		}
-		
-		virtual void transform () {
-			transform_forward->execute ();
-		}
-	
-		/*!*******************************************************************
-		 * \brief Reset any matrices if necessary
-		 * 
-		 * This method should be overwritten if the element solves with an
-		 * implicit part. It should only be called if the timestep duration
-		 * has changed, for the most part.
-		 *********************************************************************/
-		virtual void implicit_reset () {};
-	
-		/*!*******************************************************************
 		 * \brief Set the collocation grid.
 		 * 
 		 * TODO This assumes 1D n^3. Either the grid should be moved to a subclass or made more general
@@ -182,7 +130,7 @@ namespace bases
 		inline void set_grid (std::shared_ptr<collocation_grid> i_grid) {
 			grid = i_grid;
 		}
-	
+
 		/*!*******************************************************************
 		 * \brief Set the matrix solver.
 		 * 
@@ -191,7 +139,7 @@ namespace bases
 		inline void set_solver (std::shared_ptr<solver> i_plan) {
 			matrix_solver = i_plan;
 		}
-	
+
 		/*!*******************************************************************
 		 * \brief Set the transform operation
 		 * 
@@ -212,7 +160,7 @@ namespace bases
 			plans.push_back (std::move (i_plan));
 			TRACE ("Added.");
 		}
-		
+	
 		inline void add_boundary (int edge, int send_tag, int recv_tag, int process) {
 			TRACE ("Adding boundary, new...");
 			boundary_bools [edge] = true;
@@ -224,6 +172,42 @@ namespace bases
 			boundary_recv_tags [edge] = recv_tag;
 			boundary_processes [edge] = process;
 			TRACE ("Added.");
+		}
+		
+		/*!*******************************************************************
+		 * \brief Initialize the scalar name
+		 * 
+		 * \param name The integer name index to be initialized
+		 * \param initial_conditions The double array of initial conditions
+		 *********************************************************************/
+		virtual void initialize (int name, double* initial_conditions = NULL) = 0;
+		
+		/*!*******************************************************************
+		 * \brief Reset every scalar index < 0 and converts to spectral space
+		 * 
+		 * At the beginning of each timestep, all scalars with index < 0 should
+		 * be reset (e.g. the right hand sides of equations have index < 0). 
+		 * This must be overwritten in a subclass, which should likely call
+		 * the base method. The base method converts from normal space to 
+		 * spectral space if necessary.
+		 *********************************************************************/
+		virtual void explicit_reset () {
+			if (!(flags & transformed)) {
+				transform ();
+			}
+		}
+		
+		/*!*******************************************************************
+		 * \brief Reset any matrices if necessary
+		 * 
+		 * This method should be overwritten if the element solves with an
+		 * implicit part. It should only be called if the timestep duration
+		 * has changed, for the most part.
+		 *********************************************************************/
+		virtual void implicit_reset () {};
+		
+		virtual void transform () {
+			transform_forward->execute ();
 		}
 		
 		/*!*******************************************************************
@@ -271,6 +255,99 @@ namespace bases
 				*value *= weight;
 			}
 		}
+		
+		virtual void communicate (int n, int edge_0, int* in_0, int edge_1, int* in_1, int* out_0 = NULL, int* out_1 = NULL) {
+			DEBUG ("BEGINNING");
+
+			if (!out_0) {
+				out_0 = in_0;
+			}
+			if (!out_1) {
+				out_1 = in_1;
+			}
+			
+			if (name % 2 == 0) {
+				if (boundary_bools [edge_0]) {
+					DEBUG ("Sending edge_0 by " << name << " with " << boundary_send_tags [edge_0]);
+					messenger_ptr->send (in_0, boundary_processes [edge_0], boundary_send_tags [edge_0], 1.0, n);
+					DEBUG ("Sent");
+				}
+				if (boundary_bools [edge_1]) {
+					DEBUG ("Recving edge_1 by " << name << " with " << boundary_recv_tags [edge_1]);
+					messenger_ptr->recv (out_1, boundary_processes [edge_1], boundary_recv_tags [edge_1], 0.0, n);
+					DEBUG ("Recved");
+				}
+				if (boundary_bools [edge_0]) {
+					DEBUG ("Recving edge_0");
+					messenger_ptr->recv (out_0, boundary_processes [edge_0], boundary_recv_tags [edge_0], 0.0, n);
+					DEBUG ("Recved");
+				}
+				if (boundary_bools [edge_1]) {
+					DEBUG ("Sending edge_1");
+					messenger_ptr->send (in_1, boundary_processes [edge_1], boundary_send_tags [edge_1], 1.0, n);
+					DEBUG ("Sent");
+				}
+			}
+
+			if (name % 2 == 1) {
+				if (boundary_bools [edge_1]) {
+					DEBUG ("Recving edge_1 by " << name << " with " << boundary_recv_tags [edge_1]);
+					messenger_ptr->recv (out_1, boundary_processes [edge_1], boundary_recv_tags [edge_1], 1.0, n);
+					DEBUG ("Recved");
+				}
+				if (boundary_bools [edge_0]) {
+					DEBUG ("Sending edge_0 by " << name << " with " << boundary_send_tags [edge_0]);
+					messenger_ptr->send (in_0, boundary_processes [edge_0], boundary_send_tags [edge_0], 0.0, n);
+					DEBUG ("Sent");
+				}
+				if (boundary_bools [edge_1]) {
+					DEBUG ("Sending edge_1");
+					messenger_ptr->send (in_1, boundary_processes [edge_1], boundary_send_tags [edge_1], 1.0, n);
+					DEBUG ("Sent");
+				}
+				if (boundary_bools [edge_0]) {
+					DEBUG ("Recving edge_0");
+					messenger_ptr->recv (out_0, boundary_processes [edge_0], boundary_recv_tags [edge_0], 0.0, n);
+					DEBUG ("Recved");
+				}
+			}
+		}
+		
+		virtual void communicate (int n, int edge_0, double* in_0, int edge_1, double* in_1, double* out_0 = NULL, double* out_1 = NULL) {
+			if (!out_0) {
+				out_0 = in_0;
+			}
+			if (!out_1) {
+				out_1 = in_1;
+			}
+			
+			if (name % 2 == 0) {
+				if (boundary_bools [edge_0]) {
+					messenger_ptr->send (in_0, boundary_processes [edge_0], boundary_send_tags [edge_0], 1.0, n);
+				}
+				if (boundary_bools [edge_1]) {
+					messenger_ptr->recv (out_0, boundary_processes [edge_1], boundary_recv_tags [edge_1], 0.0, n);
+				}
+			} 
+			if (boundary_bools [edge_1]) {
+				messenger_ptr->recv (out_1, boundary_processes [edge_1], boundary_send_tags [edge_1], 1.0, n);
+			}
+			if (boundary_bools [edge_0]) {
+				messenger_ptr->send (in_1, boundary_processes [edge_0], boundary_recv_tags [edge_0], 0.0, n);
+			}
+			if (name % 2 == 1) {
+				if (boundary_bools [edge_0]) {
+					messenger_ptr->send (in_0, boundary_processes [edge_0], boundary_send_tags [edge_0], 1.0, n);
+				}
+				if (boundary_bools [edge_1]) {
+					messenger_ptr->recv (out_0, boundary_processes [edge_1], boundary_recv_tags [edge_1], 0.0, n);
+				}
+			}
+		}
+		
+		/*
+			TODO Send and recv should be consolidated into communicate
+		*/
 		
 		/*!*******************************************************************
 		 * \brief Execute the boundary conditions
@@ -335,7 +412,6 @@ namespace bases
 		std::vector <int> boundary_recv_tags;
 		std::vector <int> boundary_processes;
 		std::vector <double> boundary_weights;
-		std::vector <int> excesses;
 
 	private:
 		std::shared_ptr<solver> matrix_solver; //!< A shared pointer to the matrix solver
