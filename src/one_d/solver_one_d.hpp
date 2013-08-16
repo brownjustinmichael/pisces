@@ -71,7 +71,7 @@ namespace one_d
 		std::vector <double> positions_0;
 		std::vector <double> positions_n;
 		std::vector <double> factorized_matrix;
-		std::vector<int> ipiv; //!< A vector of integers needed to calculate the factorization
+		std::vector <int> ipiv; //!< A vector of integers needed to calculate the factorization
 		
 		/*!*******************************************************************
 		 * \copydoc bases::solver::factorize ()

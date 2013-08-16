@@ -193,6 +193,7 @@ namespace bases
 		 * spectral space if necessary.
 		 *********************************************************************/
 		virtual void explicit_reset () {
+			DEBUG ("FLAGS " << flags);
 			if (!(flags & transformed)) {
 				transform ();
 			}
@@ -272,6 +273,10 @@ namespace bases
 				}
 			}
 		}
+		
+		/*
+			TODO This might be able to be contained entirely within the messenger
+		*/
 		
 		/*!*******************************************************************
 		 * \brief Execute the boundary conditions

@@ -17,9 +17,9 @@ namespace bases
 {
 	void element::calculate () {
 		TRACE ("Calculating...");
-				
-		flags &= ~implicit_started;
-		flags &= ~explicit_started;
+		
+		explicit_reset ();
+		implicit_reset ();
 		
 		TRACE ("Writing to file...");
 		
@@ -85,8 +85,11 @@ namespace bases
 		double t_timestep;
 		for (int i = 0; i < inputParams ["timesteps"].asInt; ++i) {
 			INFO ("Timestep " << i);
+			DEBUG ("FLAGS " << flags);
 			calculate ();
+			DEBUG ("FLAGS " << flags);
 			output ();
+			DEBUG ("FLAGS " << flags);
 			execute_boundaries ();
 			t_timestep = calculate_timestep ();
 			messenger_ptr->min (&t_timestep);

@@ -33,21 +33,9 @@ namespace bases
 	
 	void explicit_plan::execute () {
 		plan::execute ();
-		TRACE ("Executing...");
-		if (!(*flags_ptr & explicit_started)) {
-			element_ptr->explicit_reset ();
-			*flags_ptr |= explicit_started;
-		}
-		TRACE ("Executed.");
 	}
 	
 	void implicit_plan::execute () {
 		plan::execute ();
-		TRACE ("Executing...");
-		if (!(*flags_ptr & implicit_started)) {
-			element_ptr->implicit_reset ();
-			*flags_ptr |= implicit_started;
-		}
-		TRACE ("Executed.");
 	}
 } /* bases */

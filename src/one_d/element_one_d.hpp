@@ -234,6 +234,8 @@ namespace one_d
 					utils::scale (n * n, 0.0, &matrix [0]);
 				}
 			}
+			
+			virtual double calculate_timestep ();
 		
 		private:
 			std::vector<double> matrix; //!< A vector containing the double matrix used in the implicit solver

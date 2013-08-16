@@ -35,7 +35,6 @@ namespace one_d
 			double diffusion_coeff = inputParams["diffusion_coeff"].asDouble;
 			double advection_coeff = inputParams["advection_coeff"].asDouble; 
 			double alpha = 0.5;
-			std::vector <double> init (n);
 		
 			assert (n > 0);
 		
@@ -79,6 +78,9 @@ namespace one_d
 		
 		cuda_element::cuda_element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& inputParams, utils::messenger* i_messenger_ptr, int i_flags) : 
 		element (i_n, return_position (i_n, 0, i_excess_0, i_position_0, i_excess_n, i_position_n), return_position (i_n, i_n - 1, i_excess_0, i_position_0, i_excess_n, i_position_n), i_name, inputParams, i_messenger_ptr, i_flags) {
+
+			assert (n > 0);
+		
 			TRACE ("Initializing...");
 		
 			matrix.resize (i_n * i_n, 0.0);
@@ -89,15 +91,20 @@ namespace one_d
 			normal_stream->append ((*this) [position]);
 			normal_stream->append ((*this) [velocity]);
 			normal_stream->append ((*this) [rhs]);
-			
+
 			set_transform (std::make_shared <fftw_cosine> (fftw_cosine (this, n, velocity)));
-		
+					
 			// Set up solver
 			set_solver (std::make_shared <solver> (solver (this, n, i_excess_0, i_excess_n, timestep, boundary_weights [edge_0], boundary_weights [edge_n], grid->get_data (0), &matrix [0], velocity, rhs)));
 			
 			normal_stream->to_file ();
 		
-			TRACE ("Initialized.");
+			TRACE ("Initialized." << flags);
+
+		}
+		
+		double cuda_element::calculate_timestep () {
+			return 0.0;
 		}
 	} /* chebyshev */
 } /* one_d */

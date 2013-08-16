@@ -6,30 +6,35 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
+#ifndef UTILS_CUBLAS_HCU_K6B7R3SS
+#define UTILS_CUBLAS_HCU_K6B7R3SS
+
 #include <cublas.h>
 #include <stdio.h>
 
 namespace utils
 {
-	namespace cublas
+	namespace cuda
 	{
-		void HANDLE_STATUS (cublasStatus status) {
-			switch (status) {
-				case CUBLAS_STATUS_NOT_INITIALIZED: printf ("CUBLAS didn't initialize correctly.\n"); throw 0; 
-				case CUBLAS_STATUS_ALLOC_FAILED: printf ("CUBLAS allocation failed.\n"); throw 0; 
-				case CUBLAS_STATUS_INVALID_VALUE: printf ("CUBLAS unsupported value or parameter.\n"); throw 0; 
-				case CUBLAS_STATUS_ARCH_MISMATCH: printf ("CUBLAS feature absent in current architecture.\n"); throw 0; 
-				case CUBLAS_STATUS_MAPPING_ERROR: printf ("CUBLAS access to GPU memory failed.\n"); throw 0;
-				case CUBLAS_STATUS_EXECUTION_FAILED: printf ("CUBLAS failed to execute.\n"); throw 0;
-				case CUBLAS_STATUS_INTERNAL_ERROR: printf ("CUBLAS internal operation failed.\n"); throw 0;
-			}
-		}
-	
-		template <class datatype>
-		struct cublas_vector 
+		void HANDLE_STATUS (cublasStatus status);
+		
+		struct config
 		{
 		public:
-			cublas_vector (int i_n, datatype *x = NULL, int incx = 1) {
+			config () {
+				HANDLE_STATUS (cublasInit ());
+			}
+		
+			virtual ~config () {
+				HANDLE_STATUS (cublasShutdown ());
+			}
+		};
+		
+		template <class datatype>
+		struct vector 
+		{
+		public:
+			vector (int i_n, datatype *x = NULL, int incx = 1) {
 				inc_vect = 1;
 				n = i_n;
 				HANDLE_STATUS (cublasAlloc (n, sizeof (datatype), (void**) &vect));
@@ -38,11 +43,11 @@ namespace utils
 				}
 			}
 		
-			~cublas_vector () {
+			~vector () {
 				HANDLE_STATUS (cublasFree (vect));
 			}
 		
-			datatype* operator& () {
+			datatype* pointer () {
 				return vect;
 			}
 		
@@ -63,39 +68,32 @@ namespace utils
 			datatype* vect;
 			int inc_vect;
 		};
-	
-		struct cublas_config
-		{
-		public:
-			cublas_config () {
-				HANDLE_STATUS (cublasInit ());
-			}
 		
-			virtual ~cublas_config () {
-				HANDLE_STATUS (cublasShutdown ());
-			}
-		};
+		typedef vector <float> vect_float;
+		typedef vector <double> vect_double;
 		
-		void copy (int n, float* x, float* y, int incx, int incy);
+		void copy (int n, vect_float* x, vect_float* y, int incx = 1, int incy = 1);
 	
-		void copy (int n, double* x, double* y, int incx, int incy);
+		void copy (int n, vect_double* x, vect_double* y, int incx = 1, int incy = 1);
 	
-		void scale (int n, float a, float* x, int incx);
+		void scale (int n, float a, vect_float* x, int incx = 1);
 		
-		void scale (int n, double a, double* x, int incx);
+		void scale (int n, double a, vect_double* x, int incx = 1);
 
-		double dot (int n, float* x, float* y, int incx, int incy);
+		double dot (int n, vect_float* x, vect_float* y, int incx = 1, int incy = 1);
 	
-		double dot (int n, double* x, double* y, int incx, int incy);
+		double dot (int n, vect_double* x, vect_double* y, int incx = 1, int incy = 1);
 
-		void add_scaled (int n, float a, float *x, float *y, int incx, int incy);
+		void add_scaled (int n, float a, vect_float* x, vect_float* y, int incx = 1, int incy = 1);
 	
-		void add_scaled (int n, double a, double *x, double *y, int incx, int incy);
+		void add_scaled (int n, double a, vect_double* x, vect_double* y, int incx = 1, int incy = 1);
 	
-		void matrix_vector_multiply (int m, int n, float alpha, float *a, float *x, float beta, float *y, int lda, int incx, int incy);
+		void matrix_vector_multiply (int m, int n, float alpha, vect_float* a, vect_float* x, float beta, vect_float* y, int lda, int incx = 1, int incy = 1);
 		
-		void matrix_vector_multiply (int m, int n, double alpha, double *a, double *x, double beta, double *y, int lda, int incx, int incy);
+		void matrix_vector_multiply (int m, int n, double alpha, vect_double* a, vect_double* x, double beta, vect_double y, int lda, int incx = 1, int incy = 1);
 		
 	} /* cublas */
 
 } /* utils */
+
+#endif /* end of include guard: UTILS_CUBLAS_HCU_K6B7R3SS */

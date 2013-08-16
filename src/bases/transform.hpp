@@ -38,7 +38,9 @@ namespace bases
 		/*!*******************************************************************
 		 * \copybrief bases::explicit_plan::execute ()
 		 *********************************************************************/
-		virtual void execute () {}
+		virtual void execute () {
+			explicit_plan::execute ();
+		}
 	};
 } /* bases */
 

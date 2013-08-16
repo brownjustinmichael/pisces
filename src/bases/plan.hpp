@@ -43,9 +43,7 @@ enum index {
  * \brief A set of flags to be used with the plan class
  *********************************************************************/
 enum plan_flags {
-	unchanged_timestep = 0x400,
-	implicit_started = 0x100,
-	explicit_started = 0x200
+	unchanged_timestep = 0x400
 };
 
 namespace bases

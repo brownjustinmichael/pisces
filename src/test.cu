@@ -6,10 +6,8 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
+#include "utils/utils_cublas.hcu"
 #include "config.hpp"
-#include "one_d/element_one_d.hpp"
-
-#include "mpi.h"
 
 /*!*******************************************************************
  * \mainpage
@@ -69,69 +67,62 @@
  * \param argc The integer number of command line arguments
  * \param argv The character array of command line arguments
  *********************************************************************/
-int main (int argc, char *argv[])
-{
-	int id;
-	int n_elements;
+
+void test () {
+	// io::parameter_map inputParams;
+	// io::read_params_txt parameters ("../input/parameters.txt");
+	// inputParams = parameters.load_params();
+	// 
+	// 
+	// int n = inputParams ["gridpoints"].asInt / n_elements;
+	// double position_0 = -1.0 + 2.0 / n_elements * id;
+	// double position_n = -1.0 + 2.0 / n_elements * (id + 1);
+	// int excess_0;
+	// int excess_n;
+	// if (id == 0) {
+	// 	excess_0 = 0;
+	// } else {
+	// 	excess_0 = 1;
+	// }
+	// if (id == n_elements - 1) {
+	// 	excess_n = 0;
+	// } else {
+	// 	excess_n = 1;
+	// }
+	// int name = id;
 	
-	// Initialize messenger
-	utils::messenger process_messenger (&argc, &argv);
-
-	id = process_messenger.get_id ();
-	n_elements = process_messenger.get_np ();
-
-	log_config::update_name (id);
-
-	// The program runs through the execution flags.
-	while ((argc > 1) && (argv [1] [0] == '-')) {
-		switch (argv [1] [1]) {
-			// Debug switch
-			case 'D':
-				log_config::update_severity (atoi (&(argv [1] [2])));
-				break;
-		}
-		--argc;
-		++argv;
-	}
+	float a [100];
 		
-	io::parameter_map inputParams;
-	io::read_params_txt parameters ("../input/parameters.txt");
-	inputParams = parameters.load_params();
-	
-	
-	int n = inputParams ["gridpoints"].asInt / n_elements;
-	double position_0 = -1.0 + 2.0 / n_elements * id;
-	double position_n = -1.0 + 2.0 / n_elements * (id + 1);
-	int excess_0;
-	int excess_n;
-	if (id == 0) {
-		excess_0 = 0;
-	} else {
-		excess_0 = 1;
-	}
-	if (id == n_elements - 1) {
-		excess_n = 0;
-	} else {
-		excess_n = 1;
-	}
-	int name = id;
-	
-	one_d::chebyshev::cuda_element element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
-	
-	if (id != 0) {
-		TRACE ("Adding boundary to " << name << " at 0 at processor " << id - 1);
-		element.add_boundary (one_d::edge_0, 1, 2, id - 1);
-	}
-	if (id != n_elements - 1) {
-		TRACE ("Adding boundary to " << name << " at n - 1 at processor " << id + 1);
-		element.add_boundary (one_d::edge_n, 2, 1, id + 1);
+	for (int i = 0; i < 100; ++i) {
+		a [i] = i;
 	}
 	
-	element.send_positions ();
+	utils::cuda::vector <float> dev_a (100, a), dev_b (100);
 	
-	element.run ();
+	utils::cuda::scale (100, (float) 2.0, &dev_a);
 	
-	INFO ("Main complete.");
+	dev_a.copy_to_host (100, a);
 	
-	return 0;
+	for (int i = 0; i < 100; ++i) {
+		printf ("Final %d: %f\n", i, a [i]);
+	}
+	
+	// one_d::chebyshev::cuda_element element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
+	// 
+	// if (id != 0) {
+	// 	TRACE ("Adding boundary to " << name << " at 0 at processor " << id - 1);
+	// 	element.add_boundary (one_d::edge_0, 1, 2, id - 1);
+	// }
+	// if (id != n_elements - 1) {
+	// 	TRACE ("Adding boundary to " << name << " at n - 1 at processor " << id + 1);
+	// 	element.add_boundary (one_d::edge_n, 2, 1, id + 1);
+	// }
+	// 
+	// element.send_positions ();
+	// element.recv_positions ();
+	// 
+	// element.run ();
+	// 
+	// INFO ("Main complete.");
+	// 
 }
