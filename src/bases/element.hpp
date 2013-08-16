@@ -13,6 +13,7 @@
 #define ELEMENT_HPP_IUTSU4TQ
 
 #include <string>
+#include <cassert>
 #include "plan.hpp"
 #include "solver.hpp"
 #include "transform.hpp"
@@ -217,137 +218,60 @@ namespace bases
 		 *********************************************************************/
 		virtual void calculate ();
 		
-		/*!*******************************************************************
-		 * \brief Send all relevant boundary data to adjacent elements
-		 * 
-		 * In general, this should not be overwritten in subclasses.
-		 *********************************************************************/
-		virtual void send (int n, double weight, double* value, int edge, int inc = 1) {
-			TRACE ("Sending...");
-			if (boundary_bools [edge]) {
-				messenger_ptr->send (value, boundary_processes [edge], boundary_send_tags [edge], weight, n, inc);
-			}
-		}
-		virtual void send (int n, int weight, int* value, int edge, int inc = 1) {
-			TRACE ("Sending...");
-			if (boundary_bools [edge]) {
-				messenger_ptr->send (value, boundary_processes [edge], boundary_send_tags [edge], weight, n, inc);
-			}
-		}
-		/*!*******************************************************************
-		 * \brief Receive all relevant boundary data from adjacent elements
-		 * 
-		 * In general, this should not be overwritten in subclasses.
-		 *********************************************************************/
-		virtual void recv (int n, double weight, double* value, int edge, int inc = 1) {
-			TRACE ("Recving...");
-			if (boundary_bools [edge]) {
-				messenger_ptr->recv (value, boundary_processes [edge], boundary_recv_tags [edge], weight, n, inc);
-			} else {
-				*value *= weight;
-			}
-		}
-		virtual void recv (int n, int weight, int* value, int edge, int inc = 1) {
-			TRACE ("Recving...");
-			if (boundary_bools [edge]) {
-				messenger_ptr->recv (value, boundary_processes [edge], boundary_recv_tags [edge], weight, n, inc);
-			} else {
-				*value *= weight;
-			}
-		}
+		template <class datatype>
+		void communicate (int in_n_0, int edge_0, datatype* in_0, int in_n_1, int edge_1, datatype* in_1, datatype* out_0, datatype* out_1, int out_n_0 = -1, int out_n_1 = -1) {
+			TRACE ("Communicating...");
 		
-		virtual void communicate (int n, int edge_0, int* in_0, int edge_1, int* in_1, int* out_0 = NULL, int* out_1 = NULL) {
-			DEBUG ("BEGINNING");
+			assert (out_0 != in_0);
+			assert (out_0 != in_1);
+			assert (out_1 != in_0);
+			assert (out_1 != in_1);
 
-			if (!out_0) {
-				out_0 = in_0;
+			if (out_n_0 == -1) {
+				out_n_0 = in_n_0;
 			}
-			if (!out_1) {
-				out_1 = in_1;
+			if (out_n_1 == -1) {
+				out_n_1 = in_n_1;
 			}
 			
 			if (name % 2 == 0) {
 				if (boundary_bools [edge_0]) {
-					DEBUG ("Sending edge_0 by " << name << " with " << boundary_send_tags [edge_0]);
-					messenger_ptr->send (in_0, boundary_processes [edge_0], boundary_send_tags [edge_0], 1.0, n);
-					DEBUG ("Sent");
+					messenger_ptr->send (in_0, boundary_processes [edge_0], boundary_send_tags [edge_0], (datatype) 1, in_n_0);
+					messenger_ptr->recv (out_0, boundary_processes [edge_0], boundary_recv_tags [edge_0], (datatype) 0, out_n_0);
+				} else {
+					for (int i = 0; i < out_n_0; ++i) {
+						out_0 [i] = (datatype) 0;
+					}
 				}
 				if (boundary_bools [edge_1]) {
-					DEBUG ("Recving edge_1 by " << name << " with " << boundary_recv_tags [edge_1]);
-					messenger_ptr->recv (out_1, boundary_processes [edge_1], boundary_recv_tags [edge_1], 0.0, n);
-					DEBUG ("Recved");
-				}
-				if (boundary_bools [edge_0]) {
-					DEBUG ("Recving edge_0");
-					messenger_ptr->recv (out_0, boundary_processes [edge_0], boundary_recv_tags [edge_0], 0.0, n);
-					DEBUG ("Recved");
-				}
-				if (boundary_bools [edge_1]) {
-					DEBUG ("Sending edge_1");
-					messenger_ptr->send (in_1, boundary_processes [edge_1], boundary_send_tags [edge_1], 1.0, n);
-					DEBUG ("Sent");
+					messenger_ptr->recv (out_1, boundary_processes [edge_1], boundary_recv_tags [edge_1], (datatype) 0, out_n_1);
+					messenger_ptr->send (in_1, boundary_processes [edge_1], boundary_send_tags [edge_1], (datatype) 1, in_n_1);
+				} else {
+					for (int i = 0; i < out_n_1; ++i) {
+						out_1 [i] = (datatype) 0;
+					}
 				}
 			}
-
+		
 			if (name % 2 == 1) {
 				if (boundary_bools [edge_1]) {
-					DEBUG ("Recving edge_1 by " << name << " with " << boundary_recv_tags [edge_1]);
-					messenger_ptr->recv (out_1, boundary_processes [edge_1], boundary_recv_tags [edge_1], 1.0, n);
-					DEBUG ("Recved");
+					messenger_ptr->recv (out_1, boundary_processes [edge_1], boundary_recv_tags [edge_1], (datatype) 0, out_n_1);
+					messenger_ptr->send (in_1, boundary_processes [edge_1], boundary_send_tags [edge_1], (datatype) 1, in_n_1);
+				} else {
+					for (int i = 0; i < out_n_1; ++i) {
+						out_1 [i] = (datatype) 0;
+					}
 				}
 				if (boundary_bools [edge_0]) {
-					DEBUG ("Sending edge_0 by " << name << " with " << boundary_send_tags [edge_0]);
-					messenger_ptr->send (in_0, boundary_processes [edge_0], boundary_send_tags [edge_0], 0.0, n);
-					DEBUG ("Sent");
-				}
-				if (boundary_bools [edge_1]) {
-					DEBUG ("Sending edge_1");
-					messenger_ptr->send (in_1, boundary_processes [edge_1], boundary_send_tags [edge_1], 1.0, n);
-					DEBUG ("Sent");
-				}
-				if (boundary_bools [edge_0]) {
-					DEBUG ("Recving edge_0");
-					messenger_ptr->recv (out_0, boundary_processes [edge_0], boundary_recv_tags [edge_0], 0.0, n);
-					DEBUG ("Recved");
+					messenger_ptr->send (in_0, boundary_processes [edge_0], boundary_send_tags [edge_0], (datatype) 1, in_n_0);
+					messenger_ptr->recv (out_0, boundary_processes [edge_0], boundary_recv_tags [edge_0], (datatype) 0, out_n_0);
+				} else {
+					for (int i = 0; i < out_n_0; ++i) {
+						out_0 [i] = (datatype) 0;
+					}
 				}
 			}
 		}
-		
-		virtual void communicate (int n, int edge_0, double* in_0, int edge_1, double* in_1, double* out_0 = NULL, double* out_1 = NULL) {
-			if (!out_0) {
-				out_0 = in_0;
-			}
-			if (!out_1) {
-				out_1 = in_1;
-			}
-			
-			if (name % 2 == 0) {
-				if (boundary_bools [edge_0]) {
-					messenger_ptr->send (in_0, boundary_processes [edge_0], boundary_send_tags [edge_0], 1.0, n);
-				}
-				if (boundary_bools [edge_1]) {
-					messenger_ptr->recv (out_0, boundary_processes [edge_1], boundary_recv_tags [edge_1], 0.0, n);
-				}
-			} 
-			if (boundary_bools [edge_1]) {
-				messenger_ptr->recv (out_1, boundary_processes [edge_1], boundary_send_tags [edge_1], 1.0, n);
-			}
-			if (boundary_bools [edge_0]) {
-				messenger_ptr->send (in_1, boundary_processes [edge_0], boundary_recv_tags [edge_0], 0.0, n);
-			}
-			if (name % 2 == 1) {
-				if (boundary_bools [edge_0]) {
-					messenger_ptr->send (in_0, boundary_processes [edge_0], boundary_send_tags [edge_0], 1.0, n);
-				}
-				if (boundary_bools [edge_1]) {
-					messenger_ptr->recv (out_0, boundary_processes [edge_1], boundary_recv_tags [edge_1], 0.0, n);
-				}
-			}
-		}
-		
-		/*
-			TODO Send and recv should be consolidated into communicate
-		*/
 		
 		/*!*******************************************************************
 		 * \brief Execute the boundary conditions
@@ -367,8 +291,6 @@ namespace bases
 
 		virtual void send_positions ();
 		
-		virtual void recv_positions ();
-
 		virtual void update ();
 		
 		virtual void update_timestep (double new_timestep);

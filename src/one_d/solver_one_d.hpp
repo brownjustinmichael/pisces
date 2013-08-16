@@ -48,8 +48,6 @@ namespace one_d
 		
 		void send_positions ();
 		
-		void recv_positions ();
-		
 		void update ();
 
 	protected:
@@ -67,6 +65,8 @@ namespace one_d
 		
 		std::vector <double> error_0;
 		std::vector <double> error_n;
+		std::vector <double> out_error_0;
+		std::vector <double> out_error_n;
 		std::vector <double> data_temp;
 		std::vector <double> positions_0;
 		std::vector <double> positions_n;

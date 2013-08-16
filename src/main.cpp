@@ -133,7 +133,6 @@ int main (int argc, char *argv[])
 	}
 
 	element.send_positions ();
-	element.recv_positions ();
 	
 	element.run ();
 	

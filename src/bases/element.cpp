@@ -15,7 +15,7 @@
 
 namespace bases
 {
-	void element::calculate () {		
+	void element::calculate () {
 		TRACE ("Calculating...");
 				
 		flags &= ~implicit_started;
@@ -60,10 +60,6 @@ namespace bases
 	
 	void element::send_positions () {
 		matrix_solver->send_positions ();
-	}
-	
-	void element::recv_positions () {
-		matrix_solver->recv_positions ();
 	}
 	
 	void element::update () {

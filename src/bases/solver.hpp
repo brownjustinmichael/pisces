@@ -50,8 +50,6 @@ namespace bases
 
 		virtual void send_positions () = 0;
 		
-		virtual void recv_positions () = 0;
-
 		virtual void update () = 0;
 		
 	protected:		

@@ -27,14 +27,16 @@ namespace one_d
 		
 		TRACE ("Instantiating...");
 		
-		data_temp.resize (n, 0.0);
+		expected_excess_0 = 0;
+		expected_excess_n = 0;
 		rhs = &((*element_ptr) [i_name_rhs]);
 		default_matrix = i_default_matrix;
-		matrix = i_matrix;
+		matrix = i_matrix;		
+		data_temp.resize (n, 0.0);
 		factorized_matrix.resize (n * n);
 		ipiv.resize (n, 0);
-		error_0.resize (std::max (excess_0, expected_excess_0) + 1, 0.0);
-		error_n.resize (std::max (excess_n, expected_excess_n) + 1, 0.0);
+
+		TRACE ("Instantiated");
 		
 		/*
 			TODO It would be nice if the boundaries were established by the time this was called so that positions and excesses could be exchanged in the constructor
@@ -72,8 +74,6 @@ namespace one_d
 		
 		TRACE ("Solving...");
 		
-		DEBUG ("error " << excess_0 << " " << excess_n);
-		
 		utils::copy (n, data_in, &data_temp [0]);
 		
 		data_temp [excess_0] += alpha_0 * timestep * rhs [excess_0] + error_0 [0];
@@ -101,30 +101,20 @@ namespace one_d
 				TODO Replace this with a more useful exception that can be handled
 			*/
 		}
-		
-		DEBUG("HERE")
 				
-		error_0 [0] = (alpha_0 * timestep) * (rhs [excess_0] - utils::dot (n, matrix + excess_0, &data_temp [0], n));
-		error_n [0] = (alpha_n * timestep) * (rhs [n - 1 - excess_n] - utils::dot (n, matrix + n - 1 - excess_n, &data_temp [0], n));
-		for (int i = 0; i < excess_0; ++i) {
-			DEBUG ("THERE" << i + 1 << " " << error_0.size () << " " << positions_0.size () << " " << positions_n.size ())
-			error_0 [i + 1] = utils::dot_interpolate (n, &((*element_ptr) (position)), n, default_matrix, &data_temp [0], positions_0 [i]);
+		out_error_0 [0] = (alpha_0 * timestep) * (rhs [excess_0] - utils::dot (n, matrix + excess_0, &data_temp [0], n));
+		out_error_n [0] = (alpha_n * timestep) * (rhs [n - 1 - excess_n] - utils::dot (n, matrix + n - 1 - excess_n, &data_temp [0], n));
+		for (int i = 0; i < expected_excess_0; ++i) {
+			out_error_0 [i + 1] = utils::dot_interpolate (n, &((*element_ptr) (position)), n, default_matrix, &data_temp [0], positions_0 [i]);
 		}
-		for (int i = 0; i < excess_n; ++i) {
-			DEBUG ("EVERYWHERE" << i + 1 << " " << error_n.size () << " " << positions_0.size () << " " << positions_n.size ())
-			error_n [i + 1] = utils::dot_interpolate (n, &((*element_ptr) (position)), n, default_matrix, &data_temp [0], positions_n [i]);
+		for (int i = 0; i < expected_excess_n; ++i) {
+			out_error_n [i + 1] = utils::dot_interpolate (n, &((*element_ptr) (position)), n, default_matrix, &data_temp [0], positions_n [i]);
 		}
+				
+		element_ptr->communicate <double> (expected_excess_0 + 1, edge_0, &out_error_0 [0], expected_excess_n + 1, edge_n, &out_error_n [0], &error_0 [0], &error_n [0], excess_0 + 1, excess_n + 1);
 		
-		DEBUG ("Further" << error_0.size () << " " << error_n.size ());
-		
-		
-		element_ptr->send (expected_excess_0 + 1, 1.0, &error_0 [0], edge_0);
-		element_ptr->send (expected_excess_n + 1, 1.0, &error_n [0], edge_n);
-		
-		element_ptr->recv (excess_0 + 1, 0.0, &error_0 [0], edge_0);
-		element_ptr->recv (excess_n + 1, 0.0, &error_n [0], edge_n);
 		for (int i = 0; i < excess_0; ++i) {
-			error_0 [i + 1] -= data_in [excess_0 - 1 - i];
+			error_0 [i + 1] -= data_in [i];
 		}
 		for (int i = 0; i < excess_n; ++i) {
 			error_n [i + 1] -= data_in [n - excess_n + i];
@@ -136,31 +126,16 @@ namespace one_d
 	void solver::send_positions () {
 		TRACE ("Sending positions...");
 		
-		DEBUG ("Before: " << excess_0 << " " << excess_n << " " << expected_excess_0 << " " << expected_excess_n);
-		element_ptr->communicate (1, edge_0, &excess_0, edge_n, &excess_n, &expected_excess_0, &expected_excess_n);
-		DEBUG ("After: " << expected_excess_0 << " " << expected_excess_n);
+		element_ptr->communicate <int> (1, edge_0, &excess_0, 1, edge_n, &excess_n, &expected_excess_0, &expected_excess_n);
 		
-		if (excess_0 != 0 && (int) positions_0.size () == 0) {
-			element_ptr->send (excess_0, 1.0, &((*element_ptr) (position)), edge_0);
-		} 
-		if (excess_n != 0 && (int) positions_n.size () == 0) {
-			element_ptr->send (excess_n, 1.0, &((*element_ptr) (position, n - 1)), edge_n, -1);
-		}
-	}
-	
-	void solver::recv_positions () {
-		TRACE ("Recving positions...");
+		error_0.resize (excess_0 + 1, 0.0);
+		error_n.resize (excess_n + 1, 0.0);
+		out_error_0.resize (expected_excess_0 + 1, 0.0);
+		out_error_n.resize (expected_excess_n + 1, 0.0);
+		positions_0.resize (expected_excess_0);
+		positions_n.resize (expected_excess_n);
 		
-		DEBUG ("1. " << expected_excess_0 << " " << (int) positions_0.size ())
-		if (expected_excess_0 != 0 && (int) positions_0.size () == 0) {
-			positions_0.resize (expected_excess_0);
-			element_ptr->recv (expected_excess_0, 0.0, &positions_0 [0], edge_0);
-		}
-		DEBUG ("2. " << expected_excess_n << " " << (int) positions_n.size ())
-		if (expected_excess_n != 0 && (int) positions_n.size () == 0) {
-			positions_n.resize (expected_excess_n);
-			element_ptr->recv (expected_excess_n, 0.0, &positions_n [0], edge_n);
-		}
+		element_ptr->communicate <double> (excess_0, edge_0, &((*element_ptr) (position)), excess_n, edge_n, &((*element_ptr) (position, n - 1)), &positions_0 [0], &positions_n [0], expected_excess_0, expected_excess_n);
 	}
 	
 	void solver::update () {
