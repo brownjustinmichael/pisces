@@ -12,10 +12,14 @@ if not conf.CheckCXX ():
     env ["CXX"] = OCXX
 else:
     env.Append (CPPFLAGS = ["-D_MPI"])
+    env.Append (NVCCFLAGS = ["-D_MPI"])
 
 conf.Finish ()
 
+env.Tool ('cuda')
+
 # env = Environment (ENV = os.environ, CXX = "g++")
 env.Append (CPPFLAGS = ["-Wall", "-g", "-std=c++0x"])
+env.Append (NVCCFLAGS = ["-g"])
 
 env.SConscript ("../src/SConscript", variant_dir = ".", duplicate = 0, exports = {"env": env})

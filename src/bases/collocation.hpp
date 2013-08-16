@@ -68,7 +68,7 @@ namespace bases
 		int derivs; //!< The integer number of derivatives deep the collocation grid runs
 	
 	private:
-		std::vector<std::vector<double>> data; //!< A double vector containing the collocation points
+		std::vector<std::vector<double> > data; //!< A double vector containing the collocation points
 	};
 } /* bases */
 

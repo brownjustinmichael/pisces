@@ -1,13 +1,19 @@
 Import ("env")
 Import ("objects")
 
-for lib in ["lapack", "blas", "atlas"]:
+conf = Configure (env)
+
+for lib in ["lapack", "blas", "atlas", "cublas"]:
     if lib not in env ['LIBS']:
-        env.Append (LIBS = lib)
+        conf.CheckLib (lib)
+
+env = conf.Finish ()
 
 objects.append (env.Object ("utils_mpi.cpp"))
 
 objects.append (env.Object ("utils_lapack.cpp"))
+
+objects.append (env.Object ("utils_cublas.cu"))
 
 objects.append (env.Object ("interpolate.cpp"))
 

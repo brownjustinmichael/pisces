@@ -5,10 +5,9 @@ conf = Configure (env)
 
 objects = []
 if conf.CheckLib ("log4cxx"):
-    env.Append (LIBS = ["log4cxx"])
     env.Append (CPPFLAGS = ["-D_LOG4CXX"])
-else:
-    print ("WARNING. Library log4cxx not installed. Be certain that the system knows to use alternate logger.")
+
+env = conf.Finish ()
 
 path = os.path.dirname (inspect.getfile (inspect.currentframe ()))
 

@@ -15,13 +15,13 @@ namespace utils
 	{
 		void HANDLE_STATUS (cublasStatus status) {
 			switch (status) {
-				case CUBLAS_STATUS_NOT_INITIALIZED: printf ("CUBLAS didn't initialize correctly."); throw 0; 
-				case CUBLAS_STATUS_ALLOC_FAILED: printf ("CUBLAS allocation failed."); throw 0; 
-				case CUBLAS_STATUS_INVALID_VALUE: printf ("CUBLAS unsupported value or parameter."); throw 0; 
-				case CUBLAS_STATUS_ARCH_MISMATCH: printf ("CUBLAS feature absent in current architecture."); throw 0; 
-				case CUBLAS_STATUS_MAPPING_ERROR: printf ("CUBLAS access to GPU memory failed."); throw 0;
-				case CUBLAS_STATUS_EXECUTION_FAILED: printf ("CUBLAS failed to execute."); throw 0;
-				case CUBLAS_STATUS_INTERNAL_ERROR: printf ("CUBLAS internal operation failed."); throw 0;
+				case CUBLAS_STATUS_NOT_INITIALIZED: printf ("CUBLAS didn't initialize correctly.\n"); throw 0; 
+				case CUBLAS_STATUS_ALLOC_FAILED: printf ("CUBLAS allocation failed.\n"); throw 0; 
+				case CUBLAS_STATUS_INVALID_VALUE: printf ("CUBLAS unsupported value or parameter.\n"); throw 0; 
+				case CUBLAS_STATUS_ARCH_MISMATCH: printf ("CUBLAS feature absent in current architecture.\n"); throw 0; 
+				case CUBLAS_STATUS_MAPPING_ERROR: printf ("CUBLAS access to GPU memory failed.\n"); throw 0;
+				case CUBLAS_STATUS_EXECUTION_FAILED: printf ("CUBLAS failed to execute.\n"); throw 0;
+				case CUBLAS_STATUS_INTERNAL_ERROR: printf ("CUBLAS internal operation failed.\n"); throw 0;
 			}
 		}
 	
@@ -32,7 +32,6 @@ namespace utils
 			cublas_vector (int i_n, datatype *x = NULL, int incx = 1) {
 				inc_vect = 1;
 				n = i_n;
-				is_active = true;
 				HANDLE_STATUS (cublasAlloc (n, sizeof (datatype), (void**) &vect));
 				if (x) {
 					copy_to_device (n, x, incx);
@@ -68,14 +67,35 @@ namespace utils
 		struct cublas_config
 		{
 		public:
-			cublas_handler () {
+			cublas_config () {
 				HANDLE_STATUS (cublasInit ());
 			}
 		
-			virtual ~cublas_handler () {
+			virtual ~cublas_config () {
 				HANDLE_STATUS (cublasShutdown ());
 			}
-		};		
+		};
+		
+		void copy (int n, float* x, float* y, int incx, int incy);
+	
+		void copy (int n, double* x, double* y, int incx, int incy);
+	
+		void scale (int n, float a, float* x, int incx);
+		
+		void scale (int n, double a, double* x, int incx);
+
+		double dot (int n, float* x, float* y, int incx, int incy);
+	
+		double dot (int n, double* x, double* y, int incx, int incy);
+
+		void add_scaled (int n, float a, float *x, float *y, int incx, int incy);
+	
+		void add_scaled (int n, double a, double *x, double *y, int incx, int incy);
+	
+		void matrix_vector_multiply (int m, int n, float alpha, float *a, float *x, float beta, float *y, int lda, int incx, int incy);
+		
+		void matrix_vector_multiply (int m, int n, double alpha, double *a, double *x, double beta, double *y, int lda, int incx, int incy);
+		
 	} /* cublas */
 
 } /* utils */
