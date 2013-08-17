@@ -12,6 +12,11 @@
 #include "../config.hpp"
 #include "../bases/transform.hpp"
 
+#ifndef __CUDACC__
+class cufftHandle;
+class cufftComplex;
+#endif // __CUDACC__
+
 namespace bases
 {
 	class element;
@@ -34,7 +39,7 @@ namespace one_d
 			 *********************************************************************/
 			fftw_cosine (bases::element* i_element_ptr, int i_n, int i_name_in, int i_name_out = null);
 		
-			virtual ~fftw_cosine () {}
+			virtual ~fftw_cosine ();
 		
 			/*!*******************************************************************
 			 * \copydoc bases::transform::execute ()
@@ -44,7 +49,9 @@ namespace one_d
 		private:
 			int padded_n;
 			double scalar; //!< The scalar used after the transform (1 / sqrt (2 * (n - 1)))
-			fftw_plan fourier_plan; //!< The fftw_plan object to be executed
+			cufftComplex* data;
+			cufftHandle* plan;
+			// fftw_plan fourier_plan; //!< The fftw_plan object to be executed
 		};
 	} /* cuda */
 } /* one_d */

@@ -9,11 +9,9 @@ for lib in ["lapack", "blas", "atlas", "cublas"]:
 
 env = conf.Finish ()
 
-objects.append (env.Object ("utils_mpi.cpp"))
-
 objects.append (env.Object ("utils_lapack.cpp"))
 
-objects.append (env.Object ("utils_cublas.cu"))
+# objects.append (env.Object ("utils_cublas.cu"))
 
 objects.append (env.Object ("interpolate.cpp"))
 

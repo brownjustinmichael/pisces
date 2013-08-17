@@ -19,4 +19,4 @@ objects.append (env.Object ("config.cpp"))
 
 env.Default (env.Program(target = "../run/main", source = (["main.cpp"] + objects)))
 
-env.Default (env.Program(target = "../run/main_cuda", source = (["main_cuda.cpp"] + objects)))
+# env.Default (env.Program(target = "../run/main_cuda", source = (["main_cuda.cpp"] + objects)))

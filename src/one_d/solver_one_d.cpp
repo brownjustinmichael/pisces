@@ -101,7 +101,7 @@ namespace one_d
 				TODO Replace this with a more useful exception that can be handled
 			*/
 		}
-				
+		
 		out_error_0 [0] = (alpha_0 * timestep) * (rhs [excess_0] - utils::dot (n, matrix + excess_0, &data_temp [0], n));
 		out_error_n [0] = (alpha_n * timestep) * (rhs [n - 1 - excess_n] - utils::dot (n, matrix + n - 1 - excess_n, &data_temp [0], n));
 		for (int i = 0; i < expected_excess_0; ++i) {
@@ -110,8 +110,11 @@ namespace one_d
 		for (int i = 0; i < expected_excess_n; ++i) {
 			out_error_n [i + 1] = utils::dot_interpolate (n, &((*element_ptr) (position)), n, default_matrix, &data_temp [0], positions_n [i]);
 		}
-				
-		element_ptr->communicate <double> (expected_excess_0 + 1, edge_0, &out_error_0 [0], expected_excess_n + 1, edge_n, &out_error_n [0], &error_0 [0], &error_n [0], excess_0 + 1, excess_n + 1);
+		
+		messenger_ptr->send (expected_excess_0 + 1, &out_error_0 [0], edge_0);
+		messenger_ptr->send (expected_excess_n + 1, &out_error_n [0], edge_n);
+		messenger_ptr->recv (excess_0 + 1, &error_0 [0], edge_0);
+		messenger_ptr->recv (excess_n + 1, &error_n [0], edge_n);
 		
 		for (int i = 0; i < excess_0; ++i) {
 			error_0 [i + 1] -= data_in [i];
@@ -126,7 +129,10 @@ namespace one_d
 	void solver::send_positions () {
 		TRACE ("Sending positions...");
 		
-		element_ptr->communicate <int> (1, edge_0, &excess_0, 1, edge_n, &excess_n, &expected_excess_0, &expected_excess_n);
+		messenger_ptr->send (1, &excess_0, edge_0);
+		messenger_ptr->send (1, &excess_n, edge_n);
+		messenger_ptr->recv (1, &expected_excess_0, edge_0);
+		messenger_ptr->recv (1, &expected_excess_n, edge_n);
 		
 		error_0.resize (excess_0 + 1, 0.0);
 		error_n.resize (excess_n + 1, 0.0);
@@ -135,7 +141,11 @@ namespace one_d
 		positions_0.resize (expected_excess_0);
 		positions_n.resize (expected_excess_n);
 		
-		element_ptr->communicate <double> (excess_0, edge_0, &((*element_ptr) (position)), excess_n, edge_n, &((*element_ptr) (position, n - 1)), &positions_0 [0], &positions_n [0], expected_excess_0, expected_excess_n);
+		messenger_ptr->send (excess_0, &((*element_ptr) (position)), edge_0);
+		messenger_ptr->send (excess_n, &((*element_ptr) (position, n - 1)), edge_n);
+		messenger_ptr->recv (expected_excess_0, &positions_0 [0], edge_0);
+		messenger_ptr->recv (expected_excess_n, &positions_n [0], edge_n);
+		
 	}
 	
 	void solver::update () {

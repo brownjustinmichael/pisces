@@ -16,6 +16,7 @@ namespace bases
 		TRACE ("Instantiating...");
 		element_ptr = i_element_ptr;
 		flags_ptr = &(element_ptr->flags);
+		messenger_ptr = element_ptr->messenger_ptr;
 		TRACE ("Instantiated.");
 	}
 	

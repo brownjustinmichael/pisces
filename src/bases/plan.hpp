@@ -48,6 +48,7 @@ enum plan_flags {
 namespace bases
 {
 	class element;
+	class messenger;
 	
 	/*!*******************************************************************
 	* \brief The basic functional unit, containing a recipe for execution
@@ -79,6 +80,7 @@ namespace bases
 		int default_flags; //!< An integer set of default flags to use in case the user does not specify any flags
 		int *flags_ptr; //!< A pointer to the integer execution flags
 		element* element_ptr; //!< A pointer to the element with which the plan is associated
+		messenger* messenger_ptr; //!< A pointer to the messenger associated with the element
 	};
 
 	/*!*******************************************************************

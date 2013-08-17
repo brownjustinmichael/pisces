@@ -19,18 +19,9 @@
 #include "solver.hpp"
 #include "transform.hpp"
 #include "../utils/io.hpp"
-#include "../utils/messenger.hpp"
+#include "messenger.hpp"
 #include "collocation.hpp"
 #include "../config.hpp"
-
-enum element_flags {
-	recv_first = 0x800
-};
-
-enum boundary_flags {
-	linked_0 = 0x20,
-	linked_n = 0x40
-};
 
 namespace bases
 {	
@@ -58,7 +49,7 @@ namespace bases
 		* \param i_inputParams The parameter object that contains the input parameters of the run
 		* \param i_flags An integer set of execution flags
 		*********************************************************************/
-		element (int i_name, int n_boundaries, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : inputParams (i_inputParams) {
+		element (int i_name, int n_boundaries, io::parameter_map& i_inputParams, messenger* i_messenger_ptr, int i_flags) : inputParams (i_inputParams) {
 			name = i_name;
 			boundary_bools.resize (n_boundaries);
 			boundary_processes.resize (n_boundaries);
@@ -70,6 +61,13 @@ namespace bases
 			flags = i_flags;
 			timestep = 0.0;
 			duration = 0.0;
+			for (int i = 0; i < n_boundaries; ++i) {
+				if (messenger_ptr->linked (i)) {
+					boundary_weights [i] = 0.5;
+				} else {
+					boundary_weights [i] = 0.0;
+				}
+			}
 		}
 		
 		virtual ~element () {}
@@ -194,7 +192,6 @@ namespace bases
 		 * spectral space if necessary.
 		 *********************************************************************/
 		virtual void explicit_reset () {
-			DEBUG ("FLAGS " << flags);
 			if (!(flags & transformed)) {
 				transform ();
 			}
@@ -219,65 +216,6 @@ namespace bases
 		 * In general, this should not be overwritten in subclasses.
 		 *********************************************************************/
 		virtual void calculate ();
-		
-		template <class datatype>
-		void communicate (int in_n_0, int edge_0, datatype* in_0, int in_n_1, int edge_1, datatype* in_1, datatype* out_0, datatype* out_1, int out_n_0 = -1, int out_n_1 = -1) {
-			TRACE ("Communicating...");
-		
-			assert (out_0 != in_0);
-			assert (out_0 != in_1);
-			assert (out_1 != in_0);
-			assert (out_1 != in_1);
-
-			if (out_n_0 == -1) {
-				out_n_0 = in_n_0;
-			}
-			if (out_n_1 == -1) {
-				out_n_1 = in_n_1;
-			}
-			
-			if (name % 2 == 0) {
-				if (boundary_bools [edge_0]) {
-					messenger_ptr->send (in_0, boundary_processes [edge_0], boundary_send_tags [edge_0], (datatype) 1, in_n_0);
-					messenger_ptr->recv (out_0, boundary_processes [edge_0], boundary_recv_tags [edge_0], (datatype) 0, out_n_0);
-				} else {
-					for (int i = 0; i < out_n_0; ++i) {
-						out_0 [i] = (datatype) 0;
-					}
-				}
-				if (boundary_bools [edge_1]) {
-					messenger_ptr->recv (out_1, boundary_processes [edge_1], boundary_recv_tags [edge_1], (datatype) 0, out_n_1);
-					messenger_ptr->send (in_1, boundary_processes [edge_1], boundary_send_tags [edge_1], (datatype) 1, in_n_1);
-				} else {
-					for (int i = 0; i < out_n_1; ++i) {
-						out_1 [i] = (datatype) 0;
-					}
-				}
-			}
-		
-			if (name % 2 == 1) {
-				if (boundary_bools [edge_1]) {
-					messenger_ptr->recv (out_1, boundary_processes [edge_1], boundary_recv_tags [edge_1], (datatype) 0, out_n_1);
-					messenger_ptr->send (in_1, boundary_processes [edge_1], boundary_send_tags [edge_1], (datatype) 1, in_n_1);
-				} else {
-					for (int i = 0; i < out_n_1; ++i) {
-						out_1 [i] = (datatype) 0;
-					}
-				}
-				if (boundary_bools [edge_0]) {
-					messenger_ptr->send (in_0, boundary_processes [edge_0], boundary_send_tags [edge_0], (datatype) 1, in_n_0);
-					messenger_ptr->recv (out_0, boundary_processes [edge_0], boundary_recv_tags [edge_0], (datatype) 0, out_n_0);
-				} else {
-					for (int i = 0; i < out_n_0; ++i) {
-						out_0 [i] = (datatype) 0;
-					}
-				}
-			}
-		}
-		
-		/*
-			TODO This might be able to be contained entirely within the messenger
-		*/
 		
 		/*!*******************************************************************
 		 * \brief Execute the boundary conditions
@@ -318,7 +256,7 @@ namespace bases
 	protected:
 		int name; //!< A string representation of the element, to be used in file output
 		io::parameter_map& inputParams; //!< The map that contains the input parameters
-		utils::messenger* messenger_ptr;
+		messenger* messenger_ptr;
 		
 		int flags; //!< An integer set of execution flags
 

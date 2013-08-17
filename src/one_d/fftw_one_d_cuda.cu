@@ -7,20 +7,34 @@
  ************************************************************************/
 
 #include <math.h>
-#include <fftw3.h>
+#include <cufft.h>
 #include "fftw_one_d_cuda.hpp"
-#include "../utils/utils.hpp"
-#define SWAP(a,b) tempr=(a);(a)=(b);(b)=tempr
+#include "../utils/utils_cublas.hcu"
 #define PI 3.141592653589793
 
 namespace one_d
 {
 	namespace cuda
 	{
+		__global__ void real_to_complex (int n, double* in, cufftComplex* out) {
+			int tid = threadIdx.x;
+			out [tid].x = in [tid];
+			out [tid].y = 0.0;
+		}
+		
 		fftw_cosine::fftw_cosine (bases::element* i_element_ptr, int i_n, int i_name_in, int i_name_out) : 
 		bases::transform (i_element_ptr, i_n, i_name_in, i_name_out) {
-			scalar = 1.0 / sqrt (2.0 * (n - 1));
-			fourier_plan = fftw_plan_r2r_1d (n, data_in, data_out, FFTW_REDFT00, FFTW_ESTIMATE);
+			cudaMalloc ((void **) data, n * sizeof (cufftComplex));
+			if (cudaGetLastError() != cudaSuccess){
+				fprintf(stderr, "Cuda error: Failed to allocate\n");
+				throw 1;	
+			}
+			
+			// fourier_plan = fftw_plan_r2r_1d (n, data_in, data_out, FFTW_REDFT00, FFTW_ESTIMATE);
+		}
+		
+		fftw_cosine::~fftw_cosine () {
+			
 		}
 		
 		void fftw_cosine::execute () {
@@ -31,7 +45,7 @@ namespace one_d
 				*flags_ptr |= transformed;
 			}
 			
-			fftw_execute (fourier_plan);	
+			// fftw_execute (fourier_plan);	
 
 			for (int i = 0; i < n + 1; ++i) {
 				data_out [i] *= scalar;

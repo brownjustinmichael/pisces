@@ -45,14 +45,12 @@ namespace one_d
 		 * \param i_excess_n The integer number of points evaluated in the adjacent element
 		 * \copydoc bases::element::element ()
 		 *********************************************************************/
-		element (int i_n, double i_position_0, double i_position_n, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : 
+		element (int i_n, double i_position_0, double i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
 		bases::element (i_name, 2, i_inputParams, i_messenger_ptr, i_flags) {
 			n = i_n;
 			position_0 = i_position_0;
 			position_n = i_position_n;
-			boundary_weights [edge_0] = 0.0;
-			boundary_weights [edge_n] = 0.0;
-			
+
 			cell.resize (i_n);
 			for (int i = 0; i < i_n; ++i) {
 				cell [i] = i;
@@ -145,7 +143,7 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc one_d::element::element ()
 			 *********************************************************************/
-			element (int i_n, double i_position_0, double i_position_n, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : one_d::element (i_n, i_position_0, i_position_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
+			element (int i_n, double i_position_0, double i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : one_d::element (i_n, i_position_0, i_position_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				initialize (position);
 				set_grid (std::make_shared<chebyshev_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), position_0 - position_n)));
 			}
@@ -201,7 +199,7 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc element::element ()
 			 *********************************************************************/
-			advection_diffusion_element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags);
+			advection_diffusion_element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags);
 			
 			virtual ~advection_diffusion_element () {}
 		
@@ -225,7 +223,7 @@ namespace one_d
 		class cuda_element : public element
 		{
 		public:
-			cuda_element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_input_Params, utils::messenger* i_messenger_ptr, int i_flags);
+			cuda_element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_input_Params, bases::messenger* i_messenger_ptr, int i_flags);
 			
 			virtual ~cuda_element () {}
 		

@@ -75,7 +75,7 @@ int main (int argc, char *argv[])
 	int n_elements;
 	
 	// Initialize messenger
-	utils::messenger process_messenger (&argc, &argv);
+	bases::messenger process_messenger (&argc, &argv);
 
 	id = process_messenger.get_id ();
 	n_elements = process_messenger.get_np ();

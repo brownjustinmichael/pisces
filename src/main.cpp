@@ -79,7 +79,7 @@ int main (int argc, char *argv[])
 	
 #if _MPI
 	// Initialize messenger
-	utils::messenger process_messenger (&argc, &argv);
+	bases::messenger process_messenger (&argc, &argv, 2);
 
 	id = process_messenger.get_id ();
 	n_elements = process_messenger.get_np ();
@@ -120,17 +120,18 @@ int main (int argc, char *argv[])
 		excess_n = 1;
 	}
 	int name = id;
-	
-	one_d::chebyshev::advection_diffusion_element element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
-	
+
 	if (id != 0) {
 		TRACE ("Adding boundary to " << name << " at 0 at processor " << id - 1);
-		element.add_boundary (one_d::edge_0, 1, 2, id - 1);
+		process_messenger.add_boundary (one_d::edge_0, id - 1);
 	}
 	if (id != n_elements - 1) {
 		TRACE ("Adding boundary to " << name << " at n - 1 at processor " << id + 1);
-		element.add_boundary (one_d::edge_n, 2, 1, id + 1);
+		process_messenger.add_boundary (one_d::edge_n, id + 1);
 	}
+	
+	one_d::chebyshev::advection_diffusion_element element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
+
 
 	element.send_positions ();
 	
