@@ -60,6 +60,9 @@ namespace bases
 	class plan
 	{
 	public:
+		/*!**********************************************************************
+		 * \param i_element_ptr A pointer to the associated element
+		 ************************************************************************/
 		plan (element* i_element_ptr);
 		
 		virtual ~plan () {}
@@ -95,6 +98,7 @@ namespace bases
 		 * \param i_n The integer number of elements in the data
 		 * \param i_name_in The integer scalar index of the input
 		 * \param i_name_out The integer scalar index of the output
+		 * \copydoc plan::plan ()
 		 *********************************************************************/
 		explicit_plan (element* i_element_ptr, int i_n, int i_name_in, int i_name_out = null);
 	
@@ -123,6 +127,7 @@ namespace bases
 		 * \param i_n The integer number of elements in a row of the square i_matrix
 		 * \param i_grid A shared pointer to the collocation grid object
 		 * \param i_matrix The double matrix to be updated
+		 * \copydoc plan::plan ()
 		 *********************************************************************/
 		implicit_plan (element* i_element_ptr, int i_n, bases::collocation_grid* i_grid, double *i_matrix) : plan (i_element_ptr) {
 			n = i_n;

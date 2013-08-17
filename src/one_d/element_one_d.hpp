@@ -105,12 +105,12 @@ namespace one_d
 		 * \copydoc bases::element::execute_boundaries ()
 		 *********************************************************************/
 		inline void execute_boundaries () {
-			if (!(boundary_bools [edge_0])) {
+			if (messenger_ptr->linked (edge_0)) {
 				for (iterator iter = begin (); iter != end (); ++iter) {
 					(*this) (*iter, 0) = fixed_points_0 [*iter];
 				}
 			}
-			if (!(boundary_bools [edge_n])) {
+			if (messenger_ptr->linked (edge_n)) {
 				for (iterator iter = begin (); iter != end (); ++iter) {
 					(*this) (*iter, n - 1) = fixed_points_n [*iter];
 				}

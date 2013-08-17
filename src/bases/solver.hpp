@@ -33,7 +33,8 @@ namespace bases
 		/*!*******************************************************************
 		 * \copydoc explicit_plan::explicit_plan ()
 		 *********************************************************************/
-		solver (element* i_element_ptr, int i_n, int i_name_in, int i_name_out) : explicit_plan (i_element_ptr, i_n, i_name_in, i_name_out) {}
+		solver (element* i_element_ptr, int i_n, int i_name_in, int i_name_out) : 
+		explicit_plan (i_element_ptr, i_n, i_name_in, i_name_out) {}
 		
 		virtual ~solver () {}
 			
@@ -49,7 +50,10 @@ namespace bases
 		}
 
 		virtual void send_positions () = 0;
-		
+
+		/*!**********************************************************************
+		 * TODO This could be contained within execute and be signaled with a flag
+		 ************************************************************************/
 		virtual void update () = 0;
 		
 	protected:		

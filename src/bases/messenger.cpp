@@ -36,39 +36,7 @@ namespace bases
 		process_queue [edge_to_index (recv_mode, edge)] = process;
 	}
 	
-	int messenger::edge_to_index (int mode, int edge) {
-		if (id % 2 == 0) {
-			if (edge % 2 == 0) {
-				return 2 * edge + mode;
-			} else {
-				return 2 * edge + 1 - mode;
-			}
-		} else {
-			if (edge % 2 == 0) {
-				return 2 * (1 + edge) + mode;
-			} else {
-				return 2 * (edge - 1) + 1 - mode;
-			}
-		}
-	}
-	
-	int messenger::index_to_mode (int index) {
-		if (id % 2 == 0) {
-			if (index % 4 == 0 || index % 4 == 3) {
-				return send_mode;
-			} else {
-				return recv_mode;
-			}
-		} else {
-			if (index % 4 == 1 || index % 4 == 2) {
-				return send_mode;
-			} else {
-				return recv_mode;
-			}
-		}
-	}
-	
-	void messenger::send (int n, double* data, int edge, int inc) {
+	void messenger::send (int n, double* data, int edge) {
 		if (double_data_queue [edge_to_index (send_mode, edge)]) {
 			FATAL ("Message already in queue at this edge.");
 			throw 0;
@@ -85,7 +53,7 @@ namespace bases
 		double_check ();
 	}
 	
-	void messenger::recv (int n, double* data, int edge, int inc) {
+	void messenger::recv (int n, double* data, int edge) {
 		if (double_data_queue [edge_to_index (recv_mode, edge)]) {
 			FATAL ("Message already in queue at this edge.");
 			throw 0;
@@ -124,7 +92,7 @@ namespace bases
 		}
 	}
 
-	void messenger::send (int n, int* data, int edge, int inc) {
+	void messenger::send (int n, int* data, int edge) {
 		if (int_data_queue [edge_to_index (send_mode, edge)]) {
 			FATAL ("Message already in queue at this edge.");
 			throw 0;
@@ -141,7 +109,7 @@ namespace bases
 		int_check ();
 	}
 	
-	void messenger::recv (int n, int* data, int edge, int inc) {
+	void messenger::recv (int n, int* data, int edge) {
 		if (int_data_queue [edge_to_index (recv_mode, edge)]) {
 			FATAL ("Message already in queue at this edge.");
 			throw 0;
