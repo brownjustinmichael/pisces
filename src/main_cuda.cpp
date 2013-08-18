@@ -11,64 +11,6 @@
 
 #include "mpi.h"
 
-/*!*******************************************************************
- * \mainpage
- *
- * \author Justin Brown
- * \author Ryan Moll
- *
- * \section Introduction
- *
- * The goal of this project is to set up a code designed to do 2D 
- * Anelastic simulations using a spectral element scheme. Currently, 
- * the aim is do get the solution to the 1D advection-diffusion 
- * equation for a constant background flow.
- *
- * Possible further reaching goals: 3D, pseudo-incompressible
- *********************************************************************/
-
-/*!*******************************************************************
- * \namespace bases
- * 
- * \brief A namespace containing the base classes of the code
- *********************************************************************/
-
-/*!*******************************************************************
- * \namespace io
- * 
- * \brief A namespace containing all the input and output classes of the code
- *********************************************************************/
-
-/*!*******************************************************************
- * \namespace utils
- * 
- * \brief A namespace containing the various utilities needed in the code, such as linear algebra
- *********************************************************************/
-
-/*!*******************************************************************
- * \namespace one_d
- * 
- * \brief A namespace containing all the 1D pieces of the code
- *********************************************************************/
-
-/*!*******************************************************************
- * \namespace one_d::chebyshev
- * 
- * \brief A namespace containing the 1D Chebyshev pieces of the code
- *********************************************************************/
-
-/*!*******************************************************************
- * \namespace two_d
- * 
- * \brief A namespace containing all the 2D pieces of the code
- *********************************************************************/
-
-/*!*******************************************************************
- * \brief The main call
- * 
- * \param argc The integer number of command line arguments
- * \param argv The character array of command line arguments
- *********************************************************************/
 int main (int argc, char *argv[])
 {
 	int id;

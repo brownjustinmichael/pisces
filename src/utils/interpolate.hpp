@@ -11,11 +11,27 @@
 
 namespace utils
 {
-	double interpolate (int n, double* dx, double* dy, double x);
+	/*!**********************************************************************
+	 * \brief Interpolate over the array dy at x_0
+	 * 
+	 * \param n The integer number of elements in dx, dy
+	 * \param x The double array of independent variables
+	 * \param y The double array of dependent variables
+	 * \param x_0 The double value at which to interpolate
+	 ************************************************************************/
+	double interpolate (int n, double* x, double* y, double x_0);
 	
-	void matrix_interpolate (int n, double* dx, int m, double* dy, double da, int incy, double* douty, double x);
-	
-	double dot_interpolate (int n, double* dx, int m, double* dy, double* df, double x);
+	/*!**********************************************************************
+	 * \brief Interpolate a matrix multiplication at x_0
+	 * 
+	 * \param n The integer number of elements in x, rows in y
+	 * \param x The double array of independent variables
+	 * \param m The integer number of columns in y, elements in f
+	 * \param y The double array matrix to interpolate
+	 * \param f The double array with which to take the dot product
+	 * \param x_0 The double value at which to interpolate
+	 ************************************************************************/
+	double dot_interpolate (int n, double* x, int m, double* y, double* f, double x_0);
 	
 } /* utils */
 

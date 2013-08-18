@@ -35,12 +35,25 @@ namespace one_d
 		data_temp.resize (n, 0.0);
 		factorized_matrix.resize (n * n);
 		ipiv.resize (n, 0);
-
-		TRACE ("Instantiated");
 		
-		/*
-			TODO It would be nice if the boundaries were established by the time this was called so that positions and excesses could be exchanged in the constructor
-		*/
+		messenger_ptr->send (1, &excess_0, edge_0);
+		messenger_ptr->send (1, &excess_n, edge_n);
+		messenger_ptr->recv (1, &expected_excess_0, edge_0);
+		messenger_ptr->recv (1, &expected_excess_n, edge_n);
+		
+		error_0.resize (excess_0 + 1, 0.0);
+		error_n.resize (excess_n + 1, 0.0);
+		out_error_0.resize (expected_excess_0 + 1, 0.0);
+		out_error_n.resize (expected_excess_n + 1, 0.0);
+		positions_0.resize (expected_excess_0);
+		positions_n.resize (expected_excess_n);
+		
+		messenger_ptr->send (excess_0, &((*element_ptr) (position)), edge_0);
+		messenger_ptr->send (excess_n, &((*element_ptr) (position, n - 1)), edge_n);
+		messenger_ptr->recv (expected_excess_0, &positions_0 [0], edge_0);
+		messenger_ptr->recv (expected_excess_n, &positions_n [0], edge_n);
+		
+		TRACE ("Instantiated");
 	}
 	
 	void solver::factorize () {
@@ -74,82 +87,60 @@ namespace one_d
 		
 		TRACE ("Solving...");
 		
-		utils::copy (n, data_in, &data_temp [0]);
-		
-		data_temp [excess_0] += alpha_0 * timestep * rhs [excess_0] + error_0 [0];
-		for (int i = 0; i < excess_0; ++i) {
-			data_temp [i] += error_0 [excess_0 - i]; 
-		}
-		data_temp [n - 1 - excess_n] += alpha_n * timestep * rhs [n - 1 - excess_n] + error_n [0];
-		for (int i = 0; i < excess_n; ++i) {
-			data_temp [n - excess_n + i] += error_n [i + 1];
-		}
-		utils::add_scaled (n - 2 - excess_0 - excess_n, timestep, rhs + 1 + excess_0, &data_temp [excess_0 + 1]);
-				
-		utils::matrix_solve (n, &factorized_matrix [0], &ipiv [0], &data_temp [0], &info);
-		
-		for (int i = 0; i < n; ++i) {
-			if (std::isnan (data_temp [i])) {
-				info = -1;
+		for (int j = 0; j < 3; ++j) {
+			out_error_0 [0] = (alpha_0 * timestep) * (rhs [excess_0] - utils::dot (n, matrix + excess_0, &data_temp [0], n));
+			out_error_n [0] = (alpha_n * timestep) * (rhs [n - 1 - excess_n] - utils::dot (n, matrix + n - 1 - excess_n, &data_temp [0], n));
+			for (int i = 0; i < expected_excess_0; ++i) {
+				out_error_0 [i + 1] = utils::dot_interpolate (n, &((*element_ptr) (position)), n, default_matrix, &data_temp [0], positions_0 [i]);
 			}
+			for (int i = 0; i < expected_excess_n; ++i) {
+				out_error_n [i + 1] = utils::dot_interpolate (n, &((*element_ptr) (position)), n, default_matrix, &data_temp [0], positions_n [i]);
+			}
+		
+			messenger_ptr->send (expected_excess_0 + 1, &out_error_0 [0], edge_0);
+			messenger_ptr->send (expected_excess_n + 1, &out_error_n [0], edge_n);
+			messenger_ptr->recv (excess_0 + 1, &error_0 [0], edge_0);
+			messenger_ptr->recv (excess_n + 1, &error_n [0], edge_n);
+		
+			for (int i = 0; i < excess_0; ++i) {
+				error_0 [i + 1] -= data_in [i];
+			}
+			for (int i = 0; i < excess_n; ++i) {
+				error_n [i + 1] -= data_in [n - excess_n + i];
+			}	
+			
+			utils::copy (n, data_in, &data_temp [0]);
+		
+			data_temp [excess_0] += alpha_0 * timestep * rhs [excess_0] + error_0 [0];
+			for (int i = 0; i < excess_0; ++i) {
+				data_temp [i] += error_0 [excess_0 - i]; 
+			}
+			data_temp [n - 1 - excess_n] += alpha_n * timestep * rhs [n - 1 - excess_n] + error_n [0];
+			for (int i = 0; i < excess_n; ++i) {
+				data_temp [n - excess_n + i] += error_n [i + 1];
+			}
+			utils::add_scaled (n - 2 - excess_0 - excess_n, timestep, rhs + 1 + excess_0, &data_temp [excess_0 + 1]);
+				
+			utils::matrix_solve (n, &factorized_matrix [0], &ipiv [0], &data_temp [0], &info);
+		
+			for (int i = 0; i < n; ++i) {
+				if (std::isnan (data_temp [i])) {
+					info = -1;
+				}
+			}
+		
+			if (info != 0) {
+				ERROR ("Unable to solve factorized matrix equation");
+				throw 0; // For now, kill the program. 
+				/*
+					TODO Replace this with a more useful exception that can be handled
+				*/
+			}
+			
 		}
-		
-		if (info != 0) {
-			ERROR ("Unable to solve factorized matrix equation");
-			throw 0; // For now, kill the program. 
-			/*
-				TODO Replace this with a more useful exception that can be handled
-			*/
-		}
-		
-		out_error_0 [0] = (alpha_0 * timestep) * (rhs [excess_0] - utils::dot (n, matrix + excess_0, &data_temp [0], n));
-		out_error_n [0] = (alpha_n * timestep) * (rhs [n - 1 - excess_n] - utils::dot (n, matrix + n - 1 - excess_n, &data_temp [0], n));
-		for (int i = 0; i < expected_excess_0; ++i) {
-			out_error_0 [i + 1] = utils::dot_interpolate (n, &((*element_ptr) (position)), n, default_matrix, &data_temp [0], positions_0 [i]);
-		}
-		for (int i = 0; i < expected_excess_n; ++i) {
-			out_error_n [i + 1] = utils::dot_interpolate (n, &((*element_ptr) (position)), n, default_matrix, &data_temp [0], positions_n [i]);
-		}
-		
-		messenger_ptr->send (expected_excess_0 + 1, &out_error_0 [0], edge_0);
-		messenger_ptr->send (expected_excess_n + 1, &out_error_n [0], edge_n);
-		messenger_ptr->recv (excess_0 + 1, &error_0 [0], edge_0);
-		messenger_ptr->recv (excess_n + 1, &error_n [0], edge_n);
-		
-		for (int i = 0; i < excess_0; ++i) {
-			error_0 [i + 1] -= data_in [i];
-		}
-		for (int i = 0; i < excess_n; ++i) {
-			error_n [i + 1] -= data_in [n - excess_n + i];
-		}
-		
-		TRACE ("Solve complete.")
-	}
-	
-	void solver::send_positions () {
-		TRACE ("Sending positions...");
-		
-		messenger_ptr->send (1, &excess_0, edge_0);
-		messenger_ptr->send (1, &excess_n, edge_n);
-		messenger_ptr->recv (1, &expected_excess_0, edge_0);
-		messenger_ptr->recv (1, &expected_excess_n, edge_n);
-		
-		error_0.resize (excess_0 + 1, 0.0);
-		error_n.resize (excess_n + 1, 0.0);
-		out_error_0.resize (expected_excess_0 + 1, 0.0);
-		out_error_n.resize (expected_excess_n + 1, 0.0);
-		positions_0.resize (expected_excess_0);
-		positions_n.resize (expected_excess_n);
-		
-		messenger_ptr->send (excess_0, &((*element_ptr) (position)), edge_0);
-		messenger_ptr->send (excess_n, &((*element_ptr) (position, n - 1)), edge_n);
-		messenger_ptr->recv (expected_excess_0, &positions_0 [0], edge_0);
-		messenger_ptr->recv (expected_excess_n, &positions_n [0], edge_n);
-		
-	}
-	
-	void solver::update () {
 		TRACE ("Updating...");
 		utils::copy (n, &data_temp [0], data_out);
+		
+		TRACE ("Solve complete.")
 	}
 } /* one_d */

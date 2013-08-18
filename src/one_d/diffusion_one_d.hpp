@@ -40,7 +40,7 @@ namespace one_d
 			* \param i_grid a shared pointer to the collocation_grid, which must be defined for the second derivative
 			* \copydoc bases::explicit_plan::explicit_plan ()
 			*********************************************************************/
-			explicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, bases::collocation_grid* i_grid, int i_name_in, int i_position, int i_name_out = null);
+			explicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, bases::collocation_grid* i_grid, int i_name_in, int i_name_out = null);
 
 			virtual ~explicit_diffusion () {}
 
@@ -51,7 +51,6 @@ namespace one_d
 
 		private:
 			double coeff; //!< A double that represents the coefficient in front of the diffusion term in the differential equation
-			int position;
 			bases::collocation_grid* grid; //!< A pointer to a collocation grid that contains the the Chebyshev values
 		};
 
@@ -65,9 +64,6 @@ namespace one_d
 		public:
 			/*!*******************************************************************
 			 * \param i_coeff A double containing the coefficient in front of the diffusion term in the differential equation
-			 * \param i_alpha_0 A double that determines the multiplier on the top boundary
-			 * \param i_alpha_n A double that determines the multiplier on the bottom boundary
-			 * \param i_timestep A pointer to the double current timestep duration
 			 * \param i_grid a shared pointer to the collocation_grid, which must be defined for the second derivative
 			 * 
 			 * \copydetails bases::implicit_plan::implicit_plan ()
@@ -83,7 +79,6 @@ namespace one_d
 
 		private:
 			double coeff; //!< A double that represents the coefficient in front of the diffusion term in the differential equation
-			std::vector<double> temp;
 		};
 	} /* chebyshev */
 } /* oned */

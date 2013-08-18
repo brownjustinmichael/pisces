@@ -19,11 +19,10 @@ namespace one_d
 {
 	namespace chebyshev
 	{
-		explicit_diffusion::explicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, bases::collocation_grid* i_grid, int i_name_in, int i_position, int i_name_out) : bases::explicit_plan (i_element_ptr, i_n, i_name_in, i_name_out) {
+		explicit_diffusion::explicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, bases::collocation_grid* i_grid, int i_name_in, int i_name_out) : bases::explicit_plan (i_element_ptr, i_n, i_name_in, i_name_out) {
 			TRACE ("Initializing...");
 			coeff = i_coeff;
 			grid = i_grid;
-			position = i_position;
 			TRACE ("Initialized.");
 		}
 
@@ -54,21 +53,15 @@ namespace one_d
 		}
 
 		void implicit_diffusion::execute () {
-			/*
-				TODO In general, the matrix does not need to be reset every time the timestep changes. This could be a minor speed increase
-			*/
-			if (!(*flags_ptr & unchanged_timestep)) {
-				TRACE ("Operating...");
-				bases::implicit_plan::execute ();
+			bases::implicit_plan::execute ();
 			
-				// This is the main loop for setting up the diffusion equation in Chebyshev space
-			   	// utils::add_scaled (n, coeff / 1.0, grid->get_data (2) + 0, matrix + 0, n, n);
-			   	// utils::add_scaled (n, coeff / 1.0, grid->get_data (2) + n - 1, matrix + n - 1, n, n);
-				for (int i = 0; i < n; ++i) {
-				   	utils::add_scaled (n, coeff, grid->get_data (2) + i, matrix + i, n, n);
-				}
-				TRACE ("Operation complete.");
+			TRACE ("Operating...");
+		
+			// This is the main loop for setting up the diffusion equation in Chebyshev space
+			for (int i = 0; i < n; ++i) {
+			   	utils::add_scaled (n, coeff, grid->get_data (2) + i, matrix + i, n, n);
 			}
+			TRACE ("Operation complete.");
 		}
 	} /* chebyshev */
 } /* one_d */

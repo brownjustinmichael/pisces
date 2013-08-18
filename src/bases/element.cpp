@@ -15,19 +15,20 @@
 
 namespace bases
 {
-	void element::send_positions () {
-		matrix_solver->send_positions ();
-	}
-	
 	void element::run () {
 		double t_timestep;
-		for (int i = 0; i < inputParams ["timesteps"].asInt; ++i) {
-			INFO ("Timestep " << i);
+		implicit_reset ();
+
+		for (std::shared_ptr <plan> i_plan : implicit_plans) {
+			i_plan->execute ();
+		}
+		
+		for (int j = 0; j < inputParams ["timesteps"].asInt; ++j) {
+			INFO ("Timestep " << j);
 			
 			TRACE ("Calculating...");
 		
 			explicit_reset ();
-			implicit_reset ();
 		
 			// Output in transform space
 			if (transform_stream) {
@@ -37,8 +38,8 @@ namespace bases
 		
 			TRACE ("Executing plans...");
 		
-			for (int i = 0; i < (int) plans.size (); ++i) {
-				plans [i]->execute ();
+			for (std::shared_ptr <plan> i_plan : plans) {
+				i_plan->execute ();
 			}
 		
 			TRACE ("Calculation complete.");
@@ -53,17 +54,9 @@ namespace bases
 			t_timestep = calculate_timestep ();
 			messenger_ptr->min (&t_timestep);
 			
-			TRACE ("Attempting update...");
-			for (int k = 0; k < 3; ++k) {
-				if (matrix_solver) {
-					matrix_solver->execute ();
-				} else {
-					WARN ("No matrix solver defined. It is likely the element was not set up correctly.");
-				}
-			}
 			TRACE ("Updating...")
 			if (matrix_solver) {
-				matrix_solver->update ();
+				matrix_solver->execute ();
 			} else {
 				WARN ("No matrix solver defined. It is likely the element was not set up correctly.");
 			}

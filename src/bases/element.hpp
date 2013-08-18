@@ -45,8 +45,9 @@ namespace bases
 		
 		/*!*******************************************************************
 		* \param i_name The string representation of the element
-		* \param n_boundaries 
+		* \param n_boundaries The integer number of boundaries (must be a multiple of 2)
 		* \param i_inputParams The parameter object that contains the input parameters of the run
+		* \param i_messenger_ptr A pointer to a messenger object
 		* \param i_flags An integer set of execution flags
 		*********************************************************************/
 		element (int i_name, int n_boundaries, io::parameter_map& i_inputParams, messenger* i_messenger_ptr, int i_flags) : inputParams (i_inputParams) {
@@ -90,7 +91,7 @@ namespace bases
 		 * 
 		 * \return A double reference to the given index of the named scalar
 		 *********************************************************************/
-		virtual double& operator () (int name, int index = 0) {
+		virtual double& operator() (int name, int index = 0) {
 			return (&((*this) [name])) [index];
 		}
 		
@@ -162,6 +163,17 @@ namespace bases
 		}
 		
 		/*!*******************************************************************
+		 * \brief Adds an implicit plan to be executed in order once at the start
+		 * 
+		 * \param i_plan A shared pointer to the plan to add
+		 *********************************************************************/
+		inline void add_implicit_plan (std::shared_ptr <plan> i_plan) {
+			TRACE ("Adding implicit plan...");
+			implicit_plans.push_back (std::move (i_plan));
+			TRACE ("Added.");
+		}
+		
+		/*!*******************************************************************
 		 * \brief Initialize the scalar name
 		 * 
 		 * \param name The integer name index to be initialized
@@ -204,11 +216,6 @@ namespace bases
 		virtual void transform () {
 			transform_forward->execute ();
 		}
-		
-		/*!**********************************************************************
-		 * TODO This function should not be called by the element. It should be solely in the solver or messenger constructor.
-		 ************************************************************************/
-		virtual void send_positions ();
 		
 		/*!**********************************************************************
 		 * \brief Calculate the new timestep duration
@@ -279,6 +286,7 @@ namespace bases
 		std::shared_ptr<solver> matrix_solver; //!< A shared pointer to the matrix solver
 		
 		std::vector <std::shared_ptr <plan>> plans; //!< A vector of shared pointers of plans to be executed
+		std::vector <std::shared_ptr <plan>> implicit_plans; //!< A vector of shared pointers of plans to be executed
 	};
 } /* bases */
 

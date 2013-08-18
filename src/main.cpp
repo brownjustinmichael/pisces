@@ -131,9 +131,6 @@ int main (int argc, char *argv[])
 	}
 	
 	one_d::chebyshev::advection_diffusion_element element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
-
-
-	element.send_positions ();
 	
 	element.run ();
 	

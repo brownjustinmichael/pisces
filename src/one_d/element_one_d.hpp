@@ -22,17 +22,23 @@
 	
 namespace one_d
 {
+	/*!**********************************************************************
+	 * \brief Integer representation of the edges
+	 * 
+	 * These edges must range from 0 to the total number of boundaries - 1 for
+	 * messenger to work correctly.
+	 ************************************************************************/
 	enum edges {
 		edge_0 = 0,
 		edge_n = 1
 	};
 	
 	/*!*******************************************************************
+	 * \brief The 1D base element class
+	 * 
 	 * A 1D implementation of the element base class. This provides the
 	 * storage, indexing facilities, and failsafe_dump output. The plans should be added in a 
 	 * further subclass.
-	 * 
-	 * \brief \copybrief bases::element
 	 *********************************************************************/
 	class element : public bases::element
 	{
@@ -41,8 +47,6 @@ namespace one_d
 		 * \param i_n The number of data elements in each scalar
 		 * \param i_position_0 The double position of index excess_0
 		 * \param i_position_n The double position of index n - 1 - excess_n
-		 * \param i_excess_0 The integer number of points evaluated in the adjacent element
-		 * \param i_excess_n The integer number of points evaluated in the adjacent element
 		 * \copydoc bases::element::element ()
 		 *********************************************************************/
 		element (int i_n, double i_position_0, double i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
@@ -63,6 +67,20 @@ namespace one_d
 		virtual ~element () {}
 	
 		/*!*******************************************************************
+		 * \brief Get the double reference to the named scalar
+		 * 
+		 * \param name The integer name from the index enumeration
+		 * 
+		 * \return A double reference to the first element of the named scalar
+		 *********************************************************************/
+		inline double& operator[] (int name) {
+			if (scalars [name].size () == (unsigned int) 0) {
+				initialize (name);
+			}
+			return scalars [name] [0];
+		}
+	
+		/*!*******************************************************************
 		 * \copydoc bases::element::initialize ()
 		 *********************************************************************/
 		virtual void initialize (int name, double* initial_conditions = NULL) {
@@ -76,16 +94,6 @@ namespace one_d
 			fixed_points_0 [name] = scalars [name] [0];
 			fixed_points_n [name] = scalars [name] [n - 1];
 			failsafe_dump->append (&(scalars [name]) [0]);
-		}
-	
-		/*!*******************************************************************
-		 * \copydoc bases::element::operator[] ()
-		 *********************************************************************/
-		inline double& operator[] (int name) {
-			if (scalars [name].size () == (unsigned int) 0) {
-				initialize (name);
-			}
-			return scalars [name] [0];
 		}
 		
 		/*!*******************************************************************
@@ -197,6 +205,8 @@ namespace one_d
 		{
 		public:
 			/*!*******************************************************************
+			 * \param i_excess_0 The integer number of points evaluated in the adjacent element
+			 * \param i_excess_n The integer number of points evaluated in the adjacent element
 			 * \copydoc element::element ()
 			 *********************************************************************/
 			advection_diffusion_element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags);

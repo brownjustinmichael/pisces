@@ -22,15 +22,27 @@
 	
 namespace one_d
 {
-	double return_position (int n, int i, int excess_0, double position_0, int excess_n, double position_n) {
-		double pioN = std::acos (-1.0) / (n - 1);
-		double scale = (position_0 - position_n) / (std::cos (excess_0 * pioN) - std::cos ((n - 1 - excess_n) * pioN));
-		double initial = position_0 - scale * std::cos (excess_0 * pioN);
-		return scale * std::cos (i * pioN) + initial;
-	}
-	
 	namespace chebyshev
 	{
+		/*!**********************************************************************
+		 * \brief Helper to calculate positions in chebyshev elements
+		 * 
+		 * \param n The integer number of data points
+		 * \param i The integer element index for the calculation
+		 * \param excess_0 The integer number of excess data points on the edge_0 side
+		 * \param position_0 The double position at index excess_0
+		 * \param excess_n The integer number of excess data points on the edge_n side
+		 * \param position_n The double position at index n - 1 - excess_n
+		 * 
+		 * \return The double position of the given index
+		 ************************************************************************/
+		double return_position (int n, int i, int excess_0, double position_0, int excess_n, double position_n) {
+			double pioN = std::acos (-1.0) / (n - 1);
+			double scale = (position_0 - position_n) / (std::cos (excess_0 * pioN) - std::cos ((n - 1 - excess_n) * pioN));
+			double initial = position_0 - scale * std::cos (excess_0 * pioN);
+			return scale * std::cos (i * pioN) + initial;
+		}
+		
 		advection_diffusion_element::advection_diffusion_element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
 		element (i_n, return_position (i_n, 0, i_excess_0, i_position_0, i_excess_n, i_position_n), return_position (i_n, i_n - 1, i_excess_0, i_position_0, i_excess_n, i_position_n), i_name, inputParams, i_messenger_ptr, i_flags) {
 			double diffusion_coeff = inputParams["diffusion_coeff"].asDouble;
@@ -51,13 +63,13 @@ namespace one_d
 			normal_stream->append ((*this) [rhs]);
 			
 			// Set up plans in order
-			add_plan (std::make_shared <explicit_diffusion> (explicit_diffusion (this, diffusion_coeff * (1.0 - alpha), i_n, &*grid, velocity, position, rhs)));
+			add_plan (std::make_shared <explicit_diffusion> (explicit_diffusion (this, diffusion_coeff * (1.0 - alpha), i_n, &*grid, velocity, rhs)));
 
 			set_transform (std::make_shared <fftw_cosine> (fftw_cosine (this, n, velocity)));
 			if (advection_coeff != 0.0) {
 				add_plan (std::make_shared <advec> (advec (this, n, advection_coeff, velocity, rhs, grid)));
 			}
-			add_plan (std::make_shared <implicit_diffusion> (implicit_diffusion (this, - diffusion_coeff * alpha, i_n, &*grid, &matrix [0])));
+			add_implicit_plan (std::make_shared <implicit_diffusion> (implicit_diffusion (this, - diffusion_coeff * alpha, i_n, &*grid, &matrix [0])));
 		
 			// Set up solver
 			DEBUG ("WEIGHTS " << boundary_weights [edge_0] << " " << boundary_weights [edge_n]);

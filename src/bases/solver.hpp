@@ -48,15 +48,8 @@ namespace bases
 			}
 			*flags_ptr |= transformed;
 		}
-
-		virtual void send_positions () = 0;
-
-		/*!**********************************************************************
-		 * TODO This could be contained within execute and be signaled with a flag
-		 ************************************************************************/
-		virtual void update () = 0;
 		
-	protected:		
+	protected:
 		/*!*******************************************************************
 		 * \brief Factorize the matrix equation
 		 * 

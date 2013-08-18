@@ -105,7 +105,7 @@ namespace bases
 		virtual ~explicit_plan () {}
 	
 		/*!*******************************************************************
-		 * \copydoc plan::execute ()
+		 * \copydoc bases::plan::execute ()
 		 *********************************************************************/
 		virtual void execute ();
 		
