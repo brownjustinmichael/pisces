@@ -17,8 +17,8 @@ namespace bases
 	void element::run () {
 		implicit_reset ();
 
-		for (std::shared_ptr <plan> i_plan : implicit_plans) {
-			i_plan->execute ();
+		for (int i = 0; i < (int) implicit_plans.size (); ++i) {
+			implicit_plans [i]->execute ();
 		}
 		
 		for (int j = 0; j < inputParams ["timesteps"].asInt; ++j) {
@@ -36,14 +36,14 @@ namespace bases
 		
 			TRACE ("Executing plans...");
 		
-			for (std::shared_ptr <plan> i_plan : pre_transform_plans) {
-				i_plan->execute ();
+			for (int i = 0; i < (int) pre_transform_plans.size (); ++i) {
+				pre_transform_plans [i]->execute ();
 			}
 			
 			transform_inverse ();
 			
-			for (std::shared_ptr <plan> i_plan : post_transform_plans) {
-				i_plan->execute ();
+			for (int i = 0; i < (int) post_transform_plans.size (); ++i) {
+				post_transform_plans [i]->execute ();
 			}
 		
 			TRACE ("Calculation complete.");

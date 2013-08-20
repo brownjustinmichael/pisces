@@ -60,7 +60,9 @@ namespace one_d
 				cell [i] = i;
 			}
 			
-			failsafe_dump = std::make_shared <io::simple_output> (io::simple_output ("dump_" + std::to_string (name) + ".dat", n));
+			std::ostringstream convert;
+			convert << name;
+			failsafe_dump = std::make_shared <io::simple_output> (io::simple_output ("dump_" + convert.str () + ".dat", n));
 			failsafe_dump->append (&cell [0]);
 		}
 		

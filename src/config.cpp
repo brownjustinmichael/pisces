@@ -40,11 +40,13 @@ void log_config::update_severity (int severity_index) {
 void log_config::update_name (int id) {
 #ifdef _LOG4CXX
 		
-		logger = log4cxx::Logger::getLogger ("element_" + std::to_string (id));
-		logger->setLevel (int_to_severity (severity));
+	std::ostringstream convert;
+	convert << id;
+	logger = log4cxx::Logger::getLogger ("element_" + convert.str ());
+	logger->setLevel (int_to_severity (severity));
 
-		logger->addAppender (new log4cxx::ConsoleAppender (new log4cxx::PatternLayout ("%-5p %c{2}: %C (%M %L) - %m%n")));
-		logger->addAppender (new log4cxx::FileAppender (new log4cxx::PatternLayout ("%d %-5p %c{2}: %C (%M %L) - %m%n"), "element_" + std::to_string (id) + ".log", false));
+	logger->addAppender (new log4cxx::ConsoleAppender (new log4cxx::PatternLayout ("%-5p %c{2}: %C (%M %L) - %m%n")));
+	logger->addAppender (new log4cxx::FileAppender (new log4cxx::PatternLayout ("%d %-5p %c{2}: %C (%M %L) - %m%n"), "element_" + convert.str () + ".log", false));
 		
 #endif // _LOG4CXX
 }

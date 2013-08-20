@@ -56,7 +56,9 @@ namespace one_d
 			matrix.resize (i_n * i_n, 0.0);
 			
 			// Set up output
-			normal_stream = std::make_shared <io::incremental_output> (io::incremental_output ("../output/test_angle_" + std::to_string (name) + "_", ".dat", 4, new io::header, i_n, inputParams["output_every"].asInt));
+			std::ostringstream convert;
+			convert << name;
+			normal_stream = std::make_shared <io::incremental_output> (io::incremental_output ("../output/test_angle_" + convert.str () + "_", ".dat", 4, new io::header, i_n, inputParams["output_every"].asInt));
 			normal_stream->append (cell [0]);
 			normal_stream->append ((*this) [position]);
 			normal_stream->append ((*this) [velocity]);

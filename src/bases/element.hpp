@@ -223,8 +223,8 @@ namespace bases
 		 * TODO Need implementation if reverse transform is not forward transform
 		 ************************************************************************/
 		virtual void transform_inverse () {
-			for (std::shared_ptr <plan> i_transform : transforms) {
-				i_transform->execute ();
+			for (int i = 0; i < (int) transforms.size (); ++i) {
+				transforms [i]->execute ();
 			}
 			if (flags & transformed) {
 				flags &= ~transformed;
@@ -238,8 +238,8 @@ namespace bases
 			t_timestep = calculate_timestep ();
 			messenger_ptr->min (&t_timestep);
 			
-			for (std::shared_ptr <solver> i_solver : solvers) {
-				i_solver->execute ();
+			for (int i = 0; i < (int) solvers.size (); ++i) {
+				solvers [i]->execute ();
 			}
 			
 			duration += timestep;
