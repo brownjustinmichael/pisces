@@ -3,20 +3,18 @@ import SCons.Conftest
 
 env = Environment (ENV = os.environ)
 
-# env ["CXX"] = "/opt/centos/devtoolset-1.1/root/usr/bin/g++"
-
-OCXX = env ["CXX"]
-env ["CXX"] = "mpic++"
-
-conf = Configure (env)
-
-if not conf.CheckCXX ():
-    env ["CXX"] = OCXX
-else:
-    env.Append (CPPFLAGS = ["-D_MPI"])
-    env.Append (NVCCFLAGS = ["-D_MPI"])
-
-conf.Finish ()
+# OCXX = env ["CXX"]
+# env ["CXX"] = "mpic++"
+# 
+# conf = Configure (env)
+# 
+# if not conf.CheckCXX ():
+#     env ["CXX"] = OCXX
+# else:
+#     env.Append (CPPFLAGS = ["-D_MPI"])
+#     env.Append (NVCCFLAGS = ["-D_MPI"])
+# 
+# conf.Finish ()
 
 env.Tool ('cuda')
 
