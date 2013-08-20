@@ -40,7 +40,7 @@ namespace one_d
 			* \param i_grid a shared pointer to the collocation_grid, which must be defined for the second derivative
 			* \copydoc bases::explicit_plan::explicit_plan ()
 			*********************************************************************/
-			explicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, bases::collocation_grid* i_grid, int i_name_in, int i_name_out = null);
+			explicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, bases::collocation_grid* i_grid, int i_name_in, int i_name_out = null, int i_flags = 0x00);
 
 			virtual ~explicit_diffusion () {}
 
@@ -68,7 +68,7 @@ namespace one_d
 			 * 
 			 * \copydetails bases::implicit_plan::implicit_plan ()
 			 *********************************************************************/
-			implicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, bases::collocation_grid* i_grid, double *i_matrix);
+			implicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, bases::collocation_grid* i_grid, double *i_matrix, int i_flags = 0x00);
 
 			virtual ~implicit_diffusion () {}
 

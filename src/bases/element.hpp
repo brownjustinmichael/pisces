@@ -17,7 +17,6 @@
 #include <memory>
 #include "plan.hpp"
 #include "solver.hpp"
-#include "transform.hpp"
 #include "../utils/io.hpp"
 #include "messenger.hpp"
 #include "collocation.hpp"
@@ -146,9 +145,8 @@ namespace bases
 		 * 
 		 * TODO This assumes one scalar field. It should be generalized.
 		 *********************************************************************/
-		inline void add_transform (std::shared_ptr<transform> i_plan) {
+		inline void add_transform (std::shared_ptr<plan> i_plan) {
 			transforms.push_back (i_plan);
-			add_plan (i_plan);
 		}
 
 		/*!*******************************************************************
@@ -156,9 +154,20 @@ namespace bases
 		 * 
 		 * \param i_plan A shared pointer to the plan to add
 		 *********************************************************************/
-		inline void add_plan (std::shared_ptr <plan> i_plan) {
+		inline void add_pre_plan (std::shared_ptr <plan> i_plan) {
 			TRACE ("Adding plan...");
-			plans.push_back (std::move (i_plan));
+			pre_transform_plans.push_back (std::move (i_plan));
+			TRACE ("Added.");
+		}
+		
+		/*!*******************************************************************
+		 * \brief Adds a plan to be executed in order
+		 * 
+		 * \param i_plan A shared pointer to the plan to add
+		 *********************************************************************/
+		inline void add_post_plan (std::shared_ptr <plan> i_plan) {
+			TRACE ("Adding plan...");
+			post_transform_plans.push_back (std::move (i_plan));
 			TRACE ("Added.");
 		}
 		
@@ -214,9 +223,35 @@ namespace bases
 		 * TODO Need implementation if reverse transform is not forward transform
 		 ************************************************************************/
 		virtual void transform_inverse () {
-			for (std::shared_ptr <transform> i_transform : transforms) {
+			for (std::shared_ptr <plan> i_transform : transforms) {
 				i_transform->execute ();
 			}
+			if (flags & transformed) {
+				flags &= ~transformed;
+			} else {
+				flags |= transformed;
+			}
+		}
+		
+		virtual void solve () {
+			double t_timestep;
+			t_timestep = calculate_timestep ();
+			messenger_ptr->min (&t_timestep);
+			
+			for (std::shared_ptr <solver> i_solver : solvers) {
+				i_solver->execute ();
+			}
+			
+			duration += timestep;
+			INFO ("TOTAL TIME: " << duration);
+			if (t_timestep != timestep) {
+				flags &= ~unchanged_timestep;
+				INFO ("Updating timestep: " << t_timestep);
+			} else {
+				flags |= unchanged_timestep;
+			}
+			timestep = t_timestep;
+			flags |= transformed;
 		}
 		
 		/*!**********************************************************************
@@ -283,10 +318,11 @@ namespace bases
 		*/
 
 	private:
-		std::vector<std::shared_ptr<transform>> transforms; //!< A shared pointer to the forward transform
+		std::vector<std::shared_ptr<plan>> transforms; //!< A shared pointer to the forward transform
 		std::vector<std::shared_ptr<solver>> solvers; //!< A vector of shared pointers to the matrix solvers
 		
-		std::vector <std::shared_ptr <plan>> plans; //!< A vector of shared pointers of plans to be executed
+		std::vector <std::shared_ptr <plan>> pre_transform_plans; //!< A vector of shared pointers of plans to be executed
+		std::vector <std::shared_ptr <plan>> post_transform_plans; //!< A vector of shared pointers of plans to be executed
 		std::vector <std::shared_ptr <plan>> implicit_plans; //!< A vector of shared pointers of plans to be executed
 	};
 } /* bases */

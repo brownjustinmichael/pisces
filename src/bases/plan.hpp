@@ -43,7 +43,8 @@ enum index {
  * \brief A set of flags to be used with the plan class
  *********************************************************************/
 enum plan_flags {
-	unchanged_timestep = 0x400
+	unchanged_timestep = 0x400,
+	transformed = 0x10
 };
 
 namespace bases
@@ -64,7 +65,7 @@ namespace bases
 		/*!**********************************************************************
 		 * \param i_element_ptr A pointer to the associated element
 		 ************************************************************************/
-		plan (element* i_element_ptr);
+		plan (element* i_element_ptr, int flags = 0x00);
 		
 		virtual ~plan () {}
 		
@@ -81,9 +82,10 @@ namespace bases
 		}
 			
 	protected:
-		int default_flags; //!< An integer set of default flags to use in case the user does not specify any flags
-		int *flags_ptr; //!< A pointer to the integer execution flags
 		element* element_ptr; //!< A pointer to the element with which the plan is associated
+		int flags; // The integer plan execution flags
+		int default_flags; //!< An integer set of default flags to use in case the user does not specify any flags
+		int *flags_ptr; //!< A pointer to the integer element execution flags
 		messenger* messenger_ptr; //!< A pointer to the messenger associated with the element
 	};
 
@@ -101,7 +103,7 @@ namespace bases
 		 * \param i_name_out The integer scalar index of the output
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		explicit_plan (element* i_element_ptr, int i_n, int i_name_in, int i_name_out = null);
+		explicit_plan (element* i_element_ptr, int i_n, int i_name_in, int i_name_out = null, int flags = 0x00);
 	
 		virtual ~explicit_plan () {}
 	
@@ -130,11 +132,11 @@ namespace bases
 		 * \param i_matrix The double matrix to be updated
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		implicit_plan (element* i_element_ptr, int i_n, bases::collocation_grid* i_grid, double *i_matrix) : plan (i_element_ptr) {
-			n = i_n;
-			grid = i_grid;
-			matrix = i_matrix;
-		}
+		implicit_plan (element* i_element_ptr, int i_n, bases::collocation_grid* i_grid, double *i_matrix, int i_flags = 0x00) : 
+		plan (i_element_ptr, i_flags), 
+		n (i_n),
+		grid (i_grid),
+		matrix (i_matrix) {}
 
 		virtual ~implicit_plan () {}
 		

@@ -10,14 +10,12 @@
 #define SOLVER_HPP_BDH126SH
 	
 #include "plan.hpp"
-#include "transform.hpp"
 
 /*!*******************************************************************
  * \brief Execution flags used by the solver class
  *********************************************************************/
 enum solver_flags {
 	factorized = 0x08,
-	never_factorized = 0x04,
 };
 
 namespace bases
@@ -33,8 +31,8 @@ namespace bases
 		/*!*******************************************************************
 		 * \copydoc explicit_plan::explicit_plan ()
 		 *********************************************************************/
-		solver (element* i_element_ptr, int i_n, int i_name_in, int i_name_out) : 
-		explicit_plan (i_element_ptr, i_n, i_name_in, i_name_out) {}
+		solver (element* i_element_ptr, int i_n, int i_name_in, int i_name_out, int i_flags = 0x00) : 
+		explicit_plan (i_element_ptr, i_n, i_name_in, i_name_out, i_flags) {}
 		
 		virtual ~solver () {}
 			
@@ -43,10 +41,13 @@ namespace bases
 		 *********************************************************************/
 		virtual void execute () {
 			explicit_plan::execute ();
-			if ((!(*flags_ptr & factorized)) || (*flags_ptr & never_factorized)) {
+			if ((!(flags & factorized)) || !(*flags_ptr & factorized)) {
 				factorize ();
 			}
-			*flags_ptr |= transformed;
+			
+			/*
+				TODO The transformed flag requires better handling. It could be handled entirely by element?
+			*/
 		}
 		
 	protected:
@@ -58,7 +59,7 @@ namespace bases
 		 * execution flags that the matrix has been factorized.
 		 *********************************************************************/
 		virtual void factorize () {
-			*flags_ptr |= factorized;
+			flags |= factorized;
 		}
 	};
 } /* bases */

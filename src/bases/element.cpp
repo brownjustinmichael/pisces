@@ -10,13 +10,11 @@
 #include "element.hpp"
 #include "../config.hpp"
 #include "solver.hpp"
-#include "transform.hpp"
 #include "../utils/utils.hpp"
 
 namespace bases
 {
 	void element::run () {
-		double t_timestep;
 		implicit_reset ();
 
 		for (std::shared_ptr <plan> i_plan : implicit_plans) {
@@ -38,7 +36,13 @@ namespace bases
 		
 			TRACE ("Executing plans...");
 		
-			for (std::shared_ptr <plan> i_plan : plans) {
+			for (std::shared_ptr <plan> i_plan : pre_transform_plans) {
+				i_plan->execute ();
+			}
+			
+			transform_inverse ();
+			
+			for (std::shared_ptr <plan> i_plan : post_transform_plans) {
 				i_plan->execute ();
 			}
 		
@@ -50,25 +54,10 @@ namespace bases
 			}
 
 			execute_boundaries ();
-
-			t_timestep = calculate_timestep ();
-			messenger_ptr->min (&t_timestep);
 			
-			TRACE ("Updating...")
-			for (std::shared_ptr <solver> i_solver : solvers) {
-				i_solver->execute ();
-			}
+			TRACE ("Updating...");
 			
-			duration += timestep;
-			INFO ("TOTAL TIME: " << duration);
-			if (t_timestep != timestep) {
-				flags &= ~unchanged_timestep;
-				flags &= ~factorized;
-				INFO ("Updating timestep: " << t_timestep);
-			} else {
-				flags |= unchanged_timestep;
-			}
-			timestep = t_timestep;
+			solve ();
 		
 			TRACE ("Update complete");
 		}

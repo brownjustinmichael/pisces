@@ -10,7 +10,7 @@
 #define FFTW_ONE_D_CUDA_HPP_G5118SR0
 
 #include "../config.hpp"
-#include "../bases/transform.hpp"
+#include "../bases/plan.hpp"
 
 #ifndef __CUDACC__
 class cufftHandle;
@@ -30,20 +30,20 @@ namespace one_d
 		/*!*******************************************************************
 		 * An implementation of the transform class using FFTW3.
 		 * 
-		 * \brief \copybrief bases::transform
+		 * \brief \copybrief bases::explicit_plan
 		 *********************************************************************/
-		class fftw_cosine : public bases::transform
+		class fftw_cosine : public bases::explicit_plan
 		{
 		public:
 			/*!*******************************************************************
-			 * \copydoc bases::transform::transform ()
+			 * \copydoc bases::explicit_plan::explicit_plan ()
 			 *********************************************************************/
 			fftw_cosine (bases::element* i_element_ptr, int i_n, int i_name_in, int i_name_out = null);
 		
 			virtual ~fftw_cosine ();
 		
 			/*!*******************************************************************
-			 * \copydoc bases::transform::execute ()
+			 * \copydoc bases::explicit_plan::execute ()
 			 *********************************************************************/
 			void execute ();
 	

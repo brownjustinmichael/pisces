@@ -19,10 +19,10 @@ namespace one_d
 {
 	namespace chebyshev
 	{
-		explicit_diffusion::explicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, bases::collocation_grid* i_grid, int i_name_in, int i_name_out) : bases::explicit_plan (i_element_ptr, i_n, i_name_in, i_name_out) {
-			TRACE ("Initializing...");
-			coeff = i_coeff;
-			grid = i_grid;
+		explicit_diffusion::explicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, bases::collocation_grid* i_grid, int i_name_in, int i_name_out, int i_flags) :
+		bases::explicit_plan (i_element_ptr, i_n, i_name_in, i_name_out, i_flags),
+		coeff (i_coeff), 
+		grid (i_grid) {
 			TRACE ("Initialized.");
 		}
 
@@ -45,12 +45,9 @@ namespace one_d
 			TRACE ("Operation complete.");
 		}
 		
-		implicit_diffusion::implicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, bases::collocation_grid* i_grid, double *i_matrix) : bases::implicit_plan (i_element_ptr, i_n, i_grid, i_matrix) {
-			coeff = i_coeff;
-			n = i_n;
-			grid = i_grid;
-			matrix = i_matrix;
-		}
+		implicit_diffusion::implicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, bases::collocation_grid* i_grid, double *i_matrix, int i_flags) : 
+		bases::implicit_plan (i_element_ptr, i_n, i_grid, i_matrix, i_flags), 
+		coeff (i_coeff) {}
 
 		void implicit_diffusion::execute () {
 			bases::implicit_plan::execute ();

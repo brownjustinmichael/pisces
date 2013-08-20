@@ -12,17 +12,19 @@
 
 namespace bases
 {
-	plan::plan (element* i_element_ptr) {
+	plan::plan (element* i_element_ptr, int i_flags) :
+	element_ptr (i_element_ptr),
+	flags (i_flags) {
 		TRACE ("Instantiating...");
-		element_ptr = i_element_ptr;
 		flags_ptr = &(element_ptr->flags);
 		messenger_ptr = element_ptr->messenger_ptr;
 		TRACE ("Instantiated.");
 	}
 	
-	explicit_plan::explicit_plan (element* i_element_ptr, int i_n, int i_name_in, int i_name_out) : plan (i_element_ptr) {
+	explicit_plan::explicit_plan (element* i_element_ptr, int i_n, int i_name_in, int i_name_out, int i_flags) : 
+	plan (i_element_ptr, i_flags),
+	n (i_n) {
 		TRACE ("Instantiating...");
-		n = i_n;
 		data_in = &((*i_element_ptr) [i_name_in]);
 		if (i_name_out == null) {
 			data_out = &((*i_element_ptr) [i_name_in]);

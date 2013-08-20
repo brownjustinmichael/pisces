@@ -17,8 +17,8 @@
 
 namespace one_d
 {
-	solver::solver (bases::element* i_element_ptr, int i_n, int i_excess_0, int i_excess_n, double& i_timestep, double& i_alpha_0, double& i_alpha_n, double *i_default_matrix, double *i_matrix, int i_name_in, int i_name_rhs, int i_name_out) : 
-	bases::solver (i_element_ptr, i_n, i_name_in, i_name_out), 
+	solver::solver (bases::element* i_element_ptr, int i_n, int i_excess_0, int i_excess_n, double& i_timestep, double& i_alpha_0, double& i_alpha_n, double *i_default_matrix, double *i_matrix, int i_name_in, int i_name_rhs, int i_name_out, int i_flags) : 
+	bases::solver (i_element_ptr, i_n, i_name_in, i_name_out, i_flags), 
 	timestep (i_timestep), 
 	alpha_0 (i_alpha_0), 
 	alpha_n (i_alpha_n), 

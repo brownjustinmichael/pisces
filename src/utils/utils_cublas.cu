@@ -6,7 +6,7 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include "utils_cublas.hcu"
+#include "utils_cublas.cuh"
 #include <vector>
 #include <cassert>
 

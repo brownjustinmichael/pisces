@@ -64,11 +64,11 @@ namespace one_d
 			normal_stream->append ((*this) [temperature]);
 			
 			// Set up plans in order
-			add_plan (std::make_shared <explicit_diffusion> (explicit_diffusion (this, diffusion_coeff * (1.0 - alpha), i_n, &*grid, velocity, vel_rhs)));
+			add_pre_plan (std::make_shared <explicit_diffusion> (explicit_diffusion (this, diffusion_coeff * (1.0 - alpha), i_n, &*grid, velocity, vel_rhs)));
 
 			add_transform (std::make_shared <fftw_cosine> (fftw_cosine (this, n, velocity)));
 			if (advection_coeff != 0.0) {
-				add_plan (std::make_shared <advec> (advec (this, n, advection_coeff, velocity, vel_rhs, grid)));
+				add_post_plan (std::make_shared <advec> (advec (this, n, advection_coeff, velocity, vel_rhs, grid)));
 			}
 			add_implicit_plan (std::make_shared <implicit_diffusion> (implicit_diffusion (this, - diffusion_coeff * alpha, i_n, &*grid, &matrix [0])));
 		
@@ -76,19 +76,19 @@ namespace one_d
 			add_solver (std::make_shared <solver> (solver (this, n, i_excess_0, i_excess_n, timestep, boundary_weights [edge_0], boundary_weights [edge_n], grid->get_data (0), &matrix [0], velocity, vel_rhs)));
 			
 
-			// temp_matrix.resize (i_n * i_n, 0.0);
-			// 
-			// // Set up plans in order
-			// add_plan (std::make_shared <explicit_diffusion> (explicit_diffusion (this, diffusion_coeff * (1.0 - alpha), i_n, &*grid, temperature, temp_rhs)));
-			// 
-			// add_transform (std::make_shared <fftw_cosine> (fftw_cosine (this, n, temperature)));
-			// if (advection_coeff != 0.0) {
-			// 	add_plan (std::make_shared <advec> (advec (this, n, advection_coeff, temperature, temp_rhs, grid)));
-			// }
-			// add_implicit_plan (std::make_shared <implicit_diffusion> (implicit_diffusion (this, - diffusion_coeff * alpha, i_n, &*grid, &temp_matrix [0])));
-			// 		
-			// // Set up solver
-			// add_solver (std::make_shared <solver> (solver (this, n, i_excess_0, i_excess_n, timestep, boundary_weights [edge_0], boundary_weights [edge_n], grid->get_data (0), &temp_matrix [0], temperature, temp_rhs)));
+			temp_matrix.resize (i_n * i_n, 0.0);
+			
+			// Set up plans in order
+			add_pre_plan (std::make_shared <explicit_diffusion> (explicit_diffusion (this, diffusion_coeff * (1.0 - alpha), i_n, &*grid, temperature, temp_rhs)));
+			
+			add_transform (std::make_shared <fftw_cosine> (fftw_cosine (this, n, temperature)));
+			if (advection_coeff != 0.0) {
+				add_post_plan (std::make_shared <advec> (advec (this, n, advection_coeff, temperature, temp_rhs, grid)));
+			}
+			add_implicit_plan (std::make_shared <implicit_diffusion> (implicit_diffusion (this, - diffusion_coeff * alpha, i_n, &*grid, &temp_matrix [0])));
+					
+			// Set up solver
+			add_solver (std::make_shared <solver> (solver (this, n, i_excess_0, i_excess_n, timestep, boundary_weights [edge_0], boundary_weights [edge_n], grid->get_data (0), &temp_matrix [0], temperature, temp_rhs)));
 			
 			/*
 				TODO Second solver causes an error "Unable to solve factorized equation"

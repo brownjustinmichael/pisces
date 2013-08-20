@@ -9,7 +9,7 @@
 #include <math.h>
 #include <cufft.h>
 #include "fftw_one_d_cuda.hpp"
-#include "../utils/utils_cublas.hcu"
+#include "../utils/utils_cublas.cuh"
 
 namespace one_d
 {
@@ -41,7 +41,7 @@ namespace one_d
 		}
 		
 		fftw_cosine::fftw_cosine (bases::element* i_element_ptr, int i_n, int i_name_in, int i_name_out) : 
-		bases::transform (i_element_ptr, i_n, i_name_in, i_name_out) {
+		bases::explicit_plan (i_element_ptr, i_n, i_name_in, i_name_out) {
 			TRACE ("Instantiating...");
 			if (cudaMalloc ((void **) &data_real, 2 * n * sizeof (double)) != cudaSuccess){
 				FATAL ("Failed to allocate.\n");
@@ -69,13 +69,8 @@ namespace one_d
 		}
 		
 		void fftw_cosine::execute () {
-			bases::transform::execute ();
-			if (*flags_ptr & transformed) {
-				*flags_ptr &= ~transformed;
-			} else {
-				*flags_ptr |= transformed;
-			}
-			
+			bases::explicit_plan::execute ();
+
 			for (int i = 0; i < n; ++i) {
 				DEBUG ("THERE: " << data_in [i]);
 			}
