@@ -1,0 +1,122 @@
+\hypertarget{classbases_1_1solver}{\section{bases\-:\-:solver Class Reference}
+\label{classbases_1_1solver}\index{bases\-::solver@{bases\-::solver}}
+}
+
+
+A class designed to solve a matrix equation.  
+
+
+
+
+{\ttfamily \#include $<$solver.\-hpp$>$}
+
+Inheritance diagram for bases\-:\-:solver\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{classbases_1_1solver}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classbases_1_1solver_a7b849e5ddfd8ae55b4bbf59010d2b4bd}{solver} (\hyperlink{classbases_1_1element}{element} $\ast$i\-\_\-element\-\_\-ptr, int i\-\_\-n, int i\-\_\-name\-\_\-in, int i\-\_\-name\-\_\-out, int i\-\_\-flags=0x00)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual void \hyperlink{classbases_1_1solver_a8adf4c428bf4322a664c811073b491e1}{execute} ()
+\begin{DoxyCompactList}\small\item\em Solve the matrix equation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual void \hyperlink{classbases_1_1solver_adfc4b2709650924535e117405e7e3a21}{factorize} ()
+\begin{DoxyCompactList}\small\item\em Factorize the matrix equation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Detailed Description}
+A class designed to solve a matrix equation. 
+
+
+
+ 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classbases_1_1solver_a7b849e5ddfd8ae55b4bbf59010d2b4bd}{\index{bases\-::solver@{bases\-::solver}!solver@{solver}}
+\index{solver@{solver}!bases::solver@{bases\-::solver}}
+\subsubsection[{solver}]{\setlength{\rightskip}{0pt plus 5cm}bases\-::solver\-::solver (
+\begin{DoxyParamCaption}
+\item[{{\bf element} $\ast$}]{i\-\_\-element\-\_\-ptr, }
+\item[{int}]{i\-\_\-n, }
+\item[{int}]{i\-\_\-name\-\_\-in, }
+\item[{int}]{i\-\_\-name\-\_\-out, }
+\item[{int}]{i\-\_\-flags = {\ttfamily 0x00}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{classbases_1_1solver_a7b849e5ddfd8ae55b4bbf59010d2b4bd}
+
+
+
+
+
+
+ 
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-n} & The integer number of elements in the data \\
+\hline
+{\em i\-\_\-name\-\_\-in} & The integer scalar index of the input \\
+\hline
+{\em i\-\_\-name\-\_\-out} & The integer scalar index of the output \\
+\hline
+\end{DoxyParams}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-element\-\_\-ptr} & A pointer to the associated element \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classbases_1_1solver_a8adf4c428bf4322a664c811073b491e1}{\index{bases\-::solver@{bases\-::solver}!execute@{execute}}
+\index{execute@{execute}!bases::solver@{bases\-::solver}}
+\subsubsection[{execute}]{\setlength{\rightskip}{0pt plus 5cm}virtual void bases\-::solver\-::execute (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}}\label{classbases_1_1solver_a8adf4c428bf4322a664c811073b491e1}
+
+
+Solve the matrix equation. 
+
+
+
+ 
+
+Reimplemented from \hyperlink{classbases_1_1explicit__plan_a21bcba4d429590031bba41ee2a48a4ef}{bases\-::explicit\-\_\-plan}.
+
+
+
+Reimplemented in \hyperlink{classone__d_1_1solver_a7c28bd733cb3c3849afe1773974eb4f6}{one\-\_\-d\-::solver}.
+
+\hypertarget{classbases_1_1solver_adfc4b2709650924535e117405e7e3a21}{\index{bases\-::solver@{bases\-::solver}!factorize@{factorize}}
+\index{factorize@{factorize}!bases::solver@{bases\-::solver}}
+\subsubsection[{factorize}]{\setlength{\rightskip}{0pt plus 5cm}virtual void bases\-::solver\-::factorize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [protected]}, {\ttfamily [virtual]}}}\label{classbases_1_1solver_adfc4b2709650924535e117405e7e3a21}
+
+
+Factorize the matrix equation. 
+
+
+
+ This method checks first whether the matrix has been factorized, according to the execution flags. Upon success, it notes in the execution flags that the matrix has been factorized. 
+
+Reimplemented in \hyperlink{classone__d_1_1solver_a33e9bc05b91b4da54ce783235447f334}{one\-\_\-d\-::solver}.
+
+
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/bases/\hyperlink{solver_8hpp}{solver.\-hpp}\end{DoxyCompactItemize}

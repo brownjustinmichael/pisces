@@ -1,0 +1,23 @@
+var searchData=
+[
+  ['data_5fin',['data_in',['../classbases_1_1explicit__plan.html#a8faf976ec6c01951dd6d5e7421630184',1,'bases::explicit_plan']]],
+  ['data_5fout',['data_out',['../classbases_1_1explicit__plan.html#a55946d0b4b1a19da12469447de247b82',1,'bases::explicit_plan']]],
+  ['data_5ftemp',['data_temp',['../classone__d_1_1solver.html#aac1795dc7503b6c96b5c6ad59fc9de20',1,'one_d::solver']]],
+  ['daxpy_5f',['daxpy_',['../utils__lapack_8cpp.html#a0f9cfb31c6f2731705dc1695e9d6e2d0',1,'utils_lapack.cpp']]],
+  ['dcopy_5f',['dcopy_',['../utils__lapack_8cpp.html#a3031b7ee89efd261a0280ca955224d4c',1,'utils_lapack.cpp']]],
+  ['ddot_5f',['ddot_',['../utils__lapack_8cpp.html#a2247ca92b3cf0e88e9448ad05240921f',1,'utils_lapack.cpp']]],
+  ['debug',['DEBUG',['../config_8hpp.html#aae7727cb8ebf38194dba535a0c6555b3',1,'config.hpp']]],
+  ['default_5fflags',['default_flags',['../classbases_1_1plan.html#a756595e230cc99e84de4392ac691eefd',1,'bases::plan']]],
+  ['default_5fmatrix',['default_matrix',['../classone__d_1_1solver.html#ac1002a2062ffc61df2ceddbd7d8d3f6e',1,'one_d::solver']]],
+  ['derivs',['derivs',['../classbases_1_1collocation__grid.html#a696572e39da7ee8ab64f3300db8b0408',1,'bases::collocation_grid']]],
+  ['dgemv_5f',['dgemv_',['../utils__lapack_8cpp.html#a53c7c2159f19abafbec2bc09f2c0cdcc',1,'utils_lapack.cpp']]],
+  ['dgetrf_5f',['dgetrf_',['../solver__lapack_8cpp.html#ae56e8f1e7103728e3bc7c17b82868a81',1,'solver_lapack.cpp']]],
+  ['dgetrs_5f',['dgetrs_',['../solver__lapack_8cpp.html#a27a5040bb8500a1c3134352387aa4008',1,'solver_lapack.cpp']]],
+  ['diffusion_5fone_5fd_2ecpp',['diffusion_one_d.cpp',['../diffusion__one__d_8cpp.html',1,'']]],
+  ['diffusion_5fone_5fd_2ehpp',['diffusion_one_d.hpp',['../diffusion__one__d_8hpp.html',1,'']]],
+  ['dot',['dot',['../namespaceutils.html#a9e636142e9a630aee25812c5b558205c',1,'utils']]],
+  ['dot_5finterpolate',['dot_interpolate',['../namespaceutils.html#a850e14cc48078412f6b35a02381a31c0',1,'utils']]],
+  ['double_5fptrs',['double_ptrs',['../classio_1_1output.html#a88f0aef3b2bc117e94a876435e59ff96',1,'io::output']]],
+  ['dscal_5f',['dscal_',['../utils__lapack_8cpp.html#a9f3a532154194ac4fc097770a4b28a63',1,'utils_lapack.cpp']]],
+  ['duration',['duration',['../classbases_1_1element.html#a47315779623a1472300076f4df1c713b',1,'bases::element']]]
+];

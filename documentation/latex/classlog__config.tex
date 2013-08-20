@@ -1,0 +1,81 @@
+\hypertarget{classlog__config}{\section{log\-\_\-config Class Reference}
+\label{classlog__config}\index{log\-\_\-config@{log\-\_\-config}}
+}
+
+
+A class containing the relevant configuration details, such as logging severity.  
+
+
+
+
+{\ttfamily \#include $<$config.\-hpp$>$}
+
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{classlog__config_a00103c7e762a66cb5e7717f3dfb46c53}{update\-\_\-severity} (int severity\-\_\-index)
+\begin{DoxyCompactList}\small\item\em Updates the severity of the logger. \end{DoxyCompactList}\item 
+static void \hyperlink{classlog__config_ae9fa43978bbf0007ff911eed5b46d17c}{update\-\_\-name} (int id)
+\begin{DoxyCompactList}\small\item\em Updates the name of the logger and log file. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classlog__config_a834f2cce03a7594e4f112d21ff72d260}{static int \hyperlink{classlog__config_a834f2cce03a7594e4f112d21ff72d260}{severity} = 2}\label{classlog__config_a834f2cce03a7594e4f112d21ff72d260}
+
+\begin{DoxyCompactList}\small\item\em The integer level of severity to be output in the log. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A class containing the relevant configuration details, such as logging severity. 
+
+
+
+ 
+
+\subsection{Member Function Documentation}
+\hypertarget{classlog__config_ae9fa43978bbf0007ff911eed5b46d17c}{\index{log\-\_\-config@{log\-\_\-config}!update\-\_\-name@{update\-\_\-name}}
+\index{update\-\_\-name@{update\-\_\-name}!log_config@{log\-\_\-config}}
+\subsubsection[{update\-\_\-name}]{\setlength{\rightskip}{0pt plus 5cm}void log\-\_\-config\-::update\-\_\-name (
+\begin{DoxyParamCaption}
+\item[{int}]{id}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{classlog__config_ae9fa43978bbf0007ff911eed5b46d17c}
+
+
+Updates the name of the logger and log file. 
+
+
+
+ The name of the logger becomes element\-\_\-id, and the file name element\-\_\-id.\-log.
+
+
+\begin{DoxyParams}{Parameters}
+{\em id} & The integer id with which to label the log. \\
+\hline
+\end{DoxyParams}
+\hypertarget{classlog__config_a00103c7e762a66cb5e7717f3dfb46c53}{\index{log\-\_\-config@{log\-\_\-config}!update\-\_\-severity@{update\-\_\-severity}}
+\index{update\-\_\-severity@{update\-\_\-severity}!log_config@{log\-\_\-config}}
+\subsubsection[{update\-\_\-severity}]{\setlength{\rightskip}{0pt plus 5cm}void log\-\_\-config\-::update\-\_\-severity (
+\begin{DoxyParamCaption}
+\item[{int}]{severity\-\_\-index}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{classlog__config_a00103c7e762a66cb5e7717f3dfb46c53}
+
+
+Updates the severity of the logger. 
+
+
+
+ The severity scheme is as follows\-: 0\-: Trace\-: Indicates a code location, used for optimization 1\-: Debug\-: Used to diagnose bugs 2\-: Info\-: Produces relevant information to user (default) 3\-: Warn\-: May indicate an issue, depending on user intent 4\-: Error\-: A problem that can be handled has occurred 5\-: Fatal\-: A problem that cannot be handled has occurred
+
+
+\begin{DoxyParams}{Parameters}
+{\em severity\-\_\-index} & The integer severity below which log statements are suppressed \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/\hyperlink{config_8hpp}{config.\-hpp}\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/\hyperlink{config_8cpp}{config.\-cpp}\end{DoxyCompactItemize}

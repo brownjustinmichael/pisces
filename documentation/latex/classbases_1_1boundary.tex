@@ -1,0 +1,142 @@
+\hypertarget{classbases_1_1boundary}{\section{bases\-:\-:boundary Class Reference}
+\label{classbases_1_1boundary}\index{bases\-::boundary@{bases\-::boundary}}
+}
+
+
+A plan that implements a boundary condition.  
+
+
+
+
+{\ttfamily \#include $<$boundary.\-hpp$>$}
+
+Inheritance diagram for bases\-:\-:boundary\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{classbases_1_1boundary}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classbases_1_1boundary_a3633e4c08767f16e437e72701b03014c}{boundary} (int i\-\_\-edge, int i\-\_\-process)
+\item 
+virtual void \hyperlink{classbases_1_1boundary_a54ba54d2bb10f841d69c219af3b0fdc0}{associate} (\hyperlink{classbases_1_1element}{element} $\ast$i\-\_\-element\-\_\-ptr)
+\begin{DoxyCompactList}\small\item\em Associate the plan with the element that contains it. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classbases_1_1boundary_a84c47f979eac14d45c8ff9c09cc170a8}{send} ()
+\begin{DoxyCompactList}\small\item\em Send the boundary information to the linked processor. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classbases_1_1boundary_aa0983fe4b4ef2005720aec25a06eaff2}{recv} ()
+\begin{DoxyCompactList}\small\item\em Receive the boundary information from the linked processor. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classbases_1_1boundary_a6455066e38aea0a30e848a57c5465aa1}{int \hyperlink{classbases_1_1boundary_a6455066e38aea0a30e848a57c5465aa1}{edge}}\label{classbases_1_1boundary_a6455066e38aea0a30e848a57c5465aa1}
+
+\begin{DoxyCompactList}\small\item\em An integer flag that specifies which boundary to use. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1boundary_a1e30d39fa400af6803eab559d6620314}{int \hyperlink{classbases_1_1boundary_a1e30d39fa400af6803eab559d6620314}{index}}\label{classbases_1_1boundary_a1e30d39fa400af6803eab559d6620314}
+
+\begin{DoxyCompactList}\small\item\em The integer index to the boundary in the element. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1boundary_a3583d7718a34c668465241d86822de24}{int \hyperlink{classbases_1_1boundary_a3583d7718a34c668465241d86822de24}{increment}}\label{classbases_1_1boundary_a3583d7718a34c668465241d86822de24}
+
+\begin{DoxyCompactList}\small\item\em The integer increment to the next most inward index. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1boundary_a601cc576fbbb9526840e419c318a6c93}{int \hyperlink{classbases_1_1boundary_a601cc576fbbb9526840e419c318a6c93}{process}}\label{classbases_1_1boundary_a601cc576fbbb9526840e419c318a6c93}
+
+\begin{DoxyCompactList}\small\item\em The integer process id destination for send and recv. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A plan that implements a boundary condition. 
+
+
+
+ This plan adds the send and recv methods, which are used to communicate between boundaries with external memory. In general, this is done with a message passing interface, such as Open\-M\-P\-I. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classbases_1_1boundary_a3633e4c08767f16e437e72701b03014c}{\index{bases\-::boundary@{bases\-::boundary}!boundary@{boundary}}
+\index{boundary@{boundary}!bases::boundary@{bases\-::boundary}}
+\subsubsection[{boundary}]{\setlength{\rightskip}{0pt plus 5cm}bases\-::boundary\-::boundary (
+\begin{DoxyParamCaption}
+\item[{int}]{i\-\_\-edge, }
+\item[{int}]{i\-\_\-process}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{classbases_1_1boundary_a3633e4c08767f16e437e72701b03014c}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-edge} & An integer flag that specifies which boundary flag to use \\
+\hline
+{\em i\-\_\-process} & The integer process id destination for send and recv \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classbases_1_1boundary_a54ba54d2bb10f841d69c219af3b0fdc0}{\index{bases\-::boundary@{bases\-::boundary}!associate@{associate}}
+\index{associate@{associate}!bases::boundary@{bases\-::boundary}}
+\subsubsection[{associate}]{\setlength{\rightskip}{0pt plus 5cm}void bases\-::boundary\-::associate (
+\begin{DoxyParamCaption}
+\item[{{\bf element} $\ast$}]{i\-\_\-element\-\_\-ptr}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classbases_1_1boundary_a54ba54d2bb10f841d69c219af3b0fdc0}
+
+
+Associate the plan with the element that contains it. 
+
+
+
+ 
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-element\-\_\-ptr} & A pointer to an element \\
+\hline
+\end{DoxyParams}
+
+
+Reimplemented from \hyperlink{classbases_1_1plan_a0f9a7d5f3984ba99a48a462f09d87b5c}{bases\-::plan}.
+
+
+
+Reimplemented in \hyperlink{classone__d_1_1diffusive__boundary_ae8b851282284945b7e6e9373a0edb4a3}{one\-\_\-d\-::diffusive\-\_\-boundary}, and \hyperlink{classone__d_1_1link__boundary_a3c8652f7b39208dc58f34804a523cc36}{one\-\_\-d\-::link\-\_\-boundary}.
+
+\hypertarget{classbases_1_1boundary_aa0983fe4b4ef2005720aec25a06eaff2}{\index{bases\-::boundary@{bases\-::boundary}!recv@{recv}}
+\index{recv@{recv}!bases::boundary@{bases\-::boundary}}
+\subsubsection[{recv}]{\setlength{\rightskip}{0pt plus 5cm}virtual void bases\-::boundary\-::recv (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}}\label{classbases_1_1boundary_aa0983fe4b4ef2005720aec25a06eaff2}
+
+
+Receive the boundary information from the linked processor. 
+
+
+
+ 
+
+Reimplemented in \hyperlink{classone__d_1_1link__boundary_a6ad7e21758061ec53348b66d0143437b}{one\-\_\-d\-::link\-\_\-boundary}.
+
+\hypertarget{classbases_1_1boundary_a84c47f979eac14d45c8ff9c09cc170a8}{\index{bases\-::boundary@{bases\-::boundary}!send@{send}}
+\index{send@{send}!bases::boundary@{bases\-::boundary}}
+\subsubsection[{send}]{\setlength{\rightskip}{0pt plus 5cm}virtual void bases\-::boundary\-::send (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}}\label{classbases_1_1boundary_a84c47f979eac14d45c8ff9c09cc170a8}
+
+
+Send the boundary information to the linked processor. 
+
+
+
+ 
+
+Reimplemented in \hyperlink{classone__d_1_1link__boundary_af16859eb2f5ce2d623456644fc21e91f}{one\-\_\-d\-::link\-\_\-boundary}.
+
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/bases/\hyperlink{boundary_8hpp}{boundary.\-hpp}\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/bases/\hyperlink{boundary_8cpp}{boundary.\-cpp}\end{DoxyCompactItemize}

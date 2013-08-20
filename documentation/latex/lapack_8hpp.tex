@@ -1,0 +1,277 @@
+\hypertarget{lapack_8hpp}{\section{/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/utils/lapack.hpp File Reference}
+\label{lapack_8hpp}\index{/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/utils/lapack.\-hpp@{/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/utils/lapack.\-hpp}}
+}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+double \hyperlink{lapack_8hpp_acca6a389c82a663b59fbb668490c0593}{ddot\-\_\-} (int $\ast$n, double $\ast$dx, int $\ast$incx, double $\ast$dy, int $\ast$incy)
+\begin{DoxyCompactList}\small\item\em Function from B\-L\-A\-S that calculates a dot product. \end{DoxyCompactList}\item 
+void \hyperlink{lapack_8hpp_a7587d178a40074c6f9dfd60f744cb808}{dcopy\-\_\-} (int $\ast$n, double $\ast$dx, int $\ast$incx, double $\ast$dy, int $\ast$incy)
+\begin{DoxyCompactList}\small\item\em Function from B\-L\-A\-S that copies a double array to another in place. \end{DoxyCompactList}\item 
+void \hyperlink{lapack_8hpp_a096971c98bcbbab6f037abf6e3842972}{dscal\-\_\-} (int $\ast$n, double $\ast$da, double $\ast$dx, int $\ast$incx)
+\begin{DoxyCompactList}\small\item\em Function from B\-L\-A\-S that scales a double array. \end{DoxyCompactList}\item 
+void \hyperlink{lapack_8hpp_a11ec686a9f090b02a697b6e7c26294b1}{daxpy\-\_\-} (int $\ast$n, double $\ast$da, double $\ast$dx, int $\ast$incx, double $\ast$dy, int $\ast$incy)
+\begin{DoxyCompactList}\small\item\em Function from B\-L\-A\-S for vector-\/vector addition (dy = da $\ast$ dx + dy) \end{DoxyCompactList}\item 
+void \hyperlink{lapack_8hpp_a53c7c2159f19abafbec2bc09f2c0cdcc}{dgemv\-\_\-} (char $\ast$trans, int $\ast$m, int $\ast$n, double $\ast$alpha, double $\ast$a, int $\ast$lda, double $\ast$x, int $\ast$incx, double $\ast$beta, double $\ast$y, int $\ast$incy)
+\begin{DoxyCompactList}\small\item\em Function from B\-L\-A\-S for matrix-\/vector multiplication (y = alpha $\ast$ a $\ast$ x + beta $\ast$ y) \end{DoxyCompactList}\item 
+void \hyperlink{lapack_8hpp_ae56e8f1e7103728e3bc7c17b82868a81}{dgetrf\-\_\-} (int $\ast$m, int $\ast$n, double $\ast$a, int $\ast$lda, int $\ast$ipiv, int $\ast$info)
+\begin{DoxyCompactList}\small\item\em Function from L\-A\-P\-A\-C\-K that factorizes the matrix a by L\-U decomposition. \end{DoxyCompactList}\item 
+void \hyperlink{lapack_8hpp_a27a5040bb8500a1c3134352387aa4008}{dgetrs\-\_\-} (char $\ast$trans, int $\ast$n, int $\ast$nrhs, double $\ast$a, int $\ast$lda, int $\ast$ipiv, double $\ast$b, int $\ast$ldb, int $\ast$info)
+\begin{DoxyCompactList}\small\item\em Function from L\-A\-P\-A\-C\-K that solves a factorized matrix equation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+
+
+
+
+Spectral Element
+
+This file simply contains the L\-A\-P\-A\-C\-K and B\-L\-A\-S routines that can be used throughout the code.
+
+Created by Justin Brown on 2013-\/04-\/29. Copyright 2013 Justin Brown. All rights reserved. 
+
+\subsection{Function Documentation}
+\hypertarget{lapack_8hpp_a11ec686a9f090b02a697b6e7c26294b1}{\index{lapack.\-hpp@{lapack.\-hpp}!daxpy\-\_\-@{daxpy\-\_\-}}
+\index{daxpy\-\_\-@{daxpy\-\_\-}!lapack.hpp@{lapack.\-hpp}}
+\subsubsection[{daxpy\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}void daxpy\-\_\- (
+\begin{DoxyParamCaption}
+\item[{int $\ast$}]{n, }
+\item[{double $\ast$}]{da, }
+\item[{double $\ast$}]{dx, }
+\item[{int $\ast$}]{incx, }
+\item[{double $\ast$}]{dy, }
+\item[{int $\ast$}]{incy}
+\end{DoxyParamCaption}
+)}}\label{lapack_8hpp_a11ec686a9f090b02a697b6e7c26294b1}
+
+
+Function from B\-L\-A\-S for vector-\/vector addition (dy = da $\ast$ dx + dy) 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em n} & A pointer to the integer number of values in dy \\
+\hline
+{\em da} & A pointer to the double da \\
+\hline
+{\em dx} & The double vector dx \\
+\hline
+{\em incx} & A pointer to the integer spacing of elements in dx \\
+\hline
+{\em dy} & The double vector dy \\
+\hline
+{\em incy} & A pointer to the integer spacing of elements in dy \\
+\hline
+\end{DoxyParams}
+\hypertarget{lapack_8hpp_a7587d178a40074c6f9dfd60f744cb808}{\index{lapack.\-hpp@{lapack.\-hpp}!dcopy\-\_\-@{dcopy\-\_\-}}
+\index{dcopy\-\_\-@{dcopy\-\_\-}!lapack.hpp@{lapack.\-hpp}}
+\subsubsection[{dcopy\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}void dcopy\-\_\- (
+\begin{DoxyParamCaption}
+\item[{int $\ast$}]{n, }
+\item[{double $\ast$}]{dx, }
+\item[{int $\ast$}]{incx, }
+\item[{double $\ast$}]{dy, }
+\item[{int $\ast$}]{incy}
+\end{DoxyParamCaption}
+)}}\label{lapack_8hpp_a7587d178a40074c6f9dfd60f744cb808}
+
+
+Function from B\-L\-A\-S that copies a double array to another in place. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em n} & A pointer to an integer number of elements in x to copy to y \\
+\hline
+{\em dx} & The array from which the data are copied \\
+\hline
+{\em incx} & A pointer to an integer spacing of elements in x \\
+\hline
+{\em dy} & The array to which the data are copied \\
+\hline
+{\em incy} & A pointer to an integer spacing of elements in y \\
+\hline
+\end{DoxyParams}
+\hypertarget{lapack_8hpp_acca6a389c82a663b59fbb668490c0593}{\index{lapack.\-hpp@{lapack.\-hpp}!ddot\-\_\-@{ddot\-\_\-}}
+\index{ddot\-\_\-@{ddot\-\_\-}!lapack.hpp@{lapack.\-hpp}}
+\subsubsection[{ddot\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}double ddot\-\_\- (
+\begin{DoxyParamCaption}
+\item[{int $\ast$}]{n, }
+\item[{double $\ast$}]{dx, }
+\item[{int $\ast$}]{incx, }
+\item[{double $\ast$}]{dy, }
+\item[{int $\ast$}]{incy}
+\end{DoxyParamCaption}
+)}}\label{lapack_8hpp_acca6a389c82a663b59fbb668490c0593}
+
+
+Function from B\-L\-A\-S that calculates a dot product. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em n} & A pointer to an integer number of elements in dx and dy to dot \\
+\hline
+{\em dx} & The first double array of data \\
+\hline
+{\em incx} & A pointer to an integer spacing of elements in dx \\
+\hline
+{\em dy} & The second double array of data \\
+\hline
+{\em incy} & A pointer to an integer spacing of elements in dy \\
+\hline
+\end{DoxyParams}
+\hypertarget{lapack_8hpp_a53c7c2159f19abafbec2bc09f2c0cdcc}{\index{lapack.\-hpp@{lapack.\-hpp}!dgemv\-\_\-@{dgemv\-\_\-}}
+\index{dgemv\-\_\-@{dgemv\-\_\-}!lapack.hpp@{lapack.\-hpp}}
+\subsubsection[{dgemv\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}void dgemv\-\_\- (
+\begin{DoxyParamCaption}
+\item[{char $\ast$}]{trans, }
+\item[{int $\ast$}]{m, }
+\item[{int $\ast$}]{n, }
+\item[{double $\ast$}]{alpha, }
+\item[{double $\ast$}]{a, }
+\item[{int $\ast$}]{lda, }
+\item[{double $\ast$}]{x, }
+\item[{int $\ast$}]{incx, }
+\item[{double $\ast$}]{beta, }
+\item[{double $\ast$}]{y, }
+\item[{int $\ast$}]{incy}
+\end{DoxyParamCaption}
+)}}\label{lapack_8hpp_a53c7c2159f19abafbec2bc09f2c0cdcc}
+
+
+Function from B\-L\-A\-S for matrix-\/vector multiplication (y = alpha $\ast$ a $\ast$ x + beta $\ast$ y) 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em trans} & A pointer to transposition character (\char`\"{}\-N\char`\"{} for not transposed, \char`\"{}\-T\char`\"{} for transposed) \\
+\hline
+{\em m} & A pointer to the number of rows in a \\
+\hline
+{\em n} & A pointer to the number of columns in a \\
+\hline
+{\em alpha} & A pointer to the double multiplier on a \\
+\hline
+{\em a} & The double matrix a \\
+\hline
+{\em lda} & A pointer to the integer number of leading dimension of a \\
+\hline
+{\em x} & The double vector x \\
+\hline
+{\em incx} & A pointer to an integer spacing of elements in x \\
+\hline
+{\em beta} & A pointer to the double multiplier on y \\
+\hline
+{\em y} & The double vector y, overwritten with the solution \\
+\hline
+{\em incy} & A pointer to an integer spacing of elements in y \\
+\hline
+\end{DoxyParams}
+\hypertarget{lapack_8hpp_ae56e8f1e7103728e3bc7c17b82868a81}{\index{lapack.\-hpp@{lapack.\-hpp}!dgetrf\-\_\-@{dgetrf\-\_\-}}
+\index{dgetrf\-\_\-@{dgetrf\-\_\-}!lapack.hpp@{lapack.\-hpp}}
+\subsubsection[{dgetrf\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}void dgetrf\-\_\- (
+\begin{DoxyParamCaption}
+\item[{int $\ast$}]{m, }
+\item[{int $\ast$}]{n, }
+\item[{double $\ast$}]{a, }
+\item[{int $\ast$}]{lda, }
+\item[{int $\ast$}]{ipiv, }
+\item[{int $\ast$}]{info}
+\end{DoxyParamCaption}
+)}}\label{lapack_8hpp_ae56e8f1e7103728e3bc7c17b82868a81}
+
+
+Function from L\-A\-P\-A\-C\-K that factorizes the matrix a by L\-U decomposition. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em m} & A pointer to the number of rows in a \\
+\hline
+{\em n} & A pointer to the number of columns in a \\
+\hline
+{\em a} & A double matrix to be overwritten with its L\-U decomposition \\
+\hline
+{\em lda} & A double pointer to the integer leading dimension of a \\
+\hline
+{\em ipiv} & An integer array to contain the pivot indices \\
+\hline
+{\em info} & A pointer to an integer indicating success (0 for successful exit) \\
+\hline
+\end{DoxyParams}
+\hypertarget{lapack_8hpp_a27a5040bb8500a1c3134352387aa4008}{\index{lapack.\-hpp@{lapack.\-hpp}!dgetrs\-\_\-@{dgetrs\-\_\-}}
+\index{dgetrs\-\_\-@{dgetrs\-\_\-}!lapack.hpp@{lapack.\-hpp}}
+\subsubsection[{dgetrs\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}void dgetrs\-\_\- (
+\begin{DoxyParamCaption}
+\item[{char $\ast$}]{trans, }
+\item[{int $\ast$}]{n, }
+\item[{int $\ast$}]{nrhs, }
+\item[{double $\ast$}]{a, }
+\item[{int $\ast$}]{lda, }
+\item[{int $\ast$}]{ipiv, }
+\item[{double $\ast$}]{b, }
+\item[{int $\ast$}]{ldb, }
+\item[{int $\ast$}]{info}
+\end{DoxyParamCaption}
+)}}\label{lapack_8hpp_a27a5040bb8500a1c3134352387aa4008}
+
+
+Function from L\-A\-P\-A\-C\-K that solves a factorized matrix equation. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em trans} & A pointer to transposition character (\char`\"{}\-N\char`\"{} for not transposed, \char`\"{}\-T\char`\"{} for transposed) \\
+\hline
+{\em n} & A pointer to the number of columns in a \\
+\hline
+{\em nrhs} & A pointer to the number of right hand sides \\
+\hline
+{\em a} & A double matrix to be overwritten with its L\-U decomposition \\
+\hline
+{\em lda} & A pointer to the integer number of leading dimension of a \\
+\hline
+{\em ipiv} & An integer array to contain the pivot indices \\
+\hline
+{\em b} & The double right hand side array, overwritten with solution \\
+\hline
+{\em ldb} & A pointer to the integer number of leading dimension of b \\
+\hline
+{\em info} & A pointer to an integer indicating success (0 for successful exit) \\
+\hline
+\end{DoxyParams}
+\hypertarget{lapack_8hpp_a096971c98bcbbab6f037abf6e3842972}{\index{lapack.\-hpp@{lapack.\-hpp}!dscal\-\_\-@{dscal\-\_\-}}
+\index{dscal\-\_\-@{dscal\-\_\-}!lapack.hpp@{lapack.\-hpp}}
+\subsubsection[{dscal\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}void dscal\-\_\- (
+\begin{DoxyParamCaption}
+\item[{int $\ast$}]{n, }
+\item[{double $\ast$}]{da, }
+\item[{double $\ast$}]{dx, }
+\item[{int $\ast$}]{incx}
+\end{DoxyParamCaption}
+)}}\label{lapack_8hpp_a096971c98bcbbab6f037abf6e3842972}
+
+
+Function from B\-L\-A\-S that scales a double array. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em n} & A pointer to an integer number of elements in x to copy to y \\
+\hline
+{\em da} & The double by which to scale the data \\
+\hline
+{\em dx} & The array from which the data are copied \\
+\hline
+{\em incx} & A pointer to an integer spacing of elements in x \\
+\hline
+\end{DoxyParams}

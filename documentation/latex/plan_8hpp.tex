@@ -1,0 +1,93 @@
+\hypertarget{plan_8hpp}{\section{/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/bases/plan.hpp File Reference}
+\label{plan_8hpp}\index{/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/bases/plan.\-hpp@{/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/bases/plan.\-hpp}}
+}
+{\ttfamily \#include \char`\"{}collocation.\-hpp\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}../config.\-hpp\char`\"{}}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classbases_1_1plan}{bases\-::plan}
+\begin{DoxyCompactList}\small\item\em The basic functional unit, containing a recipe for execution. \end{DoxyCompactList}\item 
+class \hyperlink{classbases_1_1explicit__plan}{bases\-::explicit\-\_\-plan}
+\begin{DoxyCompactList}\small\item\em A subclass of plan, specific to explicit methods. \end{DoxyCompactList}\item 
+class \hyperlink{classbases_1_1implicit__plan}{bases\-::implicit\-\_\-plan}
+\begin{DoxyCompactList}\small\item\em A subclass of plan, specific to implicit methods. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+namespace \hyperlink{namespacebases}{bases}
+\begin{DoxyCompactList}\small\item\em A namespace containing the base classes of the code. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \hyperlink{plan_8hpp_a6784e1c334dfceb8f017667c0b0f6a3e}{index} \{ \\*
+{\bfseries null} = 00, 
+{\bfseries position} = 01, 
+{\bfseries x\-\_\-position} = 01, 
+{\bfseries x\-\_\-pos} = 01, 
+\\*
+{\bfseries y\-\_\-position} = 02, 
+{\bfseries y\-\_\-pos} = 02, 
+{\bfseries z\-\_\-position} = 03, 
+{\bfseries z\-\_\-pos} = 03, 
+\\*
+{\bfseries velocity} = 11, 
+{\bfseries vel} = 11, 
+{\bfseries x\-\_\-velocity} = 11, 
+{\bfseries x\-\_\-vel} = 11, 
+\\*
+{\bfseries y\-\_\-velocity} = 12, 
+{\bfseries y\-\_\-vel} = 12, 
+{\bfseries z\-\_\-velocity} = 13, 
+{\bfseries z\-\_\-vel} = 13, 
+\\*
+{\bfseries pressure} = 20, 
+{\bfseries pres} = 20, 
+{\bfseries temperature} = 21, 
+{\bfseries temp} = 21, 
+\\*
+{\bfseries composition} = 22, 
+{\bfseries comp} = 22, 
+{\bfseries rhs} = -\/01, 
+{\bfseries vel\-\_\-rhs} = -\/11, 
+\\*
+{\bfseries temp\-\_\-rhs} = -\/21
+ \}
+\begin{DoxyCompactList}\small\item\em A set of indices to be used with the element scalars for convenience. \end{DoxyCompactList}\item 
+enum \hyperlink{plan_8hpp_a0364e462573fea987dc8d1491ad0ea58}{plan\-\_\-flags} \{ {\bfseries unchanged\-\_\-timestep} = 0x400, 
+{\bfseries transformed} = 0x10
+ \}
+\begin{DoxyCompactList}\small\item\em A set of flags to be used with the plan class. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+
+
+
+
+Spectral Element
+
+This file provides the abstract base class plan, from which all code executions should derive.
+
+Created by Justin Brown on 2013-\/04-\/08. Copyright 2013 Justin Brown. All rights reserved. 
+
+\subsection{Enumeration Type Documentation}
+\hypertarget{plan_8hpp_a6784e1c334dfceb8f017667c0b0f6a3e}{\index{plan.\-hpp@{plan.\-hpp}!index@{index}}
+\index{index@{index}!plan.hpp@{plan.\-hpp}}
+\subsubsection[{index}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf index}}}\label{plan_8hpp_a6784e1c334dfceb8f017667c0b0f6a3e}
+
+
+A set of indices to be used with the element scalars for convenience. 
+
+
+
+ Indices less than zero are \char`\"{}resettable.\char`\"{} The null index is equivalent to a N\-U\-L\-L pointer. \hypertarget{plan_8hpp_a0364e462573fea987dc8d1491ad0ea58}{\index{plan.\-hpp@{plan.\-hpp}!plan\-\_\-flags@{plan\-\_\-flags}}
+\index{plan\-\_\-flags@{plan\-\_\-flags}!plan.hpp@{plan.\-hpp}}
+\subsubsection[{plan\-\_\-flags}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf plan\-\_\-flags}}}\label{plan_8hpp_a0364e462573fea987dc8d1491ad0ea58}
+
+
+A set of flags to be used with the plan class. 
+
+
+
+ 

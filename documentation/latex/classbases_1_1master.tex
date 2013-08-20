@@ -1,0 +1,110 @@
+\hypertarget{classbases_1_1master}{\section{bases\-:\-:master Class Reference}
+\label{classbases_1_1master}\index{bases\-::master@{bases\-::master}}
+}
+
+
+The class that sets up and runs elements.  
+
+
+
+
+{\ttfamily \#include $<$master.\-hpp$>$}
+
+Inheritance diagram for bases\-:\-:master\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classbases_1_1master}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classbases_1_1master_a72c95fc1daa30b3109c056036cef488b}{master} (int i\-\_\-id, int i\-\_\-n\-\_\-elements, std\-::string parameter\-\_\-filename)
+\item 
+virtual \hyperlink{namespaceio_a1c55c654666eeece6a9724f453fdbd87}{io\-::parameter\-\_\-map} \& \hyperlink{classbases_1_1master_ae2abaf645c0749f29cb76f3d9628aaa3}{get\-\_\-params} ()
+\begin{DoxyCompactList}\small\item\em Get the parameter map object associated with the master object. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classbases_1_1master_a1b04748fd9da5863c4063184c135e8e5}{run} ()
+\begin{DoxyCompactList}\small\item\em Run the simulation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classbases_1_1master_a153b2f560ec4a629ad291ee405b354b0}{int \hyperlink{classbases_1_1master_a153b2f560ec4a629ad291ee405b354b0}{id}}\label{classbases_1_1master_a153b2f560ec4a629ad291ee405b354b0}
+
+\begin{DoxyCompactList}\small\item\em The integer processor id. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1master_ab745465f54a5586a856f2c20cf981bdf}{int \hyperlink{classbases_1_1master_ab745465f54a5586a856f2c20cf981bdf}{tsteps}}\label{classbases_1_1master_ab745465f54a5586a856f2c20cf981bdf}
+
+\begin{DoxyCompactList}\small\item\em The integer total number of timesteps to take. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1master_a784386fab783a6ce7cf6c49ad0687208}{std\-::vector$<$ std\-::shared\-\_\-ptr\\*
+$<$ \hyperlink{classbases_1_1element}{element} $>$ $>$ \hyperlink{classbases_1_1master_a784386fab783a6ce7cf6c49ad0687208}{elements}}\label{classbases_1_1master_a784386fab783a6ce7cf6c49ad0687208}
+
+\begin{DoxyCompactList}\small\item\em A vector containing shared pointers to the contained elements. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1master_a2bef8a5f3c2a7cb1c56e49e62b3db61c}{\hyperlink{namespaceio_a1c55c654666eeece6a9724f453fdbd87}{io\-::parameter\-\_\-map} \hyperlink{classbases_1_1master_a2bef8a5f3c2a7cb1c56e49e62b3db61c}{input\-Params}}\label{classbases_1_1master_a2bef8a5f3c2a7cb1c56e49e62b3db61c}
+
+\begin{DoxyCompactList}\small\item\em The parameter map object containing the input parameters. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+The class that sets up and runs elements. 
+
+
+
+ The master class contains a set of elements and slave processes. Generally, the master will take care of the administrative details where the slaves will mostly just run linear algebra. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classbases_1_1master_a72c95fc1daa30b3109c056036cef488b}{\index{bases\-::master@{bases\-::master}!master@{master}}
+\index{master@{master}!bases::master@{bases\-::master}}
+\subsubsection[{master}]{\setlength{\rightskip}{0pt plus 5cm}bases\-::master\-::master (
+\begin{DoxyParamCaption}
+\item[{int}]{i\-\_\-id, }
+\item[{int}]{i\-\_\-n\-\_\-elements, }
+\item[{std\-::string}]{parameter\-\_\-filename}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{classbases_1_1master_a72c95fc1daa30b3109c056036cef488b}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-id} & The integer process id \\
+\hline
+{\em i\-\_\-n\-\_\-elements} & The number of elements in the process \\
+\hline
+{\em parameter\-\_\-filename} & The string location of the parameter file \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classbases_1_1master_ae2abaf645c0749f29cb76f3d9628aaa3}{\index{bases\-::master@{bases\-::master}!get\-\_\-params@{get\-\_\-params}}
+\index{get\-\_\-params@{get\-\_\-params}!bases::master@{bases\-::master}}
+\subsubsection[{get\-\_\-params}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf io\-::parameter\-\_\-map}\& bases\-::master\-::get\-\_\-params (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}}\label{classbases_1_1master_ae2abaf645c0749f29cb76f3d9628aaa3}
+
+
+Get the parameter map object associated with the master object. 
+
+
+
+ \begin{DoxyReturn}{Returns}
+The parameter map object 
+\end{DoxyReturn}
+\hypertarget{classbases_1_1master_a1b04748fd9da5863c4063184c135e8e5}{\index{bases\-::master@{bases\-::master}!run@{run}}
+\index{run@{run}!bases::master@{bases\-::master}}
+\subsubsection[{run}]{\setlength{\rightskip}{0pt plus 5cm}virtual void bases\-::master\-::run (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}}\label{classbases_1_1master_a1b04748fd9da5863c4063184c135e8e5}
+
+
+Run the simulation. 
+
+
+
+ Go through each element in order and execute each. 
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/bases/\hyperlink{master_8hpp}{master.\-hpp}\end{DoxyCompactItemize}

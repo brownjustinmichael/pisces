@@ -1,0 +1,398 @@
+\hypertarget{namespaceutils}{\section{utils Namespace Reference}
+\label{namespaceutils}\index{utils@{utils}}
+}
+
+
+A namespace containing the various utilities needed in the code, such as linear algebra.  
+
+
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+double \hyperlink{namespaceutils_abf17f0fd1aabd0f354f78d08d2e685f2}{interpolate} (int n, double $\ast$x, double $\ast$y, double x\-\_\-0)
+\begin{DoxyCompactList}\small\item\em Interpolate over the array dy at x\-\_\-0. \end{DoxyCompactList}\item 
+double \hyperlink{namespaceutils_a850e14cc48078412f6b35a02381a31c0}{dot\-\_\-interpolate} (int n, double $\ast$x, int m, double $\ast$y, double $\ast$f, double x\-\_\-0)
+\begin{DoxyCompactList}\small\item\em Interpolate a matrix multiplication at x\-\_\-0. \end{DoxyCompactList}\item 
+void \hyperlink{namespaceutils_ac33776257194ff4afac9cb455d437e37}{matrix\-\_\-factorize} (int m, int n, double $\ast$a, int $\ast$ipiv, int $\ast$info=N\-U\-L\-L, int lda=-\/1)
+\begin{DoxyCompactList}\small\item\em L\-U Decompose the matrix a. \end{DoxyCompactList}\item 
+void \hyperlink{namespaceutils_a8aa3da9d5c69032bee818d0a0d5c59bc}{matrix\-\_\-solve} (int n, double $\ast$a, int $\ast$ipiv, double $\ast$b, int $\ast$info=N\-U\-L\-L, int nrhs=1, int lda=-\/1, int ldb=-\/1)
+\begin{DoxyCompactList}\small\item\em Solve b = A $\ast$ x and output result in b. \end{DoxyCompactList}\item 
+void \hyperlink{namespaceutils_abed0c18a9dc4509e784b7598f03bde7d}{copy} (int n, float $\ast$x, float $\ast$y, int incx=1, int incy=1)
+\begin{DoxyCompactList}\small\item\em Copies a double array into another. \end{DoxyCompactList}\item 
+void \hyperlink{namespaceutils_ad0a7847c08fc8930fa817b3993c2357f}{copy} (int n, double $\ast$x, double $\ast$y, int incx=1, int incy=1)
+\begin{DoxyCompactList}\small\item\em Copies a double array into another. \end{DoxyCompactList}\item 
+void \hyperlink{namespaceutils_a2f7633cf62c8fbf04542c16cd25ac954}{scale} (int n, float a, float $\ast$x, int incx=1)
+\begin{DoxyCompactList}\small\item\em Scales a float array by a constant. \end{DoxyCompactList}\item 
+void \hyperlink{namespaceutils_a9fd21a47ebc85aef5ef6bab18d3081ff}{scale} (int n, double a, double $\ast$x, int incx=1)
+\begin{DoxyCompactList}\small\item\em Scales a double array by a constant. \end{DoxyCompactList}\item 
+double \hyperlink{namespaceutils_a9e636142e9a630aee25812c5b558205c}{dot} (int n, double $\ast$x, double $\ast$y, int incx=1, int incy=1)
+\begin{DoxyCompactList}\small\item\em Takes the dot product of two arrays. \end{DoxyCompactList}\item 
+void \hyperlink{namespaceutils_a335999fcf29f6dfae2a4e630b5ca53d9}{add\-\_\-scaled} (int n, double da, double $\ast$x, double $\ast$y, int incx=1, int incy=1)
+\begin{DoxyCompactList}\small\item\em Perform the operation dy = da $\ast$ dx + dy. \end{DoxyCompactList}\item 
+void \hyperlink{namespaceutils_a86f1146cab3c538fef7502930e2813b9}{matrix\-\_\-vector\-\_\-multiply} (int m, int n, double alpha, double $\ast$a, double $\ast$x, double beta, double $\ast$y, int lda=-\/1, int incx=1, int incy=1)
+\begin{DoxyCompactList}\small\item\em Perform the matrix-\/vector multiplication y = alpha $\ast$ a $\ast$ x + beta $\ast$ y. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A namespace containing the various utilities needed in the code, such as linear algebra. 
+
+ 
+
+\subsection{Function Documentation}
+\hypertarget{namespaceutils_a335999fcf29f6dfae2a4e630b5ca53d9}{\index{utils@{utils}!add\-\_\-scaled@{add\-\_\-scaled}}
+\index{add\-\_\-scaled@{add\-\_\-scaled}!utils@{utils}}
+\subsubsection[{add\-\_\-scaled}]{\setlength{\rightskip}{0pt plus 5cm}void utils\-::add\-\_\-scaled (
+\begin{DoxyParamCaption}
+\item[{int}]{n, }
+\item[{double}]{da, }
+\item[{double $\ast$}]{x, }
+\item[{double $\ast$}]{y, }
+\item[{int}]{incx = {\ttfamily 1}, }
+\item[{int}]{incy = {\ttfamily 1}}
+\end{DoxyParamCaption}
+)}}\label{namespaceutils_a335999fcf29f6dfae2a4e630b5ca53d9}
+
+
+Perform the operation dy = da $\ast$ dx + dy. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em n} & An integer number of elements to operate on \\
+\hline
+{\em da} & The double da \\
+\hline
+{\em x} & The double array dx \\
+\hline
+{\em y} & The double array dy which is replaced with the output \\
+\hline
+{\em incx} & The integer spacing of elements in dx \\
+\hline
+{\em incy} & The integer spacing of elements in dy \\
+\hline
+\end{DoxyParams}
+\hypertarget{namespaceutils_abed0c18a9dc4509e784b7598f03bde7d}{\index{utils@{utils}!copy@{copy}}
+\index{copy@{copy}!utils@{utils}}
+\subsubsection[{copy}]{\setlength{\rightskip}{0pt plus 5cm}void utils\-::copy (
+\begin{DoxyParamCaption}
+\item[{int}]{n, }
+\item[{float $\ast$}]{x, }
+\item[{float $\ast$}]{y, }
+\item[{int}]{incx = {\ttfamily 1}, }
+\item[{int}]{incy = {\ttfamily 1}}
+\end{DoxyParamCaption}
+)}}\label{namespaceutils_abed0c18a9dc4509e784b7598f03bde7d}
+
+
+Copies a double array into another. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em n} & An integer number of elements to copy \\
+\hline
+{\em x} & A float array of values to be copied \\
+\hline
+{\em y} & A float array to be copied to \\
+\hline
+{\em incx} & The integer spacing of elements in dx \\
+\hline
+{\em incy} & The integer spacing of elements in dy \\
+\hline
+\end{DoxyParams}
+\hypertarget{namespaceutils_ad0a7847c08fc8930fa817b3993c2357f}{\index{utils@{utils}!copy@{copy}}
+\index{copy@{copy}!utils@{utils}}
+\subsubsection[{copy}]{\setlength{\rightskip}{0pt plus 5cm}void utils\-::copy (
+\begin{DoxyParamCaption}
+\item[{int}]{n, }
+\item[{double $\ast$}]{x, }
+\item[{double $\ast$}]{y, }
+\item[{int}]{incx = {\ttfamily 1}, }
+\item[{int}]{incy = {\ttfamily 1}}
+\end{DoxyParamCaption}
+)}}\label{namespaceutils_ad0a7847c08fc8930fa817b3993c2357f}
+
+
+Copies a double array into another. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em n} & An integer number of elements to copy \\
+\hline
+{\em x} & A double array of values to be copied \\
+\hline
+{\em y} & A double array to be copied to \\
+\hline
+{\em incx} & The integer spacing of elements in dx \\
+\hline
+{\em incy} & The integer spacing of elements in dy \\
+\hline
+\end{DoxyParams}
+\hypertarget{namespaceutils_a9e636142e9a630aee25812c5b558205c}{\index{utils@{utils}!dot@{dot}}
+\index{dot@{dot}!utils@{utils}}
+\subsubsection[{dot}]{\setlength{\rightskip}{0pt plus 5cm}double utils\-::dot (
+\begin{DoxyParamCaption}
+\item[{int}]{n, }
+\item[{double $\ast$}]{x, }
+\item[{double $\ast$}]{y, }
+\item[{int}]{incx = {\ttfamily 1}, }
+\item[{int}]{incy = {\ttfamily 1}}
+\end{DoxyParamCaption}
+)}}\label{namespaceutils_a9e636142e9a630aee25812c5b558205c}
+
+
+Takes the dot product of two arrays. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em n} & An integer number of elements to dot \\
+\hline
+{\em x} & The first double array \\
+\hline
+{\em y} & The second double array \\
+\hline
+{\em incx} & The integer spacing of elements in dx \\
+\hline
+{\em incy} & The integer spacing of elements in dy\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The double dot product 
+\end{DoxyReturn}
+\hypertarget{namespaceutils_a850e14cc48078412f6b35a02381a31c0}{\index{utils@{utils}!dot\-\_\-interpolate@{dot\-\_\-interpolate}}
+\index{dot\-\_\-interpolate@{dot\-\_\-interpolate}!utils@{utils}}
+\subsubsection[{dot\-\_\-interpolate}]{\setlength{\rightskip}{0pt plus 5cm}double utils\-::dot\-\_\-interpolate (
+\begin{DoxyParamCaption}
+\item[{int}]{n, }
+\item[{double $\ast$}]{x, }
+\item[{int}]{m, }
+\item[{double $\ast$}]{y, }
+\item[{double $\ast$}]{f, }
+\item[{double}]{x\-\_\-0}
+\end{DoxyParamCaption}
+)}}\label{namespaceutils_a850e14cc48078412f6b35a02381a31c0}
+
+
+Interpolate a matrix multiplication at x\-\_\-0. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em n} & The integer number of elements in x, rows in y \\
+\hline
+{\em x} & The double array of independent variables \\
+\hline
+{\em m} & The integer number of columns in y, elements in f \\
+\hline
+{\em y} & The double array matrix to interpolate \\
+\hline
+{\em f} & The double array with which to take the dot product \\
+\hline
+{\em x\-\_\-0} & The double value at which to interpolate \\
+\hline
+\end{DoxyParams}
+\hypertarget{namespaceutils_abf17f0fd1aabd0f354f78d08d2e685f2}{\index{utils@{utils}!interpolate@{interpolate}}
+\index{interpolate@{interpolate}!utils@{utils}}
+\subsubsection[{interpolate}]{\setlength{\rightskip}{0pt plus 5cm}double utils\-::interpolate (
+\begin{DoxyParamCaption}
+\item[{int}]{n, }
+\item[{double $\ast$}]{x, }
+\item[{double $\ast$}]{y, }
+\item[{double}]{x\-\_\-0}
+\end{DoxyParamCaption}
+)}}\label{namespaceutils_abf17f0fd1aabd0f354f78d08d2e685f2}
+
+
+Interpolate over the array dy at x\-\_\-0. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em n} & The integer number of elements in dx, dy \\
+\hline
+{\em x} & The double array of independent variables \\
+\hline
+{\em y} & The double array of dependent variables \\
+\hline
+{\em x\-\_\-0} & The double value at which to interpolate \\
+\hline
+\end{DoxyParams}
+\hypertarget{namespaceutils_ac33776257194ff4afac9cb455d437e37}{\index{utils@{utils}!matrix\-\_\-factorize@{matrix\-\_\-factorize}}
+\index{matrix\-\_\-factorize@{matrix\-\_\-factorize}!utils@{utils}}
+\subsubsection[{matrix\-\_\-factorize}]{\setlength{\rightskip}{0pt plus 5cm}void utils\-::matrix\-\_\-factorize (
+\begin{DoxyParamCaption}
+\item[{int}]{m, }
+\item[{int}]{n, }
+\item[{double $\ast$}]{a, }
+\item[{int $\ast$}]{ipiv, }
+\item[{int $\ast$}]{info = {\ttfamily NULL}, }
+\item[{int}]{lda = {\ttfamily -\/1}}
+\end{DoxyParamCaption}
+)}}\label{namespaceutils_ac33776257194ff4afac9cb455d437e37}
+
+
+L\-U Decompose the matrix a. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em m} & An integer number of rows in a \\
+\hline
+{\em n} & An integer number of columns in a \\
+\hline
+{\em a} & The double matrix a (Fortran format) \\
+\hline
+{\em ipiv} & An integer array to contain output pivot indices \\
+\hline
+{\em info} & An integer pointer that points to 0 on success, something else on failure \\
+\hline
+{\em lda} & The leading dimension of a \\
+\hline
+\end{DoxyParams}
+\hypertarget{namespaceutils_a8aa3da9d5c69032bee818d0a0d5c59bc}{\index{utils@{utils}!matrix\-\_\-solve@{matrix\-\_\-solve}}
+\index{matrix\-\_\-solve@{matrix\-\_\-solve}!utils@{utils}}
+\subsubsection[{matrix\-\_\-solve}]{\setlength{\rightskip}{0pt plus 5cm}void utils\-::matrix\-\_\-solve (
+\begin{DoxyParamCaption}
+\item[{int}]{n, }
+\item[{double $\ast$}]{a, }
+\item[{int $\ast$}]{ipiv, }
+\item[{double $\ast$}]{b, }
+\item[{int $\ast$}]{info = {\ttfamily NULL}, }
+\item[{int}]{nrhs = {\ttfamily 1}, }
+\item[{int}]{lda = {\ttfamily -\/1}, }
+\item[{int}]{ldb = {\ttfamily -\/1}}
+\end{DoxyParamCaption}
+)}}\label{namespaceutils_a8aa3da9d5c69032bee818d0a0d5c59bc}
+
+
+Solve b = A $\ast$ x and output result in b. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em n} & An integer number of elements in b \\
+\hline
+{\em a} & The double matrix a (L\-U Decomposed) \\
+\hline
+{\em ipiv} & The integer array of pivot indices from the L\-U Decomposition \\
+\hline
+{\em b} & The double array b \\
+\hline
+{\em info} & An integer pointer that points to 0 on success, something else on failure \\
+\hline
+{\em nrhs} & The number of right hand sides in b \\
+\hline
+{\em lda} & The leading dimension of a \\
+\hline
+{\em ldb} & The leading dimension of b \\
+\hline
+\end{DoxyParams}
+\hypertarget{namespaceutils_a86f1146cab3c538fef7502930e2813b9}{\index{utils@{utils}!matrix\-\_\-vector\-\_\-multiply@{matrix\-\_\-vector\-\_\-multiply}}
+\index{matrix\-\_\-vector\-\_\-multiply@{matrix\-\_\-vector\-\_\-multiply}!utils@{utils}}
+\subsubsection[{matrix\-\_\-vector\-\_\-multiply}]{\setlength{\rightskip}{0pt plus 5cm}void utils\-::matrix\-\_\-vector\-\_\-multiply (
+\begin{DoxyParamCaption}
+\item[{int}]{m, }
+\item[{int}]{n, }
+\item[{double}]{alpha, }
+\item[{double $\ast$}]{a, }
+\item[{double $\ast$}]{x, }
+\item[{double}]{beta, }
+\item[{double $\ast$}]{y, }
+\item[{int}]{lda = {\ttfamily -\/1}, }
+\item[{int}]{incx = {\ttfamily 1}, }
+\item[{int}]{incy = {\ttfamily 1}}
+\end{DoxyParamCaption}
+)}}\label{namespaceutils_a86f1146cab3c538fef7502930e2813b9}
+
+
+Perform the matrix-\/vector multiplication y = alpha $\ast$ a $\ast$ x + beta $\ast$ y. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em m} & An integer number of rows in a \\
+\hline
+{\em n} & An integer number of columns in a \\
+\hline
+{\em alpha} & The double alpha \\
+\hline
+{\em a} & The double matrix a (Fortran format) \\
+\hline
+{\em x} & The double array x \\
+\hline
+{\em beta} & The double beta \\
+\hline
+{\em y} & The double array y \\
+\hline
+{\em lda} & The integer leading dimension of a \\
+\hline
+{\em incx} & The integer spacing of elements in x \\
+\hline
+{\em incy} & The integer spacing of elements in y \\
+\hline
+\end{DoxyParams}
+\hypertarget{namespaceutils_a2f7633cf62c8fbf04542c16cd25ac954}{\index{utils@{utils}!scale@{scale}}
+\index{scale@{scale}!utils@{utils}}
+\subsubsection[{scale}]{\setlength{\rightskip}{0pt plus 5cm}void utils\-::scale (
+\begin{DoxyParamCaption}
+\item[{int}]{n, }
+\item[{float}]{a, }
+\item[{float $\ast$}]{x, }
+\item[{int}]{incx = {\ttfamily 1}}
+\end{DoxyParamCaption}
+)}}\label{namespaceutils_a2f7633cf62c8fbf04542c16cd25ac954}
+
+
+Scales a float array by a constant. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em n} & An integer number of elements to scale \\
+\hline
+{\em a} & A float to scale the array by \\
+\hline
+{\em x} & A float array to scale \\
+\hline
+{\em incx} & The integer spacing of elements in dx \\
+\hline
+\end{DoxyParams}
+\hypertarget{namespaceutils_a9fd21a47ebc85aef5ef6bab18d3081ff}{\index{utils@{utils}!scale@{scale}}
+\index{scale@{scale}!utils@{utils}}
+\subsubsection[{scale}]{\setlength{\rightskip}{0pt plus 5cm}void utils\-::scale (
+\begin{DoxyParamCaption}
+\item[{int}]{n, }
+\item[{double}]{a, }
+\item[{double $\ast$}]{x, }
+\item[{int}]{incx = {\ttfamily 1}}
+\end{DoxyParamCaption}
+)}}\label{namespaceutils_a9fd21a47ebc85aef5ef6bab18d3081ff}
+
+
+Scales a double array by a constant. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em n} & An integer number of elements to scale \\
+\hline
+{\em a} & A double to scale the array by \\
+\hline
+{\em x} & A double array to scale \\
+\hline
+{\em incx} & The integer spacing of elements in dx \\
+\hline
+\end{DoxyParams}

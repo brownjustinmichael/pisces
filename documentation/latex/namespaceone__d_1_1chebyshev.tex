@@ -1,0 +1,70 @@
+\hypertarget{namespaceone__d_1_1chebyshev}{\section{one\-\_\-d\-:\-:chebyshev Namespace Reference}
+\label{namespaceone__d_1_1chebyshev}\index{one\-\_\-d\-::chebyshev@{one\-\_\-d\-::chebyshev}}
+}
+
+
+A namespace containing the 1\-D Chebyshev pieces of the code.  
+
+
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classone__d_1_1chebyshev_1_1explicit__diffusion}{explicit\-\_\-diffusion}
+\begin{DoxyCompactList}\small\item\em Implementation of explicit diffusion for data expressed as a sum of orthogonal functions in 1\-D. \end{DoxyCompactList}\item 
+class \hyperlink{classone__d_1_1chebyshev_1_1implicit__diffusion}{implicit\-\_\-diffusion}
+\begin{DoxyCompactList}\small\item\em Implementation of implicit diffusion for data expressed as a sum of orthogonal functions in 1\-D. \end{DoxyCompactList}\item 
+class \hyperlink{classone__d_1_1chebyshev_1_1element}{element}
+\begin{DoxyCompactList}\small\item\em A Chebyshev implementation of the 1\-D element class. \end{DoxyCompactList}\item 
+class \hyperlink{classone__d_1_1chebyshev_1_1advection__diffusion__element}{advection\-\_\-diffusion\-\_\-element}
+\begin{DoxyCompactList}\small\item\em A simple implementation of the element class with diffusion. \end{DoxyCompactList}\item 
+class \hyperlink{classone__d_1_1chebyshev_1_1cuda__element}{cuda\-\_\-element}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+double \hyperlink{namespaceone__d_1_1chebyshev_af9ab281bbb058d20bea1ec47a68ca7dd}{return\-\_\-position} (int n, int i, int excess\-\_\-0, double position\-\_\-0, int excess\-\_\-n, double position\-\_\-n)
+\begin{DoxyCompactList}\small\item\em Helper to calculate positions in chebyshev elements. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A namespace containing the 1\-D Chebyshev pieces of the code. 
+
+ 
+
+\subsection{Function Documentation}
+\hypertarget{namespaceone__d_1_1chebyshev_af9ab281bbb058d20bea1ec47a68ca7dd}{\index{one\-\_\-d\-::chebyshev@{one\-\_\-d\-::chebyshev}!return\-\_\-position@{return\-\_\-position}}
+\index{return\-\_\-position@{return\-\_\-position}!one_d::chebyshev@{one\-\_\-d\-::chebyshev}}
+\subsubsection[{return\-\_\-position}]{\setlength{\rightskip}{0pt plus 5cm}double one\-\_\-d\-::chebyshev\-::return\-\_\-position (
+\begin{DoxyParamCaption}
+\item[{int}]{n, }
+\item[{int}]{i, }
+\item[{int}]{excess\-\_\-0, }
+\item[{double}]{position\-\_\-0, }
+\item[{int}]{excess\-\_\-n, }
+\item[{double}]{position\-\_\-n}
+\end{DoxyParamCaption}
+)}}\label{namespaceone__d_1_1chebyshev_af9ab281bbb058d20bea1ec47a68ca7dd}
+
+
+Helper to calculate positions in chebyshev elements. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em n} & The integer number of data points \\
+\hline
+{\em i} & The integer element index for the calculation \\
+\hline
+{\em excess\-\_\-0} & The integer number of excess data points on the edge\-\_\-0 side \\
+\hline
+{\em position\-\_\-0} & The double position at index excess\-\_\-0 \\
+\hline
+{\em excess\-\_\-n} & The integer number of excess data points on the edge\-\_\-n side \\
+\hline
+{\em position\-\_\-n} & The double position at index n -\/ 1 -\/ excess\-\_\-n\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The double position of the given index 
+\end{DoxyReturn}

@@ -1,0 +1,211 @@
+\hypertarget{classone__d_1_1solver}{\section{one\-\_\-d\-:\-:solver Class Reference}
+\label{classone__d_1_1solver}\index{one\-\_\-d\-::solver@{one\-\_\-d\-::solver}}
+}
+
+
+A 1\-D implementation of a matrix solver.  
+
+
+
+
+{\ttfamily \#include $<$solver\-\_\-one\-\_\-d.\-hpp$>$}
+
+Inheritance diagram for one\-\_\-d\-:\-:solver\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{classone__d_1_1solver}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classone__d_1_1solver_a17c2b3e1be15e2311ac36de12cfb877b}{solver} (\hyperlink{classbases_1_1element}{bases\-::element} $\ast$i\-\_\-element\-\_\-ptr, int i\-\_\-n, int i\-\_\-excess\-\_\-0, int i\-\_\-excess\-\_\-n, double \&i\-\_\-timestep, double \&i\-\_\-alpha\-\_\-0, double \&i\-\_\-alpha\-\_\-n, double $\ast$i\-\_\-default\-\_\-matrix, double $\ast$i\-\_\-matrix, int i\-\_\-name\-\_\-in, int i\-\_\-name\-\_\-rhs, int i\-\_\-name\-\_\-out=null, int i\-\_\-flags=0x00)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+void \hyperlink{classone__d_1_1solver_a7c28bd733cb3c3849afe1773974eb4f6}{execute} ()
+\begin{DoxyCompactList}\small\item\em Solve the matrix equation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classone__d_1_1solver_a33e9bc05b91b4da54ce783235447f334}{factorize} ()
+\begin{DoxyCompactList}\small\item\em Factorize the matrix equation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classone__d_1_1solver_a490325a537d8addf5edea22b7ae4c4f5}{double \& \hyperlink{classone__d_1_1solver_a490325a537d8addf5edea22b7ae4c4f5}{timestep}}\label{classone__d_1_1solver_a490325a537d8addf5edea22b7ae4c4f5}
+
+\begin{DoxyCompactList}\small\item\em A double reference to the current timestep. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1solver_aa38c2e7d7f91ab64f3de449ad4f0c5c8}{double \& \hyperlink{classone__d_1_1solver_aa38c2e7d7f91ab64f3de449ad4f0c5c8}{alpha\-\_\-0}}\label{classone__d_1_1solver_aa38c2e7d7f91ab64f3de449ad4f0c5c8}
+
+\begin{DoxyCompactList}\small\item\em A double reference to the current edge\-\_\-0 weight. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1solver_a3e383f0bfc5e541f22583110eae4c9ab}{double \& \hyperlink{classone__d_1_1solver_a3e383f0bfc5e541f22583110eae4c9ab}{alpha\-\_\-n}}\label{classone__d_1_1solver_a3e383f0bfc5e541f22583110eae4c9ab}
+
+\begin{DoxyCompactList}\small\item\em A double reference to the current edge\-\_\-n weight. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1solver_a07b2fb5dd4cffd6acc7c4e641173c444}{int \hyperlink{classone__d_1_1solver_a07b2fb5dd4cffd6acc7c4e641173c444}{excess\-\_\-0}}\label{classone__d_1_1solver_a07b2fb5dd4cffd6acc7c4e641173c444}
+
+\begin{DoxyCompactList}\small\item\em The integer number of elements to recv from edge\-\_\-0. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1solver_a3d3f3a518faff396383fcbad9bed4da2}{int \hyperlink{classone__d_1_1solver_a3d3f3a518faff396383fcbad9bed4da2}{excess\-\_\-n}}\label{classone__d_1_1solver_a3d3f3a518faff396383fcbad9bed4da2}
+
+\begin{DoxyCompactList}\small\item\em The integer number of elements to recv from edge\-\_\-n. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1solver_ad9d68340476561f45d2c16226e65099d}{int \hyperlink{classone__d_1_1solver_ad9d68340476561f45d2c16226e65099d}{expected\-\_\-excess\-\_\-0}}\label{classone__d_1_1solver_ad9d68340476561f45d2c16226e65099d}
+
+\begin{DoxyCompactList}\small\item\em The integer number of elements to send to edge\-\_\-0. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1solver_a70da7ebd7e0c567586de45fbf28bfb8a}{int \hyperlink{classone__d_1_1solver_a70da7ebd7e0c567586de45fbf28bfb8a}{expected\-\_\-excess\-\_\-n}}\label{classone__d_1_1solver_a70da7ebd7e0c567586de45fbf28bfb8a}
+
+\begin{DoxyCompactList}\small\item\em The integer number of elements to send to edge\-\_\-n. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1solver_a9a37e318c74debf5210a52f781b1c1e7}{double $\ast$ \hyperlink{classone__d_1_1solver_a9a37e318c74debf5210a52f781b1c1e7}{rhs}}\label{classone__d_1_1solver_a9a37e318c74debf5210a52f781b1c1e7}
+
+\begin{DoxyCompactList}\small\item\em The double array of the right-\/hand-\/side of the matrix equation. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1solver_ac1002a2062ffc61df2ceddbd7d8d3f6e}{double $\ast$ \hyperlink{classone__d_1_1solver_ac1002a2062ffc61df2ceddbd7d8d3f6e}{default\-\_\-matrix}}\label{classone__d_1_1solver_ac1002a2062ffc61df2ceddbd7d8d3f6e}
+
+\begin{DoxyCompactList}\small\item\em The double array of the non-\/timestep dependent matrix component. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1solver_a7479d423e0d42293c9d953783f7715df}{double $\ast$ \hyperlink{classone__d_1_1solver_a7479d423e0d42293c9d953783f7715df}{matrix}}\label{classone__d_1_1solver_a7479d423e0d42293c9d953783f7715df}
+
+\begin{DoxyCompactList}\small\item\em The double array of the matrix component to be timestep-\/multiplied. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1solver_ab6cae4cf1e23a2e50b40d03ca146833b}{std\-::vector$<$ double $>$ \hyperlink{classone__d_1_1solver_ab6cae4cf1e23a2e50b40d03ca146833b}{error\-\_\-0}}\label{classone__d_1_1solver_ab6cae4cf1e23a2e50b40d03ca146833b}
+
+\begin{DoxyCompactList}\small\item\em A double vector to be recved from edge\-\_\-0. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1solver_ae8898a6ede0f1daad9754364a267b7ae}{std\-::vector$<$ double $>$ \hyperlink{classone__d_1_1solver_ae8898a6ede0f1daad9754364a267b7ae}{error\-\_\-n}}\label{classone__d_1_1solver_ae8898a6ede0f1daad9754364a267b7ae}
+
+\begin{DoxyCompactList}\small\item\em A double vector to be recved from edge\-\_\-n. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1solver_abb22af2fc401d3ed93ae3f400028c9de}{std\-::vector$<$ double $>$ \hyperlink{classone__d_1_1solver_abb22af2fc401d3ed93ae3f400028c9de}{out\-\_\-error\-\_\-0}}\label{classone__d_1_1solver_abb22af2fc401d3ed93ae3f400028c9de}
+
+\begin{DoxyCompactList}\small\item\em A double vector to be sent to edge\-\_\-0. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1solver_ab1ed5c7ce3f6ec0bdc9a6eb8cefaf507}{std\-::vector$<$ double $>$ \hyperlink{classone__d_1_1solver_ab1ed5c7ce3f6ec0bdc9a6eb8cefaf507}{out\-\_\-error\-\_\-n}}\label{classone__d_1_1solver_ab1ed5c7ce3f6ec0bdc9a6eb8cefaf507}
+
+\begin{DoxyCompactList}\small\item\em A double vector to be sent to edge\-\_\-n. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1solver_aac1795dc7503b6c96b5c6ad59fc9de20}{std\-::vector$<$ double $>$ \hyperlink{classone__d_1_1solver_aac1795dc7503b6c96b5c6ad59fc9de20}{data\-\_\-temp}}\label{classone__d_1_1solver_aac1795dc7503b6c96b5c6ad59fc9de20}
+
+\begin{DoxyCompactList}\small\item\em A double vector to be used in lieu of data\-\_\-out for non-\/updating steps. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1solver_ad34bc1962465a7030a22c825d9fa7473}{std\-::vector$<$ double $>$ \hyperlink{classone__d_1_1solver_ad34bc1962465a7030a22c825d9fa7473}{positions\-\_\-0}}\label{classone__d_1_1solver_ad34bc1962465a7030a22c825d9fa7473}
+
+\begin{DoxyCompactList}\small\item\em A double vector of excess positions from edge\-\_\-0. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1solver_a63b789bf32c435c56d4874589fdc81f3}{std\-::vector$<$ double $>$ \hyperlink{classone__d_1_1solver_a63b789bf32c435c56d4874589fdc81f3}{positions\-\_\-n}}\label{classone__d_1_1solver_a63b789bf32c435c56d4874589fdc81f3}
+
+\begin{DoxyCompactList}\small\item\em A double vector of excess positions from edge\-\_\-n. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1solver_a422a65f49ae474f7f3a30d1eaca19641}{std\-::vector$<$ double $>$ \hyperlink{classone__d_1_1solver_a422a65f49ae474f7f3a30d1eaca19641}{factorized\-\_\-matrix}}\label{classone__d_1_1solver_a422a65f49ae474f7f3a30d1eaca19641}
+
+\begin{DoxyCompactList}\small\item\em A double vector containing the factorized sum of default matrix and timestep $\ast$ matrix. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1solver_a668a33255403a66f8f44167fbf55f009}{std\-::vector$<$ int $>$ \hyperlink{classone__d_1_1solver_a668a33255403a66f8f44167fbf55f009}{ipiv}}\label{classone__d_1_1solver_a668a33255403a66f8f44167fbf55f009}
+
+\begin{DoxyCompactList}\small\item\em A vector of integers needed to calculate the factorization. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A 1\-D implementation of a matrix solver. 
+
+
+
+ This matrix solver solves a matrix in each element individually and sends the results to the adjacent elements. This solver should be iterated. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classone__d_1_1solver_a17c2b3e1be15e2311ac36de12cfb877b}{\index{one\-\_\-d\-::solver@{one\-\_\-d\-::solver}!solver@{solver}}
+\index{solver@{solver}!one_d::solver@{one\-\_\-d\-::solver}}
+\subsubsection[{solver}]{\setlength{\rightskip}{0pt plus 5cm}one\-\_\-d\-::solver\-::solver (
+\begin{DoxyParamCaption}
+\item[{{\bf bases\-::element} $\ast$}]{i\-\_\-element\-\_\-ptr, }
+\item[{int}]{i\-\_\-n, }
+\item[{int}]{i\-\_\-excess\-\_\-0, }
+\item[{int}]{i\-\_\-excess\-\_\-n, }
+\item[{double \&}]{i\-\_\-timestep, }
+\item[{double \&}]{i\-\_\-alpha\-\_\-0, }
+\item[{double \&}]{i\-\_\-alpha\-\_\-n, }
+\item[{double $\ast$}]{i\-\_\-default\-\_\-matrix, }
+\item[{double $\ast$}]{i\-\_\-matrix, }
+\item[{int}]{i\-\_\-name\-\_\-in, }
+\item[{int}]{i\-\_\-name\-\_\-rhs, }
+\item[{int}]{i\-\_\-name\-\_\-out = {\ttfamily null}, }
+\item[{int}]{i\-\_\-flags = {\ttfamily 0x00}}
+\end{DoxyParamCaption}
+)}}\label{classone__d_1_1solver_a17c2b3e1be15e2311ac36de12cfb877b}
+
+
+
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-excess\-\_\-0} & The integer number of excess elements on the edge\-\_\-0 side \\
+\hline
+{\em i\-\_\-excess\-\_\-n} & The integer number of excess elements on the edge\-\_\-n side \\
+\hline
+{\em i\-\_\-timestep} & A double reference to the current timestep \\
+\hline
+{\em i\-\_\-alpha\-\_\-0} & A double reference to the edge\-\_\-0 weight \\
+\hline
+{\em i\-\_\-alpha\-\_\-n} & A double reference to the edge\-\_\-n weight \\
+\hline
+{\em i\-\_\-default\-\_\-matrix} & A double array containing the 0 order collocation matrix \\
+\hline
+{\em i\-\_\-matrix} & The double matrix to be factorized \\
+\hline
+{\em i\-\_\-name\-\_\-rhs} & The integer representation of the matrix right-\/hand-\/side \\
+\hline
+\end{DoxyParams}
+
+
+ 
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-n} & The integer number of elements in the data \\
+\hline
+{\em i\-\_\-name\-\_\-in} & The integer scalar index of the input \\
+\hline
+{\em i\-\_\-name\-\_\-out} & The integer scalar index of the output \\
+\hline
+\end{DoxyParams}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-element\-\_\-ptr} & A pointer to the associated element \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classone__d_1_1solver_a7c28bd733cb3c3849afe1773974eb4f6}{\index{one\-\_\-d\-::solver@{one\-\_\-d\-::solver}!execute@{execute}}
+\index{execute@{execute}!one_d::solver@{one\-\_\-d\-::solver}}
+\subsubsection[{execute}]{\setlength{\rightskip}{0pt plus 5cm}void one\-\_\-d\-::solver\-::execute (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classone__d_1_1solver_a7c28bd733cb3c3849afe1773974eb4f6}
+
+
+Solve the matrix equation. 
+
+
+
+ 
+
+ 
+
+Reimplemented from \hyperlink{classbases_1_1solver_a8adf4c428bf4322a664c811073b491e1}{bases\-::solver}.
+
+\hypertarget{classone__d_1_1solver_a33e9bc05b91b4da54ce783235447f334}{\index{one\-\_\-d\-::solver@{one\-\_\-d\-::solver}!factorize@{factorize}}
+\index{factorize@{factorize}!one_d::solver@{one\-\_\-d\-::solver}}
+\subsubsection[{factorize}]{\setlength{\rightskip}{0pt plus 5cm}void one\-\_\-d\-::solver\-::factorize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}}\label{classone__d_1_1solver_a33e9bc05b91b4da54ce783235447f334}
+
+
+Factorize the matrix equation. 
+
+
+
+ 
+
+ This method checks first whether the matrix has been factorized, according to the execution flags. Upon success, it notes in the execution flags that the matrix has been factorized. 
+
+Reimplemented from \hyperlink{classbases_1_1solver_adfc4b2709650924535e117405e7e3a21}{bases\-::solver}.
+
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/one\-\_\-d/solver\-\_\-one\-\_\-d.\-hpp\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/one\-\_\-d/\hyperlink{solver__one__d_8cpp}{solver\-\_\-one\-\_\-d.\-cpp}\end{DoxyCompactItemize}

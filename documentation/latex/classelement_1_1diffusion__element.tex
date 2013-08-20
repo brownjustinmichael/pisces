@@ -1,0 +1,78 @@
+\hypertarget{classelement_1_1diffusion__element}{\section{element\-:\-:diffusion\-\_\-element Class Reference}
+\label{classelement_1_1diffusion__element}\index{element\-::diffusion\-\_\-element@{element\-::diffusion\-\_\-element}}
+}
+
+
+A simple implementation of the element class with diffusion.  
+
+
+
+
+{\ttfamily \#include $<$element.\-hpp$>$}
+
+Inheritance diagram for element\-:\-:diffusion\-\_\-element\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classelement_1_1diffusion__element}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classelement_1_1diffusion__element_a93a857480b341ec48356db407c08feea}{diffusion\-\_\-element} (int i\-\_\-n, int i\-\_\-flags)
+\item 
+void \hyperlink{classelement_1_1diffusion__element_af14afe9aa8d5e374201c305ad2de3d3c}{update} ()
+\begin{DoxyCompactList}\small\item\em This calculates diffusion and output for a constant timestep. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A simple implementation of the element class with diffusion. 
+
+
+
+ This class contains a full element's capacity to run a single element diffusion in 1\-D. It cannot yet tie to other elements or calculate its own timestep. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classelement_1_1diffusion__element_a93a857480b341ec48356db407c08feea}{\index{element\-::diffusion\-\_\-element@{element\-::diffusion\-\_\-element}!diffusion\-\_\-element@{diffusion\-\_\-element}}
+\index{diffusion\-\_\-element@{diffusion\-\_\-element}!element::diffusion_element@{element\-::diffusion\-\_\-element}}
+\subsubsection[{diffusion\-\_\-element}]{\setlength{\rightskip}{0pt plus 5cm}element\-::diffusion\-\_\-element\-::diffusion\-\_\-element (
+\begin{DoxyParamCaption}
+\item[{int}]{i\-\_\-n, }
+\item[{int}]{i\-\_\-flags}
+\end{DoxyParamCaption}
+)}}\label{classelement_1_1diffusion__element_a93a857480b341ec48356db407c08feea}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-n} & The number of elements in each 1\-D data array \\
+\hline
+{\em i\-\_\-flags} & Flags for the boundary conditions and evaluation \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classelement_1_1diffusion__element_af14afe9aa8d5e374201c305ad2de3d3c}{\index{element\-::diffusion\-\_\-element@{element\-::diffusion\-\_\-element}!update@{update}}
+\index{update@{update}!element::diffusion_element@{element\-::diffusion\-\_\-element}}
+\subsubsection[{update}]{\setlength{\rightskip}{0pt plus 5cm}void element\-::diffusion\-\_\-element\-::update (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classelement_1_1diffusion__element_af14afe9aa8d5e374201c305ad2de3d3c}
+
+
+This calculates diffusion and output for a constant timestep. 
+
+
+
+ 
+
+Implements \hyperlink{classelement_1_1element_a4addb59e38072d5a99d3d9a9de9c225e}{element\-::element}.
+
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/element/\hyperlink{element_8hpp}{element.\-hpp}\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/element/\hyperlink{element_8cpp}{element.\-cpp}\end{DoxyCompactItemize}

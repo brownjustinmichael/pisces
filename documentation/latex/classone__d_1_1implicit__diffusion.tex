@@ -1,0 +1,178 @@
+\hypertarget{classone__d_1_1implicit__diffusion}{\section{one\-\_\-d\-:\-:implicit\-\_\-diffusion Class Reference}
+\label{classone__d_1_1implicit__diffusion}\index{one\-\_\-d\-::implicit\-\_\-diffusion@{one\-\_\-d\-::implicit\-\_\-diffusion}}
+}
+
+
+Implementation of implicit diffusion for data expressed as a sum of orthogonal functions in 1\-D.  
+
+
+
+
+{\ttfamily \#include $<$diffusion.\-hpp$>$}
+
+Inheritance diagram for one\-\_\-d\-:\-:implicit\-\_\-diffusion\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classone__d_1_1implicit__diffusion}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classone__d_1_1implicit__diffusion_af37d08e6f8cf358d294f517a19c07f4d}{implicit\-\_\-diffusion} (double i\-\_\-coeff, double i\-\_\-alpha\-\_\-0, double i\-\_\-alpha\-\_\-n, double $\ast$i\-\_\-timestep\-\_\-ptr, int i\-\_\-n, std\-::shared\-\_\-ptr$<$ \hyperlink{classbases_1_1collocation__grid}{bases\-::collocation\-\_\-grid} $>$ i\-\_\-grid, double $\ast$i\-\_\-matrix, int $\ast$i\-\_\-flags\-\_\-ptr=N\-U\-L\-L)
+\item 
+void \hyperlink{classone__d_1_1implicit__diffusion_a6ccaf3ea76d05f3373e934862904ab5a}{execute} ()
+\begin{DoxyCompactList}\small\item\em Operate the plan on the data arrays contained in the class. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static std\-::unique\-\_\-ptr$<$ \hyperlink{classbases_1_1plan_a7b4ddc2f876b9e4dcf899feb20ae369f}{plan} $>$ \hyperlink{classone__d_1_1implicit__diffusion_a03c2ed0f0359538d5d2c928c23df9038}{make\-\_\-unique} (double i\-\_\-coeff, double i\-\_\-alpha\-\_\-0, double i\-\_\-alpha\-\_\-n, double $\ast$i\-\_\-timestep\-\_\-ptr, int i\-\_\-n, std\-::shared\-\_\-ptr$<$ \hyperlink{classbases_1_1collocation__grid}{bases\-::collocation\-\_\-grid} $>$ i\-\_\-grid, double $\ast$i\-\_\-matrix, int $\ast$i\-\_\-flags\-\_\-ptr=N\-U\-L\-L)
+\begin{DoxyCompactList}\small\item\em Make a unique pointer pointing to a new instance of collocation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classbases_1_1implicit__plan_a43fa2adfff9e68a66a23cf03b027a32d}{int \hyperlink{classbases_1_1implicit__plan_a43fa2adfff9e68a66a23cf03b027a32d}{n}}\label{classbases_1_1implicit__plan_a43fa2adfff9e68a66a23cf03b027a32d}
+
+\begin{DoxyCompactList}\small\item\em An integer number of data elements (grid points) that collocation\-\_\-1\-D will be built to handle. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1implicit__plan_af9d3db062039649e63a7fe1f83a9d155}{double $\ast$ \hyperlink{classbases_1_1implicit__plan_af9d3db062039649e63a7fe1f83a9d155}{matrix}}\label{classbases_1_1implicit__plan_af9d3db062039649e63a7fe1f83a9d155}
+
+\begin{DoxyCompactList}\small\item\em A double pointer to the input data. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1plan_a756595e230cc99e84de4392ac691eefd}{int \hyperlink{classbases_1_1plan_a756595e230cc99e84de4392ac691eefd}{default\-\_\-flags}}\label{classbases_1_1plan_a756595e230cc99e84de4392ac691eefd}
+
+\begin{DoxyCompactList}\small\item\em An integer set of default flags to use in case the user does not specify any flags. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Implementation of implicit diffusion for data expressed as a sum of orthogonal functions in 1\-D. 
+
+
+
+ This implementation adds the diffusion terms to the implicit matrix. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classone__d_1_1implicit__diffusion_af37d08e6f8cf358d294f517a19c07f4d}{\index{one\-\_\-d\-::implicit\-\_\-diffusion@{one\-\_\-d\-::implicit\-\_\-diffusion}!implicit\-\_\-diffusion@{implicit\-\_\-diffusion}}
+\index{implicit\-\_\-diffusion@{implicit\-\_\-diffusion}!one_d::implicit_diffusion@{one\-\_\-d\-::implicit\-\_\-diffusion}}
+\subsubsection[{implicit\-\_\-diffusion}]{\setlength{\rightskip}{0pt plus 5cm}one\-\_\-d\-::implicit\-\_\-diffusion\-::implicit\-\_\-diffusion (
+\begin{DoxyParamCaption}
+\item[{double}]{i\-\_\-coeff, }
+\item[{double}]{i\-\_\-alpha\-\_\-0, }
+\item[{double}]{i\-\_\-alpha\-\_\-n, }
+\item[{double $\ast$}]{i\-\_\-timestep\-\_\-ptr, }
+\item[{int}]{i\-\_\-n, }
+\item[{std\-::shared\-\_\-ptr$<$ {\bf bases\-::collocation\-\_\-grid} $>$}]{i\-\_\-grid, }
+\item[{double $\ast$}]{i\-\_\-matrix, }
+\item[{int $\ast$}]{i\-\_\-flags\-\_\-ptr = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)}}\label{classone__d_1_1implicit__diffusion_af37d08e6f8cf358d294f517a19c07f4d}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-coeff} & A double containing the coefficient in front of the diffusion term in the differential equation \\
+\hline
+{\em i\-\_\-alpha\-\_\-0} & A double that determines the multiplier on the top boundary \\
+\hline
+{\em i\-\_\-alpha\-\_\-n} & A double that determines the multiplier on the bottom boundary \\
+\hline
+{\em i\-\_\-timestep\-\_\-ptr} & A pointer to the double current timestep duration \\
+\hline
+{\em i\-\_\-grid} & a shared pointer to the collocation\-\_\-grid, which must be defined for the second derivative\\
+\hline
+\end{DoxyParams}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-n} & The integer number of elements in a row of the square i\-\_\-matrix \\
+\hline
+{\em i\-\_\-matrix} & The double matrix to be updated\\
+\hline
+\end{DoxyParams}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-flags\-\_\-ptr} & A pointer to the integer execution flags \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classone__d_1_1implicit__diffusion_a6ccaf3ea76d05f3373e934862904ab5a}{\index{one\-\_\-d\-::implicit\-\_\-diffusion@{one\-\_\-d\-::implicit\-\_\-diffusion}!execute@{execute}}
+\index{execute@{execute}!one_d::implicit_diffusion@{one\-\_\-d\-::implicit\-\_\-diffusion}}
+\subsubsection[{execute}]{\setlength{\rightskip}{0pt plus 5cm}void one\-\_\-d\-::implicit\-\_\-diffusion\-::execute (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classone__d_1_1implicit__diffusion_a6ccaf3ea76d05f3373e934862904ab5a}
+
+
+Operate the plan on the data arrays contained in the class. 
+
+
+
+ 
+
+ 
+
+ The plan class serves as a wrapper for this function. 
+
+Implements \hyperlink{classbases_1_1implicit__plan_a40b575c812055b0b5d443d797b67c874}{bases\-::implicit\-\_\-plan}.
+
+\hypertarget{classone__d_1_1implicit__diffusion_a03c2ed0f0359538d5d2c928c23df9038}{\index{one\-\_\-d\-::implicit\-\_\-diffusion@{one\-\_\-d\-::implicit\-\_\-diffusion}!make\-\_\-unique@{make\-\_\-unique}}
+\index{make\-\_\-unique@{make\-\_\-unique}!one_d::implicit_diffusion@{one\-\_\-d\-::implicit\-\_\-diffusion}}
+\subsubsection[{make\-\_\-unique}]{\setlength{\rightskip}{0pt plus 5cm}static std\-::unique\-\_\-ptr$<${\bf plan}$>$ one\-\_\-d\-::implicit\-\_\-diffusion\-::make\-\_\-unique (
+\begin{DoxyParamCaption}
+\item[{double}]{i\-\_\-coeff, }
+\item[{double}]{i\-\_\-alpha\-\_\-0, }
+\item[{double}]{i\-\_\-alpha\-\_\-n, }
+\item[{double $\ast$}]{i\-\_\-timestep\-\_\-ptr, }
+\item[{int}]{i\-\_\-n, }
+\item[{std\-::shared\-\_\-ptr$<$ {\bf bases\-::collocation\-\_\-grid} $>$}]{i\-\_\-grid, }
+\item[{double $\ast$}]{i\-\_\-matrix, }
+\item[{int $\ast$}]{i\-\_\-flags\-\_\-ptr = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{classone__d_1_1implicit__diffusion_a03c2ed0f0359538d5d2c928c23df9038}
+
+
+Make a unique pointer pointing to a new instance of collocation. 
+
+
+
+ 
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-coeff} & A double containing the coefficient in front of the diffusion term in the differential equation \\
+\hline
+{\em i\-\_\-alpha\-\_\-0} & A double that determines the multiplier on the top boundary \\
+\hline
+{\em i\-\_\-alpha\-\_\-n} & A double that determines the multiplier on the bottom boundary \\
+\hline
+{\em i\-\_\-timestep\-\_\-ptr} & A pointer to the double current timestep duration \\
+\hline
+{\em i\-\_\-grid} & a shared pointer to the collocation\-\_\-grid, which must be defined for the second derivative\\
+\hline
+\end{DoxyParams}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-n} & The integer number of elements in a row of the square i\-\_\-matrix \\
+\hline
+{\em i\-\_\-matrix} & The double matrix to be updated\\
+\hline
+\end{DoxyParams}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-flags\-\_\-ptr} & A pointer to the integer execution flags \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/one\-\_\-d/\hyperlink{diffusion_8hpp}{diffusion.\-hpp}\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/one\-\_\-d/\hyperlink{diffusion_8cpp}{diffusion.\-cpp}\end{DoxyCompactItemize}

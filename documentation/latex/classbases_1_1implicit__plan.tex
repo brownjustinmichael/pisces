@@ -1,0 +1,112 @@
+\hypertarget{classbases_1_1implicit__plan}{\section{bases\-:\-:implicit\-\_\-plan Class Reference}
+\label{classbases_1_1implicit__plan}\index{bases\-::implicit\-\_\-plan@{bases\-::implicit\-\_\-plan}}
+}
+
+
+A subclass of plan, specific to implicit methods.  
+
+
+
+
+{\ttfamily \#include $<$plan.\-hpp$>$}
+
+Inheritance diagram for bases\-:\-:implicit\-\_\-plan\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classbases_1_1implicit__plan}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classbases_1_1implicit__plan_aee12711a50c3fdec6da0861fba6736f1}{implicit\-\_\-plan} (\hyperlink{classbases_1_1element}{element} $\ast$i\-\_\-element\-\_\-ptr, int i\-\_\-n, \hyperlink{classbases_1_1collocation__grid}{bases\-::collocation\-\_\-grid} $\ast$i\-\_\-grid, double $\ast$i\-\_\-matrix, int i\-\_\-flags=0x00)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual void \hyperlink{classbases_1_1implicit__plan_a564bcb2be88ca9abe77c981d77d58d74}{execute} ()
+\begin{DoxyCompactList}\small\item\em Operate the plan on the data arrays contained in the class. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classbases_1_1implicit__plan_a43fa2adfff9e68a66a23cf03b027a32d}{int \hyperlink{classbases_1_1implicit__plan_a43fa2adfff9e68a66a23cf03b027a32d}{n}}\label{classbases_1_1implicit__plan_a43fa2adfff9e68a66a23cf03b027a32d}
+
+\begin{DoxyCompactList}\small\item\em An integer number of data elements. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1implicit__plan_a23a0aa32f42b2ba03ef47ba60567522b}{\hyperlink{classbases_1_1collocation__grid}{bases\-::collocation\-\_\-grid} $\ast$ \hyperlink{classbases_1_1implicit__plan_a23a0aa32f42b2ba03ef47ba60567522b}{grid}}\label{classbases_1_1implicit__plan_a23a0aa32f42b2ba03ef47ba60567522b}
+
+\begin{DoxyCompactList}\small\item\em A shared pointer to the grid. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1implicit__plan_af9d3db062039649e63a7fe1f83a9d155}{double $\ast$ \hyperlink{classbases_1_1implicit__plan_af9d3db062039649e63a7fe1f83a9d155}{matrix}}\label{classbases_1_1implicit__plan_af9d3db062039649e63a7fe1f83a9d155}
+
+\begin{DoxyCompactList}\small\item\em A double pointer to the input data. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A subclass of plan, specific to implicit methods. 
+
+
+
+ These plans produce output in a square matrix but take no input. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classbases_1_1implicit__plan_aee12711a50c3fdec6da0861fba6736f1}{\index{bases\-::implicit\-\_\-plan@{bases\-::implicit\-\_\-plan}!implicit\-\_\-plan@{implicit\-\_\-plan}}
+\index{implicit\-\_\-plan@{implicit\-\_\-plan}!bases::implicit_plan@{bases\-::implicit\-\_\-plan}}
+\subsubsection[{implicit\-\_\-plan}]{\setlength{\rightskip}{0pt plus 5cm}bases\-::implicit\-\_\-plan\-::implicit\-\_\-plan (
+\begin{DoxyParamCaption}
+\item[{{\bf element} $\ast$}]{i\-\_\-element\-\_\-ptr, }
+\item[{int}]{i\-\_\-n, }
+\item[{{\bf bases\-::collocation\-\_\-grid} $\ast$}]{i\-\_\-grid, }
+\item[{double $\ast$}]{i\-\_\-matrix, }
+\item[{int}]{i\-\_\-flags = {\ttfamily 0x00}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{classbases_1_1implicit__plan_aee12711a50c3fdec6da0861fba6736f1}
+
+
+
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-n} & The integer number of elements in a row of the square i\-\_\-matrix \\
+\hline
+{\em i\-\_\-grid} & A shared pointer to the collocation grid object \\
+\hline
+{\em i\-\_\-matrix} & The double matrix to be updated \\
+\hline
+\end{DoxyParams}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-element\-\_\-ptr} & A pointer to the associated element \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classbases_1_1implicit__plan_a564bcb2be88ca9abe77c981d77d58d74}{\index{bases\-::implicit\-\_\-plan@{bases\-::implicit\-\_\-plan}!execute@{execute}}
+\index{execute@{execute}!bases::implicit_plan@{bases\-::implicit\-\_\-plan}}
+\subsubsection[{execute}]{\setlength{\rightskip}{0pt plus 5cm}void bases\-::implicit\-\_\-plan\-::execute (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classbases_1_1implicit__plan_a564bcb2be88ca9abe77c981d77d58d74}
+
+
+Operate the plan on the data arrays contained in the class. 
+
+
+
+ 
+
+ The plan class serves as a wrapper for this function. 
+
+Reimplemented from \hyperlink{classbases_1_1plan_a85d7e7f7a04ac8213ea57bde32db34c2}{bases\-::plan}.
+
+
+
+Reimplemented in \hyperlink{classone__d_1_1chebyshev_1_1implicit__diffusion_a5da5289b943a5d3384c7b0341f890125}{one\-\_\-d\-::chebyshev\-::implicit\-\_\-diffusion}.
+
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/bases/\hyperlink{plan_8hpp}{plan.\-hpp}\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/bases/\hyperlink{plan_8cpp}{plan.\-cpp}\end{DoxyCompactItemize}

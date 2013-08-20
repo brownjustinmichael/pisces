@@ -1,0 +1,278 @@
+\hypertarget{utils__lapack_8cpp}{\section{/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/utils/utils\-\_\-lapack.cpp File Reference}
+\label{utils__lapack_8cpp}\index{/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/utils/utils\-\_\-lapack.\-cpp@{/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/utils/utils\-\_\-lapack.\-cpp}}
+}
+{\ttfamily \#include $<$cassert$>$}\\*
+{\ttfamily \#include \char`\"{}utils.\-hpp\char`\"{}}\\*
+\subsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+namespace \hyperlink{namespaceutils}{utils}
+\begin{DoxyCompactList}\small\item\em A namespace containing the various utilities needed in the code, such as linear algebra. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+double \hyperlink{utils__lapack_8cpp_a2247ca92b3cf0e88e9448ad05240921f}{ddot\-\_\-} (int $\ast$n, double $\ast$x, int $\ast$incx, double $\ast$y, int $\ast$incy)
+\begin{DoxyCompactList}\small\item\em Function from B\-L\-A\-S that calculates a dot product. \end{DoxyCompactList}\item 
+void \hyperlink{utils__lapack_8cpp_a810fd148920b7fe8ad7bb4d1208a754c}{scopy\-\_\-} (int $\ast$n, float $\ast$x, int $\ast$incx, float $\ast$y, int $\ast$incy)
+\begin{DoxyCompactList}\small\item\em Function from B\-L\-A\-S that copies a float array to another in place. \end{DoxyCompactList}\item 
+void \hyperlink{utils__lapack_8cpp_a3031b7ee89efd261a0280ca955224d4c}{dcopy\-\_\-} (int $\ast$n, double $\ast$x, int $\ast$incx, double $\ast$y, int $\ast$incy)
+\begin{DoxyCompactList}\small\item\em Function from B\-L\-A\-S that copies a double array to another in place. \end{DoxyCompactList}\item 
+void \hyperlink{utils__lapack_8cpp_a8eea0062fb47c65901804399dd339640}{sscal\-\_\-} (int $\ast$n, float $\ast$a, float $\ast$x, int $\ast$incx)
+\begin{DoxyCompactList}\small\item\em Function from B\-L\-A\-S that scales a float array. \end{DoxyCompactList}\item 
+void \hyperlink{utils__lapack_8cpp_a9f3a532154194ac4fc097770a4b28a63}{dscal\-\_\-} (int $\ast$n, double $\ast$a, double $\ast$x, int $\ast$incx)
+\begin{DoxyCompactList}\small\item\em Function from B\-L\-A\-S that scales a double array. \end{DoxyCompactList}\item 
+void \hyperlink{utils__lapack_8cpp_a0f9cfb31c6f2731705dc1695e9d6e2d0}{daxpy\-\_\-} (int $\ast$n, double $\ast$a, double $\ast$x, int $\ast$incx, double $\ast$y, int $\ast$incy)
+\begin{DoxyCompactList}\small\item\em Function from B\-L\-A\-S for vector-\/vector addition (dy = da $\ast$ dx + dy) \end{DoxyCompactList}\item 
+void \hyperlink{utils__lapack_8cpp_a53c7c2159f19abafbec2bc09f2c0cdcc}{dgemv\-\_\-} (char $\ast$trans, int $\ast$m, int $\ast$n, double $\ast$alpha, double $\ast$a, int $\ast$lda, double $\ast$x, int $\ast$incx, double $\ast$beta, double $\ast$y, int $\ast$incy)
+\begin{DoxyCompactList}\small\item\em Function from B\-L\-A\-S for matrix-\/vector multiplication (y = alpha $\ast$ a $\ast$ x + beta $\ast$ y) \end{DoxyCompactList}\item 
+void \hyperlink{namespaceutils_abed0c18a9dc4509e784b7598f03bde7d}{utils\-::copy} (int n, float $\ast$x, float $\ast$y, int incx=1, int incy=1)
+\begin{DoxyCompactList}\small\item\em Copies a double array into another. \end{DoxyCompactList}\item 
+void \hyperlink{namespaceutils_ad0a7847c08fc8930fa817b3993c2357f}{utils\-::copy} (int n, double $\ast$x, double $\ast$y, int incx=1, int incy=1)
+\begin{DoxyCompactList}\small\item\em Copies a double array into another. \end{DoxyCompactList}\item 
+void \hyperlink{namespaceutils_a2f7633cf62c8fbf04542c16cd25ac954}{utils\-::scale} (int n, float a, float $\ast$x, int incx=1)
+\begin{DoxyCompactList}\small\item\em Scales a float array by a constant. \end{DoxyCompactList}\item 
+void \hyperlink{namespaceutils_a9fd21a47ebc85aef5ef6bab18d3081ff}{utils\-::scale} (int n, double a, double $\ast$x, int incx=1)
+\begin{DoxyCompactList}\small\item\em Scales a double array by a constant. \end{DoxyCompactList}\item 
+double \hyperlink{namespaceutils_a9e636142e9a630aee25812c5b558205c}{utils\-::dot} (int n, double $\ast$x, double $\ast$y, int incx=1, int incy=1)
+\begin{DoxyCompactList}\small\item\em Takes the dot product of two arrays. \end{DoxyCompactList}\item 
+void \hyperlink{namespaceutils_a335999fcf29f6dfae2a4e630b5ca53d9}{utils\-::add\-\_\-scaled} (int n, double da, double $\ast$x, double $\ast$y, int incx=1, int incy=1)
+\begin{DoxyCompactList}\small\item\em Perform the operation dy = da $\ast$ dx + dy. \end{DoxyCompactList}\item 
+void \hyperlink{namespaceutils_a86f1146cab3c538fef7502930e2813b9}{utils\-::matrix\-\_\-vector\-\_\-multiply} (int m, int n, double alpha, double $\ast$a, double $\ast$x, double beta, double $\ast$y, int lda=-\/1, int incx=1, int incy=1)
+\begin{DoxyCompactList}\small\item\em Perform the matrix-\/vector multiplication y = alpha $\ast$ a $\ast$ x + beta $\ast$ y. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+
+
+
+
+Spectral Element
+
+Created by Justin Brown on 2013-\/04-\/29. Copyright 2013 Justin Brown. All rights reserved. 
+
+\subsection{Function Documentation}
+\hypertarget{utils__lapack_8cpp_a0f9cfb31c6f2731705dc1695e9d6e2d0}{\index{utils\-\_\-lapack.\-cpp@{utils\-\_\-lapack.\-cpp}!daxpy\-\_\-@{daxpy\-\_\-}}
+\index{daxpy\-\_\-@{daxpy\-\_\-}!utils_lapack.cpp@{utils\-\_\-lapack.\-cpp}}
+\subsubsection[{daxpy\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}void daxpy\-\_\- (
+\begin{DoxyParamCaption}
+\item[{int $\ast$}]{n, }
+\item[{double $\ast$}]{a, }
+\item[{double $\ast$}]{x, }
+\item[{int $\ast$}]{incx, }
+\item[{double $\ast$}]{y, }
+\item[{int $\ast$}]{incy}
+\end{DoxyParamCaption}
+)}}\label{utils__lapack_8cpp_a0f9cfb31c6f2731705dc1695e9d6e2d0}
+
+
+Function from B\-L\-A\-S for vector-\/vector addition (dy = da $\ast$ dx + dy) 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em n} & A pointer to the integer number of values in dy \\
+\hline
+{\em a} & A pointer to the double da \\
+\hline
+{\em x} & The double vector dx \\
+\hline
+{\em incx} & A pointer to the integer spacing of elements in dx \\
+\hline
+{\em y} & The double vector dy \\
+\hline
+{\em incy} & A pointer to the integer spacing of elements in dy \\
+\hline
+\end{DoxyParams}
+\hypertarget{utils__lapack_8cpp_a3031b7ee89efd261a0280ca955224d4c}{\index{utils\-\_\-lapack.\-cpp@{utils\-\_\-lapack.\-cpp}!dcopy\-\_\-@{dcopy\-\_\-}}
+\index{dcopy\-\_\-@{dcopy\-\_\-}!utils_lapack.cpp@{utils\-\_\-lapack.\-cpp}}
+\subsubsection[{dcopy\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}void dcopy\-\_\- (
+\begin{DoxyParamCaption}
+\item[{int $\ast$}]{n, }
+\item[{double $\ast$}]{x, }
+\item[{int $\ast$}]{incx, }
+\item[{double $\ast$}]{y, }
+\item[{int $\ast$}]{incy}
+\end{DoxyParamCaption}
+)}}\label{utils__lapack_8cpp_a3031b7ee89efd261a0280ca955224d4c}
+
+
+Function from B\-L\-A\-S that copies a double array to another in place. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em n} & A pointer to an integer number of elements in x to copy to y \\
+\hline
+{\em x} & The array from which the data are copied \\
+\hline
+{\em incx} & A pointer to an integer spacing of elements in x \\
+\hline
+{\em y} & The array to which the data are copied \\
+\hline
+{\em incy} & A pointer to an integer spacing of elements in y \\
+\hline
+\end{DoxyParams}
+\hypertarget{utils__lapack_8cpp_a2247ca92b3cf0e88e9448ad05240921f}{\index{utils\-\_\-lapack.\-cpp@{utils\-\_\-lapack.\-cpp}!ddot\-\_\-@{ddot\-\_\-}}
+\index{ddot\-\_\-@{ddot\-\_\-}!utils_lapack.cpp@{utils\-\_\-lapack.\-cpp}}
+\subsubsection[{ddot\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}double ddot\-\_\- (
+\begin{DoxyParamCaption}
+\item[{int $\ast$}]{n, }
+\item[{double $\ast$}]{x, }
+\item[{int $\ast$}]{incx, }
+\item[{double $\ast$}]{y, }
+\item[{int $\ast$}]{incy}
+\end{DoxyParamCaption}
+)}}\label{utils__lapack_8cpp_a2247ca92b3cf0e88e9448ad05240921f}
+
+
+Function from B\-L\-A\-S that calculates a dot product. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em n} & A pointer to an integer number of elements in dx and dy to dot \\
+\hline
+{\em x} & The first double array of data \\
+\hline
+{\em incx} & A pointer to an integer spacing of elements in dx \\
+\hline
+{\em y} & The second double array of data \\
+\hline
+{\em incy} & A pointer to an integer spacing of elements in dy \\
+\hline
+\end{DoxyParams}
+\hypertarget{utils__lapack_8cpp_a53c7c2159f19abafbec2bc09f2c0cdcc}{\index{utils\-\_\-lapack.\-cpp@{utils\-\_\-lapack.\-cpp}!dgemv\-\_\-@{dgemv\-\_\-}}
+\index{dgemv\-\_\-@{dgemv\-\_\-}!utils_lapack.cpp@{utils\-\_\-lapack.\-cpp}}
+\subsubsection[{dgemv\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}void dgemv\-\_\- (
+\begin{DoxyParamCaption}
+\item[{char $\ast$}]{trans, }
+\item[{int $\ast$}]{m, }
+\item[{int $\ast$}]{n, }
+\item[{double $\ast$}]{alpha, }
+\item[{double $\ast$}]{a, }
+\item[{int $\ast$}]{lda, }
+\item[{double $\ast$}]{x, }
+\item[{int $\ast$}]{incx, }
+\item[{double $\ast$}]{beta, }
+\item[{double $\ast$}]{y, }
+\item[{int $\ast$}]{incy}
+\end{DoxyParamCaption}
+)}}\label{utils__lapack_8cpp_a53c7c2159f19abafbec2bc09f2c0cdcc}
+
+
+Function from B\-L\-A\-S for matrix-\/vector multiplication (y = alpha $\ast$ a $\ast$ x + beta $\ast$ y) 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em trans} & A pointer to transposition character (\char`\"{}\-N\char`\"{} for not transposed, \char`\"{}\-T\char`\"{} for transposed) \\
+\hline
+{\em m} & A pointer to the number of rows in a \\
+\hline
+{\em n} & A pointer to the number of columns in a \\
+\hline
+{\em alpha} & A pointer to the double multiplier on a \\
+\hline
+{\em a} & The double matrix a \\
+\hline
+{\em lda} & A pointer to the integer number of leading dimension of a \\
+\hline
+{\em x} & The double vector x \\
+\hline
+{\em incx} & A pointer to an integer spacing of elements in x \\
+\hline
+{\em beta} & A pointer to the double multiplier on y \\
+\hline
+{\em y} & The double vector y, overwritten with the solution \\
+\hline
+{\em incy} & A pointer to an integer spacing of elements in y \\
+\hline
+\end{DoxyParams}
+\hypertarget{utils__lapack_8cpp_a9f3a532154194ac4fc097770a4b28a63}{\index{utils\-\_\-lapack.\-cpp@{utils\-\_\-lapack.\-cpp}!dscal\-\_\-@{dscal\-\_\-}}
+\index{dscal\-\_\-@{dscal\-\_\-}!utils_lapack.cpp@{utils\-\_\-lapack.\-cpp}}
+\subsubsection[{dscal\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}void dscal\-\_\- (
+\begin{DoxyParamCaption}
+\item[{int $\ast$}]{n, }
+\item[{double $\ast$}]{a, }
+\item[{double $\ast$}]{x, }
+\item[{int $\ast$}]{incx}
+\end{DoxyParamCaption}
+)}}\label{utils__lapack_8cpp_a9f3a532154194ac4fc097770a4b28a63}
+
+
+Function from B\-L\-A\-S that scales a double array. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em n} & A pointer to an integer number of elements in x to copy to y \\
+\hline
+{\em a} & The double by which to scale the data \\
+\hline
+{\em x} & The array from which the data are copied \\
+\hline
+{\em incx} & A pointer to an integer spacing of elements in x \\
+\hline
+\end{DoxyParams}
+\hypertarget{utils__lapack_8cpp_a810fd148920b7fe8ad7bb4d1208a754c}{\index{utils\-\_\-lapack.\-cpp@{utils\-\_\-lapack.\-cpp}!scopy\-\_\-@{scopy\-\_\-}}
+\index{scopy\-\_\-@{scopy\-\_\-}!utils_lapack.cpp@{utils\-\_\-lapack.\-cpp}}
+\subsubsection[{scopy\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}void scopy\-\_\- (
+\begin{DoxyParamCaption}
+\item[{int $\ast$}]{n, }
+\item[{float $\ast$}]{x, }
+\item[{int $\ast$}]{incx, }
+\item[{float $\ast$}]{y, }
+\item[{int $\ast$}]{incy}
+\end{DoxyParamCaption}
+)}}\label{utils__lapack_8cpp_a810fd148920b7fe8ad7bb4d1208a754c}
+
+
+Function from B\-L\-A\-S that copies a float array to another in place. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em n} & A pointer to an integer number of elements in x to copy to y \\
+\hline
+{\em x} & The array from which the data are copied \\
+\hline
+{\em incx} & A pointer to an integer spacing of elements in x \\
+\hline
+{\em y} & The array to which the data are copied \\
+\hline
+{\em incy} & A pointer to an integer spacing of elements in y \\
+\hline
+\end{DoxyParams}
+\hypertarget{utils__lapack_8cpp_a8eea0062fb47c65901804399dd339640}{\index{utils\-\_\-lapack.\-cpp@{utils\-\_\-lapack.\-cpp}!sscal\-\_\-@{sscal\-\_\-}}
+\index{sscal\-\_\-@{sscal\-\_\-}!utils_lapack.cpp@{utils\-\_\-lapack.\-cpp}}
+\subsubsection[{sscal\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}void sscal\-\_\- (
+\begin{DoxyParamCaption}
+\item[{int $\ast$}]{n, }
+\item[{float $\ast$}]{a, }
+\item[{float $\ast$}]{x, }
+\item[{int $\ast$}]{incx}
+\end{DoxyParamCaption}
+)}}\label{utils__lapack_8cpp_a8eea0062fb47c65901804399dd339640}
+
+
+Function from B\-L\-A\-S that scales a float array. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em n} & A pointer to an integer number of elements in x to copy to y \\
+\hline
+{\em a} & The float by which to scale the data \\
+\hline
+{\em x} & The array from which the data are copied \\
+\hline
+{\em incx} & A pointer to an integer spacing of elements in x \\
+\hline
+\end{DoxyParams}

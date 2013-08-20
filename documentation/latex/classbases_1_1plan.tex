@@ -1,0 +1,94 @@
+\hypertarget{classbases_1_1plan}{\section{bases\-:\-:plan Class Reference}
+\label{classbases_1_1plan}\index{bases\-::plan@{bases\-::plan}}
+}
+
+
+The basic functional unit, containing a recipe for execution.  
+
+
+
+
+{\ttfamily \#include $<$plan.\-hpp$>$}
+
+Inheritance diagram for bases\-:\-:plan\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=1.674140cm]{classbases_1_1plan}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classbases_1_1plan_ad0516a1b2b7d3262ea3abab8e8d5edf2}{plan} (\hyperlink{classbases_1_1element}{element} $\ast$i\-\_\-element\-\_\-ptr, int flags=0x00)
+\item 
+virtual void \hyperlink{classbases_1_1plan_a85d7e7f7a04ac8213ea57bde32db34c2}{execute} ()
+\begin{DoxyCompactList}\small\item\em Operate the plan on the data arrays contained in the class. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classbases_1_1plan_a54cd8904b8d499e5fc01c8060021d47b}{\hyperlink{classbases_1_1element}{element} $\ast$ \hyperlink{classbases_1_1plan_a54cd8904b8d499e5fc01c8060021d47b}{element\-\_\-ptr}}\label{classbases_1_1plan_a54cd8904b8d499e5fc01c8060021d47b}
+
+\begin{DoxyCompactList}\small\item\em A pointer to the element with which the plan is associated. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1plan_ad8a2f8000cca7764e9a057c3da1618c4}{int {\bfseries flags}}\label{classbases_1_1plan_ad8a2f8000cca7764e9a057c3da1618c4}
+
+\item 
+\hypertarget{classbases_1_1plan_a756595e230cc99e84de4392ac691eefd}{int \hyperlink{classbases_1_1plan_a756595e230cc99e84de4392ac691eefd}{default\-\_\-flags}}\label{classbases_1_1plan_a756595e230cc99e84de4392ac691eefd}
+
+\begin{DoxyCompactList}\small\item\em An integer set of default flags to use in case the user does not specify any flags. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1plan_a4f423a3831579d895a0658164bb82b8c}{int $\ast$ \hyperlink{classbases_1_1plan_a4f423a3831579d895a0658164bb82b8c}{flags\-\_\-ptr}}\label{classbases_1_1plan_a4f423a3831579d895a0658164bb82b8c}
+
+\begin{DoxyCompactList}\small\item\em A pointer to the integer element execution flags. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1plan_ac2a21aeb561224e01b1fc989e752131a}{\hyperlink{classbases_1_1messenger}{messenger} $\ast$ \hyperlink{classbases_1_1plan_ac2a21aeb561224e01b1fc989e752131a}{messenger\-\_\-ptr}}\label{classbases_1_1plan_ac2a21aeb561224e01b1fc989e752131a}
+
+\begin{DoxyCompactList}\small\item\em A pointer to the messenger associated with the element. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+The basic functional unit, containing a recipe for execution. 
+
+
+
+ An implemented plan class contains the operator and the addresses of all the relevant data arrays to operate on. Each plan need be constructed only once and can run any number of times each timestep. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classbases_1_1plan_ad0516a1b2b7d3262ea3abab8e8d5edf2}{\index{bases\-::plan@{bases\-::plan}!plan@{plan}}
+\index{plan@{plan}!bases::plan@{bases\-::plan}}
+\subsubsection[{plan}]{\setlength{\rightskip}{0pt plus 5cm}bases\-::plan\-::plan (
+\begin{DoxyParamCaption}
+\item[{{\bf element} $\ast$}]{i\-\_\-element\-\_\-ptr, }
+\item[{int}]{flags = {\ttfamily 0x00}}
+\end{DoxyParamCaption}
+)}}\label{classbases_1_1plan_ad0516a1b2b7d3262ea3abab8e8d5edf2}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-element\-\_\-ptr} & A pointer to the associated element \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classbases_1_1plan_a85d7e7f7a04ac8213ea57bde32db34c2}{\index{bases\-::plan@{bases\-::plan}!execute@{execute}}
+\index{execute@{execute}!bases::plan@{bases\-::plan}}
+\subsubsection[{execute}]{\setlength{\rightskip}{0pt plus 5cm}virtual void bases\-::plan\-::execute (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}}\label{classbases_1_1plan_a85d7e7f7a04ac8213ea57bde32db34c2}
+
+
+Operate the plan on the data arrays contained in the class. 
+
+
+
+ The plan class serves as a wrapper for this function. 
+
+Reimplemented in \hyperlink{classbases_1_1implicit__plan_a564bcb2be88ca9abe77c981d77d58d74}{bases\-::implicit\-\_\-plan}, \hyperlink{classbases_1_1explicit__plan_a21bcba4d429590031bba41ee2a48a4ef}{bases\-::explicit\-\_\-plan}, \hyperlink{classone__d_1_1chebyshev_1_1implicit__diffusion_a5da5289b943a5d3384c7b0341f890125}{one\-\_\-d\-::chebyshev\-::implicit\-\_\-diffusion}, \hyperlink{classone__d_1_1solver_a7c28bd733cb3c3849afe1773974eb4f6}{one\-\_\-d\-::solver}, \hyperlink{classone__d_1_1chebyshev_1_1explicit__diffusion_a2a6de638d550ecd781c74d7ef35dd866}{one\-\_\-d\-::chebyshev\-::explicit\-\_\-diffusion}, \hyperlink{classone__d_1_1cuda_1_1fftw__cosine_a557fc154a9e6ffe9a8179667b66901dc}{one\-\_\-d\-::cuda\-::fftw\-\_\-cosine}, \hyperlink{classone__d_1_1fftw__cosine_aa8b0befe7b047feb004b2c41644a2fa4}{one\-\_\-d\-::fftw\-\_\-cosine}, \hyperlink{classbases_1_1solver_a8adf4c428bf4322a664c811073b491e1}{bases\-::solver}, and \hyperlink{classone__d_1_1advec_a1811538aec2a23cc27ef87fbce5dec8c}{one\-\_\-d\-::advec}.
+
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/bases/\hyperlink{plan_8hpp}{plan.\-hpp}\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/bases/\hyperlink{plan_8cpp}{plan.\-cpp}\end{DoxyCompactItemize}

@@ -1,0 +1,35 @@
+\hypertarget{utils_8hpp}{\section{/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/utils/utils.hpp File Reference}
+\label{utils_8hpp}\index{/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/utils/utils.\-hpp@{/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/utils/utils.\-hpp}}
+}
+\subsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+namespace \hyperlink{namespaceutils}{utils}
+\begin{DoxyCompactList}\small\item\em A namespace containing the various utilities needed in the code, such as linear algebra. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{namespaceutils_abed0c18a9dc4509e784b7598f03bde7d}{utils\-::copy} (int n, float $\ast$x, float $\ast$y, int incx=1, int incy=1)
+\begin{DoxyCompactList}\small\item\em Copies a double array into another. \end{DoxyCompactList}\item 
+void \hyperlink{namespaceutils_ad0a7847c08fc8930fa817b3993c2357f}{utils\-::copy} (int n, double $\ast$x, double $\ast$y, int incx=1, int incy=1)
+\begin{DoxyCompactList}\small\item\em Copies a double array into another. \end{DoxyCompactList}\item 
+void \hyperlink{namespaceutils_a2f7633cf62c8fbf04542c16cd25ac954}{utils\-::scale} (int n, float a, float $\ast$x, int incx=1)
+\begin{DoxyCompactList}\small\item\em Scales a float array by a constant. \end{DoxyCompactList}\item 
+void \hyperlink{namespaceutils_a9fd21a47ebc85aef5ef6bab18d3081ff}{utils\-::scale} (int n, double a, double $\ast$x, int incx=1)
+\begin{DoxyCompactList}\small\item\em Scales a double array by a constant. \end{DoxyCompactList}\item 
+double \hyperlink{namespaceutils_a9e636142e9a630aee25812c5b558205c}{utils\-::dot} (int n, double $\ast$x, double $\ast$y, int incx=1, int incy=1)
+\begin{DoxyCompactList}\small\item\em Takes the dot product of two arrays. \end{DoxyCompactList}\item 
+void \hyperlink{namespaceutils_a335999fcf29f6dfae2a4e630b5ca53d9}{utils\-::add\-\_\-scaled} (int n, double da, double $\ast$x, double $\ast$y, int incx=1, int incy=1)
+\begin{DoxyCompactList}\small\item\em Perform the operation dy = da $\ast$ dx + dy. \end{DoxyCompactList}\item 
+void \hyperlink{namespaceutils_a86f1146cab3c538fef7502930e2813b9}{utils\-::matrix\-\_\-vector\-\_\-multiply} (int m, int n, double alpha, double $\ast$a, double $\ast$x, double beta, double $\ast$y, int lda=-\/1, int incx=1, int incy=1)
+\begin{DoxyCompactList}\small\item\em Perform the matrix-\/vector multiplication y = alpha $\ast$ a $\ast$ x + beta $\ast$ y. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+
+
+
+
+Spectral Element
+
+Created by Justin Brown on 2013-\/04-\/29. Copyright 2013 Justin Brown. All rights reserved. 

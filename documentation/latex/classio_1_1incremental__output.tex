@@ -1,0 +1,109 @@
+\hypertarget{classio_1_1incremental__output}{\section{io\-:\-:incremental\-\_\-output Class Reference}
+\label{classio_1_1incremental__output}\index{io\-::incremental\-\_\-output@{io\-::incremental\-\_\-output}}
+}
+
+
+An incremental implementation of the output class.  
+
+
+
+
+{\ttfamily \#include $<$io.\-hpp$>$}
+
+Inheritance diagram for io\-:\-:incremental\-\_\-output\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classio_1_1incremental__output}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classio_1_1incremental__output_a01308d0fb0a638bd9f382deecfbe82a5}{incremental\-\_\-output} (std\-::string i\-\_\-file\-\_\-base, std\-::string i\-\_\-file\-\_\-extension, int i\-\_\-int\-\_\-width, \hyperlink{classio_1_1header}{header} $\ast$i\-\_\-header\-\_\-ptr, int i\-\_\-n, int i\-\_\-output\-\_\-every)
+\item 
+std\-::string \hyperlink{classio_1_1incremental__output_a239bbe0e73c9c26b7eab7970dac95a56}{generate\-\_\-file\-\_\-name} ()
+\begin{DoxyCompactList}\small\item\em Generates the next file name in the sequence. \end{DoxyCompactList}\item 
+void \hyperlink{classio_1_1incremental__output_a966b0a04f3150e1060d69fd08aed0c99}{to\-\_\-file} ()
+\begin{DoxyCompactList}\small\item\em Outputs to file. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Detailed Description}
+An incremental implementation of the output class. 
+
+
+
+ This class is an implementation of the output class that increments the file number with each iteration. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classio_1_1incremental__output_a01308d0fb0a638bd9f382deecfbe82a5}{\index{io\-::incremental\-\_\-output@{io\-::incremental\-\_\-output}!incremental\-\_\-output@{incremental\-\_\-output}}
+\index{incremental\-\_\-output@{incremental\-\_\-output}!io::incremental_output@{io\-::incremental\-\_\-output}}
+\subsubsection[{incremental\-\_\-output}]{\setlength{\rightskip}{0pt plus 5cm}io\-::incremental\-\_\-output\-::incremental\-\_\-output (
+\begin{DoxyParamCaption}
+\item[{std\-::string}]{i\-\_\-file\-\_\-base, }
+\item[{std\-::string}]{i\-\_\-file\-\_\-extension, }
+\item[{int}]{i\-\_\-int\-\_\-width, }
+\item[{{\bf header} $\ast$}]{i\-\_\-header\-\_\-ptr, }
+\item[{int}]{i\-\_\-n, }
+\item[{int}]{i\-\_\-output\-\_\-every}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{classio_1_1incremental__output_a01308d0fb0a638bd9f382deecfbe82a5}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-file\-\_\-base} & A string containing the file name base (the string before the numbers, including the path) \\
+\hline
+{\em i\-\_\-file\-\_\-extension} & A string containing the file name extension (the string after the numbers, including the '.') \\
+\hline
+{\em i\-\_\-int\-\_\-width} & The total number of characters the integer in the file name can have \\
+\hline
+{\em i\-\_\-header\-\_\-ptr} & A pointer to the header object \\
+\hline
+{\em i\-\_\-n} & The integer number of points in the data \\
+\hline
+{\em i\-\_\-output\-\_\-every} & An integer number of steps between outputs \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classio_1_1incremental__output_a239bbe0e73c9c26b7eab7970dac95a56}{\index{io\-::incremental\-\_\-output@{io\-::incremental\-\_\-output}!generate\-\_\-file\-\_\-name@{generate\-\_\-file\-\_\-name}}
+\index{generate\-\_\-file\-\_\-name@{generate\-\_\-file\-\_\-name}!io::incremental_output@{io\-::incremental\-\_\-output}}
+\subsubsection[{generate\-\_\-file\-\_\-name}]{\setlength{\rightskip}{0pt plus 5cm}std\-::string io\-::incremental\-\_\-output\-::generate\-\_\-file\-\_\-name (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}}\label{classio_1_1incremental__output_a239bbe0e73c9c26b7eab7970dac95a56}
+
+
+Generates the next file name in the sequence. 
+
+
+
+ \begin{DoxyReturn}{Returns}
+The incremented file name 
+\end{DoxyReturn}
+\hypertarget{classio_1_1incremental__output_a966b0a04f3150e1060d69fd08aed0c99}{\index{io\-::incremental\-\_\-output@{io\-::incremental\-\_\-output}!to\-\_\-file@{to\-\_\-file}}
+\index{to\-\_\-file@{to\-\_\-file}!io::incremental_output@{io\-::incremental\-\_\-output}}
+\subsubsection[{to\-\_\-file}]{\setlength{\rightskip}{0pt plus 5cm}void io\-::incremental\-\_\-output\-::to\-\_\-file (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}}\label{classio_1_1incremental__output_a966b0a04f3150e1060d69fd08aed0c99}
+
+
+Outputs to file. 
+
+
+
+ 
+
+Implements \hyperlink{classio_1_1output_aae295dd37ca6397fcf8c2109f2c0e418}{io\-::output}.
+
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/utils/\hyperlink{io_8hpp}{io.\-hpp}\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/utils/\hyperlink{io_8cpp}{io.\-cpp}\end{DoxyCompactItemize}

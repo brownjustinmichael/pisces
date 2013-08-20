@@ -1,0 +1,105 @@
+\hypertarget{classone__d_1_1chebyshev_1_1implicit__diffusion}{\section{one\-\_\-d\-:\-:chebyshev\-:\-:implicit\-\_\-diffusion Class Reference}
+\label{classone__d_1_1chebyshev_1_1implicit__diffusion}\index{one\-\_\-d\-::chebyshev\-::implicit\-\_\-diffusion@{one\-\_\-d\-::chebyshev\-::implicit\-\_\-diffusion}}
+}
+
+
+Implementation of implicit diffusion for data expressed as a sum of orthogonal functions in 1\-D.  
+
+
+
+
+{\ttfamily \#include $<$diffusion\-\_\-one\-\_\-d.\-hpp$>$}
+
+Inheritance diagram for one\-\_\-d\-:\-:chebyshev\-:\-:implicit\-\_\-diffusion\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classone__d_1_1chebyshev_1_1implicit__diffusion}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classone__d_1_1chebyshev_1_1implicit__diffusion_a35446cbf70197754a5039cd8bfc3d30e}{implicit\-\_\-diffusion} (\hyperlink{classbases_1_1element}{bases\-::element} $\ast$i\-\_\-element\-\_\-ptr, double i\-\_\-coeff, int i\-\_\-n, \hyperlink{classbases_1_1collocation__grid}{bases\-::collocation\-\_\-grid} $\ast$i\-\_\-grid, double $\ast$i\-\_\-matrix, int i\-\_\-flags=0x00)
+\item 
+void \hyperlink{classone__d_1_1chebyshev_1_1implicit__diffusion_a5da5289b943a5d3384c7b0341f890125}{execute} ()
+\begin{DoxyCompactList}\small\item\em Operate the plan on the data arrays contained in the class. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Detailed Description}
+Implementation of implicit diffusion for data expressed as a sum of orthogonal functions in 1\-D. 
+
+
+
+ This implementation adds the diffusion terms to the implicit matrix. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classone__d_1_1chebyshev_1_1implicit__diffusion_a35446cbf70197754a5039cd8bfc3d30e}{\index{one\-\_\-d\-::chebyshev\-::implicit\-\_\-diffusion@{one\-\_\-d\-::chebyshev\-::implicit\-\_\-diffusion}!implicit\-\_\-diffusion@{implicit\-\_\-diffusion}}
+\index{implicit\-\_\-diffusion@{implicit\-\_\-diffusion}!one_d::chebyshev::implicit_diffusion@{one\-\_\-d\-::chebyshev\-::implicit\-\_\-diffusion}}
+\subsubsection[{implicit\-\_\-diffusion}]{\setlength{\rightskip}{0pt plus 5cm}one\-\_\-d\-::chebyshev\-::implicit\-\_\-diffusion\-::implicit\-\_\-diffusion (
+\begin{DoxyParamCaption}
+\item[{{\bf bases\-::element} $\ast$}]{i\-\_\-element\-\_\-ptr, }
+\item[{double}]{i\-\_\-coeff, }
+\item[{int}]{i\-\_\-n, }
+\item[{{\bf bases\-::collocation\-\_\-grid} $\ast$}]{i\-\_\-grid, }
+\item[{double $\ast$}]{i\-\_\-matrix, }
+\item[{int}]{i\-\_\-flags = {\ttfamily 0x00}}
+\end{DoxyParamCaption}
+)}}\label{classone__d_1_1chebyshev_1_1implicit__diffusion_a35446cbf70197754a5039cd8bfc3d30e}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-coeff} & A double containing the coefficient in front of the diffusion term in the differential equation \\
+\hline
+{\em i\-\_\-grid} & a shared pointer to the collocation\-\_\-grid, which must be defined for the second derivative\\
+\hline
+\end{DoxyParams}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-n} & The integer number of elements in a row of the square i\-\_\-matrix \\
+\hline
+{\em i\-\_\-grid} & A shared pointer to the collocation grid object \\
+\hline
+{\em i\-\_\-matrix} & The double matrix to be updated \\
+\hline
+\end{DoxyParams}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-element\-\_\-ptr} & A pointer to the associated element \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classone__d_1_1chebyshev_1_1implicit__diffusion_a5da5289b943a5d3384c7b0341f890125}{\index{one\-\_\-d\-::chebyshev\-::implicit\-\_\-diffusion@{one\-\_\-d\-::chebyshev\-::implicit\-\_\-diffusion}!execute@{execute}}
+\index{execute@{execute}!one_d::chebyshev::implicit_diffusion@{one\-\_\-d\-::chebyshev\-::implicit\-\_\-diffusion}}
+\subsubsection[{execute}]{\setlength{\rightskip}{0pt plus 5cm}void one\-\_\-d\-::chebyshev\-::implicit\-\_\-diffusion\-::execute (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classone__d_1_1chebyshev_1_1implicit__diffusion_a5da5289b943a5d3384c7b0341f890125}
+
+
+Operate the plan on the data arrays contained in the class. 
+
+
+
+ 
+
+ 
+
+ The plan class serves as a wrapper for this function. 
+
+Reimplemented from \hyperlink{classbases_1_1implicit__plan_a564bcb2be88ca9abe77c981d77d58d74}{bases\-::implicit\-\_\-plan}.
+
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/one\-\_\-d/\hyperlink{diffusion__one__d_8hpp}{diffusion\-\_\-one\-\_\-d.\-hpp}\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/one\-\_\-d/\hyperlink{diffusion__one__d_8cpp}{diffusion\-\_\-one\-\_\-d.\-cpp}\end{DoxyCompactItemize}

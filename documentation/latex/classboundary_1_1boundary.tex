@@ -1,0 +1,110 @@
+\hypertarget{classboundary_1_1boundary}{\section{boundary\-:\-:boundary Class Reference}
+\label{classboundary_1_1boundary}\index{boundary\-::boundary@{boundary\-::boundary}}
+}
+
+
+An abstract plan class to handle boundary conditions.  
+
+
+
+
+{\ttfamily \#include $<$boundary.\-hpp$>$}
+
+Inheritance diagram for boundary\-:\-:boundary\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classboundary_1_1boundary}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classboundary_1_1boundary_af1b5c319decaac90b9a6762d8c5d7438}{boundary} (double i\-\_\-alpha\-\_\-plus, double $\ast$i\-\_\-data\-\_\-plus, double i\-\_\-alpha\-\_\-minus, double $\ast$i\-\_\-data\-\_\-minus)
+\item 
+virtual void \hyperlink{classboundary_1_1boundary_ad5c7967ab2e710a86d1d89d4600c7568}{execute} ()=0
+\begin{DoxyCompactList}\small\item\em Operate the plan on the data arrays contained in the class. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classboundary_1_1boundary_a8e358b93badffa81343aea35bbe351c0}{double \hyperlink{classboundary_1_1boundary_a8e358b93badffa81343aea35bbe351c0}{alpha\-\_\-plus}}\label{classboundary_1_1boundary_a8e358b93badffa81343aea35bbe351c0}
+
+\begin{DoxyCompactList}\small\item\em A double coefficient for the contribution from the positive boundary. \end{DoxyCompactList}\item 
+\hypertarget{classboundary_1_1boundary_aaa0ab185e8c6c7d784799479fdeaae44}{double \hyperlink{classboundary_1_1boundary_aaa0ab185e8c6c7d784799479fdeaae44}{alpha\-\_\-minus}}\label{classboundary_1_1boundary_aaa0ab185e8c6c7d784799479fdeaae44}
+
+\begin{DoxyCompactList}\small\item\em A double coefficient for the contribution from the negative boudary. \end{DoxyCompactList}\item 
+\hypertarget{classboundary_1_1boundary_a8aeb4adf7f12086bd78adc5445f4c757}{double $\ast$ \hyperlink{classboundary_1_1boundary_a8aeb4adf7f12086bd78adc5445f4c757}{data\-\_\-plus}}\label{classboundary_1_1boundary_a8aeb4adf7f12086bd78adc5445f4c757}
+
+\begin{DoxyCompactList}\small\item\em A pointer to the double first element of the positive boundary. \end{DoxyCompactList}\item 
+\hypertarget{classboundary_1_1boundary_a38706e972e08a232bdb4bf3d57490ab6}{double $\ast$ \hyperlink{classboundary_1_1boundary_a38706e972e08a232bdb4bf3d57490ab6}{data\-\_\-minus}}\label{classboundary_1_1boundary_a38706e972e08a232bdb4bf3d57490ab6}
+
+\begin{DoxyCompactList}\small\item\em A pointer to the double first element of the negative boundary. \end{DoxyCompactList}\item 
+\hypertarget{classplan_a14f8cce3065ed97f0909eda7b62ca1dc}{int \hyperlink{classplan_a14f8cce3065ed97f0909eda7b62ca1dc}{default\-\_\-flags}}\label{classplan_a14f8cce3065ed97f0909eda7b62ca1dc}
+
+\begin{DoxyCompactList}\small\item\em An integer set of default flags to use in case the user does not specify any flags. \end{DoxyCompactList}\item 
+\hypertarget{classplan_ada18dc9e93c6833cd8c0d228598e20db}{int $\ast$ {\bfseries flags\-\_\-ptr}}\label{classplan_ada18dc9e93c6833cd8c0d228598e20db}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+An abstract plan class to handle boundary conditions. 
+
+
+
+ This class contains the necessary coefficients and pointers to handle boundary conditions. The implementation will depend on the number of dimensions. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classboundary_1_1boundary_af1b5c319decaac90b9a6762d8c5d7438}{\index{boundary\-::boundary@{boundary\-::boundary}!boundary@{boundary}}
+\index{boundary@{boundary}!boundary::boundary@{boundary\-::boundary}}
+\subsubsection[{boundary}]{\setlength{\rightskip}{0pt plus 5cm}boundary\-::boundary\-::boundary (
+\begin{DoxyParamCaption}
+\item[{double}]{i\-\_\-alpha\-\_\-plus, }
+\item[{double $\ast$}]{i\-\_\-data\-\_\-plus, }
+\item[{double}]{i\-\_\-alpha\-\_\-minus, }
+\item[{double $\ast$}]{i\-\_\-data\-\_\-minus}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{classboundary_1_1boundary_af1b5c319decaac90b9a6762d8c5d7438}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-alpha\-\_\-plus} & A double coefficient for the contribution from the positive boundary \\
+\hline
+{\em i\-\_\-data\-\_\-plus} & A pointer to the double first element of the positive boundary \\
+\hline
+{\em i\-\_\-alpha\-\_\-minus} & A double coefficient for the contribution from the negative boudary \\
+\hline
+{\em i\-\_\-data\-\_\-minus} & A pointer to the double first element of the negative boundary \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classboundary_1_1boundary_ad5c7967ab2e710a86d1d89d4600c7568}{\index{boundary\-::boundary@{boundary\-::boundary}!execute@{execute}}
+\index{execute@{execute}!boundary::boundary@{boundary\-::boundary}}
+\subsubsection[{execute}]{\setlength{\rightskip}{0pt plus 5cm}virtual void boundary\-::boundary\-::execute (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [pure virtual]}}}\label{classboundary_1_1boundary_ad5c7967ab2e710a86d1d89d4600c7568}
+
+
+Operate the plan on the data arrays contained in the class. 
+
+
+
+ 
+
+ The plan class serves as a wrapper for this function. 
+
+Implements \hyperlink{classplan_a2aaf5789c18317995b2eaf168e839fb5}{plan}.
+
+
+
+Implemented in \hyperlink{classboundary_1_1boundary__1_d_a10d56aff9623f0886de1d9f0eb991863}{boundary\-::boundary\-\_\-1\-D}.
+
+
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/boundary/\hyperlink{boundary_8hpp}{boundary.\-hpp}\end{DoxyCompactItemize}

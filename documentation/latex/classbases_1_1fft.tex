@@ -1,0 +1,112 @@
+\hypertarget{classbases_1_1fft}{\section{bases\-:\-:fft Class Reference}
+\label{classbases_1_1fft}\index{bases\-::fft@{bases\-::fft}}
+}
+
+
+An explicit plan that operates an F\-F\-T.  
+
+
+
+
+{\ttfamily \#include $<$fft.\-hpp$>$}
+
+Inheritance diagram for bases\-:\-:fft\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{classbases_1_1fft}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classbases_1_1fft_a84e56922b802575533ede34024d55e8b}{fft} (int i\-\_\-n, double $\ast$i\-\_\-data\-\_\-in, double $\ast$i\-\_\-data\-\_\-out, int $\ast$i\-\_\-flags\-\_\-ptr=N\-U\-L\-L)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual void \hyperlink{classbases_1_1fft_ae97a792d8538c0362640148f6328d85e}{execute} ()=0
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classbases_1_1explicit__plan_a6acccce0b2ef4489b411a264cab019c9}{int \hyperlink{classbases_1_1explicit__plan_a6acccce0b2ef4489b411a264cab019c9}{n}}\label{classbases_1_1explicit__plan_a6acccce0b2ef4489b411a264cab019c9}
+
+\begin{DoxyCompactList}\small\item\em An integer number of data elements (grid points) that collocation\-\_\-1\-D will be built to handle. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1explicit__plan_a8faf976ec6c01951dd6d5e7421630184}{double $\ast$ \hyperlink{classbases_1_1explicit__plan_a8faf976ec6c01951dd6d5e7421630184}{data\-\_\-in}}\label{classbases_1_1explicit__plan_a8faf976ec6c01951dd6d5e7421630184}
+
+\begin{DoxyCompactList}\small\item\em A double pointer to the input data. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1explicit__plan_a55946d0b4b1a19da12469447de247b82}{double $\ast$ \hyperlink{classbases_1_1explicit__plan_a55946d0b4b1a19da12469447de247b82}{data\-\_\-out}}\label{classbases_1_1explicit__plan_a55946d0b4b1a19da12469447de247b82}
+
+\begin{DoxyCompactList}\small\item\em A double pointer to the output data. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1plan_a756595e230cc99e84de4392ac691eefd}{int \hyperlink{classbases_1_1plan_a756595e230cc99e84de4392ac691eefd}{default\-\_\-flags}}\label{classbases_1_1plan_a756595e230cc99e84de4392ac691eefd}
+
+\begin{DoxyCompactList}\small\item\em An integer set of default flags to use in case the user does not specify any flags. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1plan_a4f423a3831579d895a0658164bb82b8c}{int $\ast$ \hyperlink{classbases_1_1plan_a4f423a3831579d895a0658164bb82b8c}{flags\-\_\-ptr}}\label{classbases_1_1plan_a4f423a3831579d895a0658164bb82b8c}
+
+\begin{DoxyCompactList}\small\item\em A pointer to the integer execution flags. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+An explicit plan that operates an F\-F\-T. 
+
+
+
+ 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classbases_1_1fft_a84e56922b802575533ede34024d55e8b}{\index{bases\-::fft@{bases\-::fft}!fft@{fft}}
+\index{fft@{fft}!bases::fft@{bases\-::fft}}
+\subsubsection[{fft}]{\setlength{\rightskip}{0pt plus 5cm}bases\-::fft\-::fft (
+\begin{DoxyParamCaption}
+\item[{int}]{i\-\_\-n, }
+\item[{double $\ast$}]{i\-\_\-data\-\_\-in, }
+\item[{double $\ast$}]{i\-\_\-data\-\_\-out, }
+\item[{int $\ast$}]{i\-\_\-flags\-\_\-ptr = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{classbases_1_1fft_a84e56922b802575533ede34024d55e8b}
+
+
+
+
+
+
+ 
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-n} & The integer number of elements in the data \\
+\hline
+{\em i\-\_\-data\-\_\-in} & The double vector of input \\
+\hline
+{\em i\-\_\-data\-\_\-out} & The double vector of output (if N\-U\-L\-L, use i\-\_\-data\-\_\-in) \\
+\hline
+\end{DoxyParams}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-flags\-\_\-ptr} & A pointer to the integer execution flags \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classbases_1_1fft_ae97a792d8538c0362640148f6328d85e}{\index{bases\-::fft@{bases\-::fft}!execute@{execute}}
+\index{execute@{execute}!bases::fft@{bases\-::fft}}
+\subsubsection[{execute}]{\setlength{\rightskip}{0pt plus 5cm}virtual void bases\-::fft\-::execute (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [pure virtual]}}}\label{classbases_1_1fft_ae97a792d8538c0362640148f6328d85e}
+
+
+ Operate the plan on the data arrays contained in the class. 
+
+Implements \hyperlink{classbases_1_1explicit__plan_abe58a9c4d3b0bb692e1cdf1506ac6281}{bases\-::explicit\-\_\-plan}.
+
+
+
+Implemented in \hyperlink{classone__d_1_1fftw__cosine_aa8b0befe7b047feb004b2c41644a2fa4}{one\-\_\-d\-::fftw\-\_\-cosine}.
+
+
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/bases/\hyperlink{fft_8hpp}{fft.\-hpp}\end{DoxyCompactItemize}

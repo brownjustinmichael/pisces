@@ -1,0 +1,106 @@
+\hypertarget{classcollocation_1_1collocation__grid}{\section{collocation\-:\-:collocation\-\_\-grid Class Reference}
+\label{classcollocation_1_1collocation__grid}\index{collocation\-::collocation\-\_\-grid@{collocation\-::collocation\-\_\-grid}}
+}
+
+
+An abstract class containing a collocation grid.  
+
+
+
+
+{\ttfamily \#include $<$collocation.\-hpp$>$}
+
+Inheritance diagram for collocation\-:\-:collocation\-\_\-grid\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classcollocation_1_1collocation__grid}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classcollocation_1_1collocation__grid_ac579840eb302c73265bcf6bb0d050da2}{collocation\-\_\-grid} (int i\-\_\-derivs, int i\-\_\-rows, int i\-\_\-cols)
+\item 
+double \& \hyperlink{classcollocation_1_1collocation__grid_ae4c6823908ca97d0302ee8bdef30f996}{index} (int deriv, int row, int col)
+\begin{DoxyCompactList}\small\item\em An indexing operation into the grid, for convenience. \end{DoxyCompactList}\item 
+\hypertarget{classcollocation_1_1collocation__grid_a6f1a7584de56f404ace53d98f1d68437}{double $\ast$ {\bfseries get\-\_\-data} (int deriv)}\label{classcollocation_1_1collocation__grid_a6f1a7584de56f404ace53d98f1d68437}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classcollocation_1_1collocation__grid_ac1091b01caad2cb238586116ac51852d}{int \hyperlink{classcollocation_1_1collocation__grid_ac1091b01caad2cb238586116ac51852d}{rows}}\label{classcollocation_1_1collocation__grid_ac1091b01caad2cb238586116ac51852d}
+
+\begin{DoxyCompactList}\small\item\em The integer number of rows in the grid. \end{DoxyCompactList}\item 
+\hypertarget{classcollocation_1_1collocation__grid_ae2fe5a4cc61080740c692bcfa13730fb}{int \hyperlink{classcollocation_1_1collocation__grid_ae2fe5a4cc61080740c692bcfa13730fb}{cols}}\label{classcollocation_1_1collocation__grid_ae2fe5a4cc61080740c692bcfa13730fb}
+
+\begin{DoxyCompactList}\small\item\em The integer number of columns in the grid. \end{DoxyCompactList}\item 
+\hypertarget{classcollocation_1_1collocation__grid_a37941e925c4f43a83206b2be70a5d63b}{int \hyperlink{classcollocation_1_1collocation__grid_a37941e925c4f43a83206b2be70a5d63b}{derivs}}\label{classcollocation_1_1collocation__grid_a37941e925c4f43a83206b2be70a5d63b}
+
+\begin{DoxyCompactList}\small\item\em The integer number of derivatives deep the collocation grid runs. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+An abstract class containing a collocation grid. 
+
+
+
+ This will need to be instantiated for a collocation method. Ideally, the structure contains a grid of polynomial values at a number of collocation points which can be called for little temporal expense. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classcollocation_1_1collocation__grid_ac579840eb302c73265bcf6bb0d050da2}{\index{collocation\-::collocation\-\_\-grid@{collocation\-::collocation\-\_\-grid}!collocation\-\_\-grid@{collocation\-\_\-grid}}
+\index{collocation\-\_\-grid@{collocation\-\_\-grid}!collocation::collocation_grid@{collocation\-::collocation\-\_\-grid}}
+\subsubsection[{collocation\-\_\-grid}]{\setlength{\rightskip}{0pt plus 5cm}collocation\-::collocation\-\_\-grid\-::collocation\-\_\-grid (
+\begin{DoxyParamCaption}
+\item[{int}]{i\-\_\-derivs, }
+\item[{int}]{i\-\_\-rows, }
+\item[{int}]{i\-\_\-cols}
+\end{DoxyParamCaption}
+)}}\label{classcollocation_1_1collocation__grid_ac579840eb302c73265bcf6bb0d050da2}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-derivs} & The integer number of derivatives in the grid \\
+\hline
+{\em i\-\_\-rows} & The integer number of rows in the grid \\
+\hline
+{\em i\-\_\-cols} & The integer number of columns in the grid \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classcollocation_1_1collocation__grid_ae4c6823908ca97d0302ee8bdef30f996}{\index{collocation\-::collocation\-\_\-grid@{collocation\-::collocation\-\_\-grid}!index@{index}}
+\index{index@{index}!collocation::collocation_grid@{collocation\-::collocation\-\_\-grid}}
+\subsubsection[{index}]{\setlength{\rightskip}{0pt plus 5cm}double\& collocation\-::collocation\-\_\-grid\-::index (
+\begin{DoxyParamCaption}
+\item[{int}]{deriv, }
+\item[{int}]{row, }
+\item[{int}]{col}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{classcollocation_1_1collocation__grid_ae4c6823908ca97d0302ee8bdef30f996}
+
+
+An indexing operation into the grid, for convenience. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em deriv} & The integer deriv to be indexed \\
+\hline
+{\em row} & The integer row to be indexed \\
+\hline
+{\em col} & The integer column to be indexed\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The double value at the index 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/collocation/\hyperlink{collocation_8hpp}{collocation.\-hpp}\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/collocation/\hyperlink{collocation_8cpp}{collocation.\-cpp}\end{DoxyCompactItemize}

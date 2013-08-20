@@ -1,0 +1,102 @@
+\hypertarget{classone__d_1_1diffusive__boundary}{\section{one\-\_\-d\-:\-:diffusive\-\_\-boundary Class Reference}
+\label{classone__d_1_1diffusive__boundary}\index{one\-\_\-d\-::diffusive\-\_\-boundary@{one\-\_\-d\-::diffusive\-\_\-boundary}}
+}
+
+
+An implementation of the boundary class in 1\-D for boundaries with viscosity.  
+
+
+
+
+{\ttfamily \#include $<$boundary\-\_\-one\-\_\-d.\-hpp$>$}
+
+Inheritance diagram for one\-\_\-d\-:\-:diffusive\-\_\-boundary\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{classone__d_1_1diffusive__boundary}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classone__d_1_1diffusive__boundary_ad402530bee0063e6cb05ceaa506c5706}{diffusive\-\_\-boundary} (int i\-\_\-edge, int i\-\_\-ext\-\_\-send, int i\-\_\-ext\-\_\-recv, int i\-\_\-process)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+void \hyperlink{classone__d_1_1diffusive__boundary_ae8b851282284945b7e6e9373a0edb4a3}{associate} (\hyperlink{classbases_1_1element}{bases\-::element} $\ast$i\-\_\-element\-\_\-ptr)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual void \hyperlink{classone__d_1_1diffusive__boundary_a2a841c3e9b57d10fc28d41e325b8452c}{execute} ()
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classone__d_1_1diffusive__boundary_a92a238a42a698045527f50aebd353352}{double \hyperlink{classone__d_1_1diffusive__boundary_a92a238a42a698045527f50aebd353352}{coeff}}\label{classone__d_1_1diffusive__boundary_a92a238a42a698045527f50aebd353352}
+
+\begin{DoxyCompactList}\small\item\em The double diffusion coefficient. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Detailed Description}
+An implementation of the boundary class in 1\-D for boundaries with viscosity. 
+
+
+
+ This class handles the single point boundary by using Lagrange interpolation using two points from each element. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classone__d_1_1diffusive__boundary_ad402530bee0063e6cb05ceaa506c5706}{\index{one\-\_\-d\-::diffusive\-\_\-boundary@{one\-\_\-d\-::diffusive\-\_\-boundary}!diffusive\-\_\-boundary@{diffusive\-\_\-boundary}}
+\index{diffusive\-\_\-boundary@{diffusive\-\_\-boundary}!one_d::diffusive_boundary@{one\-\_\-d\-::diffusive\-\_\-boundary}}
+\subsubsection[{diffusive\-\_\-boundary}]{\setlength{\rightskip}{0pt plus 5cm}one\-\_\-d\-::diffusive\-\_\-boundary\-::diffusive\-\_\-boundary (
+\begin{DoxyParamCaption}
+\item[{int}]{i\-\_\-edge, }
+\item[{int}]{i\-\_\-ext\-\_\-send, }
+\item[{int}]{i\-\_\-ext\-\_\-recv, }
+\item[{int}]{i\-\_\-process}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{classone__d_1_1diffusive__boundary_ad402530bee0063e6cb05ceaa506c5706}
+
+
+
+
+
+
+ 
+
+\subsection{Member Function Documentation}
+\hypertarget{classone__d_1_1diffusive__boundary_ae8b851282284945b7e6e9373a0edb4a3}{\index{one\-\_\-d\-::diffusive\-\_\-boundary@{one\-\_\-d\-::diffusive\-\_\-boundary}!associate@{associate}}
+\index{associate@{associate}!one_d::diffusive_boundary@{one\-\_\-d\-::diffusive\-\_\-boundary}}
+\subsubsection[{associate}]{\setlength{\rightskip}{0pt plus 5cm}void one\-\_\-d\-::diffusive\-\_\-boundary\-::associate (
+\begin{DoxyParamCaption}
+\item[{{\bf bases\-::element} $\ast$}]{i\-\_\-element\-\_\-ptr}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}}\label{classone__d_1_1diffusive__boundary_ae8b851282284945b7e6e9373a0edb4a3}
+
+
+
+
+
+
+ 
+
+Reimplemented from \hyperlink{classone__d_1_1link__boundary_a3c8652f7b39208dc58f34804a523cc36}{one\-\_\-d\-::link\-\_\-boundary}.
+
+\hypertarget{classone__d_1_1diffusive__boundary_a2a841c3e9b57d10fc28d41e325b8452c}{\index{one\-\_\-d\-::diffusive\-\_\-boundary@{one\-\_\-d\-::diffusive\-\_\-boundary}!execute@{execute}}
+\index{execute@{execute}!one_d::diffusive_boundary@{one\-\_\-d\-::diffusive\-\_\-boundary}}
+\subsubsection[{execute}]{\setlength{\rightskip}{0pt plus 5cm}virtual void one\-\_\-d\-::diffusive\-\_\-boundary\-::execute (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}}\label{classone__d_1_1diffusive__boundary_a2a841c3e9b57d10fc28d41e325b8452c}
+
+
+
+
+
+
+ 
+
+Reimplemented from \hyperlink{classone__d_1_1link__boundary_a839303f3eb1a7c5fe204d3020eadaebb}{one\-\_\-d\-::link\-\_\-boundary}.
+
+
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/one\-\_\-d/\hyperlink{boundary__one__d_8hpp}{boundary\-\_\-one\-\_\-d.\-hpp}\end{DoxyCompactItemize}

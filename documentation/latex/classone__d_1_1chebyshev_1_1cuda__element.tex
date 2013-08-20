@@ -1,0 +1,68 @@
+\hypertarget{classone__d_1_1chebyshev_1_1cuda__element}{\section{one\-\_\-d\-:\-:chebyshev\-:\-:cuda\-\_\-element Class Reference}
+\label{classone__d_1_1chebyshev_1_1cuda__element}\index{one\-\_\-d\-::chebyshev\-::cuda\-\_\-element@{one\-\_\-d\-::chebyshev\-::cuda\-\_\-element}}
+}
+Inheritance diagram for one\-\_\-d\-:\-:chebyshev\-:\-:cuda\-\_\-element\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{classone__d_1_1chebyshev_1_1cuda__element}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classone__d_1_1chebyshev_1_1cuda__element_a2a501d087aa0072a5feb79a594b108a3}{{\bfseries cuda\-\_\-element} (int i\-\_\-n, double i\-\_\-position\-\_\-0, double i\-\_\-position\-\_\-n, int i\-\_\-excess\-\_\-0, int i\-\_\-excess\-\_\-n, int i\-\_\-name, \hyperlink{namespaceio_a1c55c654666eeece6a9724f453fdbd87}{io\-::parameter\-\_\-map} \&i\-\_\-input\-\_\-\-Params, \hyperlink{classbases_1_1messenger}{bases\-::messenger} $\ast$i\-\_\-messenger\-\_\-ptr, int i\-\_\-flags)}\label{classone__d_1_1chebyshev_1_1cuda__element_a2a501d087aa0072a5feb79a594b108a3}
+
+\item 
+void \hyperlink{classone__d_1_1chebyshev_1_1cuda__element_ac304ac234f63b576d3acab5c31c9a31f}{implicit\-\_\-reset} ()
+\begin{DoxyCompactList}\small\item\em Reset any matrices if necessary. \end{DoxyCompactList}\item 
+virtual double \hyperlink{classone__d_1_1chebyshev_1_1cuda__element_a528350be3f4edf1470ca31576b3f7ea2}{calculate\-\_\-timestep} ()
+\begin{DoxyCompactList}\small\item\em Calculate the new timestep duration. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classone__d_1_1chebyshev_1_1cuda__element_a528350be3f4edf1470ca31576b3f7ea2}{\index{one\-\_\-d\-::chebyshev\-::cuda\-\_\-element@{one\-\_\-d\-::chebyshev\-::cuda\-\_\-element}!calculate\-\_\-timestep@{calculate\-\_\-timestep}}
+\index{calculate\-\_\-timestep@{calculate\-\_\-timestep}!one_d::chebyshev::cuda_element@{one\-\_\-d\-::chebyshev\-::cuda\-\_\-element}}
+\subsubsection[{calculate\-\_\-timestep}]{\setlength{\rightskip}{0pt plus 5cm}double one\-\_\-d\-::chebyshev\-::cuda\-\_\-element\-::calculate\-\_\-timestep (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classone__d_1_1chebyshev_1_1cuda__element_a528350be3f4edf1470ca31576b3f7ea2}
+
+
+Calculate the new timestep duration. 
+
+
+
+ This method should be overwritten in the final class. It uses the knowledge of the user to beat numerical instabilities.
+
+\begin{DoxyReturn}{Returns}
+The double recommended timestep for the next timestep 
+\end{DoxyReturn}
+
+
+Implements \hyperlink{classbases_1_1element_aa8a344e596bf8cee3fdeda611b98bb1c}{bases\-::element}.
+
+\hypertarget{classone__d_1_1chebyshev_1_1cuda__element_ac304ac234f63b576d3acab5c31c9a31f}{\index{one\-\_\-d\-::chebyshev\-::cuda\-\_\-element@{one\-\_\-d\-::chebyshev\-::cuda\-\_\-element}!implicit\-\_\-reset@{implicit\-\_\-reset}}
+\index{implicit\-\_\-reset@{implicit\-\_\-reset}!one_d::chebyshev::cuda_element@{one\-\_\-d\-::chebyshev\-::cuda\-\_\-element}}
+\subsubsection[{implicit\-\_\-reset}]{\setlength{\rightskip}{0pt plus 5cm}void one\-\_\-d\-::chebyshev\-::cuda\-\_\-element\-::implicit\-\_\-reset (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}}\label{classone__d_1_1chebyshev_1_1cuda__element_ac304ac234f63b576d3acab5c31c9a31f}
+
+
+Reset any matrices if necessary. 
+
+
+
+ This method should be overwritten if the element solves with an implicit part. It should only be called if the timestep duration has changed, for the most part. 
+
+Reimplemented from \hyperlink{classbases_1_1element_a0311b32b397accaba0b9066c6c402274}{bases\-::element}.
+
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/one\-\_\-d/\hyperlink{element__one__d_8hpp}{element\-\_\-one\-\_\-d.\-hpp}\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/one\-\_\-d/\hyperlink{element__one__d_8cpp}{element\-\_\-one\-\_\-d.\-cpp}\end{DoxyCompactItemize}

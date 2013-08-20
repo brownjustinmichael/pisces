@@ -1,0 +1,104 @@
+\hypertarget{classcollocation_1_1chebyshev__grid}{\section{collocation\-:\-:chebyshev\-\_\-grid Class Reference}
+\label{classcollocation_1_1chebyshev__grid}\index{collocation\-::chebyshev\-\_\-grid@{collocation\-::chebyshev\-\_\-grid}}
+}
+
+
+A collocation grid for Chebyshev polynomials.  
+
+
+
+
+{\ttfamily \#include $<$collocation.\-hpp$>$}
+
+Inheritance diagram for collocation\-:\-:chebyshev\-\_\-grid\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classcollocation_1_1chebyshev__grid}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classcollocation_1_1chebyshev__grid_ad5bf0baabf0f68952faf64df8beaa373}{chebyshev\-\_\-grid} (int i\-\_\-\-M, int i\-\_\-\-N, double i\-\_\-scale=1.\-0)
+\item 
+double \& \hyperlink{classcollocation_1_1collocation__grid_ae4c6823908ca97d0302ee8bdef30f996}{index} (int deriv, int row, int col)
+\begin{DoxyCompactList}\small\item\em An indexing operation into the grid, for convenience. \end{DoxyCompactList}\item 
+\hypertarget{classcollocation_1_1collocation__grid_a6f1a7584de56f404ace53d98f1d68437}{double $\ast$ {\bfseries get\-\_\-data} (int deriv)}\label{classcollocation_1_1collocation__grid_a6f1a7584de56f404ace53d98f1d68437}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classcollocation_1_1collocation__grid_ac1091b01caad2cb238586116ac51852d}{int \hyperlink{classcollocation_1_1collocation__grid_ac1091b01caad2cb238586116ac51852d}{rows}}\label{classcollocation_1_1collocation__grid_ac1091b01caad2cb238586116ac51852d}
+
+\begin{DoxyCompactList}\small\item\em The integer number of rows in the grid. \end{DoxyCompactList}\item 
+\hypertarget{classcollocation_1_1collocation__grid_ae2fe5a4cc61080740c692bcfa13730fb}{int \hyperlink{classcollocation_1_1collocation__grid_ae2fe5a4cc61080740c692bcfa13730fb}{cols}}\label{classcollocation_1_1collocation__grid_ae2fe5a4cc61080740c692bcfa13730fb}
+
+\begin{DoxyCompactList}\small\item\em The integer number of columns in the grid. \end{DoxyCompactList}\item 
+\hypertarget{classcollocation_1_1collocation__grid_a37941e925c4f43a83206b2be70a5d63b}{int \hyperlink{classcollocation_1_1collocation__grid_a37941e925c4f43a83206b2be70a5d63b}{derivs}}\label{classcollocation_1_1collocation__grid_a37941e925c4f43a83206b2be70a5d63b}
+
+\begin{DoxyCompactList}\small\item\em The integer number of derivatives deep the collocation grid runs. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A collocation grid for Chebyshev polynomials. 
+
+
+
+ This collocation grid stores the N collocation points for up to the Mth order Chebyshev polynomial and its first and second derivatives 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classcollocation_1_1chebyshev__grid_ad5bf0baabf0f68952faf64df8beaa373}{\index{collocation\-::chebyshev\-\_\-grid@{collocation\-::chebyshev\-\_\-grid}!chebyshev\-\_\-grid@{chebyshev\-\_\-grid}}
+\index{chebyshev\-\_\-grid@{chebyshev\-\_\-grid}!collocation::chebyshev_grid@{collocation\-::chebyshev\-\_\-grid}}
+\subsubsection[{chebyshev\-\_\-grid}]{\setlength{\rightskip}{0pt plus 5cm}collocation\-::chebyshev\-\_\-grid\-::chebyshev\-\_\-grid (
+\begin{DoxyParamCaption}
+\item[{int}]{i\-\_\-\-M, }
+\item[{int}]{i\-\_\-\-N, }
+\item[{double}]{i\-\_\-scale = {\ttfamily 1.0}}
+\end{DoxyParamCaption}
+)}}\label{classcollocation_1_1chebyshev__grid_ad5bf0baabf0f68952faf64df8beaa373}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-\-M} & The integer max order of Chebyshev polynomial \\
+\hline
+{\em i\-\_\-\-N} & The integer number of collocation points \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classcollocation_1_1collocation__grid_ae4c6823908ca97d0302ee8bdef30f996}{\index{collocation\-::chebyshev\-\_\-grid@{collocation\-::chebyshev\-\_\-grid}!index@{index}}
+\index{index@{index}!collocation::chebyshev_grid@{collocation\-::chebyshev\-\_\-grid}}
+\subsubsection[{index}]{\setlength{\rightskip}{0pt plus 5cm}double\& collocation\-::collocation\-\_\-grid\-::index (
+\begin{DoxyParamCaption}
+\item[{int}]{deriv, }
+\item[{int}]{row, }
+\item[{int}]{col}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [inherited]}}}\label{classcollocation_1_1collocation__grid_ae4c6823908ca97d0302ee8bdef30f996}
+
+
+An indexing operation into the grid, for convenience. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em deriv} & The integer deriv to be indexed \\
+\hline
+{\em row} & The integer row to be indexed \\
+\hline
+{\em col} & The integer column to be indexed\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The double value at the index 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/collocation/\hyperlink{collocation_8hpp}{collocation.\-hpp}\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/collocation/\hyperlink{collocation_8cpp}{collocation.\-cpp}\end{DoxyCompactItemize}

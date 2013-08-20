@@ -1,0 +1,275 @@
+\hypertarget{classone__d_1_1advection__diffusion__element}{\section{one\-\_\-d\-:\-:advection\-\_\-diffusion\-\_\-element Class Reference}
+\label{classone__d_1_1advection__diffusion__element}\index{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element@{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element}}
+}
+
+
+A simple implementation of the element class with diffusion.  
+
+
+
+
+{\ttfamily \#include $<$element.\-hpp$>$}
+
+Inheritance diagram for one\-\_\-d\-:\-:advection\-\_\-diffusion\-\_\-element\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classone__d_1_1advection__diffusion__element}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classone__d_1_1advection__diffusion__element_a16b48aeb792f7cc2e88b15e0c6084eb0}{advection\-\_\-diffusion\-\_\-element} (int i\-\_\-n, int i\-\_\-flags)
+\item 
+void \hyperlink{classone__d_1_1element_af02a8e438b872fbf87893a41bee23098}{add\-\_\-scalar} (int name)
+\begin{DoxyCompactList}\small\item\em Add a scalar to the element. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classbases_1_1element_a11b38922e9235387cc7454cdbf574083}{calculate} ()
+\begin{DoxyCompactList}\small\item\em Calculate the matrix terms to be used in update. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classbases_1_1element_a326fa42addabf81c0f283b41050c0a88}{execute\-\_\-boundaries} ()
+\begin{DoxyCompactList}\small\item\em Execute the boundary conditions. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classbases_1_1element_a5a28329097f10e5969d9fc1df8c4f3c0}{update} ()
+\begin{DoxyCompactList}\small\item\em Update the element. \end{DoxyCompactList}\item 
+void \hyperlink{classbases_1_1element_ae06b8652e590e92cd4e00b25cdc6e093}{add\-\_\-explicit\-\_\-grid\-\_\-plan} (std\-::unique\-\_\-ptr$<$ plan $>$ i\-\_\-plan)
+\begin{DoxyCompactList}\small\item\em Adds an explicit plan to be evaluated in grid space. \end{DoxyCompactList}\item 
+void \hyperlink{classbases_1_1element_af88394210714fd50d3559dc7b243725d}{add\-\_\-explicit\-\_\-space\-\_\-plan} (std\-::unique\-\_\-ptr$<$ plan $>$ i\-\_\-plan)
+\begin{DoxyCompactList}\small\item\em Adds an explicit plan to be evaluated in normal space. \end{DoxyCompactList}\item 
+void \hyperlink{classbases_1_1element_a72495325294ba811587336132c3a6b9f}{add\-\_\-implicit\-\_\-plan} (std\-::unique\-\_\-ptr$<$ plan $>$ i\-\_\-plan)
+\begin{DoxyCompactList}\small\item\em Adds an implicit plan to be evaluated. \end{DoxyCompactList}\item 
+void \hyperlink{classbases_1_1element_a68f28460bb9cf500fb404f2591be6a65}{add\-\_\-boundary} (std\-::unique\-\_\-ptr$<$ plan $>$ i\-\_\-plan)
+\begin{DoxyCompactList}\small\item\em Adds a boundary condition to execute in normal space. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classone__d_1_1element_abffb6235b8bcf6e2085ad7dde0c5be3c}{int \hyperlink{classone__d_1_1element_abffb6235b8bcf6e2085ad7dde0c5be3c}{n}}\label{classone__d_1_1element_abffb6235b8bcf6e2085ad7dde0c5be3c}
+
+\begin{DoxyCompactList}\small\item\em The number of elements in each 1\-D array. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1element_abc6399df360c45095f825f8cc33c4016}{std\-::vector$<$ int $>$ \hyperlink{classone__d_1_1element_abc6399df360c45095f825f8cc33c4016}{cell}}\label{classone__d_1_1element_abc6399df360c45095f825f8cc33c4016}
+
+\begin{DoxyCompactList}\small\item\em An integer array for tracking each cell number for output. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1element_a3b4a7ca16c0882f82f9889c02ecff9e5}{std\-::map$<$ int, std\-::vector\\*
+$<$ double $>$ $>$ \hyperlink{classone__d_1_1element_a3b4a7ca16c0882f82f9889c02ecff9e5}{scalars}}\label{classone__d_1_1element_a3b4a7ca16c0882f82f9889c02ecff9e5}
+
+\begin{DoxyCompactList}\small\item\em A vector of scalar vectors. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1element_ae96e3c9a7a8c0aa53e6f98e62ecf23af}{int \hyperlink{classbases_1_1element_ae96e3c9a7a8c0aa53e6f98e62ecf23af}{flags}}\label{classbases_1_1element_ae96e3c9a7a8c0aa53e6f98e62ecf23af}
+
+\begin{DoxyCompactList}\small\item\em An integer set of execution flags. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1element_a3fc9074c4ab78ed2a0386b1709e696bd}{int \hyperlink{classbases_1_1element_a3fc9074c4ab78ed2a0386b1709e696bd}{n\-\_\-explicit\-\_\-grid\-\_\-plans}}\label{classbases_1_1element_a3fc9074c4ab78ed2a0386b1709e696bd}
+
+\begin{DoxyCompactList}\small\item\em The number of explicit grid plans to execute. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1element_addbb10b83c789f862271c10ef3e1d596}{int \hyperlink{classbases_1_1element_addbb10b83c789f862271c10ef3e1d596}{n\-\_\-explicit\-\_\-space\-\_\-plans}}\label{classbases_1_1element_addbb10b83c789f862271c10ef3e1d596}
+
+\begin{DoxyCompactList}\small\item\em The number of explicit space plans to execute. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1element_a7ff41fe1e907e2afba9f6c3e770ff46c}{int \hyperlink{classbases_1_1element_a7ff41fe1e907e2afba9f6c3e770ff46c}{n\-\_\-implicit\-\_\-plans}}\label{classbases_1_1element_a7ff41fe1e907e2afba9f6c3e770ff46c}
+
+\begin{DoxyCompactList}\small\item\em The number of implicit plans to execute. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1element_a8ce271217c13987fced96c4c92398148}{int \hyperlink{classbases_1_1element_a8ce271217c13987fced96c4c92398148}{n\-\_\-boundaries}}\label{classbases_1_1element_a8ce271217c13987fced96c4c92398148}
+
+\begin{DoxyCompactList}\small\item\em The number of boundary conditions to execute. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1element_ac0bd283b49358bd1f5a0b6ec0e1daae0}{double \hyperlink{classbases_1_1element_ac0bd283b49358bd1f5a0b6ec0e1daae0}{timestep}}\label{classbases_1_1element_ac0bd283b49358bd1f5a0b6ec0e1daae0}
+
+\begin{DoxyCompactList}\small\item\em The double timestep length. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1element_ad3ea8bf4f7e4e7016adb50f37023a14f}{double \hyperlink{classbases_1_1element_ad3ea8bf4f7e4e7016adb50f37023a14f}{previous\-\_\-timestep}}\label{classbases_1_1element_ad3ea8bf4f7e4e7016adb50f37023a14f}
+
+\begin{DoxyCompactList}\small\item\em The double duration of the previous timestep. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1element_a0be44a6a3cef50bf30850759c9c1f433}{std\-::shared\-\_\-ptr$<$ collocation\-\_\-grid $>$ \hyperlink{classbases_1_1element_a0be44a6a3cef50bf30850759c9c1f433}{grid}}\label{classbases_1_1element_a0be44a6a3cef50bf30850759c9c1f433}
+
+\begin{DoxyCompactList}\small\item\em A shared pointer to the collocation grid. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1element_ab361d0ea13c2a7a687989bd752d5e5bb}{std\-::unique\-\_\-ptr$<$ plan $>$ \hyperlink{classbases_1_1element_ab361d0ea13c2a7a687989bd752d5e5bb}{transform\-\_\-forward}}\label{classbases_1_1element_ab361d0ea13c2a7a687989bd752d5e5bb}
+
+\begin{DoxyCompactList}\small\item\em A unique pointer to the forward transform. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1element_ac35b7d212d08c6f520285bed97311d1f}{std\-::unique\-\_\-ptr$<$ solver $>$ \hyperlink{classbases_1_1element_ac35b7d212d08c6f520285bed97311d1f}{matrix\-\_\-solver}}\label{classbases_1_1element_ac35b7d212d08c6f520285bed97311d1f}
+
+\begin{DoxyCompactList}\small\item\em A unique pointer to the matrix solver. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1element_ad954d7448518632c3e8872334de13be1}{std\-::unique\-\_\-ptr$<$ \hyperlink{classio_1_1output}{io\-::output} $>$ \hyperlink{classbases_1_1element_ad954d7448518632c3e8872334de13be1}{angle\-\_\-stream}}\label{classbases_1_1element_ad954d7448518632c3e8872334de13be1}
+
+\begin{DoxyCompactList}\small\item\em An implementation to output in angle space. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1element_a37264602a9fadc22ffdaa5d08769c573}{std\-::unique\-\_\-ptr$<$ \hyperlink{classio_1_1output}{io\-::output} $>$ \hyperlink{classbases_1_1element_a37264602a9fadc22ffdaa5d08769c573}{failsafe\-\_\-dump}}\label{classbases_1_1element_a37264602a9fadc22ffdaa5d08769c573}
+
+\begin{DoxyCompactList}\small\item\em An implementation to dump in case of failure. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1element_ac4279079d360b935914250d971055926}{std\-::vector$<$ std\-::unique\-\_\-ptr\\*
+$<$ plan $>$ $>$ \hyperlink{classbases_1_1element_ac4279079d360b935914250d971055926}{explicit\-\_\-grid\-\_\-plans}}\label{classbases_1_1element_ac4279079d360b935914250d971055926}
+
+\begin{DoxyCompactList}\small\item\em A vector of unique pointers to explicit grid plans to be executed. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1element_ac213ee9d5e2b9dd4f9889fd6183064d6}{std\-::vector$<$ std\-::unique\-\_\-ptr\\*
+$<$ plan $>$ $>$ \hyperlink{classbases_1_1element_ac213ee9d5e2b9dd4f9889fd6183064d6}{explicit\-\_\-space\-\_\-plans}}\label{classbases_1_1element_ac213ee9d5e2b9dd4f9889fd6183064d6}
+
+\begin{DoxyCompactList}\small\item\em A vector of unique pointers to explicit space plans to be executed. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1element_a238aea68f2f520d2b681ff4e0a9bb5d0}{std\-::vector$<$ std\-::unique\-\_\-ptr\\*
+$<$ plan $>$ $>$ \hyperlink{classbases_1_1element_a238aea68f2f520d2b681ff4e0a9bb5d0}{implicit\-\_\-plans}}\label{classbases_1_1element_a238aea68f2f520d2b681ff4e0a9bb5d0}
+
+\begin{DoxyCompactList}\small\item\em A vector of unique pointers to implicit plans to be executed. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1element_a4b0d20dc02fe4e1fe92e100ea332ea22}{std\-::vector$<$ std\-::unique\-\_\-ptr\\*
+$<$ plan $>$ $>$ \hyperlink{classbases_1_1element_a4b0d20dc02fe4e1fe92e100ea332ea22}{boundaries}}\label{classbases_1_1element_a4b0d20dc02fe4e1fe92e100ea332ea22}
+
+\begin{DoxyCompactList}\small\item\em A vector of unique pointers to boundary conditions to be executed. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A simple implementation of the element class with diffusion. 
+
+
+
+ This class contains a full element's capacity to run a single element diffusion in 1\-D. It cannot yet tie to other elements or calculate its own timestep. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classone__d_1_1advection__diffusion__element_a16b48aeb792f7cc2e88b15e0c6084eb0}{\index{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element@{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element}!advection\-\_\-diffusion\-\_\-element@{advection\-\_\-diffusion\-\_\-element}}
+\index{advection\-\_\-diffusion\-\_\-element@{advection\-\_\-diffusion\-\_\-element}!one_d::advection_diffusion_element@{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element}}
+\subsubsection[{advection\-\_\-diffusion\-\_\-element}]{\setlength{\rightskip}{0pt plus 5cm}one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element\-::advection\-\_\-diffusion\-\_\-element (
+\begin{DoxyParamCaption}
+\item[{int}]{i\-\_\-n, }
+\item[{int}]{i\-\_\-flags}
+\end{DoxyParamCaption}
+)}}\label{classone__d_1_1advection__diffusion__element_a16b48aeb792f7cc2e88b15e0c6084eb0}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-n} & The number of elements in each 1\-D data array \\
+\hline
+{\em i\-\_\-flags} & Flags for the boundary conditions and evaluation \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classbases_1_1element_a68f28460bb9cf500fb404f2591be6a65}{\index{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element@{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element}!add\-\_\-boundary@{add\-\_\-boundary}}
+\index{add\-\_\-boundary@{add\-\_\-boundary}!one_d::advection_diffusion_element@{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element}}
+\subsubsection[{add\-\_\-boundary}]{\setlength{\rightskip}{0pt plus 5cm}void bases\-::element\-::add\-\_\-boundary (
+\begin{DoxyParamCaption}
+\item[{std\-::unique\-\_\-ptr$<$ {\bf plan} $>$}]{i\-\_\-plan}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [inherited]}}}\label{classbases_1_1element_a68f28460bb9cf500fb404f2591be6a65}
+
+
+Adds a boundary condition to execute in normal space. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-plan} & A unique pointer to the plan to add \\
+\hline
+\end{DoxyParams}
+\hypertarget{classbases_1_1element_ae06b8652e590e92cd4e00b25cdc6e093}{\index{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element@{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element}!add\-\_\-explicit\-\_\-grid\-\_\-plan@{add\-\_\-explicit\-\_\-grid\-\_\-plan}}
+\index{add\-\_\-explicit\-\_\-grid\-\_\-plan@{add\-\_\-explicit\-\_\-grid\-\_\-plan}!one_d::advection_diffusion_element@{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element}}
+\subsubsection[{add\-\_\-explicit\-\_\-grid\-\_\-plan}]{\setlength{\rightskip}{0pt plus 5cm}void bases\-::element\-::add\-\_\-explicit\-\_\-grid\-\_\-plan (
+\begin{DoxyParamCaption}
+\item[{std\-::unique\-\_\-ptr$<$ {\bf plan} $>$}]{i\-\_\-plan}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [inherited]}}}\label{classbases_1_1element_ae06b8652e590e92cd4e00b25cdc6e093}
+
+
+Adds an explicit plan to be evaluated in grid space. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-plan} & A unique pointer to the plan to add \\
+\hline
+\end{DoxyParams}
+\hypertarget{classbases_1_1element_af88394210714fd50d3559dc7b243725d}{\index{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element@{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element}!add\-\_\-explicit\-\_\-space\-\_\-plan@{add\-\_\-explicit\-\_\-space\-\_\-plan}}
+\index{add\-\_\-explicit\-\_\-space\-\_\-plan@{add\-\_\-explicit\-\_\-space\-\_\-plan}!one_d::advection_diffusion_element@{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element}}
+\subsubsection[{add\-\_\-explicit\-\_\-space\-\_\-plan}]{\setlength{\rightskip}{0pt plus 5cm}void bases\-::element\-::add\-\_\-explicit\-\_\-space\-\_\-plan (
+\begin{DoxyParamCaption}
+\item[{std\-::unique\-\_\-ptr$<$ {\bf plan} $>$}]{i\-\_\-plan}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [inherited]}}}\label{classbases_1_1element_af88394210714fd50d3559dc7b243725d}
+
+
+Adds an explicit plan to be evaluated in normal space. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-plan} & A unique pointer to the plan to add \\
+\hline
+\end{DoxyParams}
+\hypertarget{classbases_1_1element_a72495325294ba811587336132c3a6b9f}{\index{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element@{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element}!add\-\_\-implicit\-\_\-plan@{add\-\_\-implicit\-\_\-plan}}
+\index{add\-\_\-implicit\-\_\-plan@{add\-\_\-implicit\-\_\-plan}!one_d::advection_diffusion_element@{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element}}
+\subsubsection[{add\-\_\-implicit\-\_\-plan}]{\setlength{\rightskip}{0pt plus 5cm}void bases\-::element\-::add\-\_\-implicit\-\_\-plan (
+\begin{DoxyParamCaption}
+\item[{std\-::unique\-\_\-ptr$<$ {\bf plan} $>$}]{i\-\_\-plan}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [inherited]}}}\label{classbases_1_1element_a72495325294ba811587336132c3a6b9f}
+
+
+Adds an implicit plan to be evaluated. 
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-plan} & A unique pointer to the plan to add \\
+\hline
+\end{DoxyParams}
+\hypertarget{classone__d_1_1element_af02a8e438b872fbf87893a41bee23098}{\index{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element@{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element}!add\-\_\-scalar@{add\-\_\-scalar}}
+\index{add\-\_\-scalar@{add\-\_\-scalar}!one_d::advection_diffusion_element@{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element}}
+\subsubsection[{add\-\_\-scalar}]{\setlength{\rightskip}{0pt plus 5cm}void one\-\_\-d\-::element\-::add\-\_\-scalar (
+\begin{DoxyParamCaption}
+\item[{int}]{name}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}, {\ttfamily [inherited]}}}\label{classone__d_1_1element_af02a8e438b872fbf87893a41bee23098}
+
+
+Add a scalar to the element. 
+
+
+
+ 
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em name} & The integer name from the index enumeration \\
+\hline
+\end{DoxyParams}
+
+
+Implements \hyperlink{classbases_1_1element_aa7e70a91d43230b52ed5e76f641c372c}{bases\-::element}.
+
+\hypertarget{classbases_1_1element_a11b38922e9235387cc7454cdbf574083}{\index{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element@{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element}!calculate@{calculate}}
+\index{calculate@{calculate}!one_d::advection_diffusion_element@{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element}}
+\subsubsection[{calculate}]{\setlength{\rightskip}{0pt plus 5cm}void bases\-::element\-::calculate (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}, {\ttfamily [inherited]}}}\label{classbases_1_1element_a11b38922e9235387cc7454cdbf574083}
+
+
+Calculate the matrix terms to be used in update. 
+
+
+
+ \hypertarget{classbases_1_1element_a326fa42addabf81c0f283b41050c0a88}{\index{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element@{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element}!execute\-\_\-boundaries@{execute\-\_\-boundaries}}
+\index{execute\-\_\-boundaries@{execute\-\_\-boundaries}!one_d::advection_diffusion_element@{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element}}
+\subsubsection[{execute\-\_\-boundaries}]{\setlength{\rightskip}{0pt plus 5cm}void bases\-::element\-::execute\-\_\-boundaries (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}, {\ttfamily [inherited]}}}\label{classbases_1_1element_a326fa42addabf81c0f283b41050c0a88}
+
+
+Execute the boundary conditions. 
+
+
+
+ \hypertarget{classbases_1_1element_a5a28329097f10e5969d9fc1df8c4f3c0}{\index{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element@{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element}!update@{update}}
+\index{update@{update}!one_d::advection_diffusion_element@{one\-\_\-d\-::advection\-\_\-diffusion\-\_\-element}}
+\subsubsection[{update}]{\setlength{\rightskip}{0pt plus 5cm}void bases\-::element\-::update (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}, {\ttfamily [inherited]}}}\label{classbases_1_1element_a5a28329097f10e5969d9fc1df8c4f3c0}
+
+
+Update the element. 
+
+
+
+ 
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/one\-\_\-d/\hyperlink{one__d_2element_8hpp}{element.\-hpp}\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/one\-\_\-d/\hyperlink{one__d_2element_8cpp}{element.\-cpp}\end{DoxyCompactItemize}

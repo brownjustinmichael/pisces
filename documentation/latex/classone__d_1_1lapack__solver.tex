@@ -1,0 +1,191 @@
+\hypertarget{classone__d_1_1lapack__solver}{\section{one\-\_\-d\-:\-:lapack\-\_\-solver Class Reference}
+\label{classone__d_1_1lapack__solver}\index{one\-\_\-d\-::lapack\-\_\-solver@{one\-\_\-d\-::lapack\-\_\-solver}}
+}
+
+
+A class designed to solve a matrix equation.  
+
+
+
+
+{\ttfamily \#include $<$solver.\-hpp$>$}
+
+Inheritance diagram for one\-\_\-d\-:\-:lapack\-\_\-solver\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classone__d_1_1lapack__solver}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classone__d_1_1lapack__solver_a90054189d5a8d6d6c83471d82fffe5b2}{lapack\-\_\-solver} (int i\-\_\-n, double $\ast$i\-\_\-data\-\_\-in, double $\ast$i\-\_\-rhs, double $\ast$i\-\_\-matrix, double $\ast$i\-\_\-data\-\_\-out, int $\ast$i\-\_\-flags\-\_\-ptr=N\-U\-L\-L)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+void \hyperlink{classone__d_1_1lapack__solver_ac3a24df2dbfc5ce2ff26227c501b3e50}{i\-\_\-factorize} ()
+\begin{DoxyCompactList}\small\item\em The implementation for factorizing the matrix equation. \end{DoxyCompactList}\item 
+void \hyperlink{classone__d_1_1lapack__solver_a1e6baae0ecf3ff09f035b2da62aa011a}{i\-\_\-solve} ()
+\begin{DoxyCompactList}\small\item\em The implementation for solving a factorized matrix equation. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classbases_1_1solver_ac33752732436d880f3b44a6c3661efc6}{solve} ()
+\begin{DoxyCompactList}\small\item\em Solve the matrix equation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static std\-::unique\-\_\-ptr$<$ \hyperlink{classbases_1_1solver_a02f41eb5f26a8413ef214c14eab623d4}{solver} $>$ \hyperlink{classone__d_1_1lapack__solver_a92c6f92c65a24ec6d7686acf2869041c}{make\-\_\-unique} (int i\-\_\-n, double $\ast$i\-\_\-data\-\_\-in, double $\ast$i\-\_\-rhs, double $\ast$i\-\_\-matrix, double $\ast$i\-\_\-data\-\_\-out, int $\ast$i\-\_\-flags\-\_\-ptr=N\-U\-L\-L)
+\begin{DoxyCompactList}\small\item\em Make a unique pointer to a new \hyperlink{classone__d_1_1lapack__solver}{lapack\-\_\-solver} object. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classbases_1_1solver_a3f127eb3297cd2ee2ba15452a18c6331}{int $\ast$ \hyperlink{classbases_1_1solver_a3f127eb3297cd2ee2ba15452a18c6331}{flags\-\_\-ptr}}\label{classbases_1_1solver_a3f127eb3297cd2ee2ba15452a18c6331}
+
+\begin{DoxyCompactList}\small\item\em A pointer to the integer execution flags. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1solver_a612d48bf6f15d6eccb6fdad64cd0e62d}{int \hyperlink{classbases_1_1solver_a612d48bf6f15d6eccb6fdad64cd0e62d}{default\-\_\-flags}}\label{classbases_1_1solver_a612d48bf6f15d6eccb6fdad64cd0e62d}
+
+\begin{DoxyCompactList}\small\item\em Default flags to use if i\-\_\-flags\-\_\-ptr is N\-U\-L\-L. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A class designed to solve a matrix equation. 
+
+
+
+ A L\-A\-P\-A\-C\-K implementation of a matrix solver 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classone__d_1_1lapack__solver_a90054189d5a8d6d6c83471d82fffe5b2}{\index{one\-\_\-d\-::lapack\-\_\-solver@{one\-\_\-d\-::lapack\-\_\-solver}!lapack\-\_\-solver@{lapack\-\_\-solver}}
+\index{lapack\-\_\-solver@{lapack\-\_\-solver}!one_d::lapack_solver@{one\-\_\-d\-::lapack\-\_\-solver}}
+\subsubsection[{lapack\-\_\-solver}]{\setlength{\rightskip}{0pt plus 5cm}one\-\_\-d\-::lapack\-\_\-solver\-::lapack\-\_\-solver (
+\begin{DoxyParamCaption}
+\item[{int}]{i\-\_\-n, }
+\item[{double $\ast$}]{i\-\_\-data\-\_\-in, }
+\item[{double $\ast$}]{i\-\_\-rhs, }
+\item[{double $\ast$}]{i\-\_\-matrix, }
+\item[{double $\ast$}]{i\-\_\-data\-\_\-out, }
+\item[{int $\ast$}]{i\-\_\-flags\-\_\-ptr = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{classone__d_1_1lapack__solver_a90054189d5a8d6d6c83471d82fffe5b2}
+
+
+
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-n} & The integer number of elements in the data \\
+\hline
+{\em i\-\_\-data\-\_\-in} & The double array of input \\
+\hline
+{\em i\-\_\-rhs} & The double array of the right-\/hand-\/side of the matrix equation \\
+\hline
+{\em i\-\_\-matrix} & The double matrix to be factorized \\
+\hline
+{\em i\-\_\-data\-\_\-out} & The double array of output \\
+\hline
+\end{DoxyParams}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-flags\-\_\-ptr} & A pointer to the integer execution flags \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classone__d_1_1lapack__solver_ac3a24df2dbfc5ce2ff26227c501b3e50}{\index{one\-\_\-d\-::lapack\-\_\-solver@{one\-\_\-d\-::lapack\-\_\-solver}!i\-\_\-factorize@{i\-\_\-factorize}}
+\index{i\-\_\-factorize@{i\-\_\-factorize}!one_d::lapack_solver@{one\-\_\-d\-::lapack\-\_\-solver}}
+\subsubsection[{i\-\_\-factorize}]{\setlength{\rightskip}{0pt plus 5cm}void one\-\_\-d\-::lapack\-\_\-solver\-::i\-\_\-factorize (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classone__d_1_1lapack__solver_ac3a24df2dbfc5ce2ff26227c501b3e50}
+
+
+The implementation for factorizing the matrix equation. 
+
+
+
+ 
+
+ 
+
+Implements \hyperlink{classbases_1_1solver_ad2343a4f9a4c243f7089c177f38509f6}{bases\-::solver}.
+
+\hypertarget{classone__d_1_1lapack__solver_a1e6baae0ecf3ff09f035b2da62aa011a}{\index{one\-\_\-d\-::lapack\-\_\-solver@{one\-\_\-d\-::lapack\-\_\-solver}!i\-\_\-solve@{i\-\_\-solve}}
+\index{i\-\_\-solve@{i\-\_\-solve}!one_d::lapack_solver@{one\-\_\-d\-::lapack\-\_\-solver}}
+\subsubsection[{i\-\_\-solve}]{\setlength{\rightskip}{0pt plus 5cm}void one\-\_\-d\-::lapack\-\_\-solver\-::i\-\_\-solve (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classone__d_1_1lapack__solver_a1e6baae0ecf3ff09f035b2da62aa011a}
+
+
+The implementation for solving a factorized matrix equation. 
+
+
+
+ 
+
+ 
+
+Implements \hyperlink{classbases_1_1solver_a4432b97ae2eb2efeff6a5dff14c4936e}{bases\-::solver}.
+
+\hypertarget{classone__d_1_1lapack__solver_a92c6f92c65a24ec6d7686acf2869041c}{\index{one\-\_\-d\-::lapack\-\_\-solver@{one\-\_\-d\-::lapack\-\_\-solver}!make\-\_\-unique@{make\-\_\-unique}}
+\index{make\-\_\-unique@{make\-\_\-unique}!one_d::lapack_solver@{one\-\_\-d\-::lapack\-\_\-solver}}
+\subsubsection[{make\-\_\-unique}]{\setlength{\rightskip}{0pt plus 5cm}static std\-::unique\-\_\-ptr$<${\bf solver}$>$ one\-\_\-d\-::lapack\-\_\-solver\-::make\-\_\-unique (
+\begin{DoxyParamCaption}
+\item[{int}]{i\-\_\-n, }
+\item[{double $\ast$}]{i\-\_\-data\-\_\-in, }
+\item[{double $\ast$}]{i\-\_\-rhs, }
+\item[{double $\ast$}]{i\-\_\-matrix, }
+\item[{double $\ast$}]{i\-\_\-data\-\_\-out, }
+\item[{int $\ast$}]{i\-\_\-flags\-\_\-ptr = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{classone__d_1_1lapack__solver_a92c6f92c65a24ec6d7686acf2869041c}
+
+
+Make a unique pointer to a new \hyperlink{classone__d_1_1lapack__solver}{lapack\-\_\-solver} object. 
+
+
+
+ 
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-n} & The integer number of elements in the data \\
+\hline
+{\em i\-\_\-data\-\_\-in} & The double array of input \\
+\hline
+{\em i\-\_\-rhs} & The double array of the right-\/hand-\/side of the matrix equation \\
+\hline
+{\em i\-\_\-matrix} & The double matrix to be factorized \\
+\hline
+{\em i\-\_\-data\-\_\-out} & The double array of output \\
+\hline
+\end{DoxyParams}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-flags\-\_\-ptr} & A pointer to the integer execution flags \\
+\hline
+\end{DoxyParams}
+\hypertarget{classbases_1_1solver_ac33752732436d880f3b44a6c3661efc6}{\index{one\-\_\-d\-::lapack\-\_\-solver@{one\-\_\-d\-::lapack\-\_\-solver}!solve@{solve}}
+\index{solve@{solve}!one_d::lapack_solver@{one\-\_\-d\-::lapack\-\_\-solver}}
+\subsubsection[{solve}]{\setlength{\rightskip}{0pt plus 5cm}virtual void bases\-::solver\-::solve (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}, {\ttfamily [inherited]}}}\label{classbases_1_1solver_ac33752732436d880f3b44a6c3661efc6}
+
+
+Solve the matrix equation. 
+
+
+
+ 
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/one\-\_\-d/\hyperlink{one__d_2solver_8hpp}{solver.\-hpp}\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/one\-\_\-d/\hyperlink{solver_8cpp}{solver.\-cpp}\end{DoxyCompactItemize}

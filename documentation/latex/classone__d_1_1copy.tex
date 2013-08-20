@@ -1,0 +1,157 @@
+\hypertarget{classone__d_1_1copy}{\section{one\-\_\-d\-:\-:copy Class Reference}
+\label{classone__d_1_1copy}\index{one\-\_\-d\-::copy@{one\-\_\-d\-::copy}}
+}
+
+
+A plan that copies one array into another.  
+
+
+
+
+{\ttfamily \#include $<$lapack.\-hpp$>$}
+
+Inheritance diagram for one\-\_\-d\-:\-:copy\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classone__d_1_1copy}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classone__d_1_1copy_aa6fb1d819967a3e95a8b7ebde4212261}{copy} (int i\-\_\-n, double $\ast$i\-\_\-data\-\_\-in, double $\ast$i\-\_\-data\-\_\-out, int $\ast$i\-\_\-flags\-\_\-ptr=N\-U\-L\-L)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual void \hyperlink{classone__d_1_1copy_a89443bd9de8cc907a1d9a9334aeb9f35}{execute} ()
+\begin{DoxyCompactList}\small\item\em Operate the plan on the data arrays contained in the class. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static std\-::unique\-\_\-ptr$<$ \hyperlink{classbases_1_1plan_a7b4ddc2f876b9e4dcf899feb20ae369f}{plan} $>$ \hyperlink{classone__d_1_1copy_a0519713b55f644a402b38557d71970a5}{make\-\_\-unique} (int i\-\_\-n, double $\ast$i\-\_\-data\-\_\-in, double $\ast$i\-\_\-data\-\_\-out, int $\ast$i\-\_\-flags\-\_\-ptr=N\-U\-L\-L)
+\begin{DoxyCompactList}\small\item\em Make a unique pointer to a new copy object. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classbases_1_1explicit__plan_a6acccce0b2ef4489b411a264cab019c9}{int \hyperlink{classbases_1_1explicit__plan_a6acccce0b2ef4489b411a264cab019c9}{n}}\label{classbases_1_1explicit__plan_a6acccce0b2ef4489b411a264cab019c9}
+
+\begin{DoxyCompactList}\small\item\em An integer number of data elements (grid points) that collocation\-\_\-1\-D will be built to handle. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1explicit__plan_a8faf976ec6c01951dd6d5e7421630184}{double $\ast$ \hyperlink{classbases_1_1explicit__plan_a8faf976ec6c01951dd6d5e7421630184}{data\-\_\-in}}\label{classbases_1_1explicit__plan_a8faf976ec6c01951dd6d5e7421630184}
+
+\begin{DoxyCompactList}\small\item\em A double pointer to the input data. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1explicit__plan_a55946d0b4b1a19da12469447de247b82}{double $\ast$ \hyperlink{classbases_1_1explicit__plan_a55946d0b4b1a19da12469447de247b82}{data\-\_\-out}}\label{classbases_1_1explicit__plan_a55946d0b4b1a19da12469447de247b82}
+
+\begin{DoxyCompactList}\small\item\em A double pointer to the output data; if data\-\_\-in == data\-\_\-out, the operation is done in place (but inefficient) \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1plan_a756595e230cc99e84de4392ac691eefd}{int \hyperlink{classbases_1_1plan_a756595e230cc99e84de4392ac691eefd}{default\-\_\-flags}}\label{classbases_1_1plan_a756595e230cc99e84de4392ac691eefd}
+
+\begin{DoxyCompactList}\small\item\em An integer set of default flags to use in case the user does not specify any flags. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1plan_a4f423a3831579d895a0658164bb82b8c}{int $\ast$ \hyperlink{classbases_1_1plan_a4f423a3831579d895a0658164bb82b8c}{flags\-\_\-ptr}}\label{classbases_1_1plan_a4f423a3831579d895a0658164bb82b8c}
+
+\begin{DoxyCompactList}\small\item\em A pointer to the integer execution flags. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A plan that copies one array into another. 
+
+
+
+ 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classone__d_1_1copy_aa6fb1d819967a3e95a8b7ebde4212261}{\index{one\-\_\-d\-::copy@{one\-\_\-d\-::copy}!copy@{copy}}
+\index{copy@{copy}!one_d::copy@{one\-\_\-d\-::copy}}
+\subsubsection[{copy}]{\setlength{\rightskip}{0pt plus 5cm}one\-\_\-d\-::copy\-::copy (
+\begin{DoxyParamCaption}
+\item[{int}]{i\-\_\-n, }
+\item[{double $\ast$}]{i\-\_\-data\-\_\-in, }
+\item[{double $\ast$}]{i\-\_\-data\-\_\-out, }
+\item[{int $\ast$}]{i\-\_\-flags\-\_\-ptr = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{classone__d_1_1copy_aa6fb1d819967a3e95a8b7ebde4212261}
+
+
+
+
+
+
+ 
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-n} & The integer number of elements in the data \\
+\hline
+{\em i\-\_\-data\-\_\-in} & The double vector of input \\
+\hline
+{\em i\-\_\-data\-\_\-out} & The double vector of output \\
+\hline
+\end{DoxyParams}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-flags\-\_\-ptr} & A pointer to the integer execution flags \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classone__d_1_1copy_a89443bd9de8cc907a1d9a9334aeb9f35}{\index{one\-\_\-d\-::copy@{one\-\_\-d\-::copy}!execute@{execute}}
+\index{execute@{execute}!one_d::copy@{one\-\_\-d\-::copy}}
+\subsubsection[{execute}]{\setlength{\rightskip}{0pt plus 5cm}virtual void one\-\_\-d\-::copy\-::execute (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}}\label{classone__d_1_1copy_a89443bd9de8cc907a1d9a9334aeb9f35}
+
+
+Operate the plan on the data arrays contained in the class. 
+
+
+
+ 
+
+ 
+
+ The plan class serves as a wrapper for this function. 
+
+Implements \hyperlink{classbases_1_1explicit__plan_abe58a9c4d3b0bb692e1cdf1506ac6281}{bases\-::explicit\-\_\-plan}.
+
+\hypertarget{classone__d_1_1copy_a0519713b55f644a402b38557d71970a5}{\index{one\-\_\-d\-::copy@{one\-\_\-d\-::copy}!make\-\_\-unique@{make\-\_\-unique}}
+\index{make\-\_\-unique@{make\-\_\-unique}!one_d::copy@{one\-\_\-d\-::copy}}
+\subsubsection[{make\-\_\-unique}]{\setlength{\rightskip}{0pt plus 5cm}static std\-::unique\-\_\-ptr$<${\bf plan}$>$ one\-\_\-d\-::copy\-::make\-\_\-unique (
+\begin{DoxyParamCaption}
+\item[{int}]{i\-\_\-n, }
+\item[{double $\ast$}]{i\-\_\-data\-\_\-in, }
+\item[{double $\ast$}]{i\-\_\-data\-\_\-out, }
+\item[{int $\ast$}]{i\-\_\-flags\-\_\-ptr = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{classone__d_1_1copy_a0519713b55f644a402b38557d71970a5}
+
+
+Make a unique pointer to a new copy object. 
+
+
+
+ 
+
+ 
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-n} & The integer number of elements in the data \\
+\hline
+{\em i\-\_\-data\-\_\-in} & The double vector of input \\
+\hline
+{\em i\-\_\-data\-\_\-out} & The double vector of output \\
+\hline
+\end{DoxyParams}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-flags\-\_\-ptr} & A pointer to the integer execution flags \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/one\-\_\-d/\hyperlink{lapack_8hpp}{lapack.\-hpp}\end{DoxyCompactItemize}

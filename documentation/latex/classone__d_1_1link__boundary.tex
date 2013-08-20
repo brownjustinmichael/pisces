@@ -1,0 +1,207 @@
+\hypertarget{classone__d_1_1link__boundary}{\section{one\-\_\-d\-:\-:link\-\_\-boundary Class Reference}
+\label{classone__d_1_1link__boundary}\index{one\-\_\-d\-::link\-\_\-boundary@{one\-\_\-d\-::link\-\_\-boundary}}
+}
+
+
+An abstract plan class to handle 1\-D boundary conditions.  
+
+
+
+
+{\ttfamily \#include $<$boundary\-\_\-one\-\_\-d.\-hpp$>$}
+
+Inheritance diagram for one\-\_\-d\-:\-:link\-\_\-boundary\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{classone__d_1_1link__boundary}
+\end{center}
+\end{figure}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classone__d_1_1link__boundary_aac2a6d1e68fc6b0bf95a5e1055db1f8c}{typedef std\-::map$<$ int, \\*
+std\-::vector$<$ double $>$ $>$ {\bfseries buffer}}\label{classone__d_1_1link__boundary_aac2a6d1e68fc6b0bf95a5e1055db1f8c}
+
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classone__d_1_1link__boundary_a545f99303111cd43c474e0fb8753cfe4}{link\-\_\-boundary} (int i\-\_\-n, int i\-\_\-edge, int i\-\_\-ext\-\_\-send, int i\-\_\-ext\-\_\-recv, int i\-\_\-process)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual void \hyperlink{classone__d_1_1link__boundary_a3c8652f7b39208dc58f34804a523cc36}{associate} (\hyperlink{classbases_1_1element}{bases\-::element} $\ast$\hyperlink{classbases_1_1plan_a54cd8904b8d499e5fc01c8060021d47b}{element\-\_\-ptr})
+\begin{DoxyCompactList}\small\item\em Associate the plan with the element that contains it. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classone__d_1_1link__boundary_af16859eb2f5ce2d623456644fc21e91f}{send} ()
+\begin{DoxyCompactList}\small\item\em Send the boundary information to the linked processor. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classone__d_1_1link__boundary_a6ad7e21758061ec53348b66d0143437b}{recv} ()
+\begin{DoxyCompactList}\small\item\em Receive the boundary information from the linked processor. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classone__d_1_1link__boundary_a839303f3eb1a7c5fe204d3020eadaebb}{execute} ()
+\begin{DoxyCompactList}\small\item\em Operate the plan on the data arrays contained in the class. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classone__d_1_1link__boundary_a942871611e7e2df2dd53d78316dd07da}{int \hyperlink{classone__d_1_1link__boundary_a942871611e7e2df2dd53d78316dd07da}{n}}\label{classone__d_1_1link__boundary_a942871611e7e2df2dd53d78316dd07da}
+
+\begin{DoxyCompactList}\small\item\em The integer width of the boundary. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1link__boundary_ae13b8e7a3ad6ff7cdd3afba5a8b88a66}{int \hyperlink{classone__d_1_1link__boundary_ae13b8e7a3ad6ff7cdd3afba5a8b88a66}{ext\-\_\-send}}\label{classone__d_1_1link__boundary_ae13b8e7a3ad6ff7cdd3afba5a8b88a66}
+
+\begin{DoxyCompactList}\small\item\em The integer send tag. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1link__boundary_a931a7862ab3af0dee5c400d9798bbcba}{int \hyperlink{classone__d_1_1link__boundary_a931a7862ab3af0dee5c400d9798bbcba}{ext\-\_\-recv}}\label{classone__d_1_1link__boundary_a931a7862ab3af0dee5c400d9798bbcba}
+
+\begin{DoxyCompactList}\small\item\em The integer recv tag. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1link__boundary_a05e6721eb5c42298bbc61dc1f67887c4}{std\-::vector$<$ double $>$ \hyperlink{classone__d_1_1link__boundary_a05e6721eb5c42298bbc61dc1f67887c4}{to\-\_\-send}}\label{classone__d_1_1link__boundary_a05e6721eb5c42298bbc61dc1f67887c4}
+
+\begin{DoxyCompactList}\small\item\em The serialized vector containing the data to send. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1link__boundary_a482444b130bdc86937ab75efafa12e21}{std\-::vector$<$ double $>$ \hyperlink{classone__d_1_1link__boundary_a482444b130bdc86937ab75efafa12e21}{to\-\_\-recv}}\label{classone__d_1_1link__boundary_a482444b130bdc86937ab75efafa12e21}
+
+\begin{DoxyCompactList}\small\item\em The serialized vector to contain the received data. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1link__boundary_ad078cb1c9c97960e563d2eca686304ca}{buffer \hyperlink{classone__d_1_1link__boundary_ad078cb1c9c97960e563d2eca686304ca}{send\-\_\-buffer}}\label{classone__d_1_1link__boundary_ad078cb1c9c97960e563d2eca686304ca}
+
+\begin{DoxyCompactList}\small\item\em The buffer that contains the data to send. \end{DoxyCompactList}\item 
+\hypertarget{classone__d_1_1link__boundary_a2789e5216b3751a4a51b2f1adc5ea1e6}{buffer \hyperlink{classone__d_1_1link__boundary_a2789e5216b3751a4a51b2f1adc5ea1e6}{recv\-\_\-buffer}}\label{classone__d_1_1link__boundary_a2789e5216b3751a4a51b2f1adc5ea1e6}
+
+\begin{DoxyCompactList}\small\item\em The buffer that contains the received data. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+An abstract plan class to handle 1\-D boundary conditions. 
+
+
+
+ This class implements boundary conditions in 1\-D with Open\-M\-P\-I 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classone__d_1_1link__boundary_a545f99303111cd43c474e0fb8753cfe4}{\index{one\-\_\-d\-::link\-\_\-boundary@{one\-\_\-d\-::link\-\_\-boundary}!link\-\_\-boundary@{link\-\_\-boundary}}
+\index{link\-\_\-boundary@{link\-\_\-boundary}!one_d::link_boundary@{one\-\_\-d\-::link\-\_\-boundary}}
+\subsubsection[{link\-\_\-boundary}]{\setlength{\rightskip}{0pt plus 5cm}one\-\_\-d\-::link\-\_\-boundary\-::link\-\_\-boundary (
+\begin{DoxyParamCaption}
+\item[{int}]{i\-\_\-n, }
+\item[{int}]{i\-\_\-edge, }
+\item[{int}]{i\-\_\-ext\-\_\-send, }
+\item[{int}]{i\-\_\-ext\-\_\-recv, }
+\item[{int}]{i\-\_\-process}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{classone__d_1_1link__boundary_a545f99303111cd43c474e0fb8753cfe4}
+
+
+
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-n} & The integer width of the boundary \\
+\hline
+{\em i\-\_\-ext\-\_\-send} & The integer send tag \\
+\hline
+{\em i\-\_\-ext\-\_\-recv} & The integer recv tag \\
+\hline
+\end{DoxyParams}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-edge} & An integer flag that specifies which boundary flag to use \\
+\hline
+{\em i\-\_\-process} & The integer process id destination for send and recv \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classone__d_1_1link__boundary_a3c8652f7b39208dc58f34804a523cc36}{\index{one\-\_\-d\-::link\-\_\-boundary@{one\-\_\-d\-::link\-\_\-boundary}!associate@{associate}}
+\index{associate@{associate}!one_d::link_boundary@{one\-\_\-d\-::link\-\_\-boundary}}
+\subsubsection[{associate}]{\setlength{\rightskip}{0pt plus 5cm}virtual void one\-\_\-d\-::link\-\_\-boundary\-::associate (
+\begin{DoxyParamCaption}
+\item[{{\bf bases\-::element} $\ast$}]{element\-\_\-ptr}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}}\label{classone__d_1_1link__boundary_a3c8652f7b39208dc58f34804a523cc36}
+
+
+Associate the plan with the element that contains it. 
+
+
+
+ 
+
+ 
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-element\-\_\-ptr} & A pointer to an element \\
+\hline
+\end{DoxyParams}
+
+
+Reimplemented from \hyperlink{classbases_1_1boundary_a54ba54d2bb10f841d69c219af3b0fdc0}{bases\-::boundary}.
+
+
+
+Reimplemented in \hyperlink{classone__d_1_1diffusive__boundary_ae8b851282284945b7e6e9373a0edb4a3}{one\-\_\-d\-::diffusive\-\_\-boundary}.
+
+\hypertarget{classone__d_1_1link__boundary_a839303f3eb1a7c5fe204d3020eadaebb}{\index{one\-\_\-d\-::link\-\_\-boundary@{one\-\_\-d\-::link\-\_\-boundary}!execute@{execute}}
+\index{execute@{execute}!one_d::link_boundary@{one\-\_\-d\-::link\-\_\-boundary}}
+\subsubsection[{execute}]{\setlength{\rightskip}{0pt plus 5cm}virtual void one\-\_\-d\-::link\-\_\-boundary\-::execute (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}}\label{classone__d_1_1link__boundary_a839303f3eb1a7c5fe204d3020eadaebb}
+
+
+Operate the plan on the data arrays contained in the class. 
+
+
+
+ 
+
+ The plan class serves as a wrapper for this function. 
+
+Reimplemented from \hyperlink{classbases_1_1plan_a85d7e7f7a04ac8213ea57bde32db34c2}{bases\-::plan}.
+
+
+
+Reimplemented in \hyperlink{classone__d_1_1diffusive__boundary_a2a841c3e9b57d10fc28d41e325b8452c}{one\-\_\-d\-::diffusive\-\_\-boundary}.
+
+\hypertarget{classone__d_1_1link__boundary_a6ad7e21758061ec53348b66d0143437b}{\index{one\-\_\-d\-::link\-\_\-boundary@{one\-\_\-d\-::link\-\_\-boundary}!recv@{recv}}
+\index{recv@{recv}!one_d::link_boundary@{one\-\_\-d\-::link\-\_\-boundary}}
+\subsubsection[{recv}]{\setlength{\rightskip}{0pt plus 5cm}void one\-\_\-d\-::link\-\_\-boundary\-::recv (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classone__d_1_1link__boundary_a6ad7e21758061ec53348b66d0143437b}
+
+
+Receive the boundary information from the linked processor. 
+
+
+
+ 
+
+ 
+
+Reimplemented from \hyperlink{classbases_1_1boundary_aa0983fe4b4ef2005720aec25a06eaff2}{bases\-::boundary}.
+
+\hypertarget{classone__d_1_1link__boundary_af16859eb2f5ce2d623456644fc21e91f}{\index{one\-\_\-d\-::link\-\_\-boundary@{one\-\_\-d\-::link\-\_\-boundary}!send@{send}}
+\index{send@{send}!one_d::link_boundary@{one\-\_\-d\-::link\-\_\-boundary}}
+\subsubsection[{send}]{\setlength{\rightskip}{0pt plus 5cm}void one\-\_\-d\-::link\-\_\-boundary\-::send (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classone__d_1_1link__boundary_af16859eb2f5ce2d623456644fc21e91f}
+
+
+Send the boundary information to the linked processor. 
+
+
+
+ 
+
+ 
+
+Reimplemented from \hyperlink{classbases_1_1boundary_a84c47f979eac14d45c8ff9c09cc170a8}{bases\-::boundary}.
+
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/one\-\_\-d/\hyperlink{boundary__one__d_8hpp}{boundary\-\_\-one\-\_\-d.\-hpp}\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/one\-\_\-d/\hyperlink{boundary__one__d_8cpp}{boundary\-\_\-one\-\_\-d.\-cpp}\end{DoxyCompactItemize}

@@ -1,0 +1,112 @@
+\hypertarget{classbases_1_1explicit__plan}{\section{bases\-:\-:explicit\-\_\-plan Class Reference}
+\label{classbases_1_1explicit__plan}\index{bases\-::explicit\-\_\-plan@{bases\-::explicit\-\_\-plan}}
+}
+
+
+A subclass of plan, specific to explicit methods.  
+
+
+
+
+{\ttfamily \#include $<$plan.\-hpp$>$}
+
+Inheritance diagram for bases\-:\-:explicit\-\_\-plan\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.008969cm]{classbases_1_1explicit__plan}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classbases_1_1explicit__plan_a4c4c1f48e79e10dd6f85610f5814ba7f}{explicit\-\_\-plan} (\hyperlink{classbases_1_1element}{element} $\ast$i\-\_\-element\-\_\-ptr, int i\-\_\-n, int i\-\_\-name\-\_\-in, int i\-\_\-name\-\_\-out=null, int flags=0x00)
+\begin{DoxyCompactList}\small\item\em \end{DoxyCompactList}\item 
+virtual void \hyperlink{classbases_1_1explicit__plan_a21bcba4d429590031bba41ee2a48a4ef}{execute} ()
+\begin{DoxyCompactList}\small\item\em Operate the plan on the data arrays contained in the class. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classbases_1_1explicit__plan_a6acccce0b2ef4489b411a264cab019c9}{int \hyperlink{classbases_1_1explicit__plan_a6acccce0b2ef4489b411a264cab019c9}{n}}\label{classbases_1_1explicit__plan_a6acccce0b2ef4489b411a264cab019c9}
+
+\begin{DoxyCompactList}\small\item\em An integer number of data elements (grid points) that collocation\-\_\-1\-D will be built to handle. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1explicit__plan_a8faf976ec6c01951dd6d5e7421630184}{double $\ast$ \hyperlink{classbases_1_1explicit__plan_a8faf976ec6c01951dd6d5e7421630184}{data\-\_\-in}}\label{classbases_1_1explicit__plan_a8faf976ec6c01951dd6d5e7421630184}
+
+\begin{DoxyCompactList}\small\item\em A double pointer to the input data. \end{DoxyCompactList}\item 
+\hypertarget{classbases_1_1explicit__plan_a55946d0b4b1a19da12469447de247b82}{double $\ast$ \hyperlink{classbases_1_1explicit__plan_a55946d0b4b1a19da12469447de247b82}{data\-\_\-out}}\label{classbases_1_1explicit__plan_a55946d0b4b1a19da12469447de247b82}
+
+\begin{DoxyCompactList}\small\item\em A double pointer to the output data. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A subclass of plan, specific to explicit methods. 
+
+
+
+ These plans take input and produce output. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classbases_1_1explicit__plan_a4c4c1f48e79e10dd6f85610f5814ba7f}{\index{bases\-::explicit\-\_\-plan@{bases\-::explicit\-\_\-plan}!explicit\-\_\-plan@{explicit\-\_\-plan}}
+\index{explicit\-\_\-plan@{explicit\-\_\-plan}!bases::explicit_plan@{bases\-::explicit\-\_\-plan}}
+\subsubsection[{explicit\-\_\-plan}]{\setlength{\rightskip}{0pt plus 5cm}bases\-::explicit\-\_\-plan\-::explicit\-\_\-plan (
+\begin{DoxyParamCaption}
+\item[{{\bf element} $\ast$}]{i\-\_\-element\-\_\-ptr, }
+\item[{int}]{i\-\_\-n, }
+\item[{int}]{i\-\_\-name\-\_\-in, }
+\item[{int}]{i\-\_\-name\-\_\-out = {\ttfamily null}, }
+\item[{int}]{flags = {\ttfamily 0x00}}
+\end{DoxyParamCaption}
+)}}\label{classbases_1_1explicit__plan_a4c4c1f48e79e10dd6f85610f5814ba7f}
+
+
+
+
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-n} & The integer number of elements in the data \\
+\hline
+{\em i\-\_\-name\-\_\-in} & The integer scalar index of the input \\
+\hline
+{\em i\-\_\-name\-\_\-out} & The integer scalar index of the output \\
+\hline
+\end{DoxyParams}
+
+
+ 
+\begin{DoxyParams}{Parameters}
+{\em i\-\_\-element\-\_\-ptr} & A pointer to the associated element \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classbases_1_1explicit__plan_a21bcba4d429590031bba41ee2a48a4ef}{\index{bases\-::explicit\-\_\-plan@{bases\-::explicit\-\_\-plan}!execute@{execute}}
+\index{execute@{execute}!bases::explicit_plan@{bases\-::explicit\-\_\-plan}}
+\subsubsection[{execute}]{\setlength{\rightskip}{0pt plus 5cm}void bases\-::explicit\-\_\-plan\-::execute (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}}\label{classbases_1_1explicit__plan_a21bcba4d429590031bba41ee2a48a4ef}
+
+
+Operate the plan on the data arrays contained in the class. 
+
+
+
+ 
+
+ The plan class serves as a wrapper for this function. 
+
+Reimplemented from \hyperlink{classbases_1_1plan_a85d7e7f7a04ac8213ea57bde32db34c2}{bases\-::plan}.
+
+
+
+Reimplemented in \hyperlink{classone__d_1_1solver_a7c28bd733cb3c3849afe1773974eb4f6}{one\-\_\-d\-::solver}, \hyperlink{classone__d_1_1chebyshev_1_1explicit__diffusion_a2a6de638d550ecd781c74d7ef35dd866}{one\-\_\-d\-::chebyshev\-::explicit\-\_\-diffusion}, \hyperlink{classone__d_1_1cuda_1_1fftw__cosine_a557fc154a9e6ffe9a8179667b66901dc}{one\-\_\-d\-::cuda\-::fftw\-\_\-cosine}, \hyperlink{classone__d_1_1fftw__cosine_aa8b0befe7b047feb004b2c41644a2fa4}{one\-\_\-d\-::fftw\-\_\-cosine}, \hyperlink{classbases_1_1solver_a8adf4c428bf4322a664c811073b491e1}{bases\-::solver}, and \hyperlink{classone__d_1_1advec_a1811538aec2a23cc27ef87fbce5dec8c}{one\-\_\-d\-::advec}.
+
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/bases/\hyperlink{plan_8hpp}{plan.\-hpp}\item 
+/\-Users/justinbrown/\-Dropbox/spectral\-\_\-element/src/bases/\hyperlink{plan_8cpp}{plan.\-cpp}\end{DoxyCompactItemize}
