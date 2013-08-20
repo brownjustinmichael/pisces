@@ -24,6 +24,7 @@
 
 namespace bases
 {	
+	template <class datatype>
 	/*!*******************************************************************
 	 * \brief This is the basic class of the code
 	 * 

@@ -1,0 +1,594 @@
+file /home/jumbrown/Dropbox/spectral_element/src/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+.sconf_temp/conftest_0.c <-
+  |
+  |
+  |
+  |int
+  |main() {
+  |  
+  |return 0;
+  |}
+  |
+gcc -o .sconf_temp/conftest_0.o -c -Wall -g -std=c++0x .sconf_temp/conftest_0.c
+cmdModule.c(166):ERROR:11: Usage is 'module command  [arguments ...] '
+
+  Modules Release 3.2.9 2011-11-24 (Copyright GNU GPL v2 1991):
+
+  Usage: module [ switches ] [ subcommand ] [subcommand-args ]
+
+Switches:
+	-H|--help		this usage info
+	-V|--version		modules version & configuration options
+	-f|--force		force active dependency resolution
+	-t|--terse		terse    format avail and list format
+	-l|--long		long     format avail and list format
+	-h|--human		readable format avail and list format
+	-v|--verbose		enable  verbose messages
+	-s|--silent		disable verbose messages
+	-c|--create		create caches for avail and apropos
+	-i|--icase		case insensitive
+	-u|--userlvl <lvl>	set user level to (nov[ice],exp[ert],adv[anced])
+  Available SubCommands and Args:
+	+ add|load		modulefile [modulefile ...]
+	+ rm|unload		modulefile [modulefile ...]
+	+ switch|swap		[modulefile1] modulefile2
+	+ display|show		modulefile [modulefile ...]
+	+ avail			[modulefile [modulefile ...]]
+	+ use [-a|--append]	dir [dir ...]
+	+ unuse			dir [dir ...]
+	+ update
+	+ refresh
+	+ purge
+	+ list
+	+ clear
+	+ help			[modulefile [modulefile ...]]
+	+ whatis		[modulefile [modulefile ...]]
+	+ apropos|keyword	string
+	+ initadd		modulefile [modulefile ...]
+	+ initprepend		modulefile [modulefile ...]
+	+ initrm		modulefile [modulefile ...]
+	+ initswitch		modulefile1 modulefile2
+	+ initlist
+	+ initclear
+
+cc1: warning: command line option "-std=c++0x" is valid for C++/ObjC++ but not for C
+gcc -o .sconf_temp/conftest_0 .sconf_temp/conftest_0.o -L/usr/local/cuda/lib64 -lcudart -llog4cxx
+cmdModule.c(166):ERROR:11: Usage is 'module command  [arguments ...] '
+
+  Modules Release 3.2.9 2011-11-24 (Copyright GNU GPL v2 1991):
+
+  Usage: module [ switches ] [ subcommand ] [subcommand-args ]
+
+Switches:
+	-H|--help		this usage info
+	-V|--version		modules version & configuration options
+	-f|--force		force active dependency resolution
+	-t|--terse		terse    format avail and list format
+	-l|--long		long     format avail and list format
+	-h|--human		readable format avail and list format
+	-v|--verbose		enable  verbose messages
+	-s|--silent		disable verbose messages
+	-c|--create		create caches for avail and apropos
+	-i|--icase		case insensitive
+	-u|--userlvl <lvl>	set user level to (nov[ice],exp[ert],adv[anced])
+  Available SubCommands and Args:
+	+ add|load		modulefile [modulefile ...]
+	+ rm|unload		modulefile [modulefile ...]
+	+ switch|swap		[modulefile1] modulefile2
+	+ display|show		modulefile [modulefile ...]
+	+ avail			[modulefile [modulefile ...]]
+	+ use [-a|--append]	dir [dir ...]
+	+ unuse			dir [dir ...]
+	+ update
+	+ refresh
+	+ purge
+	+ list
+	+ clear
+	+ help			[modulefile [modulefile ...]]
+	+ whatis		[modulefile [modulefile ...]]
+	+ apropos|keyword	string
+	+ initadd		modulefile [modulefile ...]
+	+ initprepend		modulefile [modulefile ...]
+	+ initrm		modulefile [modulefile ...]
+	+ initswitch		modulefile1 modulefile2
+	+ initlist
+	+ initclear
+
+scons: Configure: yes
+
+scons: Configure: Checking for C library pthread... 
+.sconf_temp/conftest_1.c <-
+  |
+  |
+  |
+  |int
+  |main() {
+  |  
+  |return 0;
+  |}
+  |
+gcc -o .sconf_temp/conftest_1.o -c -Wall -g -std=c++0x -D_LOG4CXX .sconf_temp/conftest_1.c
+cmdModule.c(166):ERROR:11: Usage is 'module command  [arguments ...] '
+
+  Modules Release 3.2.9 2011-11-24 (Copyright GNU GPL v2 1991):
+
+  Usage: module [ switches ] [ subcommand ] [subcommand-args ]
+
+Switches:
+	-H|--help		this usage info
+	-V|--version		modules version & configuration options
+	-f|--force		force active dependency resolution
+	-t|--terse		terse    format avail and list format
+	-l|--long		long     format avail and list format
+	-h|--human		readable format avail and list format
+	-v|--verbose		enable  verbose messages
+	-s|--silent		disable verbose messages
+	-c|--create		create caches for avail and apropos
+	-i|--icase		case insensitive
+	-u|--userlvl <lvl>	set user level to (nov[ice],exp[ert],adv[anced])
+  Available SubCommands and Args:
+	+ add|load		modulefile [modulefile ...]
+	+ rm|unload		modulefile [modulefile ...]
+	+ switch|swap		[modulefile1] modulefile2
+	+ display|show		modulefile [modulefile ...]
+	+ avail			[modulefile [modulefile ...]]
+	+ use [-a|--append]	dir [dir ...]
+	+ unuse			dir [dir ...]
+	+ update
+	+ refresh
+	+ purge
+	+ list
+	+ clear
+	+ help			[modulefile [modulefile ...]]
+	+ whatis		[modulefile [modulefile ...]]
+	+ apropos|keyword	string
+	+ initadd		modulefile [modulefile ...]
+	+ initprepend		modulefile [modulefile ...]
+	+ initrm		modulefile [modulefile ...]
+	+ initswitch		modulefile1 modulefile2
+	+ initlist
+	+ initclear
+
+cc1: warning: command line option "-std=c++0x" is valid for C++/ObjC++ but not for C
+gcc -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -L/usr/local/cuda/lib64 -lcudart -llog4cxx -lpthread
+cmdModule.c(166):ERROR:11: Usage is 'module command  [arguments ...] '
+
+  Modules Release 3.2.9 2011-11-24 (Copyright GNU GPL v2 1991):
+
+  Usage: module [ switches ] [ subcommand ] [subcommand-args ]
+
+Switches:
+	-H|--help		this usage info
+	-V|--version		modules version & configuration options
+	-f|--force		force active dependency resolution
+	-t|--terse		terse    format avail and list format
+	-l|--long		long     format avail and list format
+	-h|--human		readable format avail and list format
+	-v|--verbose		enable  verbose messages
+	-s|--silent		disable verbose messages
+	-c|--create		create caches for avail and apropos
+	-i|--icase		case insensitive
+	-u|--userlvl <lvl>	set user level to (nov[ice],exp[ert],adv[anced])
+  Available SubCommands and Args:
+	+ add|load		modulefile [modulefile ...]
+	+ rm|unload		modulefile [modulefile ...]
+	+ switch|swap		[modulefile1] modulefile2
+	+ display|show		modulefile [modulefile ...]
+	+ avail			[modulefile [modulefile ...]]
+	+ use [-a|--append]	dir [dir ...]
+	+ unuse			dir [dir ...]
+	+ update
+	+ refresh
+	+ purge
+	+ list
+	+ clear
+	+ help			[modulefile [modulefile ...]]
+	+ whatis		[modulefile [modulefile ...]]
+	+ apropos|keyword	string
+	+ initadd		modulefile [modulefile ...]
+	+ initprepend		modulefile [modulefile ...]
+	+ initrm		modulefile [modulefile ...]
+	+ initswitch		modulefile1 modulefile2
+	+ initlist
+	+ initclear
+
+scons: Configure: yes
+
+
+file /home/jumbrown/Dropbox/spectral_element/src/utils/SConscript,line 5:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library lapack... 
+.sconf_temp/conftest_2.c <-
+  |
+  |
+  |
+  |int
+  |main() {
+  |  
+  |return 0;
+  |}
+  |
+gcc -o .sconf_temp/conftest_2.o -c -Wall -g -std=c++0x -D_LOG4CXX .sconf_temp/conftest_2.c
+cmdModule.c(166):ERROR:11: Usage is 'module command  [arguments ...] '
+
+  Modules Release 3.2.9 2011-11-24 (Copyright GNU GPL v2 1991):
+
+  Usage: module [ switches ] [ subcommand ] [subcommand-args ]
+
+Switches:
+	-H|--help		this usage info
+	-V|--version		modules version & configuration options
+	-f|--force		force active dependency resolution
+	-t|--terse		terse    format avail and list format
+	-l|--long		long     format avail and list format
+	-h|--human		readable format avail and list format
+	-v|--verbose		enable  verbose messages
+	-s|--silent		disable verbose messages
+	-c|--create		create caches for avail and apropos
+	-i|--icase		case insensitive
+	-u|--userlvl <lvl>	set user level to (nov[ice],exp[ert],adv[anced])
+  Available SubCommands and Args:
+	+ add|load		modulefile [modulefile ...]
+	+ rm|unload		modulefile [modulefile ...]
+	+ switch|swap		[modulefile1] modulefile2
+	+ display|show		modulefile [modulefile ...]
+	+ avail			[modulefile [modulefile ...]]
+	+ use [-a|--append]	dir [dir ...]
+	+ unuse			dir [dir ...]
+	+ update
+	+ refresh
+	+ purge
+	+ list
+	+ clear
+	+ help			[modulefile [modulefile ...]]
+	+ whatis		[modulefile [modulefile ...]]
+	+ apropos|keyword	string
+	+ initadd		modulefile [modulefile ...]
+	+ initprepend		modulefile [modulefile ...]
+	+ initrm		modulefile [modulefile ...]
+	+ initswitch		modulefile1 modulefile2
+	+ initlist
+	+ initclear
+
+cc1: warning: command line option "-std=c++0x" is valid for C++/ObjC++ but not for C
+gcc -o .sconf_temp/conftest_2 .sconf_temp/conftest_2.o -L/usr/local/cuda/lib64 -lcudart -llog4cxx -lpthread -llapack
+cmdModule.c(166):ERROR:11: Usage is 'module command  [arguments ...] '
+
+  Modules Release 3.2.9 2011-11-24 (Copyright GNU GPL v2 1991):
+
+  Usage: module [ switches ] [ subcommand ] [subcommand-args ]
+
+Switches:
+	-H|--help		this usage info
+	-V|--version		modules version & configuration options
+	-f|--force		force active dependency resolution
+	-t|--terse		terse    format avail and list format
+	-l|--long		long     format avail and list format
+	-h|--human		readable format avail and list format
+	-v|--verbose		enable  verbose messages
+	-s|--silent		disable verbose messages
+	-c|--create		create caches for avail and apropos
+	-i|--icase		case insensitive
+	-u|--userlvl <lvl>	set user level to (nov[ice],exp[ert],adv[anced])
+  Available SubCommands and Args:
+	+ add|load		modulefile [modulefile ...]
+	+ rm|unload		modulefile [modulefile ...]
+	+ switch|swap		[modulefile1] modulefile2
+	+ display|show		modulefile [modulefile ...]
+	+ avail			[modulefile [modulefile ...]]
+	+ use [-a|--append]	dir [dir ...]
+	+ unuse			dir [dir ...]
+	+ update
+	+ refresh
+	+ purge
+	+ list
+	+ clear
+	+ help			[modulefile [modulefile ...]]
+	+ whatis		[modulefile [modulefile ...]]
+	+ apropos|keyword	string
+	+ initadd		modulefile [modulefile ...]
+	+ initprepend		modulefile [modulefile ...]
+	+ initrm		modulefile [modulefile ...]
+	+ initswitch		modulefile1 modulefile2
+	+ initlist
+	+ initclear
+
+scons: Configure: yes
+
+scons: Configure: Checking for C library blas... 
+.sconf_temp/conftest_3.c <-
+  |
+  |
+  |
+  |int
+  |main() {
+  |  
+  |return 0;
+  |}
+  |
+gcc -o .sconf_temp/conftest_3.o -c -Wall -g -std=c++0x -D_LOG4CXX .sconf_temp/conftest_3.c
+cmdModule.c(166):ERROR:11: Usage is 'module command  [arguments ...] '
+
+  Modules Release 3.2.9 2011-11-24 (Copyright GNU GPL v2 1991):
+
+  Usage: module [ switches ] [ subcommand ] [subcommand-args ]
+
+Switches:
+	-H|--help		this usage info
+	-V|--version		modules version & configuration options
+	-f|--force		force active dependency resolution
+	-t|--terse		terse    format avail and list format
+	-l|--long		long     format avail and list format
+	-h|--human		readable format avail and list format
+	-v|--verbose		enable  verbose messages
+	-s|--silent		disable verbose messages
+	-c|--create		create caches for avail and apropos
+	-i|--icase		case insensitive
+	-u|--userlvl <lvl>	set user level to (nov[ice],exp[ert],adv[anced])
+  Available SubCommands and Args:
+	+ add|load		modulefile [modulefile ...]
+	+ rm|unload		modulefile [modulefile ...]
+	+ switch|swap		[modulefile1] modulefile2
+	+ display|show		modulefile [modulefile ...]
+	+ avail			[modulefile [modulefile ...]]
+	+ use [-a|--append]	dir [dir ...]
+	+ unuse			dir [dir ...]
+	+ update
+	+ refresh
+	+ purge
+	+ list
+	+ clear
+	+ help			[modulefile [modulefile ...]]
+	+ whatis		[modulefile [modulefile ...]]
+	+ apropos|keyword	string
+	+ initadd		modulefile [modulefile ...]
+	+ initprepend		modulefile [modulefile ...]
+	+ initrm		modulefile [modulefile ...]
+	+ initswitch		modulefile1 modulefile2
+	+ initlist
+	+ initclear
+
+cc1: warning: command line option "-std=c++0x" is valid for C++/ObjC++ but not for C
+gcc -o .sconf_temp/conftest_3 .sconf_temp/conftest_3.o -L/usr/local/cuda/lib64 -lcudart -llog4cxx -lpthread -llapack -lblas
+cmdModule.c(166):ERROR:11: Usage is 'module command  [arguments ...] '
+
+  Modules Release 3.2.9 2011-11-24 (Copyright GNU GPL v2 1991):
+
+  Usage: module [ switches ] [ subcommand ] [subcommand-args ]
+
+Switches:
+	-H|--help		this usage info
+	-V|--version		modules version & configuration options
+	-f|--force		force active dependency resolution
+	-t|--terse		terse    format avail and list format
+	-l|--long		long     format avail and list format
+	-h|--human		readable format avail and list format
+	-v|--verbose		enable  verbose messages
+	-s|--silent		disable verbose messages
+	-c|--create		create caches for avail and apropos
+	-i|--icase		case insensitive
+	-u|--userlvl <lvl>	set user level to (nov[ice],exp[ert],adv[anced])
+  Available SubCommands and Args:
+	+ add|load		modulefile [modulefile ...]
+	+ rm|unload		modulefile [modulefile ...]
+	+ switch|swap		[modulefile1] modulefile2
+	+ display|show		modulefile [modulefile ...]
+	+ avail			[modulefile [modulefile ...]]
+	+ use [-a|--append]	dir [dir ...]
+	+ unuse			dir [dir ...]
+	+ update
+	+ refresh
+	+ purge
+	+ list
+	+ clear
+	+ help			[modulefile [modulefile ...]]
+	+ whatis		[modulefile [modulefile ...]]
+	+ apropos|keyword	string
+	+ initadd		modulefile [modulefile ...]
+	+ initprepend		modulefile [modulefile ...]
+	+ initrm		modulefile [modulefile ...]
+	+ initswitch		modulefile1 modulefile2
+	+ initlist
+	+ initclear
+
+scons: Configure: yes
+
+scons: Configure: Checking for C library atlas... 
+.sconf_temp/conftest_4.c <-
+  |
+  |
+  |
+  |int
+  |main() {
+  |  
+  |return 0;
+  |}
+  |
+gcc -o .sconf_temp/conftest_4.o -c -Wall -g -std=c++0x -D_LOG4CXX .sconf_temp/conftest_4.c
+cmdModule.c(166):ERROR:11: Usage is 'module command  [arguments ...] '
+
+  Modules Release 3.2.9 2011-11-24 (Copyright GNU GPL v2 1991):
+
+  Usage: module [ switches ] [ subcommand ] [subcommand-args ]
+
+Switches:
+	-H|--help		this usage info
+	-V|--version		modules version & configuration options
+	-f|--force		force active dependency resolution
+	-t|--terse		terse    format avail and list format
+	-l|--long		long     format avail and list format
+	-h|--human		readable format avail and list format
+	-v|--verbose		enable  verbose messages
+	-s|--silent		disable verbose messages
+	-c|--create		create caches for avail and apropos
+	-i|--icase		case insensitive
+	-u|--userlvl <lvl>	set user level to (nov[ice],exp[ert],adv[anced])
+  Available SubCommands and Args:
+	+ add|load		modulefile [modulefile ...]
+	+ rm|unload		modulefile [modulefile ...]
+	+ switch|swap		[modulefile1] modulefile2
+	+ display|show		modulefile [modulefile ...]
+	+ avail			[modulefile [modulefile ...]]
+	+ use [-a|--append]	dir [dir ...]
+	+ unuse			dir [dir ...]
+	+ update
+	+ refresh
+	+ purge
+	+ list
+	+ clear
+	+ help			[modulefile [modulefile ...]]
+	+ whatis		[modulefile [modulefile ...]]
+	+ apropos|keyword	string
+	+ initadd		modulefile [modulefile ...]
+	+ initprepend		modulefile [modulefile ...]
+	+ initrm		modulefile [modulefile ...]
+	+ initswitch		modulefile1 modulefile2
+	+ initlist
+	+ initclear
+
+cc1: warning: command line option "-std=c++0x" is valid for C++/ObjC++ but not for C
+gcc -o .sconf_temp/conftest_4 .sconf_temp/conftest_4.o -L/usr/local/cuda/lib64 -lcudart -llog4cxx -lpthread -llapack -lblas -latlas
+cmdModule.c(166):ERROR:11: Usage is 'module command  [arguments ...] '
+
+  Modules Release 3.2.9 2011-11-24 (Copyright GNU GPL v2 1991):
+
+  Usage: module [ switches ] [ subcommand ] [subcommand-args ]
+
+Switches:
+	-H|--help		this usage info
+	-V|--version		modules version & configuration options
+	-f|--force		force active dependency resolution
+	-t|--terse		terse    format avail and list format
+	-l|--long		long     format avail and list format
+	-h|--human		readable format avail and list format
+	-v|--verbose		enable  verbose messages
+	-s|--silent		disable verbose messages
+	-c|--create		create caches for avail and apropos
+	-i|--icase		case insensitive
+	-u|--userlvl <lvl>	set user level to (nov[ice],exp[ert],adv[anced])
+  Available SubCommands and Args:
+	+ add|load		modulefile [modulefile ...]
+	+ rm|unload		modulefile [modulefile ...]
+	+ switch|swap		[modulefile1] modulefile2
+	+ display|show		modulefile [modulefile ...]
+	+ avail			[modulefile [modulefile ...]]
+	+ use [-a|--append]	dir [dir ...]
+	+ unuse			dir [dir ...]
+	+ update
+	+ refresh
+	+ purge
+	+ list
+	+ clear
+	+ help			[modulefile [modulefile ...]]
+	+ whatis		[modulefile [modulefile ...]]
+	+ apropos|keyword	string
+	+ initadd		modulefile [modulefile ...]
+	+ initprepend		modulefile [modulefile ...]
+	+ initrm		modulefile [modulefile ...]
+	+ initswitch		modulefile1 modulefile2
+	+ initlist
+	+ initclear
+
+scons: Configure: yes
+
+scons: Configure: Checking for C library cublas... 
+.sconf_temp/conftest_5.c <-
+  |
+  |
+  |
+  |int
+  |main() {
+  |  
+  |return 0;
+  |}
+  |
+gcc -o .sconf_temp/conftest_5.o -c -Wall -g -std=c++0x -D_LOG4CXX .sconf_temp/conftest_5.c
+cmdModule.c(166):ERROR:11: Usage is 'module command  [arguments ...] '
+
+  Modules Release 3.2.9 2011-11-24 (Copyright GNU GPL v2 1991):
+
+  Usage: module [ switches ] [ subcommand ] [subcommand-args ]
+
+Switches:
+	-H|--help		this usage info
+	-V|--version		modules version & configuration options
+	-f|--force		force active dependency resolution
+	-t|--terse		terse    format avail and list format
+	-l|--long		long     format avail and list format
+	-h|--human		readable format avail and list format
+	-v|--verbose		enable  verbose messages
+	-s|--silent		disable verbose messages
+	-c|--create		create caches for avail and apropos
+	-i|--icase		case insensitive
+	-u|--userlvl <lvl>	set user level to (nov[ice],exp[ert],adv[anced])
+  Available SubCommands and Args:
+	+ add|load		modulefile [modulefile ...]
+	+ rm|unload		modulefile [modulefile ...]
+	+ switch|swap		[modulefile1] modulefile2
+	+ display|show		modulefile [modulefile ...]
+	+ avail			[modulefile [modulefile ...]]
+	+ use [-a|--append]	dir [dir ...]
+	+ unuse			dir [dir ...]
+	+ update
+	+ refresh
+	+ purge
+	+ list
+	+ clear
+	+ help			[modulefile [modulefile ...]]
+	+ whatis		[modulefile [modulefile ...]]
+	+ apropos|keyword	string
+	+ initadd		modulefile [modulefile ...]
+	+ initprepend		modulefile [modulefile ...]
+	+ initrm		modulefile [modulefile ...]
+	+ initswitch		modulefile1 modulefile2
+	+ initlist
+	+ initclear
+
+cc1: warning: command line option "-std=c++0x" is valid for C++/ObjC++ but not for C
+gcc -o .sconf_temp/conftest_5 .sconf_temp/conftest_5.o -L/usr/local/cuda/lib64 -lcudart -llog4cxx -lpthread -llapack -lblas -latlas -lcublas
+cmdModule.c(166):ERROR:11: Usage is 'module command  [arguments ...] '
+
+  Modules Release 3.2.9 2011-11-24 (Copyright GNU GPL v2 1991):
+
+  Usage: module [ switches ] [ subcommand ] [subcommand-args ]
+
+Switches:
+	-H|--help		this usage info
+	-V|--version		modules version & configuration options
+	-f|--force		force active dependency resolution
+	-t|--terse		terse    format avail and list format
+	-l|--long		long     format avail and list format
+	-h|--human		readable format avail and list format
+	-v|--verbose		enable  verbose messages
+	-s|--silent		disable verbose messages
+	-c|--create		create caches for avail and apropos
+	-i|--icase		case insensitive
+	-u|--userlvl <lvl>	set user level to (nov[ice],exp[ert],adv[anced])
+  Available SubCommands and Args:
+	+ add|load		modulefile [modulefile ...]
+	+ rm|unload		modulefile [modulefile ...]
+	+ switch|swap		[modulefile1] modulefile2
+	+ display|show		modulefile [modulefile ...]
+	+ avail			[modulefile [modulefile ...]]
+	+ use [-a|--append]	dir [dir ...]
+	+ unuse			dir [dir ...]
+	+ update
+	+ refresh
+	+ purge
+	+ list
+	+ clear
+	+ help			[modulefile [modulefile ...]]
+	+ whatis		[modulefile [modulefile ...]]
+	+ apropos|keyword	string
+	+ initadd		modulefile [modulefile ...]
+	+ initprepend		modulefile [modulefile ...]
+	+ initrm		modulefile [modulefile ...]
+	+ initswitch		modulefile1 modulefile2
+	+ initlist
+	+ initclear
+
+scons: Configure: yes
+
+
