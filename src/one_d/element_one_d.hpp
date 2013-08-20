@@ -153,9 +153,12 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc one_d::element::element ()
 			 *********************************************************************/
-			element (int i_n, double i_position_0, double i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : one_d::element (i_n, i_position_0, i_position_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
+			element (int i_n, double i_position_0, double i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
+			one_d::element (i_n, i_position_0, i_position_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
+				TRACE ("Instantiating...");
 				initialize (position);
 				set_grid (std::make_shared<chebyshev_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), position_0 - position_n)));
+				TRACE ("Instantiated.");
 			}
 			virtual ~element () {}
 				
@@ -239,8 +242,12 @@ namespace one_d
 			cuda_element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_input_Params, bases::messenger* i_messenger_ptr, int i_flags);
 			
 			virtual ~cuda_element () {}
+			
+			virtual void setup ();
 		
 			inline void implicit_reset () {
+				element::implicit_reset ();
+				
 				if (!(flags & factorized)) {
 					utils::scale (n * n, 0.0, &matrix [0]);
 				}
@@ -249,6 +256,7 @@ namespace one_d
 			virtual double calculate_timestep ();
 		
 		private:
+			int excess_0, excess_n;
 			std::vector<double> matrix; //!< A vector containing the double matrix used in the implicit solver
 		};
 	} /* chebyshev */

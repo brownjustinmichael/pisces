@@ -59,6 +59,7 @@ namespace bases
 		 * execution flags that the matrix has been factorized.
 		 *********************************************************************/
 		virtual void factorize () {
+			TRACE ("Factorizing");
 			flags |= factorized;
 		}
 	};

@@ -15,6 +15,8 @@
 namespace bases
 {
 	void element::run () {
+		TRACE ("Running...");
+		
 		implicit_reset ();
 
 		for (int i = 0; i < (int) implicit_plans.size (); ++i) {
@@ -22,7 +24,7 @@ namespace bases
 		}
 		
 		for (int j = 0; j < inputParams ["timesteps"].asInt; ++j) {
-			INFO ("Timestep " << j);
+			INFO ("Timestep " << j << " of " << inputParams ["timesteps"].asInt);
 			
 			TRACE ("Calculating...");
 		

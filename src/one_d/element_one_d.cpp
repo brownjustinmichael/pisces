@@ -111,31 +111,38 @@ namespace one_d
 		}
 		
 		cuda_element::cuda_element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
-		element (i_n, return_position (i_n, 0, i_excess_0, i_position_0, i_excess_n, i_position_n), return_position (i_n, i_n - 1, i_excess_0, i_position_0, i_excess_n, i_position_n), i_name, inputParams, i_messenger_ptr, i_flags) {
+		element (i_n, return_position (i_n, 0, i_excess_0, i_position_0, i_excess_n, i_position_n), return_position (i_n, i_n - 1, i_excess_0, i_position_0, i_excess_n, i_position_n), i_name, inputParams, i_messenger_ptr, i_flags),
+		excess_0 (i_excess_0),
+		excess_n (i_excess_n) {
 
-			// assert (n > 0);
-			// 		
-			// TRACE ("Initializing...");
-			// 		
-			// matrix.resize (i_n * i_n, 0.0);
-			// 
-			// // Set up output
-			// normal_stream = std::make_shared <io::incremental_output> (io::incremental_output ("../output/test_angle_" + std::to_string (name) + "_", ".dat", 4, new io::header, i_n, inputParams["output_every"].asInt));
-			// normal_stream->append (cell [0]);
-			// normal_stream->append ((*this) [position]);
-			// normal_stream->append ((*this) [velocity]);
-			// normal_stream->append ((*this) [rhs]);
-			// 
-			// // add_transform (std::make_shared <fftw_cosine> (fftw_cosine (this, n, velocity)));
-			// add_transform (std::make_shared <cuda::fftw_cosine> (cuda::fftw_cosine (this, n, velocity)));
-			// 		
-			// // Set up solver
-			// add_solver (std::make_shared <solver> (solver (this, n, i_excess_0, i_excess_n, timestep, boundary_weights [edge_0], boundary_weights [edge_n], grid->get_data (0), &matrix [0], velocity, rhs)));
-			// 
-			// normal_stream->to_file ();
-			// 		
-			// TRACE ("Initialized." << flags);
+			assert (n > 0);
+					
+			TRACE ("Initializing...");
+					
+			matrix.resize (i_n * i_n, 0.0);
+			
+			TRACE ("Initialized.");
 
+		}
+		
+		void cuda_element::setup () {
+			// Set up output
+			std::ostringstream convert;
+			convert << name;
+			normal_stream = std::make_shared <io::incremental_output> (io::incremental_output ("../output/test_angle_" + convert.str () + "_", ".dat", 4, new io::header, n, inputParams["output_every"].asInt));
+			normal_stream->append (cell [0]);
+			normal_stream->append ((*this) [position]);
+			normal_stream->append ((*this) [velocity]);
+			normal_stream->append ((*this) [rhs]);
+			
+			normal_stream->to_file ();
+			
+			// add_transform (std::make_shared <fftw_cosine> (fftw_cosine (this, n, velocity)));
+			add_transform (std::make_shared <cuda::fftw_cosine> (cuda::fftw_cosine (this, n, velocity)));
+					
+			// Set up solver
+			add_solver (std::make_shared <solver> (solver (this, n, excess_0, excess_n, timestep, boundary_weights [edge_0], boundary_weights [edge_n], grid->get_data (0), &matrix [0], velocity, rhs)));
+			
 		}
 		
 		double cuda_element::calculate_timestep () {

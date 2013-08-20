@@ -11,6 +11,23 @@
 #include "fftw_one_d_cuda.hpp"
 #include "../utils/utils_cublas.cuh"
 
+#define HANDLE_ERROR(status) \
+{cudaError_t result = status; \
+switch (result) { \
+	case cudaErrorMemoryAllocation: FATAL ("Memory Allocation Error."); throw 0; \
+	case cudaErrorInvalidValue: FATAL ("Invalid value passed."); throw 0; \
+	default: if (status != cudaSuccess) {FATAL ("Other problem."); throw 0;}}}
+
+#define HANDLE_CUFFT(status) \
+{cufftResult result = status; \
+switch (result) { \
+	case CUFFT_INVALID_PLAN: FATAL ("Invalid plan for cufft."); throw 0; \
+	case CUFFT_INVALID_VALUE: FATAL ("Invalid value for cufft."); throw 0; \
+	case CUFFT_INTERNAL_ERROR: FATAL ("Internal driver error for cufft."); throw 0; \
+	case CUFFT_EXEC_FAILED: FATAL ("Failed to execute transform on cufft."); throw 0; \
+	default: if (status != CUFFT_SUCCESS) {FATAL ("Cufft Other problem."); throw 0;}}}
+
+
 __global__ void real_to_complex (int n, double* in, cufftDoubleComplex* out) {
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
 	while (tid < n) {
@@ -44,26 +61,17 @@ namespace one_d
 		fftw_cosine::fftw_cosine (bases::element* i_element_ptr, int i_n, int i_name_in, int i_name_out) : 
 		bases::explicit_plan (i_element_ptr, i_n, i_name_in, i_name_out) {
 			TRACE ("Instantiating...");
-			if (cudaMalloc ((void **) &data_real, 2 * n * sizeof (double)) != cudaSuccess){
-				FATAL ("Failed to allocate.\n");
-				throw 1;	
-			}
-			if (cudaMalloc ((void **) &data_complex, n * sizeof (cufftDoubleComplex)) != cudaSuccess) {
-				FATAL ("Failed to allocate.\n");
-				throw 1;	
-			}
-			plan = new cufftHandle;
-			if (cufftPlan1d(plan, 2 * n - 2, CUFFT_D2Z, 1) != CUFFT_SUCCESS){
-				FATAL ("Plan creation failed");
-				throw 1;	
-			}
+			HANDLE_ERROR (cudaMalloc ((void **) &data_real, 2 * n * sizeof (cufftDoubleReal)));
+			HANDLE_ERROR (cudaMalloc ((void **) &data_complex, n * sizeof (cufftDoubleComplex)));
+			cu_plan = new cufftHandle;
+			HANDLE_CUFFT (cufftPlan1d(cu_plan, 2 * n - 2, CUFFT_D2Z, 1));
+			scalar = sqrt (1.0 / 2.0 / ((double) n - 2.0));
 			TRACE ("Instantiated.");
-			// fourier_plan = fftw_plan_r2r_1d (n, data_in, data_out, FFTW_REDFT00, FFTW_ESTIMATE);
 		}
 		
 		fftw_cosine::~fftw_cosine () {
-			cufftDestroy (*plan);
-			delete plan;
+			cufftDestroy (*cu_plan);
+			// delete cu_plan;
 			cudaFree (data_real);
 			cudaFree (data_complex);
 		}
@@ -71,71 +79,34 @@ namespace one_d
 		void fftw_cosine::execute () {
 			bases::explicit_plan::execute ();
 			std::vector <cufftDoubleComplex> temp (n);
-			std::vector <double> reverse (2 * n);
+			
+			HANDLE_ERROR (cudaMemcpy (data_real, data_in, n * sizeof (double), cudaMemcpyHostToDevice));
 			
 			for (int i = 0; i < n; ++i) {
-				reverse [i] = (double) i;
-				reverse [2 * n - i - 2] = (double) i;
+				DEBUG ("Transforming: " << data_in [i]);
 			}
-			for (int i = 0; i < 2 * n - 2; ++i) {
-				DEBUG ("HERE: " << reverse [i]);
-			}
-
-			// if (cudaMemcpy (data_real, data_in, n * sizeof (double), cudaMemcpyHostToDevice) != cudaSuccess) {
-			// 	FATAL ("FAILURE");
-			// 	throw 1;
-			// }
 			
-			if (cudaMemcpy (data_real, &reverse [0], 2 * (n - 1) * sizeof (double), cudaMemcpyHostToDevice) != cudaSuccess) {
-				FATAL ("FAILURE");
-				throw 1;
-			}
-		
-			// symmetrize <<<1, std::min (n, 512)>>> (n, data_real);
-		
-			if (cudaThreadSynchronize() != cudaSuccess){
-				FATAL ("Failed to synchronize\n");
-				throw 1;	
-			}
+			symmetrize <<<1, std::min (n, 512)>>> (n, data_real);
+			
+			HANDLE_ERROR (cudaDeviceSynchronize ());
+			
+			HANDLE_CUFFT (cufftPlan1d(cu_plan, 2 * n - 2, CUFFT_D2Z, 1));
 			/* Use the CUFFT plan to transform the signal in place. */
-			if (cufftExecD2Z(*plan, data_real, data_complex) != CUFFT_SUCCESS){
-				FATAL ("ExecD2Z Forward failed");
-				throw 1;	
-			}
+			HANDLE_CUFFT (cufftExecD2Z(*cu_plan, data_real, data_complex));
 
 			cudaMemcpy (&temp [0], data_complex, n * sizeof (cufftDoubleComplex), cudaMemcpyDeviceToHost);
-			
-			if (cudaThreadSynchronize() != cudaSuccess){
-				FATAL ("Failed to synchronize\n");
-				throw 1;	
-			}
 			
 			for (int i = 0; i < n; ++i) {
 				DEBUG ("REAL: " << temp [i].x);
 				DEBUG ("IMAG: " << temp [i].y);
-			}		
+			}
 			
 			complex_to_real <<<1, std::min (n, 512)>>> (n, data_complex, data_real);
-		
-			if (cudaDeviceSynchronize() != cudaSuccess){
-				FATAL ("Failed to synchronize\n");
-				throw 1;	
-			}
-
-			cudaMemcpy (&reverse [0], data_real, n * sizeof (double), cudaMemcpyDeviceToHost);
-		
-			if (cudaThreadSynchronize() != cudaSuccess){
-				FATAL ("Failed to synchronize\n");
-				throw 1;	
-			}
-		
+					
+			cudaMemcpy (data_out, data_real, n * sizeof (double), cudaMemcpyDeviceToHost);
+			
 			for (int i = 0; i < n; ++i) {
-				DEBUG ("REAL: " << reverse [i]);
-			}
-	
-			if (cudaThreadSynchronize() != cudaSuccess){
-				FATAL ("Failed to synchronize.\n");
-				throw 1;	
+				DEBUG ("Transformed: " << data_out [i]);
 			}
 			
 			for (int i = 0; i < n; ++i) {

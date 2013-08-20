@@ -60,6 +60,7 @@ namespace one_d
 		int info;
 		
 		bases::solver::factorize ();
+		TRACE ("Factorizing...");
 		
 		utils::copy (n * n, default_matrix, &factorized_matrix [0]);
 		
@@ -127,6 +128,7 @@ namespace one_d
 		
 			for (int i = 0; i < n; ++i) {
 				if (std::isnan (data_temp [i])) {
+					ERROR ("Nan detected.");
 					info = -1;
 				}
 			}

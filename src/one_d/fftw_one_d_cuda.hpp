@@ -51,7 +51,7 @@ namespace one_d
 			double scalar; //!< The scalar used after the transform (1 / sqrt (2 * (n - 1)))
 			cufftDoubleReal* data_real;
 			cufftDoubleComplex* data_complex;
-			cufftHandle* plan;
+			cufftHandle* cu_plan;
 			// fftw_plan fourier_plan; //!< The fftw_plan object to be executed
 		};
 	} /* cuda */

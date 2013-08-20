@@ -51,6 +51,11 @@ namespace one_d
 		 *********************************************************************/
 		void execute ();
 		
+		/*!*******************************************************************
+		 * \copydoc bases::solver::factorize ()
+		 *********************************************************************/
+		void factorize ();
+		
 	protected:
 		double& timestep; //!< A double reference to the current timestep
 		double& alpha_0; //!< A double reference to the current edge_0 weight
@@ -74,11 +79,6 @@ namespace one_d
 		std::vector <double> positions_n; //!< A double vector of excess positions from edge_n
 		std::vector <double> factorized_matrix; //!< A double vector containing the factorized sum of default matrix and timestep * matrix
 		std::vector <int> ipiv; //!< A vector of integers needed to calculate the factorization
-		
-		/*!*******************************************************************
-		 * \copydoc bases::solver::factorize ()
-		 *********************************************************************/
-		void factorize ();
 	};
 } /* one_d */
 

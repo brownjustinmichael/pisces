@@ -70,16 +70,18 @@ int main (int argc, char *argv[])
 	
 	one_d::chebyshev::cuda_element element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
 	
-	one_d::cuda::fftw_cosine new_plan (&element, n, velocity, temperature);
+	element.setup ();
 	
-	new_plan.execute ();
+	// one_d::cuda::fftw_cosine new_plan (&element, n, velocity);
 	
-	// try {
-	// 	element.run ();
-	// } catch (...) {
-	// 	FATAL ("Fatal error occurred. Check log.");
-	// 	return 1;
-	// }
+	try {
+		// element.run ();
+		// new_plan.execute ();
+		element.transform_inverse ();
+	} catch (...) {
+		FATAL ("Fatal error occurred. Check log.");
+		return 1;
+	}
 	
 	INFO ("Main complete.");
 	

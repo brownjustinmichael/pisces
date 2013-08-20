@@ -212,7 +212,9 @@ namespace bases
 		 * implicit part. It should only be called if the timestep duration
 		 * has changed, for the most part.
 		 *********************************************************************/
-		virtual void implicit_reset () {};
+		virtual void implicit_reset () {
+			TRACE ("Resetting implicits...");
+		};
 		
 		/*!**********************************************************************
 		 * \brief Transform from spectral space to physical space
@@ -223,6 +225,7 @@ namespace bases
 		 * TODO Need implementation if reverse transform is not forward transform
 		 ************************************************************************/
 		virtual void transform_inverse () {
+			TRACE ("Transforming...");
 			for (int i = 0; i < (int) transforms.size (); ++i) {
 				transforms [i]->execute ();
 			}

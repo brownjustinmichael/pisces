@@ -28,6 +28,8 @@ namespace bases
 		id = 0;
 #endif // _MPI
 		assert (n_boundaries % 2 == 0);
+		double_iter = 0;
+		int_iter = 0;
 		double_data_queue.resize (2 * n_boundaries);
 		int_data_queue.resize (2 * n_boundaries);
 		n_queue.resize (2 * n_boundaries);
