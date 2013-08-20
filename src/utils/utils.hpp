@@ -15,49 +15,68 @@ namespace utils
 	 * \brief Copies a double array into another
 	 * 
 	 * \param n An integer number of elements to copy
-	 * \param dx A double array of values to be copied
-	 * \param dy A double array to be copied to
+	 * \param x A float array of values to be copied
+	 * \param y A float array to be copied to
 	 * \param incx The integer spacing of elements in dx
 	 * \param incy The integer spacing of elements in dy
 	 *********************************************************************/
 	void copy (int n, float* x, float* y, int incx = 1, int incy = 1);
+
+	/*!*******************************************************************
+	 * \brief Copies a double array into another
+	 * 
+	 * \param n An integer number of elements to copy
+	 * \param x A double array of values to be copied
+	 * \param y A double array to be copied to
+	 * \param incx The integer spacing of elements in dx
+	 * \param incy The integer spacing of elements in dy
+	 *********************************************************************/
 	void copy (int n, double* x, double* y, int incx = 1, int incy = 1);
+	
+	/*!*******************************************************************
+	 * \brief Scales a float array by a constant
+	 * 
+	 * \param n An integer number of elements to scale
+	 * \param a A float to scale the array by
+	 * \param x A float array to scale
+	 * \param incx The integer spacing of elements in dx
+	 *********************************************************************/
+	void scale (int n, float a, float* x, int incx = 1);
 	
 	/*!*******************************************************************
 	 * \brief Scales a double array by a constant
 	 * 
 	 * \param n An integer number of elements to scale
-	 * \param da A double to scale the array by
-	 * \param dx A double array to scale
+	 * \param a A double to scale the array by
+	 * \param x A double array to scale
 	 * \param incx The integer spacing of elements in dx
 	 *********************************************************************/
-	void scale (int n, float a, float* x, int incx = 1);
 	void scale (int n, double a, double* x, int incx = 1);
 
 	/*!*******************************************************************
 	 * \brief Takes the dot product of two arrays
 	 * 
 	 * \param n An integer number of elements to dot
-	 * \param dx The first double array
-	 * \param dy The second double array
+	 * \param x The first double array
+	 * \param y The second double array
 	 * \param incx The integer spacing of elements in dx
 	 * \param incy The integer spacing of elements in dy
 	 * 
 	 * \return The double dot product
 	 *********************************************************************/
-	double dot (int n, double* dx, double* dy, int incx = 1, int incy = 1);
+	double dot (int n, double* x, double* y, int incx = 1, int incy = 1);
 	
 	/*!*******************************************************************
 	 * \brief Perform the operation dy = da * dx + dy
 	 * 
 	 * \param n An integer number of elements to operate on
 	 * \param da The double da
-	 * \param dx The double array dx
-	 * \param dy The double array dy which is replaced with the output
+	 * \param x The double array dx
+	 * \param y The double array dy which is replaced with the output
 	 * \param incx The integer spacing of elements in dx
 	 * \param incy The integer spacing of elements in dy
 	 *********************************************************************/
-	void add_scaled (int n, double da, double *dx, double *dy, int incx = 1, int incy = 1);
+	void add_scaled (int n, double da, double *x, double *y, int incx = 1, int incy = 1);
 	
 	/*!*******************************************************************
 	 * \brief Perform the matrix-vector multiplication y = alpha * a * x + beta * y

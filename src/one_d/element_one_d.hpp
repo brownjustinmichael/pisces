@@ -22,17 +22,23 @@
 	
 namespace one_d
 {
+	/*!**********************************************************************
+	 * \brief Integer representation of the edges
+	 * 
+	 * These edges must range from 0 to the total number of boundaries - 1 for
+	 * messenger to work correctly.
+	 ************************************************************************/
 	enum edges {
 		edge_0 = 0,
 		edge_n = 1
 	};
 	
 	/*!*******************************************************************
+	 * \brief The 1D base element class
+	 * 
 	 * A 1D implementation of the element base class. This provides the
 	 * storage, indexing facilities, and failsafe_dump output. The plans should be added in a 
 	 * further subclass.
-	 * 
-	 * \brief \copybrief bases::element
 	 *********************************************************************/
 	class element : public bases::element
 	{
@@ -41,20 +47,14 @@ namespace one_d
 		 * \param i_n The number of data elements in each scalar
 		 * \param i_position_0 The double position of index excess_0
 		 * \param i_position_n The double position of index n - 1 - excess_n
-		 * \param i_excess_0 The integer number of points evaluated in the adjacent element
-		 * \param i_excess_n The integer number of points evaluated in the adjacent element
 		 * \copydoc bases::element::element ()
 		 *********************************************************************/
-		element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : 
+		element (int i_n, double i_position_0, double i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
 		bases::element (i_name, 2, i_inputParams, i_messenger_ptr, i_flags) {
 			n = i_n;
 			position_0 = i_position_0;
 			position_n = i_position_n;
-			excesses [edge_0] = i_excess_0;
-			excesses [edge_n] = i_excess_n;
-			boundary_weights [edge_0] = 0.0;
-			boundary_weights [edge_n] = 0.0;
-			
+
 			cell.resize (i_n);
 			for (int i = 0; i < i_n; ++i) {
 				cell [i] = i;
@@ -65,6 +65,20 @@ namespace one_d
 		}
 		
 		virtual ~element () {}
+	
+		/*!*******************************************************************
+		 * \brief Get the double reference to the named scalar
+		 * 
+		 * \param name The integer name from the index enumeration
+		 * 
+		 * \return A double reference to the first element of the named scalar
+		 *********************************************************************/
+		inline double& operator[] (int name) {
+			if (scalars [name].size () == (unsigned int) 0) {
+				initialize (name);
+			}
+			return scalars [name] [0];
+		}
 	
 		/*!*******************************************************************
 		 * \copydoc bases::element::initialize ()
@@ -80,16 +94,6 @@ namespace one_d
 			fixed_points_0 [name] = scalars [name] [0];
 			fixed_points_n [name] = scalars [name] [n - 1];
 			failsafe_dump->append (&(scalars [name]) [0]);
-		}
-	
-		/*!*******************************************************************
-		 * \copydoc bases::element::operator[] ()
-		 *********************************************************************/
-		inline double& operator[] (int name) {
-			if (scalars [name].size () == (unsigned int) 0) {
-				initialize (name);
-			}
-			return scalars [name] [0];
 		}
 		
 		/*!*******************************************************************
@@ -109,12 +113,12 @@ namespace one_d
 		 * \copydoc bases::element::execute_boundaries ()
 		 *********************************************************************/
 		inline void execute_boundaries () {
-			if (!(boundary_bools [edge_0])) {
+			if (messenger_ptr->linked (edge_0)) {
 				for (iterator iter = begin (); iter != end (); ++iter) {
 					(*this) (*iter, 0) = fixed_points_0 [*iter];
 				}
 			}
-			if (!(boundary_bools [edge_n])) {
+			if (messenger_ptr->linked (edge_n)) {
 				for (iterator iter = begin (); iter != end (); ++iter) {
 					(*this) (*iter, n - 1) = fixed_points_n [*iter];
 				}
@@ -147,7 +151,7 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc one_d::element::element ()
 			 *********************************************************************/
-			element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : one_d::element (i_n, i_position_0, i_position_n, i_excess_0, i_excess_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
+			element (int i_n, double i_position_0, double i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : one_d::element (i_n, i_position_0, i_position_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				initialize (position);
 				set_grid (std::make_shared<chebyshev_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), position_0 - position_n)));
 			}
@@ -160,8 +164,8 @@ namespace one_d
 				TRACE ("Initializing " << name);
 				if (name == position && !initial_conditions) {
 					double pioN = std::acos (-1.0) / (n - 1);
-					double scale = (position_0 - position_n) / (std::cos (excesses [edge_0] * pioN) - std::cos ((n - 1 - excesses [edge_n]) * pioN));
-					double initial_position = position_0 - scale * std::cos (excesses [edge_0] * pioN);
+					double scale = (position_0 - position_n) / 2.0;
+					double initial_position = (position_0 + position_n) / 2.0;
 					std::vector <double> init (n);
 					for (int i = 0; i < n; ++i) {
 						init [i] = scale * std::cos (i * pioN) + initial_position;
@@ -201,9 +205,11 @@ namespace one_d
 		{
 		public:
 			/*!*******************************************************************
+			 * \param i_excess_0 The integer number of points evaluated in the adjacent element
+			 * \param i_excess_n The integer number of points evaluated in the adjacent element
 			 * \copydoc element::element ()
 			 *********************************************************************/
-			advection_diffusion_element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags);
+			advection_diffusion_element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags);
 			
 			virtual ~advection_diffusion_element () {}
 		
@@ -222,12 +228,13 @@ namespace one_d
 		
 		private:
 			std::vector<double> matrix; //!< A vector containing the double matrix used in the implicit solver
+			std::vector<double> temp_matrix; //!< A vector containing the double matrix used in the implicit solver
 		};
 		
 		class cuda_element : public element
 		{
 		public:
-			cuda_element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_input_Params, utils::messenger* i_messenger_ptr, int i_flags);
+			cuda_element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_input_Params, bases::messenger* i_messenger_ptr, int i_flags);
 			
 			virtual ~cuda_element () {}
 		
@@ -236,6 +243,8 @@ namespace one_d
 					utils::scale (n * n, 0.0, &matrix [0]);
 				}
 			}
+			
+			virtual double calculate_timestep ();
 		
 		private:
 			std::vector<double> matrix; //!< A vector containing the double matrix used in the implicit solver

@@ -6,50 +6,61 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include "utils.hpp"
-#include "utils_cublas.hcu"
+#include "utils_cublas.cuh"
 #include <vector>
 #include <cassert>
 
 namespace utils
 {
-	namespace cublas
+	namespace cuda
 	{
-		cublas_config cublas_config_instance;
-	
-		void copy (int n, float* x, float* y, int incx, int incy) {
-			cublasScopy (n, x, incx, y, incy);
-		}
-	
-		void copy (int n, double* x, double* y, int incx, int incy) {
-			cublasDcopy (n, x, incx, y, incy);
-		}
-	
-		void scale (int n, float a, float* x, int incx) {
-			cublasSscal (n, a, x, incx);
+		void HANDLE_STATUS (cublasStatus status) {
+			switch (status) {
+				case CUBLAS_STATUS_NOT_INITIALIZED: printf ("CUBLAS didn't initialize correctly.\n"); throw 0; 
+				case CUBLAS_STATUS_ALLOC_FAILED: printf ("CUBLAS allocation failed.\n"); throw 0; 
+				case CUBLAS_STATUS_INVALID_VALUE: printf ("CUBLAS unsupported value or parameter.\n"); throw 0; 
+				case CUBLAS_STATUS_ARCH_MISMATCH: printf ("CUBLAS feature absent in current architecture.\n"); throw 0; 
+				case CUBLAS_STATUS_MAPPING_ERROR: printf ("CUBLAS access to GPU memory failed.\n"); throw 0;
+				case CUBLAS_STATUS_EXECUTION_FAILED: printf ("CUBLAS failed to execute.\n"); throw 0;
+				case CUBLAS_STATUS_INTERNAL_ERROR: printf ("CUBLAS internal operation failed.\n"); throw 0;
+			}
 		}
 		
-		void scale (int n, double a, double* x, int incx) {
-			cublasDscal (n, a, x, incx);
+		config config_instance;
+	
+		void copy (int n, vect_float* x, vect_float* y, int incx, int incy) {
+			cublasScopy (n, x->pointer (), incx, y->pointer (), incy);
+		}
+	
+		void copy (int n, vect_double* x, vect_double* y, int incx, int incy) {
+			cublasDcopy (n, x->pointer (), incx, y->pointer (), incy);
+		}
+	
+		void scale (int n, float a, vect_float* x, int incx) {
+			cublasSscal (n, a, x->pointer (), incx);
+		}
+		
+		void scale (int n, double a, vect_double* x, int incx) {
+			cublasDscal (n, a, x->pointer (), incx);
 		}
 
-		double dot (int n, float* x, float* y, int incx, int incy) {
-			return cublasSdot (n, x, incx, y, incy);
+		double dot (int n, vect_float* x, vect_float* y, int incx, int incy) {
+			return cublasSdot (n, x->pointer (), incx, y->pointer (), incy);
 		}
 	
-		double dot (int n, double* x, double* y, int incx, int incy) {
-			return cublasDdot (n, x, incx, y, incy);
+		double dot (int n, vect_double* x, vect_double* y, int incx, int incy) {
+			return cublasDdot (n, x->pointer (), incx, y->pointer (), incy);
 		}
 
-		void add_scaled (int n, float a, float *x, float *y, int incx, int incy) {
-			cublasSaxpy (n, a, x, incx, y, incy);
+		void add_scaled (int n, float a, vect_float* x, vect_float* y, int incx, int incy) {
+			cublasSaxpy (n, a, x->pointer (), incx, y->pointer (), incy);
 		}
 	
-		void add_scaled (int n, double a, double *x, double *y, int incx, int incy) {
-			cublasDaxpy (n, a, x, incx, y, incy);
+		void add_scaled (int n, double a, vect_double* x, vect_double* y, int incx, int incy) {
+			cublasDaxpy (n, a, x->pointer (), incx, y->pointer (), incy);
 		}
 	
-		void matrix_vector_multiply (int m, int n, float alpha, float *a, float *x, float beta, float *y, int lda, int incx, int incy) {
+		void matrix_vector_multiply (int m, int n, float alpha, vect_float* a, vect_float* x, float beta, vect_float* y, int lda, int incx, int incy) {
 			char charN = 'N';
 		
 			assert (x != y);
@@ -58,10 +69,10 @@ namespace utils
 				lda = m;
 			}
 			
-			cublasSgemv (charN, m, n, alpha, a, lda, x, incx, beta, y, incy);
+			cublasSgemv (charN, m, n, alpha, a->pointer (), lda, x->pointer (), incx, beta, y->pointer (), incy);
 		}
 		
-		void matrix_vector_multiply (int m, int n, double alpha, double *a, double *x, double beta, double *y, int lda, int incx, int incy) {
+		void matrix_vector_multiply (int m, int n, double alpha, vect_double* a, vect_double* x, double beta, vect_double* y, int lda, int incx, int incy) {
 			char charN = 'N';
 		
 			assert (x != y);
@@ -70,7 +81,7 @@ namespace utils
 				lda = m;
 			}
 			
-			cublasDgemv (charN, m, n, alpha, a, lda, x, incx, beta, y, incy);
+			cublasDgemv (charN, m, n, alpha, a->pointer (), lda, x->pointer (), incx, beta, y->pointer (), incy);
 		}
 	} /* cublas */
 	

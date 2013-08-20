@@ -9,10 +9,6 @@
 #include "config.hpp"
 #include "one_d/element_one_d.hpp"
 
-#ifdef _MPI
-#include "mpi.h"
-#endif // _MPI
-
 /*!*******************************************************************
  * \mainpage
  *
@@ -56,7 +52,7 @@
  *********************************************************************/
 
 /*!*******************************************************************
- * \namespace chebyshev
+ * \namespace one_d::chebyshev
  * 
  * \brief A namespace containing the 1D Chebyshev pieces of the code
  *********************************************************************/
@@ -77,13 +73,11 @@ int main (int argc, char *argv[])
 {
 	int id = 0, n_elements = 1;
 	
-#if _MPI
 	// Initialize messenger
-	utils::messenger process_messenger (&argc, &argv);
+	bases::messenger process_messenger (&argc, &argv, 2);
 
 	id = process_messenger.get_id ();
 	n_elements = process_messenger.get_np ();
-#endif // _MPI
 
 	log_config::update_name (id);
 
@@ -120,22 +114,24 @@ int main (int argc, char *argv[])
 		excess_n = 1;
 	}
 	int name = id;
-	
-	one_d::chebyshev::advection_diffusion_element element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
-	
+
 	if (id != 0) {
 		TRACE ("Adding boundary to " << name << " at 0 at processor " << id - 1);
-		element.add_boundary (one_d::edge_0, 1, 2, id - 1);
+		process_messenger.add_boundary (one_d::edge_0, id - 1);
 	}
 	if (id != n_elements - 1) {
 		TRACE ("Adding boundary to " << name << " at n - 1 at processor " << id + 1);
-		element.add_boundary (one_d::edge_n, 2, 1, id + 1);
+		process_messenger.add_boundary (one_d::edge_n, id + 1);
 	}
-
-	element.send_positions ();
-	element.recv_positions ();
 	
-	element.run ();
+	one_d::chebyshev::advection_diffusion_element element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
+	
+	try {
+		element.run ();
+	} catch (...) {
+		FATAL ("Fatal error occurred. Check log.");
+		return 1;
+	}
 	
 	INFO ("Main complete.");
 	

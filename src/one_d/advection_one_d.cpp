@@ -10,7 +10,6 @@
 
 #include <cmath>
 #include "advection_one_d.h"
-#include "../bases/transform.hpp"
 #include "../bases/plan.hpp"
 #include "../utils/utils.hpp"
 #include "../bases/element.hpp"
@@ -57,8 +56,7 @@ namespace one_d
 		// }
 		
 		if (*flags_ptr & transformed) {
-			FATAL ("Nonlinear advection attempted in Chebyshev space.")
-			throw 0;
+			ERROR ("Nonlinear advection attempted in Chebyshev space.")
 		}
 		
 		data_out [0] += (scalar/fac [0])*(data_in [1] - data_in [0])*data_in [0];

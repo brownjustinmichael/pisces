@@ -71,7 +71,7 @@ def add_common_nvcc_variables(env):
     env['_NVCCWRAPSHCCFLAGS'] = '${_concat("-Xcompiler ", SHCCFLAGS, "", __env__)}'
     # assemble the common command line
     # env['_NVCCCOMCOM'] = '${_concat("-Xcompiler ", CPPFLAGS, "", __env__)} $_CPPDEFFLAGS $_NVCCWRAPCPPPATH'
-    env['_NVCCCOMCOM'] = '${_concat("-Xcompiler ", NVCCFLAGS, "", __env__)} $_CPPDEFFLAGS $_NVCCWRAPCPPPATH'
+    env['_NVCCCOMCOM'] = '$_CPPDEFFLAGS $_NVCCWRAPCPPPATH'
 
 def generate(env):
   """

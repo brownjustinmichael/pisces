@@ -22,56 +22,58 @@ namespace bases
 namespace one_d
 {
 	/*!*******************************************************************
-	 * \brief \copybrief bases::solver
+	 * \brief A 1D implementation of a matrix solver
 	 * 
-	 * A LAPACK implementation of a matrix solver
+	 * This matrix solver solves a matrix in each element individually and
+	 * sends the results to the adjacent elements. This solver should be 
+	 * iterated.
 	 *********************************************************************/
 	class solver : public bases::solver
 	{
 	public:
 		/*!*******************************************************************
-		 * \param i_n The integer number of elements in the data
-		 * \param i_data_in The double array of input
-		 * \param i_rhs The double array of the right-hand-side of the matrix equation
+		 * \param i_excess_0 The integer number of excess elements on the edge_0 side
+		 * \param i_excess_n The integer number of excess elements on the edge_n side
+		 * \param i_timestep A double reference to the current timestep
+		 * \param i_alpha_0 A double reference to the edge_0 weight
+		 * \param i_alpha_n A double reference to the edge_n weight
+		 * \param i_default_matrix A double array containing the 0 order collocation matrix
 		 * \param i_matrix The double matrix to be factorized
-		 * \param i_data_out The double array of output
+		 * \param i_name_rhs The integer representation of the matrix right-hand-side
 		 * \copydoc bases::solver::solver ()
 		 *********************************************************************/
-		solver (bases::element* i_element_ptr, int i_n, double& i_timestep, double& i_alpha_0, double& i_alpha_n, double *i_default_matrix, double *i_matrix, int i_name_in, int i_name_rhs, int i_name_out = null);
+		solver (bases::element* i_element_ptr, int i_n, int i_excess_0, int i_excess_n, double& i_timestep, double& i_alpha_0, double& i_alpha_n, double *i_default_matrix, double *i_matrix, int i_name_in, int i_name_rhs, int i_name_out = null, int i_flags = 0x00);
 		
 		virtual ~solver () {}
 		
 		/*!*******************************************************************
-		 * \copydoc bases::solver::solve ()
+		 * \copydoc bases::solver::execute ()
 		 *********************************************************************/
 		void execute ();
 		
-		void send_positions ();
-		
-		void recv_positions ();
-		
-		void update ();
-
 	protected:
-		double& timestep;
-		double& alpha_0;
-		double& alpha_n;
-		double data_0, data_n;
-		double prev_data_0, prev_data_n;
-		int expected_excess_0, expected_excess_n;
-		int excess_0, excess_n;
+		double& timestep; //!< A double reference to the current timestep
+		double& alpha_0; //!< A double reference to the current edge_0 weight
+		double& alpha_n; //!< A double reference to the current edge_n weight
+
+		int excess_0; //!< The integer number of elements to recv from edge_0
+		int excess_n; //!< The integer number of elements to recv from edge_n
+		int expected_excess_0; //!< The integer number of elements to send to edge_0
+		int expected_excess_n; //!< The integer number of elements to send to edge_n
 		
-		double *rhs; //!< The double array of the right-hand-side of the matrix equation
-		double* default_matrix;
-		double *matrix; //!< The double matrix to be factorized
+		double* rhs; //!< The double array of the right-hand-side of the matrix equation
+		double* default_matrix; //!< The double array of the non-timestep dependent matrix component
+		double* matrix; //!< The double array of the matrix component to be timestep-multiplied
 		
-		std::vector <double> error_0;
-		std::vector <double> error_n;
-		std::vector <double> data_temp;
-		std::vector <double> positions_0;
-		std::vector <double> positions_n;
-		std::vector <double> factorized_matrix;
-		std::vector<int> ipiv; //!< A vector of integers needed to calculate the factorization
+		std::vector <double> error_0; //!< A double vector to be recved from edge_0
+		std::vector <double> error_n; //!< A double vector to be recved from edge_n
+		std::vector <double> out_error_0; //!< A double vector to be sent to edge_0
+		std::vector <double> out_error_n; //!< A double vector to be sent to edge_n
+		std::vector <double> data_temp; //!< A double vector to be used in lieu of data_out for non-updating steps
+		std::vector <double> positions_0; //!< A double vector of excess positions from edge_0
+		std::vector <double> positions_n; //!< A double vector of excess positions from edge_n
+		std::vector <double> factorized_matrix; //!< A double vector containing the factorized sum of default matrix and timestep * matrix
+		std::vector <int> ipiv; //!< A vector of integers needed to calculate the factorization
 		
 		/*!*******************************************************************
 		 * \copydoc bases::solver::factorize ()

@@ -13,22 +13,14 @@
 #define ELEMENT_HPP_IUTSU4TQ
 
 #include <string>
+#include <cassert>
+#include <memory>
 #include "plan.hpp"
 #include "solver.hpp"
-#include "transform.hpp"
 #include "../utils/io.hpp"
-#include "../utils/messenger.hpp"
+#include "messenger.hpp"
 #include "collocation.hpp"
 #include "../config.hpp"
-
-enum element_flags {
-	recv_first = 0x800
-};
-
-enum boundary_flags {
-	linked_0 = 0x20,
-	linked_n = 0x40
-};
 
 namespace bases
 {	
@@ -52,50 +44,30 @@ namespace bases
 		
 		/*!*******************************************************************
 		* \param i_name The string representation of the element
-		* \param n_boundaries 
+		* \param n_boundaries The integer number of boundaries (must be a multiple of 2)
 		* \param i_inputParams The parameter object that contains the input parameters of the run
+		* \param i_messenger_ptr A pointer to a messenger object
 		* \param i_flags An integer set of execution flags
 		*********************************************************************/
-		element (int i_name, int n_boundaries, io::parameter_map& i_inputParams, utils::messenger* i_messenger_ptr, int i_flags) : inputParams (i_inputParams) {
+		element (int i_name, int n_boundaries, io::parameter_map& i_inputParams, messenger* i_messenger_ptr, int i_flags) : inputParams (i_inputParams) {
 			name = i_name;
-			boundary_bools.resize (n_boundaries);
-			boundary_processes.resize (n_boundaries);
-			boundary_send_tags.resize (n_boundaries);
 			boundary_weights.resize (n_boundaries);
-			boundary_recv_tags.resize (n_boundaries);
-			excesses.resize (n_boundaries);
 			inputParams = i_inputParams;
 			messenger_ptr = i_messenger_ptr;
 			flags = i_flags;
 			timestep = 0.0;
 			duration = 0.0;
+			for (int i = 0; i < n_boundaries; ++i) {
+				if (messenger_ptr->linked (i)) {
+					boundary_weights [i] = 0.5;
+				} else {
+					boundary_weights [i] = 0.0;
+				}
+			}
 		}
 		
 		virtual ~element () {}
 		
-		bool is_linked (int edge) {
-			return boundary_bools [edge];
-		}
-		
-		int get_excess (int edge) {
-			return excesses [edge];
-		}
-		
-		int get_expected_excess (int edge) {
-			return excesses [edge];
-			/*
-				TODO Add ability to have different incoming and outgoing excess
-			*/
-		}
-		
-		/*!*******************************************************************
-		 * \brief Initialize the scalar name
-		 * 
-		 * \param name The integer name index to be initialized
-		 * \param initial_conditions The double array of initial conditions
-		 *********************************************************************/
-		virtual void initialize (int name, double* initial_conditions = NULL) = 0;
-
 		/*!*******************************************************************
 		 * \brief Get the double reference to the named scalar
 		 * 
@@ -118,7 +90,7 @@ namespace bases
 		 * 
 		 * \return A double reference to the given index of the named scalar
 		 *********************************************************************/
-		virtual double& operator () (int name, int index = 0) {
+		virtual double& operator() (int name, int index = 0) {
 			return (&((*this) [name])) [index];
 		}
 		
@@ -128,8 +100,6 @@ namespace bases
 		 * This iterator has all the properties of a vector iterator. 
 		 * Dereferencing it returns the scalar indices in the order they were
 		 * added.
-		 * 
-		 * TODO Change this to return them in numerical order to avoid possible ordering conflicts? Not an issue as long as all elements have the same type.
 		 * 
 		 * \return The iterator for the element at the first scalar index
 		 *********************************************************************/
@@ -147,6 +117,80 @@ namespace bases
 		}
 		
 		/*!*******************************************************************
+		 * \brief Set the collocation grid.
+		 * 
+		 * \param i_grid A shared_ptr to a collocation_grid object
+		 * 
+		 * TODO This assumes 1D n^3. Either the grid should be moved to a subclass or made more general
+		 *********************************************************************/
+		inline void set_grid (std::shared_ptr<collocation_grid> i_grid) {
+			grid = i_grid;
+		}
+
+		/*!*******************************************************************
+		 * \brief Set the matrix solver.
+		 * 
+		 * \param i_solver A shared_ptr to a solver object
+		 * 
+		 * TODO This assumes 1 equation. It should be generalized for multiple equations.
+		 *********************************************************************/
+		inline void add_solver (std::shared_ptr<solver> i_solver) {
+			solvers.push_back (i_solver);
+		}
+
+		/*!*******************************************************************
+		 * \brief Set the transform operation
+		 * 
+		 * \param i_plan A shared_ptr to the transform object
+		 * 
+		 * TODO This assumes one scalar field. It should be generalized.
+		 *********************************************************************/
+		inline void add_transform (std::shared_ptr<plan> i_plan) {
+			transforms.push_back (i_plan);
+		}
+
+		/*!*******************************************************************
+		 * \brief Adds a plan to be executed in order
+		 * 
+		 * \param i_plan A shared pointer to the plan to add
+		 *********************************************************************/
+		inline void add_pre_plan (std::shared_ptr <plan> i_plan) {
+			TRACE ("Adding plan...");
+			pre_transform_plans.push_back (std::move (i_plan));
+			TRACE ("Added.");
+		}
+		
+		/*!*******************************************************************
+		 * \brief Adds a plan to be executed in order
+		 * 
+		 * \param i_plan A shared pointer to the plan to add
+		 *********************************************************************/
+		inline void add_post_plan (std::shared_ptr <plan> i_plan) {
+			TRACE ("Adding plan...");
+			post_transform_plans.push_back (std::move (i_plan));
+			TRACE ("Added.");
+		}
+		
+		/*!*******************************************************************
+		 * \brief Adds an implicit plan to be executed in order once at the start
+		 * 
+		 * \param i_plan A shared pointer to the plan to add
+		 *********************************************************************/
+		inline void add_implicit_plan (std::shared_ptr <plan> i_plan) {
+			TRACE ("Adding implicit plan...");
+			implicit_plans.push_back (std::move (i_plan));
+			TRACE ("Added.");
+		}
+		
+		/*!*******************************************************************
+		 * \brief Initialize the scalar name
+		 * 
+		 * \param name The integer name index to be initialized
+		 * \param initial_conditions The double array of initial conditions
+		 *********************************************************************/
+		virtual void initialize (int name, double* initial_conditions = NULL) = 0;
+		
+		/*!*******************************************************************
 		 * \brief Reset every scalar index < 0 and converts to spectral space
 		 * 
 		 * At the beginning of each timestep, all scalars with index < 0 should
@@ -157,14 +201,10 @@ namespace bases
 		 *********************************************************************/
 		virtual void explicit_reset () {
 			if (!(flags & transformed)) {
-				transform ();
+				transform_inverse ();
 			}
 		}
 		
-		virtual void transform () {
-			transform_forward->execute ();
-		}
-	
 		/*!*******************************************************************
 		 * \brief Reset any matrices if necessary
 		 * 
@@ -173,130 +213,75 @@ namespace bases
 		 * has changed, for the most part.
 		 *********************************************************************/
 		virtual void implicit_reset () {};
-	
-		/*!*******************************************************************
-		 * \brief Set the collocation grid.
-		 * 
-		 * TODO This assumes 1D n^3. Either the grid should be moved to a subclass or made more general
-		 *********************************************************************/
-		inline void set_grid (std::shared_ptr<collocation_grid> i_grid) {
-			grid = i_grid;
-		}
-	
-		/*!*******************************************************************
-		 * \brief Set the matrix solver.
-		 * 
-		 * TODO This assumes 1 equation. It should be generalized for multiple equations.
-		 *********************************************************************/
-		inline void set_solver (std::shared_ptr<solver> i_plan) {
-			matrix_solver = i_plan;
-		}
-	
-		/*!*******************************************************************
-		 * \brief Set the transform operation
-		 * 
-		 * TODO This assumes one scalar field. It should be generalized.
-		 *********************************************************************/
-		inline void set_transform (std::shared_ptr<plan> i_plan) {
-			transform_forward = i_plan;
-			add_plan (transform_forward);
-		}
-
-		/*!*******************************************************************
-		 * \brief Adds a plan to be executed in order
-		 * 
-		 * \param i_plan A shared pointer to the plan to add
-		 *********************************************************************/
-		inline void add_plan (std::shared_ptr <plan> i_plan) {
-			TRACE ("Adding plan...");
-			plans.push_back (std::move (i_plan));
-			TRACE ("Added.");
-		}
 		
-		inline void add_boundary (int edge, int send_tag, int recv_tag, int process) {
-			TRACE ("Adding boundary, new...");
-			boundary_bools [edge] = true;
-			/*
-				TODO When ready to fix, set boundary_bools [edge] = true;
-			*/
-			boundary_weights [edge] = 0.5;
-			boundary_send_tags [edge] = send_tag;
-			boundary_recv_tags [edge] = recv_tag;
-			boundary_processes [edge] = process;
-			TRACE ("Added.");
-		}
-		
-		/*!*******************************************************************
-		 * \brief Calculate the matrix terms to be used in update
+		/*!**********************************************************************
+		 * \brief Transform from spectral space to physical space
 		 * 
-		 * In general, this should not be overwritten in subclasses.
-		 *********************************************************************/
-		virtual void calculate ();
-		
-		/*!*******************************************************************
-		 * \brief Send all relevant boundary data to adjacent elements
+		 * In some cases, like the cosine transform, this can work in reverse.
 		 * 
-		 * In general, this should not be overwritten in subclasses.
-		 *********************************************************************/
-		virtual void send (int n, double weight, double* value, int edge, int inc = 1) {
-			TRACE ("Sending...");
-			if (boundary_bools [edge]) {
-				messenger_ptr->send (value, boundary_processes [edge], boundary_send_tags [edge], weight, n, inc);
+		 * TODO Multiple transforms and batch transforms should be possible
+		 * TODO Need implementation if reverse transform is not forward transform
+		 ************************************************************************/
+		virtual void transform_inverse () {
+			for (std::shared_ptr <plan> i_transform : transforms) {
+				i_transform->execute ();
 			}
-		}
-		virtual void send (int n, int weight, int* value, int edge, int inc = 1) {
-			TRACE ("Sending...");
-			if (boundary_bools [edge]) {
-				messenger_ptr->send (value, boundary_processes [edge], boundary_send_tags [edge], weight, n, inc);
-			}
-		}
-		/*!*******************************************************************
-		 * \brief Receive all relevant boundary data from adjacent elements
-		 * 
-		 * In general, this should not be overwritten in subclasses.
-		 *********************************************************************/
-		virtual void recv (int n, double weight, double* value, int edge, int inc = 1) {
-			TRACE ("Recving...");
-			if (boundary_bools [edge]) {
-				messenger_ptr->recv (value, boundary_processes [edge], boundary_recv_tags [edge], weight, n, inc);
+			if (flags & transformed) {
+				flags &= ~transformed;
 			} else {
-				*value *= weight;
+				flags |= transformed;
 			}
 		}
-		virtual void recv (int n, int weight, int* value, int edge, int inc = 1) {
-			TRACE ("Recving...");
-			if (boundary_bools [edge]) {
-				messenger_ptr->recv (value, boundary_processes [edge], boundary_recv_tags [edge], weight, n, inc);
+		
+		virtual void solve () {
+			double t_timestep;
+			t_timestep = calculate_timestep ();
+			messenger_ptr->min (&t_timestep);
+			
+			for (std::shared_ptr <solver> i_solver : solvers) {
+				i_solver->execute ();
+			}
+			
+			duration += timestep;
+			INFO ("TOTAL TIME: " << duration);
+			if (t_timestep != timestep) {
+				flags &= ~unchanged_timestep;
+				INFO ("Updating timestep: " << t_timestep);
 			} else {
-				*value *= weight;
+				flags |= unchanged_timestep;
 			}
+			timestep = t_timestep;
+			flags |= transformed;
 		}
+		
+		/*!**********************************************************************
+		 * \brief Calculate the new timestep duration
+		 * 
+		 * This method should be overwritten in the final class. It uses the 
+		 * knowledge of the user to beat numerical instabilities.
+		 * 
+		 * \return The double recommended timestep for the next timestep
+		 ************************************************************************/
+		virtual double calculate_timestep () = 0;
 		
 		/*!*******************************************************************
 		 * \brief Execute the boundary conditions
 		 * 
-		 * In general, this should not be overwritten in subclasses.
+		 * In general, this should be overwritten in subclasses.
+		 * 
+		 * TODO I'm not entirely enthused about this method.
 		 *********************************************************************/
 		virtual void execute_boundaries () = 0;
 		
-		virtual void output ();
-
-		/*!*******************************************************************
-		 * \brief Update the element
+		/*!**********************************************************************
+		 * \brief The main function call of the class
 		 * 
-		 * In general, this should not be overwritten in subclasses.
-		 *********************************************************************/
-		virtual void attempt_update ();
-
-		virtual void send_positions ();
-		
-		virtual void recv_positions ();
-
-		virtual void update ();
-		
-		virtual void update_timestep (double new_timestep);
-		
-		virtual double calculate_timestep () = 0;
+		 * This method tells the element to begin the main run of the simulation.
+		 * It runs through all the specified plans in the appropriate order, and 
+		 * updates the values as necessary. Output, if desired, is specified by 
+		 * the output streams.
+		 ************************************************************************/
+		virtual void run ();
 		
 		/*!*******************************************************************
 		 * \brief Output all information to a dump file in the current directory
@@ -308,39 +293,37 @@ namespace bases
 			failsafe_dump->to_file ();
 		}
 		
-		virtual void run ();
-		
 	protected:
-		int name; //!< A string representation of the element, to be used in file output
+		int name; //!< An integer representation of the element, to be used in file output
 		io::parameter_map& inputParams; //!< The map that contains the input parameters
-		utils::messenger* messenger_ptr;
+		messenger* messenger_ptr; //!< A pointer to the messenger object
 		
 		int flags; //!< An integer set of execution flags
 
-		double duration;
+		double duration; //!< The double total simulated time
 		double timestep; //!< The double timestep length
 
 		std::vector <int> names; //!< A vector of integer name indices of the contained scalars
 		
 		std::shared_ptr<collocation_grid> grid; //!< A shared pointer to the collocation grid
 		
-		std::shared_ptr<plan> transform_forward; //!< A shared pointer to the forward transform
-
 		std::shared_ptr<io::output> failsafe_dump; //!< An implementation to dump in case of failure
 		std::shared_ptr<io::output> normal_stream; //!< An implementation to output in normal space
 		std::shared_ptr<io::output> transform_stream; //!< An implementation to output in transform space
 
-		std::vector <bool> boundary_bools;
-		std::vector <int> boundary_send_tags;
-		std::vector <int> boundary_recv_tags;
-		std::vector <int> boundary_processes;
-		std::vector <double> boundary_weights;
-		std::vector <int> excesses;
+		std::vector <double> boundary_weights; //!< A double vector of boundary weights
+
+		/*
+			TODO It may make marginal more sense to move boundary_weights to the messenger class...
+		*/
 
 	private:
-		std::shared_ptr<solver> matrix_solver; //!< A shared pointer to the matrix solver
+		std::vector<std::shared_ptr<plan>> transforms; //!< A shared pointer to the forward transform
+		std::vector<std::shared_ptr<solver>> solvers; //!< A vector of shared pointers to the matrix solvers
 		
-		std::vector <std::shared_ptr <plan>> plans; //!< A vector of shared pointers of plans to be executed
+		std::vector <std::shared_ptr <plan>> pre_transform_plans; //!< A vector of shared pointers of plans to be executed
+		std::vector <std::shared_ptr <plan>> post_transform_plans; //!< A vector of shared pointers of plans to be executed
+		std::vector <std::shared_ptr <plan>> implicit_plans; //!< A vector of shared pointers of plans to be executed
 	};
 } /* bases */
 

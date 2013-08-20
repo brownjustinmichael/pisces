@@ -12,7 +12,6 @@
 #ifndef PLAN_HPP_S9YPWHOM
 #define PLAN_HPP_S9YPWHOM
 
-#include <memory>
 #include "collocation.hpp"
 #include "../config.hpp"
 
@@ -36,7 +35,8 @@ enum index {
 	composition = 22, comp = 22,
 	
 	rhs = -01,
-	rhsd2 = -02
+	vel_rhs = -11,
+	temp_rhs = -21
 };
 
 /*!*******************************************************************
@@ -44,13 +44,13 @@ enum index {
  *********************************************************************/
 enum plan_flags {
 	unchanged_timestep = 0x400,
-	implicit_started = 0x100,
-	explicit_started = 0x200
+	transformed = 0x10
 };
 
 namespace bases
 {
 	class element;
+	class messenger;
 	
 	/*!*******************************************************************
 	* \brief The basic functional unit, containing a recipe for execution
@@ -62,7 +62,10 @@ namespace bases
 	class plan
 	{
 	public:
-		plan (element* i_element_ptr);
+		/*!**********************************************************************
+		 * \param i_element_ptr A pointer to the associated element
+		 ************************************************************************/
+		plan (element* i_element_ptr, int flags = 0x00);
 		
 		virtual ~plan () {}
 		
@@ -79,9 +82,11 @@ namespace bases
 		}
 			
 	protected:
-		int default_flags; //!< An integer set of default flags to use in case the user does not specify any flags
-		int *flags_ptr; //!< A pointer to the integer execution flags
 		element* element_ptr; //!< A pointer to the element with which the plan is associated
+		int flags; // The integer plan execution flags
+		int default_flags; //!< An integer set of default flags to use in case the user does not specify any flags
+		int *flags_ptr; //!< A pointer to the integer element execution flags
+		messenger* messenger_ptr; //!< A pointer to the messenger associated with the element
 	};
 
 	/*!*******************************************************************
@@ -96,13 +101,14 @@ namespace bases
 		 * \param i_n The integer number of elements in the data
 		 * \param i_name_in The integer scalar index of the input
 		 * \param i_name_out The integer scalar index of the output
+		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		explicit_plan (element* i_element_ptr, int i_n, int i_name_in, int i_name_out = null);
+		explicit_plan (element* i_element_ptr, int i_n, int i_name_in, int i_name_out = null, int flags = 0x00);
 	
 		virtual ~explicit_plan () {}
 	
 		/*!*******************************************************************
-		 * \copydoc plan::execute ()
+		 * \copydoc bases::plan::execute ()
 		 *********************************************************************/
 		virtual void execute ();
 		
@@ -124,12 +130,13 @@ namespace bases
 		 * \param i_n The integer number of elements in a row of the square i_matrix
 		 * \param i_grid A shared pointer to the collocation grid object
 		 * \param i_matrix The double matrix to be updated
+		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		implicit_plan (element* i_element_ptr, int i_n, std::shared_ptr<bases::collocation_grid> i_grid, double *i_matrix) : plan (i_element_ptr) {
-			n = i_n;
-			grid = i_grid;
-			matrix = i_matrix;
-		}
+		implicit_plan (element* i_element_ptr, int i_n, bases::collocation_grid* i_grid, double *i_matrix, int i_flags = 0x00) : 
+		plan (i_element_ptr, i_flags), 
+		n (i_n),
+		grid (i_grid),
+		matrix (i_matrix) {}
 
 		virtual ~implicit_plan () {}
 		
@@ -140,7 +147,7 @@ namespace bases
 		
 	protected:
 		int n; //!< An integer number of data elements
-		std::shared_ptr <bases::collocation_grid> grid; //!< A shared pointer to the grid
+		bases::collocation_grid* grid; //!< A shared pointer to the grid
 		double *matrix; //!< A double pointer to the input data
 	};
 } /* bases */

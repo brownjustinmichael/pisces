@@ -86,7 +86,7 @@ namespace io
 		
 		n = i_n;
 		n_data_ptrs = 0;
-		header_ptr = i_header_ptr;
+		header_ptr.reset (i_header_ptr);
 
 		TRACE ("Instantiated.");
 	}

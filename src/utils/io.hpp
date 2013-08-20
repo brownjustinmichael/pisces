@@ -10,6 +10,7 @@
 #include <map>
 #include <string>
 #include <iostream>
+#include <memory>
 #include "../config.hpp"
 
 #ifndef IO_HPP_C1E9B6EF
@@ -95,7 +96,6 @@ namespace io
 		 * \param i_n_data_headers An integer number of column headers to be read from i_data_headers
 		 * \param i_data_headers An array of strings that are the column headers
 		 * \param i_comment_string The string to be used as the comment before the header lines
-		 * \copydoc header::header ()
 		 *********************************************************************/
 		simple_header (int i_n_data_headers, std::string *i_data_headers, std::string i_comment_string = "#");
 		
@@ -121,7 +121,6 @@ namespace io
 		/*!*******************************************************************
 		 * \param i_header_ptr A pointer to the header object
 		 * \param i_n The integer number of points in the data
-		 * \param i_logger The integer representation of the logger
 		 *********************************************************************/
 		output (header *i_header_ptr, int i_n);
 		
@@ -173,7 +172,7 @@ namespace io
 		int n_data_ptrs; //!< An integer number of arrays to output
 		std::vector<double *> double_ptrs; //!< A vector of double pointers to the arrays of data (if an element is NULL, check int_ptrs at the same index instead)
 		std::vector<int *> int_ptrs; //!< A vector of integer pointers to the arrays of data
-		header *header_ptr; //!< A pointer to a header object, which contains the details regarding the construction of the header
+		std::shared_ptr <header> header_ptr; //!< A pointer to a header object, which contains the details regarding the construction of the header
 		
 		/*!*******************************************************************
 		 * \brief Write all the tracked data to file using standard C conversions
@@ -190,21 +189,19 @@ namespace io
 	 *********************************************************************/
 	class simple_output : public output
 	{
-	private:
-		int output_count;
-		int output_every;
-		std::string file_name; //!< A string containing the file name where the class should output
 	public:
 		/*!*******************************************************************
-		 * \param i_file_name A string of the file to which the data will be output
-		 * \param i_n An integer number of data points contained within each array
-		 * \param i_logger The integer representation of the logger
+		 * \param i_file_name The string name of file for output
+		 * \param i_n The integer number of points in the data
+		 * \param i_output_every An integer number of steps between outputs
 		 *********************************************************************/
 		simple_output (std::string i_file_name, int i_n, int i_output_every = 1) : output (new header, i_n) {
 			file_name = i_file_name;
 			output_count = 0;
 			output_every = i_output_every;
 		}
+		
+		~simple_output () {}
 		
 		/*!*******************************************************************
 		 * \brief Outputs to file_name
@@ -215,6 +212,11 @@ namespace io
 			}
 			++output_count;
 		} 
+		
+	private:
+		int output_count; //!< The integer count of outputs that have happened
+		int output_every; //!< The integer number of steps between outputs
+		std::string file_name; //!< A string containing the file name where the class should output
 	};
 	
 	/*!*******************************************************************
@@ -232,7 +234,7 @@ namespace io
 		 * \param i_int_width The total number of characters the integer in the file name can have
 		 * \param i_header_ptr A pointer to the header object
 		 * \param i_n The integer number of points in the data
-		 * \param i_logger The integer representation of the logger
+		 * \param i_output_every An integer number of steps between outputs
 		 *********************************************************************/
 		incremental_output (std::string i_file_base, std::string i_file_extension, int i_int_width, header *i_header_ptr, int i_n, int i_output_every) : output (i_header_ptr, i_n) {
 			output_count = 0;

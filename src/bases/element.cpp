@@ -10,97 +10,56 @@
 #include "element.hpp"
 #include "../config.hpp"
 #include "solver.hpp"
-#include "transform.hpp"
 #include "../utils/utils.hpp"
 
 namespace bases
 {
-	void element::calculate () {		
-		TRACE ("Calculating...");
-				
-		flags &= ~implicit_started;
-		flags &= ~explicit_started;
-		
-		TRACE ("Writing to file...");
-		
-		// Output in transform space
-		if (transform_stream) {
-			transform_stream->to_file ();
-		}
-		
-		TRACE ("Executing plans...");
-		
-		for (int i = 0; i < (int) plans.size (); ++i) {
-			plans [i]->execute ();
-		}
-		
-		TRACE ("Calculation complete.");
-	}
-	
-	void element::output () {
-		TRACE ("Writing to file...");
-	
-		// Output in normal space
-		if (normal_stream) {
-			normal_stream->to_file ();
-		}
-	}
-	
-	void element::attempt_update () {
-		TRACE ("Updating...");
-
-		if (matrix_solver) {
-			matrix_solver->execute ();
-		} else {
-			WARN ("No matrix solver defined. It is likely the element was not set up correctly.");
-		}
-		
-		TRACE ("Updated.");
-	}
-	
-	void element::send_positions () {
-		matrix_solver->send_positions ();
-	}
-	
-	void element::recv_positions () {
-		matrix_solver->recv_positions ();
-	}
-	
-	void element::update () {
-		matrix_solver->update ();
-	}
-		
-	void element::update_timestep (double new_timestep) {
-		duration += timestep;
-		INFO ("TOTAL TIME: " << duration);
-		if (new_timestep != timestep) {
-			flags &= ~unchanged_timestep;
-			flags &= ~factorized;
-			INFO ("Updating timestep: " << timestep);
-		} else {
-			flags |= unchanged_timestep;
-		}
-		timestep = new_timestep;
-		
-		TRACE ("Update complete");
-	}
-	
 	void element::run () {
-		double t_timestep;
-		for (int i = 0; i < inputParams ["timesteps"].asInt; ++i) {
-			INFO ("Timestep " << i);
-			calculate ();
-			output ();
-			execute_boundaries ();
-			t_timestep = calculate_timestep ();
-			messenger_ptr->min (&t_timestep);
-			TRACE ("Updating...");
-			for (int k = 0; k < 2; ++k) {
-				attempt_update ();
+		implicit_reset ();
+
+		for (std::shared_ptr <plan> i_plan : implicit_plans) {
+			i_plan->execute ();
+		}
+		
+		for (int j = 0; j < inputParams ["timesteps"].asInt; ++j) {
+			INFO ("Timestep " << j);
+			
+			TRACE ("Calculating...");
+		
+			explicit_reset ();
+		
+			// Output in transform space
+			if (transform_stream) {
+				TRACE ("Writing to file...");
+				transform_stream->to_file ();
 			}
-			attempt_update ();
-			update ();
-			update_timestep (t_timestep);
+		
+			TRACE ("Executing plans...");
+		
+			for (std::shared_ptr <plan> i_plan : pre_transform_plans) {
+				i_plan->execute ();
+			}
+			
+			transform_inverse ();
+			
+			for (std::shared_ptr <plan> i_plan : post_transform_plans) {
+				i_plan->execute ();
+			}
+		
+			TRACE ("Calculation complete.");
+			
+			if (normal_stream) {
+				TRACE ("Writing to file...");
+				normal_stream->to_file ();
+			}
+
+			execute_boundaries ();
+			
+			TRACE ("Updating...");
+			
+			solve ();
+		
+			TRACE ("Update complete");
 		}
 	}
 } /* bases */

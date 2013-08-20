@@ -29,7 +29,6 @@ namespace bases
 		 * \param i_derivs The integer number of derivatives in the grid
 		 * \param i_rows The integer number of rows in the grid
 		 * \param i_cols The integer number of columns in the grid
-		 * \param i_logger The integer representation of the logger object
 		 *********************************************************************/
 		collocation_grid (int i_derivs, int i_rows, int i_cols);
 	
