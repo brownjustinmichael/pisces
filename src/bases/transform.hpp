@@ -31,7 +31,10 @@ namespace bases
 		/*!*******************************************************************
 		 * \copydoc bases::explicit_plan::explicit_plan ()
 		 *********************************************************************/
-		transform (element* i_element_ptr, int i_n, int i_name_in, int i_name_out = null) : bases::explicit_plan (i_element_ptr, i_n, i_name_in, i_name_out) {}
+		transform (element* i_element_ptr, int i_n, int i_name_in, int i_name_out = null) : 
+		bases::explicit_plan (i_element_ptr, i_n, i_name_in, i_name_out) {
+			TRACE ("Instantiated.");
+		}
 		
 		virtual ~transform () {}
 		

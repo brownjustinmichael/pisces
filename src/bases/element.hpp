@@ -135,8 +135,8 @@ namespace bases
 		 * 
 		 * TODO This assumes 1 equation. It should be generalized for multiple equations.
 		 *********************************************************************/
-		inline void set_solver (std::shared_ptr<solver> i_solver) {
-			matrix_solver = i_solver;
+		inline void add_solver (std::shared_ptr<solver> i_solver) {
+			solvers.push_back (i_solver);
 		}
 
 		/*!*******************************************************************
@@ -146,9 +146,9 @@ namespace bases
 		 * 
 		 * TODO This assumes one scalar field. It should be generalized.
 		 *********************************************************************/
-		inline void set_transform (std::shared_ptr<plan> i_plan) {
-			transform_forward = i_plan;
-			add_plan (transform_forward);
+		inline void add_transform (std::shared_ptr<transform> i_plan) {
+			transforms.push_back (i_plan);
+			add_plan (i_plan);
 		}
 
 		/*!*******************************************************************
@@ -192,7 +192,7 @@ namespace bases
 		 *********************************************************************/
 		virtual void explicit_reset () {
 			if (!(flags & transformed)) {
-				transform ();
+				transform_inverse ();
 			}
 		}
 		
@@ -213,8 +213,10 @@ namespace bases
 		 * TODO Multiple transforms and batch transforms should be possible
 		 * TODO Need implementation if reverse transform is not forward transform
 		 ************************************************************************/
-		virtual void transform () {
-			transform_forward->execute ();
+		virtual void transform_inverse () {
+			for (std::shared_ptr <transform> i_transform : transforms) {
+				i_transform->execute ();
+			}
 		}
 		
 		/*!**********************************************************************
@@ -270,8 +272,6 @@ namespace bases
 		
 		std::shared_ptr<collocation_grid> grid; //!< A shared pointer to the collocation grid
 		
-		std::shared_ptr<plan> transform_forward; //!< A shared pointer to the forward transform
-
 		std::shared_ptr<io::output> failsafe_dump; //!< An implementation to dump in case of failure
 		std::shared_ptr<io::output> normal_stream; //!< An implementation to output in normal space
 		std::shared_ptr<io::output> transform_stream; //!< An implementation to output in transform space
@@ -283,7 +283,8 @@ namespace bases
 		*/
 
 	private:
-		std::shared_ptr<solver> matrix_solver; //!< A shared pointer to the matrix solver
+		std::vector<std::shared_ptr<transform>> transforms; //!< A shared pointer to the forward transform
+		std::vector<std::shared_ptr<solver>> solvers; //!< A vector of shared pointers to the matrix solvers
 		
 		std::vector <std::shared_ptr <plan>> plans; //!< A vector of shared pointers of plans to be executed
 		std::vector <std::shared_ptr <plan>> implicit_plans; //!< A vector of shared pointers of plans to be executed

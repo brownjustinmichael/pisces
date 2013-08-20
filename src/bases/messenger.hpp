@@ -12,7 +12,9 @@
 #include <cassert>
 #include <algorithm>
 #include <vector>
+#ifdef _MPI
 #include "mpi.h"
+#endif // _MPI
 #include "../config.hpp"
 #include "../utils/utils.hpp"
 

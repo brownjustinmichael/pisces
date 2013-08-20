@@ -4,8 +4,13 @@ Import ("env")
 conf = Configure (env)
 
 objects = []
+cuda_objects = []
+
 if conf.CheckLib ("log4cxx"):
     env.Append (CPPFLAGS = ["-D_LOG4CXX"])
+    env.Append (NVCCFLAGS = ["-D_LOG4CXX"])
+
+conf.CheckLib ("pthread")
 
 env = conf.Finish ()
 
@@ -13,10 +18,10 @@ path = os.path.dirname (inspect.getfile (inspect.currentframe ()))
 
 for dirname, dirnames, filenames in os.walk (path):
     for subdirname in dirnames:
-        env.SConscript('%s/SConscript' % os.path.join (path, subdirname), variant_dir = os.path.join (".", subdirname), duplicate = 0, exports = {'env': env, "objects": objects})
+        env.SConscript('%s/SConscript' % os.path.join (path, subdirname), variant_dir = os.path.join (".", subdirname), duplicate = 0, exports = {'env': env, "objects": objects, "cuda_objects" : cuda_objects})
 
 objects.append (env.Object ("config.cpp"))
 
 env.Default (env.Program(target = "../run/main", source = (["main.cpp"] + objects)))
 
-# env.Default (env.Program(target = "../run/main_cuda", source = (["main_cuda.cpp"] + objects)))
+env.Default (env.Program(target = "../run/main_cuda", source = (["main_cuda.cpp"] + objects + cuda_objects)))

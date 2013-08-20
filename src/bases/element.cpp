@@ -55,10 +55,8 @@ namespace bases
 			messenger_ptr->min (&t_timestep);
 			
 			TRACE ("Updating...")
-			if (matrix_solver) {
-				matrix_solver->execute ();
-			} else {
-				WARN ("No matrix solver defined. It is likely the element was not set up correctly.");
+			for (std::shared_ptr <solver> i_solver : solvers) {
+				i_solver->execute ();
 			}
 			
 			duration += timestep;

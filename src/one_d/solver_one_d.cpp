@@ -88,26 +88,28 @@ namespace one_d
 		TRACE ("Solving...");
 		
 		for (int j = 0; j < 3; ++j) {
-			out_error_0 [0] = (alpha_0 * timestep) * (rhs [excess_0] - utils::dot (n, matrix + excess_0, &data_temp [0], n));
-			out_error_n [0] = (alpha_n * timestep) * (rhs [n - 1 - excess_n] - utils::dot (n, matrix + n - 1 - excess_n, &data_temp [0], n));
-			for (int i = 0; i < expected_excess_0; ++i) {
-				out_error_0 [i + 1] = utils::dot_interpolate (n, &((*element_ptr) (position)), n, default_matrix, &data_temp [0], positions_0 [i]);
-			}
-			for (int i = 0; i < expected_excess_n; ++i) {
-				out_error_n [i + 1] = utils::dot_interpolate (n, &((*element_ptr) (position)), n, default_matrix, &data_temp [0], positions_n [i]);
-			}
+			if (j != 0) {
+				out_error_0 [0] = (alpha_0 * timestep) * (rhs [excess_0] - utils::dot (n, matrix + excess_0, &data_temp [0], n));
+				out_error_n [0] = (alpha_n * timestep) * (rhs [n - 1 - excess_n] - utils::dot (n, matrix + n - 1 - excess_n, &data_temp [0], n));
+				for (int i = 0; i < expected_excess_0; ++i) {
+					out_error_0 [i + 1] = utils::dot_interpolate (n, &((*element_ptr) (position)), n, default_matrix, &data_temp [0], positions_0 [i]);
+				}
+				for (int i = 0; i < expected_excess_n; ++i) {
+					out_error_n [i + 1] = utils::dot_interpolate (n, &((*element_ptr) (position)), n, default_matrix, &data_temp [0], positions_n [i]);
+				}
 		
-			messenger_ptr->send (expected_excess_0 + 1, &out_error_0 [0], edge_0);
-			messenger_ptr->send (expected_excess_n + 1, &out_error_n [0], edge_n);
-			messenger_ptr->recv (excess_0 + 1, &error_0 [0], edge_0);
-			messenger_ptr->recv (excess_n + 1, &error_n [0], edge_n);
+				messenger_ptr->send (expected_excess_0 + 1, &out_error_0 [0], edge_0);
+				messenger_ptr->send (expected_excess_n + 1, &out_error_n [0], edge_n);
+				messenger_ptr->recv (excess_0 + 1, &error_0 [0], edge_0);
+				messenger_ptr->recv (excess_n + 1, &error_n [0], edge_n);
 		
-			for (int i = 0; i < excess_0; ++i) {
-				error_0 [i + 1] -= data_in [i];
+				for (int i = 0; i < excess_0; ++i) {
+					error_0 [i + 1] -= data_in [i];
+				}
+				for (int i = 0; i < excess_n; ++i) {
+					error_n [i + 1] -= data_in [n - excess_n + i];
+				}	
 			}
-			for (int i = 0; i < excess_n; ++i) {
-				error_n [i + 1] -= data_in [n - excess_n + i];
-			}	
 			
 			utils::copy (n, data_in, &data_temp [0]);
 		

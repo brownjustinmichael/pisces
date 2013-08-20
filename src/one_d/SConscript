@@ -1,5 +1,6 @@
 Import ("env")
 Import ("objects")
+Import ("cuda_objects")
 
 for lib in ["fftw3"]:
     if lib not in env ['LIBS']:
@@ -13,4 +14,8 @@ objects.append (env.Object ("advection_one_d.cpp"))
 
 objects.append (env.Object ("solver_one_d.cpp"))
 
-# objects.append (env.Object ("fftw_one_d_cuda.cu"))
+for lib in ["cufft"]:
+    if lib not in env ['LIBS']:
+        env.Append (LIBS = lib)
+
+objects.append (env.Object ("fftw_one_d_cuda.cu"))

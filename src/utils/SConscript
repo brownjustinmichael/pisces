@@ -1,5 +1,6 @@
 Import ("env")
 Import ("objects")
+Import ("cuda_objects")
 
 conf = Configure (env)
 
@@ -11,8 +12,6 @@ env = conf.Finish ()
 
 objects.append (env.Object ("utils_lapack.cpp"))
 
-# objects.append (env.Object ("utils_cublas.cu"))
-
 objects.append (env.Object ("interpolate.cpp"))
 
 objects.append (env.Object ("solver_lapack.cpp"))
@@ -20,3 +19,5 @@ objects.append (env.Object ("solver_lapack.cpp"))
 objects.append (env.Object ("chebyshev.cpp"))
 
 objects.append (env.Object ("io.cpp"))
+
+cuda_objects.append (env.Object ("utils_cublas.cu"))

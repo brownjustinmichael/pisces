@@ -9,10 +9,6 @@
 #include "config.hpp"
 #include "one_d/element_one_d.hpp"
 
-#ifdef _MPI
-#include "mpi.h"
-#endif // _MPI
-
 /*!*******************************************************************
  * \mainpage
  *
@@ -77,13 +73,11 @@ int main (int argc, char *argv[])
 {
 	int id = 0, n_elements = 1;
 	
-#if _MPI
 	// Initialize messenger
 	bases::messenger process_messenger (&argc, &argv, 2);
 
 	id = process_messenger.get_id ();
 	n_elements = process_messenger.get_np ();
-#endif // _MPI
 
 	log_config::update_name (id);
 
@@ -132,7 +126,12 @@ int main (int argc, char *argv[])
 	
 	one_d::chebyshev::advection_diffusion_element element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
 	
-	element.run ();
+	try {
+		element.run ();
+	} catch (...) {
+		FATAL ("Fatal error occurred. Check log.");
+		return 1;
+	}
 	
 	INFO ("Main complete.");
 	

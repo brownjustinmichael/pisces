@@ -86,7 +86,7 @@ namespace one_d
 		virtual void initialize (int name, double* initial_conditions = NULL) {
 			if (scalars [name].size () == (unsigned int) 0) {
 				names.push_back (name);
-				scalars [name].resize (n + 1, 0.0);
+				scalars [name].resize (n, 0.0);
 			}
 			if (initial_conditions) {
 				utils::copy (n, initial_conditions, &(scalars [name]) [0]);
@@ -228,6 +228,7 @@ namespace one_d
 		
 		private:
 			std::vector<double> matrix; //!< A vector containing the double matrix used in the implicit solver
+			std::vector<double> temp_matrix; //!< A vector containing the double matrix used in the implicit solver
 		};
 		
 		class cuda_element : public element

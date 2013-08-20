@@ -8,16 +8,14 @@
 
 #include "config.hpp"
 #include "one_d/element_one_d.hpp"
-
-#include "mpi.h"
+#include "one_d/fftw_one_d_cuda.hpp"
 
 int main (int argc, char *argv[])
-{
-	int id;
-	int n_elements;
+{	
+	int id = 0, n_elements = 1;
 	
 	// Initialize messenger
-	bases::messenger process_messenger (&argc, &argv);
+	bases::messenger process_messenger (&argc, &argv, 2);
 
 	id = process_messenger.get_id ();
 	n_elements = process_messenger.get_np ();
@@ -35,6 +33,9 @@ int main (int argc, char *argv[])
 		--argc;
 		++argv;
 	}
+	
+	TRACE ("Command line arguments read, beginning setup.");
+
 		
 	io::parameter_map inputParams;
 	io::read_params_txt parameters ("../input/parameters.txt");
@@ -58,20 +59,27 @@ int main (int argc, char *argv[])
 	}
 	int name = id;
 	
-	one_d::chebyshev::cuda_element element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
-	
 	if (id != 0) {
 		TRACE ("Adding boundary to " << name << " at 0 at processor " << id - 1);
-		element.add_boundary (one_d::edge_0, 1, 2, id - 1);
+		process_messenger.add_boundary (one_d::edge_0, id - 1);
 	}
 	if (id != n_elements - 1) {
 		TRACE ("Adding boundary to " << name << " at n - 1 at processor " << id + 1);
-		element.add_boundary (one_d::edge_n, 2, 1, id + 1);
+		process_messenger.add_boundary (one_d::edge_n, id + 1);
 	}
 	
-	element.send_positions ();
+	one_d::chebyshev::cuda_element element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
 	
-	element.run ();
+	one_d::cuda::fftw_cosine new_plan (&element, n, velocity, temperature);
+	
+	new_plan.execute ();
+	
+	// try {
+	// 	element.run ();
+	// } catch (...) {
+	// 	FATAL ("Fatal error occurred. Check log.");
+	// 	return 1;
+	// }
 	
 	INFO ("Main complete.");
 	
