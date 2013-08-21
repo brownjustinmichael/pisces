@@ -11,22 +11,24 @@
 
 #include <exception>
 
-namespace io
+namespace exceptions
 {
-	namespace exceptions
+	/*!*******************************************************************
+	 * \brief This is an exception that can occur when opening files
+	 *********************************************************************/
+	class file_exception : public std::exception
 	{
+	public:
 		/*!*******************************************************************
-		 * \brief This is an exception that can occur when opening files
+		 * \brief Describe the nature of the exception
 		 *********************************************************************/
-		class file_exception : public std::exception
-		{
-		public:
-			/*!*******************************************************************
-			 * \brief Describe the nature of the exception
-			 *********************************************************************/
-			inline const char *what () {return "File couldn't be opened";}
-		};
-	} /* exceptions */
-} /* io */
+		inline const char *what () {return "File couldn't be opened";}	};
+	
+	class already_factorized
+	{
+	public:
+		inline const char *what () {return "Matrix already factorized";}
+	};
+} /* exceptions */
 
 #endif /* end of include guard: EXCEPTIONS_HPP_82T7S9HQ */

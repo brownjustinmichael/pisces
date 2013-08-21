@@ -47,12 +47,12 @@ namespace one_d
 		 *********************************************************************/
 		void execute ();
 		
+	protected:
 		/*!*******************************************************************
 		 * \copydoc bases::solver <datatype>::factorize ()
 		 *********************************************************************/
-		void factorize ();
+		void _factorize ();
 		
-	protected:
 		using bases::solver <datatype>::element_ptr;
 		using bases::solver <datatype>::n;
 		using bases::solver <datatype>::data_in;

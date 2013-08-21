@@ -58,10 +58,9 @@ namespace one_d
 	}
 	
 	template <class datatype>
-	void solver <datatype>::factorize () {
+	void solver <datatype>::_factorize () {
 		int info;
 		
-		bases::solver <datatype>::factorize ();
 		TRACE ("Factorizing...");
 		
 		utils::copy (n * n, default_matrix, &factorized_matrix [0]);

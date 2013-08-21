@@ -1,10 +1,10 @@
 Import ("env")
-Import ("objects")
+Import ("cuda_objects")
 
-objects.append (env.Object ("element_one_d_cuda.cpp"))
+cuda_objects.append (env.Object ("element_one_d_cuda.cpp"))
 
 for lib in ["cufft"]:
     if lib not in env ['LIBS']:
         env.Append (LIBS = lib)
 
-objects.append (env.Object ("fftw_one_d_cuda.cu"))
+cuda_objects.append (env.Object ("fftw_one_d_cuda.cu"))

@@ -16,6 +16,7 @@
  *********************************************************************/
 enum solver_flags {
 	factorized = 0x08,
+	first_run = 0x10
 };
 
 namespace bases
@@ -39,14 +40,21 @@ namespace bases
 		 * \brief Solve the matrix equation
 		 *********************************************************************/
 		virtual void execute () {
-			explicit_plan <datatype>::execute ();
 			if ((!(flags & factorized)) || !(*flags_ptr & factorized)) {
-				factorize ();
+				_factorize ();
 			}
+			explicit_plan <datatype>::execute ();
 			
 			/*
 				TODO The transformed flag requires better handling. It could be handled entirely by element?
 			*/
+		}
+		
+		virtual void factorize () {
+			if ((!(flags & factorized)) || !(*flags_ptr & factorized)) {
+				_factorize ();
+			}
+			flags |= factorized;
 		}
 		
 	protected:
@@ -57,10 +65,7 @@ namespace bases
 		 * according to the execution flags. Upon success, it notes in the
 		 * execution flags that the matrix has been factorized.
 		 *********************************************************************/
-		virtual void factorize () {
-			TRACE ("Factorizing");
-			flags |= factorized;
-		}
+		virtual void _factorize () = 0;
 		
 		using explicit_plan <datatype>::flags;
 		using explicit_plan <datatype>::flags_ptr;

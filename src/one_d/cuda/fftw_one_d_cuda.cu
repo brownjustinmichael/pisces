@@ -9,7 +9,7 @@
 #include <math.h>
 #include <cufft.h>
 #include "fftw_one_d_cuda.hpp"
-#include "../../utils/utils_cublas.cuh"
+#include "../../utils/utils_cublas.hpp"
 
 #define HANDLE_ERROR(status) \
 {cudaError_t result = status; \
@@ -57,10 +57,11 @@ namespace one_d
 {
 	namespace cuda
 	{
-		fftw_cosine::fftw_cosine (bases::element <double>* i_element_ptr, int i_n, int i_name_in, int i_name_out) : 
-		bases::explicit_plan <double> (i_element_ptr, i_n, i_name_in, i_name_out) {
+		fftw_cosine::fftw_cosine (bases::element <double>* i_element_ptr, int i_n, double* i_data_dev) : 
+		bases::plan <double> (i_element_ptr),
+		n (i_n),
+		data_real (i_data_dev) {
 			TRACE ("Instantiating...");
-			HANDLE_ERROR (cudaMalloc ((void **) &data_real, 2 * n * sizeof (cufftDoubleReal)));
 			HANDLE_ERROR (cudaMalloc ((void **) &data_complex, n * sizeof (cufftDoubleComplex)));
 			cu_plan = new cufftHandle;
 			HANDLE_CUFFT (cufftPlan1d((cufftHandle*) cu_plan, 2 * n - 2, CUFFT_D2Z, 1));
@@ -69,30 +70,30 @@ namespace one_d
 		}
 		
 		fftw_cosine::~fftw_cosine () {
-			// cufftDestroy (*((cufftHandle *) cu_plan));
-			// delete cu_plan;
-			cudaFree (data_real);
+			cufftDestroy (*((cufftHandle *) cu_plan));
+			delete (cufftHandle*) cu_plan;
 			cudaFree (data_complex);
 		}
 		
 		void fftw_cosine::execute () {
-			bases::explicit_plan <double>::execute ();
-			
-			HANDLE_ERROR (cudaMemcpy (data_real, data_in, n * sizeof (double), cudaMemcpyHostToDevice));
+			bases::plan <double>::execute ();
 			
 			symmetrize <<<1, std::min (n, 512)>>> (n, (double *) data_real);
-			
-			HANDLE_ERROR (cudaDeviceSynchronize ());
 			
 			HANDLE_CUFFT (cufftExecD2Z(*((cufftHandle *) cu_plan), (double*) data_real, (cufftDoubleComplex*) data_complex));
 			
 			complex_to_real <<<1, std::min (n, 512)>>> (n, (cufftDoubleComplex*) data_complex, (double*) data_real);
-					
-			cudaMemcpy (data_out, data_real, n * sizeof (double), cudaMemcpyDeviceToHost);
 			
-			for (int i = 0; i < n; ++i) {
-				data_out [i] *= scalar;
-			}
+			utils::cuda::scale (n, scalar, (double*) data_real);
+		}
+		
+		transfer::transfer (bases::element <double>* i_element_ptr, int i_n, double* i_data_dev, double* i_data) :
+		bases::plan <double> (i_element_ptr),
+		data_dev (i_data_dev),
+		data (i_data) {}
+		
+		void transfer::execute () {
+			cudaMemcpy (data, data_dev, n * sizeof (double), cudaMemcpyDeviceToHost);
 		}
 	} /* cuda */
 } /* one_d */

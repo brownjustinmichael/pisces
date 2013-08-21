@@ -31,12 +31,6 @@ namespace bases
 		
 			explicit_reset ();
 		
-			// Output in transform space
-			if (transform_stream) {
-				TRACE ("Writing to file...");
-				transform_stream->to_file ();
-			}
-		
 			TRACE ("Executing plans...");
 		
 			for (int i = 0; i < (int) pre_transform_plans.size (); ++i) {
@@ -44,6 +38,8 @@ namespace bases
 			}
 			
 			transform_inverse ();
+			
+			factorize ();
 			
 			for (int i = 0; i < (int) post_transform_plans.size (); ++i) {
 				post_transform_plans [i]->execute ();
@@ -61,6 +57,12 @@ namespace bases
 			TRACE ("Updating...");
 			
 			solve ();
+			
+			// Output in transform space
+			if (transform_stream) {
+				TRACE ("Writing to file...");
+				transform_stream->to_file ();
+			}
 		
 			TRACE ("Update complete");
 		}

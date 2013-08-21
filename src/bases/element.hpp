@@ -241,6 +241,12 @@ namespace bases
 				flags |= transformed;
 			}
 		}
+
+		virtual void factorize () {
+			for (int i = 0; i < (int) solvers.size (); ++i) {
+				solvers [i]->factorize ();
+			}
+		}
 		
 		virtual void solve () {
 			datatype t_timestep;
