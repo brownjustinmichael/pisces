@@ -8,3 +8,5 @@ objects.append (env.Object ("element.cpp"))
 objects.append (env.Object ("collocation.cpp"))
 
 objects.append (env.Object ("messenger.cpp"))
+
+objects.append (env.Object ("solver.cpp"))

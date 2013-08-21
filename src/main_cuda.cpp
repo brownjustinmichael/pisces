@@ -15,7 +15,7 @@ int main (int argc, char *argv[])
 	int id = 0, n_elements = 1;
 	
 	// Initialize messenger
-	bases::messenger process_messenger (&argc, &argv, 2);
+	bases::messenger <double> process_messenger (&argc, &argv, 2);
 
 	id = process_messenger.get_id ();
 	n_elements = process_messenger.get_np ();
@@ -68,7 +68,7 @@ int main (int argc, char *argv[])
 		process_messenger.add_boundary (one_d::edge_n, id + 1);
 	}
 	
-	one_d::chebyshev::cuda_element element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
+	one_d::chebyshev::cuda_element <double> element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
 	
 	element.setup ();
 	

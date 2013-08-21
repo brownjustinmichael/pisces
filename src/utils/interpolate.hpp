@@ -33,6 +33,17 @@ namespace utils
 	 ************************************************************************/
 	double dot_interpolate (int n, double* x, int m, double* y, double* f, double x_0);
 	
+	/*!**********************************************************************
+	 * \brief Interpolate a matrix multiplication at x_0
+	 * 
+	 * \param n The integer number of elements in x, rows in y
+	 * \param x The double array of independent variables
+	 * \param m The integer number of columns in y, elements in f
+	 * \param y The double array matrix to interpolate
+	 * \param f The double array with which to take the dot product
+	 * \param x_0 The double value at which to interpolate
+	 ************************************************************************/
+	float dot_interpolate (int n, float* x, int m, float* y, float* f, float x_0);
 } /* utils */
 
 #endif /* end of include guard: INTERPOLATE_HPP_IZNK7T4T */

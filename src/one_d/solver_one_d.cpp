@@ -17,8 +17,9 @@
 
 namespace one_d
 {
-	solver::solver (bases::element* i_element_ptr, int i_n, int i_excess_0, int i_excess_n, double& i_timestep, double& i_alpha_0, double& i_alpha_n, double *i_default_matrix, double *i_matrix, int i_name_in, int i_name_rhs, int i_name_out, int i_flags) : 
-	bases::solver (i_element_ptr, i_n, i_name_in, i_name_out, i_flags), 
+	template <class datatype>
+	solver <datatype>::solver (bases::element <datatype>* i_element_ptr, int i_n, int i_excess_0, int i_excess_n, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype *i_default_matrix, datatype *i_matrix, int i_name_in, int i_name_rhs, int i_name_out, int i_flags) : 
+	bases::solver <datatype> (i_element_ptr, i_n, i_name_in, i_name_out, i_flags), 
 	timestep (i_timestep), 
 	alpha_0 (i_alpha_0), 
 	alpha_n (i_alpha_n), 
@@ -56,10 +57,11 @@ namespace one_d
 		TRACE ("Instantiated");
 	}
 	
-	void solver::factorize () {
+	template <class datatype>
+	void solver <datatype>::factorize () {
 		int info;
 		
-		bases::solver::factorize ();
+		bases::solver <datatype>::factorize ();
 		TRACE ("Factorizing...");
 		
 		utils::copy (n * n, default_matrix, &factorized_matrix [0]);
@@ -81,10 +83,11 @@ namespace one_d
 		}
 	}
 	
-	void solver::execute () {
+	template <class datatype>
+	void solver <datatype>::execute () {
 		int info;
 		
-		bases::solver::execute ();
+		bases::solver <datatype>::execute ();
 		
 		TRACE ("Solving...");
 		
@@ -147,4 +150,7 @@ namespace one_d
 		
 		TRACE ("Solve complete.")
 	}
+	
+	template class solver <double>;
+	template class solver <float>;
 } /* one_d */

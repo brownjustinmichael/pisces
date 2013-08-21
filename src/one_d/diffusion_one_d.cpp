@@ -19,15 +19,17 @@ namespace one_d
 {
 	namespace chebyshev
 	{
-		explicit_diffusion::explicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, bases::collocation_grid* i_grid, int i_name_in, int i_name_out, int i_flags) :
-		bases::explicit_plan (i_element_ptr, i_n, i_name_in, i_name_out, i_flags),
+		template <class datatype>
+		explicit_diffusion <datatype>::explicit_diffusion (bases::element <datatype>* i_element_ptr, datatype i_coeff, int i_n, bases::collocation_grid <datatype>* i_grid, int i_name_in, int i_name_out, int i_flags) :
+		bases::explicit_plan <datatype> (i_element_ptr, i_n, i_name_in, i_name_out, i_flags),
 		coeff (i_coeff), 
 		grid (i_grid) {
 			TRACE ("Initialized.");
 		}
 
-		void explicit_diffusion::execute () {
-			bases::explicit_plan::execute ();
+		template <class datatype>
+		void explicit_diffusion <datatype>::execute () {
+			bases::explicit_plan <datatype>::execute ();
 		
 			TRACE ("Operating...");
 			
@@ -45,12 +47,14 @@ namespace one_d
 			TRACE ("Operation complete.");
 		}
 		
-		implicit_diffusion::implicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, bases::collocation_grid* i_grid, double *i_matrix, int i_flags) : 
-		bases::implicit_plan (i_element_ptr, i_n, i_grid, i_matrix, i_flags), 
+		template <class datatype>
+		implicit_diffusion <datatype>::implicit_diffusion (bases::element <datatype>* i_element_ptr, datatype i_coeff, int i_n, bases::collocation_grid <datatype>* i_grid, datatype *i_matrix, int i_flags) : 
+		bases::implicit_plan <datatype> (i_element_ptr, i_n, i_grid, i_matrix, i_flags), 
 		coeff (i_coeff) {}
 
-		void implicit_diffusion::execute () {
-			bases::implicit_plan::execute ();
+		template <class datatype>
+		void implicit_diffusion <datatype>::execute () {
+			bases::implicit_plan <datatype>::execute ();
 			
 			TRACE ("Operating...");
 		
@@ -60,6 +64,12 @@ namespace one_d
 			}
 			TRACE ("Operation complete.");
 		}
+		
+		template class explicit_diffusion <double>;
+		template class explicit_diffusion <float>;
+
+		template class implicit_diffusion <double>;
+		template class implicit_diffusion <float>;
 	} /* chebyshev */
 } /* one_d */
 

@@ -115,6 +115,7 @@ namespace io
 	/*!*******************************************************************
 	 * \brief An abstract output stream base class that generates output files
 	 *********************************************************************/
+	template <class datatype>
 	class output
 	{
 	public:
@@ -127,18 +128,18 @@ namespace io
 		virtual ~output () {}
 		
 		/*!*******************************************************************
-		 * \brief Append a double array to the list to be output
+		 * \brief Append a datatype array to the list to be output
 		 * 
-		 * \param data_ptr A double pointer to the data to be the new column
+		 * \param data_ptr A datatype pointer to the data to be the new column
 		 *********************************************************************/
-		virtual void append (double *data_ptr);
+		virtual void append (datatype *data_ptr);
 		
 		/*!*******************************************************************
-		 * \brief Append a double array to the list to be output
+		 * \brief Append a datatype array to the list to be output
 		 * 
-		 * \param data_ptr A double pointer reference to the data to be the new column
+		 * \param data_ptr A datatype pointer reference to the data to be the new column
 		 *********************************************************************/
-		virtual void append (double& data_ptr) {
+		virtual void append (datatype& data_ptr) {
 			append (&data_ptr);
 		}
 		
@@ -163,14 +164,14 @@ namespace io
 		 * 
 		 * This function should be overwritten by subclasses, though it may 
 		 * contain a call to this function, which will output with default 
-		 * double representation in C++.
+		 * datatype representation in C++.
 		 *********************************************************************/
 		virtual void to_file () = 0;
 		
 	protected:
 		int n; //!< An integer number of elements in each array
 		int n_data_ptrs; //!< An integer number of arrays to output
-		std::vector<double *> double_ptrs; //!< A vector of double pointers to the arrays of data (if an element is NULL, check int_ptrs at the same index instead)
+		std::vector<datatype *> datatype_ptrs; //!< A vector of datatype pointers to the arrays of data (if an element is NULL, check int_ptrs at the same index instead)
 		std::vector<int *> int_ptrs; //!< A vector of integer pointers to the arrays of data
 		std::shared_ptr <header> header_ptr; //!< A pointer to a header object, which contains the details regarding the construction of the header
 		
@@ -187,7 +188,8 @@ namespace io
 	 * 
 	 * This class is a simple implementation of the output class.
 	 *********************************************************************/
-	class simple_output : public output
+	template <class datatype>
+	class simple_output : public output <datatype>
 	{
 	public:
 		/*!*******************************************************************
@@ -195,7 +197,8 @@ namespace io
 		 * \param i_n The integer number of points in the data
 		 * \param i_output_every An integer number of steps between outputs
 		 *********************************************************************/
-		simple_output (std::string i_file_name, int i_n, int i_output_every = 1) : output (new header, i_n) {
+		simple_output (std::string i_file_name, int i_n, int i_output_every = 1) : 
+		output <datatype> (new header, i_n) {
 			file_name = i_file_name;
 			output_count = 0;
 			output_every = i_output_every;
@@ -208,7 +211,7 @@ namespace io
 		 *********************************************************************/
 		void to_file () {
 			if (output_count % output_every == 0) {
-				std_to_file (file_name);
+				output <datatype>::std_to_file (file_name);
 			}
 			++output_count;
 		} 
@@ -225,7 +228,8 @@ namespace io
 	 * This class is an implementation of the output class that increments 
 	 * the file number with each iteration.
 	 *********************************************************************/
-	class incremental_output : public output
+	template <class datatype>
+	class incremental_output : public output <datatype>
 	{
 	public:
 		/*!*******************************************************************
@@ -236,7 +240,8 @@ namespace io
 		 * \param i_n The integer number of points in the data
 		 * \param i_output_every An integer number of steps between outputs
 		 *********************************************************************/
-		incremental_output (std::string i_file_base, std::string i_file_extension, int i_int_width, header *i_header_ptr, int i_n, int i_output_every) : output (i_header_ptr, i_n) {
+		incremental_output (std::string i_file_base, std::string i_file_extension, int i_int_width, header *i_header_ptr, int i_n, int i_output_every) : 
+		output <datatype> (i_header_ptr, i_n) {
 			output_count = 0;
 			output_every = i_output_every;
 			int_width = i_int_width;
@@ -256,7 +261,7 @@ namespace io
 		 *********************************************************************/
 		void to_file () {
 			if (output_count % output_every == 0) {
-				output::std_to_file (generate_file_name ());
+				output <datatype>::std_to_file (generate_file_name ());
 			}
 			++output_count;
 		} 

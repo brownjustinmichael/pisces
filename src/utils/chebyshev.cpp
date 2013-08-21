@@ -14,7 +14,9 @@
 #include "../bases/collocation.hpp"
 #include "chebyshev.hpp"
 
-chebyshev_grid::chebyshev_grid (int i_M, int i_N, double i_scale, double i_width) : bases::collocation_grid (3, i_M, i_N) {
+template <class datatype>
+chebyshev_grid <datatype>::chebyshev_grid (int i_M, int i_N, datatype i_scale, datatype i_width) : 
+bases::collocation_grid <datatype> (3, i_M, i_N) {
 	int d, m, k;
 	scale = i_scale;
 	width = i_width;
@@ -26,7 +28,7 @@ chebyshev_grid::chebyshev_grid (int i_M, int i_N, double i_scale, double i_width
 	for (d = 0; d < 3; ++d) {
 		for (k = 0; k < i_N; ++k) {
 			for (m = 0; m < i_M; ++m) {
-				index (d, m, k) = recursion (d, m, k);
+				bases::collocation_grid <datatype>::index (d, m, k) = recursion (d, m, k);
 				exists (d, m, k) = true;
 			}
 		}
@@ -34,22 +36,23 @@ chebyshev_grid::chebyshev_grid (int i_M, int i_N, double i_scale, double i_width
 	
 	for (k = 0; k < i_N; ++k) {
 		for (m = 0; m < i_M; ++m) {
-			index (1, m, k) *= 2.0 / width;
-			index (2, m, k) *= 2.0 / width * 2.0 / width;
+			bases::collocation_grid <datatype>::index (1, m, k) *= 2.0 / width;
+			bases::collocation_grid <datatype>::index (2, m, k) *= 2.0 / width * 2.0 / width;
 		}
 	}
 	
 	for (d = 0; d < 3; ++d) {
 		for (k = 0; k < i_N; ++k) {
-			index (d, 0, k) /= 2.0;
-			index (d, i_M - 1, k) /= 2.0;
+			bases::collocation_grid <datatype>::index (d, 0, k) /= 2.0;
+			bases::collocation_grid <datatype>::index (d, i_M - 1, k) /= 2.0;
 		}
 	}
 	
 	TRACE ("Instantiated...");
 }
 
-double chebyshev_grid::recursion (int d, int m, int k) {		
+template <class datatype>
+datatype chebyshev_grid <datatype>::recursion (int d, int m, int k) {		
 	assert (d >= 0);
 	assert (d < 3);
 	assert (m >= 0);
@@ -58,7 +61,7 @@ double chebyshev_grid::recursion (int d, int m, int k) {
 	// Use the recursion relations to calculate the correct value of the polynomial at the collocation point
 	if (exists (d, m, k)) {
 		// This value has already been calculated
-		return index (d, m, k);
+		return bases::collocation_grid <datatype>::index (d, m, k);
 	} else if ((d == 2 && (m == 0 || m == 1)) || (d == 1 && m == 0)) {
 		// The first two polynomials of the second derivative and the first polynomial of the first derivative are 0.0
 		return 0.0;
@@ -83,4 +86,7 @@ double chebyshev_grid::recursion (int d, int m, int k) {
 		throw 0;
 	}
 }
+
+template class chebyshev_grid <double>;
+template class chebyshev_grid <float>;
 	

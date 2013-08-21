@@ -18,11 +18,6 @@
 #include "../bases/collocation.hpp"
 #include "../utils/utils.hpp"
 
-namespace bases
-{
-	class element;
-} /* bases */
-
 namespace one_d
 {
 	namespace chebyshev
@@ -32,26 +27,31 @@ namespace one_d
 		* 
 		* This implementation calculates the derivatives at the current time
 		*********************************************************************/
-		class explicit_diffusion : public bases::explicit_plan
+		template <class datatype>
+		class explicit_diffusion : public bases::explicit_plan <datatype>
 		{
 		public:
 			/*!*******************************************************************
-			* \param i_coeff A double containing the coefficient in front of the diffusion term in the differential equation
+			* \param i_coeff A datatype containing the coefficient in front of the diffusion term in the differential equation
 			* \param i_grid a shared pointer to the collocation_grid, which must be defined for the second derivative
-			* \copydoc bases::explicit_plan::explicit_plan ()
+			* \copydoc bases::explicit_plan <datatype>::explicit_plan ()
 			*********************************************************************/
-			explicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, bases::collocation_grid* i_grid, int i_name_in, int i_name_out = null, int i_flags = 0x00);
+			explicit_diffusion (bases::element <datatype>* i_element_ptr, datatype i_coeff, int i_n, bases::collocation_grid <datatype>* i_grid, int i_name_in, int i_name_out = null, int i_flags = 0x00);
 
 			virtual ~explicit_diffusion () {}
 
 			/*!*******************************************************************
-			* \copydoc bases::explicit_plan::execute ()
+			* \copydoc bases::explicit_plan <datatype>::execute ()
 			*********************************************************************/
 			void execute ();
 
 		private:
-			double coeff; //!< A double that represents the coefficient in front of the diffusion term in the differential equation
-			bases::collocation_grid* grid; //!< A pointer to a collocation grid that contains the the Chebyshev values
+			using bases::explicit_plan <datatype>::n;
+			using bases::explicit_plan <datatype>::data_in;
+			using bases::explicit_plan <datatype>::data_out;
+			
+			datatype coeff; //!< A datatype that represents the coefficient in front of the diffusion term in the differential equation
+			bases::collocation_grid <datatype>* grid; //!< A pointer to a collocation grid that contains the the Chebyshev values
 		};
 
 		/*!*******************************************************************
@@ -59,26 +59,31 @@ namespace one_d
 		 * 
 		 * This implementation adds the diffusion terms to the implicit matrix.
 		 *********************************************************************/
-		class implicit_diffusion : public bases::implicit_plan
+		template <class datatype>
+		class implicit_diffusion : public bases::implicit_plan <datatype>
 		{
 		public:
 			/*!*******************************************************************
-			 * \param i_coeff A double containing the coefficient in front of the diffusion term in the differential equation
+			 * \param i_coeff A datatype containing the coefficient in front of the diffusion term in the differential equation
 			 * \param i_grid a shared pointer to the collocation_grid, which must be defined for the second derivative
 			 * 
-			 * \copydetails bases::implicit_plan::implicit_plan ()
+			 * \copydetails bases::implicit_plan <datatype>::implicit_plan ()
 			 *********************************************************************/
-			implicit_diffusion (bases::element* i_element_ptr, double i_coeff, int i_n, bases::collocation_grid* i_grid, double *i_matrix, int i_flags = 0x00);
+			implicit_diffusion (bases::element <datatype>* i_element_ptr, datatype i_coeff, int i_n, bases::collocation_grid <datatype>* i_grid, datatype *i_matrix, int i_flags = 0x00);
 
 			virtual ~implicit_diffusion () {}
 
 			/*!*******************************************************************
-			 * \copydoc bases::implicit_plan::execute ()
+			 * \copydoc bases::implicit_plan <datatype>::execute ()
 			 *********************************************************************/
 			void execute ();
 
 		private:
-			double coeff; //!< A double that represents the coefficient in front of the diffusion term in the differential equation
+			using bases::implicit_plan <datatype>::n;
+			using bases::implicit_plan <datatype>::grid;
+			using bases::implicit_plan <datatype>::matrix;
+			
+			datatype coeff; //!< A datatype that represents the coefficient in front of the diffusion term in the differential equation
 		};
 	} /* chebyshev */
 } /* oned */

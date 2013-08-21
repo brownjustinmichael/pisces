@@ -24,17 +24,17 @@
 
 namespace bases
 {	
-	// template <class datatype>
 	/*!*******************************************************************
 	 * \brief This is the basic class of the code
 	 * 
 	 * A true run will contain multiple elements linked together at the 
 	 * boundaries. This code is designed to work by the collocation method.
 	 *********************************************************************/
+	template <class datatype>
 	class element
 	{
 	public:
-		friend class plan;
+		friend class plan <datatype>;
 		/*!*******************************************************************
 		 * \brief An iterator for the element class
 		 * 
@@ -50,7 +50,7 @@ namespace bases
 		* \param i_messenger_ptr A pointer to a messenger object
 		* \param i_flags An integer set of execution flags
 		*********************************************************************/
-		element (int i_name, int n_boundaries, io::parameter_map& i_inputParams, messenger* i_messenger_ptr, int i_flags) : inputParams (i_inputParams) {
+		element (int i_name, int n_boundaries, io::parameter_map& i_inputParams, messenger <datatype>* i_messenger_ptr, int i_flags) : inputParams (i_inputParams) {
 			name = i_name;
 			boundary_weights.resize (n_boundaries);
 			inputParams = i_inputParams;
@@ -70,28 +70,28 @@ namespace bases
 		virtual ~element () {}
 		
 		/*!*******************************************************************
-		 * \brief Get the double reference to the named scalar
+		 * \brief Get the datatype reference to the named scalar
 		 * 
 		 * \param name The integer name from the index enumeration
 		 * 
 		 * This must be implemented in a subclass and will depend on the 
 		 * storage system.
 		 * 
-		 * \return A double reference to the first element of the named scalar
+		 * \return A datatype reference to the first element of the named scalar
 		 *********************************************************************/
-		virtual double& operator[] (int name) = 0;
+		virtual datatype& operator[] (int name) = 0;
 	
 		/*!*******************************************************************
-		 * \brief Get the double reference to the given index of the named scalar
+		 * \brief Get the datatype reference to the given index of the named scalar
 		 * 
 		 * \param name The integer name from the index enumeration
 		 * \param index The integer index of interest	
 		 * 
 		 * For simplicity, this may need to be overloaded in higher dimensions.
 		 * 
-		 * \return A double reference to the given index of the named scalar
+		 * \return A datatype reference to the given index of the named scalar
 		 *********************************************************************/
-		virtual double& operator() (int name, int index = 0) {
+		virtual datatype& operator() (int name, int index = 0) {
 			return (&((*this) [name])) [index];
 		}
 		
@@ -124,7 +124,7 @@ namespace bases
 		 * 
 		 * TODO This assumes 1D n^3. Either the grid should be moved to a subclass or made more general
 		 *********************************************************************/
-		inline void set_grid (std::shared_ptr<collocation_grid> i_grid) {
+		inline void set_grid (std::shared_ptr <collocation_grid <datatype> > i_grid) {
 			grid = i_grid;
 		}
 
@@ -135,8 +135,12 @@ namespace bases
 		 * 
 		 * TODO This assumes 1 equation. It should be generalized for multiple equations.
 		 *********************************************************************/
-		inline void add_solver (std::shared_ptr<solver> i_solver) {
+		inline void add_solver (std::shared_ptr <solver <datatype> > i_solver) {
 			solvers.push_back (i_solver);
+		}
+		
+		inline void add_name (int i_name) {
+			names.push_back (i_name);
 		}
 
 		/*!*******************************************************************
@@ -146,7 +150,7 @@ namespace bases
 		 * 
 		 * TODO This assumes one scalar field. It should be generalized.
 		 *********************************************************************/
-		inline void add_transform (std::shared_ptr<plan> i_plan) {
+		inline void add_transform (std::shared_ptr<plan <datatype> > i_plan) {
 			transforms.push_back (i_plan);
 		}
 
@@ -155,7 +159,7 @@ namespace bases
 		 * 
 		 * \param i_plan A shared pointer to the plan to add
 		 *********************************************************************/
-		inline void add_pre_plan (std::shared_ptr <plan> i_plan) {
+		inline void add_pre_plan (std::shared_ptr <plan <datatype> > i_plan) {
 			TRACE ("Adding plan...");
 			pre_transform_plans.push_back (std::move (i_plan));
 			TRACE ("Added.");
@@ -166,7 +170,7 @@ namespace bases
 		 * 
 		 * \param i_plan A shared pointer to the plan to add
 		 *********************************************************************/
-		inline void add_post_plan (std::shared_ptr <plan> i_plan) {
+		inline void add_post_plan (std::shared_ptr <plan <datatype> > i_plan) {
 			TRACE ("Adding plan...");
 			post_transform_plans.push_back (std::move (i_plan));
 			TRACE ("Added.");
@@ -177,7 +181,7 @@ namespace bases
 		 * 
 		 * \param i_plan A shared pointer to the plan to add
 		 *********************************************************************/
-		inline void add_implicit_plan (std::shared_ptr <plan> i_plan) {
+		inline void add_implicit_plan (std::shared_ptr <plan <datatype> > i_plan) {
 			TRACE ("Adding implicit plan...");
 			implicit_plans.push_back (std::move (i_plan));
 			TRACE ("Added.");
@@ -187,9 +191,9 @@ namespace bases
 		 * \brief Initialize the scalar name
 		 * 
 		 * \param name The integer name index to be initialized
-		 * \param initial_conditions The double array of initial conditions
+		 * \param initial_conditions The datatype array of initial conditions
 		 *********************************************************************/
-		virtual void initialize (int name, double* initial_conditions = NULL) = 0;
+		virtual void initialize (int name, datatype* initial_conditions = NULL) = 0;
 		
 		/*!*******************************************************************
 		 * \brief Reset every scalar index < 0 and converts to spectral space
@@ -238,7 +242,7 @@ namespace bases
 		}
 		
 		virtual void solve () {
-			double t_timestep;
+			datatype t_timestep;
 			t_timestep = calculate_timestep ();
 			messenger_ptr->min (&t_timestep);
 			
@@ -264,9 +268,9 @@ namespace bases
 		 * This method should be overwritten in the final class. It uses the 
 		 * knowledge of the user to beat numerical instabilities.
 		 * 
-		 * \return The double recommended timestep for the next timestep
+		 * \return The datatype recommended timestep for the next timestep
 		 ************************************************************************/
-		virtual double calculate_timestep () = 0;
+		virtual datatype calculate_timestep () = 0;
 		
 		/*!*******************************************************************
 		 * \brief Execute the boundary conditions
@@ -300,34 +304,34 @@ namespace bases
 	protected:
 		int name; //!< An integer representation of the element, to be used in file output
 		io::parameter_map& inputParams; //!< The map that contains the input parameters
-		messenger* messenger_ptr; //!< A pointer to the messenger object
+		messenger <datatype>* messenger_ptr; //!< A pointer to the messenger object
 		
 		int flags; //!< An integer set of execution flags
 
-		double duration; //!< The double total simulated time
-		double timestep; //!< The double timestep length
+		datatype duration; //!< The datatype total simulated time
+		datatype timestep; //!< The datatype timestep length
 
 		std::vector <int> names; //!< A vector of integer name indices of the contained scalars
 		
-		std::shared_ptr<collocation_grid> grid; //!< A shared pointer to the collocation grid
+		std::shared_ptr <collocation_grid <datatype> > grid; //!< A shared pointer to the collocation grid
 		
-		std::shared_ptr<io::output> failsafe_dump; //!< An implementation to dump in case of failure
-		std::shared_ptr<io::output> normal_stream; //!< An implementation to output in normal space
-		std::shared_ptr<io::output> transform_stream; //!< An implementation to output in transform space
+		std::shared_ptr <io::output <datatype> > failsafe_dump; //!< An implementation to dump in case of failure
+		std::shared_ptr <io::output <datatype> > normal_stream; //!< An implementation to output in normal space
+		std::shared_ptr <io::output <datatype> > transform_stream; //!< An implementation to output in transform space
 
-		std::vector <double> boundary_weights; //!< A double vector of boundary weights
+		std::vector <datatype> boundary_weights; //!< A datatype vector of boundary weights
 
 		/*
 			TODO It may make marginal more sense to move boundary_weights to the messenger class...
 		*/
 
 	private:
-		std::vector<std::shared_ptr<plan>> transforms; //!< A shared pointer to the forward transform
-		std::vector<std::shared_ptr<solver>> solvers; //!< A vector of shared pointers to the matrix solvers
+		std::vector<std::shared_ptr<plan <datatype> > > transforms; //!< A shared pointer to the forward transform
+		std::vector<std::shared_ptr<solver <datatype> > > solvers; //!< A vector of shared pointers to the matrix solvers
 		
-		std::vector <std::shared_ptr <plan>> pre_transform_plans; //!< A vector of shared pointers of plans to be executed
-		std::vector <std::shared_ptr <plan>> post_transform_plans; //!< A vector of shared pointers of plans to be executed
-		std::vector <std::shared_ptr <plan>> implicit_plans; //!< A vector of shared pointers of plans to be executed
+		std::vector <std::shared_ptr <plan <datatype> > > pre_transform_plans; //!< A vector of shared pointers of plans to be executed
+		std::vector <std::shared_ptr <plan <datatype> > > post_transform_plans; //!< A vector of shared pointers of plans to be executed
+		std::vector <std::shared_ptr <plan <datatype> > > implicit_plans; //!< A vector of shared pointers of plans to be executed
 	};
 } /* bases */
 

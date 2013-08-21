@@ -35,6 +35,7 @@ namespace bases
 	 * to other elements. It may be dimension specific. There should only be 
 	 * one per thread.
 	 ************************************************************************/
+	template <class datatype>
 	class messenger
 	{
 	public:
@@ -128,7 +129,7 @@ namespace bases
 		virtual void add_boundary (int edge, int process);
 				
 		/*!**********************************************************************
-		 * \brief Add send action in the double queue
+		 * \brief Add send action in the datatype queue
 		 * 
 		 * Warning. This does not send the data immediately. This could be 
 		 * rewritten to save the information in a buffer, but it does not at 
@@ -136,13 +137,13 @@ namespace bases
 		 * be sent until an entire set of send/recv commands are queued. 
 		 * 
 		 * \param n The integer number of elements to send
-		 * \param data The double pointer to the data to send
+		 * \param data The datatype pointer to the data to send
 		 * \param edge The integer representation of the corresponding edge
 		 ************************************************************************/
-		virtual void send (int n, double* data, int edge);
+		virtual void send (int n, datatype* data, int edge);
 		
 		/*!**********************************************************************
-		 * \brief Add recv action in the double queue
+		 * \brief Add recv action in the datatype queue
 		 * 
 		 * Warning. This does not recv the data immediately. This could be 
 		 * rewritten to wait for the information, but it does not at 
@@ -150,10 +151,10 @@ namespace bases
 		 * arrive until an entire set of send/recv commands are queued. 
 		 * 
 		 * \param n The integer number of elements to recv
-		 * \param data The double pointer to the data to recv
+		 * \param data The datatype pointer to the data to recv
 		 * \param edge The integer representation of the corresponding edge
 		 ************************************************************************/
-		virtual void recv (int n, double* data, int edge);
+		virtual void recv (int n, datatype* data, int edge);
 
 		/*!**********************************************************************
 		 * \brief Add send action in the integer queue
@@ -188,9 +189,9 @@ namespace bases
 		 * 
 		 * This uses the messenger buffer.
 		 * 
-		 * \param data The double pointer to the double to minimize
+		 * \param data The datatype pointer to the datatype to minimize
 		 ************************************************************************/		
-		virtual void min (double* data);
+		virtual void min (datatype* data);
 		
 		/*!**********************************************************************
 		 * \brief Determine if all processes meet a condition
@@ -203,27 +204,27 @@ namespace bases
 		
 	private:
 		/*!**********************************************************************
-		 * \brief Check to see if an action in the double queue is ready to be sent
+		 * \brief Check to see if an action in the datatype queue is ready to be sent
 		 ************************************************************************/
-		virtual void double_check ();
+		virtual void data_check ();
 		
 		/*!**********************************************************************
-		 * \brief Check to see if an action in the double queue is ready to be sent
+		 * \brief Check to see if an action in the datatype queue is ready to be sent
 		 ************************************************************************/
 		virtual void int_check ();
 		
 		int id; //!< The integer id of the current process
 		int np; //!< The integer number of total processes
-		int double_iter; //!< The integer current location in the double queue
+		int data_iter; //!< The integer current location in the datatype queue
 		int int_iter; //!< The integer current location in the integer queue
 		
-		std::vector <double*> double_data_queue; //!< A double pointer vector containing the elements to send/recv
+		std::vector <datatype*> data_queue; //!< A datatype pointer vector containing the elements to send/recv
 		std::vector <int*> int_data_queue; //!< An integer pointer vector containing the elements to send/recv
 		
 		std::vector <int> n_queue; //!< An integer vector containing the number of elements to send/recv
 		std::vector <int> process_queue; //!< An integer vector containing the processes for send/recv
 		
-		std::vector <double> buffer; //!< A double vector to be used as a buffer if needed
+		std::vector <datatype> buffer; //!< A datatype vector to be used as a buffer if needed
 		std::vector <int> int_buffer; //!< An integer vector to be used as a buffer if needed
 	};
 } /* bases */

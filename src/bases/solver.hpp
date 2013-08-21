@@ -20,19 +20,18 @@ enum solver_flags {
 
 namespace bases
 {
-	class element;
-
 	/*!*******************************************************************
 	 * \brief A class designed to solve a matrix equation
 	 *********************************************************************/
-	class solver : public explicit_plan
+	template <class datatype>
+	class solver : public explicit_plan <datatype>
 	{
 	public:
 		/*!*******************************************************************
 		 * \copydoc explicit_plan::explicit_plan ()
 		 *********************************************************************/
-		solver (element* i_element_ptr, int i_n, int i_name_in, int i_name_out, int i_flags = 0x00) : 
-		explicit_plan (i_element_ptr, i_n, i_name_in, i_name_out, i_flags) {}
+		solver (element <datatype>* i_element_ptr, int i_n, int i_name_in, int i_name_out, int i_flags = 0x00) : 
+		explicit_plan <datatype> (i_element_ptr, i_n, i_name_in, i_name_out, i_flags) {}
 		
 		virtual ~solver () {}
 			
@@ -40,7 +39,7 @@ namespace bases
 		 * \brief Solve the matrix equation
 		 *********************************************************************/
 		virtual void execute () {
-			explicit_plan::execute ();
+			explicit_plan <datatype>::execute ();
 			if ((!(flags & factorized)) || !(*flags_ptr & factorized)) {
 				factorize ();
 			}
@@ -62,6 +61,9 @@ namespace bases
 			TRACE ("Factorizing");
 			flags |= factorized;
 		}
+		
+		using explicit_plan <datatype>::flags;
+		using explicit_plan <datatype>::flags_ptr;
 	};
 } /* bases */
 

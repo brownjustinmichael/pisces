@@ -57,9 +57,8 @@ namespace one_d
 {
 	namespace cuda
 	{
-		
-		fftw_cosine::fftw_cosine (bases::element* i_element_ptr, int i_n, int i_name_in, int i_name_out) : 
-		bases::explicit_plan (i_element_ptr, i_n, i_name_in, i_name_out) {
+		fftw_cosine::fftw_cosine (bases::element <double>* i_element_ptr, int i_n, int i_name_in, int i_name_out) : 
+		bases::explicit_plan <double> (i_element_ptr, i_n, i_name_in, i_name_out) {
 			TRACE ("Instantiating...");
 			HANDLE_ERROR (cudaMalloc ((void **) &data_real, 2 * n * sizeof (cufftDoubleReal)));
 			HANDLE_ERROR (cudaMalloc ((void **) &data_complex, n * sizeof (cufftDoubleComplex)));
@@ -77,7 +76,7 @@ namespace one_d
 		}
 		
 		void fftw_cosine::execute () {
-			bases::explicit_plan::execute ();
+			bases::explicit_plan <double>::execute ();
 			std::vector <cufftDoubleComplex> temp (n);
 			
 			HANDLE_ERROR (cudaMemcpy (data_real, data_in, n * sizeof (double), cudaMemcpyHostToDevice));

@@ -22,6 +22,7 @@ namespace bases
 	 * number of collocation points which can be called for little 
 	 * temporal expense.
 	 *********************************************************************/
+	template <class datatype>
 	class collocation_grid
 	{
 	public:
@@ -30,7 +31,21 @@ namespace bases
 		 * \param i_rows The integer number of rows in the grid
 		 * \param i_cols The integer number of columns in the grid
 		 *********************************************************************/
-		collocation_grid (int i_derivs, int i_rows, int i_cols);
+		collocation_grid (int i_derivs, int i_rows, int i_cols) {
+			rows = i_rows;
+			cols = i_cols;
+			derivs = i_derivs;
+
+			TRACE ("Instantiating...")
+
+			data.resize (derivs);
+
+			for (int i = 0; i < i_derivs; ++i) {
+				data [i].resize (i_rows * i_cols);
+			}
+
+			TRACE ("Instantiated...")
+		}
 	
 		virtual ~collocation_grid () {}
 	
@@ -43,7 +58,7 @@ namespace bases
 		 * 
 		 * \return The double value at the index
 		 *********************************************************************/
-		inline double& index (int deriv, int row, int col) {
+		inline datatype& index (int deriv, int row, int col) {
 			return data [deriv] [row * cols + col];
 		}
 	
@@ -57,7 +72,7 @@ namespace bases
 		 * 
 		 * \return A pointer to the first element of the double data array
 		 *********************************************************************/
-		inline double *get_data (int deriv) {
+		inline datatype* get_data (int deriv) {
 			return &(data [deriv] [0]);
 		}
 	
@@ -67,7 +82,7 @@ namespace bases
 		int derivs; //!< The integer number of derivatives deep the collocation grid runs
 	
 	private:
-		std::vector<std::vector<double> > data; //!< A double vector containing the collocation points
+		std::vector<std::vector<datatype> > data; //!< A double vector containing the collocation points
 	};
 } /* bases */
 

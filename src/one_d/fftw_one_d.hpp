@@ -13,11 +13,6 @@
 #include "../config.hpp"
 #include "../bases/plan.hpp"
 
-namespace bases
-{
-	class element;
-} /* bases */
-
 namespace one_d
 {		
 	/*!*******************************************************************
@@ -25,39 +20,30 @@ namespace one_d
 	 * 
 	 * \brief \copybrief bases::transform
 	 *********************************************************************/
-	class fftw_cosine : public bases::explicit_plan
+	template <class datatype>
+	class fftw_cosine : public bases::explicit_plan <datatype>
 	{
 	public:
 		/*!*******************************************************************
 		 * \copydoc bases::transform::transform ()
 		 *********************************************************************/
-		fftw_cosine (bases::element* i_element_ptr, int i_n, int i_name_in, int i_name_out = null, int i_flags = 0x00) : 
-		bases::explicit_plan (i_element_ptr, i_n, i_name_in, i_name_out, i_flags) {
-			scalar = 1.0 / sqrt (2.0 * (n - 1));
-			fourier_plan = fftw_plan_r2r_1d (n, data_in, data_out, FFTW_REDFT00, FFTW_ESTIMATE);
-		}
+		fftw_cosine (bases::element <datatype>* i_element_ptr, int i_n, int i_name_in, int i_name_out = null, int i_flags = 0x00);
 		
 		virtual ~fftw_cosine () {}
 		
 		/*!*******************************************************************
 		 * \copydoc bases::transform::execute ()
 		 *********************************************************************/
-		void execute () {
-			TRACE ("Executing...");
-			
-			bases::explicit_plan::execute ();
-			
-			fftw_execute (fourier_plan);
-			
-			for (int i = 0; i < n; ++i) {
-				data_out [i] *= scalar;
-			}
-			
-		}
+		void execute ();
 	
 	private:		
-		double scalar; //!< The scalar used after the transform (1 / sqrt (2 * (n - 1)))
+		using bases::explicit_plan <datatype>::n;
+		using bases::explicit_plan <datatype>::data_in;
+		using bases::explicit_plan <datatype>::data_out;
+		
+		datatype scalar; //!< The scalar used after the transform (1 / sqrt (2 * (n - 1)))
 		fftw_plan fourier_plan; //!< The fftw_plan object to be executed
+		fftwf_plan fourier_plan_float; //!< The fftw_plan object to be executed
 	};
 } /* one_d */
 

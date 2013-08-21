@@ -14,21 +14,8 @@
 
 namespace bases
 {
-	collocation_grid::collocation_grid (int i_derivs, int i_rows, int i_cols) {
-		rows = i_rows;
-		cols = i_cols;
-		derivs = i_derivs;
-
-		TRACE ("Instantiating...")
-
-		data.resize (derivs);
-
-		for (int i = 0; i < i_derivs; ++i) {
-			data [i].resize (i_rows * i_cols);
-		}
-
-		TRACE ("Instantiated...")
-	}
+	template class collocation_grid <double>;
+	template class collocation_grid <float>;
 } /* bases */
 
 #endif /* end of include guard: COLLOCATION_CPP_HV4P0UOP */

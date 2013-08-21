@@ -18,11 +18,6 @@ class cufftDoubleReal;
 class cufftDoubleComplex;
 #endif // __CUDACC__
 
-namespace bases
-{
-	class element;
-} /* bases */
-
 namespace one_d
 {
 	namespace cuda
@@ -30,20 +25,20 @@ namespace one_d
 		/*!*******************************************************************
 		 * An implementation of the transform class using FFTW3.
 		 * 
-		 * \brief \copybrief bases::explicit_plan
+		 * \brief \copybrief bases::explicit_plan <double>
 		 *********************************************************************/
-		class fftw_cosine : public bases::explicit_plan
+		class fftw_cosine : public bases::explicit_plan <double>
 		{
 		public:
 			/*!*******************************************************************
-			 * \copydoc bases::explicit_plan::explicit_plan ()
+			 * \copydoc bases::explicit_plan <double>::explicit_plan ()
 			 *********************************************************************/
-			fftw_cosine (bases::element* i_element_ptr, int i_n, int i_name_in, int i_name_out = null);
+			fftw_cosine (bases::element <double>* i_element_ptr, int i_n, int i_name_in, int i_name_out = null);
 		
 			virtual ~fftw_cosine ();
 		
 			/*!*******************************************************************
-			 * \copydoc bases::explicit_plan::execute ()
+			 * \copydoc bases::explicit_plan <double>::execute ()
 			 *********************************************************************/
 			void execute ();
 	

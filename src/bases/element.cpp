@@ -14,7 +14,8 @@
 
 namespace bases
 {
-	void element::run () {
+	template <class datatype>
+	void element <datatype>::run () {
 		TRACE ("Running...");
 		
 		implicit_reset ();
@@ -64,4 +65,7 @@ namespace bases
 			TRACE ("Update complete");
 		}
 	}
+	
+	template class element <double>;
+	template class element <float>;
 } /* bases */

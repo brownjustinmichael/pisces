@@ -12,7 +12,8 @@
 
 namespace bases
 {
-	plan::plan (element* i_element_ptr, int i_flags) :
+	template <class datatype>
+	plan <datatype>::plan (element <datatype>* i_element_ptr, int i_flags) :
 	element_ptr (i_element_ptr),
 	flags (i_flags) {
 		TRACE ("Instantiating...");
@@ -21,8 +22,9 @@ namespace bases
 		TRACE ("Instantiated.");
 	}
 	
-	explicit_plan::explicit_plan (element* i_element_ptr, int i_n, int i_name_in, int i_name_out, int i_flags) : 
-	plan (i_element_ptr, i_flags),
+	template <class datatype>
+	explicit_plan <datatype>::explicit_plan (element <datatype>* i_element_ptr, int i_n, int i_name_in, int i_name_out, int i_flags) : 
+	plan <datatype> (i_element_ptr, i_flags),
 	n (i_n) {
 		TRACE ("Instantiating...");
 		data_in = &((*i_element_ptr) [i_name_in]);
@@ -34,11 +36,22 @@ namespace bases
 		TRACE ("Instantiated.");
 	}
 	
-	void explicit_plan::execute () {
-		plan::execute ();
+	template <class datatype>
+	void explicit_plan <datatype>::execute () {
+		plan <datatype>::execute ();
 	}
 	
-	void implicit_plan::execute () {
-		plan::execute ();
+	template <class datatype>
+	void implicit_plan <datatype>::execute () {
+		plan <datatype>::execute ();
 	}
+	
+	template class plan <double>;
+	template class plan <float>;
+	
+	template class explicit_plan <double>;
+	template class explicit_plan <float>;
+	
+	template class implicit_plan <double>;
+	template class implicit_plan <float>;
 } /* bases */

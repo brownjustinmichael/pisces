@@ -81,7 +81,8 @@ namespace io
 		TRACE ("Constructed.");
 	}
 	
-	output::output (header *i_header_ptr, int i_n) {
+	template <class datatype>
+	output <datatype>::output (header *i_header_ptr, int i_n) {
 		TRACE ("Instantiating...");
 		
 		n = i_n;
@@ -91,27 +92,30 @@ namespace io
 		TRACE ("Instantiated.");
 	}
 	
-	void output::append (double *data_ptr) {
-		TRACE ("Appending double to output...");
+	template <class datatype>
+	void output <datatype>::append (datatype *data_ptr) {
+		TRACE ("Appending datatype to output...");
 		
 		++n_data_ptrs;
-		double_ptrs.push_back (data_ptr);
+		datatype_ptrs.push_back (data_ptr);
 		int_ptrs.push_back (NULL);
 		
 		TRACE ("Appended.");
 	}
 	
-	void output::append (int *data_ptr) {
+	template <class datatype>
+	void output <datatype>::append (int *data_ptr) {
 		TRACE ("Appending int to output...");
 		
 		++n_data_ptrs;
-		double_ptrs.push_back (NULL);
+		datatype_ptrs.push_back (NULL);
 		int_ptrs.push_back (data_ptr);
 		
 		TRACE ("Appended.");
 	}
 	
-	void output::std_to_file (std::string file_name) {
+	template <class datatype>
+	void output <datatype>::std_to_file (std::string file_name) {
 		int i, j;
 		std::ofstream file_stream; // A file stream object to be used when writing to file 
 		
@@ -133,10 +137,10 @@ namespace io
 		{
 			for (j = 0; j < n_data_ptrs; ++j)
 			{
-				if (double_ptrs [j] == NULL) {
+				if (datatype_ptrs [j] == NULL) {
 					file_stream << int_ptrs [j] [i];
 				} else {
-					file_stream << double_ptrs [j] [i];
+					file_stream << datatype_ptrs [j] [i];
 				}
 				file_stream << ' ';
 			}
@@ -148,7 +152,8 @@ namespace io
 		TRACE ("Output to file.");
 	}
 	
-	std::string incremental_output::generate_file_name () {
+	template <class datatype>
+	std::string incremental_output <datatype>::generate_file_name () {
 
 		TRACE ("Generating new file_name...");
 		
@@ -163,4 +168,13 @@ namespace io
 		
 		return std::string (new_file_name.str ());
 	}
+	
+	template class output <double>;
+	template class output <float>;
+	
+	template class simple_output <double>;
+	template class simple_output <float>;
+	
+	template class incremental_output <double>;
+	template class incremental_output <float>;
 } /* io */

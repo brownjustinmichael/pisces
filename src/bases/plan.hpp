@@ -49,7 +49,10 @@ enum plan_flags {
 
 namespace bases
 {
+	template <class datatype>
 	class element;
+		
+	template <class datatype>
 	class messenger;
 	
 	/*!*******************************************************************
@@ -59,13 +62,14 @@ namespace bases
 	* all the relevant data arrays to operate on. Each plan need be 
 	* constructed only once and can run any number of times each timestep.
 	*********************************************************************/
+	template <class datatype>
 	class plan
 	{
 	public:
 		/*!**********************************************************************
 		 * \param i_element_ptr A pointer to the associated element
 		 ************************************************************************/
-		plan (element* i_element_ptr, int flags = 0x00);
+		plan (element <datatype>* i_element_ptr, int flags = 0x00);
 		
 		virtual ~plan () {}
 		
@@ -82,11 +86,11 @@ namespace bases
 		}
 			
 	protected:
-		element* element_ptr; //!< A pointer to the element with which the plan is associated
+		element <datatype>* element_ptr; //!< A pointer to the element with which the plan is associated
 		int flags; // The integer plan execution flags
 		int default_flags; //!< An integer set of default flags to use in case the user does not specify any flags
 		int *flags_ptr; //!< A pointer to the integer element execution flags
-		messenger* messenger_ptr; //!< A pointer to the messenger associated with the element
+		messenger <datatype>* messenger_ptr; //!< A pointer to the messenger associated with the element
 	};
 
 	/*!*******************************************************************
@@ -94,7 +98,8 @@ namespace bases
 	 * 
 	 * These plans take input and produce output.
 	 *********************************************************************/
-	class explicit_plan : public plan
+	template <class datatype>
+	class explicit_plan : public plan <datatype>
 	{
 	public:
 		/*!*******************************************************************
@@ -103,7 +108,7 @@ namespace bases
 		 * \param i_name_out The integer scalar index of the output
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		explicit_plan (element* i_element_ptr, int i_n, int i_name_in, int i_name_out = null, int flags = 0x00);
+		explicit_plan (element <datatype>* i_element_ptr, int i_n, int i_name_in, int i_name_out = null, int flags = 0x00);
 	
 		virtual ~explicit_plan () {}
 	
@@ -114,8 +119,8 @@ namespace bases
 		
 	protected:
 		int n; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
-		double* data_in; //!< A double pointer to the input data
-		double* data_out; //!< A double pointer to the output data
+		datatype* data_in; //!< A datatype pointer to the input data
+		datatype* data_out; //!< A datatype pointer to the output data
 	};
 	
 	/*!*******************************************************************
@@ -123,17 +128,18 @@ namespace bases
 	 * 
 	 * These plans produce output in a square matrix but take no input.
 	 *********************************************************************/
-	class implicit_plan : public plan
+	template <class datatype>
+	class implicit_plan : public plan <datatype>
 	{
 	public:
 		/*!*******************************************************************
 		 * \param i_n The integer number of elements in a row of the square i_matrix
 		 * \param i_grid A shared pointer to the collocation grid object
-		 * \param i_matrix The double matrix to be updated
+		 * \param i_matrix The datatype matrix to be updated
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		implicit_plan (element* i_element_ptr, int i_n, bases::collocation_grid* i_grid, double *i_matrix, int i_flags = 0x00) : 
-		plan (i_element_ptr, i_flags), 
+		implicit_plan (element <datatype>* i_element_ptr, int i_n, collocation_grid <datatype>* i_grid, datatype *i_matrix, int i_flags = 0x00) : 
+		plan <datatype> (i_element_ptr, i_flags), 
 		n (i_n),
 		grid (i_grid),
 		matrix (i_matrix) {}
@@ -147,8 +153,8 @@ namespace bases
 		
 	protected:
 		int n; //!< An integer number of data elements
-		bases::collocation_grid* grid; //!< A shared pointer to the grid
-		double *matrix; //!< A double pointer to the input data
+		collocation_grid <datatype>* grid; //!< A shared pointer to the grid
+		datatype *matrix; //!< A datatype pointer to the input data
 	};
 } /* bases */
 

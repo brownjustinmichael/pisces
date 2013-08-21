@@ -40,17 +40,18 @@ namespace one_d
 	 * storage, indexing facilities, and failsafe_dump output. The plans should be added in a 
 	 * further subclass.
 	 *********************************************************************/
-	class element : public bases::element
+	template <class datatype>
+	class element : public bases::element <datatype>
 	{
 	public:	
 		/*!*******************************************************************
 		 * \param i_n The number of data elements in each scalar
-		 * \param i_position_0 The double position of index excess_0
-		 * \param i_position_n The double position of index n - 1 - excess_n
-		 * \copydoc bases::element::element ()
+		 * \param i_position_0 The datatype position of index excess_0
+		 * \param i_position_n The datatype position of index n - 1 - excess_n
+		 * \copydoc bases::element <datatype>::element ()
 		 *********************************************************************/
-		element (int i_n, double i_position_0, double i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
-		bases::element (i_name, 2, i_inputParams, i_messenger_ptr, i_flags) {
+		element (int i_n, datatype i_position_0, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger <datatype>* i_messenger_ptr, int i_flags) : 
+		bases::element <datatype> (i_name, 2, i_inputParams, i_messenger_ptr, i_flags) {
 			n = i_n;
 			position_0 = i_position_0;
 			position_n = i_position_n;
@@ -62,20 +63,20 @@ namespace one_d
 			
 			std::ostringstream convert;
 			convert << name;
-			failsafe_dump = std::make_shared <io::simple_output> (io::simple_output ("dump_" + convert.str () + ".dat", n));
+			failsafe_dump = std::make_shared <io::simple_output <datatype> > (io::simple_output <datatype>  ("dump_" + convert.str () + ".dat", n));
 			failsafe_dump->append (&cell [0]);
 		}
 		
 		virtual ~element () {}
 	
 		/*!*******************************************************************
-		 * \brief Get the double reference to the named scalar
+		 * \brief Get the datatype reference to the named scalar
 		 * 
 		 * \param name The integer name from the index enumeration
 		 * 
-		 * \return A double reference to the first element of the named scalar
+		 * \return A datatype reference to the first element of the named scalar
 		 *********************************************************************/
-		inline double& operator[] (int name) {
+		inline datatype& operator[] (int name) {
 			if (scalars [name].size () == (unsigned int) 0) {
 				initialize (name);
 			}
@@ -83,11 +84,11 @@ namespace one_d
 		}
 	
 		/*!*******************************************************************
-		 * \copydoc bases::element::initialize ()
+		 * \copydoc bases::element <datatype>::initialize ()
 		 *********************************************************************/
-		virtual void initialize (int name, double* initial_conditions = NULL) {
+		virtual void initialize (int name, datatype* initial_conditions = NULL) {
 			if (scalars [name].size () == (unsigned int) 0) {
-				names.push_back (name);
+				bases::element <datatype>::add_name (name);
 				scalars [name].resize (n, 0.0);
 			}
 			if (initial_conditions) {
@@ -99,12 +100,11 @@ namespace one_d
 		}
 		
 		/*!*******************************************************************
-		 * \copydoc bases::element::explicit_reset ()
+		 * \copydoc bases::element <datatype>::explicit_reset ()
 		 *********************************************************************/
 		inline void explicit_reset () {
-			bases::element::explicit_reset ();
-			bases::element::iterator iter;
-			for (iter = begin (); iter != end (); ++iter) {
+			bases::element <datatype>::explicit_reset (); 
+			for (iterator iter = bases::element <datatype>::begin (); iter != bases::element <datatype>::end (); ++iter) {
 				if (*iter < 0) {
 					utils::scale (n, 0.0, &((*this) [*iter]));
 				}
@@ -112,30 +112,36 @@ namespace one_d
 		}
 		
 		/*!*******************************************************************
-		 * \copydoc bases::element::execute_boundaries ()
+		 * \copydoc bases::element <datatype>::execute_boundaries ()
 		 *********************************************************************/
 		inline void execute_boundaries () {
 			if (messenger_ptr->linked (edge_0)) {
-				for (iterator iter = begin (); iter != end (); ++iter) {
+				for (iterator iter = bases::element <datatype>::begin (); iter != bases::element <datatype>::end (); ++iter) {
 					(*this) (*iter, 0) = fixed_points_0 [*iter];
 				}
 			}
 			if (messenger_ptr->linked (edge_n)) {
-				for (iterator iter = begin (); iter != end (); ++iter) {
+				for (iterator iter = bases::element <datatype>::begin (); iter != bases::element <datatype>::end (); ++iter) {
 					(*this) (*iter, n - 1) = fixed_points_n [*iter];
 				}
 			}
 		}
 		
 	protected:
+		using bases::element <datatype>::name;
+		using bases::element <datatype>::names;
+		using bases::element <datatype>::failsafe_dump;
+		using bases::element <datatype>::messenger_ptr;
+		typedef typename bases::element <datatype>::iterator iterator;
+		
 		int n; //!< The number of elements in each 1D array
-		double position_0; //!< The double position of index 0
-		double position_n; //!< The double position of index n - 1
+		datatype position_0; //!< The datatype position of index 0
+		datatype position_n; //!< The datatype position of index n - 1
 		std::vector<int> cell; //!< An integer array for tracking each cell number for output
 
-		std::map <int, std::vector <double>> scalars; //!< A vector of scalar vectors
-		std::map <int, double> fixed_points_0; //!< The initial values of the scalars at index 0
-		std::map <int, double> fixed_points_n; //!< The initial values of the scalars at index n - 1
+		std::map <int, std::vector <datatype>> scalars; //!< A vector of scalar vectors
+		std::map <int, datatype> fixed_points_0; //!< The initial values of the scalars at index 0
+		std::map <int, datatype> fixed_points_n; //!< The initial values of the scalars at index n - 1
 		
 		/*
 			TODO Perhaps there's a better way to handle the fixed points
@@ -147,17 +153,18 @@ namespace one_d
 		/*!*******************************************************************
 		 * \brief A Chebyshev implementation of the 1D element class
 		 *********************************************************************/
-		class element : public one_d::element
+		template <class datatype>
+		class element : public one_d::element <datatype>
 		{
 		public:
 			/*!*******************************************************************
 			 * \copydoc one_d::element::element ()
 			 *********************************************************************/
-			element (int i_n, double i_position_0, double i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
-			one_d::element (i_n, i_position_0, i_position_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
+			element (int i_n, datatype i_position_0, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger <datatype>* i_messenger_ptr, int i_flags) : 
+			one_d::element <datatype> (i_n, i_position_0, i_position_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
 				initialize (position);
-				set_grid (std::make_shared<chebyshev_grid> (chebyshev_grid (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), position_0 - position_n)));
+				one_d::element <datatype>::set_grid (std::make_shared <chebyshev_grid <datatype> > (chebyshev_grid <datatype> (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), position_0 - position_n)));
 				TRACE ("Instantiated.");
 			}
 			virtual ~element () {}
@@ -165,24 +172,24 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc one_d::element::initialize ()
 			 *********************************************************************/
-			virtual void initialize (int name, double* initial_conditions = NULL) {
+			virtual void initialize (int name, datatype* initial_conditions = NULL) {
 				TRACE ("Initializing " << name);
 				if (name == position && !initial_conditions) {
-					double pioN = std::acos (-1.0) / (n - 1);
-					double scale = (position_0 - position_n) / 2.0;
-					double initial_position = (position_0 + position_n) / 2.0;
-					std::vector <double> init (n);
+					datatype pioN = std::acos (-1.0) / (n - 1);
+					datatype scale = (position_0 - position_n) / 2.0;
+					datatype initial_position = (position_0 + position_n) / 2.0;
+					std::vector <datatype> init (n);
 					for (int i = 0; i < n; ++i) {
 						init [i] = scale * std::cos (i * pioN) + initial_position;
 					}
-					one_d::element::initialize (name, &init [0]);
+					one_d::element <datatype>::initialize (name, &init [0]);
 				} else if (name == velocity && !initial_conditions){
-					double scale = inputParams["init_cond_scale"].asDouble;
-					double width = inputParams["init_cond_width"].asDouble;
-					double mean = inputParams["init_cond_mean"].asDouble;
-					double sigma = inputParams["init_cond_sigma"].asDouble;
-					std::vector <double> init (n);
-					double height, temp;
+					datatype scale = inputParams["init_cond_scale"].asDouble;
+					datatype width = inputParams["init_cond_width"].asDouble;
+					datatype mean = inputParams["init_cond_mean"].asDouble;
+					datatype sigma = inputParams["init_cond_sigma"].asDouble;
+					std::vector <datatype> init (n);
+					datatype height, temp;
 					height = std::max (scale * std::exp (- (width / 2.0 - mean) * (width / 2.0 - mean) / 2.0 / sigma / sigma), scale * std::exp (- (- width / 2.0 - mean) * (- width / 2.0 - mean) / 2.0 / sigma / sigma));
 					for (int i = 0; i < n; ++i) {
 						temp = scale * std::exp (- ((*this) (position, i) - mean) * ((*this) (position, i) - mean) / 2.0 / sigma / sigma) - height;
@@ -192,12 +199,18 @@ namespace one_d
 							init [i] = 0.0;
 						}
 					}
-					one_d::element::initialize (name, &init [0]);
+					one_d::element <datatype>::initialize (name, &init [0]);
 				} else {
-					one_d::element::initialize (name, initial_conditions);
+					one_d::element <datatype>::initialize (name, initial_conditions);
 				}
 				TRACE ("Initialized.");
 			}
+			
+		protected:
+			using one_d::element <datatype>::position_0;
+			using one_d::element <datatype>::position_n;
+			using one_d::element <datatype>::n;
+			using one_d::element <datatype>::inputParams;
 		};
 		
 		/*!*******************************************************************
@@ -206,7 +219,8 @@ namespace one_d
 		 * This class contains a full element's capacity to run a single 
 		 * element diffusion in 1D with constant timestep.
 		 *********************************************************************/
-		class advection_diffusion_element : public element
+		template <class datatype>
+		class advection_diffusion_element : public element <datatype>
 		{
 		public:
 			/*!*******************************************************************
@@ -214,7 +228,7 @@ namespace one_d
 			 * \param i_excess_n The integer number of points evaluated in the adjacent element
 			 * \copydoc element::element ()
 			 *********************************************************************/
-			advection_diffusion_element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags);
+			advection_diffusion_element (int i_n, datatype i_position_0, datatype i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_inputParams, bases::messenger <datatype>* i_messenger_ptr, int i_flags);
 			
 			virtual ~advection_diffusion_element () {}
 		
@@ -222,42 +236,64 @@ namespace one_d
 			 * \copydoc element::implicit_reset ()
 			 *********************************************************************/
 			inline void implicit_reset () {
-				element::implicit_reset ();
+				element <datatype>::implicit_reset ();
 			
 				if (!(flags & factorized)) {
 					utils::scale (n * n, 0.0, &matrix [0]);
 				}
 			}
 			
-			virtual double calculate_timestep ();
+			virtual datatype calculate_timestep ();
 		
 		private:
-			std::vector<double> matrix; //!< A vector containing the double matrix used in the implicit solver
-			std::vector<double> temp_matrix; //!< A vector containing the double matrix used in the implicit solver
+			using element <datatype>::n;
+			using element <datatype>::flags;
+			using element <datatype>::name;
+			using element <datatype>::normal_stream;
+			using element <datatype>::cell;
+			using element <datatype>::timestep;
+			using element <datatype>::boundary_weights;
+			using element <datatype>::inputParams;
+			using element <datatype>::grid;
+			typedef typename element <datatype>::iterator iterator;
+		
+			std::vector<datatype> matrix; //!< A vector containing the datatype matrix used in the implicit solver
+			std::vector<datatype> temp_matrix; //!< A vector containing the datatype matrix used in the implicit solver
 		};
 		
-		class cuda_element : public element
+		template <class datatype>
+		class cuda_element : public element <datatype>
 		{
 		public:
-			cuda_element (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_input_Params, bases::messenger* i_messenger_ptr, int i_flags);
+			cuda_element (int i_n, datatype i_position_0, datatype i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_input_Params, bases::messenger <datatype>* i_messenger_ptr, int i_flags);
 			
 			virtual ~cuda_element () {}
 			
 			virtual void setup ();
 		
 			inline void implicit_reset () {
-				element::implicit_reset ();
+				element <datatype>::implicit_reset ();
 				
 				if (!(flags & factorized)) {
 					utils::scale (n * n, 0.0, &matrix [0]);
 				}
 			}
 			
-			virtual double calculate_timestep ();
+			virtual datatype calculate_timestep ();
 		
 		private:
+			using element <datatype>::n;
+			using element <datatype>::flags;
+			using element <datatype>::name;
+			using element <datatype>::normal_stream;
+			using element <datatype>::cell;
+			using element <datatype>::timestep;
+			using element <datatype>::boundary_weights;
+			using element <datatype>::inputParams;
+			using element <datatype>::grid;
+
 			int excess_0, excess_n;
-			std::vector<double> matrix; //!< A vector containing the double matrix used in the implicit solver
+			std::vector<datatype> matrix; //!< A vector containing the datatype matrix used in the implicit solver
 		};
 	} /* chebyshev */
 } /* one_d */

@@ -20,24 +20,29 @@
  * This collocation grid stores the N collocation points for up to the
  * Mth order Chebyshev polynomial and its first and second derivatives
  *********************************************************************/
-class chebyshev_grid : public bases::collocation_grid
+template <class datatype>
+class chebyshev_grid : public bases::collocation_grid <datatype>
 {
 public:
 	/*!*******************************************************************
 	 * \param i_M The integer max order of Chebyshev polynomial
 	 * \param i_N The integer number of collocation points
-	 * \param i_scale A double by which the grid should be scaled
-	 * \param i_width The double width of the collocation region
+	 * \param i_scale A datatype by which the grid should be scaled
+	 * \param i_width The datatype width of the collocation region
 	 *********************************************************************/
-	chebyshev_grid (int i_M, int i_N, double i_scale = 1.0, double i_width = 2.0);
+	chebyshev_grid (int i_M, int i_N, datatype i_scale = 1.0, datatype i_width = 2.0);
 	
 	virtual ~chebyshev_grid () {};
 	
 private:
-	double scale; //!< A double by which the collocation grid should be scaled
-	double width; //!< The double width of the collocation region
+	using bases::collocation_grid <datatype>::derivs;
+	using bases::collocation_grid <datatype>::rows;
+	using bases::collocation_grid <datatype>::cols;
+	
+	datatype scale; //!< A datatype by which the collocation grid should be scaled
+	datatype width; //!< The datatype width of the collocation region
 	std::vector<bool> exists_array; //!< A bool vector containing whether the points exist
-	double pioN; //!< The double 3.14159.../N, for use in calculations
+	datatype pioN; //!< The datatype 3.14159.../N, for use in calculations
 	
 	/*!*******************************************************************
  	* \brief A check to see whether an element exists, for recursion
@@ -63,9 +68,9 @@ private:
 	 * \param m The integer row to be indexed
 	 * \param k The integer column to be indexed
 	 * 
-	 * \return The double value of the index
+	 * \return The datatype value of the index
 	 *********************************************************************/
-	double recursion (int d, int m, int k);
+	datatype recursion (int d, int m, int k);
 };
 
 #endif /* end of include guard: COLLOCATION_HPP_HLJUSAEZ */

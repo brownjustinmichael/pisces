@@ -16,11 +16,12 @@
 
 namespace one_d
 {
-	advec::advec (bases::element* i_element_ptr, int i_n, double i_c, int i_name_in, int i_name_out, std::shared_ptr<bases::collocation_grid> i_grid) : bases::explicit_plan (i_element_ptr, i_n, i_name_in, i_name_out)
+	template <class datatype>
+	advec <datatype>::advec (bases::element <datatype>* i_element_ptr, int i_n, datatype i_c, int i_name_in, int i_name_out, std::shared_ptr<bases::collocation_grid <datatype>> i_grid) : bases::explicit_plan <datatype> (i_element_ptr, i_n, i_name_in, i_name_out)
 	{
 		TRACE ("Instantiating...");
 		grid = i_grid;
-		double pi = std::acos(-1.0);
+		datatype pi = std::acos(-1.0);
 		c = i_c;
 		
 		fac.resize(n,0.0);
@@ -34,11 +35,12 @@ namespace one_d
 		TRACE ("Instantiated.");
 	}
 
-	void advec::execute()
+	template <class datatype>
+	void advec <datatype>::execute()
 	{
-		double scalar = -c;
+		datatype scalar = -c;
 		
-		bases::plan::execute ();
+		bases::plan <datatype>::execute ();
 
 		// if (!(*flags_ptr | transformed)) {
 		// 		FATAL ("Linear Advection attempted in physical space.")
@@ -66,4 +68,7 @@ namespace one_d
 		}
 		data_out [n - 1] += (scalar/fac [n - 1])*(data_in [n - 1] - data_in [n - 2])*data_in [n - 1];
 	}
+	
+	template class advec <double>;
+	template class advec <float>;
 }
