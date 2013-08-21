@@ -9,7 +9,7 @@
 #include <math.h>
 #include <cufft.h>
 #include "fftw_one_d_cuda.hpp"
-#include "../utils/utils_cublas.cuh"
+#include "../../utils/utils_cublas.cuh"
 
 #define HANDLE_ERROR(status) \
 {cudaError_t result = status; \
@@ -63,13 +63,13 @@ namespace one_d
 			HANDLE_ERROR (cudaMalloc ((void **) &data_real, 2 * n * sizeof (cufftDoubleReal)));
 			HANDLE_ERROR (cudaMalloc ((void **) &data_complex, n * sizeof (cufftDoubleComplex)));
 			cu_plan = new cufftHandle;
-			HANDLE_CUFFT (cufftPlan1d(cu_plan, 2 * n - 2, CUFFT_D2Z, 1));
-			scalar = sqrt (1.0 / 2.0 / ((double) n - 2.0));
+			HANDLE_CUFFT (cufftPlan1d((cufftHandle*) cu_plan, 2 * n - 2, CUFFT_D2Z, 1));
+			scalar = sqrt (1.0 / 2.0 / ((double) n - 1.0));
 			TRACE ("Instantiated.");
 		}
 		
 		fftw_cosine::~fftw_cosine () {
-			cufftDestroy (*cu_plan);
+			// cufftDestroy (*((cufftHandle *) cu_plan));
 			// delete cu_plan;
 			cudaFree (data_real);
 			cudaFree (data_complex);
@@ -77,36 +77,18 @@ namespace one_d
 		
 		void fftw_cosine::execute () {
 			bases::explicit_plan <double>::execute ();
-			std::vector <cufftDoubleComplex> temp (n);
 			
 			HANDLE_ERROR (cudaMemcpy (data_real, data_in, n * sizeof (double), cudaMemcpyHostToDevice));
 			
-			for (int i = 0; i < n; ++i) {
-				DEBUG ("Transforming: " << data_in [i]);
-			}
-			
-			symmetrize <<<1, std::min (n, 512)>>> (n, data_real);
+			symmetrize <<<1, std::min (n, 512)>>> (n, (double *) data_real);
 			
 			HANDLE_ERROR (cudaDeviceSynchronize ());
 			
-			HANDLE_CUFFT (cufftPlan1d(cu_plan, 2 * n - 2, CUFFT_D2Z, 1));
-			/* Use the CUFFT plan to transform the signal in place. */
-			HANDLE_CUFFT (cufftExecD2Z(*cu_plan, data_real, data_complex));
-
-			cudaMemcpy (&temp [0], data_complex, n * sizeof (cufftDoubleComplex), cudaMemcpyDeviceToHost);
+			HANDLE_CUFFT (cufftExecD2Z(*((cufftHandle *) cu_plan), (double*) data_real, (cufftDoubleComplex*) data_complex));
 			
-			for (int i = 0; i < n; ++i) {
-				DEBUG ("REAL: " << temp [i].x);
-				DEBUG ("IMAG: " << temp [i].y);
-			}
-			
-			complex_to_real <<<1, std::min (n, 512)>>> (n, data_complex, data_real);
+			complex_to_real <<<1, std::min (n, 512)>>> (n, (cufftDoubleComplex*) data_complex, (double*) data_real);
 					
 			cudaMemcpy (data_out, data_real, n * sizeof (double), cudaMemcpyDeviceToHost);
-			
-			for (int i = 0; i < n; ++i) {
-				DEBUG ("Transformed: " << data_out [i]);
-			}
 			
 			for (int i = 0; i < n; ++i) {
 				data_out [i] *= scalar;

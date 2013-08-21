@@ -1,4 +1,4 @@
-file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 4:
+file /home/jumbrown/Dropbox/spectral_element/src/SConscript,line 10:
 	Configure(confdir = .sconf_temp)
 scons: Configure: Checking for C library log4cxx... 
 scons: Configure: ".sconf_temp/conftest_0.c" is up to date.
@@ -20,7 +20,7 @@ scons: Configure: The original builder output was:
   |
 scons: Configure: ".sconf_temp/conftest_0" is up to date.
 scons: Configure: The original builder output was:
-  |gcc -o .sconf_temp/conftest_0 .sconf_temp/conftest_0.o -L/usr/local/cuda/lib -lcudart -llog4cxx
+  |gcc -o .sconf_temp/conftest_0 .sconf_temp/conftest_0.o -L/usr/local/cuda/lib64 -lcudart -llog4cxx
   |
 scons: Configure: (cached) yes
 
@@ -44,12 +44,12 @@ scons: Configure: The original builder output was:
   |
 scons: Configure: ".sconf_temp/conftest_1" is up to date.
 scons: Configure: The original builder output was:
-  |gcc -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -L/usr/local/cuda/lib -lcudart -llog4cxx -lpthread
+  |gcc -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -L/usr/local/cuda/lib64 -lcudart -llog4cxx -lpthread
   |
 scons: Configure: (cached) yes
 
 
-file /Users/justinbrown/Dropbox/spectral_element/src/utils/SConscript,line 5:
+file /home/jumbrown/Dropbox/spectral_element/src/utils/SConscript,line 5:
 	Configure(confdir = .sconf_temp)
 scons: Configure: Checking for C library lapack... 
 scons: Configure: ".sconf_temp/conftest_2.c" is up to date.
@@ -71,7 +71,7 @@ scons: Configure: The original builder output was:
   |
 scons: Configure: ".sconf_temp/conftest_2" is up to date.
 scons: Configure: The original builder output was:
-  |gcc -o .sconf_temp/conftest_2 .sconf_temp/conftest_2.o -L/usr/local/cuda/lib -lcudart -llog4cxx -lpthread -lfftw3 -lfftw3f -lcufft -llapack
+  |gcc -o .sconf_temp/conftest_2 .sconf_temp/conftest_2.o -L/usr/local/cuda/lib64 -lcudart -llog4cxx -lpthread -llapack
   |
 scons: Configure: (cached) yes
 
@@ -95,7 +95,7 @@ scons: Configure: The original builder output was:
   |
 scons: Configure: ".sconf_temp/conftest_3" is up to date.
 scons: Configure: The original builder output was:
-  |gcc -o .sconf_temp/conftest_3 .sconf_temp/conftest_3.o -L/usr/local/cuda/lib -lcudart -llog4cxx -lpthread -lfftw3 -lfftw3f -lcufft -llapack -lblas
+  |gcc -o .sconf_temp/conftest_3 .sconf_temp/conftest_3.o -L/usr/local/cuda/lib64 -lcudart -llog4cxx -lpthread -llapack -lblas
   |
 scons: Configure: (cached) yes
 
@@ -119,7 +119,7 @@ scons: Configure: The original builder output was:
   |
 scons: Configure: ".sconf_temp/conftest_4" is up to date.
 scons: Configure: The original builder output was:
-  |gcc -o .sconf_temp/conftest_4 .sconf_temp/conftest_4.o -L/usr/local/cuda/lib -lcudart -llog4cxx -lpthread -lfftw3 -lfftw3f -lcufft -llapack -lblas -latlas
+  |gcc -o .sconf_temp/conftest_4 .sconf_temp/conftest_4.o -L/usr/local/cuda/lib64 -lcudart -llog4cxx -lpthread -llapack -lblas -latlas
   |
 scons: Configure: (cached) yes
 
@@ -143,7 +143,7 @@ scons: Configure: The original builder output was:
   |
 scons: Configure: ".sconf_temp/conftest_5" is up to date.
 scons: Configure: The original builder output was:
-  |gcc -o .sconf_temp/conftest_5 .sconf_temp/conftest_5.o -L/usr/local/cuda/lib -lcudart -llog4cxx -lpthread -lfftw3 -lfftw3f -lcufft -llapack -lblas -latlas -lcublas
+  |gcc -o .sconf_temp/conftest_5 .sconf_temp/conftest_5.o -L/usr/local/cuda/lib64 -lcudart -llog4cxx -lpthread -llapack -lblas -latlas -lcublas
   |
 scons: Configure: (cached) yes
 

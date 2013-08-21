@@ -63,7 +63,7 @@ namespace one_d
 			
 			std::ostringstream convert;
 			convert << name;
-			failsafe_dump = std::make_shared <io::simple_output <datatype> > (io::simple_output <datatype>  ("dump_" + convert.str () + ".dat", n));
+			failsafe_dump.reset (new io::simple_output <datatype>  ("dump_" + convert.str () + ".dat", n));
 			failsafe_dump->append (&cell [0]);
 		}
 		
@@ -150,6 +150,26 @@ namespace one_d
 
 	namespace chebyshev
 	{
+		/*!**********************************************************************
+		 * \brief Helper to calculate positions in chebyshev elements
+		 * 
+		 * \param n The integer number of data points
+		 * \param i The integer element index for the calculation
+		 * \param excess_0 The integer number of excess data points on the edge_0 side
+		 * \param position_0 The datatype position at index excess_0
+		 * \param excess_n The integer number of excess data points on the edge_n side
+		 * \param position_n The datatype position at index n - 1 - excess_n
+		 * 
+		 * \return The datatype position of the given index
+		 ************************************************************************/
+		template <class datatype>
+		datatype return_position (int n, int i, int excess_0, datatype position_0, int excess_n, datatype position_n) {
+			datatype pioN = std::acos (-1.0) / (n - 1);
+			datatype scale = (position_0 - position_n) / (std::cos (excess_0 * pioN) - std::cos ((n - 1 - excess_n) * pioN));
+			datatype initial = position_0 - scale * std::cos (excess_0 * pioN);
+			return scale * std::cos (i * pioN) + initial;
+		}
+		
 		/*!*******************************************************************
 		 * \brief A Chebyshev implementation of the 1D element class
 		 *********************************************************************/
@@ -164,7 +184,7 @@ namespace one_d
 			one_d::element <datatype> (i_n, i_position_0, i_position_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
 				initialize (position);
-				one_d::element <datatype>::set_grid (std::make_shared <chebyshev_grid <datatype> > (chebyshev_grid <datatype> (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), position_0 - position_n)));
+				one_d::element <datatype>::set_grid (new chebyshev_grid <datatype> (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), position_0 - position_n));
 				TRACE ("Instantiated.");
 			}
 			virtual ~element () {}
@@ -259,41 +279,6 @@ namespace one_d
 		
 			std::vector<datatype> matrix; //!< A vector containing the datatype matrix used in the implicit solver
 			std::vector<datatype> temp_matrix; //!< A vector containing the datatype matrix used in the implicit solver
-		};
-		
-		template <class datatype>
-		class cuda_element : public element <datatype>
-		{
-		public:
-			cuda_element (int i_n, datatype i_position_0, datatype i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_input_Params, bases::messenger <datatype>* i_messenger_ptr, int i_flags);
-			
-			virtual ~cuda_element () {}
-			
-			virtual void setup ();
-		
-			inline void implicit_reset () {
-				element <datatype>::implicit_reset ();
-				
-				if (!(flags & factorized)) {
-					utils::scale (n * n, 0.0, &matrix [0]);
-				}
-			}
-			
-			virtual datatype calculate_timestep ();
-		
-		private:
-			using element <datatype>::n;
-			using element <datatype>::flags;
-			using element <datatype>::name;
-			using element <datatype>::normal_stream;
-			using element <datatype>::cell;
-			using element <datatype>::timestep;
-			using element <datatype>::boundary_weights;
-			using element <datatype>::inputParams;
-			using element <datatype>::grid;
-
-			int excess_0, excess_n;
-			std::vector<datatype> matrix; //!< A vector containing the datatype matrix used in the implicit solver
 		};
 	} /* chebyshev */
 } /* one_d */

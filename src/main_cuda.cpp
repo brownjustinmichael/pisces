@@ -7,8 +7,7 @@
  ************************************************************************/
 
 #include "config.hpp"
-#include "one_d/element_one_d.hpp"
-#include "one_d/fftw_one_d_cuda.hpp"
+#include "one_d/cuda/element_one_d_cuda.hpp"
 
 int main (int argc, char *argv[])
 {	
@@ -16,12 +15,12 @@ int main (int argc, char *argv[])
 	
 	// Initialize messenger
 	bases::messenger <double> process_messenger (&argc, &argv, 2);
-
+	
 	id = process_messenger.get_id ();
 	n_elements = process_messenger.get_np ();
-
+	
 	log_config::update_name (id);
-
+	
 	// The program runs through the execution flags.
 	while ((argc > 1) && (argv [1] [0] == '-')) {
 		switch (argv [1] [1]) {
@@ -35,7 +34,7 @@ int main (int argc, char *argv[])
 	}
 	
 	TRACE ("Command line arguments read, beginning setup.");
-
+	
 		
 	io::parameter_map inputParams;
 	io::read_params_txt parameters ("../input/parameters.txt");
@@ -71,13 +70,11 @@ int main (int argc, char *argv[])
 	one_d::chebyshev::cuda_element <double> element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
 	
 	element.setup ();
-	
-	// one_d::cuda::fftw_cosine new_plan (&element, n, velocity);
-	
+
 	try {
-		// element.run ();
+		element.run ();
 		// new_plan.execute ();
-		element.transform_inverse ();
+		// element.transform_inverse ();
 	} catch (...) {
 		FATAL ("Fatal error occurred. Check log.");
 		return 1;

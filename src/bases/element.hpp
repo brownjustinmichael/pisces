@@ -124,8 +124,8 @@ namespace bases
 		 * 
 		 * TODO This assumes 1D n^3. Either the grid should be moved to a subclass or made more general
 		 *********************************************************************/
-		inline void set_grid (std::shared_ptr <collocation_grid <datatype> > i_grid) {
-			grid = i_grid;
+		inline void set_grid (collocation_grid <datatype>* i_grid) {
+			grid = std::shared_ptr <collocation_grid <datatype>> (i_grid);
 		}
 
 		/*!*******************************************************************
@@ -135,8 +135,8 @@ namespace bases
 		 * 
 		 * TODO This assumes 1 equation. It should be generalized for multiple equations.
 		 *********************************************************************/
-		inline void add_solver (std::shared_ptr <solver <datatype> > i_solver) {
-			solvers.push_back (i_solver);
+		inline void add_solver (solver <datatype>* i_solver) {
+			solvers.push_back (std::shared_ptr <solver <datatype>> (i_solver));
 		}
 		
 		inline void add_name (int i_name) {
@@ -150,8 +150,9 @@ namespace bases
 		 * 
 		 * TODO This assumes one scalar field. It should be generalized.
 		 *********************************************************************/
-		inline void add_transform (std::shared_ptr<plan <datatype> > i_plan) {
-			transforms.push_back (i_plan);
+		inline void add_transform (plan <datatype>* i_plan) {
+			transforms.push_back (std::shared_ptr <plan <datatype>> (i_plan));
+			// transforms.push_back (i_plan));
 		}
 
 		/*!*******************************************************************
@@ -159,9 +160,9 @@ namespace bases
 		 * 
 		 * \param i_plan A shared pointer to the plan to add
 		 *********************************************************************/
-		inline void add_pre_plan (std::shared_ptr <plan <datatype> > i_plan) {
+		inline void add_pre_plan (plan <datatype>* i_plan) {
 			TRACE ("Adding plan...");
-			pre_transform_plans.push_back (std::move (i_plan));
+			pre_transform_plans.push_back (std::shared_ptr <plan <datatype>> (i_plan));
 			TRACE ("Added.");
 		}
 		
@@ -170,9 +171,9 @@ namespace bases
 		 * 
 		 * \param i_plan A shared pointer to the plan to add
 		 *********************************************************************/
-		inline void add_post_plan (std::shared_ptr <plan <datatype> > i_plan) {
+		inline void add_post_plan (plan <datatype>* i_plan) {
 			TRACE ("Adding plan...");
-			post_transform_plans.push_back (std::move (i_plan));
+			post_transform_plans.push_back (std::shared_ptr <plan <datatype>> (i_plan));
 			TRACE ("Added.");
 		}
 		
@@ -181,9 +182,9 @@ namespace bases
 		 * 
 		 * \param i_plan A shared pointer to the plan to add
 		 *********************************************************************/
-		inline void add_implicit_plan (std::shared_ptr <plan <datatype> > i_plan) {
+		inline void add_implicit_plan (plan <datatype>* i_plan) {
 			TRACE ("Adding implicit plan...");
-			implicit_plans.push_back (std::move (i_plan));
+			implicit_plans.push_back (std::shared_ptr <plan <datatype>> (i_plan));
 			TRACE ("Added.");
 		}
 		
@@ -326,6 +327,7 @@ namespace bases
 		*/
 
 	private:
+		// std::vector<plan <datatype>* > transforms; //!< A shared pointer to the forward transform
 		std::vector<std::shared_ptr<plan <datatype> > > transforms; //!< A shared pointer to the forward transform
 		std::vector<std::shared_ptr<solver <datatype> > > solvers; //!< A vector of shared pointers to the matrix solvers
 		

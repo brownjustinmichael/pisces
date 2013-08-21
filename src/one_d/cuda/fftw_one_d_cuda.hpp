@@ -9,14 +9,8 @@
 #ifndef FFTW_ONE_D_CUDA_HPP_G5118SR0
 #define FFTW_ONE_D_CUDA_HPP_G5118SR0
 
-#include "../config.hpp"
-#include "../bases/plan.hpp"
-
-#ifndef __CUDACC__
-class cufftHandle;
-class cufftDoubleReal;
-class cufftDoubleComplex;
-#endif // __CUDACC__
+#include "../../config.hpp"
+#include "../../bases/plan.hpp"
 
 namespace one_d
 {
@@ -44,9 +38,9 @@ namespace one_d
 	
 		private:
 			double scalar; //!< The scalar used after the transform (1 / sqrt (2 * (n - 1)))
-			cufftDoubleReal* data_real;
-			cufftDoubleComplex* data_complex;
-			cufftHandle* cu_plan;
+			void* data_real;
+			void* data_complex;
+			void* cu_plan;
 			// fftw_plan fourier_plan; //!< The fftw_plan object to be executed
 		};
 	} /* cuda */

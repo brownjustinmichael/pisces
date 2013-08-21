@@ -1,6 +1,12 @@
 import os, inspect
 Import ("env")
 
+def directory (path, dirname):
+    if dirname [len (path) + 1:] == "":
+        return ""
+    else:
+        return dirname [len (path) + 1:] + "/"
+
 conf = Configure (env)
 
 objects = []
@@ -18,7 +24,7 @@ path = os.path.dirname (inspect.getfile (inspect.currentframe ()))
 
 for dirname, dirnames, filenames in os.walk (path):
     for subdirname in dirnames:
-        env.SConscript('%s/SConscript' % os.path.join (path, subdirname), variant_dir = os.path.join (".", subdirname), duplicate = 0, exports = {'env': env, "objects": objects, "cuda_objects" : cuda_objects})
+        env.SConscript('%s/SConscript' % os.path.join (dirname, subdirname), variant_dir = os.path.join (".", directory (path, dirname) + subdirname), duplicate = 0, exports = {'env': env, "objects": objects, "cuda_objects" : cuda_objects})
 
 objects.append (env.Object ("config.cpp"))
 
