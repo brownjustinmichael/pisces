@@ -9,7 +9,7 @@
 #include <math.h>
 #include <cufft.h>
 #include "fftw_one_d_cuda.hpp"
-#include "../../utils/utils_cublas.hpp"
+#include "../../utils/cuda/utils_cublas.hpp"
 
 #define HANDLE_ERROR(status) \
 {cudaError_t result = status; \

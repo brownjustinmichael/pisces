@@ -125,7 +125,7 @@ namespace one_d
 				data_temp [n - excess_n + i] += error_n [i + 1];
 			}
 			utils::add_scaled (n - 2 - excess_0 - excess_n, timestep, rhs + 1 + excess_0, &data_temp [excess_0 + 1]);
-				
+			
 			utils::matrix_solve (n, &factorized_matrix [0], &ipiv [0], &data_temp [0], &info);
 		
 			for (int i = 0; i < n; ++i) {

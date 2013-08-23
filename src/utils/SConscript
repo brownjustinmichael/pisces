@@ -19,5 +19,3 @@ objects.append (env.Object ("solver_lapack.cpp"))
 objects.append (env.Object ("chebyshev.cpp"))
 
 objects.append (env.Object ("io.cpp"))
-
-cuda_objects.append (env.Object ("utils_cublas.cu"))

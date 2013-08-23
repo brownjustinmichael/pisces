@@ -50,15 +50,15 @@ namespace bases
 		* \param i_messenger_ptr A pointer to a messenger object
 		* \param i_flags An integer set of execution flags
 		*********************************************************************/
-		element (int i_name, int n_boundaries, io::parameter_map& i_inputParams, messenger <datatype>* i_messenger_ptr, int i_flags) : inputParams (i_inputParams) {
+		element (int i_name, int dimensions, io::parameter_map& i_inputParams, messenger <datatype>* i_messenger_ptr, int i_flags) : inputParams (i_inputParams) {
 			name = i_name;
-			boundary_weights.resize (n_boundaries);
+			boundary_weights.resize (2 * dimensions);
 			inputParams = i_inputParams;
 			messenger_ptr = i_messenger_ptr;
 			flags = i_flags;
 			timestep = 0.0;
 			duration = 0.0;
-			for (int i = 0; i < n_boundaries; ++i) {
+			for (int i = 0; i < 2 * dimensions; ++i) {
 				if (messenger_ptr->linked (i)) {
 					boundary_weights [i] = 0.5;
 				} else {
@@ -93,6 +93,10 @@ namespace bases
 		 *********************************************************************/
 		virtual datatype& operator() (int name, int index = 0) {
 			return (&((*this) [name])) [index];
+		}
+		
+		virtual datatype* pointer (int name, int index = 0) {
+			return &((*this) [name]) + index;
 		}
 		
 		/*!*******************************************************************
@@ -246,6 +250,7 @@ namespace bases
 			for (int i = 0; i < (int) solvers.size (); ++i) {
 				solvers [i]->factorize ();
 			}
+			flags |= factorized;
 		}
 		
 		virtual void solve () {
@@ -261,6 +266,7 @@ namespace bases
 			INFO ("TOTAL TIME: " << duration);
 			if (t_timestep != timestep) {
 				flags &= ~unchanged_timestep;
+				flags &= ~factorized;
 				INFO ("Updating timestep: " << t_timestep);
 			} else {
 				flags |= unchanged_timestep;

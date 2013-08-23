@@ -9,7 +9,6 @@
 #ifndef ELEMENT_HPP_3SURDTOH
 #define ELEMENT_HPP_3SURDTOH
 
-#include <memory>
 #include <string>
 #include <vector>
 #include <map>
@@ -18,7 +17,6 @@
 #include "../bases/plan.hpp"
 #include "../utils/utils.hpp"
 #include "../utils/chebyshev.hpp"
-#include "../utils/interpolate.hpp"
 	
 namespace one_d
 {
@@ -51,7 +49,7 @@ namespace one_d
 		 * \copydoc bases::element <datatype>::element ()
 		 *********************************************************************/
 		element (int i_n, datatype i_position_0, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger <datatype>* i_messenger_ptr, int i_flags) : 
-		bases::element <datatype> (i_name, 2, i_inputParams, i_messenger_ptr, i_flags) {
+		bases::element <datatype> (i_name, 1, i_inputParams, i_messenger_ptr, i_flags) {
 			n = i_n;
 			position_0 = i_position_0;
 			position_n = i_position_n;
@@ -125,6 +123,10 @@ namespace one_d
 					(*this) (*iter, n - 1) = fixed_points_n [*iter];
 				}
 			}
+			
+			/*
+				TODO Not sure why these aren't !linked...
+			*/
 		}
 		
 	protected:

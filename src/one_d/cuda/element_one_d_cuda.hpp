@@ -10,7 +10,7 @@
 #define ELEMENT_ONE_D_CUDA_HPP_IBOLYZP9
 
 #include "../element_one_d.hpp"
-#include "../../utils/utils_cublas.hpp"
+#include "../../utils/cuda/utils_cublas.hpp"
 
 namespace one_d
 {

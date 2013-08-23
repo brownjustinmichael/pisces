@@ -69,7 +69,12 @@ namespace one_d
 			for (int i = 1; i < n - 1; ++i) {
 				t_timestep = std::min (t_timestep, (datatype) (std::abs (((*this) (position, i - 1) - (*this) (position, i + 1)) / (*this) (velocity, i)) / inputParams["advection_coeff"].asDouble));
 			}
-			return t_timestep * inputParams["courant_factor"].asDouble;
+			t_timestep *= inputParams["courant_factor"].asDouble;
+			if (t_timestep < timestep || t_timestep > 2.0 * timestep) {
+				return t_timestep;
+			} else {
+				return timestep;
+			}
 		}
 		
 		template class advection_diffusion_element <double>;

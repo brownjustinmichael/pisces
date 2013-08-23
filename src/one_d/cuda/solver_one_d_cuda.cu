@@ -31,6 +31,11 @@ namespace one_d
 			HANDLE_ERROR (cudaMemcpy (factorized_matrix_dev, &factorized_matrix [0], n * n * sizeof (datatype), cudaMemcpyHostToDevice));
 		}
 		
+		template <class datatype>
+		void solver <datatype>::execute () {
+			
+		}
+		
 		template class solver <double>;
 	} /* cuda */
 } /* one_d */
