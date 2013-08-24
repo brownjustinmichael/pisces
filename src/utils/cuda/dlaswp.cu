@@ -1,12 +1,67 @@
+#include <stdio.h>
+
+// Log Change: Adding CUDA functions
+const int threadsPerBlock = 256;
+
+__global__ void swap (int n, double* a, int lda, int k1, int k2, int* ipiv, int incx) {
+	double temp;
+	int ix;
+	int ip;
+	if (blockIdx.x == 0) {
+		if (incx > 0) {
+			ix = k1 - 1;
+			for (int i = k1 - 1; i < k2; ++i) {
+				ip = ipiv [ix] - 1;
+				if (ip != i) {
+					int j = threadIdx.x;
+					if (threadIdx.x == 0) {
+					}
+					while (j < n) {
+						temp = a [i + j * lda];
+						a [i + j * lda] = a [ip + j * lda];
+						a [ip + j * lda] = temp;
+						j += blockDim.x;
+					}
+					__syncthreads ();
+				}
+				ix += incx;
+			}
+		} else {
+			ix = (1 - k2) * incx;
+			for (int i = k2 - 1; i >= k1 - 1; --i) {
+				ip = ipiv [ix] - 1;
+				if (ip != i) {
+					int j = threadIdx.x;
+					if (threadIdx.x == 0) {
+					}
+					while (j < n) {
+						temp = a [i + j * lda];
+						a [i + j * lda] = a [ip + j * lda];
+						a [ip + j * lda] = temp;
+						j += blockDim.x;
+					}
+					__syncthreads ();
+				}
+				ix += incx;
+			}
+		}
+	}
+}
+// End Change
+
 /* Subroutine */ int dlaswpcuda_(int *n, double *a, int *lda, int 
 	*k1, int *k2, int *ipiv, int *incx)
 {
-    /* System generated locals */
+	// Log Change: Adding CUDA variables
+	int threads = min (*n, threadsPerBlock);
+	// Original
+    /*
     int a_dim1, a_offset, i__1, i__2, i__3, i__4;
 
-    /* Local variables */
     int i__, j, k, i1, i2, n32, ip, ix, ix0, inc;
     double temp;
+	*/
+	// End Change
 
 
 /*  -- LAPACK auxiliary routine (version 3.1) -- */
@@ -69,13 +124,36 @@
 
 /*     Interchange row I with row IPIV(I) for each of rows K1 through K2. */
 
-    /* Parameter adjustments */
+	// Log Change: Adding in CUDA function
+	if (incx == 0) {
+		return 0;
+	}
+	
+	double* a_dev;
+	int* ipiv_dev;
+	
+	cudaMalloc (&a_dev, sizeof (double) * *n * *lda);
+	cudaMalloc (&ipiv_dev, sizeof (int) * *incx * (abs (*k2 - *k1) + 1));
+	
+	cudaMemcpy (a_dev, a, sizeof (double) * *n * *lda, cudaMemcpyHostToDevice);
+	cudaMemcpy (ipiv_dev, ipiv, sizeof (int) * *incx * (abs (*k2 - *k1) + 1), cudaMemcpyHostToDevice);
+	
+	swap <<<1, threads>>> (*n, a_dev, *lda, *k1, *k2, ipiv_dev, *incx);
+	
+	cudaDeviceSynchronize ();
+	
+	cudaMemcpy (a, a_dev, sizeof (double) * *n * *lda, cudaMemcpyDeviceToHost);
+	
+	cudaFree (a_dev);
+	cudaFree (ipiv_dev);
+	
+	// Original
+	/*
     a_dim1 = *lda;
     a_offset = 1 + a_dim1;
     a -= a_offset;
     --ipiv;
 
-    /* Function Body */
     if (*incx > 0) {
 		ix0 = *k1;
 		i1 = *k1;
@@ -89,7 +167,7 @@
     } else {
 		return 0;
     }
-
+    * 
     n32 = *n / 32 << 5;
     if (n32 != 0) {
 		i__1 = n32;
@@ -105,13 +183,10 @@
 						temp = a[i__ + k * a_dim1];
 						a[i__ + k * a_dim1] = a[ip + k * a_dim1];
 						a[ip + k * a_dim1] = temp;
-		/* L10: */
 					}
 				}
 				ix += *incx;
-	/* L20: */
 		    }
-	/* L30: */
 		}
     }
     if (n32 != *n) {
@@ -127,13 +202,13 @@
 				    temp = a[i__ + k * a_dim1];
 				    a[i__ + k * a_dim1] = a[ip + k * a_dim1];
 				    a[ip + k * a_dim1] = temp;
-		/* L40: */
 				}
 		    }
 		    ix += *incx;
-	/* L50: */
 		}
     }
+    */
+	// End Changes
 
     return 0;
 

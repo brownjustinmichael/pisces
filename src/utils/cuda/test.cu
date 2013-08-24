@@ -87,7 +87,7 @@ int main (int argc, char *argv[])
 	
 	// INFO ("Main complete.");
 
-	int n = 1024;
+	int n = 32;
 	int info;
 	double range = 10.0;
 	std::vector <double> matrix (n * n), mcopy (n * n);
@@ -110,6 +110,7 @@ int main (int argc, char *argv[])
 	int ione = 1;
 	
 	dgetrf_ (&n, &n, &matrix [0], &n, &ipiv [0], &info);
+	
 	dgetrscuda_ (&charN, &n, &ione, &matrix [0], &n, &ipiv [0], &x [0], &n, &info);
 	
 	if (info != 0) {
@@ -132,6 +133,8 @@ int main (int argc, char *argv[])
 			printf ("Problem %e.\n", xcopy [i]);
 		}
 	}
+	
+	printf ("Done\n");
 	
 	return 0;
 }
