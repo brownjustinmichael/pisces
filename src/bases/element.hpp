@@ -245,6 +245,10 @@ namespace bases
 				flags |= transformed;
 			}
 		}
+		
+		virtual void output () {
+			normal_stream->to_file ();
+		}
 
 		virtual void factorize () {
 			for (int i = 0; i < (int) solvers.size (); ++i) {
