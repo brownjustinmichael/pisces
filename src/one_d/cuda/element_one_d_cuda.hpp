@@ -25,7 +25,7 @@ namespace one_d
 			class fft_element : public element <datatype>
 			{
 			public:
-				fft_element (int i_n, datatype i_position_0, datatype i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_input_Params, bases::messenger <datatype>* i_messenger_ptr, int i_flags);
+				fft_element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_input_Params, bases::messenger <datatype>* i_messenger_ptr, int i_flags);
 			
 				virtual ~fft_element () {}
 			

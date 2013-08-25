@@ -48,12 +48,13 @@ namespace one_d
 		 * \param i_position_n The datatype position of index n - 1 - excess_n
 		 * \copydoc bases::element <datatype>::element ()
 		 *********************************************************************/
-		element (int i_n, datatype i_position_0, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger <datatype>* i_messenger_ptr, int i_flags) : 
-		bases::element <datatype> (i_name, 1, i_inputParams, i_messenger_ptr, i_flags) {
-			n = i_n;
-			position_0 = i_position_0;
-			position_n = i_position_n;
-
+		element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger <datatype>* i_messenger_ptr, int i_flags) : 
+		bases::element <datatype> (i_name, 1, i_inputParams, i_messenger_ptr, i_flags),
+		n (i_n),
+		excess_0 (i_excess_0),
+		excess_n (i_excess_n),
+		position_0 (i_position_0),
+		position_n (i_position_n) {
 			cell.resize (i_n);
 			for (int i = 0; i < i_n; ++i) {
 				cell [i] = i;
@@ -137,6 +138,9 @@ namespace one_d
 		typedef typename bases::element <datatype>::iterator iterator;
 		
 		int n; //!< The number of elements in each 1D array
+		
+		int excess_0;
+		int excess_n;
 		datatype position_0; //!< The datatype position of index 0
 		datatype position_n; //!< The datatype position of index n - 1
 		std::vector<int> cell; //!< An integer array for tracking each cell number for output
@@ -182,8 +186,8 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc one_d::element::element ()
 			 *********************************************************************/
-			element (int i_n, datatype i_position_0, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger <datatype>* i_messenger_ptr, int i_flags) : 
-			one_d::element <datatype> (i_n, i_position_0, i_position_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
+			element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger <datatype>* i_messenger_ptr, int i_flags) : 
+			one_d::element <datatype> (i_n, i_excess_0, i_position_0, i_excess_n, i_position_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
 				initialize (position);
 				one_d::element <datatype>::set_grid (new chebyshev_grid <datatype> (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), position_0 - position_n));
@@ -198,8 +202,8 @@ namespace one_d
 				TRACE ("Initializing " << name);
 				if (name == position && !initial_conditions) {
 					datatype pioN = std::acos (-1.0) / (n - 1);
-					datatype scale = (position_0 - position_n) / 2.0;
-					datatype initial_position = (position_0 + position_n) / 2.0;
+					datatype scale = (position_0 - position_n) / (std::cos (excess_0 * pioN) - std::cos ((n - 1 - excess_n) * pioN));
+					datatype initial_position = position_0 - scale * std::cos (excess_0 * pioN);
 					std::vector <datatype> init (n);
 					for (int i = 0; i < n; ++i) {
 						init [i] = scale * std::cos (i * pioN) + initial_position;
@@ -231,6 +235,8 @@ namespace one_d
 		protected:
 			using one_d::element <datatype>::position_0;
 			using one_d::element <datatype>::position_n;
+			using one_d::element <datatype>::excess_0;
+			using one_d::element <datatype>::excess_n;
 			using one_d::element <datatype>::n;
 			using one_d::element <datatype>::inputParams;
 		};
@@ -250,7 +256,7 @@ namespace one_d
 			 * \param i_excess_n The integer number of points evaluated in the adjacent element
 			 * \copydoc element::element ()
 			 *********************************************************************/
-			advection_diffusion_element (int i_n, datatype i_position_0, datatype i_position_n, int i_excess_0, int i_excess_n, int i_name, io::parameter_map& i_inputParams, bases::messenger <datatype>* i_messenger_ptr, int i_flags);
+			advection_diffusion_element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger <datatype>* i_messenger_ptr, int i_flags);
 			
 			virtual ~advection_diffusion_element () {}
 		

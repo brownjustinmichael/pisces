@@ -135,6 +135,7 @@ namespace two_d
 		typedef typename bases::element <datatype>::iterator iterator;
 		
 		int n; //!< The number of elements in each 1D array
+		int m;
 		std::vector <datatype> positions; //!< A vector of the edge positions
 		std::vector<int> cell_n; //!< An integer array for tracking each cell number for output
 		std::vector<int> cell_m; //!< An integer array for tracking each cell number for output
@@ -145,6 +146,14 @@ namespace two_d
 		std::map <int, std::vector <datatype> > fixed_points_n0; //!< The initial values of the scalars at index 0
 		std::map <int, std::vector <datatype> > fixed_points_0m; //!< The initial values of the scalars at index 0
 	};
+	
+	namespace fourier
+	{
+		namespace chebyshev
+		{
+			
+		} /* chebyshev */
+	} /* fourier */
 } /* two_d */
 
 #endif /* end of include guard: ELEMENT_TWO_D_HPP_CJ68F4IB */

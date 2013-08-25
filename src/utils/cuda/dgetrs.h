@@ -9,6 +9,8 @@
 #ifndef DGETRS_H_ZG149ZBV
 #define DGETRS_H_ZG149ZBV
 
+int solve_lu (int n, int nrhs, double *a, int lda, int* ipiv, double*b, int ldb, int* info);
+
 int dgetrscuda_(char *trans, int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info);
 	
 int dtrsmcuda_(char *side, char *uplo, char *transa, char *diag, int *m, int *n, double *alpha, double *a, int *lda, double *b, int *ldb);

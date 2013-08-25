@@ -82,7 +82,7 @@ def generate(env):
   ptx_builder = SCons.Builder.Builder(action = '$NVCC -ptx $NVCCFLAGS $_NVCCWRAPCFLAGS $NVCCWRAPCCFLAGS $_NVCCCOMCOM $SOURCES -o $TARGET',
                                       emitter = {},
                                       suffix = '.ptx',
-                                      src_suffix = CUDASuffixes)
+                                      src_suffix = CUDASuffixes,LINK = "g++")
   env['BUILDERS']['PTXFile'] = ptx_builder
 
   # create builders that make static & shared objects from .cu files
@@ -112,6 +112,8 @@ def generate(env):
   # set the include path, and pass both c compiler flags and c++ compiler flags
   env['NVCCFLAGS'] = SCons.Util.CLVar('')
   env['SHNVCCFLAGS'] = SCons.Util.CLVar('') + ' -shared'
+  
+  env['LINK'] = "$CXX"
   
   # 'NVCC Command'
   env['NVCCCOM']   = '$NVCC -o $TARGET -c $NVCCFLAGS $_NVCCWRAPCFLAGS $NVCCWRAPCCFLAGS $_NVCCCOMCOM $SOURCES'

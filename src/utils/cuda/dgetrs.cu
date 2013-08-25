@@ -1,29 +1,29 @@
 #include <stdbool.h>
+#include <stdio.h>
+#include "solver_utils_cuda.cuh"
 
-/* Table of constant values */
+int xerblacuda_(char *, int *);
 
-int max (int a, int b);
-
+// Log Change: Rewriting names and variables
+int solve_lu (int n, int nrhs, double *a, int lda, int* ipiv, double*b, int ldb, int* info) {
+// Original
+/* 
 static int c__1 = 1;
 static double c_b12 = 1.;
 static int c_n1 = -1;
 
-/* Subroutine */ int dgetrscuda_(char *trans, int *n, int *nrhs, 
-	double *a, int *lda, int *ipiv, double *b, int *
-	ldb, int *info)
+* int dgetrs_(char *trans, int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info)
 {
-    /* System generated locals */
-    int a_dim1, a_offset, b_dim1, b_offset, alt_info;
+int a_dim1, a_offset, b_dim1, b_offset, alt_info;
 
-    /* Local variables */
-	extern int dlaswpcuda_(int *n, double *a, int *lda, int *k1, int *k2, int *ipiv, int *incx);
-    extern bool lsamecuda_(char *, char *);
-    extern /* Subroutine */ int dtrsmcuda_(char *, char *, char *, char *, 
-	    int *, int *, double *, double *, int *, 
-	    double *, int *), xerblacuda_(
-	    char *, int *), dlaswpcuda_(int *, double *, 
-	    int *, int *, int *, int *, int *);
+	extern int dlaswp_(int *n, double *a, int *lda, int *k1, int *k2, int *ipiv, int *incx);
+    extern bool lsame_(char *, char *);
+    extern int dtrsm_(char *, char *, char *, char *, int *, int *, double *, double *, int *, double *, int *)
+    xerbla_(char *, int *)
+    dlaswp_(int *, double *, int *, int *, int *, int *, int *);
     bool notran;
+	*/
+// End Change
 
 
 /*  -- LAPACK routine (version 3.1) -- */
@@ -97,16 +97,72 @@ static int c_n1 = -1;
 
 /*     Test the input parameters. */
 
-    /* Parameter adjustments */
-    a_dim1 = *lda;
-    a_offset = 1 + a_dim1;
-    a -= a_offset;
-    --ipiv;
-    b_dim1 = *ldb;
-    b_offset = 1 + b_dim1;
-    b -= b_offset;
-
-    /* Function Body */
+/*     Quick return if possible */
+    if (n == 0 || nrhs == 0) {
+	return 0;
+    }
+	
+	// Log Change: Only needed for No Transpose, replaced cody body with CUDA calls
+    *info = 0;
+	int alt_info;
+    if (n < 0) {
+		*info = -2;
+    } else if (nrhs < 0) {
+		*info = -3;
+    } else if (lda < max(1,n)) {
+		*info = -5;
+    } else if (ldb < max(1,n)) {
+		*info = -8;
+    }
+    if (*info != 0) {
+		alt_info = -(*info);
+		xerblacuda_("DGETRS", &alt_info);
+		return 0;
+	}
+	
+	swap <<<1, min (nrhs, 256)>>> (nrhs, b, ldb, 1, n, ipiv, 1);
+	operation_left_lower <<<min (nrhs, 1024), min (n, 256)>>> (n, nrhs, a, lda, b, ldb, false);
+	operation_left_upper <<<min (nrhs, 1024), min (n, 256)>>> (n, nrhs, a, lda, b, ldb, true);
+	
+	
+// 	double *a_dev, *b_dev;
+// 	int *ipiv_dev;
+// 	
+// 	cudaMalloc (&a_dev, sizeof (double) * n * lda);
+// 	cudaMalloc (&b_dev, sizeof (double) * nrhs * ldb);
+// 	cudaMalloc (&ipiv_dev, sizeof (int) * n);
+// 	
+// 	cudaMemcpy (a_dev, a, sizeof (double) * n * lda, cudaMemcpyHostToDevice);
+// 	cudaMemcpy (b_dev, b, sizeof (double) * nrhs * ldb, cudaMemcpyHostToDevice);
+// 	cudaMemcpy (ipiv_dev, ipiv, sizeof (int) * n, cudaMemcpyHostToDevice);
+// 	
+// 	swap <<<1, min (nrhs, 256)>>> (nrhs, b_dev, ldb, 1, n, ipiv_dev, 1);
+// 	
+// /*        Solve L*X = B, overwriting B with X. */
+// 
+// 	operation_left_lower <<<min (nrhs, 1024), min (n, 256)>>> (n, nrhs, a_dev, lda, b_dev, ldb, false);
+// 	
+// /*        Solve U*X = B, overwriting B with X. */
+// 
+// 	operation_left_upper <<<min (nrhs, 1024), min (n, 256)>>> (n, nrhs, a_dev, lda, b_dev, ldb, true);
+// 		
+// 	cudaMemcpy (b, b_dev, sizeof (double) * nrhs * ldb, cudaMemcpyDeviceToHost);
+// 	
+// 	cudaDeviceSynchronize ();
+// 	
+// 	cudaFree (ipiv_dev);
+// 	cudaFree (a_dev);
+// 	cudaFree (b_dev);
+	// Original
+	/*
+    // a_dim1 = *lda;
+    // a_offset = 1 + a_dim1;
+	// a -= a_offset;
+	// --ipiv;
+    // b_dim1 = *ldb;
+    // b_offset = 1 + b_dim1;
+	// b -= b_offset;
+	
     *info = 0;
     notran = lsamecuda_(trans, "N");
     if (! notran && ! lsamecuda_(trans, "T") && ! lsamecuda_(
@@ -127,47 +183,26 @@ static int c_n1 = -1;
 	return 0;
     }
 
-/*     Quick return if possible */
-
-    if (*n == 0 || *nrhs == 0) {
-	return 0;
-    }
-
     if (notran) {
+		
+		dlaswpcuda_(nrhs, b, ldb, &c__1, n, ipiv, &c__1);
+		
+		dtrsmcuda_("Left", "Lower", "No transpose", "Unit", n, nrhs, &c_b12, a, lda, b, ldb);
 
-/*        Solve A * X = B. */
-
-/*        Apply row interchanges to the right hand sides. */
-
-	dlaswpcuda_(nrhs, &b[b_offset], ldb, &c__1, n, &ipiv[1], &c__1);
-
-/*        Solve L*X = B, overwriting B with X. */
-
-	dtrsmcuda_("Left", "Lower", "No transpose", "Unit", n, nrhs, &c_b12, &a[
-		a_offset], lda, &b[b_offset], ldb);
-
-/*        Solve U*X = B, overwriting B with X. */
-
-	dtrsmcuda_("Left", "Upper", "No transpose", "Non-unit", n, nrhs, &c_b12, &
-		a[a_offset], lda, &b[b_offset], ldb);
+		dtrsmcuda_("Left", "Upper", "No transpose", "Non-unit", n, nrhs, &c_b12, a, lda, b, ldb);
+	
     } else {
-
-/*        Solve A' * X = B. */
-
-/*        Solve U'*X = B, overwriting B with X. */
 
 	dtrsmcuda_("Left", "Upper", "Transpose", "Non-unit", n, nrhs, &c_b12, &a[
 		a_offset], lda, &b[b_offset], ldb);
 
-/*        Solve L'*X = B, overwriting B with X. */
-
 	dtrsmcuda_("Left", "Lower", "Transpose", "Unit", n, nrhs, &c_b12, &a[
 		a_offset], lda, &b[b_offset], ldb);
 
-/*        Apply row interchanges to the solution vectors. */
-
 	dlaswpcuda_(nrhs, &b[b_offset], ldb, &c__1, n, &ipiv[1], &c_n1);
     }
+    */
+	// End Change
 
     return 0;
 

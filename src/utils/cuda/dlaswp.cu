@@ -131,7 +131,7 @@ __global__ void swap (int n, double* a, int lda, int k1, int k2, int* ipiv, int 
 	
 	double* a_dev;
 	int* ipiv_dev;
-	
+		
 	cudaMalloc (&a_dev, sizeof (double) * *n * *lda);
 	cudaMalloc (&ipiv_dev, sizeof (int) * *incx * (abs (*k2 - *k1) + 1));
 	

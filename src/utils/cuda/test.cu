@@ -13,7 +13,6 @@
 #include "dgetrs.h"
 #include <stdlib.h>
 
-
 extern "C" {void dgetrf_ (int* n, int* m, double* a, int* lda, int* ipiv, int* info);}
 
 int main (int argc, char *argv[])
@@ -87,50 +86,82 @@ int main (int argc, char *argv[])
 	
 	// INFO ("Main complete.");
 
-	int n = 32;
+	int n = 1024;
+	int nrhs = 6;
+	int lda = n + 106, ldb = n + 20;
 	int info;
 	double range = 10.0;
-	std::vector <double> matrix (n * n), mcopy (n * n);
-	std::vector <double> x (n), xcopy (n);
+	
+	double* a_dev, *b_dev;
+	int* ipiv_dev;
+	std::vector <double> matrix (n * lda);
+	std::vector <double> mcopy (n * lda);
+	std::vector <double> x (n * ldb), xcopy (n * ldb);
 	std::vector <int> ipiv (n);
 	
 	for (int i = 0; i < n; ++i) {
 		// printf ("Before: ");
 		for (int j = 0; j < n; ++j) {
-			matrix [i + j * n] = (double) rand () / (double) RAND_MAX * 2.0 * range - range;
-			mcopy [i + j * n] = matrix [i + j * n];
-			// printf ("%e ", matrix [i + j * n]);
+			matrix [i + j * lda] = (double) rand () / (double) RAND_MAX * 2.0 * range - range;
+			mcopy [i + j * lda] = matrix [i + j * lda];
+			// printf ("%e ", matrix [i + j * lda]);
 		}
-		x [i] = (double) rand () / (double) RAND_MAX * 2.0 * range - range;
-		xcopy [i] = x [i];
-		// printf ("= %e\n", x[i]);
+		// printf ("= ");
+		for (int j = 0; j < nrhs; ++j) {
+			x [i + j * ldb] = (double) rand () / (double) RAND_MAX * 2.0 * range - range;
+			xcopy [i + j * ldb] = x [i + j * ldb];
+			// printf ("%e ", x[i + j * ldb]);
+		}
+		// printf ("\n");
 	}
 	
-	char charN = 'N';
-	int ione = 1;
 	
-	dgetrf_ (&n, &n, &matrix [0], &n, &ipiv [0], &info);
+	dgetrf_ (&n, &n, &matrix [0], &lda, &ipiv [0], &info);
 	
-	dgetrscuda_ (&charN, &n, &ione, &matrix [0], &n, &ipiv [0], &x [0], &n, &info);
+	// solve_lu (n, nrhs, &matrix [0], lda, &ipiv [0], &x [0], ldb, &info);
+		
+	cudaMalloc (&a_dev, sizeof (double) * n * lda);
+	cudaMalloc (&b_dev, sizeof (double) * nrhs * ldb);
+	cudaMalloc (&ipiv_dev, sizeof (int) * n);
+	
+	cudaMemcpy (a_dev, &matrix [0], sizeof (double) * n * lda, cudaMemcpyHostToDevice);
+	cudaMemcpy (b_dev, &x [0], sizeof (double) * nrhs * ldb, cudaMemcpyHostToDevice);
+	cudaMemcpy (ipiv_dev, &ipiv [0], sizeof (int) * n, cudaMemcpyHostToDevice);
+	
+	solve_lu (n, nrhs, a_dev, lda, ipiv_dev, b_dev, ldb, &info);
+	
+	cudaMemcpy (&x [0], b_dev, sizeof (double) * nrhs * ldb, cudaMemcpyDeviceToHost);
+	
+	cudaDeviceSynchronize ();
+	
+	cudaFree (ipiv_dev);
+	cudaFree (a_dev);
+	cudaFree (b_dev);
 	
 	if (info != 0) {
 		printf ("Error");
 	}
 	
-	// for (int i = 0; i < n; ++i) {
+	for (int i = 0; i < n; ++i) {
 	// 	printf ("After: ");
 	// 	for (int j = 0; j < n; ++j) {
 	// 		printf ("%f ", matrix [i + j * n]);
 	// 	}
-	// 	printf ("= %f\n", x[i]);
-	// }
+		// printf ("= ");
+		// for (int j = 0; j < nrhs; ++j) {
+		// 	printf ("%f ", x[i + j * ldb]);
+		// }
+		// printf ("\n");
+	}
 	
 	for (int i = 0; i < n; ++i) {
-		for (int j = 0; j < n; ++j) {
-			xcopy [i] -= mcopy [i + j * n] * x [j];
-		}
-		if (abs (xcopy [i]) > 1.e-10) {
-			printf ("Problem %e.\n", xcopy [i]);
+		for (int k = 0; k < nrhs; ++k) {
+			for (int j = 0; j < n; ++j) {
+				xcopy [i + k * ldb] -= mcopy [i + j * lda] * x [j + k * ldb];
+			}
+			if (abs (xcopy [i + k * ldb]) > 1.e-4) {
+				printf ("Problem %e.\n", xcopy [i + k * ldb]);
+			}
 		}
 	}
 	

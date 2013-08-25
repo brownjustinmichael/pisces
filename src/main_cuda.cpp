@@ -71,7 +71,7 @@ int main (int argc, char *argv[])
 	// 	process_messenger.add_boundary (one_d::edge_n, id + 1);
 	// }
 	// 
-	// one_d::chebyshev::cuda::fft_element <double> element (n, position_0, position_n, excess_0, excess_n, name, inputParams, &process_messenger, 0x00);
+	// one_d::chebyshev::cuda::fft_element <double> element (n, excess_0, position_0, excess_n, position_n, name, inputParams, &process_messenger, 0x00);
 	// 
 	// element.setup ();
 	// 
@@ -103,8 +103,8 @@ int main (int argc, char *argv[])
 	char charN = 'N';
 	int ione = 1;
 
-	utils::matrix_factorize (n, n, &matrix [0], &ipiv [0], &info);
-	dgetrscuda_ (&charN, &n, &ione, &matrix [0], &n, &ipiv [0], &x [0], &n, &info);
+	// utils::matrix_factorize (n, n, &matrix [0], &ipiv [0], &info);
+	// dgetrscuda_ (&charN, &n, &ione, &matrix [0], &n, &ipiv [0], &x [0], &n, &info);
 	
 	if (info != 0) {
 		printf ("Error");
