@@ -16,7 +16,7 @@
 #include "../bases/element.hpp"
 #include "../bases/plan.hpp"
 #include "../utils/utils.hpp"
-#include "../utils/chebyshev.hpp"
+#include "collocation_one_d.hpp"
 	
 namespace one_d
 {
@@ -50,13 +50,13 @@ namespace one_d
 		 *********************************************************************/
 		element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger <datatype>* i_messenger_ptr, int i_flags) : 
 		bases::element <datatype> (i_name, 1, i_inputParams, i_messenger_ptr, i_flags),
-		n (i_n),
+		n (i_n + 1),
 		excess_0 (i_excess_0),
 		excess_n (i_excess_n),
 		position_0 (i_position_0),
 		position_n (i_position_n) {
-			cell.resize (i_n);
-			for (int i = 0; i < i_n; ++i) {
+			cell.resize (n);
+			for (int i = 0; i < n; ++i) {
 				cell [i] = i;
 			}
 			
@@ -156,26 +156,6 @@ namespace one_d
 
 	namespace chebyshev
 	{
-		/*!**********************************************************************
-		 * \brief Helper to calculate positions in chebyshev elements
-		 * 
-		 * \param n The integer number of data points
-		 * \param i The integer element index for the calculation
-		 * \param excess_0 The integer number of excess data points on the edge_0 side
-		 * \param position_0 The datatype position at index excess_0
-		 * \param excess_n The integer number of excess data points on the edge_n side
-		 * \param position_n The datatype position at index n - 1 - excess_n
-		 * 
-		 * \return The datatype position of the given index
-		 ************************************************************************/
-		template <class datatype>
-		datatype return_position (int n, int i, int excess_0, datatype position_0, int excess_n, datatype position_n) {
-			datatype pioN = std::acos (-1.0) / (n - 1);
-			datatype scale = (position_0 - position_n) / (std::cos (excess_0 * pioN) - std::cos ((n - 1 - excess_n) * pioN));
-			datatype initial = position_0 - scale * std::cos (excess_0 * pioN);
-			return scale * std::cos (i * pioN) + initial;
-		}
-		
 		/*!*******************************************************************
 		 * \brief A Chebyshev implementation of the 1D element class
 		 *********************************************************************/
@@ -190,7 +170,7 @@ namespace one_d
 			one_d::element <datatype> (i_n, i_excess_0, i_position_0, i_excess_n, i_position_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
 				initialize (position);
-				one_d::element <datatype>::set_grid (new chebyshev_grid <datatype> (i_n, i_n, sqrt (2.0 / (i_n - 1.0)), position_0 - position_n));
+				one_d::element <datatype>::set_grid (new grid <datatype> (n, n, sqrt (2.0 / (n - 1.0)), (*this) (position) - (*this) (position, n - 1)));
 				TRACE ("Instantiated.");
 			}
 			virtual ~element () {}
@@ -289,6 +269,119 @@ namespace one_d
 			std::vector<datatype> temp_matrix; //!< A vector containing the datatype matrix used in the implicit solver
 		};
 	} /* chebyshev */
+	
+	namespace fourier
+	{
+		/*!*******************************************************************
+		 * \brief A Chebyshev implementation of the 1D element class
+		 *********************************************************************/
+		template <class datatype>
+		class element : public one_d::element <datatype>
+		{
+		public:
+			/*!*******************************************************************
+			 * \copydoc one_d::element::element ()
+			 *********************************************************************/
+			element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger <datatype>* i_messenger_ptr, int i_flags) : 
+			one_d::element <datatype> (i_n, i_excess_0, i_position_0, i_excess_n, i_position_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
+				TRACE ("Instantiating...");
+				initialize (position);
+				one_d::element <datatype>::set_grid (new grid <datatype> (n, n, sqrt (2.0 / (n - 1.0)), (*this) (position) - (*this) (position, n - 1)));
+				TRACE ("Instantiated.");
+			}
+			virtual ~element () {}
+			
+			/*!*******************************************************************
+			 * \copydoc one_d::element::initialize ()
+			 *********************************************************************/
+			virtual void initialize (int name, datatype* initial_conditions = NULL) {
+				TRACE ("Initializing " << name);
+				if (name == position && !initial_conditions) {
+					std::vector <datatype> init (n);
+					for (int i = 0; i < n; ++i) {
+						init [i] = (i - excess_0) * (position_n - position_0) / (n - 1 - excess_n - excess_0) + position_0;
+					}
+					one_d::element <datatype>::initialize (name, &init [0]);
+				} else if (name == velocity && !initial_conditions){
+					datatype scale = inputParams["init_cond_scale"].asDouble;
+					datatype width = inputParams["init_cond_width"].asDouble;
+					datatype mean = inputParams["init_cond_mean"].asDouble;
+					datatype sigma = inputParams["init_cond_sigma"].asDouble;
+					std::vector <datatype> init (n);
+					datatype height, temp;
+					height = std::max (scale * std::exp (- (width / 2.0 - mean) * (width / 2.0 - mean) / 2.0 / sigma / sigma), scale * std::exp (- (- width / 2.0 - mean) * (- width / 2.0 - mean) / 2.0 / sigma / sigma));
+					for (int i = 0; i < n; ++i) {
+						temp = scale * std::exp (- ((*this) (position, i) - mean) * ((*this) (position, i) - mean) / 2.0 / sigma / sigma) - height;
+						if (temp > 0.0) {
+							init [i] = temp;
+						} else {
+							init [i] = 0.0;
+						}
+					}
+					one_d::element <datatype>::initialize (name, &init [0]);
+				} else {
+					one_d::element <datatype>::initialize (name, initial_conditions);
+				}
+				TRACE ("Initialized.");
+			}
+		
+		protected:
+			using one_d::element <datatype>::position_0;
+			using one_d::element <datatype>::position_n;
+			using one_d::element <datatype>::excess_0;
+			using one_d::element <datatype>::excess_n;
+			using one_d::element <datatype>::n;
+			using one_d::element <datatype>::inputParams;
+		};
+	
+		/*!*******************************************************************
+		 * \brief A simple implementation of the element class with diffusion
+		 * 
+		 * This class contains a full element's capacity to run a single 
+		 * element diffusion in 1D with constant timestep.
+		 *********************************************************************/
+		template <class datatype>
+		class advection_diffusion_element : public element <datatype>
+		{
+		public:
+			/*!*******************************************************************
+			 * \param i_excess_0 The integer number of points evaluated in the adjacent element
+			 * \param i_excess_n The integer number of points evaluated in the adjacent element
+			 * \copydoc element::element ()
+			 *********************************************************************/
+			advection_diffusion_element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger <datatype>* i_messenger_ptr, int i_flags);
+		
+			virtual ~advection_diffusion_element () {}
+	
+			/*!*******************************************************************
+			 * \copydoc element::implicit_reset ()
+			 *********************************************************************/
+			inline void implicit_reset () {
+				element <datatype>::implicit_reset ();
+		
+				if (!(flags & factorized)) {
+					utils::scale (n * n, 0.0, &matrix [0]);
+				}
+			}
+		
+			virtual datatype calculate_timestep ();
+	
+		private:
+			using element <datatype>::n;
+			using element <datatype>::flags;
+			using element <datatype>::name;
+			using element <datatype>::normal_stream;
+			using element <datatype>::cell;
+			using element <datatype>::timestep;
+			using element <datatype>::boundary_weights;
+			using element <datatype>::inputParams;
+			using element <datatype>::grid;
+			typedef typename element <datatype>::iterator iterator;
+	
+			std::vector<datatype> matrix; //!< A vector containing the datatype matrix used in the implicit solver
+			std::vector<datatype> temp_matrix; //!< A vector containing the datatype matrix used in the implicit solver
+		};
+	} /* fourier */
 } /* one_d */
 
 #endif /* end of include guard: ELEMENT_HPP_3SURDTOH */
