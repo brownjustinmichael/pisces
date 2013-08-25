@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file chebyshev.hpp
+ * \file collocation_one_d.hpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-08.
@@ -77,7 +77,7 @@ namespace one_d
 	   	datatype recursion (int d, int m, int k);
 	   };
 	} /* chebyshev */
-
+	
 	namespace fourier
 	{
 	   /*!*******************************************************************
@@ -111,6 +111,6 @@ namespace one_d
 	   	datatype pioN; //!< The datatype 3.14159.../N, for use in calculations
 	   };
 	} /* fourier */
-} /* utils */
+} /* one_d */
 
 #endif /* end of include guard: COLLOCATION_HPP_HLJUSAEZ */

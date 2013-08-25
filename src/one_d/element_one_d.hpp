@@ -170,7 +170,7 @@ namespace one_d
 			one_d::element <datatype> (i_n, i_excess_0, i_position_0, i_excess_n, i_position_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
 				initialize (position);
-				one_d::element <datatype>::set_grid (new grid <datatype> (n, n, sqrt (2.0 / (n - 1.0)), position_0 - position_n));
+				one_d::element <datatype>::set_grid (new grid <datatype> (n, n, sqrt (2.0 / (n - 1.0)), (*this) (position) - (*this) (position, n - 1)));
 				TRACE ("Instantiated.");
 			}
 			virtual ~element () {}
@@ -286,7 +286,7 @@ namespace one_d
 			one_d::element <datatype> (i_n, i_excess_0, i_position_0, i_excess_n, i_position_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
 				initialize (position);
-				one_d::element <datatype>::set_grid (new grid <datatype> (n, n, sqrt (2.0 / (n - 1.0)), position_0 - position_n));
+				one_d::element <datatype>::set_grid (new grid <datatype> (n, n, sqrt (2.0 / (n - 1.0)), (*this) (position) - (*this) (position, n - 1)));
 				TRACE ("Instantiated.");
 			}
 			virtual ~element () {}

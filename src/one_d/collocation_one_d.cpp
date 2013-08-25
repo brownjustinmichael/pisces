@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file chebyshev.cpp
+ * \file collocation_one_d.cpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-08.
@@ -110,11 +110,10 @@ namespace one_d
 			for (k = 0; k < i_N; ++k) {
 				for (m = 0; m < i_M; ++m) {
 					bases::collocation_grid <datatype>::index (0, m, k) = scale * std::cos (pioN * k * m);
-					bases::collocation_grid <datatype>::index (1, m, k) = (datatype) (-m * 2.0 / width) * scale * std::sin (pioN * k * m);
-					bases::collocation_grid <datatype>::index (2, m, k) = (datatype) (-m * m * 4.0 / width / width) * scale * std::cos (pioN * k * m);
+					bases::collocation_grid <datatype>::index (1, m, k) = (((datatype) -m) * 2.0 / width) * scale * std::sin (pioN * k * m);
+					bases::collocation_grid <datatype>::index (2, m, k) = -(((datatype) m * m) * 4.0 / width / width) * scale * std::cos (pioN * k * m);
 				}
 			}
-			
 			for (d = 0; d < 3; ++d) {
 				for (k = 0; k < i_N; ++k) {
 					bases::collocation_grid <datatype>::index (d, 0, k) /= 2.0;
@@ -128,8 +127,5 @@ namespace one_d
 	template class grid <double>;
 	template class grid <float>;
 	} /* fourier */
-	
-} /* utils */
-
-
+} /* one_d */
 	
