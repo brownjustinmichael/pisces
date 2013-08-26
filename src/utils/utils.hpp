@@ -41,6 +41,16 @@ namespace utils
 	 * \param x A float array to scale
 	 * \param incx The integer spacing of elements in dx
 	 *********************************************************************/
+	void scale (int n, int a, int* x, int incx = 1);
+
+	/*!*******************************************************************
+	 * \brief Scales a float array by a constant
+	 * 
+	 * \param n An integer number of elements to scale
+	 * \param a A float to scale the array by
+	 * \param x A float array to scale
+	 * \param incx The integer spacing of elements in dx
+	 *********************************************************************/
 	void scale (int n, float a, float* x, int incx = 1);
 	
 	/*!*******************************************************************

@@ -10,34 +10,31 @@
 #include "fftw_one_d_cuda.hpp"
 #include "solver_one_d_cuda.hpp"
 
-namespace one_d
+namespace cuda
 {
-	namespace chebyshev
+	namespace one_d
 	{
-		template <class datatype>
-		class element;
-		
-		namespace cuda
+		namespace chebyshev
 		{
 			template <class datatype>
-			fft_element <datatype>::fft_element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& inputParams, bases::messenger <datatype>* i_messenger_ptr, int i_flags) : 
-			element <datatype> (i_n, i_excess_0, i_position_0, i_excess_n, i_position_n, i_name, inputParams, i_messenger_ptr, i_flags),
+			fft_element <datatype>::fft_element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
+			::one_d::chebyshev::element <datatype> (i_n, i_excess_0, i_position_0, i_excess_n, i_position_n, i_name, inputParams, i_messenger_ptr, i_flags),
 			excess_0 (i_excess_0),
 			excess_n (i_excess_n) {
 
 				assert (n > 0);
-					
-				TRACE ("Initializing...");
-					
-				matrix.resize (i_n * i_n, 0.0);
 				
+				TRACE ("Initializing...");
+				
+				matrix.resize (n * n, 0.0);
+			
 				// data_dev is twice necessary size for FFT
 				data_dev.resize (2 * n);
 				rhs_dev.resize (n);
-			
+		
 				TRACE ("Initialized.");
 			}
-		
+	
 			template <class datatype>
 			void fft_element <datatype>::setup () {
 				// Set up output
@@ -48,23 +45,24 @@ namespace one_d
 				transform_stream->append ((*this) [position]);
 				transform_stream->append ((*this) [velocity]);
 				transform_stream->append ((*this) [rhs]);
-			
-				transform_stream->to_file ();
-			
-				element <datatype>::add_transform (new one_d::cuda::fftw_cosine (this, n, data_dev.pointer ()));
-				element <datatype>::add_post_plan (new one_d::cuda::transfer (this, n, data_dev.pointer (), &((*this) [velocity])));
-					
-				// Set up solver
-				element <datatype>::add_solver (new solver <datatype> (this, n, excess_0, excess_n, timestep, boundary_weights [edge_0], boundary_weights [edge_n], grid->get_data (0), &matrix [0], velocity, rhs));
-			
-			}
 		
+				transform_stream->to_file ();
+		
+				::one_d::chebyshev::element <datatype>::add_transform (new fftw_cosine <datatype> (this, n, data_dev.pointer ()));
+				::one_d::chebyshev::element <datatype>::add_post_plan (new transfer <datatype> (this, n, data_dev.pointer (), &((*this) [velocity])));
+				
+				// Set up solver
+				::one_d::chebyshev::element <datatype>::add_solver (new solver <datatype> (this, n, excess_0, excess_n, timestep, boundary_weights [::one_d::edge_0], boundary_weights [::one_d::edge_n], grid->get_data (0), &matrix [0], velocity, rhs));
+		
+			}
+	
 			template <class datatype>
 			datatype fft_element <datatype>::calculate_timestep () {
 				return 0.0;
 			}
 
 			template class fft_element <double>;
-		} /* cuda */
-	} /* chebyshev */
-} /* one_d */
+			template class fft_element <float>;
+		} /* chebyshev */
+	} /* one_d */
+} /* cuda */

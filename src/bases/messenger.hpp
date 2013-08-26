@@ -35,7 +35,6 @@ namespace bases
 	 * to other elements. It may be dimension specific. There should only be 
 	 * one per thread.
 	 ************************************************************************/
-	template <class datatype>
 	class messenger
 	{
 	public:
@@ -140,7 +139,8 @@ namespace bases
 		 * \param data The datatype pointer to the data to send
 		 * \param edge The integer representation of the corresponding edge
 		 ************************************************************************/
-		virtual void send (int n, datatype* data, int edge);
+		template <class datatype>
+		void send (int n, datatype* data, int edge);
 		
 		/*!**********************************************************************
 		 * \brief Add recv action in the datatype queue
@@ -154,35 +154,8 @@ namespace bases
 		 * \param data The datatype pointer to the data to recv
 		 * \param edge The integer representation of the corresponding edge
 		 ************************************************************************/
-		virtual void recv (int n, datatype* data, int edge);
-
-		/*!**********************************************************************
-		 * \brief Add send action in the integer queue
-		 * 
-		 * Warning. This does not send the data immediately. This could be 
-		 * rewritten to save the information in a buffer, but it does not at 
-		 * present. It sends if it can, but the information is not guaranteed to
-		 * be sent until an entire set of send/recv commands are queued. 
-		 * 
-		 * \param n The integer number of elements to send
-		 * \param data The integer pointer to the data to send
-		 * \param edge The integer representation of the corresponding edge
-		 ************************************************************************/
-		virtual void send (int n, int* data, int edge);
-		
-		/*!**********************************************************************
-		 * \brief Add recv action in the integer queue
-		 * 
-		 * Warning. This does not recv the data immediately. This could be 
-		 * rewritten to wait for the information, but it does not at 
-		 * present. It recvs if it can, but the information is not guaranteed to
-		 * arrive until an entire set of send/recv commands are queued. 
-		 * 
-		 * \param n The integer number of elements to recv
-		 * \param data The integer pointer to the data to recv
-		 * \param edge The integer representation of the corresponding edge
-		 ************************************************************************/
-		virtual void recv (int n, int* data, int edge);
+		template <class datatype>
+		void recv (int n, datatype* data, int edge);
 		
 		/*!**********************************************************************
 		 * \brief Calculate a minimum across elements
@@ -190,8 +163,9 @@ namespace bases
 		 * This uses the messenger buffer.
 		 * 
 		 * \param data The datatype pointer to the datatype to minimize
-		 ************************************************************************/		
-		virtual void min (datatype* data);
+		 ************************************************************************/	
+		template <class datatype>	
+		void min (datatype* data);
 		
 		/*!**********************************************************************
 		 * \brief Determine if all processes meet a condition
@@ -206,26 +180,19 @@ namespace bases
 		/*!**********************************************************************
 		 * \brief Check to see if an action in the datatype queue is ready to be sent
 		 ************************************************************************/
-		virtual void data_check ();
-		
-		/*!**********************************************************************
-		 * \brief Check to see if an action in the datatype queue is ready to be sent
-		 ************************************************************************/
-		virtual void int_check ();
+		template <class datatype>
+		void data_check ();
 		
 		int id; //!< The integer id of the current process
 		int np; //!< The integer number of total processes
 		int data_iter; //!< The integer current location in the datatype queue
 		int int_iter; //!< The integer current location in the integer queue
 		
-		std::vector <datatype*> data_queue; //!< A datatype pointer vector containing the elements to send/recv
+		std::vector <void*> data_queue; //!< A datatype pointer vector containing the elements to send/recv
 		std::vector <int*> int_data_queue; //!< An integer pointer vector containing the elements to send/recv
 		
 		std::vector <int> n_queue; //!< An integer vector containing the number of elements to send/recv
 		std::vector <int> process_queue; //!< An integer vector containing the processes for send/recv
-		
-		std::vector <datatype> buffer; //!< A datatype vector to be used as a buffer if needed
-		std::vector <int> int_buffer; //!< An integer vector to be used as a buffer if needed
 	};
 } /* bases */
 

@@ -12,22 +12,23 @@
 #include "../../config.hpp"
 #include "../../bases/plan.hpp"
 
-namespace one_d
+namespace cuda
 {
-	namespace cuda
+	namespace one_d
 	{
 		/*!*******************************************************************
 		 * An implementation of the transform class using FFTW3.
 		 * 
 		 * \brief \copybrief bases::explicit_plan <double>
 		 *********************************************************************/
-		class fftw_cosine : public bases::plan <double>
+		template <class datatype>
+		class fftw_cosine : public bases::plan <datatype>
 		{
 		public:
 			/*!*******************************************************************
 			 * \copydoc bases::explicit_plan <double>::explicit_plan ()
 			 *********************************************************************/
-			fftw_cosine (bases::element <double>* i_element_ptr, int i_n, double* i_data_dev);
+			fftw_cosine (bases::element <datatype>* i_element_ptr, int i_n, datatype* i_data_dev);
 		
 			virtual ~fftw_cosine ();
 		
@@ -38,17 +39,18 @@ namespace one_d
 	
 		private:
 			int n;
-			double scalar; //!< The scalar used after the transform (1 / sqrt (2 * (n - 1)))
+			datatype scalar; //!< The scalar used after the transform (1 / sqrt (2 * (n - 1)))
 			void* data_real;
 			void* data_complex;
 			void* cu_plan;
 			// fftw_plan fourier_plan; //!< The fftw_plan object to be executed
 		};
 		
-		class transfer : public bases::plan <double>
+		template <class datatype>
+		class transfer : public bases::plan <datatype>
 		{
 		public:
-			transfer (bases::element <double>* i_element_ptr, int i_n, double* i_data_dev, double* i_data);
+			transfer (bases::element <datatype>* i_element_ptr, int i_n, datatype* i_data_dev, datatype* i_data);
 			
 			virtual ~transfer () {}
 			
@@ -56,10 +58,10 @@ namespace one_d
 		
 		private:
 			int n;
-			double* data_dev;
-			double* data;
+			datatype* data_dev;
+			datatype* data;
 		};
-	} /* cuda */
-} /* one_d */
+	} /* one_d */
+} /* cuda */
 
 #endif /* end of include guard: FFTW_ONE_D_CUDA_HPP_G5118SR0 */

@@ -11,7 +11,6 @@
 #include <vector>
 #include <stdio.h>
 #include "utils/solver_utils.hpp"
-#include "utils/cuda/dgetrs.h"
 
 int main (int argc, char *argv[])
 {	
@@ -83,40 +82,6 @@ int main (int argc, char *argv[])
 	// }
 	
 	// INFO ("Main complete.");
-
-	int n = 6;
-	int info;
-	std::vector <double> matrix (n * n);
-	std::vector <double> x (n);
-	std::vector <int> ipiv (n);
-	
-	for (int i = 0; i < n; ++i) {
-		printf ("Before: ");
-		for (int j = 0; j < n; ++j) {
-			matrix [i + j * n] = i + j;
-			printf ("%f ", matrix [i + j * n]);
-		}
-		x [i] = i;
-		printf ("= %f\n", x[i]);
-	}
-	
-	char charN = 'N';
-	int ione = 1;
-
-	// utils::matrix_factorize (n, n, &matrix [0], &ipiv [0], &info);
-	// dgetrscuda_ (&charN, &n, &ione, &matrix [0], &n, &ipiv [0], &x [0], &n, &info);
-	
-	if (info != 0) {
-		printf ("Error");
-	}
-	
-	for (int i = 0; i < n; ++i) {
-		printf ("After: ");
-		for (int j = 0; j < n; ++j) {
-			printf ("%f ", matrix [i + j * n]);
-		}
-		printf ("= %f\n", x[i]);
-	}
 	
 	return 0;
 }

@@ -50,15 +50,15 @@ namespace bases
 		* \param i_messenger_ptr A pointer to a messenger object
 		* \param i_flags An integer set of execution flags
 		*********************************************************************/
-		element (int i_name, int dimensions, io::parameter_map& i_inputParams, messenger <datatype>* i_messenger_ptr, int i_flags) : inputParams (i_inputParams) {
+		element (int i_name, int i_dimensions, io::parameter_map& i_inputParams, messenger* i_messenger_ptr, int i_flags) : inputParams (i_inputParams) {
 			name = i_name;
-			boundary_weights.resize (2 * dimensions);
+			boundary_weights.resize (2 * i_dimensions);
 			inputParams = i_inputParams;
 			messenger_ptr = i_messenger_ptr;
 			flags = i_flags;
 			timestep = 0.0;
 			duration = 0.0;
-			for (int i = 0; i < 2 * dimensions; ++i) {
+			for (int i = 0; i < 2 * i_dimensions; ++i) {
 				if (messenger_ptr->linked (i)) {
 					boundary_weights [i] = 0.5;
 				} else {
@@ -321,7 +321,7 @@ namespace bases
 	protected:
 		int name; //!< An integer representation of the element, to be used in file output
 		io::parameter_map& inputParams; //!< The map that contains the input parameters
-		messenger <datatype>* messenger_ptr; //!< A pointer to the messenger object
+		messenger* messenger_ptr; //!< A pointer to the messenger object
 		
 		int flags; //!< An integer set of execution flags
 

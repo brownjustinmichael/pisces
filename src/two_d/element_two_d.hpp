@@ -26,8 +26,8 @@ namespace two_d
 	public:
 		element (int i_n, datatype i_position_00, datatype i_position_nm, int i_m, datatype i_position_0m, datatype i_position_n0, int i_name, io::parameter_map& i_inputParams, bases::messenger <datatype>* i_messenger_ptr, int i_flags) : 
 		bases::element <datatype> (i_name, 2, i_inputParams, i_messenger_ptr, i_flags),
-		n (i_n),
-		m (i_m) {
+		n (i_n + 1),
+		m (i_m + 1) {
 			positions.resize (4);
 			positions [edge_00] = i_position_00;
 			positions [edge_nm] = i_position_nm;
@@ -141,6 +141,9 @@ namespace two_d
 		std::vector<int> cell_m; //!< An integer array for tracking each cell number for output
 
 		std::map <int, std::vector <datatype> > scalars; //!< A vector of scalar vectors
+		
+		std::map <int, int [2]> edge_map;
+		std::map <int, std::map <int, std::vector <datatype> > > fixed_points;
 		std::map <int, std::vector <datatype> > fixed_points_00; //!< The initial values of the scalars at index 0
 		std::map <int, std::vector <datatype> > fixed_points_nm; //!< The initial values of the scalars at index 0
 		std::map <int, std::vector <datatype> > fixed_points_n0; //!< The initial values of the scalars at index 0

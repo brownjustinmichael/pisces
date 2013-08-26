@@ -9,20 +9,9 @@
 #ifndef UTILS_CUBLAS_HCU_K6B7R3SS
 #define UTILS_CUBLAS_HCU_K6B7R3SS
 
-#define HANDLE_STATUS(status) \
-{cublasStatus result = status; \
-switch (result) { \
-	case CUBLAS_STATUS_NOT_INITIALIZED: printf ("CUBLAS didn't initialize correctly.\n"); throw 0; \
-	case CUBLAS_STATUS_ALLOC_FAILED: printf ("CUBLAS allocation failed.\n"); throw 0; \
-	case CUBLAS_STATUS_INVALID_VALUE: printf ("CUBLAS unsupported value or parameter.\n"); throw 0; \
-	case CUBLAS_STATUS_ARCH_MISMATCH: printf ("CUBLAS feature absent in current architecture.\n"); throw 0; \
-	case CUBLAS_STATUS_MAPPING_ERROR: printf ("CUBLAS access to GPU memory failed.\n"); throw 0; \
-	case CUBLAS_STATUS_EXECUTION_FAILED: printf ("CUBLAS failed to execute.\n"); throw 0; \
-	case CUBLAS_STATUS_INTERNAL_ERROR: printf ("CUBLAS internal operation failed.\n"); throw 0;}}
-
-namespace utils
+namespace cuda
 {
-	namespace cuda
+	namespace utils
 	{
 		template <class datatype>
 		struct vector 
@@ -71,9 +60,7 @@ namespace utils
 		void matrix_vector_multiply (int m, int n, float alpha, float* a, float* x, float beta, float* y, int lda, int incx = 1, int incy = 1);
 		
 		void matrix_vector_multiply (int m, int n, double alpha, double* a, double* x, double beta, double y, int lda, int incx = 1, int incy = 1);
-		
-	} /* cublas */
-
-} /* utils */
+	} /* utils */
+} /* cuda */
 
 #endif /* end of include guard: UTILS_CUBLAS_HCU_K6B7R3SS */

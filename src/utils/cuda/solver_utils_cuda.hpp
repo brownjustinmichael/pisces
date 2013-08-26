@@ -13,7 +13,9 @@ namespace cuda
 {
 	namespace utils
 	{
-		void matrix_solve (int n, double* a, int* ipiv, double* b, int *info = NULL, int nrhs = 1, int lda = -1, int ldb = -1);
+		void matrix_solve (int n, double* a, int* ipiv, double* b, int nrhs = 1, int lda = -1, int ldb = -1);
+
+		void matrix_solve (int n, float* a, int* ipiv, float* b, int nrhs = 1, int lda = -1, int ldb = -1);
 	} /* utils */
 } /* cuda */
 

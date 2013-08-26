@@ -48,7 +48,7 @@ namespace one_d
 		 * \param i_position_n The datatype position of index n - 1 - excess_n
 		 * \copydoc bases::element <datatype>::element ()
 		 *********************************************************************/
-		element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger <datatype>* i_messenger_ptr, int i_flags) : 
+		element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
 		bases::element <datatype> (i_name, 1, i_inputParams, i_messenger_ptr, i_flags),
 		n (i_n + 1),
 		excess_0 (i_excess_0),
@@ -58,6 +58,16 @@ namespace one_d
 			cell.resize (n);
 			for (int i = 0; i < n; ++i) {
 				cell [i] = i;
+			}
+			
+			edge_map [edge_0] = 0;
+			edge_map [edge_n] = n - 1;
+			
+			if (i_messenger_ptr->linked (edge_0)) {
+				fixed_points [edge_0];
+			}
+			if (i_messenger_ptr->linked (edge_n)) {
+				fixed_points [edge_n];
 			}
 			
 			std::ostringstream convert;
@@ -93,8 +103,9 @@ namespace one_d
 			if (initial_conditions) {
 				utils::copy (n, initial_conditions, &(scalars [name]) [0]);
 			}
-			fixed_points_0 [name] = scalars [name] [0];
-			fixed_points_n [name] = scalars [name] [n - 1];
+			for (std::map <int, int>::iterator i_edge = edge_map.begin (); i_edge != edge_map.end (); ++i_edge) {
+				fixed_points [i_edge->first] [name] = scalars [name] [i_edge->second];
+			}
 			failsafe_dump->append (&(scalars [name]) [0]);
 		}
 		
@@ -114,20 +125,11 @@ namespace one_d
 		 * \copydoc bases::element <datatype>::execute_boundaries ()
 		 *********************************************************************/
 		inline void execute_boundaries () {
-			if (messenger_ptr->linked (edge_0)) {
-				for (iterator iter = bases::element <datatype>::begin (); iter != bases::element <datatype>::end (); ++iter) {
-					(*this) (*iter, 0) = fixed_points_0 [*iter];
+			for (typename std::map <int, std::map <int, datatype> >::iterator i_edge = fixed_points.begin (); i_edge != fixed_points.end (); ++i_edge) {
+				for (typename std::map <int, datatype>::iterator iter = (i_edge->second).begin (); iter != (i_edge->second).end (); ++iter) {
+					(*this) (iter->first, edge_map [i_edge->first]) = iter->second;
 				}
 			}
-			if (messenger_ptr->linked (edge_n)) {
-				for (iterator iter = bases::element <datatype>::begin (); iter != bases::element <datatype>::end (); ++iter) {
-					(*this) (*iter, n - 1) = fixed_points_n [*iter];
-				}
-			}
-			
-			/*
-				TODO Not sure why these aren't !linked...
-			*/
 		}
 		
 	protected:
@@ -146,12 +148,9 @@ namespace one_d
 		std::vector<int> cell; //!< An integer array for tracking each cell number for output
 
 		std::map <int, std::vector <datatype>> scalars; //!< A vector of scalar vectors
-		std::map <int, datatype> fixed_points_0; //!< The initial values of the scalars at index 0
-		std::map <int, datatype> fixed_points_n; //!< The initial values of the scalars at index n - 1
 		
-		/*
-			TODO Perhaps there's a better way to handle the fixed points
-		*/
+		std::map <int, int> edge_map;
+		std::map <int, std::map <int, datatype> > fixed_points;
 	};
 
 	namespace chebyshev
@@ -166,7 +165,7 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc one_d::element::element ()
 			 *********************************************************************/
-			element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger <datatype>* i_messenger_ptr, int i_flags) : 
+			element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
 			one_d::element <datatype> (i_n, i_excess_0, i_position_0, i_excess_n, i_position_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
 				initialize (position);
@@ -236,7 +235,7 @@ namespace one_d
 			 * \param i_excess_n The integer number of points evaluated in the adjacent element
 			 * \copydoc element::element ()
 			 *********************************************************************/
-			advection_diffusion_element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger <datatype>* i_messenger_ptr, int i_flags);
+			advection_diffusion_element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags);
 			
 			virtual ~advection_diffusion_element () {}
 		
@@ -282,7 +281,7 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc one_d::element::element ()
 			 *********************************************************************/
-			element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger <datatype>* i_messenger_ptr, int i_flags) : 
+			element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
 			one_d::element <datatype> (i_n, i_excess_0, i_position_0, i_excess_n, i_position_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
 				initialize (position);
@@ -349,7 +348,7 @@ namespace one_d
 			 * \param i_excess_n The integer number of points evaluated in the adjacent element
 			 * \copydoc element::element ()
 			 *********************************************************************/
-			advection_diffusion_element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger <datatype>* i_messenger_ptr, int i_flags);
+			advection_diffusion_element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags);
 		
 			virtual ~advection_diffusion_element () {}
 	

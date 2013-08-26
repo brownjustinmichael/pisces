@@ -10,13 +10,7 @@
 #include <cufft.h>
 #include "fftw_one_d_cuda.hpp"
 #include "../../utils/cuda/utils_cublas.hpp"
-
-#define HANDLE_ERROR(status) \
-{cudaError_t result = status; \
-switch (result) { \
-	case cudaErrorMemoryAllocation: FATAL ("Memory Allocation Error."); throw 0; \
-	case cudaErrorInvalidValue: FATAL ("Invalid value passed."); throw 0; \
-	default: if (status != cudaSuccess) {FATAL ("Other problem."); throw 0;}}}
+#include "../../utils/cuda/utils_cuda.cuh"
 
 #define HANDLE_CUFFT(status) \
 {cufftResult result = status; \
@@ -45,6 +39,14 @@ __global__ void complex_to_real (int n, cufftDoubleComplex* in, double* out) {
 	}
 }
 
+__global__ void complex_to_real (int n, cufftComplex* in, float* out) {
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	while (tid < n) {
+		out [tid] = in [tid].x;
+		tid += blockDim.x * gridDim.x;
+	}
+}
+
 __global__ void symmetrize (int n, double* data) {
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
 	while (tid < n - 1 && tid != 0) {
@@ -53,11 +55,20 @@ __global__ void symmetrize (int n, double* data) {
 	}
 }
 
-namespace one_d
+__global__ void symmetrize (int n, float* data) {
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	while (tid < n - 1 && tid != 0) {
+		data [2 * n - 2 - tid] = data [tid];
+		tid += blockDim.x * gridDim.x;
+	}
+}
+
+namespace cuda
 {
-	namespace cuda
+	namespace one_d
 	{
-		fftw_cosine::fftw_cosine (bases::element <double>* i_element_ptr, int i_n, double* i_data_dev) : 
+		template <>
+		fftw_cosine <double>::fftw_cosine (bases::element <double>* i_element_ptr, int i_n, double* i_data_dev) : 
 		bases::plan <double> (i_element_ptr),
 		n (i_n),
 		data_real (i_data_dev) {
@@ -69,13 +80,28 @@ namespace one_d
 			TRACE ("Instantiated.");
 		}
 		
-		fftw_cosine::~fftw_cosine () {
+		template <>
+		fftw_cosine <float>::fftw_cosine (bases::element <float>* i_element_ptr, int i_n, float* i_data_dev) : 
+		bases::plan <float> (i_element_ptr),
+		n (i_n),
+		data_real (i_data_dev) {
+			TRACE ("Instantiating...");
+			HANDLE_ERROR (cudaMalloc ((void **) &data_complex, n * sizeof (cufftComplex)));
+			cu_plan = new cufftHandle;
+			HANDLE_CUFFT (cufftPlan1d((cufftHandle*) cu_plan, 2 * n - 2, CUFFT_R2C, 1));
+			scalar = sqrt (1.0 / 2.0 / ((float) n - 1.0));
+			TRACE ("Instantiated.");
+		}
+		
+		template <class datatype>
+		fftw_cosine <datatype>::~fftw_cosine () {
 			cufftDestroy (*((cufftHandle *) cu_plan));
 			delete (cufftHandle*) cu_plan;
 			cudaFree (data_complex);
 		}
 		
-		void fftw_cosine::execute () {
+		template <>
+		void fftw_cosine <double>::execute () {
 			bases::plan <double>::execute ();
 			
 			symmetrize <<<1, std::min (n, 512)>>> (n, (double *) data_real);
@@ -84,16 +110,34 @@ namespace one_d
 			
 			complex_to_real <<<1, std::min (n, 512)>>> (n, (cufftDoubleComplex*) data_complex, (double*) data_real);
 			
-			utils::cuda::scale (n, scalar, (double*) data_real);
+			utils::scale (n, scalar, (double*) data_real);
 		}
 		
-		transfer::transfer (bases::element <double>* i_element_ptr, int i_n, double* i_data_dev, double* i_data) :
-		bases::plan <double> (i_element_ptr),
+		template <>
+		void fftw_cosine <float>::execute () {
+			bases::plan <float>::execute ();
+			
+			symmetrize <<<1, std::min (n, 512)>>> (n, (float *) data_real);
+			
+			HANDLE_CUFFT (cufftExecR2C(*((cufftHandle *) cu_plan), (float*) data_real, (cufftComplex*) data_complex));
+			
+			complex_to_real <<<1, std::min (n, 512)>>> (n, (cufftComplex*) data_complex, (float*) data_real);
+			
+			utils::scale (n, scalar, (float*) data_real);
+		}
+		
+		template <class datatype>
+		transfer <datatype>::transfer (bases::element <datatype>* i_element_ptr, int i_n, datatype* i_data_dev, datatype* i_data) :
+		bases::plan <datatype> (i_element_ptr),
 		data_dev (i_data_dev),
 		data (i_data) {}
 		
-		void transfer::execute () {
-			cudaMemcpy (data, data_dev, n * sizeof (double), cudaMemcpyDeviceToHost);
+		template <class datatype>
+		void transfer <datatype>::execute () {
+			cudaMemcpy (data, data_dev, n * sizeof (datatype), cudaMemcpyDeviceToHost);
 		}
-	} /* cuda */
-} /* one_d */
+		
+		template class transfer <double>;
+		template class transfer <float>;
+	} /* one_d */
+} /* cuda */

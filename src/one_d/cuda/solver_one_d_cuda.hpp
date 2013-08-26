@@ -10,29 +10,38 @@
 #define SOLVER_ONE_D_HPP_YNU1VLWZ
 
 #include "../solver_one_d.hpp"
-#include "element_one_d_cuda.hpp"
 
-namespace one_d
+namespace cuda
 {
-	namespace cuda
+	namespace one_d
 	{
 		template <class datatype>
-		class solver : one_d::solver <datatype>
+		class solver : public ::one_d::solver <datatype>
 		{
 		public:
 			solver (bases::element <datatype>* i_element_ptr, int i_n, int i_excess_0, int i_excess_n, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype *i_default_matrix, datatype *i_matrix, int i_name_in, int i_name_rhs, int i_name_out = null, int i_flags = 0x00);
 			
-			virtual ~solver () {}
+			virtual ~solver ();
 			
 			virtual void execute ();
 			
 		protected:
 			virtual void _factorize ();
 			
+			using ::one_d::solver <datatype>::n;
+			using ::one_d::solver <datatype>::data_in;
+			using ::one_d::solver <datatype>::data_out;
+			using ::one_d::solver <datatype>::rhs;
+			using ::one_d::solver <datatype>::ipiv;
+			using ::one_d::solver <datatype>::alpha_0;
+			using ::one_d::solver <datatype>::alpha_n;
+			using ::one_d::solver <datatype>::timestep;
+			
+			int* ipiv_dev;
 			datatype* factorized_matrix;
 			datatype* factorized_matrix_dev;
 		};
-	} /* cuda */
-} /* one_d */
+	} /* one_d */
+} /* cuda */
 
 #endif /* end of include guard: SOLVER_ONE_D_HPP_YNU1VLWZ */

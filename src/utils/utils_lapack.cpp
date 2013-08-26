@@ -141,6 +141,12 @@ namespace utils
 		dcopy_ (&n, x, &incx, y, &incy);
 	}
 	
+	void scale (int n, int a, int* x, int incx) {
+		for (int i = 0; i < n; i += incx) {
+			x [i] *= a;
+		}
+	}
+	
 	void scale (int n, float a, float* x, int incx) {
 		sscal_ (&n, &a, x, &incx);
 	}

@@ -7,14 +7,15 @@
  ************************************************************************/
 
 #include "utils_cublas.hpp"
+#include "utils_cuda.cuh"
 #include <vector>
 #include <cassert>
 #include <cublas.h>
 #include <stdio.h>
 
-namespace utils
+namespace cuda
 {
-	namespace cuda
+	namespace utils
 	{
 		template <class datatype>
 		vector <datatype>::vector (int i_n, datatype *x, int incx) {
@@ -136,5 +137,5 @@ namespace utils
 		
 		template class vector <double>;
 		template class vector <float>;
-	} /* cuda */
-} /* utils */
+	} /* utils */
+} /* cuda */

@@ -1,17 +1,8 @@
 Import ("env")
 Import ("cuda_objects")
 
-test_objects = []
-
-test_objects.append (env.Object ("dgetrs.cu"))
-# test_objects.append (env.Object ("dlaswp.cu"))
-# test_objects.append (env.Object ("dtrsm.cu"))
-test_objects.append (env.Object ("lsame.cu"))
-test_objects.append (env.Object ("xerbla.cu"))
-# test_objects.append (env.Object ("cuPrintf.cu"))
-
-# env.Default (env.Program(target = "../../../run/test", source = (["test.cu"] + test_objects)))
-
 cuda_objects.append (env.Object ("utils_cublas.cu"))
+
+cuda_objects.append (env.Object ("solver_utils_cuda.cu"))
 
 

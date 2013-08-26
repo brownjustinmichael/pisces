@@ -51,8 +51,7 @@ namespace bases
 {
 	template <class datatype>
 	class element;
-		
-	template <class datatype>
+	
 	class messenger;
 	
 	/*!*******************************************************************
@@ -90,7 +89,7 @@ namespace bases
 		int flags; // The integer plan execution flags
 		int default_flags; //!< An integer set of default flags to use in case the user does not specify any flags
 		int *flags_ptr; //!< A pointer to the integer element execution flags
-		messenger <datatype>* messenger_ptr; //!< A pointer to the messenger associated with the element
+		messenger* messenger_ptr; //!< A pointer to the messenger associated with the element
 	};
 
 	/*!*******************************************************************
