@@ -37,6 +37,14 @@ namespace cuda
 		
 				virtual void setup ();
 	
+				inline void explicit_reset () {
+					::one_d::chebyshev::element <datatype>::explicit_reset ();
+					
+					TRACE ("Resetting explicit part...");
+					
+					utils::scale (n, (datatype) 0.0, rhs_dev.pointer ());
+				}
+				
 				inline void implicit_reset () {
 					::one_d::chebyshev::element <datatype>::implicit_reset ();
 			
@@ -58,6 +66,7 @@ namespace cuda
 				using ::one_d::chebyshev::element <datatype>::boundary_weights;
 				using ::one_d::chebyshev::element <datatype>::inputParams;
 				using ::one_d::chebyshev::element <datatype>::grid;
+				using ::one_d::chebyshev::element <datatype>::pointer;
 
 				int excess_0, excess_n;
 				utils::vector <datatype> data_dev;

@@ -33,6 +33,8 @@ namespace cuda
 				// data_dev is twice necessary size for FFT
 				data_dev.resize (2 * n);
 				rhs_dev.resize (n);
+				
+				data_dev.copy_to_device (n, pointer (velocity));
 		
 				TRACE ("Initialized.");
 			}
@@ -45,22 +47,27 @@ namespace cuda
 				// Set up output
 				std::ostringstream convert;
 				convert << name;
-				transform_stream.reset (new io::incremental_output <datatype>  ("../output/test_angle_" + convert.str () + "_", ".dat", 4, new io::header, n, inputParams["output_every"].asInt));
+				normal_stream.reset (new io::incremental_output <datatype>  ("../output/normal_" + convert.str () + "_", ".dat", 4, new io::header, n, inputParams["output_every"].asInt));
+				normal_stream->append (cell [0]);
+				normal_stream->append ((*this) [position]);
+				normal_stream->append ((*this) [velocity]);
+				
+				transform_stream.reset (new io::incremental_output <datatype>  ("../output/transform_" + convert.str () + "_", ".dat", 4, new io::header, n, inputParams["output_every"].asInt));
 				transform_stream->append (cell [0]);
 				transform_stream->append ((*this) [position]);
 				transform_stream->append ((*this) [velocity]);
 		
 				transform_stream->to_file ();
 				
-				::one_d::chebyshev::element <datatype>::add_implicit_plan (new ::one_d::implicit_diffusion <datatype> (this, - diffusion_coeff * alpha, n, &*grid, &matrix [0]));
+				this->add_implicit_plan (new ::one_d::implicit_diffusion <datatype> (this, - diffusion_coeff * alpha, n, &*grid, &matrix [0]));
 				
-				::one_d::chebyshev::element <datatype>::add_pre_plan (new explicit_diffusion <datatype> (this, diffusion_coeff * (1.0 - alpha), n, &*grid, data_dev.pointer (), rhs_dev.pointer ()));
+				this->add_pre_plan (new explicit_diffusion <datatype> (this, diffusion_coeff * (1.0 - alpha), n, &*grid, data_dev.pointer (), rhs_dev.pointer ()));
 		
-				::one_d::chebyshev::element <datatype>::add_transform (new fftw_cosine <datatype> (this, n, data_dev.pointer ()));
-				::one_d::chebyshev::element <datatype>::add_post_plan (new transfer <datatype> (this, n, data_dev.pointer (), &((*this) [velocity])));
+				this->add_transform (new fftw_cosine <datatype> (this, n, data_dev.pointer ()));
+				this->add_post_plan (new transfer <datatype> (this, n, data_dev.pointer (), &((*this) [velocity])));
 				
 				// Set up solver
-				::one_d::chebyshev::element <datatype>::add_solver (new solver <datatype> (this, n, excess_0, excess_n, timestep, boundary_weights [::one_d::edge_0], boundary_weights [::one_d::edge_n], grid->get_data (0), &matrix [0], data_dev.pointer (), rhs_dev.pointer ()));
+				this->add_solver (new solver <datatype> (this, n, excess_0, excess_n, timestep, boundary_weights [::one_d::edge_0], boundary_weights [::one_d::edge_n], grid->get_data (0), &matrix [0], data_dev.pointer (), rhs_dev.pointer ()));
 		
 			}
 	

@@ -47,17 +47,44 @@ namespace cuda
 		
 		template <class datatype>
 		void solver <datatype>::execute () {
+			std::vector <datatype> to_print (n);
+			
 			TRACE ("Setting up solve...");
 			
+			cudaMemcpy (&to_print [0], data_in, n * sizeof (datatype), cudaMemcpyDeviceToHost);
+			
+			for (int i = 0; i < n; ++i) {
+				DEBUG ("Before: " << to_print [i]);
+			}
+			
+			cudaMemcpy (&to_print [0], rhs, n * sizeof (datatype), cudaMemcpyDeviceToHost);
+			
+			for (int i = 0; i < n; ++i) {
+				DEBUG ("RHS: " << to_print [i]);
+			}
+
 			utils::copy (n, data_in, data_out);
 		
 			utils::add_scaled (1, alpha_0 * timestep, rhs, data_out);
 			utils::add_scaled (1, alpha_n * timestep, rhs + n - 1, data_out + n - 1);
-			utils::add_scaled (n, timestep, rhs + 1, data_out + 1);
+			utils::add_scaled (n - 2, timestep, rhs + 1, data_out + 1);
 
 			TRACE ("Solving...");
 			
+			cudaMemcpy (&to_print [0], data_in, n * sizeof (datatype), cudaMemcpyDeviceToHost);
+			
+			for (int i = 0; i < n; ++i) {
+				DEBUG ("Prepped: " << to_print [i]);
+			}
+			
 			utils::matrix_solve (n, factorized_matrix_dev, ipiv_dev, data_out);
+			
+			cudaMemcpy (&to_print [0], data_out, n * sizeof (datatype), cudaMemcpyDeviceToHost);
+			
+			for (int i = 0; i < n; ++i) {
+				DEBUG ("After: " << to_print [i]);
+			}
+			
 			
 			TRACE ("Solved.");
 		}

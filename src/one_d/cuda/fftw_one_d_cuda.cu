@@ -119,7 +119,7 @@ namespace cuda
 		template <>
 		void fftw_cosine <float>::execute () {
 			bases::plan <float>::execute ();
-			
+
 			symmetrize <<<1, std::min (n, 512)>>> (n, (float *) data_real);
 			
 			HANDLE_CUFFT (cufftExecR2C(*((cufftHandle *) cu_plan), (float*) data_real, (cufftComplex*) data_complex));
@@ -127,12 +127,12 @@ namespace cuda
 			complex_to_real <<<1, std::min (n, 512)>>> (n, (cufftComplex*) data_complex, (float*) data_real);
 			
 			utils::scale (n, scalar, (float*) data_real);
-
 		}
 		
 		template <class datatype>
 		transfer <datatype>::transfer (bases::element <datatype>* i_element_ptr, int i_n, datatype* i_data_dev, datatype* i_data) :
 		bases::plan <datatype> (i_element_ptr),
+		n (i_n),
 		data_dev (i_data_dev),
 		data (i_data) {}
 		

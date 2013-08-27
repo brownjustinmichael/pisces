@@ -1,9 +1,9 @@
 n_elements 1
-diffusion_coeff 0.01
+diffusion_coeff 0.1
 advection_coeff 0.0
 courant_factor 0.8
-timesteps 1000
-output_every 100
+timesteps 10
+output_every 1
 gridpoints 64
 time_step_size 0.1
 init_cond_scale 1.0

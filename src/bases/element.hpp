@@ -210,6 +210,7 @@ namespace bases
 		 * spectral space if necessary.
 		 *********************************************************************/
 		virtual void explicit_reset () {
+			TRACE ("Resetting explicits...");
 			if (!(flags & transformed)) {
 				transform_inverse ();
 			}
@@ -247,7 +248,12 @@ namespace bases
 		}
 		
 		virtual void output () {
-			normal_stream->to_file ();
+			if (normal_stream) {
+				normal_stream->to_file ();
+			}
+			if (transform_stream) {
+				transform_stream->to_file ();
+			}
 		}
 
 		virtual void factorize () {

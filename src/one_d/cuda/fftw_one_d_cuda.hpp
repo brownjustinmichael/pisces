@@ -38,6 +38,8 @@ namespace cuda
 			void execute ();
 	
 		private:
+			using bases::plan <datatype>::flags_ptr;
+
 			int n;
 			datatype scalar; //!< The scalar used after the transform (1 / sqrt (2 * (n - 1)))
 			void* data_real;
@@ -57,6 +59,9 @@ namespace cuda
 			virtual void execute ();
 		
 		private:
+			using bases::plan <datatype>::element_ptr;
+			using bases::plan <datatype>::flags_ptr;
+			
 			int n;
 			datatype* data_dev;
 			datatype* data;
