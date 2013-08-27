@@ -42,11 +42,11 @@ namespace cuda
 
 		private:
 			using bases::explicit_plan <datatype>::n;
+			using bases::explicit_plan <datatype>::data_in;
+			using bases::explicit_plan <datatype>::data_out;
 		
 			datatype coeff; //!< A datatype that represents the coefficient in front of the diffusion term in the differential equation
-			datatype* data_in;
-			datatype* data_out;
-			
+
 			utils::vector <datatype> deriv_matrix; //!< A pointer to a collocation grid that contains the the Chebyshev values
 		};
 	} /* oned */

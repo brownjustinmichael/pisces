@@ -262,6 +262,7 @@ namespace one_d
 			using element <datatype>::boundary_weights;
 			using element <datatype>::inputParams;
 			using element <datatype>::grid;
+			using bases::element <datatype>::pointer;
 			typedef typename element <datatype>::iterator iterator;
 		
 			std::vector<datatype> matrix; //!< A vector containing the datatype matrix used in the implicit solver
@@ -375,6 +376,7 @@ namespace one_d
 			using element <datatype>::boundary_weights;
 			using element <datatype>::inputParams;
 			using element <datatype>::grid;
+			using bases::element <datatype>::pointer;
 			typedef typename element <datatype>::iterator iterator;
 	
 			std::vector<datatype> matrix; //!< A vector containing the datatype matrix used in the implicit solver

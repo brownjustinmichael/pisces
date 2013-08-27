@@ -103,11 +103,11 @@ namespace bases
 	public:
 		/*!*******************************************************************
 		 * \param i_n The integer number of elements in the data
-		 * \param i_name_in The integer scalar index of the input
-		 * \param i_name_out The integer scalar index of the output
+		 * \param i_data_in The integer scalar index of the input
+		 * \param i_data_out The integer scalar index of the output
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		explicit_plan (element <datatype>* i_element_ptr, int i_n, int i_name_in, int i_name_out = null, int flags = 0x00);
+		explicit_plan (element <datatype>* i_element_ptr, int i_n, datatype* i_data_in, datatype* i_data_out = NULL, int flags = 0x00);
 	
 		virtual ~explicit_plan () {}
 	

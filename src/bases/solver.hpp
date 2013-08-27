@@ -31,8 +31,8 @@ namespace bases
 		/*!*******************************************************************
 		 * \copydoc explicit_plan::explicit_plan ()
 		 *********************************************************************/
-		solver (element <datatype>* i_element_ptr, int i_n, int i_name_in, int i_name_out, int i_flags = 0x00) : 
-		explicit_plan <datatype> (i_element_ptr, i_n, i_name_in, i_name_out, i_flags) {}
+		solver (element <datatype>* i_element_ptr, int i_n, datatype* i_data_in, datatype* i_data_out, int i_flags = 0x00) : 
+		explicit_plan <datatype> (i_element_ptr, i_n, i_data_in, i_data_out, i_flags) {}
 		
 		virtual ~solver () {}
 			

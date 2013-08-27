@@ -12,15 +12,15 @@
 namespace one_d
 {
 	template <>
-	fftw_cosine <double>::fftw_cosine (bases::element <double>* i_element_ptr, int i_n, int i_name_in, int i_name_out, int i_flags) : 
-	bases::explicit_plan <double> (i_element_ptr, i_n, i_name_in, i_name_out, i_flags) {
+	fftw_cosine <double>::fftw_cosine (bases::element <double>* i_element_ptr, int i_n, double* i_data_in, double* i_data_out, int i_flags) : 
+	bases::explicit_plan <double> (i_element_ptr, i_n, i_data_in, i_data_out, i_flags) {
 		scalar = 1.0 / std::sqrt (2.0 * (n - 1));
 		fourier_plan = fftw_plan_r2r_1d (n, data_in, data_out, FFTW_REDFT00, FFTW_ESTIMATE);
 	}
 	
 	template <>
-	fftw_cosine <float>::fftw_cosine (bases::element <float>* i_element_ptr, int i_n, int i_name_in, int i_name_out, int i_flags) : 
-	bases::explicit_plan <float> (i_element_ptr, i_n, i_name_in, i_name_out, i_flags) {
+	fftw_cosine <float>::fftw_cosine (bases::element <float>* i_element_ptr, int i_n, float* i_data_in, float* i_data_out, int i_flags) : 
+	bases::explicit_plan <float> (i_element_ptr, i_n, i_data_in, i_data_out, i_flags) {
 		scalar = 1.0 / std::sqrt (2.0 * (n - 1));
 		fourier_plan_float = fftwf_plan_r2r_1d (n, data_in, data_out, FFTW_REDFT00, FFTW_ESTIMATE);
 	}

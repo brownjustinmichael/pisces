@@ -30,14 +30,14 @@ namespace cuda
 			
 			using ::one_d::solver <datatype>::n;
 			using ::one_d::solver <datatype>::ipiv;
+			using ::one_d::solver <datatype>::data_in;
+			using ::one_d::solver <datatype>::data_out;
+			using ::one_d::solver <datatype>::rhs;
 			using ::one_d::solver <datatype>::alpha_0;
 			using ::one_d::solver <datatype>::alpha_n;
 			using ::one_d::solver <datatype>::timestep;
 			using ::one_d::solver <datatype>::factorized_matrix;
 			
-			datatype* data_in;
-			datatype* data_out;
-			datatype* rhs;
 			int* ipiv_dev;
 			datatype* factorized_matrix_dev;
 		};

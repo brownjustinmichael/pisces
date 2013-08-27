@@ -14,10 +14,8 @@ namespace cuda
 	{
 		template <class datatype>
 		explicit_diffusion <datatype>::explicit_diffusion (bases::element <datatype>* i_element_ptr, datatype i_coeff, int i_n, bases::collocation_grid <datatype>* i_grid, datatype* i_data_in, datatype* i_data_out, int i_flags) :
-		bases::explicit_plan <datatype> (i_element_ptr, i_n, null, null, i_flags),
-		coeff (i_coeff), 
-		data_in (i_data_in),
-		data_out (i_data_out) {
+		bases::explicit_plan <datatype> (i_element_ptr, i_n, i_data_in, i_data_out, i_flags),
+		coeff (i_coeff) {
 		
 			deriv_matrix.resize (n * n);
 			deriv_matrix.copy_to_device (n * n, i_grid->get_data (2));

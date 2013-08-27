@@ -23,15 +23,15 @@ namespace bases
 	}
 	
 	template <class datatype>
-	explicit_plan <datatype>::explicit_plan (element <datatype>* i_element_ptr, int i_n, int i_name_in, int i_name_out, int i_flags) : 
+	explicit_plan <datatype>::explicit_plan (element <datatype>* i_element_ptr, int i_n, datatype* i_data_in, datatype* i_data_out, int i_flags) : 
 	plan <datatype> (i_element_ptr, i_flags),
-	n (i_n) {
+	n (i_n),
+	data_in (i_data_in) {
 		TRACE ("Instantiating...");
-		data_in = &((*i_element_ptr) [i_name_in]);
-		if (i_name_out == null) {
-			data_out = &((*i_element_ptr) [i_name_in]);
+		if (i_data_out == NULL) {
+			data_out = data_in;
 		} else {
-			data_out = &((*i_element_ptr) [i_name_out]);
+			data_out = i_data_out;
 		}
 		TRACE ("Instantiated.");
 	}

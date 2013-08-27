@@ -17,7 +17,7 @@
 namespace one_d
 {
 	template <class datatype>
-	advec <datatype>::advec (bases::element <datatype>* i_element_ptr, int i_n, datatype i_c, int i_name_in, int i_name_out, std::shared_ptr<bases::collocation_grid <datatype>> i_grid) : bases::explicit_plan <datatype> (i_element_ptr, i_n, i_name_in, i_name_out)
+	advec <datatype>::advec (bases::element <datatype>* i_element_ptr, int i_n, datatype i_c, datatype* i_data_in, datatype* i_data_out, std::shared_ptr<bases::collocation_grid <datatype>> i_grid) : bases::explicit_plan <datatype> (i_element_ptr, i_n, i_data_in, i_data_out)
 	{
 		TRACE ("Instantiating...");
 		grid = i_grid;

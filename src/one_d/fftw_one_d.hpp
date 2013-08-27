@@ -27,7 +27,7 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::transform::transform ()
 		 *********************************************************************/
-		fftw_cosine (bases::element <datatype>* i_element_ptr, int i_n, int i_name_in, int i_name_out = null, int i_flags = 0x00);
+		fftw_cosine (bases::element <datatype>* i_element_ptr, int i_n, datatype* i_data_in, datatype* i_data_out = NULL, int i_flags = 0x00);
 		
 		virtual ~fftw_cosine () {}
 		

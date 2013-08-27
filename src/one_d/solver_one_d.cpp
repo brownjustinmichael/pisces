@@ -18,8 +18,8 @@
 namespace one_d
 {
 	template <class datatype>
-	solver <datatype>::solver (bases::element <datatype>* i_element_ptr, int i_n, int i_excess_0, int i_excess_n, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype *i_default_matrix, datatype *i_matrix, int i_name_in, int i_name_rhs, int i_name_out, int i_flags) : 
-	bases::solver <datatype> (i_element_ptr, i_n, i_name_in, i_name_out, i_flags), 
+	solver <datatype>::solver (bases::element <datatype>* i_element_ptr, int i_n, int i_excess_0, int i_excess_n, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype *i_default_matrix, datatype *i_matrix, datatype* i_data_in, datatype* i_rhs, datatype* i_data_out, int i_flags) : 
+	bases::solver <datatype> (i_element_ptr, i_n, i_data_in, i_data_out, i_flags), 
 	timestep (i_timestep), 
 	alpha_0 (i_alpha_0), 
 	alpha_n (i_alpha_n), 
@@ -30,7 +30,7 @@ namespace one_d
 		
 		expected_excess_0 = 0;
 		expected_excess_n = 0;
-		rhs = &((*element_ptr) [i_name_rhs]);
+		rhs = i_rhs;
 		default_matrix = i_default_matrix;
 		matrix = i_matrix;		
 		data_temp.resize (n, 0.0);
