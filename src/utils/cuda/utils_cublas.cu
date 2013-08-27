@@ -6,6 +6,7 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
+#include "../../config.hpp"
 #include "utils_cublas.hpp"
 #include "utils_cuda.cuh"
 #include <vector>
@@ -22,7 +23,7 @@ namespace cuda
 			inc_vect = 1;
 			n = i_n;
 			if (n != 0) {
-				HANDLE_STATUS (cublasAlloc (n, sizeof (datatype), (void**) &vect));
+				HANDLE_ERROR (cudaMalloc ((void**) &vect, n * sizeof (datatype)));
 				if (x) {
 					copy_to_device (n, x, incx);
 				}
@@ -32,18 +33,18 @@ namespace cuda
 		template <class datatype>
 		vector <datatype>::~vector () {
 			if (n != 0) {
-				HANDLE_STATUS (cublasFree (vect));
+				HANDLE_ERROR (cudaFree (vect));
 			}
 		}
 		
 		template <class datatype>
 		void vector <datatype>::resize (int i_n) {
 			if (n != 0) {
-				HANDLE_STATUS (cublasFree (vect));
+				HANDLE_ERROR (cudaFree ((datatype*) vect));
 			}
 			if (i_n != 0) {
 				n = i_n;
-				HANDLE_STATUS (cublasAlloc (n, sizeof (datatype), (void**) &vect));
+				HANDLE_ERROR (cudaMalloc ((void**) &vect, n * sizeof (datatype)));
 			}
 		}
 		

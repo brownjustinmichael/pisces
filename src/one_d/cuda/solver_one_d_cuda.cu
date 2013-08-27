@@ -17,10 +17,20 @@ namespace cuda
 	namespace one_d
 	{
 		template <class datatype>
-		solver <datatype>::solver (bases::element <datatype>* i_element_ptr, int i_n, int i_excess_0, int i_excess_n, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype *i_default_matrix, datatype *i_matrix, int i_name_in, int i_name_rhs, int i_name_out, int i_flags) :
-		::one_d::solver <datatype> (i_element_ptr, i_n, i_excess_0, i_excess_n, i_timestep, i_alpha_0, i_alpha_n, i_default_matrix, i_matrix, i_name_in, i_name_rhs, i_name_out, i_flags) {
+		solver <datatype>::solver (bases::element <datatype>* i_element_ptr, int i_n, int i_excess_0, int i_excess_n, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype *i_default_matrix, datatype *i_matrix, datatype* i_data_in, datatype* i_rhs, datatype* i_data_out, int i_flags) :
+		::one_d::solver <datatype> (i_element_ptr, i_n, i_excess_0, i_excess_n, i_timestep, i_alpha_0, i_alpha_n, i_default_matrix, i_matrix, null, null, null, i_flags),
+		data_in (i_data_in),
+		data_out (i_data_out),
+		rhs (i_rhs) {
+			if (!data_out) {
+				data_out = data_in;
+			}
+			
 			HANDLE_ERROR (cudaMalloc ((void**) &factorized_matrix_dev, n * n * sizeof (datatype)));
 			HANDLE_ERROR (cudaMalloc ((void**) &ipiv_dev, n * sizeof (int)));
+			
+			HANDLE_ERROR (cudaDeviceSynchronize ());
+			
 		}
 		
 		template <class datatype>
@@ -31,7 +41,11 @@ namespace cuda
 		
 		template <class datatype>
 		void solver <datatype>::_factorize () {
+			DEBUG ("Factorizing...");
+			
 			::one_d::solver <datatype>::_factorize ();
+
+			HANDLE_ERROR (cudaDeviceSynchronize ());
 			
 			HANDLE_ERROR (cudaMemcpy (factorized_matrix_dev, &factorized_matrix [0], n * n * sizeof (datatype), cudaMemcpyHostToDevice));
 			HANDLE_ERROR (cudaMemcpy (ipiv_dev, &ipiv [0], n * sizeof (int), cudaMemcpyHostToDevice));
@@ -39,13 +53,19 @@ namespace cuda
 		
 		template <class datatype>
 		void solver <datatype>::execute () {
+			TRACE ("Setting up solve...");
+			
 			utils::copy (n, data_in, data_out);
 		
-			data_out [0] += alpha_0 * timestep * rhs [0];
-			data_out [n - 1] += alpha_n * timestep * rhs [n - 1];
-			utils::add_scaled (n - 2, timestep, rhs + 1, data_out + 1);
+			utils::add_scaled (1, alpha_0 * timestep, rhs, data_out);
+			utils::add_scaled (1, alpha_n * timestep, rhs + n - 1, data_out + n - 1);
+			utils::add_scaled (n, timestep, rhs + 1, data_out + 1);
+
+			TRACE ("Solving...");
 			
 			utils::matrix_solve (n, factorized_matrix_dev, ipiv_dev, data_out);
+			
+			TRACE ("Solved.");
 		}
 		
 		template class solver <double>;

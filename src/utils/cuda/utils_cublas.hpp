@@ -59,7 +59,7 @@ namespace cuda
 	
 		void matrix_vector_multiply (int m, int n, float alpha, float* a, float* x, float beta, float* y, int lda, int incx = 1, int incy = 1);
 		
-		void matrix_vector_multiply (int m, int n, double alpha, double* a, double* x, double beta, double y, int lda, int incx = 1, int incy = 1);
+		void matrix_vector_multiply (int m, int n, double alpha, double* a, double* x, double beta, double* y, int lda, int incx = 1, int incy = 1);
 	} /* utils */
 } /* cuda */
 

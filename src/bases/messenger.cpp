@@ -18,6 +18,7 @@
 
 namespace bases
 {
+#ifdef _MPI
 	template <class datatype>
 	MPI_Datatype mpi_type ();
 	
@@ -35,6 +36,7 @@ namespace bases
 	MPI_Datatype mpi_type <int> () {
 		return MPI::INT;
 	}
+#endif // _MPI
 	
 	messenger::messenger (int* argc, char*** argv, int n_boundaries) {
 #ifdef _MPI

@@ -41,7 +41,7 @@ namespace cuda
 					::one_d::chebyshev::element <datatype>::implicit_reset ();
 			
 					if (!(flags & factorized)) {
-						utils::scale (n * n, 0.0, &matrix [0]);
+						::utils::scale (n * n, 0.0, &matrix [0]);
 					}
 				}
 		

@@ -10,3 +10,5 @@ for lib in ["cufft"]:
 cuda_objects.append (env.Object ("fftw_one_d_cuda.cu"))
 
 cuda_objects.append (env.Object ("solver_one_d_cuda.cu"))
+
+cuda_objects.append (env.Object ("diffusion_one_d_cuda.cpp"))

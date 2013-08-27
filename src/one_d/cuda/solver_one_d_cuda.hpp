@@ -19,7 +19,7 @@ namespace cuda
 		class solver : public ::one_d::solver <datatype>
 		{
 		public:
-			solver (bases::element <datatype>* i_element_ptr, int i_n, int i_excess_0, int i_excess_n, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype *i_default_matrix, datatype *i_matrix, int i_name_in, int i_name_rhs, int i_name_out = null, int i_flags = 0x00);
+			solver (bases::element <datatype>* i_element_ptr, int i_n, int i_excess_0, int i_excess_n, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype *i_default_matrix, datatype *i_matrix, datatype* i_data_in, datatype* i_rhs, datatype* i_data_out = NULL, int i_flags = 0x00);
 			
 			virtual ~solver ();
 			
@@ -29,16 +29,16 @@ namespace cuda
 			virtual void _factorize ();
 			
 			using ::one_d::solver <datatype>::n;
-			using ::one_d::solver <datatype>::data_in;
-			using ::one_d::solver <datatype>::data_out;
-			using ::one_d::solver <datatype>::rhs;
 			using ::one_d::solver <datatype>::ipiv;
 			using ::one_d::solver <datatype>::alpha_0;
 			using ::one_d::solver <datatype>::alpha_n;
 			using ::one_d::solver <datatype>::timestep;
+			using ::one_d::solver <datatype>::factorized_matrix;
 			
+			datatype* data_in;
+			datatype* data_out;
+			datatype* rhs;
 			int* ipiv_dev;
-			datatype* factorized_matrix;
 			datatype* factorized_matrix_dev;
 		};
 	} /* one_d */

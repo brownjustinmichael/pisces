@@ -9,6 +9,8 @@
 #include "element_one_d_cuda.hpp"
 #include "fftw_one_d_cuda.hpp"
 #include "solver_one_d_cuda.hpp"
+#include "diffusion_one_d_cuda.hpp"
+#include "../diffusion_one_d.hpp"
 
 namespace cuda
 {
@@ -37,6 +39,9 @@ namespace cuda
 	
 			template <class datatype>
 			void fft_element <datatype>::setup () {
+				datatype diffusion_coeff = (datatype) inputParams["diffusion_coeff"].asDouble;
+				datatype alpha = 0.5;
+				
 				// Set up output
 				std::ostringstream convert;
 				convert << name;
@@ -44,21 +49,34 @@ namespace cuda
 				transform_stream->append (cell [0]);
 				transform_stream->append ((*this) [position]);
 				transform_stream->append ((*this) [velocity]);
-				transform_stream->append ((*this) [rhs]);
 		
 				transform_stream->to_file ();
+				
+				::one_d::chebyshev::element <datatype>::add_implicit_plan (new ::one_d::implicit_diffusion <datatype> (this, - diffusion_coeff * alpha, n, &*grid, &matrix [0]));
+				
+				::one_d::chebyshev::element <datatype>::add_pre_plan (new explicit_diffusion <datatype> (this, diffusion_coeff * (1.0 - alpha), n, &*grid, data_dev.pointer (), rhs_dev.pointer ()));
 		
 				::one_d::chebyshev::element <datatype>::add_transform (new fftw_cosine <datatype> (this, n, data_dev.pointer ()));
 				::one_d::chebyshev::element <datatype>::add_post_plan (new transfer <datatype> (this, n, data_dev.pointer (), &((*this) [velocity])));
 				
 				// Set up solver
-				::one_d::chebyshev::element <datatype>::add_solver (new solver <datatype> (this, n, excess_0, excess_n, timestep, boundary_weights [::one_d::edge_0], boundary_weights [::one_d::edge_n], grid->get_data (0), &matrix [0], velocity, rhs));
+				::one_d::chebyshev::element <datatype>::add_solver (new solver <datatype> (this, n, excess_0, excess_n, timestep, boundary_weights [::one_d::edge_0], boundary_weights [::one_d::edge_n], grid->get_data (0), &matrix [0], data_dev.pointer (), rhs_dev.pointer ()));
 		
 			}
 	
 			template <class datatype>
 			datatype fft_element <datatype>::calculate_timestep () {
-				return 0.0;
+				datatype t_timestep;
+				t_timestep = inputParams["time_step_size"].asDouble;
+				for (int i = 1; i < n - 1; ++i) {
+					t_timestep = std::min (t_timestep, (datatype) (std::abs (((*this) (position, i - 1) - (*this) (position, i + 1)) / (*this) (velocity, i))));
+				}
+				t_timestep *= inputParams["courant_factor"].asDouble;
+				if (t_timestep < timestep || t_timestep > 2.0 * timestep) {
+					return t_timestep;
+				} else {
+					return timestep;
+				}
 			}
 
 			template class fft_element <double>;

@@ -90,6 +90,9 @@ namespace cuda
 			cu_plan = new cufftHandle;
 			HANDLE_CUFFT (cufftPlan1d((cufftHandle*) cu_plan, 2 * n - 2, CUFFT_R2C, 1));
 			scalar = sqrt (1.0 / 2.0 / ((float) n - 1.0));
+			
+			HANDLE_ERROR (cudaDeviceSynchronize ());
+			
 			TRACE ("Instantiated.");
 		}
 		
@@ -124,6 +127,7 @@ namespace cuda
 			complex_to_real <<<1, std::min (n, 512)>>> (n, (cufftComplex*) data_complex, (float*) data_real);
 			
 			utils::scale (n, scalar, (float*) data_real);
+
 		}
 		
 		template <class datatype>
