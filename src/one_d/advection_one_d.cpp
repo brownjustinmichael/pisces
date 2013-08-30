@@ -17,7 +17,8 @@
 namespace one_d
 {
 	template <class datatype>
-	advec <datatype>::advec (bases::element <datatype>* i_element_ptr, int i_n, datatype i_c, datatype* i_data_in, datatype* i_data_out, std::shared_ptr<bases::collocation_grid <datatype>> i_grid) : bases::explicit_plan <datatype> (i_element_ptr, i_n, i_data_in, i_data_out)
+	advec <datatype>::advec (int i_n, datatype i_c, datatype* i_data_in, datatype* i_data_out, std::shared_ptr<bases::collocation_grid <datatype>> i_grid) : 
+	bases::explicit_plan <datatype> (i_n, i_data_in, i_data_out)
 	{
 		TRACE ("Instantiating...");
 		grid = i_grid;
@@ -40,8 +41,6 @@ namespace one_d
 	{
 		datatype scalar = -c;
 		
-		bases::plan <datatype>::execute ();
-
 		// if (!(*flags_ptr | transformed)) {
 		// 		FATAL ("Linear Advection attempted in physical space.")
 		// 		throw 0;
@@ -56,10 +55,6 @@ namespace one_d
 		// if (*flags_ptr & linked_n) {
 		// 	data_out [n - 1] -= c * utils::dot (n, grid->get_data (1) + n - 1, data_in, n);
 		// }
-		
-		if (*flags_ptr & transformed) {
-			ERROR ("Nonlinear advection attempted in Chebyshev space.")
-		}
 		
 		data_out [0] += (scalar/fac [0])*(data_in [1] - data_in [0])*data_in [0];
 		for (int i = 1; i < (n - 1); i++)

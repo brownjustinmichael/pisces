@@ -14,25 +14,40 @@
 namespace two_d
 {
 	enum edges {
-		edge_00 = 0, // Start at 0, 0, increment by n
-		edge_nm = 1, // Start at 0, m, increment by n
-		edge_0m = 2, // Start at 0, 0, increment by 1
-		edge_n0 = 3 // Start at n, 0, increment by 1
+		edge_n0 = 0, // Start at 0, 0, increment by n
+		edge_nn = 1, // Start at n, 0, increment by n
+		edge_m0 = 2, // Start at 0, 0, increment by 1
+		edge_mm = 3 // Start at 0, m, increment by 1
 	}
 	
 	template <class datatype>
 	class element
 	{
 	public:
-		element (int i_n, datatype i_position_00, datatype i_position_nm, int i_m, datatype i_position_0m, datatype i_position_n0, int i_name, io::parameter_map& i_inputParams, bases::messenger <datatype>* i_messenger_ptr, int i_flags) : 
+		element (int i_n, datatype i_position_n0, datatype i_position_nn, int i_m, datatype i_position_m0, datatype i_position_n0, int i_name, io::parameter_map& i_inputParams, bases::messenger <datatype>* i_messenger_ptr, int i_flags) : 
 		bases::element <datatype> (i_name, 2, i_inputParams, i_messenger_ptr, i_flags),
 		n (i_n + 1),
 		m (i_m + 1) {
-			positions.resize (4);
-			positions [edge_00] = i_position_00;
-			positions [edge_nm] = i_position_nm;
-			positions [edge_0m] = i_position_0m;
 			positions [edge_n0] = i_position_n0;
+			positions [edge_nn] = i_position_nn;
+			positions [edge_m0] = i_position_m0;
+			positions [edge_mm] = i_position_n0;
+			
+			edge_index [edge_n0] = 0;
+			edge_next [edge_n0] = n;
+			edge_size [edge_n0] = m;
+			
+			edge_index [edge_nn] = n - 1;
+			edge_next [edge_nn] = n;
+			edge_size [edge_nn] = m;
+			
+			edge_index [edge_m0] = 0;
+			edge_next [edge_m0] = 1;
+			edge_size [edge_m0] = n;
+			
+			edge_index [edge_mm] = (m - 1) * n;
+			edge_next [edge_mm] = 1;
+			edge_size [edge_mm] = n;
 			
 			cell.resize (n * m);
 			for (int i = 0; i < n; ++i) {
@@ -78,21 +93,15 @@ namespace two_d
 		 *********************************************************************/
 		virtual void initialize (int name, datatype* initial_conditions = NULL) {
 			if (scalars [name].size () == (unsigned int) 0) {
-				bases::element <datatype>::add_name (name);
 				scalars [name].resize (n * m, 0.0);
 			}
 			if (initial_conditions) {
 				utils::copy (n * m, initial_conditions, &(scalars [name]) [0]);
 			}
-			fixed_points_00 [name].resize (m);
-			fixed_points_nm [name].resize (m);
-			fixed_points_0m [name].resize (n);
-			fixed_points_n0 [name].resize (n);
-			
-			utils::copy (m, pointer (name, 0, 0), &(fixed_points_00 [name] [0]), n);
-			utils::copy (m, pointer (name, 0, m), &(fixed_points_nm [name] [0]), n);
-			utils::copy (n, pointer (name, 0, 0), &(fixed_points_0m [name] [0]));
-			utils::copy (n, pointer (name, n, 0), &(fixed_points_n0 [name] [0]));
+			for (std::map <int, std::map <int, std::vector <datatype> > >::iterator iter = fixed_points.begin (); iter != fixed_points.end (); ++iter) {
+				iter->second.resize (edge_size [iter->first]);
+				utils::copy (edge_size [iter->first], pointer (name, edge_index [iter->first]), &(iter->second [name] [0]), edge_next [iter->first]);
+			}
 		}
 		
 		/*!*******************************************************************
@@ -111,43 +120,30 @@ namespace two_d
 		 * \copydoc bases::element <datatype>::execute_boundaries ()
 		 *********************************************************************/
 		inline void execute_boundaries () {
-			for (iterator iter = bases::element <datatype>::begin (); iter != bases::element <datatype>::end (); ++iter) {
-				if (!(messenger_ptr->linked (edge_00))) {
-					utils::copy (m, &(fixed_points_00 [name] [0]), pointer (name, 0, 0), 1, n);
-				}
-				if (!(messenger_ptr->linked (edge_nm))) {
-					utils::copy (m, &(fixed_points_nm [name] [0]), pointer (name, 0, m), 1, n);
-				}
-				if (!(messenger_ptr->linked (edge_0m))) {
-					utils::copy (m, &(fixed_points_0m [name] [0]), pointer (name, 0, 0));
-				}
-				if (!(messenger_ptr->linked (edge_n0))) {
-					utils::copy (m, &(fixed_points_n0 [name] [0]), pointer (name, n, 0));
+			for (std::map <int, std::map <int, std::vector <datatype> > >::iterator iter = fixed_points.begin (); iter != fixed_points.end (); ++iter) {
+				for (std::map <int, std::vector <datatype> >::iterator i_name = iter->second.begin (); i_name != iter->second.end (); ++i_name) {
+					utils::copy (edge_size [iter->first], &(i_name->second [0]), pointer (i_name->first, edge_index [iter->first]), 1, edge_next [iter->first]);
 				}
 			}
 		}
 	
 	private:
 		using bases::element <datatype>::name;
-		using bases::element <datatype>::names;
 		using bases::element <datatype>::failsafe_dump;
 		using bases::element <datatype>::messenger_ptr;
-		typedef typename bases::element <datatype>::iterator iterator;
 		
 		int n; //!< The number of elements in each 1D array
 		int m;
-		std::vector <datatype> positions; //!< A vector of the edge positions
+		std::map <int, datatype> positions; //!< A vector of the edge positions
 		std::vector<int> cell_n; //!< An integer array for tracking each cell number for output
 		std::vector<int> cell_m; //!< An integer array for tracking each cell number for output
 
 		std::map <int, std::vector <datatype> > scalars; //!< A vector of scalar vectors
 		
-		std::map <int, int [2]> edge_map;
+		std::map <int, int> edge_index;
+		std::map <int, int> edge_next;
+		std::map <int, int> edge_size;
 		std::map <int, std::map <int, std::vector <datatype> > > fixed_points;
-		std::map <int, std::vector <datatype> > fixed_points_00; //!< The initial values of the scalars at index 0
-		std::map <int, std::vector <datatype> > fixed_points_nm; //!< The initial values of the scalars at index 0
-		std::map <int, std::vector <datatype> > fixed_points_n0; //!< The initial values of the scalars at index 0
-		std::map <int, std::vector <datatype> > fixed_points_0m; //!< The initial values of the scalars at index 0
 	};
 	
 	namespace fourier

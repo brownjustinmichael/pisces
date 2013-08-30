@@ -35,13 +35,6 @@ namespace bases
 	{
 	public:
 		friend class plan <datatype>;
-		/*!*******************************************************************
-		 * \brief An iterator for the element class
-		 * 
-		 * This iterator steps through the scalar fields in the order they
-		 * were added.
-		 *********************************************************************/
-		typedef std::vector <int>::iterator iterator;
 		
 		/*!*******************************************************************
 		* \param i_name The string representation of the element
@@ -100,28 +93,6 @@ namespace bases
 		}
 		
 		/*!*******************************************************************
-		 * \brief Get the iterator for the class at the first scalar index
-		 * 
-		 * This iterator has all the properties of a vector iterator. 
-		 * Dereferencing it returns the scalar indices in the order they were
-		 * added.
-		 * 
-		 * \return The iterator for the element at the first scalar index
-		 *********************************************************************/
-		virtual iterator begin () {
-			return names.begin ();
-		}
-		
-		/*!*******************************************************************
-		 * \brief Get the iterator for the class at the last scalar index
-		 * 
-		 * \return The iterator for the element at the last scalar index
-		 *********************************************************************/
-		virtual iterator end () {
-			return names.end ();
-		}
-		
-		/*!*******************************************************************
 		 * \brief Set the collocation grid.
 		 * 
 		 * \param i_grid A shared_ptr to a collocation_grid object
@@ -141,10 +112,6 @@ namespace bases
 		 *********************************************************************/
 		inline void add_solver (solver <datatype>* i_solver) {
 			solvers.push_back (std::shared_ptr <solver <datatype>> (i_solver));
-		}
-		
-		inline void add_name (int i_name) {
-			names.push_back (i_name);
 		}
 
 		/*!*******************************************************************
@@ -257,10 +224,12 @@ namespace bases
 		}
 
 		virtual void factorize () {
-			for (int i = 0; i < (int) solvers.size (); ++i) {
-				solvers [i]->factorize ();
+			if (!(flags & factorized)) {
+				for (int i = 0; i < (int) solvers.size (); ++i) {
+					solvers [i]->factorize ();
+				}
+				flags |= factorized;
 			}
-			flags |= factorized;
 		}
 		
 		virtual void solve () {
@@ -334,8 +303,6 @@ namespace bases
 		datatype duration; //!< The datatype total simulated time
 		datatype timestep; //!< The datatype timestep length
 
-		std::vector <int> names; //!< A vector of integer name indices of the contained scalars
-		
 		std::shared_ptr <collocation_grid <datatype> > grid; //!< A shared pointer to the collocation grid
 		
 		std::shared_ptr <io::output <datatype> > failsafe_dump; //!< An implementation to dump in case of failure

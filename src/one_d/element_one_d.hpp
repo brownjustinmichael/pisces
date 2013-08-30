@@ -97,7 +97,6 @@ namespace one_d
 		 *********************************************************************/
 		virtual void initialize (int name, datatype* initial_conditions = NULL) {
 			if (scalars [name].size () == (unsigned int) 0) {
-				bases::element <datatype>::add_name (name);
 				scalars [name].resize (n, 0.0);
 			}
 			if (initial_conditions) {
@@ -114,9 +113,9 @@ namespace one_d
 		 *********************************************************************/
 		inline void explicit_reset () {
 			bases::element <datatype>::explicit_reset (); 
-			for (iterator iter = bases::element <datatype>::begin (); iter != bases::element <datatype>::end (); ++iter) {
-				if (*iter < 0) {
-					utils::scale (n, 0.0, &((*this) [*iter]));
+			for (typename std::map <int, std::vector <datatype> >::iterator iter = scalars.begin (); iter != scalars.end (); ++iter) {
+				if (iter->first < 0) {
+					utils::scale (n, 0.0, &(iter->second [0]));
 				}
 			}
 		}
@@ -134,10 +133,8 @@ namespace one_d
 		
 	protected:
 		using bases::element <datatype>::name;
-		using bases::element <datatype>::names;
 		using bases::element <datatype>::failsafe_dump;
 		using bases::element <datatype>::messenger_ptr;
-		typedef typename bases::element <datatype>::iterator iterator;
 		
 		int n; //!< The number of elements in each 1D array
 		
@@ -263,7 +260,7 @@ namespace one_d
 			using element <datatype>::inputParams;
 			using element <datatype>::grid;
 			using bases::element <datatype>::pointer;
-			typedef typename element <datatype>::iterator iterator;
+			using element <datatype>::messenger_ptr;
 		
 			std::vector<datatype> matrix; //!< A vector containing the datatype matrix used in the implicit solver
 			std::vector<datatype> temp_matrix; //!< A vector containing the datatype matrix used in the implicit solver
@@ -377,7 +374,8 @@ namespace one_d
 			using element <datatype>::inputParams;
 			using element <datatype>::grid;
 			using bases::element <datatype>::pointer;
-			typedef typename element <datatype>::iterator iterator;
+			using element <datatype>::messenger_ptr;
+			
 	
 			std::vector<datatype> matrix; //!< A vector containing the datatype matrix used in the implicit solver
 			std::vector<datatype> temp_matrix; //!< A vector containing the datatype matrix used in the implicit solver

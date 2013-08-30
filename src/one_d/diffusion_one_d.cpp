@@ -18,17 +18,15 @@
 namespace one_d
 {
 	template <class datatype>
-	explicit_diffusion <datatype>::explicit_diffusion (bases::element <datatype>* i_element_ptr, datatype i_coeff, int i_n, bases::collocation_grid <datatype>* i_grid, datatype* i_data_in, datatype* i_data_out, int i_flags) :
-	bases::explicit_plan <datatype> (i_element_ptr, i_n, i_data_in, i_data_out, i_flags),
+	explicit_diffusion <datatype>::explicit_diffusion (datatype i_coeff, int i_n, bases::collocation_grid <datatype>* i_grid, datatype* i_data_in, datatype* i_data_out) :
+	bases::explicit_plan <datatype> (i_n, i_data_in, i_data_out),
 	coeff (i_coeff), 
 	grid (i_grid) {
 		TRACE ("Initialized.");
 	}
 
 	template <class datatype>
-	void explicit_diffusion <datatype>::execute () {
-		bases::explicit_plan <datatype>::execute ();
-	
+	void explicit_diffusion <datatype>::execute () {	
 		TRACE ("Operating...");
 		
 		// if (*flags_ptr & linked_0) {
@@ -46,14 +44,12 @@ namespace one_d
 	}
 	
 	template <class datatype>
-	implicit_diffusion <datatype>::implicit_diffusion (bases::element <datatype>* i_element_ptr, datatype i_coeff, int i_n, bases::collocation_grid <datatype>* i_grid, datatype *i_matrix, int i_flags) : 
-	bases::implicit_plan <datatype> (i_element_ptr, i_n, i_grid, i_matrix, i_flags), 
+	implicit_diffusion <datatype>::implicit_diffusion (datatype i_coeff, int i_n, bases::collocation_grid <datatype>* i_grid, datatype *i_matrix) : 
+	bases::implicit_plan <datatype> (i_n, i_grid, i_matrix), 
 	coeff (i_coeff) {}
 
 	template <class datatype>
-	void implicit_diffusion <datatype>::execute () {
-		bases::implicit_plan <datatype>::execute ();
-		
+	void implicit_diffusion <datatype>::execute () {		
 		TRACE ("Operating...");
 	
 		// This is the main loop for setting up the diffusion equation in Chebyshev space

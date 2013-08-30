@@ -18,11 +18,13 @@
 namespace one_d
 {
 	template <class datatype>
-	solver <datatype>::solver (bases::element <datatype>* i_element_ptr, int i_n, int i_excess_0, int i_excess_n, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype *i_default_matrix, datatype *i_matrix, datatype* i_data_in, datatype* i_rhs, datatype* i_data_out, int i_flags) : 
-	bases::solver <datatype> (i_element_ptr, i_n, i_data_in, i_data_out, i_flags), 
+	solver <datatype>::solver (bases::messenger* i_messenger_ptr, int i_n, int i_excess_0, int i_excess_n, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_positions, datatype *i_default_matrix, datatype *i_matrix, datatype* i_data_in, datatype* i_rhs, datatype* i_data_out, int i_flags) : 
+	bases::solver <datatype> (i_n, i_data_in, i_data_out, i_flags), 
+	messenger_ptr (i_messenger_ptr),
 	timestep (i_timestep), 
 	alpha_0 (i_alpha_0), 
 	alpha_n (i_alpha_n), 
+	positions (i_positions),
 	excess_0 (i_excess_0), 
 	excess_n (i_excess_n) { 
 		
@@ -49,8 +51,8 @@ namespace one_d
 		positions_0.resize (expected_excess_0);
 		positions_n.resize (expected_excess_n);
 		
-		messenger_ptr->template send <datatype> (excess_0, &((*element_ptr) (position)), edge_0);
-		messenger_ptr->template send <datatype> (excess_n, &((*element_ptr) (position, n - 1)), edge_n);
+		messenger_ptr->template send <datatype> (excess_0, positions, edge_0);
+		messenger_ptr->template send <datatype> (excess_n, &(positions [n - 1]), edge_n);
 		messenger_ptr->template recv <datatype> (expected_excess_0, &positions_0 [0], edge_0);
 		messenger_ptr->template recv <datatype> (expected_excess_n, &positions_n [0], edge_n);
 		
@@ -95,10 +97,10 @@ namespace one_d
 				out_error_0 [0] = (alpha_0 * timestep) * (rhs [excess_0] - utils::dot (n, matrix + excess_0, &data_temp [0], n));
 				out_error_n [0] = (alpha_n * timestep) * (rhs [n - 1 - excess_n] - utils::dot (n, matrix + n - 1 - excess_n, &data_temp [0], n));
 				for (int i = 0; i < expected_excess_0; ++i) {
-					out_error_0 [i + 1] = utils::dot_interpolate (n, &((*element_ptr) (position)), n, default_matrix, &data_temp [0], positions_0 [i]);
+					out_error_0 [i + 1] = utils::dot_interpolate (n, positions, n, default_matrix, &data_temp [0], positions_0 [i]);
 				}
 				for (int i = 0; i < expected_excess_n; ++i) {
-					out_error_n [i + 1] = utils::dot_interpolate (n, &((*element_ptr) (position)), n, default_matrix, &data_temp [0], positions_n [i]);
+					out_error_n [i + 1] = utils::dot_interpolate (n, positions, n, default_matrix, &data_temp [0], positions_n [i]);
 				}
 		
 				messenger_ptr->template send <datatype> (expected_excess_0 + 1, &out_error_0 [0], edge_0);

@@ -65,11 +65,6 @@ namespace bases
 	class plan
 	{
 	public:
-		/*!**********************************************************************
-		 * \param i_element_ptr A pointer to the associated element
-		 ************************************************************************/
-		plan (element <datatype>* i_element_ptr, int flags = 0x00);
-		
 		virtual ~plan () {}
 		
 		/*!*******************************************************************
@@ -77,19 +72,7 @@ namespace bases
 		* 
 		* The plan class serves as a wrapper for this function.
 		*********************************************************************/
-		virtual void execute () {
-			if (!element_ptr) {
-				ERROR ("Plan not initialized completely.");
-				throw 0;
-			}
-		}
-			
-	protected:
-		element <datatype>* element_ptr; //!< A pointer to the element with which the plan is associated
-		int flags; // The integer plan execution flags
-		int default_flags; //!< An integer set of default flags to use in case the user does not specify any flags
-		int *flags_ptr; //!< A pointer to the integer element execution flags
-		messenger* messenger_ptr; //!< A pointer to the messenger associated with the element
+		virtual void execute () = 0;
 	};
 
 	/*!*******************************************************************
@@ -107,14 +90,14 @@ namespace bases
 		 * \param i_data_out The integer scalar index of the output
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		explicit_plan (element <datatype>* i_element_ptr, int i_n, datatype* i_data_in, datatype* i_data_out = NULL, int flags = 0x00);
+		explicit_plan (int i_n, datatype* i_data_in, datatype* i_data_out = NULL);
 	
 		virtual ~explicit_plan () {}
 	
 		/*!*******************************************************************
 		 * \copydoc bases::plan::execute ()
 		 *********************************************************************/
-		virtual void execute ();
+		virtual void execute () = 0;
 		
 	protected:
 		int n; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
@@ -137,8 +120,7 @@ namespace bases
 		 * \param i_matrix The datatype matrix to be updated
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		implicit_plan (element <datatype>* i_element_ptr, int i_n, collocation_grid <datatype>* i_grid, datatype *i_matrix, int i_flags = 0x00) : 
-		plan <datatype> (i_element_ptr, i_flags), 
+		implicit_plan (int i_n, collocation_grid <datatype>* i_grid, datatype *i_matrix) :  
 		n (i_n),
 		grid (i_grid),
 		matrix (i_matrix) {}
@@ -148,7 +130,7 @@ namespace bases
 		/*!*******************************************************************
 		 * \copydoc plan::execute ()
 		 *********************************************************************/
-		virtual void execute ();
+		virtual void execute () = 0;
 		
 	protected:
 		int n; //!< An integer number of data elements

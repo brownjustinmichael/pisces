@@ -38,7 +38,7 @@ namespace one_d
 		 * \param i_name_rhs The integer representation of the matrix right-hand-side
 		 * \copydoc bases::solver <datatype>::solver ()
 		 *********************************************************************/
-		solver (bases::element <datatype>* i_element_ptr, int i_n, int i_excess_0, int i_excess_n, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype *i_default_matrix, datatype *i_matrix, datatype* i_data_in, datatype* i_rhs, datatype* i_data_out = NULL, int i_flags = 0x00);
+		solver (bases::messenger* i_messenger_ptr, int i_n, int i_excess_0, int i_excess_n, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* positions, datatype *i_default_matrix, datatype *i_matrix, datatype* i_data_in, datatype* i_rhs, datatype* i_data_out = NULL, int i_flags = 0x00);
 		
 		virtual ~solver () {}
 		
@@ -53,16 +53,17 @@ namespace one_d
 		 *********************************************************************/
 		void _factorize ();
 		
-		using bases::solver <datatype>::element_ptr;
 		using bases::solver <datatype>::n;
 		using bases::solver <datatype>::data_in;
 		using bases::solver <datatype>::data_out;
-		using bases::solver <datatype>::messenger_ptr;
+
+		bases::messenger* messenger_ptr;
 		
 		datatype& timestep; //!< A datatype reference to the current timestep
 		datatype& alpha_0; //!< A datatype reference to the current edge_0 weight
 		datatype& alpha_n; //!< A datatype reference to the current edge_n weight
 
+		datatype* positions;
 		int excess_0; //!< The integer number of elements to recv from edge_0
 		int excess_n; //!< The integer number of elements to recv from edge_n
 		int expected_excess_0; //!< The integer number of elements to send to edge_0

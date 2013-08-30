@@ -25,7 +25,6 @@ namespace one_d
 		using bases::explicit_plan <datatype>::n;
 		using bases::explicit_plan <datatype>::data_in;
 		using bases::explicit_plan <datatype>::data_out;
-		using bases::explicit_plan <datatype>::flags_ptr;
 	
 		datatype c;
 		std::vector<datatype> fac;
@@ -33,7 +32,7 @@ namespace one_d
 
 	public:
 
-		advec (bases::element <datatype>* i_element_ptr, int i_n, datatype i_c, datatype* i_data_in, datatype* i_data_out, std::shared_ptr<bases::collocation_grid <datatype>> i_grid);	//constuctor initializes private members to point to input and output vectors
+		advec (int i_n, datatype i_c, datatype* i_data_in, datatype* i_data_out, std::shared_ptr<bases::collocation_grid <datatype>> i_grid);	//constuctor initializes private members to point to input and output vectors
 		
 		virtual ~advec () {}
 		

@@ -38,23 +38,23 @@ namespace one_d
 			// Set up output
 			std::ostringstream convert;
 			convert << name;
-			normal_stream.reset (new io::incremental_output <datatype>  ("../output/test_angle_" + convert.str () + "_", ".dat", 4, new io::header, n, inputParams["output_every"].asInt));
+			normal_stream.reset (new io::incremental_output <datatype>  ("../output/normal_" + convert.str () + "_", ".dat", 4, new io::header, n, inputParams["output_every"].asInt));
 			normal_stream->append (cell [0]);
 			normal_stream->append ((*this) [position]);
 			normal_stream->append ((*this) [velocity]);
 			normal_stream->append ((*this) [vel_rhs]);
 			
 			// Set up plans in order
-			element <datatype>::add_pre_plan (new explicit_diffusion <datatype> (this, diffusion_coeff * (1.0 - alpha), n, &*grid, pointer (velocity), pointer (vel_rhs)));
+			element <datatype>::add_pre_plan (new explicit_diffusion <datatype> (diffusion_coeff * (1.0 - alpha), n, &*grid, pointer (velocity), pointer (vel_rhs)));
 
-			element <datatype>::add_transform (new fftw_cosine <datatype> (this, n, pointer (velocity)));
+			element <datatype>::add_transform (new fftw_cosine <datatype> (n, pointer (velocity)));
 			if (advection_coeff != 0.0) {
-				element <datatype>::add_post_plan (new advec <datatype> (this, n, advection_coeff, pointer (velocity), pointer (vel_rhs), grid));
+				element <datatype>::add_post_plan (new advec <datatype> (n, advection_coeff, pointer (velocity), pointer (vel_rhs), grid));
 			}
-			element <datatype>::add_implicit_plan (new implicit_diffusion <datatype> (this, - diffusion_coeff * alpha, n, &*grid, &matrix [0]));
+			element <datatype>::add_implicit_plan (new implicit_diffusion <datatype> (- diffusion_coeff * alpha, n, &*grid, &matrix [0]));
 		
 			// Set up solver
-			element <datatype>::add_solver (new solver <datatype> (this, n, i_excess_0, i_excess_n, timestep, boundary_weights [edge_0], boundary_weights [edge_n], grid->get_data (0), &matrix [0], pointer (velocity), pointer (vel_rhs)));
+			element <datatype>::add_solver (new solver <datatype> (messenger_ptr, n, i_excess_0, i_excess_n, timestep, boundary_weights [edge_0], boundary_weights [edge_n], pointer (position), grid->get_data (0), &matrix [0], pointer (velocity), pointer (vel_rhs)));
 		
 			normal_stream->to_file ();
 		
@@ -98,23 +98,23 @@ namespace one_d
 			// Set up output
 			std::ostringstream convert;
 			convert << name;
-			normal_stream.reset (new io::incremental_output <datatype>  ("../output/test_angle_" + convert.str () + "_", ".dat", 4, new io::header, n, inputParams["output_every"].asInt));
+			normal_stream.reset (new io::incremental_output <datatype>  ("../output/normal_" + convert.str () + "_", ".dat", 4, new io::header, n, inputParams["output_every"].asInt));
 			normal_stream->append (cell [0]);
 			normal_stream->append ((*this) [position]);
 			normal_stream->append ((*this) [velocity]);
 			normal_stream->append ((*this) [vel_rhs]);
 			
 			// Set up plans in order
-			element <datatype>::add_pre_plan (new explicit_diffusion <datatype> (this, diffusion_coeff * (1.0 - alpha), n, &*grid, pointer (velocity), pointer (vel_rhs)));
+			element <datatype>::add_pre_plan (new explicit_diffusion <datatype> (diffusion_coeff * (1.0 - alpha), n, &*grid, pointer (velocity), pointer (vel_rhs)));
 
-			element <datatype>::add_transform (new fftw_cosine <datatype> (this, n, pointer (velocity)));
+			element <datatype>::add_transform (new fftw_cosine <datatype> (n, pointer (velocity)));
 			if (advection_coeff != 0.0) {
-				element <datatype>::add_post_plan (new advec <datatype> (this, n, advection_coeff, pointer (velocity), pointer (vel_rhs), grid));
+				element <datatype>::add_post_plan (new advec <datatype> (n, advection_coeff, pointer (velocity), pointer (vel_rhs), grid));
 			}
-			element <datatype>::add_implicit_plan (new implicit_diffusion <datatype> (this, - diffusion_coeff * alpha, n, &*grid, &matrix [0]));
+			element <datatype>::add_implicit_plan (new implicit_diffusion <datatype> (- diffusion_coeff * alpha, n, &*grid, &matrix [0]));
 		
 			// Set up solver
-			element <datatype>::add_solver (new solver <datatype> (this, n, i_excess_0, i_excess_n, timestep, boundary_weights [edge_0], boundary_weights [edge_n], grid->get_data (0), &matrix [0], pointer (velocity), pointer (vel_rhs)));
+			element <datatype>::add_solver (new solver <datatype> (messenger_ptr, n, i_excess_0, i_excess_n, timestep, boundary_weights [edge_0], boundary_weights [edge_n], pointer (position), grid->get_data (0), &matrix [0], pointer (velocity), pointer (vel_rhs)));
 		
 			normal_stream->to_file ();
 		
