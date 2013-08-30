@@ -59,15 +59,15 @@ namespace cuda
 		
 				transform_stream->to_file ();
 				
-				this->add_implicit_plan (new ::one_d::implicit_diffusion <datatype> (this, - diffusion_coeff * alpha, n, &*grid, &matrix [0]));
+				this->add_implicit_plan (new ::one_d::implicit_diffusion <datatype> (- diffusion_coeff * alpha, n, &*grid, &matrix [0]));
 				
-				this->add_pre_plan (new explicit_diffusion <datatype> (this, diffusion_coeff * (1.0 - alpha), n, &*grid, data_dev.pointer (), rhs_dev.pointer ()));
+				this->add_pre_plan (new explicit_diffusion <datatype> (diffusion_coeff * (1.0 - alpha), n, &*grid, data_dev.pointer (), rhs_dev.pointer ()));
 		
-				this->add_transform (new fftw_cosine <datatype> (this, n, data_dev.pointer ()));
-				this->add_post_plan (new transfer <datatype> (this, n, data_dev.pointer (), &((*this) [velocity])));
+				this->add_transform (new fftw_cosine <datatype> (n, data_dev.pointer ()));
+				this->add_post_plan (new transfer <datatype> (n, data_dev.pointer (), &((*this) [velocity])));
 				
 				// Set up solver
-				this->add_solver (new solver <datatype> (this, n, excess_0, excess_n, timestep, boundary_weights [::one_d::edge_0], boundary_weights [::one_d::edge_n], grid->get_data (0), &matrix [0], data_dev.pointer (), rhs_dev.pointer ()));
+				this->add_solver (new solver <datatype> (messenger_ptr, n, excess_0, excess_n, timestep, boundary_weights [::one_d::edge_0], boundary_weights [::one_d::edge_n], pointer (position), grid->get_data (0), &matrix [0], data_dev.pointer (), rhs_dev.pointer ()));
 		
 			}
 	

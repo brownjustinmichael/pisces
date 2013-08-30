@@ -13,8 +13,8 @@ namespace cuda
 	namespace one_d
 	{
 		template <class datatype>
-		explicit_diffusion <datatype>::explicit_diffusion (bases::element <datatype>* i_element_ptr, datatype i_coeff, int i_n, bases::collocation_grid <datatype>* i_grid, datatype* i_data_in, datatype* i_data_out, int i_flags) :
-		bases::explicit_plan <datatype> (i_element_ptr, i_n, i_data_in, i_data_out, i_flags),
+		explicit_diffusion <datatype>::explicit_diffusion (datatype i_coeff, int i_n, bases::collocation_grid <datatype>* i_grid, datatype* i_data_in, datatype* i_data_out) :
+		bases::explicit_plan <datatype> (i_n, i_data_in, i_data_out),
 		coeff (i_coeff) {
 		
 			deriv_matrix.resize (n * n);
@@ -25,8 +25,6 @@ namespace cuda
 
 		template <class datatype>
 		void explicit_diffusion <datatype>::execute () {
-			bases::explicit_plan <datatype>::execute ();
-	
 			TRACE ("Operating...");
 		
 			// Set up and evaluate the explicit part of the diffusion equation

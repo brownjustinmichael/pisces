@@ -67,6 +67,7 @@ namespace cuda
 				using ::one_d::chebyshev::element <datatype>::inputParams;
 				using ::one_d::chebyshev::element <datatype>::grid;
 				using ::one_d::chebyshev::element <datatype>::pointer;
+				using ::one_d::chebyshev::element <datatype>::messenger_ptr;
 
 				int excess_0, excess_n;
 				utils::vector <datatype> data_dev;

@@ -68,8 +68,7 @@ namespace cuda
 	namespace one_d
 	{
 		template <>
-		fftw_cosine <double>::fftw_cosine (bases::element <double>* i_element_ptr, int i_n, double* i_data_dev) : 
-		bases::plan <double> (i_element_ptr),
+		fftw_cosine <double>::fftw_cosine (int i_n, double* i_data_dev) : 
 		n (i_n),
 		data_real (i_data_dev) {
 			TRACE ("Instantiating...");
@@ -81,8 +80,7 @@ namespace cuda
 		}
 		
 		template <>
-		fftw_cosine <float>::fftw_cosine (bases::element <float>* i_element_ptr, int i_n, float* i_data_dev) : 
-		bases::plan <float> (i_element_ptr),
+		fftw_cosine <float>::fftw_cosine (int i_n, float* i_data_dev) : 
 		n (i_n),
 		data_real (i_data_dev) {
 			TRACE ("Instantiating...");
@@ -105,8 +103,6 @@ namespace cuda
 		
 		template <>
 		void fftw_cosine <double>::execute () {
-			bases::plan <double>::execute ();
-			
 			symmetrize <<<1, std::min (n, 512)>>> (n, (double *) data_real);
 			
 			HANDLE_CUFFT (cufftExecD2Z(*((cufftHandle *) cu_plan), (double*) data_real, (cufftDoubleComplex*) data_complex));
@@ -118,8 +114,6 @@ namespace cuda
 		
 		template <>
 		void fftw_cosine <float>::execute () {
-			bases::plan <float>::execute ();
-
 			symmetrize <<<1, std::min (n, 512)>>> (n, (float *) data_real);
 			
 			HANDLE_CUFFT (cufftExecR2C(*((cufftHandle *) cu_plan), (float*) data_real, (cufftComplex*) data_complex));
@@ -130,8 +124,7 @@ namespace cuda
 		}
 		
 		template <class datatype>
-		transfer <datatype>::transfer (bases::element <datatype>* i_element_ptr, int i_n, datatype* i_data_dev, datatype* i_data) :
-		bases::plan <datatype> (i_element_ptr),
+		transfer <datatype>::transfer (int i_n, datatype* i_data_dev, datatype* i_data) :
 		n (i_n),
 		data_dev (i_data_dev),
 		data (i_data) {}

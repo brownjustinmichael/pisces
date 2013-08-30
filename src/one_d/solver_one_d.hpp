@@ -14,6 +14,11 @@
 #include "../bases/solver.hpp"
 #include "../utils/utils.hpp"
 
+namespace bases
+{
+	class messenger;
+} /* bases */
+
 namespace one_d
 {
 	/*!*******************************************************************

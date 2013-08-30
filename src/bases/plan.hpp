@@ -49,11 +49,6 @@ enum plan_flags {
 
 namespace bases
 {
-	template <class datatype>
-	class element;
-	
-	class messenger;
-	
 	/*!*******************************************************************
 	* \brief The basic functional unit, containing a recipe for execution
 	* 

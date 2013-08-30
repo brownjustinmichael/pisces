@@ -28,7 +28,7 @@ namespace cuda
 			/*!*******************************************************************
 			 * \copydoc bases::explicit_plan <double>::explicit_plan ()
 			 *********************************************************************/
-			fftw_cosine (bases::element <datatype>* i_element_ptr, int i_n, datatype* i_data_dev);
+			fftw_cosine (int i_n, datatype* i_data_dev);
 		
 			virtual ~fftw_cosine ();
 		
@@ -38,8 +38,6 @@ namespace cuda
 			void execute ();
 	
 		private:
-			using bases::plan <datatype>::flags_ptr;
-
 			int n;
 			datatype scalar; //!< The scalar used after the transform (1 / sqrt (2 * (n - 1)))
 			void* data_real;
@@ -52,16 +50,13 @@ namespace cuda
 		class transfer : public bases::plan <datatype>
 		{
 		public:
-			transfer (bases::element <datatype>* i_element_ptr, int i_n, datatype* i_data_dev, datatype* i_data);
+			transfer (int i_n, datatype* i_data_dev, datatype* i_data);
 			
 			virtual ~transfer () {}
 			
 			virtual void execute ();
 		
 		private:
-			using bases::plan <datatype>::element_ptr;
-			using bases::plan <datatype>::flags_ptr;
-			
 			int n;
 			datatype* data_dev;
 			datatype* data;
