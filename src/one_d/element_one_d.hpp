@@ -10,6 +10,7 @@
 #define ELEMENT_HPP_3SURDTOH
 
 #include <string>
+#include <sstream>
 #include <vector>
 #include <map>
 #include "../config.hpp"

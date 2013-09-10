@@ -1,4 +1,4 @@
-file /Users/justinbrown/Dropbox/spectral_element/build/SConstruct,line 9:
+file /Users/justinbrown/Dropbox/spectral_element/build/SConstruct,line 11:
 	Configure(confdir = .sconf_temp)
 scons: Configure: Checking whether the C++ compiler works
 scons: Configure: ".sconf_temp/conftest_0.cpp" is up to date.
@@ -16,5 +16,127 @@ scons: Configure: The original builder output was:
   |mpic++ -o .sconf_temp/conftest_0.o -c .sconf_temp/conftest_0.cpp
   |
 scons: Configure: (cached) yes
+
+
+file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 11:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+scons: Configure: ".sconf_temp/conftest_1.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_1.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+gcc -o .sconf_temp/conftest_1.o -c -Wall -g -std=c++0x .sconf_temp/conftest_1.c
+cc1: warning: command line option "-std=c++0x" is valid for C++/ObjC++ but not for C
+gcc -o .sconf_temp/conftest_1 .sconf_temp/conftest_1.o -llog4cxx
+scons: Configure: yes
+
+scons: Configure: Checking for C library pthread... 
+scons: Configure: ".sconf_temp/conftest_2.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_2.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+gcc -o .sconf_temp/conftest_2.o -c -Wall -g -std=c++0x -D_LOG4CXX .sconf_temp/conftest_2.c
+cc1: warning: command line option "-std=c++0x" is valid for C++/ObjC++ but not for C
+gcc -o .sconf_temp/conftest_2 .sconf_temp/conftest_2.o -llog4cxx -lpthread
+scons: Configure: yes
+
+
+file /Users/justinbrown/Dropbox/spectral_element/src/utils/SConscript,line 5:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library lapack... 
+scons: Configure: ".sconf_temp/conftest_3.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_3.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+gcc -o .sconf_temp/conftest_3.o -c -Wall -g -std=c++0x -D_LOG4CXX .sconf_temp/conftest_3.c
+cc1: warning: command line option "-std=c++0x" is valid for C++/ObjC++ but not for C
+gcc -o .sconf_temp/conftest_3 .sconf_temp/conftest_3.o -llog4cxx -lpthread -lfftw3 -lfftw3f -llapack
+scons: Configure: yes
+
+scons: Configure: Checking for C library blas... 
+scons: Configure: ".sconf_temp/conftest_4.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_4.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+gcc -o .sconf_temp/conftest_4.o -c -Wall -g -std=c++0x -D_LOG4CXX .sconf_temp/conftest_4.c
+cc1: warning: command line option "-std=c++0x" is valid for C++/ObjC++ but not for C
+gcc -o .sconf_temp/conftest_4 .sconf_temp/conftest_4.o -llog4cxx -lpthread -lfftw3 -lfftw3f -llapack -lblas
+scons: Configure: yes
+
+scons: Configure: Checking for C library atlas... 
+scons: Configure: ".sconf_temp/conftest_5.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_5.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+gcc -o .sconf_temp/conftest_5.o -c -Wall -g -std=c++0x -D_LOG4CXX .sconf_temp/conftest_5.c
+cc1: warning: command line option "-std=c++0x" is valid for C++/ObjC++ but not for C
+gcc -o .sconf_temp/conftest_5 .sconf_temp/conftest_5.o -llog4cxx -lpthread -lfftw3 -lfftw3f -llapack -lblas -latlas
+scons: Configure: yes
+
+scons: Configure: Checking for C library cublas... 
+scons: Configure: ".sconf_temp/conftest_6.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_6.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+gcc -o .sconf_temp/conftest_6.o -c -Wall -g -std=c++0x -D_LOG4CXX .sconf_temp/conftest_6.c
+cc1: warning: command line option "-std=c++0x" is valid for C++/ObjC++ but not for C
+gcc -o .sconf_temp/conftest_6 .sconf_temp/conftest_6.o -llog4cxx -lpthread -lfftw3 -lfftw3f -llapack -lblas -latlas -lcublas
+ld: library not found for -lcublas
+collect2: ld returned 1 exit status
+scons: Configure: no
 
 

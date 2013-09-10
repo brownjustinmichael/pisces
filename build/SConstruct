@@ -6,6 +6,8 @@ env = Environment (ENV = os.environ)
 OCXX = env ["CXX"]
 env ["CXX"] = "mpic++"
 
+include_cuda = False
+
 conf = Configure (env)
 
 if not conf.CheckCXX ():
@@ -16,11 +18,12 @@ else:
 
 conf.Finish ()
 
-env.Tool ('cuda')
+if include_cuda:
+    env.Tool ('cuda')
 
-# env = Environment (ENV = os.environ, CXX = "g++")
+    env.Append (NVCCFLAGS = ["-g", "-arch=sm_20"])
+
+env = Environment (ENV = os.environ, CXX = "g++")
 env.Append (CPPFLAGS = ["-Wall", "-g", "-std=c++0x"])
 
-env.Append (NVCCFLAGS = ["-g", "-arch=sm_20"])
-
-env.SConscript ("../src/SConscript", variant_dir = ".", duplicate = 0, exports = {"env": env})
+env.SConscript ("../src/SConscript", variant_dir = ".", duplicate = 0, exports = {"env": env, "include_cuda": include_cuda})
