@@ -124,7 +124,7 @@ int main (int argc, char *argv[])
 		process_messenger.add_boundary (one_d::edge_n, id + 1);
 	}
 	
-	one_d::fourier::advection_diffusion_element <double> element (n, excess_0, position_0, excess_n, position_n, name, inputParams, &process_messenger, 0x00);
+	one_d::chebyshev::advection_diffusion_element <double> element (n, excess_0, position_0, excess_n, position_n, name, inputParams, &process_messenger, 0x00);
 	
 	try {
 		element.run ();

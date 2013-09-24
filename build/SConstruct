@@ -3,27 +3,20 @@ import SCons.Conftest
 
 env = Environment (ENV = os.environ)
 
-OCXX = env ["CXX"]
-env ["CXX"] = "mpic++"
-
 include_cuda = False
+include_mpi = True
 
-conf = Configure (env)
+if include_mpi:
+    env ["CXX"] = "mpic++"
 
-if not conf.CheckCXX ():
-    env ["CXX"] = OCXX
-else:
     env.Append (CPPFLAGS = ["-D_MPI"])
-    env.Append (NVCCFLAGS = ["-D_MPI"])
-
-conf.Finish ()
+    if include_cuda:
+        env.Append (NVCCFLAGS = ["-D_MPI"])
 
 if include_cuda:
     env.Tool ('cuda')
-
     env.Append (NVCCFLAGS = ["-g", "-arch=sm_20"])
 
-env = Environment (ENV = os.environ, CXX = "g++")
 env.Append (CPPFLAGS = ["-Wall", "-g", "-std=c++0x"])
 
 env.SConscript ("../src/SConscript", variant_dir = ".", duplicate = 0, exports = {"env": env, "include_cuda": include_cuda})

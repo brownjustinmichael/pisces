@@ -35,7 +35,8 @@ enum index {
 	composition = 22, comp = 22,
 	
 	rhs = -01,
-	vel_rhs = -11,
+	vel_explicit_rhs = -11,
+	vel_implicit_rhs = -15,
 	temp_rhs = -21
 };
 

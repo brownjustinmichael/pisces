@@ -331,56 +331,6 @@ namespace one_d
 			using one_d::element <datatype>::n;
 			using one_d::element <datatype>::inputParams;
 		};
-	
-		/*!*******************************************************************
-		 * \brief A simple implementation of the element class with diffusion
-		 * 
-		 * This class contains a full element's capacity to run a single 
-		 * element diffusion in 1D with constant timestep.
-		 *********************************************************************/
-		template <class datatype>
-		class advection_diffusion_element : public element <datatype>
-		{
-		public:
-			/*!*******************************************************************
-			 * \param i_excess_0 The integer number of points evaluated in the adjacent element
-			 * \param i_excess_n The integer number of points evaluated in the adjacent element
-			 * \copydoc element::element ()
-			 *********************************************************************/
-			advection_diffusion_element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags);
-		
-			virtual ~advection_diffusion_element () {}
-	
-			/*!*******************************************************************
-			 * \copydoc element::implicit_reset ()
-			 *********************************************************************/
-			inline void implicit_reset () {
-				element <datatype>::implicit_reset ();
-		
-				if (!(flags & factorized)) {
-					utils::scale (n * n, 0.0, &matrix [0]);
-				}
-			}
-		
-			virtual datatype calculate_timestep ();
-	
-		private:
-			using element <datatype>::n;
-			using element <datatype>::flags;
-			using element <datatype>::name;
-			using element <datatype>::normal_stream;
-			using element <datatype>::cell;
-			using element <datatype>::timestep;
-			using element <datatype>::boundary_weights;
-			using element <datatype>::inputParams;
-			using element <datatype>::grid;
-			using bases::element <datatype>::pointer;
-			using element <datatype>::messenger_ptr;
-			
-	
-			std::vector<datatype> matrix; //!< A vector containing the datatype matrix used in the implicit solver
-			std::vector<datatype> temp_matrix; //!< A vector containing the datatype matrix used in the implicit solver
-		};
 	} /* fourier */
 } /* one_d */
 

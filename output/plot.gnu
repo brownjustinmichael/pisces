@@ -19,7 +19,7 @@ do for [i =0:4:1] {
 	
 	plot for [n = 0:99:plot_every] plot_file (i, n) u 2:3 w lp
 	
-	set yrange [-20:20]
+	set yrange [-1:1]
 
 	set tmargin at screen 0.45
 	set bmargin at screen 0.05

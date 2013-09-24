@@ -31,6 +31,8 @@ namespace io
 			input_stream >> temp;
 			input_stream >> inputParam[temp].asInt;			// n_elements
 			input_stream >> temp;
+			input_stream >> inputParam[temp].asInt;			// n_iterations
+			input_stream >> temp;
 			input_stream >> inputParam[temp].asDouble;		// diffusion_coeff 
 			input_stream >> temp;
 			input_stream >> inputParam[temp].asDouble;		// advection_coeff
