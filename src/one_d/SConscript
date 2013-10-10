@@ -15,5 +15,3 @@ objects.append (env.Object ("advection_one_d.cpp"))
 objects.append (env.Object ("fftw_one_d.cpp"))
 
 objects.append (env.Object ("solver_one_d.cpp"))
-
-objects.append (env.Object ("collocation_one_d.cpp"))

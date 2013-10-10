@@ -13,11 +13,12 @@
 #include <sstream>
 #include <vector>
 #include <map>
+#include <cmath>
 #include "../config.hpp"
 #include "../bases/element.hpp"
 #include "../bases/plan.hpp"
 #include "../utils/utils.hpp"
-#include "collocation_one_d.hpp"
+#include "../bases/collocation.hpp"
 	
 namespace one_d
 {
@@ -49,13 +50,13 @@ namespace one_d
 		 * \param i_position_n The datatype position of index n - 1 - excess_n
 		 * \copydoc bases::element <datatype>::element ()
 		 *********************************************************************/
-		element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
+		element (struct bases::axis i_axis_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
 		bases::element <datatype> (i_name, 1, i_inputParams, i_messenger_ptr, i_flags),
-		n (i_n + 1),
-		excess_0 (i_excess_0),
-		excess_n (i_excess_n),
-		position_0 (i_position_0),
-		position_n (i_position_n) {
+		n (i_axis_n.n + 1),
+		excess_0 (i_axis_n.excess_0),
+		excess_n (i_axis_n.excess_n),
+		position_0 ((datatype) i_axis_n.position_0),
+		position_n ((datatype) i_axis_n.position_n) {
 			cell.resize (n);
 			for (int i = 0; i < n; ++i) {
 				cell [i] = i;
@@ -163,11 +164,11 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc one_d::element::element ()
 			 *********************************************************************/
-			element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
-			one_d::element <datatype> (i_n, i_excess_0, i_position_0, i_excess_n, i_position_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
+			element (struct bases::axis i_axis_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
+			one_d::element <datatype> (i_axis_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
 				initialize (position);
-				one_d::element <datatype>::set_grid (new grid <datatype> (n, n, sqrt (2.0 / (n - 1.0)), (*this) (position) - (*this) (position, n - 1)));
+				one_d::element <datatype>::set_grid (new bases::chebyshev::grid <datatype> (n, n, sqrt (2.0 / (n - 1.0)), (*this) (position) - (*this) (position, n - 1)));
 				TRACE ("Instantiated.");
 			}
 			virtual ~element () {}
@@ -233,7 +234,7 @@ namespace one_d
 			 * \param i_excess_n The integer number of points evaluated in the adjacent element
 			 * \copydoc element::element ()
 			 *********************************************************************/
-			advection_diffusion_element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags);
+			advection_diffusion_element (struct bases::axis i_axis_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags);
 			
 			virtual ~advection_diffusion_element () {}
 		
@@ -242,16 +243,14 @@ namespace one_d
 			 *********************************************************************/
 			inline void implicit_reset () {
 				element <datatype>::implicit_reset ();
-			
-				if (!(flags & factorized)) {
-					utils::scale (n * n, 0.0, &matrix [0]);
-				}
 			}
 			
 			virtual datatype calculate_timestep ();
 		
 		private:
 			using element <datatype>::n;
+			using element <datatype>::excess_0;
+			using element <datatype>::excess_n;
 			using element <datatype>::flags;
 			using element <datatype>::name;
 			using element <datatype>::normal_stream;
@@ -259,7 +258,7 @@ namespace one_d
 			using element <datatype>::timestep;
 			using element <datatype>::boundary_weights;
 			using element <datatype>::inputParams;
-			using element <datatype>::grid;
+			using element <datatype>::grids;
 			using bases::element <datatype>::pointer;
 			using element <datatype>::messenger_ptr;
 		
@@ -271,7 +270,7 @@ namespace one_d
 	namespace fourier
 	{
 		/*!*******************************************************************
-		 * \brief A Chebyshev implementation of the 1D element class
+		 * \brief A Fourier implementation of the 1D element class
 		 *********************************************************************/
 		template <class datatype>
 		class element : public one_d::element <datatype>
@@ -280,11 +279,11 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc one_d::element::element ()
 			 *********************************************************************/
-			element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
-			one_d::element <datatype> (i_n, i_excess_0, i_position_0, i_excess_n, i_position_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
+			element (struct bases::axis i_axis_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
+			one_d::element <datatype> (i_axis_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
 				initialize (position);
-				one_d::element <datatype>::set_grid (new grid <datatype> (n, n, sqrt (2.0 / (n - 1.0)), (*this) (position) - (*this) (position, n - 1)));
+				one_d::element <datatype>::set_grid (new bases::fourier::grid <datatype> (n, n, sqrt (2.0 / (n - 1.0)), (*this) (position) - (*this) (position, n - 1)));
 				TRACE ("Instantiated.");
 			}
 			virtual ~element () {}

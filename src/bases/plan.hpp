@@ -45,6 +45,7 @@ enum index {
  *********************************************************************/
 enum plan_flags {
 	unchanged_timestep = 0x400,
+	implicit_set = 0x4000,
 	transformed = 0x10
 };
 
@@ -107,7 +108,7 @@ namespace bases
 	 * These plans produce output in a square matrix but take no input.
 	 *********************************************************************/
 	template <class datatype>
-	class implicit_plan : public plan <datatype>
+	class implicit_plan : public explicit_plan <datatype>
 	{
 	public:
 		/*!*******************************************************************
@@ -116,8 +117,8 @@ namespace bases
 		 * \param i_matrix The datatype matrix to be updated
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		implicit_plan (int i_n, collocation_grid <datatype>* i_grid, datatype *i_matrix) :  
-		n (i_n),
+		implicit_plan (int i_n, collocation_grid <datatype>* i_grid, datatype* i_data_in, datatype *i_matrix, datatype* i_data_out) :
+		explicit_plan <datatype> (i_n, i_data_in, i_data_out),  
 		grid (i_grid),
 		matrix (i_matrix) {}
 
@@ -129,7 +130,6 @@ namespace bases
 		virtual void execute () = 0;
 		
 	protected:
-		int n; //!< An integer number of data elements
 		collocation_grid <datatype>* grid; //!< A shared pointer to the grid
 		datatype *matrix; //!< A datatype pointer to the input data
 	};

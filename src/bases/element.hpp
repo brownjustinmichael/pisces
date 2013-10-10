@@ -24,6 +24,19 @@
 
 namespace bases
 {	
+	struct axis
+	{
+	public:
+		axis (int i_n, int i_excess_0, double i_position_0, int i_excess_n, double i_position_n) :
+		n (i_n), excess_0 (i_excess_0), excess_n (i_excess_n), position_0 (i_position_0), position_n (i_position_n) {}
+		
+		int n;
+		int excess_0;
+		int excess_n;
+		double position_0;
+		double position_n;
+	};
+	
 	/*!*******************************************************************
 	 * \brief This is the basic class of the code
 	 * 
@@ -46,6 +59,7 @@ namespace bases
 		element (int i_name, int i_dimensions, io::parameter_map& i_inputParams, messenger* i_messenger_ptr, int i_flags) : inputParams (i_inputParams) {
 			name = i_name;
 			boundary_weights.resize (2 * i_dimensions);
+			grids.resize (i_dimensions);
 			inputParams = i_inputParams;
 			messenger_ptr = i_messenger_ptr;
 			flags = i_flags;
@@ -99,8 +113,8 @@ namespace bases
 		 * 
 		 * TODO This assumes 1D n^3. Either the grid should be moved to a subclass or made more general
 		 *********************************************************************/
-		inline void set_grid (collocation_grid <datatype>* i_grid) {
-			grid = std::shared_ptr <collocation_grid <datatype>> (i_grid);
+		inline void set_grid (collocation_grid <datatype>* i_grid, int index = 0) {
+			grids [index] = std::shared_ptr <collocation_grid <datatype>> (i_grid);
 		}
 
 		/*!*******************************************************************
@@ -303,7 +317,7 @@ namespace bases
 		datatype duration; //!< The datatype total simulated time
 		datatype timestep; //!< The datatype timestep length
 
-		std::shared_ptr <collocation_grid <datatype> > grid; //!< A shared pointer to the collocation grid
+		std::vector <std::shared_ptr <collocation_grid <datatype> > > grids; //!< A shared pointer to the collocation grid
 		
 		std::shared_ptr <io::output <datatype> > failsafe_dump; //!< An implementation to dump in case of failure
 		std::shared_ptr <io::output <datatype> > normal_stream; //!< An implementation to output in normal space

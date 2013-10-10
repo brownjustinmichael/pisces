@@ -66,6 +66,8 @@ namespace one_d
 	void solver <datatype>::_factorize () {
 		int info;
 		
+		DEBUG ("factoring..." << matrix [126]);
+		
 		TRACE ("Factorizing...");
 		
 		utils::copy (n * n, default_matrix, &factorized_matrix [0]);
@@ -93,6 +95,8 @@ namespace one_d
 		int beta_0 = 1.5, beta_1 = -0.5;
 		
 		bases::solver <datatype>::execute ();
+		
+		DEBUG ("solving..." << matrix [126]);
 		
 		TRACE ("Solving...");
 		

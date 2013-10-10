@@ -20,68 +20,25 @@
 
 namespace one_d
 {
-	/*!*******************************************************************
-	* \brief Implementation of explicit diffusion for data expressed as a sum of orthogonal functions in 1D
-	* 
-	* This implementation calculates the derivatives at the current time
-	*********************************************************************/
 	template <class datatype>
-	class explicit_diffusion : public bases::explicit_plan <datatype>
+	class diffusion : public bases::implicit_plan <datatype>
 	{
 	public:
-		/*!*******************************************************************
-		* \param i_coeff A datatype containing the coefficient in front of the diffusion term in the differential equation
-		* \param i_grid a shared pointer to the collocation_grid, which must be defined for the second derivative
-		* \copydoc bases::explicit_plan <datatype>::explicit_plan ()
-		*********************************************************************/
-		explicit_diffusion (datatype i_coeff, int i_n, bases::collocation_grid <datatype>* i_grid, datatype* i_data_in, datatype* i_data_out = null);
-
-		virtual ~explicit_diffusion () {}
-
-		/*!*******************************************************************
-		* \copydoc bases::explicit_plan <datatype>::execute ()
-		*********************************************************************/
-		void execute ();
-
-	private:
-		using bases::explicit_plan <datatype>::n;
-		using bases::explicit_plan <datatype>::data_in;
-		using bases::explicit_plan <datatype>::data_out;
+		diffusion (int i_n, datatype i_coeff, datatype i_alpha, bases::collocation_grid <datatype>* i_grid, datatype* i_data_in, datatype* i_matrix, datatype* i_data_out = NULL, int i_flags = 0x0);
 		
-		datatype coeff; //!< A datatype that represents the coefficient in front of the diffusion term in the differential equation
-		bases::collocation_grid <datatype>* grid; //!< A pointer to a collocation grid that contains the the Chebyshev values
-	};
-
-	/*!*******************************************************************
-	 * \brief Implementation of implicit diffusion for data expressed as a sum of orthogonal functions in 1D
-	 * 
-	 * This implementation adds the diffusion terms to the implicit matrix.
-	 *********************************************************************/
-	template <class datatype>
-	class implicit_diffusion : public bases::implicit_plan <datatype>
-	{
-	public:
-		/*!*******************************************************************
-		 * \param i_coeff A datatype containing the coefficient in front of the diffusion term in the differential equation
-		 * \param i_grid a shared pointer to the collocation_grid, which must be defined for the second derivative
-		 * 
-		 * \copydetails bases::implicit_plan <datatype>::implicit_plan ()
-		 *********************************************************************/
-		implicit_diffusion (datatype i_coeff, int i_n, bases::collocation_grid <datatype>* i_grid, datatype *i_matrix);
-
-		virtual ~implicit_diffusion () {}
-
-		/*!*******************************************************************
-		 * \copydoc bases::implicit_plan <datatype>::execute ()
-		 *********************************************************************/
+		virtual ~diffusion () {}
+		
 		void execute ();
-
+	
 	private:
+		datatype coeff;
+		datatype alpha;
+		int flags;
 		using bases::implicit_plan <datatype>::n;
-		using bases::implicit_plan <datatype>::grid;
+		using bases::implicit_plan <datatype>::data_in;
+		using bases::implicit_plan <datatype>::data_out;
 		using bases::implicit_plan <datatype>::matrix;
-		
-		datatype coeff; //!< A datatype that represents the coefficient in front of the diffusion term in the differential equation
+		using bases::implicit_plan <datatype>::grid;
 	};
 } /* oned */
 

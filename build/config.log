@@ -1,4 +1,4 @@
-file /Users/justinbrown/Dropbox/spectral_element/src/SConscript,line 11:
+file /Users/justinbrown/Dropbox/pisces/src/SConscript,line 11:
 	Configure(confdir = .sconf_temp)
 scons: Configure: Checking for C library log4cxx... 
 scons: Configure: ".sconf_temp/conftest_0.c" is up to date.
@@ -49,7 +49,7 @@ scons: Configure: The original builder output was:
 scons: Configure: (cached) yes
 
 
-file /Users/justinbrown/Dropbox/spectral_element/src/utils/SConscript,line 5:
+file /Users/justinbrown/Dropbox/pisces/src/utils/SConscript,line 5:
 	Configure(confdir = .sconf_temp)
 scons: Configure: Checking for C library lapack... 
 scons: Configure: ".sconf_temp/conftest_2.c" is up to date.
