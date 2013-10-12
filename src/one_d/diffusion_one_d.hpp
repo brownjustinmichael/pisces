@@ -14,14 +14,14 @@
 
 #include <memory>
 #include <vector>
-#include "../bases/plan.hpp"
+#include "plan_one_d.hpp"
 #include "../bases/collocation.hpp"
 #include "../utils/utils.hpp"
 
 namespace one_d
 {
 	template <class datatype>
-	class diffusion : public bases::implicit_plan <datatype>
+	class diffusion : public implicit_plan <datatype>
 	{
 	public:
 		diffusion (int i_n, datatype i_coeff, datatype i_alpha, bases::collocation_grid <datatype>* i_grid, datatype* i_data_in, datatype* i_matrix, datatype* i_data_out = NULL, int i_flags = 0x0);
@@ -34,11 +34,11 @@ namespace one_d
 		datatype coeff;
 		datatype alpha;
 		int flags;
-		using bases::implicit_plan <datatype>::n;
-		using bases::implicit_plan <datatype>::data_in;
-		using bases::implicit_plan <datatype>::data_out;
-		using bases::implicit_plan <datatype>::matrix;
-		using bases::implicit_plan <datatype>::grid;
+		using implicit_plan <datatype>::n;
+		using implicit_plan <datatype>::data_in;
+		using implicit_plan <datatype>::data_out;
+		using implicit_plan <datatype>::matrix;
+		using implicit_plan <datatype>::grid;
 	};
 } /* oned */
 

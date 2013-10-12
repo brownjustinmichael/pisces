@@ -1,6 +1,6 @@
 /*!**********************************************************************
  * \file diffusion_one_d_cuda.hpp
- * /Users/justinbrown/Dropbox/spectral_element/src
+ * /Users/justinbrown/Dropbox/pisces/src
  * 
  * Created by Justin Brown on 2013-08-26.
  * Copyright 2013 Justin Brown. All rights reserved.
@@ -9,7 +9,7 @@
 #ifndef DIFFUSION_ONE_D_CUDA_HPP_ORJXCKL7
 #define DIFFUSION_ONE_D_CUDA_HPP_ORJXCKL7
 
-#include "../../bases/plan.hpp"
+#include "../../bases/plan_one_d.hpp"
 #include "../../utils/cuda/utils_cublas.hpp"
 #include "../../bases/collocation.hpp"
 

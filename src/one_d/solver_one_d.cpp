@@ -19,7 +19,8 @@ namespace one_d
 {
 	template <class datatype>
 	solver <datatype>::solver (bases::messenger* i_messenger_ptr, int i_n, int i_excess_0, int i_excess_n, int i_n_iterations, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_positions, datatype *i_default_matrix, datatype *i_matrix, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out, int i_flags) : 
-	bases::solver <datatype> (i_n, i_data_in, i_data_out, i_flags), 
+	bases::solver <datatype> (i_flags), 
+	explicit_plan <datatype> (i_n, i_data_in, i_data_out),
 	messenger_ptr (i_messenger_ptr),
 	timestep (i_timestep), 
 	alpha_0 (i_alpha_0), 

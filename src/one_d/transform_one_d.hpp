@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file fftw_one_d.hpp
+ * \file transform_one_d.hpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-15.
@@ -11,7 +11,7 @@
 
 #include <fftw3.h>
 #include "../config.hpp"
-#include "../bases/plan.hpp"
+#include "plan_one_d.hpp"
 
 namespace one_d
 {		
@@ -21,7 +21,7 @@ namespace one_d
 	 * \brief \copybrief bases::transform
 	 *********************************************************************/
 	template <class datatype>
-	class fftw_cosine : public bases::explicit_plan <datatype>
+	class fftw_cosine : public explicit_plan <datatype>
 	{
 	public:
 		/*!*******************************************************************
@@ -37,9 +37,9 @@ namespace one_d
 		void execute ();
 	
 	private:		
-		using bases::explicit_plan <datatype>::n;
-		using bases::explicit_plan <datatype>::data_in;
-		using bases::explicit_plan <datatype>::data_out;
+		using explicit_plan <datatype>::n;
+		using explicit_plan <datatype>::data_in;
+		using explicit_plan <datatype>::data_out;
 		
 		datatype scalar; //!< The scalar used after the transform (1 / sqrt (2 * (n - 1)))
 		fftw_plan fourier_plan; //!< The fftw_plan object to be executed

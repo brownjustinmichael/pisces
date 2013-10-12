@@ -16,7 +16,6 @@
 #include <cmath>
 #include "../config.hpp"
 #include "../bases/element.hpp"
-#include "../bases/plan.hpp"
 #include "../utils/utils.hpp"
 #include "../bases/collocation.hpp"
 	

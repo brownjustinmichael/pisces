@@ -14,17 +14,17 @@
 #include <memory>
 #include <vector>
 #include "../bases/collocation.hpp"
-#include "../bases/plan.hpp"
+#include "plan_one_d.hpp"
 
 namespace one_d
 {
 	template <class datatype>
-	class advec : public bases::explicit_plan <datatype>
+	class advec : public explicit_plan <datatype>
 	{
 	private:
-		using bases::explicit_plan <datatype>::n;
-		using bases::explicit_plan <datatype>::data_in;
-		using bases::explicit_plan <datatype>::data_out;
+		using explicit_plan <datatype>::n;
+		using explicit_plan <datatype>::data_in;
+		using explicit_plan <datatype>::data_out;
 	
 		datatype c;
 		std::vector<datatype> fac;

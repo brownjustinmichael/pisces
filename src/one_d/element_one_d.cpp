@@ -14,9 +14,9 @@
 #include "../config.hpp"
 #include "element_one_d.hpp"
 #include "diffusion_one_d.hpp"
-#include "advection_one_d.h"
+#include "advection_one_d.hpp"
 #include "solver_one_d.hpp"
-#include "fftw_one_d.hpp"
+#include "transform_one_d.hpp"
 	
 namespace one_d
 {

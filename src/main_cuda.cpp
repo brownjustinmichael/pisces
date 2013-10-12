@@ -1,6 +1,6 @@
 /*!**********************************************************************
  * \file main_cuda.cpp
- * /Users/justinbrown/Dropbox/spectral_element
+ * /Users/justinbrown/Dropbox/pisces
  * 
  * Created by Justin Brown on 2013-08-14.
  * Copyright 2013 Justin Brown. All rights reserved.

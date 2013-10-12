@@ -19,7 +19,7 @@ namespace one_d
 {
 	template <class datatype>
 	diffusion <datatype>::diffusion (int i_n, datatype i_coeff, datatype i_alpha, bases::collocation_grid <datatype>* i_grid, datatype* i_data_in, datatype* i_matrix, datatype* i_data_out, int i_flags) :
-	bases::implicit_plan <datatype> (i_n, i_grid, i_data_in, i_matrix, i_data_out),
+	implicit_plan <datatype> (i_n, i_grid, i_data_in, i_matrix, i_data_out),
 	coeff (i_coeff), 
 	alpha (i_alpha),
 	flags (i_flags) {

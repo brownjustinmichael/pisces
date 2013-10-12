@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <memory>
+#include "plan_one_d.hpp"
 #include "../bases/solver.hpp"
 #include "../utils/utils.hpp"
 
@@ -29,7 +30,7 @@ namespace one_d
 	 * iterated.
 	 *********************************************************************/
 	template <class datatype>
-	class solver : public bases::solver <datatype>
+	class solver : public bases::solver <datatype>, public explicit_plan <datatype>
 	{
 	public:
 		/*!*******************************************************************
@@ -58,9 +59,9 @@ namespace one_d
 		 *********************************************************************/
 		void _factorize ();
 		
-		using bases::solver <datatype>::n;
-		using bases::solver <datatype>::data_in;
-		using bases::solver <datatype>::data_out;
+		using explicit_plan <datatype>::n;
+		using explicit_plan <datatype>::data_in;
+		using explicit_plan <datatype>::data_out;
 		using bases::solver <datatype>::flags;
 
 		bases::messenger* messenger_ptr;

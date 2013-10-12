@@ -25,14 +25,13 @@ namespace bases
 	 * \brief A class designed to solve a matrix equation
 	 *********************************************************************/
 	template <class datatype>
-	class solver : public explicit_plan <datatype>
+	class solver : public plan <datatype>
 	{
 	public:
 		/*!*******************************************************************
 		 * \copydoc explicit_plan::explicit_plan ()
 		 *********************************************************************/
-		solver (int i_n, datatype* i_data_in, datatype* i_data_out, int i_flags = 0x00) : 
-		explicit_plan <datatype> (i_n, i_data_in, i_data_out), 
+		solver (int i_flags = 0x00) : 
 		flags (i_flags) {}
 		
 		virtual ~solver () {}
@@ -58,7 +57,6 @@ namespace bases
 		}
 		
 	protected:
-
 		virtual void _factorize () = 0;
 		
 		int flags;

@@ -1,6 +1,6 @@
 /*!**********************************************************************
- * \file fftw_one_d_cuda.cu
- * /Users/justinbrown/Dropbox/spectral_element
+ * \file transform_one_d_cuda.cu
+ * /Users/justinbrown/Dropbox/pisces
  * 
  * Created by Justin Brown on 2013-08-16.
  * Copyright 2013 Justin Brown. All rights reserved.
@@ -8,7 +8,7 @@
 
 #include <math.h>
 #include <cufft.h>
-#include "fftw_one_d_cuda.hpp"
+#include "transform_one_d_cuda.hpp"
 #include "../../utils/cuda/utils_cublas.hpp"
 #include "../../utils/cuda/utils_cuda.cuh"
 

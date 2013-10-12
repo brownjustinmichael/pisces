@@ -9,8 +9,8 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 
 #include <cmath>
-#include "advection_one_d.h"
-#include "../bases/plan.hpp"
+#include "advection_one_d.hpp"
+#include "plan_one_d.hpp"
 #include "../utils/utils.hpp"
 #include "../bases/element.hpp"
 
@@ -18,7 +18,7 @@ namespace one_d
 {
 	template <class datatype>
 	advec <datatype>::advec (int i_n, datatype i_c, datatype* i_data_in, datatype* i_data_out, std::shared_ptr<bases::collocation_grid <datatype>> i_grid) : 
-	bases::explicit_plan <datatype> (i_n, i_data_in, i_data_out)
+	explicit_plan <datatype> (i_n, i_data_in, i_data_out)
 	{
 		TRACE ("Instantiating...");
 		grid = i_grid;

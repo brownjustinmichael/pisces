@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file fftw_one_d_cuda.hpp
+ * \file transform_one_d_cuda.hpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-15.
@@ -10,7 +10,7 @@
 #define FFTW_ONE_D_CUDA_HPP_G5118SR0
 
 #include "../../config.hpp"
-#include "../../bases/plan.hpp"
+#include "../../bases/plan_one_d.hpp"
 
 namespace cuda
 {
