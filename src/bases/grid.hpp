@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file bases/collocation.hpp
+ * \file bases/grid.hpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-19.
@@ -24,7 +24,7 @@ namespace bases
 	 * temporal expense.
 	 *********************************************************************/
 	template <class datatype>
-	class collocation_grid
+	class grid
 	{
 	public:
 		/*!*******************************************************************
@@ -32,7 +32,7 @@ namespace bases
 		 * \param i_rows The integer number of rows in the grid
 		 * \param i_cols The integer number of columns in the grid
 		 *********************************************************************/
-		collocation_grid (int i_derivs, int i_rows, int i_cols) {
+		grid (int i_derivs, int i_rows, int i_cols) {
 			rows = i_rows;
 			cols = i_cols;
 			derivs = i_derivs;
@@ -48,7 +48,7 @@ namespace bases
 			TRACE ("Instantiated...")
 		}
 	
-		virtual ~collocation_grid () {}
+		virtual ~grid () {}
 	
 		/*!*******************************************************************
 		 * \brief An indexing operation into the grid, for convenience
@@ -95,7 +95,7 @@ namespace bases
 	    * Mth order Chebyshev polynomial and its first and second derivatives
 	    *********************************************************************/
 	   template <class datatype>
-	   class grid : public bases::collocation_grid <datatype>
+	   class grid : public bases::grid <datatype>
 	   {
 	   public:
 	   	/*!*******************************************************************
@@ -109,9 +109,9 @@ namespace bases
 	   	virtual ~grid () {};
 	
 	   private:
-	   	using bases::collocation_grid <datatype>::derivs;
-	   	using bases::collocation_grid <datatype>::rows;
-	   	using bases::collocation_grid <datatype>::cols;
+	   	using bases::grid <datatype>::derivs;
+	   	using bases::grid <datatype>::rows;
+	   	using bases::grid <datatype>::cols;
 	
 	   	datatype scale; //!< A datatype by which the collocation grid should be scaled
 	   	datatype width; //!< The datatype width of the collocation region
@@ -157,7 +157,7 @@ namespace bases
 	    * Mth order Chebyshev polynomial and its first and second derivatives
 	    *********************************************************************/
 	   template <class datatype>
-	   class grid : public bases::collocation_grid <datatype>
+	   class grid : public bases::grid <datatype>
 	   {
 	   public:
 	   	/*!*******************************************************************
@@ -171,9 +171,9 @@ namespace bases
 	   	virtual ~grid () {};
 	
 	   private:
-	   	using bases::collocation_grid <datatype>::derivs;
-	   	using bases::collocation_grid <datatype>::rows;
-	   	using bases::collocation_grid <datatype>::cols;
+	   	using bases::grid <datatype>::derivs;
+	   	using bases::grid <datatype>::rows;
+	   	using bases::grid <datatype>::cols;
 	
 	   	datatype scale; //!< A datatype by which the collocation grid should be scaled
 	   	datatype width; //!< The datatype width of the collocation region

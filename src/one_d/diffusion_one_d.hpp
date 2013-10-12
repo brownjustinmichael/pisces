@@ -15,7 +15,7 @@
 #include <memory>
 #include <vector>
 #include "plan_one_d.hpp"
-#include "../bases/collocation.hpp"
+#include "../bases/grid.hpp"
 #include "../utils/utils.hpp"
 
 namespace one_d
@@ -24,7 +24,7 @@ namespace one_d
 	class diffusion : public implicit_plan <datatype>
 	{
 	public:
-		diffusion (int i_n, datatype i_coeff, datatype i_alpha, bases::collocation_grid <datatype>* i_grid, datatype* i_data_in, datatype* i_matrix, datatype* i_data_out = NULL, int i_flags = 0x0);
+		diffusion (int i_n, datatype i_coeff, datatype i_alpha, bases::grid <datatype>* i_grid, datatype* i_data_in, datatype* i_matrix, datatype* i_data_out = NULL);
 		
 		virtual ~diffusion () {}
 		
@@ -33,7 +33,6 @@ namespace one_d
 	private:
 		datatype coeff;
 		datatype alpha;
-		int flags;
 		using implicit_plan <datatype>::n;
 		using implicit_plan <datatype>::data_in;
 		using implicit_plan <datatype>::data_out;

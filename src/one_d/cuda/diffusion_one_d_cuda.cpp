@@ -13,7 +13,7 @@ namespace cuda
 	namespace one_d
 	{
 		template <class datatype>
-		explicit_diffusion <datatype>::explicit_diffusion (datatype i_coeff, int i_n, bases::collocation_grid <datatype>* i_grid, datatype* i_data_in, datatype* i_data_out) :
+		explicit_diffusion <datatype>::explicit_diffusion (datatype i_coeff, int i_n, bases::grid <datatype>* i_grid, datatype* i_data_in, datatype* i_data_out) :
 		bases::explicit_plan <datatype> (i_n, i_data_in, i_data_out),
 		coeff (i_coeff) {
 		

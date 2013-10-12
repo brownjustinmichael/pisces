@@ -17,7 +17,7 @@
 #include "../config.hpp"
 #include "../bases/element.hpp"
 #include "../utils/utils.hpp"
-#include "../bases/collocation.hpp"
+#include "../bases/grid.hpp"
 	
 namespace one_d
 {

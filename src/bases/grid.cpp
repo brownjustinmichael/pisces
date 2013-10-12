@@ -12,7 +12,7 @@
 #include <cassert>
 #include <cmath>
 #include "../config.hpp"
-#include "collocation.hpp"
+#include "grid.hpp"
 
 namespace bases
 {
@@ -20,7 +20,7 @@ namespace bases
 	{
 		template <class datatype>
 		grid <datatype>::grid (int i_M, int i_N, datatype i_scale, datatype i_width) : 
-		bases::collocation_grid <datatype> (3, i_M, i_N) {
+		bases::grid <datatype> (3, i_M, i_N) {
 			int d, m, k;
 			scale = i_scale;
 			width = i_width;
@@ -32,7 +32,7 @@ namespace bases
 			for (d = 0; d < 3; ++d) {
 				for (k = 0; k < i_N; ++k) {
 					for (m = 0; m < i_M; ++m) {
-						bases::collocation_grid <datatype>::index (d, m, k) = recursion (d, m, k);
+						bases::grid <datatype>::index (d, m, k) = recursion (d, m, k);
 						exists (d, m, k) = true;
 					}
 				}
@@ -40,15 +40,15 @@ namespace bases
 	
 			for (k = 0; k < i_N; ++k) {
 				for (m = 0; m < i_M; ++m) {
-					bases::collocation_grid <datatype>::index (1, m, k) *= 2.0 / width;
-					bases::collocation_grid <datatype>::index (2, m, k) *= 2.0 / width * 2.0 / width;
+					bases::grid <datatype>::index (1, m, k) *= 2.0 / width;
+					bases::grid <datatype>::index (2, m, k) *= 2.0 / width * 2.0 / width;
 				}
 			}
 	
 			for (d = 0; d < 3; ++d) {
 				for (k = 0; k < i_N; ++k) {
-					bases::collocation_grid <datatype>::index (d, 0, k) /= 2.0;
-					bases::collocation_grid <datatype>::index (d, i_M - 1, k) /= 2.0;
+					bases::grid <datatype>::index (d, 0, k) /= 2.0;
+					bases::grid <datatype>::index (d, i_M - 1, k) /= 2.0;
 				}
 			}
 	
@@ -65,7 +65,7 @@ namespace bases
 			// Use the recursion relations to calculate the correct value of the polynomial at the collocation point
 			if (exists (d, m, k)) {
 				// This value has already been calculated
-				return bases::collocation_grid <datatype>::index (d, m, k);
+				return bases::grid <datatype>::index (d, m, k);
 			} else if ((d == 2 && (m == 0 || m == 1)) || (d == 1 && m == 0)) {
 				// The first two polynomials of the second derivative and the first polynomial of the first derivative are 0.0
 				return 0.0;
@@ -99,7 +99,7 @@ namespace bases
 	{
 		template <class datatype>
 		grid <datatype>::grid (int i_M, int i_N, datatype i_scale, datatype i_width) : 
-		bases::collocation_grid <datatype> (3, i_M, i_N) {
+		bases::grid <datatype> (3, i_M, i_N) {
 			int d, m, k;
 			scale = i_scale;
 			width = i_width;
@@ -109,15 +109,15 @@ namespace bases
 	
 			for (k = 0; k < i_N; ++k) {
 				for (m = 0; m < i_M; ++m) {
-					bases::collocation_grid <datatype>::index (0, m, k) = scale * std::cos (pioN * k * m);
-					bases::collocation_grid <datatype>::index (1, m, k) = (((datatype) -m) * 2.0 / width) * scale * std::sin (pioN * k * m);
-					bases::collocation_grid <datatype>::index (2, m, k) = -(((datatype) m * m) * 4.0 / width / width) * scale * std::cos (pioN * k * m);
+					bases::grid <datatype>::index (0, m, k) = scale * std::cos (pioN * k * m);
+					bases::grid <datatype>::index (1, m, k) = (((datatype) -m) * 2.0 / width) * scale * std::sin (pioN * k * m);
+					bases::grid <datatype>::index (2, m, k) = -(((datatype) m * m) * 4.0 / width / width) * scale * std::cos (pioN * k * m);
 				}
 			}
 			for (d = 0; d < 3; ++d) {
 				for (k = 0; k < i_N; ++k) {
-					bases::collocation_grid <datatype>::index (d, 0, k) /= 2.0;
-					bases::collocation_grid <datatype>::index (d, i_M - 1, k) /= 2.0;
+					bases::grid <datatype>::index (d, 0, k) /= 2.0;
+					bases::grid <datatype>::index (d, i_M - 1, k) /= 2.0;
 				}
 			}
 	

@@ -18,10 +18,11 @@ namespace two_d
 		namespace chebyshev
 		{
 			template <class datatype>
-			class diffusion : public bases::implicit_plan
+			class diffusion : public implicit_plan
 			{
 			public:
-				diffusion (arguments);
+				diffusion (int i_n, int i_m, datatype i_coeff, datatype i_alpha, bases::grid <datatype>* i_grid_n, bases::grid <datatype>* i_grid_m, datatype* i_data_in, datatype* i_matrix, datatype* i_data_out = NULL);
+				
 				virtual ~diffusion ();
 			
 			private:

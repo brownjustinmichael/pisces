@@ -11,7 +11,7 @@
 
 #include "../../bases/plan_one_d.hpp"
 #include "../../utils/cuda/utils_cublas.hpp"
-#include "../../bases/collocation.hpp"
+#include "../../bases/grid.hpp"
 
 namespace cuda
 {
@@ -28,10 +28,10 @@ namespace cuda
 		public:
 			/*!*******************************************************************
 			* \param i_coeff A datatype containing the coefficient in front of the diffusion term in the differential equation
-			* \param i_grid a shared pointer to the collocation_grid, which must be defined for the second derivative
+			* \param i_grid a shared pointer to the grid, which must be defined for the second derivative
 			* \copydoc bases::explicit_plan <datatype>::explicit_plan ()
 			*********************************************************************/
-			explicit_diffusion (datatype i_coeff, int i_n, bases::collocation_grid <datatype>* i_grid, datatype* i_data_in, datatype* i_data_out = NULL);
+			explicit_diffusion (datatype i_coeff, int i_n, bases::grid <datatype>* i_grid, datatype* i_data_in, datatype* i_data_out = NULL);
 
 			virtual ~explicit_diffusion () {}
 

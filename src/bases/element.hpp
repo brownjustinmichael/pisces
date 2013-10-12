@@ -19,7 +19,7 @@
 #include "solver.hpp"
 #include "../utils/io.hpp"
 #include "messenger.hpp"
-#include "collocation.hpp"
+#include "grid.hpp"
 #include "../config.hpp"
 
 namespace bases
@@ -109,12 +109,12 @@ namespace bases
 		/*!*******************************************************************
 		 * \brief Set the collocation grid.
 		 * 
-		 * \param i_grid A shared_ptr to a collocation_grid object
+		 * \param i_grid A shared_ptr to a grid object
 		 * 
 		 * TODO This assumes 1D n^3. Either the grid should be moved to a subclass or made more general
 		 *********************************************************************/
-		inline void set_grid (collocation_grid <datatype>* i_grid, int index = 0) {
-			grids [index] = std::shared_ptr <collocation_grid <datatype>> (i_grid);
+		inline void set_grid (grid <datatype>* i_grid, int index = 0) {
+			grids [index] = std::shared_ptr <grid <datatype>> (i_grid);
 		}
 
 		/*!*******************************************************************
@@ -317,7 +317,7 @@ namespace bases
 		datatype duration; //!< The datatype total simulated time
 		datatype timestep; //!< The datatype timestep length
 
-		std::vector <std::shared_ptr <collocation_grid <datatype> > > grids; //!< A shared pointer to the collocation grid
+		std::vector <std::shared_ptr <grid <datatype> > > grids; //!< A shared pointer to the collocation grid
 		
 		std::shared_ptr <io::output <datatype> > failsafe_dump; //!< An implementation to dump in case of failure
 		std::shared_ptr <io::output <datatype> > normal_stream; //!< An implementation to output in normal space

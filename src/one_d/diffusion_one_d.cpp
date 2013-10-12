@@ -10,7 +10,7 @@
 #include <cmath>
 #include <cassert>
 #include "../bases/element.hpp"
-#include "../bases/collocation.hpp"
+#include "../bases/grid.hpp"
 #include "../config.hpp"
 #include "diffusion_one_d.hpp"
 #include "../utils/utils.hpp"
@@ -18,15 +18,13 @@
 namespace one_d
 {
 	template <class datatype>
-	diffusion <datatype>::diffusion (int i_n, datatype i_coeff, datatype i_alpha, bases::collocation_grid <datatype>* i_grid, datatype* i_data_in, datatype* i_matrix, datatype* i_data_out, int i_flags) :
+	diffusion <datatype>::diffusion (int i_n, datatype i_coeff, datatype i_alpha, bases::grid <datatype>* i_grid, datatype* i_data_in, datatype* i_matrix, datatype* i_data_out) :
 	implicit_plan <datatype> (i_n, i_grid, i_data_in, i_matrix, i_data_out),
 	coeff (i_coeff), 
-	alpha (i_alpha),
-	flags (i_flags) {
+	alpha (i_alpha) {
 		for (int i = 0; i < n; ++i) {
 			utils::add_scaled (n, -coeff * alpha, grid->get_data (2) + i, matrix + i, n, n);
 		}
-		flags |= implicit_set;
 		TRACE ("Initialized.");
 	}
 
