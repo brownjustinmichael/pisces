@@ -32,8 +32,6 @@ namespace one_d
 			assert (n > 0);
 		
 			TRACE ("Initializing...");
-		
-			matrix.resize (n * n, 0.0);
 			
 			// Set up output
 			std::ostringstream convert;
@@ -45,15 +43,15 @@ namespace one_d
 			normal_stream->append ((*this) [vel_explicit_rhs]);
 			
 			// Set up plans in order
-			element <datatype>::add_pre_plan (new diffusion <datatype> (n, diffusion_coeff, alpha, &*(grids [0]), pointer (velocity), &matrix [0], pointer (vel_implicit_rhs)));
+			element <datatype>::add_pre_plan (new diffusion <datatype> (*grids [0], diffusion_coeff, alpha, pointer (velocity), pointer (vel_implicit_rhs)));
 
-			element <datatype>::add_transform (new fftw_cosine <datatype> (n, pointer (velocity)));
+			element <datatype>::add_transform (new fftw_cosine <datatype> (*grids [0], pointer (velocity)));
 			if (advection_coeff != 0.0) {
-				element <datatype>::add_post_plan (new advec <datatype> (n, advection_coeff, pointer (velocity), pointer (vel_explicit_rhs), grids [0]));
+				element <datatype>::add_post_plan (new advec <datatype> (*grids [0], advection_coeff, pointer (velocity), pointer (vel_explicit_rhs)));
 			}
 		
 			// Set up solver
-			element <datatype>::add_solver (new solver <datatype> (messenger_ptr, n, inputParams["n_iterations"].asInt, timestep, boundary_weights [edge_0], boundary_weights [edge_n], pointer (position), grids [0]->get_data (0), &matrix [0], pointer (velocity), pointer (vel_explicit_rhs), pointer (vel_implicit_rhs)));
+			element <datatype>::add_solver (new solver <datatype> (*grids [0], messenger_ptr, inputParams["n_iterations"].asInt, timestep, pointer (velocity), pointer (vel_explicit_rhs), pointer (vel_implicit_rhs)));
 		
 			normal_stream->to_file ();
 		

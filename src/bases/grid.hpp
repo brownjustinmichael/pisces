@@ -45,14 +45,14 @@ namespace bases
 		 * \param i_rows The integer number of rows in the grid
 		 * \param i_cols The integer number of columns in the grid
 		 *********************************************************************/
-		grid (axis *i_axis_ptr, int i_derivs, datatype i_alpha_0 = 0.5, datatype i_alpha_n = 0.5) :
+		grid (axis *i_axis_ptr, int i_derivs, bool linked_0 = false, bool linked_n = false) :
 		n (i_axis_ptr->n),
 		excess_0 (i_axis_ptr->excess_0),
 		excess_n (i_axis_ptr->excess_n),
 		position_0 (i_axis_ptr->position_0),
 		position_n (i_axis_ptr->position_n),
-		alpha_0 (i_alpha_0),
-		alpha_n (i_alpha_n),
+		alpha_0 (linked_0 ? 0.5 : 0.0),
+		alpha_n (linked_n ? 0.5 : 0.0),
 		derivs (i_derivs) {
 			TRACE ("Instantiating...")
 
@@ -69,9 +69,10 @@ namespace bases
 		virtual ~grid () {}
 		
 		datatype& position (int index = 0) {
-			DEBUG (positions.size ());
 			return positions [index];
 		}
+		
+		virtual datatype *matrix_ptr () = 0;
 	
 		/*!*******************************************************************
 		 * \brief An indexing operation into the grid, for convenience
@@ -131,9 +132,13 @@ namespace bases
 			 * \param i_scale A datatype by which the grid should be scaled
 			 * \param i_width The datatype width of the collocation region
 			 *********************************************************************/
-			grid (axis *i_axis_ptr, datatype i_scale = 1.0, datatype i_alpha_0 = 0.5, datatype i_alpha_n = 0.5);
+			grid (axis *i_axis_ptr, datatype i_scale = 1.0, bool linked_0 = false, bool linked_n = false);
 	
 			virtual ~grid () {};
+			
+			datatype *matrix_ptr () {
+				return &matrix [0];
+			}
 	
 		private:
 			using bases::grid <datatype>::n;
@@ -146,6 +151,7 @@ namespace bases
 	
 			datatype scale; //!< A datatype by which the collocation grid should be scaled
 			datatype width; //!< The datatype width of the collocation region
+			std::vector <datatype> matrix;
 			std::vector<bool> exists_array; //!< A bool vector containing whether the points exist
 			datatype pioN; //!< The datatype 3.14159.../N, for use in calculations
 	
@@ -197,9 +203,13 @@ namespace bases
 			 * \param i_scale A datatype by which the grid should be scaled
 			 * \param i_width The datatype width of the collocation region
 			 *********************************************************************/
-			grid (axis *i_axis_ptr, datatype i_scale = 1.0, datatype i_alpha_0 = 0.5, datatype i_alpha_n = 0.5);
+			grid (axis *i_axis_ptr, datatype i_scale = 1.0, bool linked_0 = false, bool linked_n = false);
 	
 			virtual ~grid () {};
+			
+			datatype *matrix_ptr () {
+				return &matrix [0];
+			}
 	
 		private:
 			using bases::grid <datatype>::n;
@@ -212,6 +222,7 @@ namespace bases
 	
 			datatype scale; //!< A datatype by which the collocation grid should be scaled
 			datatype width; //!< The datatype width of the collocation region
+			std::vector <datatype> matrix;
 			std::vector<bool> exists_array; //!< A bool vector containing whether the points exist
 			datatype pioN; //!< The datatype 3.14159.../N, for use in calculations
 		};

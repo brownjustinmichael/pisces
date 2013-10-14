@@ -159,7 +159,7 @@ namespace one_d
 			element (bases::axis *i_axis_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
 			one_d::element <datatype> (i_axis_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
-				one_d::element <datatype>::set_grid (new bases::chebyshev::grid <datatype> (axis_n, sqrt (2.0 / (n - 1.0))));
+				one_d::element <datatype>::set_grid (new bases::chebyshev::grid <datatype> (axis_n, sqrt (2.0 / (n - 1.0)), messenger_ptr->linked (edge_0), messenger_ptr->linked (edge_n)));
 				initialize (position);
 				TRACE ("Instantiated.");
 			}
@@ -200,6 +200,7 @@ namespace one_d
 			using one_d::element <datatype>::axis_n;
 			using one_d::element <datatype>::grids;
 			using one_d::element <datatype>::inputParams;
+			using one_d::element <datatype>::messenger_ptr;
 		};
 		
 		/*!*******************************************************************
@@ -235,9 +236,6 @@ namespace one_d
 			using element <datatype>::grids;
 			using bases::element <datatype>::pointer;
 			using element <datatype>::messenger_ptr;
-		
-			std::vector<datatype> matrix; //!< A vector containing the datatype matrix used in the implicit solver
-			std::vector<datatype> temp_matrix; //!< A vector containing the datatype matrix used in the implicit solver
 		};
 	} /* chebyshev */
 	
@@ -256,7 +254,7 @@ namespace one_d
 			element (bases::axis i_axis_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
 			one_d::element <datatype> (i_axis_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
-				one_d::element <datatype>::set_grid (new bases::fourier::grid <datatype> (axis_n, sqrt (2.0 / (n - 1.0))));
+				one_d::element <datatype>::set_grid (new bases::fourier::grid <datatype> (axis_n, sqrt (2.0 / (n - 1.0)), messenger_ptr->linked (edge_0), messenger_ptr->linked (edge_n)));
 				initialize (position);
 				TRACE ("Instantiated.");
 			}
@@ -297,6 +295,7 @@ namespace one_d
 			using one_d::element <datatype>::axis_n;
 			using one_d::element <datatype>::grids;
 			using one_d::element <datatype>::inputParams;
+			using one_d::element <datatype>::messenger_ptr;
 		};
 	} /* fourier */
 } /* one_d */

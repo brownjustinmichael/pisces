@@ -19,12 +19,13 @@ namespace bases
 	namespace chebyshev
 	{
 		template <class datatype>
-		grid <datatype>::grid (axis *i_axis_ptr, datatype i_scale, datatype i_alpha_0, datatype i_alpha_n) : 
-		bases::grid <datatype> (i_axis_ptr, 3, i_alpha_0, i_alpha_n) {
+		grid <datatype>::grid (axis *i_axis_ptr, datatype i_scale, bool linked_0, bool linked_n) : 
+		bases::grid <datatype> (i_axis_ptr, 3, linked_0, linked_n) {
 			int d, m, k;
 			scale = i_scale;
 			pioN = std::acos (-1.0) / (n - 1);
 			exists_array.resize (n * n * 3, false);
+			matrix.resize (n * n);
 	
 			TRACE ("Instantiating...");
 			
@@ -105,11 +106,12 @@ namespace bases
 	namespace fourier
 	{
 		template <class datatype>
-		grid <datatype>::grid (axis *i_axis_ptr, datatype i_scale, datatype i_alpha_0, datatype i_alpha_n) : 
-		bases::grid <datatype> (i_axis_ptr, 3, i_alpha_0, i_alpha_n) {
+		grid <datatype>::grid (axis *i_axis_ptr, datatype i_scale, bool linked_0, bool linked_n) : 
+		bases::grid <datatype> (i_axis_ptr, 3, linked_0, linked_n) {
 			int d, m, k;
 			scale = i_scale;
 			pioN = std::acos (-1.0) / (n - 1);
+			matrix.resize (n);
 	
 			TRACE ("Instantiating...");
 	

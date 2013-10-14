@@ -18,17 +18,17 @@
 namespace one_d
 {
 	template <class datatype>
-	solver <datatype>::solver (bases::messenger* i_messenger_ptr, int i_n, int i_n_iterations, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_positions, datatype *i_default_matrix, datatype *i_matrix, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out, int i_flags) : 
+	solver <datatype>::solver (bases::grid <datatype> &i_grid, bases::messenger* i_messenger_ptr, int i_n_iterations, datatype& i_timestep, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out, int i_flags) : 
 	bases::solver <datatype> (i_flags), 
-	explicit_plan <datatype> (i_n, i_data_in, i_data_out),
+	explicit_plan <datatype> (i_grid, i_data_in, i_data_out),
 	messenger_ptr (i_messenger_ptr),
 	timestep (i_timestep), 
-	alpha_0 (i_alpha_0), 
-	alpha_n (i_alpha_n), 
-	positions (i_positions),
+	alpha_0 (grid.alpha_0), 
+	alpha_n (grid.alpha_n), 
+	positions (&(grid.position ())),
 	n_iterations (i_n_iterations),
-	excess_0 (messenger_ptr->get_excess (edge_0)), 
-	excess_n (messenger_ptr->get_excess (edge_n)) { 
+	excess_0 (grid.excess_0), 
+	excess_n (grid.excess_n) { 
 		
 		TRACE ("Instantiating...");
 		
@@ -36,8 +36,8 @@ namespace one_d
 		expected_excess_n = 0;
 		explicit_rhs = i_explicit_rhs;
 		implicit_rhs = i_implicit_rhs;
-		default_matrix = i_default_matrix;
-		matrix = i_matrix;		
+		default_matrix = grid.get_data (0);
+		matrix = grid.matrix_ptr ();		
 		data_temp.resize (n, 0.0);
 		factorized_matrix.resize (n * n);
 		ipiv.resize (n, 0);

@@ -29,8 +29,9 @@ namespace one_d
 		 * \param i_data_out The integer scalar index of the output
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		explicit_plan (int i_n, datatype* i_data_in, datatype* i_data_out = NULL) : 
-		n (i_n),
+		explicit_plan (bases::grid <datatype> &i_grid, datatype* i_data_in, datatype* i_data_out = NULL) : 
+		n (i_grid.n),
+		grid (i_grid),
 		data_in (i_data_in),
 		data_out (i_data_out ? i_data_out : i_data_in) {}
 
@@ -42,7 +43,8 @@ namespace one_d
 		virtual void execute () = 0;
 	
 	protected:
-		int n; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
+		int &n; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
+		bases::grid <datatype> &grid;
 		datatype* data_in; //!< A datatype pointer to the input data
 		datatype* data_out; //!< A datatype pointer to the output data
 	};
@@ -62,10 +64,9 @@ namespace one_d
 		 * \param i_matrix The datatype matrix to be updated
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		implicit_plan (int i_n, bases::grid <datatype>* i_grid, datatype* i_data_in, datatype *i_matrix, datatype* i_data_out) :
-		explicit_plan <datatype> (i_n, i_data_in, i_data_out),  
-		grid (i_grid),
-		matrix (i_matrix) {}
+		implicit_plan (bases::grid <datatype> &i_grid, datatype* i_data_in, datatype* i_data_out) :
+		explicit_plan <datatype> (i_grid, i_data_in, i_data_out),  
+		matrix (grid.matrix_ptr ()) {}
 
 		virtual ~implicit_plan () {}
 	
@@ -75,7 +76,7 @@ namespace one_d
 		virtual void execute () = 0;
 	
 	protected:
-		bases::grid <datatype>* grid; //!< A shared pointer to the grid
+		using explicit_plan <datatype>::grid;
 		datatype *matrix; //!< A datatype pointer to the input data
 	};
 } /* one_d */

@@ -28,11 +28,10 @@ namespace one_d
 	
 		datatype c;
 		std::vector<datatype> fac;
-		std::shared_ptr<bases::grid <datatype>> grid;
 
 	public:
 
-		advec (int i_n, datatype i_c, datatype* i_data_in, datatype* i_data_out, std::shared_ptr<bases::grid <datatype>> i_grid);	//constuctor initializes private members to point to input and output vectors
+		advec (bases::grid <datatype> &i_grid, datatype i_c, datatype* i_data_in, datatype* i_data_out);	//constuctor initializes private members to point to input and output vectors
 		
 		virtual ~advec () {}
 		

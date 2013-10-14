@@ -18,12 +18,12 @@
 namespace one_d
 {
 	template <class datatype>
-	diffusion <datatype>::diffusion (int i_n, datatype i_coeff, datatype i_alpha, bases::grid <datatype>* i_grid, datatype* i_data_in, datatype* i_matrix, datatype* i_data_out) :
-	implicit_plan <datatype> (i_n, i_grid, i_data_in, i_matrix, i_data_out),
+	diffusion <datatype>::diffusion (bases::grid <datatype> &i_grid, datatype i_coeff, datatype i_alpha, datatype* i_data_in, datatype* i_data_out) :
+	implicit_plan <datatype> (i_grid, i_data_in, i_data_out),
 	coeff (i_coeff), 
 	alpha (i_alpha) {
 		for (int i = 0; i < n; ++i) {
-			utils::add_scaled (n, -coeff * alpha, grid->get_data (2) + i, matrix + i, n, n);
+			utils::add_scaled (n, -coeff * alpha, grid.get_data (2) + i, matrix + i, n, n);
 		}
 		TRACE ("Initialized.");
 	}
@@ -33,7 +33,7 @@ namespace one_d
 		TRACE ("Operating...");
 		
 		// Set up and evaluate the explicit part of the diffusion equation
-		utils::matrix_vector_multiply (n, n, coeff * (1.0 - alpha), grid->get_data (2), data_in, 1.0, data_out, n);
+		utils::matrix_vector_multiply (n, n, coeff * (1.0 - alpha), grid.get_data (2), data_in, 1.0, data_out, n);
 
 		TRACE ("Operation complete.");
 	}
