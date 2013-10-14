@@ -23,24 +23,7 @@
 #include "../config.hpp"
 
 namespace bases
-{	
-	struct axis
-	{
-	public:
-		axis (int i_n, int i_excess_0, double i_position_0, int i_excess_n, double i_position_n) :
-		n (i_n), excess_0 (i_excess_0), excess_n (i_excess_n), position_0 (i_position_0), position_n (i_position_n) {}
-		
-		int n;
-		int excess_0;
-		int excess_n;
-		double position_0;
-		double position_n;
-	};
-	
-	/*
-		TODO Make axis class calculate grid spacing
-	*/
-	
+{
 	/*!*******************************************************************
 	 * \brief This is the basic class of the code
 	 * 

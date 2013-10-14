@@ -15,6 +15,19 @@
 
 namespace bases
 {
+	class axis
+	{
+	public:
+		axis (int i_n, int i_excess_0, double i_position_0, int i_excess_n, double i_position_n) :
+		n (i_n + 1), excess_0 (i_excess_0), excess_n (i_excess_n), position_0 (i_position_0), position_n (i_position_n) {}
+		
+		int n;
+		int excess_0;
+		int excess_n;
+		double position_0;
+		double position_n;
+	};
+	
 	/*!*******************************************************************
 	 * \brief A class containing a collocation grid
 	 * 
@@ -32,23 +45,33 @@ namespace bases
 		 * \param i_rows The integer number of rows in the grid
 		 * \param i_cols The integer number of columns in the grid
 		 *********************************************************************/
-		grid (int i_derivs, int i_rows, int i_cols) {
-			rows = i_rows;
-			cols = i_cols;
-			derivs = i_derivs;
-
+		grid (axis *i_axis_ptr, int i_derivs, datatype i_alpha_0 = 0.5, datatype i_alpha_n = 0.5) :
+		n (i_axis_ptr->n),
+		excess_0 (i_axis_ptr->excess_0),
+		excess_n (i_axis_ptr->excess_n),
+		position_0 (i_axis_ptr->position_0),
+		position_n (i_axis_ptr->position_n),
+		alpha_0 (i_alpha_0),
+		alpha_n (i_alpha_n),
+		derivs (i_derivs) {
 			TRACE ("Instantiating...")
 
 			data.resize (derivs);
+			positions.resize (n);
 
 			for (int i = 0; i < i_derivs; ++i) {
-				data [i].resize (i_rows * i_cols);
+				data [i].resize (n * n);
 			}
 
 			TRACE ("Instantiated...")
 		}
 	
 		virtual ~grid () {}
+		
+		datatype& position (int index = 0) {
+			DEBUG (positions.size ());
+			return positions [index];
+		}
 	
 		/*!*******************************************************************
 		 * \brief An indexing operation into the grid, for convenience
@@ -60,7 +83,7 @@ namespace bases
 		 * \return The double value at the index
 		 *********************************************************************/
 		inline datatype& index (int deriv, int row, int col) {
-			return data [deriv] [row * cols + col];
+			return data [deriv] [row * n + col];
 		}
 	
 		/*!*******************************************************************
@@ -76,10 +99,14 @@ namespace bases
 		inline datatype* get_data (int deriv) {
 			return &(data [deriv] [0]);
 		}
+
+		int n;
+		int excess_0, excess_n;
+		datatype position_0, position_n;
+		datatype alpha_0, alpha_n;
 	
 	protected:
-		int rows; //!< The integer number of rows in the grid
-		int cols; //!< The integer number of columns in the grid
+		std::vector <datatype> positions;
 		int derivs; //!< The integer number of derivatives deep the collocation grid runs
 	
 	private:
@@ -88,98 +115,106 @@ namespace bases
 	
 	namespace chebyshev
 	{
-	   /*!*******************************************************************
-	    * \brief A collocation grid for Chebyshev polynomials
-	    * 
-	    * This collocation grid stores the N collocation points for up to the
-	    * Mth order Chebyshev polynomial and its first and second derivatives
-	    *********************************************************************/
-	   template <class datatype>
-	   class grid : public bases::grid <datatype>
-	   {
-	   public:
-	   	/*!*******************************************************************
-	   	 * \param i_M The integer max order of Chebyshev polynomial
-	   	 * \param i_N The integer number of collocation points
-	   	 * \param i_scale A datatype by which the grid should be scaled
-	   	 * \param i_width The datatype width of the collocation region
-	   	 *********************************************************************/
-	   	grid (int i_M, int i_N, datatype i_scale = 1.0, datatype i_width = 2.0);
+		/*!*******************************************************************
+		 * \brief A collocation grid for Chebyshev polynomials
+		 * 
+		 * This collocation grid stores the N collocation points for up to the
+		 * Mth order Chebyshev polynomial and its first and second derivatives
+		 *********************************************************************/
+		template <class datatype>
+		class grid : public bases::grid <datatype>
+		{
+		public:
+			/*!*******************************************************************
+			 * \param i_M The integer max order of Chebyshev polynomial
+			 * \param i_N The integer number of collocation points
+			 * \param i_scale A datatype by which the grid should be scaled
+			 * \param i_width The datatype width of the collocation region
+			 *********************************************************************/
+			grid (axis *i_axis_ptr, datatype i_scale = 1.0, datatype i_alpha_0 = 0.5, datatype i_alpha_n = 0.5);
 	
-	   	virtual ~grid () {};
+			virtual ~grid () {};
 	
-	   private:
-	   	using bases::grid <datatype>::derivs;
-	   	using bases::grid <datatype>::rows;
-	   	using bases::grid <datatype>::cols;
+		private:
+			using bases::grid <datatype>::n;
+			using bases::grid <datatype>::excess_0;
+			using bases::grid <datatype>::excess_n;
+			using bases::grid <datatype>::position_0;
+			using bases::grid <datatype>::position_n;
+			using bases::grid <datatype>::derivs;
+			using bases::grid <datatype>::positions;
 	
-	   	datatype scale; //!< A datatype by which the collocation grid should be scaled
-	   	datatype width; //!< The datatype width of the collocation region
-	   	std::vector<bool> exists_array; //!< A bool vector containing whether the points exist
-	   	datatype pioN; //!< The datatype 3.14159.../N, for use in calculations
+			datatype scale; //!< A datatype by which the collocation grid should be scaled
+			datatype width; //!< The datatype width of the collocation region
+			std::vector<bool> exists_array; //!< A bool vector containing whether the points exist
+			datatype pioN; //!< The datatype 3.14159.../N, for use in calculations
 	
-	   	/*!*******************************************************************
-	    	* \brief A check to see whether an element exists, for recursion
-	    	* 
-	   	* \param d The integer deriv to be indexed
-	   	* \param m The integer row to be indexed
-	   	* \param k The integer column to be indexed
-	   	* 
-	   	* \return An std::vector<bool>::reference of whether the element exists
-	    	*********************************************************************/
-	   	std::vector<bool>::reference exists (int d, int m, int k) {
-	   		return exists_array [d + m * derivs + k * derivs * rows];
-	   	}
+			/*!*******************************************************************
+			* \brief A check to see whether an element exists, for recursion
+			* 
+			* \param d The integer deriv to be indexed
+			* \param m The integer row to be indexed
+			* \param k The integer column to be indexed
+			* 
+			* \return An std::vector<bool>::reference of whether the element exists
+			*********************************************************************/
+			std::vector<bool>::reference exists (int d, int m, int k) {
+				return exists_array [d + m * derivs + k * derivs * n];
+			}
 	
-	   	/*!*******************************************************************
-	   	 * \brief A recursive method to calculate the full collocation grid
-	   	 * 
-	   	 * Uses known relationships of Chebyshev polynomials to calculate the 
-	   	 * value of the polynomial and its derivatives at an arbitrary 
-	   	 * collocation grid point.
-	   	 * 
-	   	 * \param d The integer deriv to be indexed
-	   	 * \param m The integer row to be indexed
-	   	 * \param k The integer column to be indexed
-	   	 * 
-	   	 * \return The datatype value of the index
-	   	 *********************************************************************/
-	   	datatype recursion (int d, int m, int k);
-	   };
+			/*!*******************************************************************
+			 * \brief A recursive method to calculate the full collocation grid
+			 * 
+			 * Uses known relationships of Chebyshev polynomials to calculate the 
+			 * value of the polynomial and its derivatives at an arbitrary 
+			 * collocation grid point.
+			 * 
+			 * \param d The integer deriv to be indexed
+			 * \param m The integer row to be indexed
+			 * \param k The integer column to be indexed
+			 * 
+			 * \return The datatype value of the index
+			 *********************************************************************/
+			datatype recursion (int d, int m, int k);
+		};
 	} /* chebyshev */
 	
 	namespace fourier
 	{
-	   /*!*******************************************************************
-	    * \brief A collocation grid for Chebyshev polynomials
-	    * 
-	    * This collocation grid stores the N collocation points for up to the
-	    * Mth order Chebyshev polynomial and its first and second derivatives
-	    *********************************************************************/
-	   template <class datatype>
-	   class grid : public bases::grid <datatype>
-	   {
-	   public:
-	   	/*!*******************************************************************
-	   	 * \param i_M The integer max order of Chebyshev polynomial
-	   	 * \param i_N The integer number of collocation points
-	   	 * \param i_scale A datatype by which the grid should be scaled
-	   	 * \param i_width The datatype width of the collocation region
-	   	 *********************************************************************/
-	   	grid (int i_M, int i_N, datatype i_scale = 1.0, datatype i_width = 2.0);
+		/*!*******************************************************************
+		 * \brief A collocation grid for Chebyshev polynomials
+		 * 
+		 * This collocation grid stores the N collocation points for up to the
+		 * Mth order Chebyshev polynomial and its first and second derivatives
+		 *********************************************************************/
+		template <class datatype>
+		class grid : public bases::grid <datatype>
+		{
+		public:
+			/*!*******************************************************************
+			 * \param i_M The integer max order of Chebyshev polynomial
+			 * \param i_N The integer number of collocation points
+			 * \param i_scale A datatype by which the grid should be scaled
+			 * \param i_width The datatype width of the collocation region
+			 *********************************************************************/
+			grid (axis *i_axis_ptr, datatype i_scale = 1.0, datatype i_alpha_0 = 0.5, datatype i_alpha_n = 0.5);
 	
-	   	virtual ~grid () {};
+			virtual ~grid () {};
 	
-	   private:
-	   	using bases::grid <datatype>::derivs;
-	   	using bases::grid <datatype>::rows;
-	   	using bases::grid <datatype>::cols;
+		private:
+			using bases::grid <datatype>::n;
+			using bases::grid <datatype>::excess_0;
+			using bases::grid <datatype>::excess_n;
+			using bases::grid <datatype>::position_0;
+			using bases::grid <datatype>::position_n;
+			using bases::grid <datatype>::derivs;
+			using bases::grid <datatype>::positions;
 	
-	   	datatype scale; //!< A datatype by which the collocation grid should be scaled
-	   	datatype width; //!< The datatype width of the collocation region
-	   	std::vector<bool> exists_array; //!< A bool vector containing whether the points exist
-	   	datatype pioN; //!< The datatype 3.14159.../N, for use in calculations
-	   };
+			datatype scale; //!< A datatype by which the collocation grid should be scaled
+			datatype width; //!< The datatype width of the collocation region
+			std::vector<bool> exists_array; //!< A bool vector containing whether the points exist
+			datatype pioN; //!< The datatype 3.14159.../N, for use in calculations
+		};
 	} /* fourier */
 } /* bases */
 

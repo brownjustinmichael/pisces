@@ -18,7 +18,7 @@
 namespace one_d
 {
 	template <class datatype>
-	solver <datatype>::solver (bases::messenger* i_messenger_ptr, int i_n, int i_excess_0, int i_excess_n, int i_n_iterations, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_positions, datatype *i_default_matrix, datatype *i_matrix, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out, int i_flags) : 
+	solver <datatype>::solver (bases::messenger* i_messenger_ptr, int i_n, int i_n_iterations, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_positions, datatype *i_default_matrix, datatype *i_matrix, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out, int i_flags) : 
 	bases::solver <datatype> (i_flags), 
 	explicit_plan <datatype> (i_n, i_data_in, i_data_out),
 	messenger_ptr (i_messenger_ptr),
@@ -27,8 +27,8 @@ namespace one_d
 	alpha_n (i_alpha_n), 
 	positions (i_positions),
 	n_iterations (i_n_iterations),
-	excess_0 (i_excess_0), 
-	excess_n (i_excess_n) { 
+	excess_0 (messenger_ptr->get_excess (edge_0)), 
+	excess_n (messenger_ptr->get_excess (edge_n)) { 
 		
 		TRACE ("Instantiating...");
 		

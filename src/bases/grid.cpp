@@ -19,36 +19,43 @@ namespace bases
 	namespace chebyshev
 	{
 		template <class datatype>
-		grid <datatype>::grid (int i_M, int i_N, datatype i_scale, datatype i_width) : 
-		bases::grid <datatype> (3, i_M, i_N) {
+		grid <datatype>::grid (axis *i_axis_ptr, datatype i_scale, datatype i_alpha_0, datatype i_alpha_n) : 
+		bases::grid <datatype> (i_axis_ptr, 3, i_alpha_0, i_alpha_n) {
 			int d, m, k;
 			scale = i_scale;
-			width = i_width;
-			pioN = std::acos (-1.0) / (i_N - 1);
-			exists_array.resize (i_M * i_N * 3, false);
+			pioN = std::acos (-1.0) / (n - 1);
+			exists_array.resize (n * n * 3, false);
 	
 			TRACE ("Instantiating...");
+			
+			datatype scale = (position_0 - position_n) / (std::cos (excess_0 * pioN) - std::cos ((n - 1 - excess_n) * pioN));
+			datatype initial_position = position_0 - scale * std::cos (excess_0 * pioN);
+			for (int i = 0; i < n; ++i) {
+				positions [i] = scale * std::cos (i * pioN) + initial_position;
+			}
+			
+			width = positions [n] - positions [0];
 	
 			for (d = 0; d < 3; ++d) {
-				for (k = 0; k < i_N; ++k) {
-					for (m = 0; m < i_M; ++m) {
+				for (k = 0; k < n; ++k) {
+					for (m = 0; m < n; ++m) {
 						bases::grid <datatype>::index (d, m, k) = recursion (d, m, k);
 						exists (d, m, k) = true;
 					}
 				}
 			}
 	
-			for (k = 0; k < i_N; ++k) {
-				for (m = 0; m < i_M; ++m) {
+			for (k = 0; k < n; ++k) {
+				for (m = 0; m < n; ++m) {
 					bases::grid <datatype>::index (1, m, k) *= 2.0 / width;
 					bases::grid <datatype>::index (2, m, k) *= 2.0 / width * 2.0 / width;
 				}
 			}
 	
 			for (d = 0; d < 3; ++d) {
-				for (k = 0; k < i_N; ++k) {
+				for (k = 0; k < n; ++k) {
 					bases::grid <datatype>::index (d, 0, k) /= 2.0;
-					bases::grid <datatype>::index (d, i_M - 1, k) /= 2.0;
+					bases::grid <datatype>::index (d, n - 1, k) /= 2.0;
 				}
 			}
 	
@@ -98,26 +105,31 @@ namespace bases
 	namespace fourier
 	{
 		template <class datatype>
-		grid <datatype>::grid (int i_M, int i_N, datatype i_scale, datatype i_width) : 
-		bases::grid <datatype> (3, i_M, i_N) {
+		grid <datatype>::grid (axis *i_axis_ptr, datatype i_scale, datatype i_alpha_0, datatype i_alpha_n) : 
+		bases::grid <datatype> (i_axis_ptr, 3, i_alpha_0, i_alpha_n) {
 			int d, m, k;
 			scale = i_scale;
-			width = i_width;
-			pioN = std::acos (-1.0) / (i_N - 1);
+			pioN = std::acos (-1.0) / (n - 1);
 	
 			TRACE ("Instantiating...");
 	
-			for (k = 0; k < i_N; ++k) {
-				for (m = 0; m < i_M; ++m) {
+			for (int i = 0; i < n; ++i) {
+				positions [i] = (i - excess_0) * (position_n - position_0) / (n - 1 - excess_n - excess_0) + position_0;
+			}
+			
+			width = positions [n] - positions [0];
+	
+			for (k = 0; k < n; ++k) {
+				for (m = 0; m < n; ++m) {
 					bases::grid <datatype>::index (0, m, k) = scale * std::cos (pioN * k * m);
 					bases::grid <datatype>::index (1, m, k) = (((datatype) -m) * 2.0 / width) * scale * std::sin (pioN * k * m);
 					bases::grid <datatype>::index (2, m, k) = -(((datatype) m * m) * 4.0 / width / width) * scale * std::cos (pioN * k * m);
 				}
 			}
 			for (d = 0; d < 3; ++d) {
-				for (k = 0; k < i_N; ++k) {
+				for (k = 0; k < n; ++k) {
 					bases::grid <datatype>::index (d, 0, k) /= 2.0;
-					bases::grid <datatype>::index (d, i_M - 1, k) /= 2.0;
+					bases::grid <datatype>::index (d, n - 1, k) /= 2.0;
 				}
 			}
 	

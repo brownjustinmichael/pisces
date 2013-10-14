@@ -49,13 +49,10 @@ namespace one_d
 		 * \param i_position_n The datatype position of index n - 1 - excess_n
 		 * \copydoc bases::element <datatype>::element ()
 		 *********************************************************************/
-		element (struct bases::axis i_axis_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
+		element (bases::axis *i_axis_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
 		bases::element <datatype> (i_name, 1, i_inputParams, i_messenger_ptr, i_flags),
-		n (i_axis_n.n + 1),
-		excess_0 (i_axis_n.excess_0),
-		excess_n (i_axis_n.excess_n),
-		position_0 ((datatype) i_axis_n.position_0),
-		position_n ((datatype) i_axis_n.position_n) {
+		axis_n (i_axis_n),
+		n (axis_n->n) {
 			cell.resize (n);
 			for (int i = 0; i < n; ++i) {
 				cell [i] = i;
@@ -137,12 +134,8 @@ namespace one_d
 		using bases::element <datatype>::failsafe_dump;
 		using bases::element <datatype>::messenger_ptr;
 		
-		int n; //!< The number of elements in each 1D array
-		
-		int excess_0;
-		int excess_n;
-		datatype position_0; //!< The datatype position of index 0
-		datatype position_n; //!< The datatype position of index n - 1
+		bases::axis *axis_n;
+		int &n;
 		std::vector<int> cell; //!< An integer array for tracking each cell number for output
 
 		std::map <int, std::vector <datatype>> scalars; //!< A vector of scalar vectors
@@ -163,11 +156,11 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc one_d::element::element ()
 			 *********************************************************************/
-			element (struct bases::axis i_axis_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
+			element (bases::axis *i_axis_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
 			one_d::element <datatype> (i_axis_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
+				one_d::element <datatype>::set_grid (new bases::chebyshev::grid <datatype> (axis_n, sqrt (2.0 / (n - 1.0))));
 				initialize (position);
-				one_d::element <datatype>::set_grid (new bases::chebyshev::grid <datatype> (n, n, sqrt (2.0 / (n - 1.0)), (*this) (position) - (*this) (position, n - 1)));
 				TRACE ("Instantiated.");
 			}
 			virtual ~element () {}
@@ -178,14 +171,7 @@ namespace one_d
 			virtual void initialize (int name, datatype* initial_conditions = NULL) {
 				TRACE ("Initializing " << name);
 				if (name == position && !initial_conditions) {
-					datatype pioN = std::acos (-1.0) / (n - 1);
-					datatype scale = (position_0 - position_n) / (std::cos (excess_0 * pioN) - std::cos ((n - 1 - excess_n) * pioN));
-					datatype initial_position = position_0 - scale * std::cos (excess_0 * pioN);
-					std::vector <datatype> init (n);
-					for (int i = 0; i < n; ++i) {
-						init [i] = scale * std::cos (i * pioN) + initial_position;
-					}
-					one_d::element <datatype>::initialize (name, &init [0]);
+					one_d::element <datatype>::initialize (name, &(grids [0]->position ()));
 				} else if (name == velocity && !initial_conditions){
 					datatype scale = inputParams["init_cond_scale"].asDouble;
 					datatype width = inputParams["init_cond_width"].asDouble;
@@ -210,11 +196,9 @@ namespace one_d
 			}
 			
 		protected:
-			using one_d::element <datatype>::position_0;
-			using one_d::element <datatype>::position_n;
-			using one_d::element <datatype>::excess_0;
-			using one_d::element <datatype>::excess_n;
 			using one_d::element <datatype>::n;
+			using one_d::element <datatype>::axis_n;
+			using one_d::element <datatype>::grids;
 			using one_d::element <datatype>::inputParams;
 		};
 		
@@ -233,7 +217,7 @@ namespace one_d
 			 * \param i_excess_n The integer number of points evaluated in the adjacent element
 			 * \copydoc element::element ()
 			 *********************************************************************/
-			advection_diffusion_element (struct bases::axis i_axis_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags);
+			advection_diffusion_element (bases::axis *i_axis_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags);
 			
 			virtual ~advection_diffusion_element () {}
 			
@@ -241,8 +225,6 @@ namespace one_d
 		
 		private:
 			using element <datatype>::n;
-			using element <datatype>::excess_0;
-			using element <datatype>::excess_n;
 			using element <datatype>::flags;
 			using element <datatype>::name;
 			using element <datatype>::normal_stream;
@@ -271,11 +253,11 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc one_d::element::element ()
 			 *********************************************************************/
-			element (struct bases::axis i_axis_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
+			element (bases::axis i_axis_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
 			one_d::element <datatype> (i_axis_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
+				one_d::element <datatype>::set_grid (new bases::fourier::grid <datatype> (axis_n, sqrt (2.0 / (n - 1.0))));
 				initialize (position);
-				one_d::element <datatype>::set_grid (new bases::fourier::grid <datatype> (n, n, sqrt (2.0 / (n - 1.0)), (*this) (position) - (*this) (position, n - 1)));
 				TRACE ("Instantiated.");
 			}
 			virtual ~element () {}
@@ -286,11 +268,7 @@ namespace one_d
 			virtual void initialize (int name, datatype* initial_conditions = NULL) {
 				TRACE ("Initializing " << name);
 				if (name == position && !initial_conditions) {
-					std::vector <datatype> init (n);
-					for (int i = 0; i < n; ++i) {
-						init [i] = (i - excess_0) * (position_n - position_0) / (n - 1 - excess_n - excess_0) + position_0;
-					}
-					one_d::element <datatype>::initialize (name, &init [0]);
+					one_d::element <datatype>::initialize (name, &(grids [0]->position ()));
 				} else if (name == velocity && !initial_conditions){
 					datatype scale = inputParams["init_cond_scale"].asDouble;
 					datatype width = inputParams["init_cond_width"].asDouble;
@@ -315,11 +293,9 @@ namespace one_d
 			}
 		
 		protected:
-			using one_d::element <datatype>::position_0;
-			using one_d::element <datatype>::position_n;
-			using one_d::element <datatype>::excess_0;
-			using one_d::element <datatype>::excess_n;
 			using one_d::element <datatype>::n;
+			using one_d::element <datatype>::axis_n;
+			using one_d::element <datatype>::grids;
 			using one_d::element <datatype>::inputParams;
 		};
 	} /* fourier */

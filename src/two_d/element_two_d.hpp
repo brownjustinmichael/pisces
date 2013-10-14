@@ -26,21 +26,22 @@ namespace two_d
 	class element : public bases::element <datatype>
 	{
 	public:
-		element (struct bases::axis i_axis_n, struct bases::axis i_axis_m, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
+		element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
 		bases::element <datatype> (i_name, 2, i_inputParams, i_messenger_ptr, i_flags),
-		n (i_axis_n.n + 1),
-		m (i_axis_m.n + 1) {
+		axis_n (i_axis_n),
+		axis_m (i_axis_m),
+		n (axis_n->n), m (axis_m->n) {
 			TRACE ("Instantiating...");
 			
-			positions [edge_n0] = i_axis_n.position_0;
-			positions [edge_nn] = i_axis_n.position_n;
-			positions [edge_m0] = i_axis_m.position_0;
-			positions [edge_mm] = i_axis_m.position_n;
+			positions [edge_n0] = i_axis_n->position_0;
+			positions [edge_nn] = i_axis_n->position_n;
+			positions [edge_m0] = i_axis_m->position_0;
+			positions [edge_mm] = i_axis_m->position_n;
 			
-			excesses [edge_n0] = i_axis_n.excess_0;
-			excesses [edge_nn] = i_axis_n.excess_n;
-			excesses [edge_m0] = i_axis_m.excess_0;
-			excesses [edge_mm] = i_axis_m.excess_n;
+			excesses [edge_n0] = i_axis_n->excess_0;
+			excesses [edge_nn] = i_axis_n->excess_n;
+			excesses [edge_m0] = i_axis_m->excess_0;
+			excesses [edge_mm] = i_axis_m->excess_n;
 			
 			edge_index [edge_n0] = 0;
 			edge_next [edge_n0] = n;
@@ -157,8 +158,9 @@ namespace two_d
 		using bases::element <datatype>::failsafe_dump;
 		using bases::element <datatype>::messenger_ptr;
 		
-		int n; //!< The number of elements in each 1D array
-		int m;
+		bases::axis *axis_n, *axis_m;
+		int &n; //!< The number of elements in each 1D array
+		int &m;
 		std::map <int, datatype> positions; //!< A vector of the edge positions
 		std::map <int, int> excesses; //!< A vector of the edge positions
 		std::vector<int> cell_n; //!< An integer array for tracking each cell number for output
@@ -183,13 +185,13 @@ namespace two_d
 				/*!*******************************************************************
 				 * \copydoc one_d::element::element ()
 				 *********************************************************************/
-				element (struct bases::axis i_axis_n, struct bases::axis i_axis_m, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
+				element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
 				two_d::element <datatype> (i_axis_n, i_axis_m, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 					TRACE ("Instantiating...");
 					
+					two_d::element <datatype>::set_grid (new bases::fourier::grid <datatype> (axis_n, sqrt (2.0 / (n - 1.0))), 0);
+					two_d::element <datatype>::set_grid (new bases::chebyshev::grid <datatype> (axis_m, sqrt (2.0 / (m - 1.0))), 1);
 					initialize (position);
-					two_d::element <datatype>::set_grid (new bases::fourier::grid <datatype> (n, n, sqrt (2.0 / (n - 1.0)), (*this) (x_position) - (*this) (x_position, n - 1)), 0);
-					two_d::element <datatype>::set_grid (new bases::chebyshev::grid <datatype> (m, m, sqrt (2.0 / (m - 1.0)), (*this) (y_position) - (*this) (y_position, 0, m - 1)), 1);
 					
 					TRACE ("Instantiated.");
 				}
@@ -203,19 +205,14 @@ namespace two_d
 					TRACE ("Initializing " << name << "...");
 					
 					if (name == x_position && !initial_conditions) {
-						DEBUG ("Location 1");
 						std::vector <datatype> init (n * m);
-						DEBUG ("Init initialized");
 						for (int i = 0; i < n; ++i) {
-							DEBUG ("Looping...");
 							for (int j = 0; j < m; ++j) {
 								init [i + j * n] = (i - excesses [edge_n0]) * (positions [edge_nn] - positions [edge_n0]) / (n - 1 - excesses [edge_nn] - excesses [edge_n0]) + positions [edge_n0];
 							}
 						}
-						DEBUG ("Done looping...");
 						two_d::element <datatype>::initialize (name, &init [0]);
 					} else if (name == y_position && !initial_conditions) {
-						DEBUG ("Location 2")
 						std::vector <datatype> init (n * m);
 						for (int i = 0; i < n; ++i) {
 							for (int j = 0; j < m; ++j) {
@@ -224,7 +221,6 @@ namespace two_d
 						}
 						two_d::element <datatype>::initialize (name, &init [0]);
 					} else if (name == velocity && !initial_conditions){
-						DEBUG ("Location 3")
 						datatype scale = inputParams["init_cond_scale"].asDouble;
 						datatype width = inputParams["init_cond_width"].asDouble;
 						datatype mean = inputParams["init_cond_mean"].asDouble;
@@ -256,6 +252,8 @@ namespace two_d
 				using two_d::element <datatype>::excesses;
 				using two_d::element <datatype>::n;
 				using two_d::element <datatype>::m;
+				using two_d::element <datatype>::axis_n;
+				using two_d::element <datatype>::axis_m;
 				using two_d::element <datatype>::inputParams;
 			};
 			

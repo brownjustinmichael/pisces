@@ -23,7 +23,7 @@ namespace one_d
 	namespace chebyshev
 	{
 		template <class datatype>
-		advection_diffusion_element <datatype>::advection_diffusion_element (struct bases::axis i_axis_n, int i_name, io::parameter_map& inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
+		advection_diffusion_element <datatype>::advection_diffusion_element (bases::axis *i_axis_n, int i_name, io::parameter_map& inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
 		element <datatype> (i_axis_n, i_name, inputParams, i_messenger_ptr, i_flags) {
 			datatype diffusion_coeff = inputParams["diffusion_coeff"].asDouble;
 			datatype advection_coeff = inputParams["advection_coeff"].asDouble; 
@@ -53,7 +53,7 @@ namespace one_d
 			}
 		
 			// Set up solver
-			element <datatype>::add_solver (new solver <datatype> (messenger_ptr, n, excess_0, excess_n, inputParams["n_iterations"].asInt, timestep, boundary_weights [edge_0], boundary_weights [edge_n], pointer (position), grids [0]->get_data (0), &matrix [0], pointer (velocity), pointer (vel_explicit_rhs), pointer (vel_implicit_rhs)));
+			element <datatype>::add_solver (new solver <datatype> (messenger_ptr, n, inputParams["n_iterations"].asInt, timestep, boundary_weights [edge_0], boundary_weights [edge_n], pointer (position), grids [0]->get_data (0), &matrix [0], pointer (velocity), pointer (vel_explicit_rhs), pointer (vel_implicit_rhs)));
 		
 			normal_stream->to_file ();
 		

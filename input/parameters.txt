@@ -1,6 +1,6 @@
 n_elements 1
 n_iterations 10
-diffusion_coeff 0.01
+diffusion_coeff 0.001
 advection_coeff 1.0
 courant_factor 0.8
 timesteps 1500
