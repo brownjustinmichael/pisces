@@ -52,6 +52,7 @@ namespace bases
 		int_iter = 0;
 		data_queue.resize (2 * n_boundaries);
 		int_data_queue.resize (2 * n_boundaries);
+		excesses.resize (2 * n_boundaries);
 		n_queue.resize (2 * n_boundaries);
 		process_queue.resize (2 * n_boundaries, -1);
 	}
@@ -62,9 +63,11 @@ namespace bases
 #endif // _MPI
 	}
 	
-	void messenger::add_boundary (int edge, int process) {
+	void messenger::add_boundary (int edge, int process, int excess) {
 		process_queue [edge_to_index (send_mode, edge)] = process;
 		process_queue [edge_to_index (recv_mode, edge)] = process;
+		excesses [edge_to_index (send_mode, edge)] = excess;
+		excesses [edge_to_index (recv_mode, edge)] = excess;
 	}
 	
 	template <class datatype>

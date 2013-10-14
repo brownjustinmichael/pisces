@@ -236,13 +236,6 @@ namespace one_d
 			advection_diffusion_element (struct bases::axis i_axis_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags);
 			
 			virtual ~advection_diffusion_element () {}
-		
-			/*!*******************************************************************
-			 * \copydoc element::implicit_reset ()
-			 *********************************************************************/
-			inline void implicit_reset () {
-				element <datatype>::implicit_reset ();
-			}
 			
 			virtual datatype calculate_timestep ();
 		

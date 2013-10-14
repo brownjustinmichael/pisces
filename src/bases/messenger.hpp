@@ -65,6 +65,10 @@ namespace bases
 			return np;
 		}
 		
+		int get_excess (int edge) {
+			return excesses [edge_to_index (send_mode, edge)];
+		}
+		
 		/*!**********************************************************************
 		 * \brief Return whether the specified edge is linked
 		 * 
@@ -125,7 +129,7 @@ namespace bases
 		 * \param edge The integer representation of the edge to link
 		 * \param process The integer id of the process to link to
 		 ************************************************************************/
-		virtual void add_boundary (int edge, int process);
+		virtual void add_boundary (int edge, int process, int excess = 1);
 				
 		/*!**********************************************************************
 		 * \brief Add send action in the datatype queue
@@ -191,6 +195,7 @@ namespace bases
 		std::vector <void*> data_queue; //!< A datatype pointer vector containing the elements to send/recv
 		std::vector <int*> int_data_queue; //!< An integer pointer vector containing the elements to send/recv
 		
+		std::vector <int> excesses;
 		std::vector <int> n_queue; //!< An integer vector containing the number of elements to send/recv
 		std::vector <int> process_queue; //!< An integer vector containing the processes for send/recv
 	};

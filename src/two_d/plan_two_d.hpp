@@ -9,7 +9,8 @@
 #ifndef PLAN_TWO_D_HPP_XQ7AJI7K
 #define PLAN_TWO_D_HPP_XQ7AJI7K
 
-#include "../bases/plan_two_d.hpp"
+#include "../bases/grid.hpp"
+#include "../bases/plan.hpp"
 
 namespace two_d
 {
@@ -28,7 +29,11 @@ namespace two_d
 		 * \param i_data_out The integer scalar index of the output
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		explicit_plan (int i_n, int i_m, datatype* i_data_in, datatype* i_data_out = NULL);
+		explicit_plan (int i_n, int i_m, datatype* i_data_in, datatype* i_data_out = NULL) :
+		n (i_n),
+		m (i_m),
+		data_in (i_data_in),
+		data_out (i_data_out ? i_data_out : i_data_in) {}
 
 		virtual ~explicit_plan () {}
 
@@ -59,13 +64,12 @@ namespace two_d
 		 * \param i_matrix The datatype matrix to be updated
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		implicit_plan (int i_n, int i_m, bases::grid <datatype>* i_grid_n, bases::grid <datatype>* i_grid_m, datatype* i_data_in, datatype *i_matrix_m, datatype* i_matrix_m, datatype* i_data_out) :
-		explicit_plan (i_n, i_m, i_data_in, i_data_out), 
+		implicit_plan (int i_n, int i_m, bases::grid <datatype>* i_grid_n, bases::grid <datatype>* i_grid_m, datatype* i_data_in, datatype *i_matrix_n, datatype* i_matrix_m, datatype* i_data_out) :
+		explicit_plan <datatype> (i_n, i_m, i_data_in, i_data_out), 
 		grid_n (i_grid_n),
 		grid_m (i_grid_m),
-		data_in (i_data_in),
 		matrix_n (i_matrix_n),
-		matrix_m (i_matrix_m),
+		matrix_m (i_matrix_m) {}
 
 		virtual ~implicit_plan () {}
 

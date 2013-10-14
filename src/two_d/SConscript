@@ -1,2 +1,12 @@
 Import ("env")
 Import ("objects")
+Import ("cuda_objects")
+
+for lib in ["fftw3", "fftw3f"]:
+    if lib not in env ['LIBS']:
+        env.Append (LIBS = lib)
+
+objects.append (env.Object ("element_two_d.cpp"))
+
+objects.append (env.Object ("plan_two_d.cpp"))
+

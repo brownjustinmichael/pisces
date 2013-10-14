@@ -37,6 +37,10 @@ namespace bases
 		double position_n;
 	};
 	
+	/*
+		TODO Make axis class calculate grid spacing
+	*/
+	
 	/*!*******************************************************************
 	 * \brief This is the basic class of the code
 	 * 
@@ -48,7 +52,7 @@ namespace bases
 	{
 	public:
 		friend class plan <datatype>;
-		
+
 		/*!*******************************************************************
 		* \param i_name The string representation of the element
 		* \param n_boundaries The integer number of boundaries (must be a multiple of 2)
@@ -276,7 +280,9 @@ namespace bases
 		 * 
 		 * \return The datatype recommended timestep for the next timestep
 		 ************************************************************************/
-		virtual datatype calculate_timestep () = 0;
+		virtual datatype calculate_timestep () {
+			return (datatype) 0.0;
+		}
 		
 		/*!*******************************************************************
 		 * \brief Execute the boundary conditions

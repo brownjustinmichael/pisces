@@ -16,7 +16,7 @@ scons: Configure: The original builder output was:
   |
 scons: Configure: ".sconf_temp/conftest_0.o" is up to date.
 scons: Configure: The original builder output was:
-  |gcc -o .sconf_temp/conftest_0.o -c -D_MPI -Wall -g -std=c++0x .sconf_temp/conftest_0.c
+  |gcc -o .sconf_temp/conftest_0.o -c -Wall -g -std=c++0x .sconf_temp/conftest_0.c
   |
 scons: Configure: ".sconf_temp/conftest_0" is up to date.
 scons: Configure: The original builder output was:
@@ -40,7 +40,7 @@ scons: Configure: The original builder output was:
   |
 scons: Configure: ".sconf_temp/conftest_1.o" is up to date.
 scons: Configure: The original builder output was:
-  |gcc -o .sconf_temp/conftest_1.o -c -D_MPI -Wall -g -std=c++0x -D_LOG4CXX .sconf_temp/conftest_1.c
+  |gcc -o .sconf_temp/conftest_1.o -c -Wall -g -std=c++0x -D_LOG4CXX .sconf_temp/conftest_1.c
   |
 scons: Configure: ".sconf_temp/conftest_1" is up to date.
 scons: Configure: The original builder output was:
@@ -67,7 +67,7 @@ scons: Configure: The original builder output was:
   |
 scons: Configure: ".sconf_temp/conftest_2.o" is up to date.
 scons: Configure: The original builder output was:
-  |gcc -o .sconf_temp/conftest_2.o -c -D_MPI -Wall -g -std=c++0x -D_LOG4CXX .sconf_temp/conftest_2.c
+  |gcc -o .sconf_temp/conftest_2.o -c -Wall -g -std=c++0x -D_LOG4CXX .sconf_temp/conftest_2.c
   |
 scons: Configure: ".sconf_temp/conftest_2" is up to date.
 scons: Configure: The original builder output was:
@@ -91,7 +91,7 @@ scons: Configure: The original builder output was:
   |
 scons: Configure: ".sconf_temp/conftest_3.o" is up to date.
 scons: Configure: The original builder output was:
-  |gcc -o .sconf_temp/conftest_3.o -c -D_MPI -Wall -g -std=c++0x -D_LOG4CXX .sconf_temp/conftest_3.c
+  |gcc -o .sconf_temp/conftest_3.o -c -Wall -g -std=c++0x -D_LOG4CXX .sconf_temp/conftest_3.c
   |
 scons: Configure: ".sconf_temp/conftest_3" is up to date.
 scons: Configure: The original builder output was:
@@ -115,7 +115,7 @@ scons: Configure: The original builder output was:
   |
 scons: Configure: ".sconf_temp/conftest_4.o" is up to date.
 scons: Configure: The original builder output was:
-  |gcc -o .sconf_temp/conftest_4.o -c -D_MPI -Wall -g -std=c++0x -D_LOG4CXX .sconf_temp/conftest_4.c
+  |gcc -o .sconf_temp/conftest_4.o -c -Wall -g -std=c++0x -D_LOG4CXX .sconf_temp/conftest_4.c
   |
 scons: Configure: ".sconf_temp/conftest_4" is up to date.
 scons: Configure: The original builder output was:
@@ -139,12 +139,12 @@ scons: Configure: The original builder output was:
   |
 scons: Configure: ".sconf_temp/conftest_5.o" is up to date.
 scons: Configure: The original builder output was:
-  |gcc -o .sconf_temp/conftest_5.o -c -D_MPI -Wall -g -std=c++0x -D_LOG4CXX .sconf_temp/conftest_5.c
+  |gcc -o .sconf_temp/conftest_5.o -c -Wall -g -std=c++0x -D_LOG4CXX .sconf_temp/conftest_5.c
   |
-scons: Configure: Building ".sconf_temp/conftest_5" failed in a previous run and all its sources are up to date.
+scons: Configure: ".sconf_temp/conftest_5" is up to date.
 scons: Configure: The original builder output was:
   |gcc -o .sconf_temp/conftest_5 .sconf_temp/conftest_5.o -llog4cxx -lpthread -lfftw3 -lfftw3f -llapack -lblas -latlas -lcublas
   |
-scons: Configure: (cached) no
+scons: Configure: (cached) yes
 
 

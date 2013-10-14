@@ -13,6 +13,11 @@
 
 namespace two_d
 {
+	enum solve_flags {
+		x_solve = 0x20,
+		y_solve = 0x40
+	}
+	
 	namespace fourier
 	{
 		namespace chebyshev
