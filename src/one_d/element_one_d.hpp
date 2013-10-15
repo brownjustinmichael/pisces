@@ -159,7 +159,7 @@ namespace one_d
 			element (bases::axis *i_axis_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
 			one_d::element <datatype> (i_axis_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
-				one_d::element <datatype>::set_grid (new bases::chebyshev::grid <datatype> (axis_n, sqrt (2.0 / (n - 1.0)), messenger_ptr->linked (edge_0), messenger_ptr->linked (edge_n)));
+				one_d::element <datatype>::set_grid (new bases::chebyshev::grid <datatype> (axis_n, messenger_ptr->linked (edge_0), messenger_ptr->linked (edge_n)));
 				initialize (position);
 				TRACE ("Instantiated.");
 			}
@@ -231,7 +231,6 @@ namespace one_d
 			using element <datatype>::normal_stream;
 			using element <datatype>::cell;
 			using element <datatype>::timestep;
-			using element <datatype>::boundary_weights;
 			using element <datatype>::inputParams;
 			using element <datatype>::grids;
 			using bases::element <datatype>::pointer;
@@ -254,7 +253,7 @@ namespace one_d
 			element (bases::axis i_axis_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
 			one_d::element <datatype> (i_axis_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
-				one_d::element <datatype>::set_grid (new bases::fourier::grid <datatype> (axis_n, sqrt (2.0 / (n - 1.0)), messenger_ptr->linked (edge_0), messenger_ptr->linked (edge_n)));
+				one_d::element <datatype>::set_grid (new bases::fourier::grid <datatype> (axis_n, messenger_ptr->linked (edge_0), messenger_ptr->linked (edge_n)));
 				initialize (position);
 				TRACE ("Instantiated.");
 			}

@@ -26,7 +26,7 @@ namespace one_d
 	}
 	
 	template <>
-	void fftw_cosine <double>::execute () {
+	void fftw_cosine <double>::execute (int element_flags) {
 		TRACE ("Executing...");
 		
 		fftw_execute (fourier_plan);
@@ -38,7 +38,7 @@ namespace one_d
 	}
 	
 	template <>
-	void fftw_cosine <float>::execute () {
+	void fftw_cosine <float>::execute (int element_flags) {
 		TRACE ("Executing...");
 		
 		fftwf_execute (fourier_plan_float);

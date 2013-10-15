@@ -91,7 +91,7 @@ namespace one_d
 	}
 	
 	template <class datatype>
-	void solver <datatype>::execute () {
+	void solver <datatype>::execute (int element_flags) {
 		int info;
 		int beta_0 = 1.5, beta_1 = -0.5;
 		

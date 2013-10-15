@@ -1,10 +1,14 @@
 Import ("env")
 Import ("objects")
 Import ("cuda_objects")
+Import ("include_cuda")
 
 conf = Configure (env)
 
-for lib in ["lapack", "blas", "atlas", "cublas"]:
+if include_cuda:
+    conf.CheckLib ("cublas")
+
+for lib in ["lapack", "blas", "atlas"]:
     if lib not in env ['LIBS']:
         conf.CheckLib (lib)
 

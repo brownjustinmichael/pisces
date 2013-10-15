@@ -22,8 +22,8 @@ namespace two_d
 			class diffusion : public implicit_plan
 			{
 			public:
-				diffusion (int i_n, int i_m, datatype i_coeff, datatype i_alpha, bases::grid <datatype>* i_grid_n, bases::grid <datatype>* i_grid_m, datatype* i_data_in, datatype* i_matrix_n, datatype* i_matrix_m, datatype* i_data_out = NULL, int i_flags = 0x0) :
-				implicit_plan <datatype> (i_n, i_m, i_grid_n, i_grid_m, i_data_in, i_matrix_n, i_matrix_m, i_data_out),
+				diffusion (bases::grid <datatype> i_grid_n, bases::grid <datatype> i_grid_m, datatype i_coeff, datatype i_alpha, datatype* i_data_in, datatype* i_data_out = NULL, int i_flags = 0x0) :
+				implicit_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out),
 				coeff (i_coeff),
 				alpha (i_alpha),
 				flags (i_flags) {
@@ -38,16 +38,16 @@ namespace two_d
 				
 				virtual ~diffusion () {}
 			
-				execute () {	
+				execute (int element_flags) {	
 					TRACE ("Operating...");
 					
-					if (flags & x_solve) {
+					if (element_flags & x_solve) {
 						utils::matrix_vector_multiply (n, n, coeff * (1.0 - alpha), grid_n->get_data (2), data_in, 1.0, data_out, n);
 					} else {
 						utils::matrix_vector_multiply (n, n, coeff, grid_n->get_data (2), data_in, 1.0, data_out, n);
 					}
 					
-					if (flags & y_solve) {
+					if (element_flags & y_solve) {
 						utils::matrix_vector_multiply (m, m, coeff * (1.0 - alpha), grid_m->get_data (2), data_in, 1.0, data_out, m);
 					} else {
 						utils::matrix_vector_multiply (m, m, coeff, grid_m->get_data (2), data_in, 1.0, data_out, m);

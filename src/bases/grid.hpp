@@ -65,6 +65,14 @@ namespace bases
 
 			TRACE ("Instantiated...")
 		}
+		
+		/*
+			TODO It would be nice to have a matrix_ptr member that other objects can reference without needing to reset
+		*/
+	
+		/*
+			TODO If printing grids can be done logically, it would be nice to put cell in here, too.
+		*/
 	
 		virtual ~grid () {}
 		
@@ -132,7 +140,7 @@ namespace bases
 			 * \param i_scale A datatype by which the grid should be scaled
 			 * \param i_width The datatype width of the collocation region
 			 *********************************************************************/
-			grid (axis *i_axis_ptr, datatype i_scale = 1.0, bool linked_0 = false, bool linked_n = false);
+			grid (axis *i_axis_ptr, bool linked_0 = false, bool linked_n = false);
 	
 			virtual ~grid () {};
 			
@@ -203,7 +211,7 @@ namespace bases
 			 * \param i_scale A datatype by which the grid should be scaled
 			 * \param i_width The datatype width of the collocation region
 			 *********************************************************************/
-			grid (axis *i_axis_ptr, datatype i_scale = 1.0, bool linked_0 = false, bool linked_n = false);
+			grid (axis *i_axis_ptr, bool linked_0 = false, bool linked_n = false);
 	
 			virtual ~grid () {};
 			

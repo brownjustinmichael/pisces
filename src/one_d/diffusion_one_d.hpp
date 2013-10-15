@@ -28,7 +28,7 @@ namespace one_d
 		
 		virtual ~diffusion () {}
 		
-		void execute ();
+		void execute (int element_flags = 0x00);
 	
 	private:
 		datatype coeff;

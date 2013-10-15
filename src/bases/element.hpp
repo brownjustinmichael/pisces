@@ -34,8 +34,6 @@ namespace bases
 	class element
 	{
 	public:
-		friend class plan <datatype>;
-
 		/*!*******************************************************************
 		* \param i_name The string representation of the element
 		* \param n_boundaries The integer number of boundaries (must be a multiple of 2)
@@ -43,22 +41,15 @@ namespace bases
 		* \param i_messenger_ptr A pointer to a messenger object
 		* \param i_flags An integer set of execution flags
 		*********************************************************************/
-		element (int i_name, int i_dimensions, io::parameter_map& i_inputParams, messenger* i_messenger_ptr, int i_flags) : inputParams (i_inputParams) {
+		element (int i_name, int i_dimensions, io::parameter_map& i_inputParams, messenger* i_messenger_ptr, int i_flags) : 
+		inputParams (i_inputParams),
+		flags (i_flags) {
 			name = i_name;
-			boundary_weights.resize (2 * i_dimensions);
 			grids.resize (i_dimensions);
 			inputParams = i_inputParams;
 			messenger_ptr = i_messenger_ptr;
-			flags = i_flags;
 			timestep = 0.0;
 			duration = 0.0;
-			for (int i = 0; i < 2 * i_dimensions; ++i) {
-				if (messenger_ptr->linked (i)) {
-					boundary_weights [i] = 0.5;
-				} else {
-					boundary_weights [i] = 0.0;
-				}
-			}
 		}
 		
 		virtual ~element () {}
@@ -206,7 +197,7 @@ namespace bases
 		virtual void transform_inverse () {
 			TRACE ("Transforming...");
 			for (int i = 0; i < (int) transforms.size (); ++i) {
-				transforms [i]->execute ();
+				transforms [i]->execute (flags);
 			}
 			if (flags & transformed) {
 				flags &= ~transformed;
@@ -311,12 +302,6 @@ namespace bases
 		std::shared_ptr <io::output <datatype> > failsafe_dump; //!< An implementation to dump in case of failure
 		std::shared_ptr <io::output <datatype> > normal_stream; //!< An implementation to output in normal space
 		std::shared_ptr <io::output <datatype> > transform_stream; //!< An implementation to output in transform space
-
-		std::vector <datatype> boundary_weights; //!< A datatype vector of boundary weights
-
-		/*
-			TODO It may make marginal more sense to move boundary_weights to the messenger class...
-		*/
 
 	private:
 		// std::vector<plan <datatype>* > transforms; //!< A shared pointer to the forward transform

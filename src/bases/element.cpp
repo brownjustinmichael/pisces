@@ -21,7 +21,7 @@ namespace bases
 		implicit_reset ();
 
 		for (int i = 0; i < (int) implicit_plans.size (); ++i) {
-			implicit_plans [i]->execute ();
+			implicit_plans [i]->execute (flags);
 		}
 		
 		for (int j = 0; j < inputParams ["timesteps"].asInt; ++j) {
@@ -34,7 +34,7 @@ namespace bases
 			TRACE ("Executing plans...");
 		
 			for (int i = 0; i < (int) pre_transform_plans.size (); ++i) {
-				pre_transform_plans [i]->execute ();
+				pre_transform_plans [i]->execute (flags);
 			}
 			
 			transform_inverse ();
@@ -42,7 +42,7 @@ namespace bases
 			factorize ();
 			
 			for (int i = 0; i < (int) post_transform_plans.size (); ++i) {
-				post_transform_plans [i]->execute ();
+				post_transform_plans [i]->execute (flags);
 			}
 		
 			TRACE ("Calculation complete.");

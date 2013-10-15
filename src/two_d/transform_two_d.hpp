@@ -11,29 +11,9 @@
 
 #include "../config.hpp"
 
-namespace bases
-{
-	template <class datatype>
-	class explicit_plan;
-} /* bases */
 
 namespace two_d
 {
-	template <class datatype>
-	class explicit_plan : public bases::explicit_plan
-	{
-	public:
-		explicit_plan (int i_n, int i_m, datatype* i_data_in, datatype* i_data_out = NULL) :
-		bases::explicit_plan <datatype> (i_n, i_data_in, i_data_out),
-		m (i_m) {}
-		
-		virtual ~explicit_plan () {}
-		
-		virtual void execute () = 0;
-	private:
-		int m;
-	};
-	
 	namespace chebyshev
 	{
 		namespace fourier
@@ -50,7 +30,7 @@ namespace two_d
 				
 				virtual ~transform () {}
 				
-				virtual void execute () {
+				virtual void execute (int element_flags = 0x00) {
 					TRACE ("Executing...");
 		
 					// Set up transform

@@ -39,7 +39,7 @@ namespace bases
 		/*!*******************************************************************
 		 * \brief Solve the matrix equation
 		 *********************************************************************/
-		virtual void execute () {
+		virtual void execute (int element_flags = 0x00) {
 			if (!(flags & factorized)) {
 				factorize ();
 			}
