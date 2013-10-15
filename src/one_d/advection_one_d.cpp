@@ -36,7 +36,7 @@ namespace one_d
 	}
 
 	template <class datatype>
-	void advec <datatype>::execute(int element_flags)
+	void advec <datatype>::execute(int &element_flags)
 	{
 		datatype scalar = -c;
 		

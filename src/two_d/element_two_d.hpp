@@ -63,8 +63,8 @@ namespace two_d
 			cell_m.resize (m);
 			for (int i = 0; i < n; ++i) {
 				for (int j = 0; j < m; ++j) {
-					cell_n [i + j * n] = i;
-					cell_m [i + j * n] = j;
+					cell_n [i * m + j] = i;
+					cell_m [i * m + j] = j;
 				}
 			}
 			
@@ -94,11 +94,11 @@ namespace two_d
 		}
 		
 		inline datatype& operator() (int name, int i = 0, int j = 0) {
-			return bases::element <datatype>::operator() (name, i + j * n);
+			return bases::element <datatype>::operator() (name, i * m + j);
 		}
 		
 		inline datatype* pointer (int name, int i = 0, int j = 0) {
-			return bases::element <datatype>::pointer (name, i + j * n);
+			return bases::element <datatype>::pointer (name, i * m + j);
 		}
 		
 		/*!*******************************************************************
@@ -191,7 +191,8 @@ namespace two_d
 					
 					two_d::element <datatype>::set_grid (new bases::fourier::grid <datatype> (axis_n, sqrt (2.0 / (n - 1.0))), 0);
 					two_d::element <datatype>::set_grid (new bases::chebyshev::grid <datatype> (axis_m, sqrt (2.0 / (m - 1.0))), 1);
-					initialize (position);
+					initialize (x_position);
+					initialize (z_position);
 					
 					TRACE ("Instantiated.");
 				}
@@ -208,15 +209,15 @@ namespace two_d
 						std::vector <datatype> init (n * m);
 						for (int i = 0; i < n; ++i) {
 							for (int j = 0; j < m; ++j) {
-								init [i + j * n] = (i - excesses [edge_n0]) * (positions [edge_nn] - positions [edge_n0]) / (n - 1 - excesses [edge_nn] - excesses [edge_n0]) + positions [edge_n0];
+								init [i * m + j] = (i - excesses [edge_n0]) * (positions [edge_nn] - positions [edge_n0]) / (n - 1 - excesses [edge_nn] - excesses [edge_n0]) + positions [edge_n0];
 							}
 						}
 						two_d::element <datatype>::initialize (name, &init [0]);
-					} else if (name == y_position && !initial_conditions) {
+					} else if (name == z_position && !initial_conditions) {
 						std::vector <datatype> init (n * m);
 						for (int i = 0; i < n; ++i) {
 							for (int j = 0; j < m; ++j) {
-								init [i + j * n] = (j - excesses [edge_m0]) * (positions [edge_mm] - positions [edge_m0]) / (m - 1 - excesses [edge_mm] - excesses [edge_m0]) + positions [edge_m0];
+								init [i * m + j] = (j - excesses [edge_m0]) * (positions [edge_mm] - positions [edge_m0]) / (m - 1 - excesses [edge_mm] - excesses [edge_m0]) + positions [edge_m0];
 							}
 						}
 						two_d::element <datatype>::initialize (name, &init [0]);
@@ -236,7 +237,7 @@ namespace two_d
 								init [i] = 0.0;
 							}
 							for (int j = 0; j < m; ++j) {
-								init [i + j * n] = init [i];
+								init [i * m + j] = init [i];
 							}
 						}
 						two_d::element <datatype>::initialize (name, &init [0]);

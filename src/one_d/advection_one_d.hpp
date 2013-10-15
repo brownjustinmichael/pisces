@@ -35,7 +35,7 @@ namespace one_d
 		
 		virtual ~advec () {}
 		
-		void execute (int element_flags = 0x00);
+		void execute (int &element_flags);
 	};
 }
 

@@ -230,7 +230,7 @@ namespace bases
 			messenger_ptr->min (&t_timestep);
 			
 			for (int i = 0; i < (int) solvers.size (); ++i) {
-				solvers [i]->execute ();
+				solvers [i]->execute (flags);
 			}
 			
 			duration += timestep;

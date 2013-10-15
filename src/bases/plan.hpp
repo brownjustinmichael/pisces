@@ -68,7 +68,7 @@ namespace bases
 		* 
 		* The plan class serves as a wrapper for this function.
 		*********************************************************************/
-		virtual void execute (int element_flags = 0x00) = 0;
+		virtual void execute (int &element_flags) = 0;
 	};
 } /* bases */
 

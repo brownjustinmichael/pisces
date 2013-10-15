@@ -29,7 +29,7 @@ namespace one_d
 	}
 
 	template <class datatype>
-	void diffusion <datatype>::execute (int element_flags) {	
+	void diffusion <datatype>::execute (int &element_flags) {	
 		TRACE ("Operating...");
 		
 		// Set up and evaluate the explicit part of the diffusion equation

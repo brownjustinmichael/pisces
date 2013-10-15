@@ -195,4 +195,16 @@ namespace utils
 		dgemv_ (&charN, &m, &n, &alpha, a, &lda, x, &incx, &beta, y, &incy);
 	}
 	
+	void diagonal_multiply (int n, float alpha, float *a, float *x, float beta, float *y, int inca, int incx, int incy) {
+		for (int i = 0; i < n; ++i) {
+			y [i * incy] = alpha * a [i * inca] * x [i * incx] + beta * y [i * incy];
+		}
+	}
+		
+	void diagonal_multiply (int n, double alpha, double *a, double *x, double beta, double *y, int inca, int incx, int incy) {
+		for (int i = 0; i < n; ++i) {
+			y [i * incy] = alpha * a [i * inca] * x [i * incx] + beta * y [i * incy];
+		}
+	}
+	
 } /* utils */

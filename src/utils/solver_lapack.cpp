@@ -127,4 +127,10 @@ namespace utils
 		
 		sgetrs_ (&charN, &n, &nrhs, a, &lda, ipiv, b, &ldb, info);
 	}
+	
+	void diagonal_solve (int n, double *a, double *b, int inca, int incb) {
+		for (int i = 0; i < n; ++i) {
+			b [i * incb] /= a [i * inca]; 
+		}
+	}
 } /* utils */

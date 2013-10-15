@@ -65,6 +65,8 @@ namespace utils
 	 *********************************************************************/
 	void matrix_solve (int n, float* a, int* ipiv, float* b, int *info = NULL, int nrhs = 1, int lda = -1, int ldb = -1);
 	
+	void diagonal_solve (int n, double *a, double *b, int nrhs = 1, int inca = 1, int ldb = -1);
+	
 } /* utils */
 
 #endif /* end of include guard: UTILS_SOLVER_HPP_YSBJBB1J */

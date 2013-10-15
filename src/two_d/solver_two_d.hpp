@@ -15,7 +15,7 @@ namespace two_d
 {
 	enum solve_flags {
 		x_solve = 0x20,
-		y_solve = 0x40
+		z_solve = 0x80
 	}
 	
 	namespace fourier
@@ -66,6 +66,8 @@ namespace two_d
 				std::vector <datatype> positions_0; //!< A datatype vector of excess positions from edge_0
 				std::vector <datatype> positions_n; //!< A datatype vector of excess positions from edge_n
 				std::vector <datatype> factorized_matrix; //!< A datatype vector containing the factorized sum of default matrix and timestep * matrix
+				std::vector <datatype> horizontal_plus_matrix;
+				std::vector <datatype> horizontal_minus_matrix;
 				std::vector <datatype> previous_rhs;
 				std::vector <int> ipiv; //!< A vector of integers needed to calculate the factorization
 				

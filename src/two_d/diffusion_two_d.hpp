@@ -22,7 +22,7 @@ namespace two_d
 			class diffusion : public implicit_plan
 			{
 			public:
-				diffusion (bases::grid <datatype> i_grid_n, bases::grid <datatype> i_grid_m, datatype i_coeff, datatype i_alpha, datatype* i_data_in, datatype* i_data_out = NULL, int i_flags = 0x0) :
+				diffusion (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype i_coeff, datatype i_alpha, datatype* i_data_in, datatype* i_data_out = NULL, int i_flags = 0x0) :
 				implicit_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out),
 				coeff (i_coeff),
 				alpha (i_alpha),
@@ -32,25 +32,33 @@ namespace two_d
 						matrix_n [j] = pioM * (datatype) ((i / 2) * (i / 2));
 					}
 					for (int j = 0; j < m; ++j) {
-						utils::add_scaled (m, -coeff * alpha, grid_m->get_data (2) + i, matrix_m + i, m, m);
+						utils::add_scaled (m, -coeff * alpha, grid_m.get_data (2) + i, matrix_m + i, m, m);
 					}
 				}
 				
 				virtual ~diffusion () {}
 			
-				execute (int element_flags) {	
+				execute (int &element_flags) {	
 					TRACE ("Operating...");
 					
-					if (element_flags & x_solve) {
-						utils::matrix_vector_multiply (n, n, coeff * (1.0 - alpha), grid_n->get_data (2), data_in, 1.0, data_out, n);
+					if (&element_flags & x_solve) {
+						for (int j = 0; j < m; ++j) {
+							utils::matrix_vector_multiply (n, n, coeff * (1.0 - alpha), grid_n.get_data (2), data_in + j, 1.0, data_out + j, n, m, m);
+						}
 					} else {
-						utils::matrix_vector_multiply (n, n, coeff, grid_n->get_data (2), data_in, 1.0, data_out, n);
+						for (int j = 0; j < m; ++j) {
+							utils::matrix_vector_multiply (n, n, coeff, grid_n.get_data (2), data_in + j, 1.0, data_out + j, n, m, m);
+						}
 					}
 					
-					if (element_flags & y_solve) {
-						utils::matrix_vector_multiply (m, m, coeff * (1.0 - alpha), grid_m->get_data (2), data_in, 1.0, data_out, m);
+					if (&element_flags & z_solve) {
+						for (int i = 0; i < n; ++i) {
+							utils::matrix_vector_multiply (m, m, coeff * (1.0 - alpha), grid_m.get_data (2), data_in + i * m, 1.0, data_out + i * m);
+						}
 					} else {
-						utils::matrix_vector_multiply (m, m, coeff, grid_m->get_data (2), data_in, 1.0, data_out, m);
+						for (int i = 0; i < n; ++i) {
+							utils::matrix_vector_multiply (m, m, coeff, grid_m.get_data (2), data_in + i * m, 1.0, data_out + i * m);
+						}
 					}
 					
 					/*

@@ -30,7 +30,7 @@ namespace two_d
 				
 				virtual ~transform () {}
 				
-				virtual void execute (int element_flags = 0x00) {
+				virtual void execute (int &element_flags) {
 					TRACE ("Executing...");
 		
 					// Set up transform
