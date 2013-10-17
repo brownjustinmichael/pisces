@@ -19,7 +19,7 @@ namespace bases
 	{
 	public:
 		axis (int i_n, int i_excess_0, double i_position_0, int i_excess_n, double i_position_n) :
-		n (i_n + 1), excess_0 (i_excess_0), excess_n (i_excess_n), position_0 (i_position_0), position_n (i_position_n) {}
+		n (i_n), excess_0 (i_excess_0), excess_n (i_excess_n), position_0 (i_position_0), position_n (i_position_n) {}
 		
 		int n;
 		int excess_0;
@@ -77,6 +77,10 @@ namespace bases
 		virtual ~grid () {}
 		
 		datatype& position (int index = 0) {
+			return positions [index];
+		}
+		
+		datatype& operator[] (int index) {
 			return positions [index];
 		}
 		

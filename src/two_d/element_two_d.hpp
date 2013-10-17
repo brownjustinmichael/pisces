@@ -258,15 +258,27 @@ namespace two_d
 				using two_d::element <datatype>::inputParams;
 			};
 			
-			class advection_diffusion_element
+			template <class datatype>
+			class advection_diffusion_element : public element <datatype>
 			{
 			public:
-				advection_diffusion_element (struct bases::axis i_axis_n, struct bases::axis i_axis_m, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags);
+				advection_diffusion_element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags);
 				
 				virtual ~advection_diffusion_element () {}
 			
+				datatype calculate_timestep ();
+			
 			private:
-				/* data */
+				using element <datatype>::n;
+				using element <datatype>::m;
+				using element <datatype>::name;
+				using element <datatype>::normal_stream;
+				using element <datatype>::cell_n;
+				using element <datatype>::cell_m;
+				using element <datatype>::grids;
+				using element <datatype>::pointer;
+				using element <datatype>::messenger_ptr;
+				using element <datatype>::timestep;
 			};
 		} /* chebyshev */
 	} /* fourier */

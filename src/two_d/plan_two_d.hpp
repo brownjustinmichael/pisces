@@ -44,7 +44,6 @@ namespace two_d
 		 *********************************************************************/
 		virtual void execute (int &element_flags) = 0;
 
-	protected:
 		int n; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
 		int m;
 		bases::grid <datatype> &grid_n, &grid_m;
@@ -58,7 +57,7 @@ namespace two_d
 	 * These plans produce output in a square matrix but take no input.
 	 *********************************************************************/
 	template <class datatype>
-	class implicit_plan : explicit_plan <datatype>
+	class implicit_plan : public explicit_plan <datatype>
 	{
 	public:
 		/*!*******************************************************************
@@ -79,7 +78,6 @@ namespace two_d
 		 *********************************************************************/
 		virtual void execute (int &element_flags) = 0;
 
-	protected:
 		using explicit_plan <datatype>::grid_n;
 		using explicit_plan <datatype>::grid_m;
 		datatype *matrix_n; //!< A datatype pointer to the input data

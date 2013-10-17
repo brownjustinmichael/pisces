@@ -72,4 +72,27 @@ namespace bases
 	};
 } /* bases */
 
+template <class datatype>
+class change_flag : public bases::plan <datatype>
+{
+public:
+	change_flag (int i_flag, bool i_boolean) :
+	flag (i_flag),
+	boolean (i_boolean) {}
+	
+	virtual ~change_flag () {}
+	
+	virtual void execute (int &element_flags) {
+		if (boolean) {
+			element_flags |= flag;
+		} else {
+			element_flags &= ~flag;
+		}
+	}
+
+private:
+	int flag;
+	bool boolean;
+};
+
 #endif /* end of include guard: PLAN_HPP_S9YPWHOM */

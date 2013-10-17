@@ -19,7 +19,7 @@ namespace two_d
 		namespace chebyshev
 		{
 			template <class datatype>
-			class diffusion : public implicit_plan
+			class diffusion : public implicit_plan <datatype>
 			{
 			public:
 				diffusion (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype i_coeff, datatype i_alpha, datatype* i_data_in, datatype* i_data_out = NULL, int i_flags = 0x0) :
@@ -27,21 +27,21 @@ namespace two_d
 				coeff (i_coeff),
 				alpha (i_alpha),
 				flags (i_flags) {
-					datatype pioM = -coeff * alpha * (2.0 * std::acos (-1.0) / (n - 1)) ** 2;
-					for (int i = 0; i < n; ++j) {
-						matrix_n [j] = pioM * (datatype) ((i / 2) * (i / 2));
+					datatype pioM = -coeff * alpha * (2.0 * std::acos (-1.0) / (n - 1)) * (2.0 * std::acos (-1.0) / (n - 1));
+					for (int i = 0; i < n; ++i) {
+						matrix_n [i] = pioM * (datatype) ((i / 2) * (i / 2));
 					}
 					for (int j = 0; j < m; ++j) {
-						utils::add_scaled (m, -coeff * alpha, grid_m.get_data (2) + i, matrix_m + i, m, m);
+						utils::add_scaled (m, -coeff * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
 					}
 				}
 				
 				virtual ~diffusion () {}
 			
-				execute (int &element_flags) {	
+				void execute (int &element_flags) {	
 					TRACE ("Operating...");
 					
-					if (&element_flags & x_solve) {
+					if (element_flags & x_solve) {
 						for (int j = 0; j < m; ++j) {
 							utils::matrix_vector_multiply (n, n, coeff * (1.0 - alpha), grid_n.get_data (2), data_in + j, 1.0, data_out + j, n, m, m);
 						}
@@ -51,7 +51,7 @@ namespace two_d
 						}
 					}
 					
-					if (&element_flags & z_solve) {
+					if (element_flags & z_solve) {
 						for (int i = 0; i < n; ++i) {
 							utils::matrix_vector_multiply (m, m, coeff * (1.0 - alpha), grid_m.get_data (2), data_in + i * m, 1.0, data_out + i * m);
 						}

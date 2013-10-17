@@ -9,25 +9,30 @@
 #ifndef SOLVER_TWO_D_HPP_JW4BV4PS
 #define SOLVER_TWO_D_HPP_JW4BV4PS
 
+#include "../bases/messenger.hpp"
 #include "../bases/solver.hpp"
+#include "plan_two_d.hpp"
 
 namespace two_d
 {
 	enum solve_flags {
 		x_solve = 0x20,
 		z_solve = 0x80
-	}
+	};
 	
 	namespace fourier
 	{
 		namespace chebyshev
 		{
-			class solver : public bases::solver
+			template <class datatype>
+			class solver : public bases::solver <datatype>, explicit_plan <datatype>
 			{
 			public:
 				solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, bases::messenger* i_messenger_ptr, int i_n_iterations, datatype& i_timestep, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out = NULL, int i_flags = 0x00);
 				
-				virtual ~solver ();
+				virtual ~solver () {}
+				
+				void execute (int &element_flags);
 			
 			private:
 				void _factorize ();
@@ -56,7 +61,6 @@ namespace two_d
 				datatype* explicit_rhs; //!< The datatype array of the right-hand-side of the matrix equation
 				datatype* implicit_rhs; //!< The datatype array of the right-hand-side of the matrix equation
 				datatype* default_matrix; //!< The datatype array of the non-timestep dependent matrix component
-				datatype* matrix; //!< The datatype array of the matrix component to be timestep-multiplied
 		
 				std::vector <datatype> error_0; //!< A datatype vector to be recved from edge_0
 				std::vector <datatype> error_n; //!< A datatype vector to be recved from edge_n

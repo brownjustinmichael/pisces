@@ -10,39 +10,24 @@
 #define TRANSFORM_TWO_D_HPP_RAXYBFTC
 
 #include "../config.hpp"
-
+#include "plan_two_d.hpp"
+#include <fftw3.h>
 
 namespace two_d
 {
-	namespace chebyshev
+	namespace fourier
 	{
-		namespace fourier
+		namespace chebyshev
 		{
 			template <class datatype>
-			class transform
+			class transform : public explicit_plan <datatype>
 			{
 			public:
-				transform (int i_n, int i_m, datatype* i_data_in, datatype* i_data_out = NULL) :
-				explicit_plan (i_n, i_m, i_data_in, i_data_out) {
-					scalar = 1.0 / std::sqrt (2.0 * (n - 1)) / std::sqrt (2.0 * (m - 1));
-					fourier_plan = fftw_plan_r2c_2d (n, m, data_in, data_out, FFTW_ESTIMATE);
-				}
+				transform (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out = NULL);
 				
 				virtual ~transform () {}
 				
-				virtual void execute (int &element_flags) {
-					TRACE ("Executing...");
-		
-					// Set up transform
-		
-					fftw_execute (fourier_plan);
-					
-					// Extract information from transform
-		
-					for (int i = 0; i < n * m; ++i) {
-						data_out [i] *= scalar;
-					}
-				}
+				virtual void execute (int &element_flags);
 			
 			protected:
 				using explicit_plan <datatype>::n;
@@ -51,10 +36,46 @@ namespace two_d
 				using explicit_plan <datatype>::data_out;
 				
 				datatype scalar;
-				fftw_plan fourier_plan;
+				fftw_plan x_plan;
+				fftw_plan z_plan;
+				fftwf_plan x_plan_float;
+				fftwf_plan z_plan_float;
+				fftw_iodim major_iodim;
+				fftw_iodim iodim;
+				fftwf_iodim major_iodim_float;
+				fftwf_iodim iodim_float;
+
 			};
-		} /* fourier */
-	} /* chebyshev */
+			
+			template <class datatype>
+			class invert : public explicit_plan <datatype>
+			{
+			public:
+				invert (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out = NULL);
+				
+				virtual ~invert () {}
+				
+				virtual void execute (int &element_flags);
+			
+			protected:
+				using explicit_plan <datatype>::n;
+				using explicit_plan <datatype>::m;
+				using explicit_plan <datatype>::data_in;
+				using explicit_plan <datatype>::data_out;
+				
+				datatype scalar;
+				fftw_plan x_plan;
+				fftw_plan z_plan;
+				fftwf_plan x_plan_float;
+				fftwf_plan z_plan_float;
+				fftw_iodim major_iodim;
+				fftw_iodim iodim;
+				fftwf_iodim major_iodim_float;
+				fftwf_iodim iodim_float;
+
+			};
+		} /* chebyshev */
+	} /* fourier */
 } /* two_d */
 
 #endif /* end of include guard: TRANSFORM_TWO_D_HPP_RAXYBFTC */
