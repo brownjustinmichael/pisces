@@ -19,7 +19,7 @@ namespace two_d
 			template <class datatype>
 			solver <datatype>:: solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, bases::messenger* i_messenger_ptr, int i_n_iterations, datatype& i_timestep, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out, int i_flags) : 
 			bases::solver <datatype> (i_flags),
-			explicit_plan <datatype> (i_grid_n, i_grid_m, data_in, data_out), 
+			explicit_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out), 
 			messenger_ptr (i_messenger_ptr), 
 			timestep (i_timestep), 
 			alpha_0 (grid_n.alpha_0), 
@@ -42,6 +42,8 @@ namespace two_d
 			
 			template <class datatype>
 			void solver <datatype>::execute (int &element_flags) {
+				TRACE ("Executing...");
+				
 				utils::copy (n * m, explicit_rhs, &data_temp [0]);
 				utils::add_scaled (n * m, 1.0, implicit_rhs, &data_temp [0]);
 				for (int j = 0; j < m; ++j) {
@@ -49,6 +51,7 @@ namespace two_d
 					utils::diagonal_solve (n, &horizontal_plus_matrix [0], &data_temp [0] + j, 1, m);
 				}
 				utils::copy (n * m, &data_temp [0], data_out);
+				TRACE ("Execution complete.");
 			}
 			
 			template class solver <float>;

@@ -31,7 +31,6 @@ namespace bases
 			
 			if (n > 1) {
 				datatype scale = (position_0 - position_n) / (std::cos (excess_0 * pioN) - std::cos ((n - 1 - excess_n) * pioN));
-				DEBUG ("Scale = " << scale);
 				datatype initial_position = position_0 - scale * std::cos (excess_0 * pioN);
 				for (int i = 0; i < n; ++i) {
 					positions [i] = scale * std::cos (i * pioN) + initial_position;

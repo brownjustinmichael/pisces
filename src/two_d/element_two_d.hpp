@@ -10,6 +10,7 @@
 #define ELEMENT_TWO_D_HPP_CJ68F4IB
 
 #include "../config.hpp"
+#include "../utils/io.hpp"
 #include "../bases/element.hpp"
 #include <cmath>
 
@@ -20,6 +21,11 @@ namespace two_d
 		edge_nn = 1, // Start at n, 0, increment by n
 		edge_m0 = 2, // Start at 0, 0, increment by 1
 		edge_mm = 3 // Start at 0, m, increment by 1
+	};
+	
+	enum initialize_flags {
+		uniform_n = 0x01,
+		uniform_m = 0x02
 	};
 	
 	template <class datatype>
@@ -59,8 +65,8 @@ namespace two_d
 			edge_next [edge_mm] = 1;
 			edge_size [edge_mm] = n;
 			
-			cell_n.resize (n);
-			cell_m.resize (m);
+			cell_n.resize (n * m);
+			cell_m.resize (n * m);
 			for (int i = 0; i < n; ++i) {
 				for (int j = 0; j < m; ++j) {
 					cell_n [i * m + j] = i;
@@ -70,9 +76,9 @@ namespace two_d
 			
 			std::ostringstream convert;
 			convert << name;
-			failsafe_dump.reset (new io::simple_output <datatype>  ("dump_" + convert.str () + ".dat", n));
-			failsafe_dump->append (&cell_n [0]);
-			failsafe_dump->append (&cell_m [0]);
+			failsafe_dump.reset (new io::output (new io::two_d::netcdf (n, m), "dump.dat"));
+			failsafe_dump->template append <int> ("i", &cell_n [0]);
+			failsafe_dump->template append <int> ("j", &cell_m [0]);
 			
 			TRACE ("Instantiated.");
 		}
@@ -87,8 +93,9 @@ namespace two_d
 		 * \return A datatype reference to the first element of the named scalar
 		 *********************************************************************/
 		inline datatype& operator[] (int name) {
-			if (scalars [name].size () == (unsigned int) 0) {
-				initialize (name);
+			if (scalars.find (name) == scalars.end ()) {
+				FATAL ("Index " << name << " not found in element.");
+				throw 0;
 			}
 			return scalars [name] [0];
 		}
@@ -100,18 +107,40 @@ namespace two_d
 		inline datatype* pointer (int name, int i = 0, int j = 0) {
 			return bases::element <datatype>::pointer (name, i * m + j);
 		}
-		
+	
 		/*!*******************************************************************
 		 * \copydoc bases::element <datatype>::initialize ()
 		 *********************************************************************/
-		virtual void initialize (int name, datatype* initial_conditions = NULL) {
-			TRACE ("Initializing...");
+		virtual void initialize (int name, datatype* initial_conditions = NULL, int flags = 0x00) {
+			TRACE ("Initializing " << name << "...");
 			
-			if (scalars [name].size () == (unsigned int) 0) {
-				scalars [name].resize (n * m, 0.0);
+			if (name == x_position) {
+				initial_conditions = &(grids [0]->position ());
+				flags |= uniform_m;
+			} else if (name == z_position) {
+				initial_conditions = &(grids [1]->position ());
+				flags |= uniform_n;
 			}
+			// Size allowing for real FFT buffer
+			scalars [name].resize (2 * (n / 2 + 1) * m, 0.0);
 			if (initial_conditions) {
-				utils::copy (n * m, initial_conditions, &(scalars [name]) [0]);
+				if ((flags & uniform_m) && (flags & uniform_n)) {
+					for (int i = 0; i < n; ++i) {
+						for (int j = 0; j < m; ++j) {
+							(*this) (name, i, j) = *initial_conditions;
+						}
+					}
+				} else if (flags & uniform_m) {
+					for (int j = 0; j < m; ++j) {
+						utils::copy (n, initial_conditions, pointer (name, 0, j), 1, m);
+					}
+				} else if (flags & uniform_n) {
+					for (int i = 0; i < n; ++i) {
+						utils::copy (m, initial_conditions, pointer (name, i, 0));
+					}
+				} else {
+					utils::copy (n * m, initial_conditions, pointer (name));
+				}
 			}
 			for (typename std::map <int, std::map <int, std::vector <datatype> > >::iterator iter = fixed_points.begin (); iter != fixed_points.end (); ++iter) {
 				iter->second [name].resize (edge_size [iter->first]);
@@ -154,6 +183,8 @@ namespace two_d
 		}
 	
 	protected:
+		using bases::element <datatype>::scalars;
+		using bases::element <datatype>::grids;
 		using bases::element <datatype>::name;
 		using bases::element <datatype>::failsafe_dump;
 		using bases::element <datatype>::messenger_ptr;
@@ -165,8 +196,6 @@ namespace two_d
 		std::map <int, int> excesses; //!< A vector of the edge positions
 		std::vector<int> cell_n; //!< An integer array for tracking each cell number for output
 		std::vector<int> cell_m; //!< An integer array for tracking each cell number for output
-
-		std::map <int, std::vector <datatype> > scalars; //!< A vector of scalar vectors
 		
 		std::map <int, int> edge_index;
 		std::map <int, int> edge_next;
@@ -197,58 +226,9 @@ namespace two_d
 					TRACE ("Instantiated.");
 				}
 				virtual ~element () {}
-			
-				/*!*******************************************************************
-				 * \copydoc one_d::element::initialize ()
-				 *********************************************************************/
-				virtual void initialize (int name, datatype* initial_conditions = NULL) {
-					
-					TRACE ("Initializing " << name << "...");
-					
-					if (name == x_position && !initial_conditions) {
-						std::vector <datatype> init (n * m);
-						for (int i = 0; i < n; ++i) {
-							for (int j = 0; j < m; ++j) {
-								init [i * m + j] = (i - excesses [edge_n0]) * (positions [edge_nn] - positions [edge_n0]) / (n - 1 - excesses [edge_nn] - excesses [edge_n0]) + positions [edge_n0];
-							}
-						}
-						two_d::element <datatype>::initialize (name, &init [0]);
-					} else if (name == z_position && !initial_conditions) {
-						std::vector <datatype> init (n * m);
-						for (int i = 0; i < n; ++i) {
-							for (int j = 0; j < m; ++j) {
-								init [i * m + j] = (j - excesses [edge_m0]) * (positions [edge_mm] - positions [edge_m0]) / (m - 1 - excesses [edge_mm] - excesses [edge_m0]) + positions [edge_m0];
-							}
-						}
-						two_d::element <datatype>::initialize (name, &init [0]);
-					} else if (name == velocity && !initial_conditions){
-						datatype scale = inputParams["init_cond_scale"].asDouble;
-						datatype width = inputParams["init_cond_width"].asDouble;
-						datatype mean = inputParams["init_cond_mean"].asDouble;
-						datatype sigma = inputParams["init_cond_sigma"].asDouble;
-						std::vector <datatype> init (n);
-						datatype height, temp;
-						height = std::max (scale * std::exp (- (width / 2.0 - mean) * (width / 2.0 - mean) / 2.0 / sigma / sigma), scale * std::exp (- (- width / 2.0 - mean) * (- width / 2.0 - mean) / 2.0 / sigma / sigma));
-						for (int i = 0; i < n; ++i) {
-							temp = scale * std::exp (- ((*this) (position, i) - mean) * ((*this) (position, i) - mean) / 2.0 / sigma / sigma) - height;
-							if (temp > 0.0) {
-								init [i] = temp;
-							} else {
-								init [i] = 0.0;
-							}
-							for (int j = 0; j < m; ++j) {
-								init [i * m + j] = init [i];
-							}
-						}
-						two_d::element <datatype>::initialize (name, &init [0]);
-					} else {
-						two_d::element <datatype>::initialize (name, initial_conditions);
-					}
-					
-					TRACE ("Initialized.");
-				}
 		
 			protected:
+				using two_d::element <datatype>::initialize;
 				using two_d::element <datatype>::positions;
 				using two_d::element <datatype>::excesses;
 				using two_d::element <datatype>::n;
@@ -269,10 +249,13 @@ namespace two_d
 				datatype calculate_timestep ();
 			
 			private:
+				using element <datatype>::inputParams;
+				using element <datatype>::initialize;
 				using element <datatype>::n;
 				using element <datatype>::m;
 				using element <datatype>::name;
 				using element <datatype>::normal_stream;
+				using element <datatype>::transform_stream;
 				using element <datatype>::cell_n;
 				using element <datatype>::cell_m;
 				using element <datatype>::grids;

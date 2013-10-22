@@ -7,8 +7,8 @@
  ************************************************************************/
 
 #include "config.hpp"
+#include "one_d/element_one_d.hpp"
 #include "two_d/element_two_d.hpp"
-#include "two_d/transform_two_d.hpp"
 
 /*!*******************************************************************
  * \mainpage
@@ -125,56 +125,20 @@ int main (int argc, char *argv[])
 	// 	process_messenger.add_boundary (one_d::edge_n, id + 1);
 	// }
 	
-	int m = n;
+	int m = n - 1;
 	
-	bases::axis horizontal_axis (n, excess_0, position_0, excess_n, position_n);
-	bases::axis vertical_axis (m, excess_0, position_0, excess_n, position_n);
+	bases::axis horizontal_axis (m, excess_0, position_0, excess_n, position_n);
+	bases::axis vertical_axis (n, excess_0, position_0, excess_n, position_n);
 	
-	// two_d::fourier::chebyshev::advection_diffusion_element <double> element (&horizontal_axis, &vertical_axis, name, inputParams, &process_messenger, 0x00);
+	// one_d::chebyshev::advection_diffusion_element <double> element (&vertical_axis, name, inputParams, &process_messenger, 0x00);
+	two_d::fourier::chebyshev::advection_diffusion_element <double> element (&horizontal_axis, &vertical_axis, name, inputParams, &process_messenger, 0x00);
 	
-	bases::fourier::grid <double> horizontal_grid (&horizontal_axis);
-	bases::chebyshev::grid <double> vertical_grid (&vertical_axis);
-	
-	std::vector <int> cell_n (n * m);
-	std::vector <int> cell_m (n * m);
-	std::vector <double> position_h (n * m);
-	std::vector <double> position_m (n * m);
-	std::vector <double> data (m * (n + 2));
-	
-	for (int i = 0; i < n; ++i) {
-		for (int j = 0; j < m; ++j) {
-			position_h [i * m + j] = horizontal_grid [i];
-			position_m [i * m + j] = vertical_grid [j];
-			cell_n [i * m + j] = i;
-			cell_m [i * m + j] = j;
-			data [i * m + j] = exp (- (vertical_grid [j] * vertical_grid [j] + horizontal_grid [i] * horizontal_grid [i]) * 16.0);
-		}
+	try {
+		element.run ();
+	} catch (...) {
+		FATAL ("Fatal error occurred. Check log.");
+		return 1;
 	}
-	
-	io::simple_output <double> out ("output.dat", n * m);
-	out.append (&cell_n [0]);
-	out.append (&cell_m [0]);
-	out.append (&position_h [0]);
-	out.append (&position_m [0]);
-	out.append (&data [0]);
-		
-	two_d::fourier::chebyshev::transform <double> plan (horizontal_grid, vertical_grid, &data [0]);
-	two_d::fourier::chebyshev::invert <double> iplan (horizontal_grid, vertical_grid, &data [0]);
-
-	int flags;
-
-	plan.execute (flags);	
-	iplan.execute (flags);
-
-	out.to_file ();
-
-	
-	// try {
-	// 	element.run ();
-	// } catch (...) {
-	// 	FATAL ("Fatal error occurred. Check log.");
-	// 	return 1;
-	// }
 	
 	INFO ("Main complete.");
 	

@@ -23,12 +23,12 @@
 enum index {
 	null = 00,
 	
-	position = 01, x_position = 01, x_pos = 01,
+	x_position = 01, x_pos = 01,
 	y_position = 02, y_pos = 02, 
-	z_position = 03, z_pos = 03,
-	velocity = 11, vel = 11, x_velocity = 11, x_vel = 11,
+	position = 03, z_position = 03, z_pos = 03,
+	vel = 11, x_velocity = 11, x_vel = 11,
 	y_velocity = 12, y_vel = 12,
-	z_velocity = 13, z_vel = 13,
+	velocity = 13, z_velocity = 13, z_vel = 13,
 	pressure = 20, pres = 20,
 	temperature = 21, temp = 21,
 	composition = 22, comp = 22,

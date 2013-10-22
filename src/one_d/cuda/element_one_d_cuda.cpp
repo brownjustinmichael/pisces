@@ -48,14 +48,14 @@ namespace cuda
 				std::ostringstream convert;
 				convert << name;
 				normal_stream.reset (new io::incremental_output <datatype>  ("../output/normal_" + convert.str () + "_", ".dat", 4, new io::header, n, inputParams["output_every"].asInt));
-				normal_stream->append (cell [0]);
-				normal_stream->append ((*this) [position]);
-				normal_stream->append ((*this) [velocity]);
+				normal_stream->template append <int> ("i", &cell [0]);
+				normal_stream->template append <datatype> ("x", pointer (position));
+				normal_stream->template append <datatype> ("u", pointer (velocity));
 				
 				transform_stream.reset (new io::incremental_output <datatype>  ("../output/transform_" + convert.str () + "_", ".dat", 4, new io::header, n, inputParams["output_every"].asInt));
-				transform_stream->append (cell [0]);
-				transform_stream->append ((*this) [position]);
-				transform_stream->append ((*this) [velocity]);
+				normal_stream->template append <int> ("i", &cell [0]);
+				normal_stream->template append <datatype> ("x", pointer (position));
+				normal_stream->template append <datatype> ("u", pointer (velocity));
 		
 				transform_stream->to_file ();
 				

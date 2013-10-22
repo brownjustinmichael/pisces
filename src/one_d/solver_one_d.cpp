@@ -12,7 +12,7 @@
 #include "../utils/utils.hpp"
 #include "../utils/solver_utils.hpp"
 #include "../utils/interpolate.hpp"
-#include "../bases/element.hpp"
+#include "../bases/messenger.hpp"
 #include "element_one_d.hpp"
 
 namespace one_d

@@ -56,6 +56,8 @@ namespace bases
 			
 			TRACE ("Updating...");
 			
+			transform_forward ();
+			
 			solve ();
 			
 			// Output in transform space

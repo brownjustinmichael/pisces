@@ -32,6 +32,10 @@ namespace one_d
 		edge_n = 1
 	};
 	
+	enum initialize_flags {
+		uniform_n = 0x01
+	};
+	
 	/*!*******************************************************************
 	 * \brief The 1D base element class
 	 * 
@@ -70,40 +74,33 @@ namespace one_d
 			
 			std::ostringstream convert;
 			convert << name;
-			failsafe_dump.reset (new io::simple_output <datatype>  ("dump_" + convert.str () + ".dat", n));
-			failsafe_dump->append (&cell [0]);
+			failsafe_dump.reset (new io::output (new io::one_d::ascii (n), "dump.dat"));
+			failsafe_dump->append ("i", &cell [0]);
 		}
 		
 		virtual ~element () {}
 	
 		/*!*******************************************************************
-		 * \brief Get the datatype reference to the named scalar
-		 * 
-		 * \param name The integer name from the index enumeration
-		 * 
-		 * \return A datatype reference to the first element of the named scalar
-		 *********************************************************************/
-		inline datatype& operator[] (int name) {
-			if (scalars [name].size () == (unsigned int) 0) {
-				initialize (name);
-			}
-			return scalars [name] [0];
-		}
-	
-		/*!*******************************************************************
 		 * \copydoc bases::element <datatype>::initialize ()
 		 *********************************************************************/
-		virtual void initialize (int name, datatype* initial_conditions = NULL) {
-			if (scalars [name].size () == (unsigned int) 0) {
-				scalars [name].resize (n, 0.0);
+		virtual void initialize (int name, datatype* initial_conditions = NULL, int flags = 0x00) {
+			TRACE ("Initializing " << name << "...");
+			
+			if (name == position) {
+				initial_conditions = &(grids [0]->position ());
 			}
+			scalars [name].resize (n, 0.0);
 			if (initial_conditions) {
 				utils::copy (n, initial_conditions, &(scalars [name]) [0]);
 			}
 			for (std::map <int, int>::iterator i_edge = edge_map.begin (); i_edge != edge_map.end (); ++i_edge) {
 				fixed_points [i_edge->first] [name] = scalars [name] [i_edge->second];
 			}
-			failsafe_dump->append (&(scalars [name]) [0]);
+			std::stringstream stream;
+			stream << name;
+			failsafe_dump->template append <datatype> (stream.str (), &(scalars [name]) [0]);
+
+			TRACE ("Initialized " << name << ".");
 		}
 		
 		/*!*******************************************************************
@@ -130,6 +127,8 @@ namespace one_d
 		}
 		
 	protected:
+		using bases::element <datatype>::scalars;
+		using bases::element <datatype>::grids;
 		using bases::element <datatype>::name;
 		using bases::element <datatype>::failsafe_dump;
 		using bases::element <datatype>::messenger_ptr;
@@ -137,8 +136,6 @@ namespace one_d
 		bases::axis *axis_n;
 		int &n;
 		std::vector<int> cell; //!< An integer array for tracking each cell number for output
-
-		std::map <int, std::vector <datatype>> scalars; //!< A vector of scalar vectors
 		
 		std::map <int, int> edge_map;
 		std::map <int, std::map <int, datatype> > fixed_points;
@@ -164,38 +161,9 @@ namespace one_d
 				TRACE ("Instantiated.");
 			}
 			virtual ~element () {}
-				
-			/*!*******************************************************************
-			 * \copydoc one_d::element::initialize ()
-			 *********************************************************************/
-			virtual void initialize (int name, datatype* initial_conditions = NULL) {
-				TRACE ("Initializing " << name);
-				if (name == position && !initial_conditions) {
-					one_d::element <datatype>::initialize (name, &(grids [0]->position ()));
-				} else if (name == velocity && !initial_conditions){
-					datatype scale = inputParams["init_cond_scale"].asDouble;
-					datatype width = inputParams["init_cond_width"].asDouble;
-					datatype mean = inputParams["init_cond_mean"].asDouble;
-					datatype sigma = inputParams["init_cond_sigma"].asDouble;
-					std::vector <datatype> init (n);
-					datatype height, temp;
-					height = std::max (scale * std::exp (- (width / 2.0 - mean) * (width / 2.0 - mean) / 2.0 / sigma / sigma), scale * std::exp (- (- width / 2.0 - mean) * (- width / 2.0 - mean) / 2.0 / sigma / sigma));
-					for (int i = 0; i < n; ++i) {
-						temp = scale * std::exp (- ((*this) (position, i) - mean) * ((*this) (position, i) - mean) / 2.0 / sigma / sigma) - height;
-						if (temp > 0.0) {
-							init [i] = temp;
-						} else {
-							init [i] = 0.0;
-						}
-					}
-					one_d::element <datatype>::initialize (name, &init [0]);
-				} else {
-					one_d::element <datatype>::initialize (name, initial_conditions);
-				}
-				TRACE ("Initialized.");
-			}
 			
 		protected:
+			using one_d::element <datatype>::initialize;
 			using one_d::element <datatype>::n;
 			using one_d::element <datatype>::axis_n;
 			using one_d::element <datatype>::grids;
@@ -225,6 +193,7 @@ namespace one_d
 			virtual datatype calculate_timestep ();
 		
 		private:
+			using element <datatype>::initialize;
 			using element <datatype>::n;
 			using element <datatype>::flags;
 			using element <datatype>::name;
@@ -258,38 +227,9 @@ namespace one_d
 				TRACE ("Instantiated.");
 			}
 			virtual ~element () {}
-			
-			/*!*******************************************************************
-			 * \copydoc one_d::element::initialize ()
-			 *********************************************************************/
-			virtual void initialize (int name, datatype* initial_conditions = NULL) {
-				TRACE ("Initializing " << name);
-				if (name == position && !initial_conditions) {
-					one_d::element <datatype>::initialize (name, &(grids [0]->position ()));
-				} else if (name == velocity && !initial_conditions){
-					datatype scale = inputParams["init_cond_scale"].asDouble;
-					datatype width = inputParams["init_cond_width"].asDouble;
-					datatype mean = inputParams["init_cond_mean"].asDouble;
-					datatype sigma = inputParams["init_cond_sigma"].asDouble;
-					std::vector <datatype> init (n);
-					datatype height, temp;
-					height = std::max (scale * std::exp (- (width / 2.0 - mean) * (width / 2.0 - mean) / 2.0 / sigma / sigma), scale * std::exp (- (- width / 2.0 - mean) * (- width / 2.0 - mean) / 2.0 / sigma / sigma));
-					for (int i = 0; i < n; ++i) {
-						temp = scale * std::exp (- ((*this) (position, i) - mean) * ((*this) (position, i) - mean) / 2.0 / sigma / sigma) - height;
-						if (temp > 0.0) {
-							init [i] = temp;
-						} else {
-							init [i] = 0.0;
-						}
-					}
-					one_d::element <datatype>::initialize (name, &init [0]);
-				} else {
-					one_d::element <datatype>::initialize (name, initial_conditions);
-				}
-				TRACE ("Initialized.");
-			}
 		
 		protected:
+			using one_d::element <datatype>::initialize;
 			using one_d::element <datatype>::n;
 			using one_d::element <datatype>::axis_n;
 			using one_d::element <datatype>::grids;

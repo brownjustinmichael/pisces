@@ -8,7 +8,7 @@ conf = Configure (env)
 if include_cuda:
     conf.CheckLib ("cublas")
 
-for lib in ["lapack", "blas", "atlas"]:
+for lib in ["lapack", "blas", "atlas", "netcdf_c++"]:
     if lib not in env ['LIBS']:
         conf.CheckLib (lib)
 

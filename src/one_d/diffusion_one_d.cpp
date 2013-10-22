@@ -9,7 +9,6 @@
 #include <iostream>
 #include <cmath>
 #include <cassert>
-#include "../bases/element.hpp"
 #include "../bases/grid.hpp"
 #include "../config.hpp"
 #include "diffusion_one_d.hpp"

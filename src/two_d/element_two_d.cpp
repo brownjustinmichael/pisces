@@ -27,22 +27,47 @@ namespace two_d
 				assert (m > 0);
 		
 				TRACE ("Initializing...");
+				
+				datatype scale = inputParams["init_cond_scale"].asDouble;
+				datatype width = inputParams["init_cond_width"].asDouble;
+				datatype mean = inputParams["init_cond_mean"].asDouble;
+				datatype sigma = inputParams["init_cond_sigma"].asDouble;
+				std::vector <datatype> init (n * m);
+				datatype height;
+				height = std::max (scale * std::exp (- (width / 2.0 - mean) * (width / 2.0 - mean) / 2.0 / sigma / sigma), scale * std::exp (- (- width / 2.0 - mean) * (- width / 2.0 - mean) / 2.0 / sigma / sigma));
+				DEBUG ("scale " << scale << " width " << width << " mean " << mean << " sigma " << sigma << " height " << height);
+				for (int i = 0; i < n; ++i) {
+					for (int j = 0; j < m; ++j) {
+						init [i * m + j] = scale * std::exp (- (((*this) (x_position, i, j) - mean) * ((*this) (x_position, i, j) - mean) + ((*this) (z_position, i, j) - mean) * ((*this) (z_position, i, j) - mean)) / 2.0 / sigma / sigma) - height;
+					}
+				}
+				initialize (velocity, &init [0]);
+				initialize (vel_explicit_rhs);
+				initialize (vel_implicit_rhs);
 			
 				// Set up output
 				std::ostringstream convert;
 				convert << name;
-				normal_stream.reset (new io::incremental_output <datatype>  ("../output/normal_" + convert.str () + "_", ".dat", 4, new io::header, n, inputParams["output_every"].asInt));
-				normal_stream->append (cell_n [0]);
-				normal_stream->append (cell_m [0]);
-				normal_stream->append ((*this) [x_position]);
-				normal_stream->append ((*this) [z_position]);
-				normal_stream->append ((*this) [velocity]);
-				normal_stream->append ((*this) [vel_explicit_rhs]);
+				normal_stream.reset (new io::incremental (new io::two_d::netcdf (n, m), "../output/normal_%04i.cdf", inputParams["output_every"].asInt));
+				normal_stream->template append <int> ("i", &cell_n [0]);
+				normal_stream->template append <int> ("j", &cell_m [0]);
+				normal_stream->template append <datatype> ("x", pointer (x_position));
+				normal_stream->template append <datatype> ("z", pointer (z_position));
+				normal_stream->template append <datatype> ("w", pointer (velocity));
+			
+				transform_stream.reset (new io::incremental (new io::two_d::netcdf (n, m), "../output/transform_%04i.cdf", inputParams["output_every"].asInt));
+				transform_stream->template append <int> ("i", &cell_n [0]);
+				transform_stream->template append <int> ("j", &cell_m [0]);
+				transform_stream->template append <datatype> ("x", pointer (x_position));
+				transform_stream->template append <datatype> ("z", pointer (z_position));
+				transform_stream->template append <datatype> ("w", pointer (velocity));
+				transform_stream->template append <datatype> ("rhs", pointer (vel_implicit_rhs));
 			
 				// Set up plans in order
 				element <datatype>::add_pre_plan (new diffusion <datatype> (*grids [0], *grids [1], diffusion_coeff, alpha, pointer (velocity), pointer (vel_implicit_rhs)));
 
-				element <datatype>::add_transform (new transform <datatype> (*grids [0], *grids [1], pointer (velocity)));
+				element <datatype>::add_forward_transform (new transform <datatype> (*grids [0], *grids [1], pointer (velocity), NULL, ignore_m));
+				element <datatype>::add_inverse_transform (new transform <datatype> (*grids [0], *grids [1], pointer (velocity), NULL, ignore_m | inverse));
 		
 				// Set up solver
 				element <datatype>::add_solver (new solver <datatype> (*grids [0], *grids [1], messenger_ptr, inputParams["n_iterations"].asInt, timestep, pointer (velocity), pointer (vel_explicit_rhs), pointer (vel_implicit_rhs)));
@@ -54,7 +79,7 @@ namespace two_d
 			
 			template <class datatype>
 			datatype advection_diffusion_element <datatype>::calculate_timestep () {
-				return 0.0;
+				return inputParams ["time_step_size"].asDouble;
 			}
 			
 			template class element <float>;

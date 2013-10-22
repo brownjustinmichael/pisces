@@ -15,6 +15,11 @@
 
 namespace two_d
 {
+	enum transform_flags {
+		ignore_m = 0x01,
+		inverse = 0x02
+	};
+	
 	namespace fourier
 	{
 		namespace chebyshev
@@ -23,7 +28,10 @@ namespace two_d
 			class transform : public explicit_plan <datatype>
 			{
 			public:
-				transform (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out = NULL);
+				/*!**********************************************************************
+				 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
+				 ************************************************************************/
+				transform (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out = NULL, int i_flags = 0x00);
 				
 				virtual ~transform () {}
 				
@@ -35,6 +43,7 @@ namespace two_d
 				using explicit_plan <datatype>::data_in;
 				using explicit_plan <datatype>::data_out;
 				
+				int flags;
 				datatype scalar;
 				fftw_plan x_plan;
 				fftw_plan z_plan;
@@ -42,37 +51,6 @@ namespace two_d
 				fftwf_plan z_plan_float;
 				fftw_iodim major_iodim;
 				fftw_iodim iodim;
-				fftwf_iodim major_iodim_float;
-				fftwf_iodim iodim_float;
-
-			};
-			
-			template <class datatype>
-			class invert : public explicit_plan <datatype>
-			{
-			public:
-				invert (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out = NULL);
-				
-				virtual ~invert () {}
-				
-				virtual void execute (int &element_flags);
-			
-			protected:
-				using explicit_plan <datatype>::n;
-				using explicit_plan <datatype>::m;
-				using explicit_plan <datatype>::data_in;
-				using explicit_plan <datatype>::data_out;
-				
-				datatype scalar;
-				fftw_plan x_plan;
-				fftw_plan z_plan;
-				fftwf_plan x_plan_float;
-				fftwf_plan z_plan_float;
-				fftw_iodim major_iodim;
-				fftw_iodim iodim;
-				fftwf_iodim major_iodim_float;
-				fftwf_iodim iodim_float;
-
 			};
 		} /* chebyshev */
 	} /* fourier */

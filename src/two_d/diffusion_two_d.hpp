@@ -27,7 +27,7 @@ namespace two_d
 				coeff (i_coeff),
 				alpha (i_alpha),
 				flags (i_flags) {
-					datatype pioM = -coeff * alpha * (2.0 * std::acos (-1.0) / (n - 1)) * (2.0 * std::acos (-1.0) / (n - 1));
+					datatype pioM = coeff * alpha * (2.0 * std::acos (-1.0) / (n - 1)) * (2.0 * std::acos (-1.0) / (n - 1));
 					for (int i = 0; i < n; ++i) {
 						matrix_n [i] = pioM * (datatype) ((i / 2) * (i / 2));
 					}
@@ -43,23 +43,28 @@ namespace two_d
 					
 					if (element_flags & x_solve) {
 						for (int j = 0; j < m; ++j) {
-							utils::matrix_vector_multiply (n, n, coeff * (1.0 - alpha), grid_n.get_data (2), data_in + j, 1.0, data_out + j, n, m, m);
+							for (int i = 0; i < n; ++i) {
+								data_out [i * m + j] = coeff * (1.0 - alpha) * matrix_n [i] * data_in [i * m + j];
+							}
 						}
 					} else {
 						for (int j = 0; j < m; ++j) {
-							utils::matrix_vector_multiply (n, n, coeff, grid_n.get_data (2), data_in + j, 1.0, data_out + j, n, m, m);
+							for (int i = 0; i < n; ++i) {
+								data_out [i * m + j] = coeff * alpha * matrix_n [i] * data_in [i * m + j];
+								DEBUG ("out " << data_out [i * m + j] << " in " << data_in [i * m + j] << " rest " << coeff * alpha * matrix_n [i])
+							}
 						}
 					}
 					
-					if (element_flags & z_solve) {
-						for (int i = 0; i < n; ++i) {
-							utils::matrix_vector_multiply (m, m, coeff * (1.0 - alpha), grid_m.get_data (2), data_in + i * m, 1.0, data_out + i * m);
-						}
-					} else {
-						for (int i = 0; i < n; ++i) {
-							utils::matrix_vector_multiply (m, m, coeff, grid_m.get_data (2), data_in + i * m, 1.0, data_out + i * m);
-						}
-					}
+					// if (element_flags & z_solve) {
+					// 	for (int i = 0; i < n; ++i) {
+					// 		utils::matrix_vector_multiply (m, m, coeff * (1.0 - alpha), grid_m.get_data (2), data_in + i * m, 1.0, data_out + i * m);
+					// 	}
+					// } else {
+					// 	for (int i = 0; i < n; ++i) {
+					// 		utils::matrix_vector_multiply (m, m, coeff, grid_m.get_data (2), data_in + i * m, 1.0, data_out + i * m);
+					// 	}
+					// }
 					
 					/*
 						TODO Make more efficient by doing calculation in spectral space, at least for horizontal component

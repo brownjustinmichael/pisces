@@ -6,9 +6,7 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include "../config.hpp"
 #include "plan.hpp"
-#include "element.hpp"
 
 namespace bases
 {

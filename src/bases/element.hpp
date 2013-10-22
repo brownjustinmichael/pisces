@@ -64,8 +64,14 @@ namespace bases
 		 * 
 		 * \return A datatype reference to the first element of the named scalar
 		 *********************************************************************/
-		virtual datatype& operator[] (int name) = 0;
-	
+		inline datatype& operator[] (int name) {
+			if (scalars.find (name) == scalars.end ()) {
+				FATAL ("Index " << name << " not found in element.");
+				throw 0;
+			}
+			return scalars [name] [0];
+		}
+		
 		/*!*******************************************************************
 		 * \brief Get the datatype reference to the given index of the named scalar
 		 * 
@@ -113,8 +119,13 @@ namespace bases
 		 * 
 		 * TODO This assumes one scalar field. It should be generalized.
 		 *********************************************************************/
-		inline void add_transform (plan <datatype>* i_plan) {
-			transforms.push_back (std::shared_ptr <plan <datatype>> (i_plan));
+		inline void add_forward_transform (plan <datatype>* i_plan) {
+			forward_transforms.push_back (std::shared_ptr <plan <datatype>> (i_plan));
+			// transforms.push_back (i_plan));
+		}
+		
+		inline void add_inverse_transform (plan <datatype>* i_plan) {
+			inverse_transforms.push_back (std::shared_ptr <plan <datatype>> (i_plan));
 			// transforms.push_back (i_plan));
 		}
 
@@ -157,7 +168,7 @@ namespace bases
 		 * \param name The integer name index to be initialized
 		 * \param initial_conditions The datatype array of initial conditions
 		 *********************************************************************/
-		virtual void initialize (int name, datatype* initial_conditions = NULL) = 0;
+		virtual void initialize (int name, datatype* initial_conditions = NULL, int flags = 0x00) = 0;
 		
 		/*!*******************************************************************
 		 * \brief Reset every scalar index < 0 and converts to spectral space
@@ -171,7 +182,7 @@ namespace bases
 		virtual void explicit_reset () {
 			TRACE ("Resetting explicits...");
 			if (!(flags & transformed)) {
-				transform_inverse ();
+				transform_forward ();
 			}
 		}
 		
@@ -194,15 +205,23 @@ namespace bases
 		 * TODO Multiple transforms and batch transforms should be possible
 		 * TODO Need implementation if reverse transform is not forward transform
 		 ************************************************************************/
-		virtual void transform_inverse () {
+		virtual void transform_forward () {
 			TRACE ("Transforming...");
-			for (int i = 0; i < (int) transforms.size (); ++i) {
-				transforms [i]->execute (flags);
-			}
-			if (flags & transformed) {
-				flags &= ~transformed;
-			} else {
+			if (!(flags & transformed)) {
+				for (int i = 0; i < (int) forward_transforms.size (); ++i) {
+					forward_transforms [i]->execute (flags);
+				}
 				flags |= transformed;
+			}
+		}
+		
+		virtual void transform_inverse () {
+			TRACE ("Inverting...");
+			if (flags & transformed) {
+				for (int i = 0; i < (int) inverse_transforms.size (); ++i) {
+					inverse_transforms [i]->execute (flags);
+				}
+				flags &= ~transformed;
 			}
 		}
 		
@@ -225,6 +244,7 @@ namespace bases
 		}
 		
 		virtual void solve () {
+			TRACE ("Beginning solve...");
 			datatype t_timestep;
 			t_timestep = calculate_timestep ();
 			messenger_ptr->min (&t_timestep);
@@ -244,6 +264,7 @@ namespace bases
 			}
 			timestep = t_timestep;
 			flags |= transformed;
+			TRACE ("Solve complete.");
 		}
 		
 		/*!**********************************************************************
@@ -297,15 +318,17 @@ namespace bases
 		datatype duration; //!< The datatype total simulated time
 		datatype timestep; //!< The datatype timestep length
 
+		std::map <int, std::vector <datatype> > scalars; //!< A vector of scalar vectors
 		std::vector <std::shared_ptr <grid <datatype> > > grids; //!< A shared pointer to the collocation grid
 		
-		std::shared_ptr <io::output <datatype> > failsafe_dump; //!< An implementation to dump in case of failure
-		std::shared_ptr <io::output <datatype> > normal_stream; //!< An implementation to output in normal space
-		std::shared_ptr <io::output <datatype> > transform_stream; //!< An implementation to output in transform space
+		std::shared_ptr <io::output> failsafe_dump; //!< An implementation to dump in case of failure
+		std::shared_ptr <io::output> normal_stream; //!< An implementation to output in normal space
+		std::shared_ptr <io::output> transform_stream; //!< An implementation to output in transform space
 
 	private:
 		// std::vector<plan <datatype>* > transforms; //!< A shared pointer to the forward transform
-		std::vector<std::shared_ptr<plan <datatype> > > transforms; //!< A shared pointer to the forward transform
+		std::vector<std::shared_ptr<plan <datatype> > > forward_transforms; //!< A shared pointer to the forward transform
+		std::vector<std::shared_ptr<plan <datatype> > > inverse_transforms; //!< A shared pointer to the forward transform
 		std::vector<std::shared_ptr<solver <datatype> > > solvers; //!< A vector of shared pointers to the matrix solvers
 		
 		std::vector <std::shared_ptr <plan <datatype> > > pre_transform_plans; //!< A vector of shared pointers of plans to be executed

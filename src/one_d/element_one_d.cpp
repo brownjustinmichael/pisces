@@ -33,19 +33,39 @@ namespace one_d
 		
 			TRACE ("Initializing...");
 			
+			datatype scale = inputParams["init_cond_scale"].asDouble;
+			datatype width = inputParams["init_cond_width"].asDouble;
+			datatype mean = inputParams["init_cond_mean"].asDouble;
+			datatype sigma = inputParams["init_cond_sigma"].asDouble;
+			std::vector <datatype> init (n);
+			datatype height, temp;
+			height = std::max (scale * std::exp (- (width / 2.0 - mean) * (width / 2.0 - mean) / 2.0 / sigma / sigma), scale * std::exp (- (- width / 2.0 - mean) * (- width / 2.0 - mean) / 2.0 / sigma / sigma));
+			for (int i = 0; i < n; ++i) {
+				temp = scale * std::exp (- ((*this) (position, i) - mean) * ((*this) (position, i) - mean) / 2.0 / sigma / sigma) - height;
+				if (temp > 0.0) {
+					init [i] = temp;
+				} else {
+					init [i] = 0.0;
+				}
+			}
+			initialize (velocity, &init [0]);
+			initialize (vel_explicit_rhs);
+			initialize (vel_implicit_rhs);
+			
 			// Set up output
 			std::ostringstream convert;
 			convert << name;
-			normal_stream.reset (new io::incremental_output <datatype>  ("../output/normal_" + convert.str () + "_", ".dat", 4, new io::header, n, inputParams["output_every"].asInt));
-			normal_stream->append (cell [0]);
-			normal_stream->append ((*this) [position]);
-			normal_stream->append ((*this) [velocity]);
-			normal_stream->append ((*this) [vel_explicit_rhs]);
+			normal_stream.reset (new io::incremental (new io::one_d::ascii (n), "../output/normal_%04i.dat", inputParams["output_every"].asInt));
+			normal_stream->template append <int> ("i", &(cell [0]));
+			normal_stream->template append <datatype> ("x", pointer (position));
+			normal_stream->template append <datatype> ("u", pointer (velocity));
+			normal_stream->template append <datatype> ("rhs", pointer (vel_explicit_rhs));
 			
 			// Set up plans in order
 			element <datatype>::add_pre_plan (new diffusion <datatype> (*grids [0], diffusion_coeff, alpha, pointer (velocity), pointer (vel_implicit_rhs)));
 
-			element <datatype>::add_transform (new fftw_cosine <datatype> (*grids [0], pointer (velocity)));
+			element <datatype>::add_inverse_transform (new fftw_cosine <datatype> (*grids [0], pointer (velocity)));
+			element <datatype>::add_forward_transform (new fftw_cosine <datatype> (*grids [0], pointer (velocity)));
 			if (advection_coeff != 0.0) {
 				element <datatype>::add_post_plan (new advec <datatype> (*grids [0], advection_coeff, pointer (velocity), pointer (vel_explicit_rhs)));
 			}
