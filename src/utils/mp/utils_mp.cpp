@@ -7,7 +7,10 @@
  ************************************************************************/
 
 #include <cassert>
-#include "utils.hpp"
+#include <algorithm>
+#include <omp.h>
+#include <stdio.h>
+#include "../utils.hpp"
 
 /*!*******************************************************************
  * \brief Function from BLAS that calculates a dot product
@@ -113,6 +116,7 @@ extern "C" void daxpy_ (int *n, double *a, double *x, int *incx, double *y, int 
  * \param incy A pointer to an integer spacing of elements in y
  *********************************************************************/
 extern "C" void sgemv_ (char *trans, int *m, int *n, float *alpha, float *a, int *lda, float *x, int *incx, float *beta, float *y, int *incy);
+extern "C" void sgemm_ (char *transa, char *transb, int *m, int *n, int *k, float *alpha, float *a, int *lda, float *b, int *ldb, float *beta, float *c, int *ldc);
 
 /*!*******************************************************************
  * \brief Function from BLAS for matrix-vector multiplication (y = alpha * a * x + beta * y)
@@ -130,6 +134,7 @@ extern "C" void sgemv_ (char *trans, int *m, int *n, float *alpha, float *a, int
  * \param incy A pointer to an integer spacing of elements in y
  *********************************************************************/
 extern "C" void dgemv_ (char *trans, int *m, int *n, double *alpha, double *a, int *lda, double *x, int *incx, double *beta, double *y, int *incy);
+extern "C" void dgemm_ (char *transa, char *transb, int *m, int *n, int *k, double *alpha, double *a, int *lda, double *b, int *ldb, double *beta, double *c, int *ldc);
 
 namespace utils
 {
@@ -139,6 +144,30 @@ namespace utils
 	
 	void copy (int n, double* x, double* y, int incx, int incy) {
 		dcopy_ (&n, x, &incx, y, &incy);
+	}
+	
+	void matrix_copy (int n, int m, float *x, float *y, int ldx, int ldy) {
+		int ione = 1;
+#pragma omp parallel
+		{
+			int i = omp_get_thread_num ();
+			while (i < m) {
+				scopy_ (&n, x + i * ldx, &ione, y + i * ldy, &ione);
+				i += omp_get_num_threads ();
+			}
+		}
+	}
+
+	void matrix_copy (int n, int m, double *x, double *y, int ldx, int ldy) {
+		int ione = 1;
+#pragma omp parallel
+		{
+			int i = omp_get_thread_num ();
+			while (i < m) {
+				dcopy_ (&n, x + i * ldx, &ione, y + i * ldy, &ione);
+				i += omp_get_num_threads ();
+			}
+		}
 	}
 	
 	void scale (int n, int a, int* x, int incx) {
@@ -171,6 +200,30 @@ namespace utils
 		daxpy_ (&n, &da, dx, &incx, dy, &incy);
 	}
 	
+	void matrix_add_scaled (int n, int m, float da, float *dx, float *dy, int ldx, int ldy) {
+		int ione = 1;
+#pragma omp parallel
+		{
+			int i = omp_get_thread_num ();
+			while (i < m) {
+				saxpy_ (&n, &da, dx + i * ldx, &ione, dy + i * ldy, &ione);
+				i += omp_get_num_threads ();
+			}
+		}
+	}
+	
+	void matrix_add_scaled (int n, int m, double da, double *dx, double *dy, int ldx, int ldy) {
+		int ione = 1;
+#pragma omp parallel
+		{
+			int i = omp_get_thread_num ();
+			while (i < m) {
+				daxpy_ (&n, &da, dx + i * ldx, &ione, dy + i * ldy, &ione);
+				i += omp_get_num_threads ();
+			}
+		}
+	}
+	
 	void matrix_vector_multiply (int m, int n, float alpha, float *a, float *x, float beta, float *y, int lda, int incx, int incy) {
 		char charN = 'N';
 		
@@ -193,6 +246,62 @@ namespace utils
 		}
 				
 		dgemv_ (&charN, &m, &n, &alpha, a, &lda, x, &incx, &beta, y, &incy);
+	}
+	
+	void matrix_matrix_multiply (int m, int n, int k, float alpha, float *a, float *b, float beta, float *c, int lda, int ldb, int ldc) {
+		char charN = 'N';
+		if (m == 0 || n == 0 || k == 0) {
+			return;
+		}
+		
+		assert (b != c);
+		
+		if (lda == -1) {
+			lda = m;
+		}
+		if (ldb == -1) {
+			ldb = k;
+		}
+		if (ldc == -1) {
+			ldc = m;
+		}
+#pragma omp parallel
+		{
+			int i = omp_get_thread_num ();
+			int nn = n / omp_get_num_threads ();
+			if (n % omp_get_num_threads () > i) {
+				nn += 1;
+			}
+			sgemm_ (&charN, &charN, &m, &nn, &k, &alpha, a, &lda, b + (i * (n / omp_get_num_threads ()) + std::min (i, n % omp_get_num_threads ())) * ldb, &ldb, &beta, c + (i * (n / omp_get_num_threads ()) + std::min (i, n % omp_get_num_threads ())) * ldc, &ldc);
+		}
+	}
+	
+	void matrix_matrix_multiply (int m, int n, int k, double alpha, double *a, double *b, double beta, double *c, int lda, int ldb, int ldc) {
+		char charN = 'N';
+		if (m == 0 || n == 0 || k == 0) {
+			return;
+		}
+		
+		assert (b != c);
+		
+		if (lda == -1) {
+			lda = m;
+		}
+		if (ldb == -1) {
+			ldb = k;
+		}
+		if (ldc == -1) {
+			ldc = m;
+		}
+#pragma omp parallel
+		{
+			int i = omp_get_thread_num ();
+			int nn = n / omp_get_num_threads ();
+			if (n % omp_get_num_threads () > i) {
+				nn += 1;
+			}
+			dgemm_ (&charN, &charN, &m, &nn, &k, &alpha, a, &lda, b + (i * (n / omp_get_num_threads ()) + std::min (i, n % omp_get_num_threads ())) * ldb, &ldb, &beta, c + (i * (n / omp_get_num_threads ()) + std::min (i, n % omp_get_num_threads ())) * ldc, &ldc);
+		}
 	}
 	
 	void diagonal_multiply (int n, float alpha, float *a, float *x, float beta, float *y, int inca, int incx, int incy) {

@@ -1,1 +1,11 @@
-gcc -Wall -std=c++0x -o main main.o config.o bases/collocation.o bases/element.o bases/messenger.o bases/plan.o bases/solver.o one_d/advection_one_d.o one_d/collocation_one_d.o one_d/diffusion_one_d.o one_d/element_one_d.o one_d/fftw_one_d.o one_d/solver_one_d.o utils/interpolate.o utils/io.o utils/solver_lapack.o utils/utils_lapack.o -llog4cxx -lblas -llapack -lfftw3
+[?1034hscons: Reading SConscript files ...
+Checking for C library log4cxx... (cached) no
+Checking for C library pthread... (cached) yes
+Checking for C library lapack... (cached) yes
+Checking for C library blas... (cached) yes
+Checking for C library atlas... (cached) yes
+Checking for C library netcdf_c++... (cached) yes
+scons: done reading SConscript files.
+scons: Building targets ...
+g++ -o one_d/solver_one_d.o -c -Wall -g -std=c++0x /Users/justinbrown/Dropbox/pisces/src/one_d/solver_one_d.cpp
+scons: building terminated because of errors.

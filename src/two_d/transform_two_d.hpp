@@ -25,15 +25,15 @@ namespace two_d
 		namespace chebyshev
 		{
 			template <class datatype>
-			class transform : public explicit_plan <datatype>
+			class horizontal_transform : public explicit_plan <datatype>
 			{
 			public:
 				/*!**********************************************************************
 				 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
 				 ************************************************************************/
-				transform (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out = NULL, int i_flags = 0x00);
+				horizontal_transform (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out = NULL, int i_flags = 0x00);
 				
-				virtual ~transform () {}
+				virtual ~horizontal_transform () {}
 				
 				virtual void execute (int &element_flags);
 			
@@ -46,11 +46,34 @@ namespace two_d
 				int flags;
 				datatype scalar;
 				fftw_plan x_plan;
-				fftw_plan z_plan;
 				fftwf_plan x_plan_float;
-				fftwf_plan z_plan_float;
 				fftw_iodim major_iodim;
 				fftw_iodim iodim;
+			};
+			
+			template <class datatype>
+			class vertical_transform : public explicit_plan <datatype>
+			{
+			public:
+				/*!**********************************************************************
+				 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
+				 ************************************************************************/
+				vertical_transform (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out = NULL, int i_flags = 0x00);
+				
+				virtual ~vertical_transform () {}
+				
+				virtual void execute (int &element_flags);
+			
+			protected:
+				using explicit_plan <datatype>::n;
+				using explicit_plan <datatype>::m;
+				using explicit_plan <datatype>::data_in;
+				using explicit_plan <datatype>::data_out;
+				
+				int flags;
+				datatype scalar;
+				fftw_plan z_plan;
+				fftwf_plan z_plan_float;
 			};
 		} /* chebyshev */
 	} /* fourier */

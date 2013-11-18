@@ -18,12 +18,6 @@ namespace bases
 	void element <datatype>::run () {
 		TRACE ("Running...");
 		
-		implicit_reset ();
-
-		for (int i = 0; i < (int) implicit_plans.size (); ++i) {
-			implicit_plans [i]->execute (flags);
-		}
-		
 		for (int j = 0; j < inputParams ["timesteps"].asInt; ++j) {
 			INFO ("Timestep " << j << " of " << inputParams ["timesteps"].asInt);
 			
@@ -37,8 +31,14 @@ namespace bases
 				pre_transform_plans [i]->execute (flags);
 			}
 			
-			transform_inverse ();
+			transform_vertical_inverse ();
 			
+			for (int i = 0; i < (int) mid_transform_plans.size (); ++i) {
+				mid_transform_plans [i]->execute (flags);
+			}
+			
+			transform_horizontal_inverse ();
+
 			factorize ();
 			
 			for (int i = 0; i < (int) post_transform_plans.size (); ++i) {
@@ -56,7 +56,7 @@ namespace bases
 			
 			TRACE ("Updating...");
 			
-			transform_forward ();
+			transform_horizontal_forward ();
 			
 			solve ();
 			

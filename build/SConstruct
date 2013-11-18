@@ -4,7 +4,8 @@ import SCons.Conftest
 env = Environment (ENV = os.environ)
 
 include_cuda = False
-include_mpi = False
+include_mpi = True
+include_mp = False
 
 if include_mpi:
     env ["CXX"] = "mpic++"
@@ -12,6 +13,10 @@ if include_mpi:
     env.Append (CPPFLAGS = ["-D_MPI"])
     if include_cuda:
         env.Append (NVCCFLAGS = ["-D_MPI"])
+        
+if include_mp:
+    env.Append (CPPFLAGS = ["-fopenmp"])
+    env.Append (LINKFLAGS = ["-fopenmp"])
 
 if include_cuda:
     env.Tool ('cuda')
@@ -20,4 +25,4 @@ if include_cuda:
 env.Append (CPPFLAGS = ["-Wall", "-g", "-std=c++0x"])
 env.Append (LINKFLAGS = [])
 
-env.SConscript ("../src/SConscript", variant_dir = ".", duplicate = 0, exports = {"env": env, "include_cuda": include_cuda})
+env.SConscript ("../src/SConscript", variant_dir = ".", duplicate = 0, exports = {"env": env, "include_cuda": include_cuda, "include_mp": include_mp})

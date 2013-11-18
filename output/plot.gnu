@@ -7,7 +7,7 @@ set rmargin at screen 0.95
 
 set xrange [-1:1]
 
-plot_file (i, n) = sprintf ("normal_%d_%04d.dat", i, n)
+plot_file (i, n) = sprintf ("normal_%04d.dat", n)
 
 unset key
 

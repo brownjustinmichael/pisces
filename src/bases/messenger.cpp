@@ -164,6 +164,89 @@ namespace bases
 		}
 	}
 	
+	template <class datatype>
+	void messenger::gather (int n, datatype* data_in, datatype* data_out) {
+		if (!data_out) {
+			data_out = data_in;
+		}
+#ifdef _MPI
+		if (id == 0 && data_out == data_in) {
+			printf ("3Here...\n");
+			MPI::COMM_WORLD.Gather (MPI_IN_PLACE, n, mpi_type <datatype> (), data_in, n, mpi_type <datatype> (), 0);
+		} else {
+			MPI::COMM_WORLD.Gather (data_in, n, mpi_type <datatype> (), data_out, n, mpi_type <datatype> (), 0);
+		}
+#else // _MPI
+		FATAL ("Gather used without MPI environment. Exiting.");
+		throw 0;
+#endif // _MPI
+	}
+	
+	template <class datatype>
+	void messenger::gatherv (int n, datatype* data_in, int *ns, datatype* data_out) {
+		if (!data_out) {
+			data_out = data_in;
+		}
+#ifdef _MPI
+		std::vector <int> displs;
+		if (id == 0) {
+			displs.resize (np);
+			for (int i = 1; i < np; ++i) {
+				displs [i] = displs [i - 1] + ns [i - 1];
+			}
+		}
+		if (id == 0 && data_out == data_in) {
+			MPI::COMM_WORLD.Gatherv (MPI_IN_PLACE, n, mpi_type <datatype> (), data_in, ns, &displs [0], mpi_type <datatype> (), 0);
+		} else {
+			MPI::COMM_WORLD.Gatherv (data_in, n, mpi_type <datatype> (), data_out, ns, &displs [0], mpi_type <datatype> (), 0);
+		}
+#else // _MPI
+		FATAL ("Gather used without MPI environment. Exiting.");
+		throw 0;
+#endif // _MPI
+	}
+	
+	template <class datatype>
+	void messenger::scatter (int n, datatype* data_in, datatype* data_out) {
+		if (!data_out) {
+			data_out = data_in;
+		}
+#ifdef _MPI
+		if (id == 0 && data_out == data_in) {
+			MPI::COMM_WORLD.Scatter (data_in, n, mpi_type <datatype> (), MPI_IN_PLACE, n, mpi_type <datatype> (), 0);
+		} else {
+			MPI::COMM_WORLD.Scatter (data_in, n, mpi_type <datatype> (), data_out, n, mpi_type <datatype> (), 0);
+		}
+#else // _MPI
+		FATAL ("Scatter used without MPI environment. Exiting.");
+		throw 0;
+#endif // _MPI
+	}
+	
+	template <class datatype>
+	void messenger::scatterv (int n, datatype* data_in, int* ns, datatype* data_out) {
+		if (!data_out) {
+			data_out = data_in;
+		}
+#ifdef _MPI
+		std::vector <int> displs;
+		if (id == 0) {
+			displs.resize (np);
+			for (int i = 1; i < np; ++i) {
+				displs [i] = displs [i - 1] + ns [i - 1];
+			}
+		}
+		if (id == 0 && data_out == data_in) {
+			MPI::COMM_WORLD.Scatterv (data_in, ns, &displs [0], mpi_type <datatype> (), MPI_IN_PLACE, n, mpi_type <datatype> (), 0);
+		} else {
+			MPI::COMM_WORLD.Scatterv (data_in, ns, &displs [0], mpi_type <datatype> (), data_out, n, mpi_type <datatype> (), 0);
+		}
+#else // _MPI
+		FATAL ("Scatter used without MPI environment. Exiting.");
+		throw 0;
+#endif // _MPI
+	}
+	
 	bool messenger::bool_and (bool boolean) {
 		int temp;
 		if (boolean) {
@@ -219,4 +302,20 @@ namespace bases
 	template void messenger::min <double> (double* data);
 	template void messenger::min <float> (float* data);
 	template void messenger::min <int> (int* data);
+
+	template void messenger::gather <double> (int n, double* data_in, double* data_out);
+	template void messenger::gather <float> (int n, float* data_in, float* data_out);
+	template void messenger::gather <int> (int n, int* data_in, int* data_out);
+	
+	template void messenger::gatherv <double> (int n, double* data_in, int *ns, double* data_out);
+	template void messenger::gatherv <float> (int n, float* data_in, int *ns, float* data_out);
+	template void messenger::gatherv <int> (int n, int* data_in, int *ns, int* data_out);
+	
+	template void messenger::scatter <double> (int n, double* data_in, double* data_out);
+	template void messenger::scatter <float> (int n, float* data_in, float* data_out);
+	template void messenger::scatter <int> (int n, int* data_in, int* data_out);
+	
+	template void messenger::scatterv <double> (int n, double* data_in, int *ns, double* data_out);
+	template void messenger::scatterv <float> (int n, float* data_in, int *ns, float* data_out);
+	template void messenger::scatterv <int> (int n, int* data_in, int *ns, int* data_out);
 } /* bases */

@@ -35,7 +35,7 @@ namespace two_d
 		grid_n (i_grid_n),
 		grid_m (i_grid_m),
 		data_in (i_data_in),
-		data_out (i_data_out ? i_data_out : i_data_in) {DEBUG ("IN: " << data_in << " OUT: " << data_out);}
+		data_out (i_data_out ? i_data_out : i_data_in) {}
 
 		virtual ~explicit_plan () {}
 

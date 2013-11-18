@@ -45,7 +45,8 @@ enum index {
 enum plan_flags {
 	unchanged_timestep = 0x400,
 	implicit_set = 0x4000,
-	transformed = 0x10
+	transformed_horizontal = 0x10,
+	transformed_vertical = 0x8000
 };
 
 namespace bases

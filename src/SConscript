@@ -1,6 +1,7 @@
 import os, inspect
 Import ("env")
 Import ("include_cuda")
+Import ("include_mp")
 
 def directory (path, dirname):
     if dirname [len (path) + 1:] == "":
@@ -25,11 +26,13 @@ path = os.path.dirname (inspect.getfile (inspect.currentframe ()))
 
 for dirname, dirnames, filenames in os.walk (path):
     for subdirname in dirnames:
-        env.SConscript('%s/SConscript' % os.path.join (dirname, subdirname), variant_dir = os.path.join (".", directory (path, dirname) + subdirname), duplicate = 0, exports = {'env': env, "objects": objects, "cuda_objects" : cuda_objects, "include_cuda" : include_cuda})
+        env.SConscript('%s/SConscript' % os.path.join (dirname, subdirname), variant_dir = os.path.join (".", directory (path, dirname) + subdirname), duplicate = 0, exports = {'env': env, "objects": objects, "cuda_objects" : cuda_objects, "include_cuda" : include_cuda, "include_mp": include_mp})
 
 objects.append (env.Object ("config.cpp"))
 
 env.Default (env.Program(target = "../run/main", source = (["main.cpp"] + objects)))
+
+env.Default (env.Program(target = "../run/block_test", source = (["block_test.cpp"] + objects)))
 
 if include_cuda:
     env.Default (env.Program(target = "../run/main_cuda", source = (["main_cuda.cpp"] + objects + cuda_objects)))

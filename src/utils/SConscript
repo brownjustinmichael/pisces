@@ -2,6 +2,7 @@ Import ("env")
 Import ("objects")
 Import ("cuda_objects")
 Import ("include_cuda")
+Import ("include_mp")
 
 conf = Configure (env)
 
@@ -14,10 +15,13 @@ for lib in ["lapack", "blas", "atlas", "netcdf_c++"]:
 
 env = conf.Finish ()
 
-objects.append (env.Object ("utils_lapack.cpp"))
+if not include_mp:
+    objects.append (env.Object ("utils.cpp"))
+    objects.append (env.Object ("solver_utils.cpp"))
 
 objects.append (env.Object ("interpolate.cpp"))
 
-objects.append (env.Object ("solver_lapack.cpp"))
+
+objects.append (env.Object ("block_solver.cpp"))
 
 objects.append (env.Object ("io.cpp"))

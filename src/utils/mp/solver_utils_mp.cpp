@@ -6,7 +6,8 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include "solver_utils.hpp"
+#include <omp.h>
+#include "../solver_utils.hpp"
 
 /*!*******************************************************************
  * \brief Function from LAPACK that factorizes the matrix a by LU decomposition
@@ -70,6 +71,10 @@ namespace utils
 			info = &iinfo;
 		}
 		
+		if (m == 0 || n == 0) {
+			return;
+		}
+		
 		if (lda == -1) {
 			lda = m;
 		}
@@ -85,6 +90,10 @@ namespace utils
 			info = &iinfo;
 		}
 		
+		if (n == 0) {
+			return;
+		}
+		
 		if (lda == -1) {
 			lda = n;
 		}
@@ -92,14 +101,25 @@ namespace utils
 		if (ldb == -1) {
 			ldb = n;
 		}
-		
-		dgetrs_ (&charN, &n, &nrhs, a, &lda, ipiv, b, &ldb, info);
+#pragma omp parallel
+		{
+			int i = omp_get_thread_num ();
+			int nn = nrhs / omp_get_num_threads ();
+			if (n % omp_get_num_threads () > i) {
+				nn += 1;
+			}
+			dgetrs_ (&charN, &n, &nn, a, &lda, ipiv, b + (i * (n / omp_get_num_threads ()) + std::min (i, n % omp_get_num_threads ())) * ldb, &ldb, info);
+		}
 	}
 	
 	void matrix_factorize (int m, int n, float* a, int *ipiv, int *info, int lda) {
 		if (!info) {
 			int iinfo;
 			info = &iinfo;
+		}
+		
+		if (m == 0 || n == 0) {
+			return;
 		}
 		
 		if (lda == -1) {
@@ -117,6 +137,10 @@ namespace utils
 			info = &iinfo;
 		}
 		
+		if (n == 0) {
+			return;
+		}
+		
 		if (lda == -1) {
 			lda = n;
 		}
@@ -124,8 +148,15 @@ namespace utils
 		if (ldb == -1) {
 			ldb = n;
 		}
-		
-		sgetrs_ (&charN, &n, &nrhs, a, &lda, ipiv, b, &ldb, info);
+#pragma omp parallel
+		{
+			int i = omp_get_thread_num ();
+			int nn = nrhs / omp_get_num_threads ();
+			if (n % omp_get_num_threads () > i) {
+				nn += 1;
+			}
+			sgetrs_ (&charN, &n, &nn, a, &lda, ipiv, b + (i * (n / omp_get_num_threads ()) + std::min (i, n % omp_get_num_threads ())) * ldb, &ldb, info);
+		}
 	}
 	
 	void diagonal_solve (int n, float *a, float *b, int inca, int incb) {

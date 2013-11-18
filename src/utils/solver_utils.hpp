@@ -10,6 +10,7 @@
 #define UTILS_SOLVER_HPP_YSBJBB1J
 
 #include <cstddef>
+#include "../bases/messenger.hpp"
 
 namespace utils
 {
@@ -68,7 +69,6 @@ namespace utils
 	void diagonal_solve (int n, double *a, double *b, int inca = 1, int incb = 1);
 
 	void diagonal_solve (int n, float *a, float *b, int inca = 1, int incb = 1);
-	
 } /* utils */
 
 #endif /* end of include guard: UTILS_SOLVER_HPP_YSBJBB1J */

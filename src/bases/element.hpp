@@ -119,13 +119,23 @@ namespace bases
 		 * 
 		 * TODO This assumes one scalar field. It should be generalized.
 		 *********************************************************************/
-		inline void add_forward_transform (plan <datatype>* i_plan) {
-			forward_transforms.push_back (std::shared_ptr <plan <datatype>> (i_plan));
+		inline void add_forward_horizontal_transform (plan <datatype>* i_plan) {
+			forward_horizontal_transforms.push_back (std::shared_ptr <plan <datatype>> (i_plan));
 			// transforms.push_back (i_plan));
 		}
 		
-		inline void add_inverse_transform (plan <datatype>* i_plan) {
-			inverse_transforms.push_back (std::shared_ptr <plan <datatype>> (i_plan));
+		inline void add_inverse_horizontal_transform (plan <datatype>* i_plan) {
+			inverse_horizontal_transforms.push_back (std::shared_ptr <plan <datatype>> (i_plan));
+			// transforms.push_back (i_plan));
+		}
+
+		inline void add_forward_vertical_transform (plan <datatype>* i_plan) {
+			forward_vertical_transforms.push_back (std::shared_ptr <plan <datatype>> (i_plan));
+			// transforms.push_back (i_plan));
+		}
+		
+		inline void add_inverse_vertical_transform (plan <datatype>* i_plan) {
+			inverse_vertical_transforms.push_back (std::shared_ptr <plan <datatype>> (i_plan));
 			// transforms.push_back (i_plan));
 		}
 
@@ -140,6 +150,12 @@ namespace bases
 			TRACE ("Added.");
 		}
 		
+		inline void add_mid_plan (plan <datatype>* i_plan) {
+			TRACE ("Adding plan...");
+			mid_transform_plans.push_back (std::shared_ptr <plan <datatype>> (i_plan));
+			TRACE ("Added.");
+		}
+
 		/*!*******************************************************************
 		 * \brief Adds a plan to be executed in order
 		 * 
@@ -148,17 +164,6 @@ namespace bases
 		inline void add_post_plan (plan <datatype>* i_plan) {
 			TRACE ("Adding plan...");
 			post_transform_plans.push_back (std::shared_ptr <plan <datatype>> (i_plan));
-			TRACE ("Added.");
-		}
-		
-		/*!*******************************************************************
-		 * \brief Adds an implicit plan to be executed in order once at the start
-		 * 
-		 * \param i_plan A shared pointer to the plan to add
-		 *********************************************************************/
-		inline void add_implicit_plan (plan <datatype>* i_plan) {
-			TRACE ("Adding implicit plan...");
-			implicit_plans.push_back (std::shared_ptr <plan <datatype>> (i_plan));
 			TRACE ("Added.");
 		}
 		
@@ -181,21 +186,13 @@ namespace bases
 		 *********************************************************************/
 		virtual void explicit_reset () {
 			TRACE ("Resetting explicits...");
-			if (!(flags & transformed)) {
-				transform_forward ();
+			if (!(flags & transformed_horizontal)) {
+				transform_horizontal_forward ();
+			}
+			if (!(flags & transformed_vertical)) {
+				transform_vertical_forward ();
 			}
 		}
-		
-		/*!*******************************************************************
-		 * \brief Reset any matrices if necessary
-		 * 
-		 * This method should be overwritten if the element solves with an
-		 * implicit part. It should only be called if the timestep duration
-		 * has changed, for the most part.
-		 *********************************************************************/
-		virtual void implicit_reset () {
-			TRACE ("Resetting implicits...");
-		};
 		
 		/*!**********************************************************************
 		 * \brief Transform from spectral space to physical space
@@ -205,23 +202,43 @@ namespace bases
 		 * TODO Multiple transforms and batch transforms should be possible
 		 * TODO Need implementation if reverse transform is not forward transform
 		 ************************************************************************/
-		virtual void transform_forward () {
+		virtual void transform_horizontal_forward () {
 			TRACE ("Transforming...");
-			if (!(flags & transformed)) {
-				for (int i = 0; i < (int) forward_transforms.size (); ++i) {
-					forward_transforms [i]->execute (flags);
+			if (!(flags & transformed_horizontal)) {
+				for (int i = 0; i < (int) forward_horizontal_transforms.size (); ++i) {
+					forward_horizontal_transforms [i]->execute (flags);
 				}
-				flags |= transformed;
+				flags |= transformed_horizontal;
 			}
 		}
 		
-		virtual void transform_inverse () {
+		virtual void transform_horizontal_inverse () {
 			TRACE ("Inverting...");
-			if (flags & transformed) {
-				for (int i = 0; i < (int) inverse_transforms.size (); ++i) {
-					inverse_transforms [i]->execute (flags);
+			if (flags & transformed_horizontal) {
+				for (int i = 0; i < (int) inverse_horizontal_transforms.size (); ++i) {
+					inverse_horizontal_transforms [i]->execute (flags);
 				}
-				flags &= ~transformed;
+				flags &= ~transformed_horizontal;
+			}
+		}
+		
+		virtual void transform_vertical_forward () {
+			TRACE ("Transforming...");
+			if (!(flags & transformed_vertical)) {
+				for (int i = 0; i < (int) forward_vertical_transforms.size (); ++i) {
+					forward_vertical_transforms [i]->execute (flags);
+				}
+				flags |= transformed_vertical;
+			}
+		}
+		
+		virtual void transform_vertical_inverse () {
+			TRACE ("Inverting...");
+			if (flags & transformed_vertical) {
+				for (int i = 0; i < (int) inverse_vertical_transforms.size (); ++i) {
+					inverse_vertical_transforms [i]->execute (flags);
+				}
+				flags &= ~transformed_vertical;
 			}
 		}
 		
@@ -263,7 +280,9 @@ namespace bases
 				flags |= unchanged_timestep;
 			}
 			timestep = t_timestep;
-			flags |= transformed;
+			if (!(flags & transformed_vertical)) {
+				transform_vertical_forward ();
+			}
 			TRACE ("Solve complete.");
 		}
 		
@@ -327,13 +346,15 @@ namespace bases
 
 	private:
 		// std::vector<plan <datatype>* > transforms; //!< A shared pointer to the forward transform
-		std::vector<std::shared_ptr<plan <datatype> > > forward_transforms; //!< A shared pointer to the forward transform
-		std::vector<std::shared_ptr<plan <datatype> > > inverse_transforms; //!< A shared pointer to the forward transform
+		std::vector<std::shared_ptr<plan <datatype> > > forward_horizontal_transforms; //!< A shared pointer to the forward transform
+		std::vector<std::shared_ptr<plan <datatype> > > inverse_horizontal_transforms; //!< A shared pointer to the forward transform
+		std::vector<std::shared_ptr<plan <datatype> > > forward_vertical_transforms; //!< A shared pointer to the forward transform
+		std::vector<std::shared_ptr<plan <datatype> > > inverse_vertical_transforms; //!< A shared pointer to the forward transform
 		std::vector<std::shared_ptr<solver <datatype> > > solvers; //!< A vector of shared pointers to the matrix solvers
 		
 		std::vector <std::shared_ptr <plan <datatype> > > pre_transform_plans; //!< A vector of shared pointers of plans to be executed
+		std::vector <std::shared_ptr <plan <datatype> > > mid_transform_plans; //!< A vector of shared pointers of plans to be executed
 		std::vector <std::shared_ptr <plan <datatype> > > post_transform_plans; //!< A vector of shared pointers of plans to be executed
-		std::vector <std::shared_ptr <plan <datatype> > > implicit_plans; //!< A vector of shared pointers of plans to be executed
 	};
 } /* bases */
 

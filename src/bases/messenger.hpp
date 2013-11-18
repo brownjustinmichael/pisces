@@ -157,6 +157,18 @@ namespace bases
 		template <class datatype>
 		void recv (int n, datatype* data, int edge);
 		
+		template <class datatype>
+		void gather (int n, datatype* data_in, datatype* data_out = NULL);
+		
+		template <class datatype>
+		void gatherv (int n, datatype* data_in, int* ns, datatype* data_out = NULL);
+		
+		template <class datatype>
+		void scatter (int n, datatype* data_in, datatype* data_out = NULL);
+		
+		template <class datatype>
+		void scatterv (int n, datatype* data_in, int* ns, datatype* data_out = NULL);
+		
 		/*!**********************************************************************
 		 * \brief Calculate a minimum across elements
 		 * 

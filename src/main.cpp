@@ -128,10 +128,10 @@ int main (int argc, char *argv[])
 	int m = n - 1;
 	
 	bases::axis horizontal_axis (m, excess_0, position_0, excess_n, position_n);
-	bases::axis vertical_axis (n, excess_0, position_0, excess_n, position_n);
+	bases::axis vertical_axis (n , excess_0, position_0, excess_n, position_n);
 	
-	// one_d::chebyshev::advection_diffusion_element <double> element (&vertical_axis, name, inputParams, &process_messenger, 0x00);
-	two_d::fourier::chebyshev::advection_diffusion_element <double> element (&horizontal_axis, &vertical_axis, name, inputParams, &process_messenger, 0x00);
+	one_d::chebyshev::advection_diffusion_element <double> element (&vertical_axis, name, inputParams, &process_messenger, 0x00);
+	// two_d::fourier::chebyshev::advection_diffusion_element <double> element (&horizontal_axis, &vertical_axis, name, inputParams, &process_messenger, 0x00);
 	
 	try {
 		element.run ();

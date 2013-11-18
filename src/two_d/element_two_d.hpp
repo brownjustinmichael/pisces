@@ -249,6 +249,7 @@ namespace two_d
 				datatype calculate_timestep ();
 			
 			private:
+				using element <datatype>::flags;
 				using element <datatype>::inputParams;
 				using element <datatype>::initialize;
 				using element <datatype>::n;

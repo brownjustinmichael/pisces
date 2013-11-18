@@ -33,6 +33,10 @@ namespace utils
 	 *********************************************************************/
 	void copy (int n, double* x, double* y, int incx = 1, int incy = 1);
 	
+	void matrix_copy (int n, int m, float *x, float *y, int ldx, int ldy);
+	
+	void matrix_copy (int n, int m, double *x, double *y, int ldx, int ldy);
+	
 	/*!*******************************************************************
 	 * \brief Scales a float array by a constant
 	 * 
@@ -113,6 +117,10 @@ namespace utils
 	 *********************************************************************/
 	void add_scaled (int n, double da, double *x, double *y, int incx = 1, int incy = 1);
 	
+	void matrix_add_scaled (int n, int m, float da, float *dx, float *dy, int ldx, int ldy);
+	
+	void matrix_add_scaled (int n, int m, double da, double *dx, double *dy, int ldx, int ldy);
+	
 	/*!*******************************************************************
 	 * \brief Perform the matrix-vector multiplication y = alpha * a * x + beta * y
 	 * 
@@ -128,6 +136,8 @@ namespace utils
 	 * \param incy The integer spacing of elements in y
 	 *********************************************************************/
 	void matrix_vector_multiply (int m, int n, float alpha, float *a, float *x, float beta, float *y, int lda = -1, int incx = 1, int incy = 1);
+	
+	void matrix_matrix_multiply (int m, int n, int k, float alpha, float *a, float *b, float beta, float *c, int lda = -1, int ldb = -1, int ldc = -1);
 
 	/*!*******************************************************************
 	 * \brief Perform the matrix-vector multiplication y = alpha * a * x + beta * y
@@ -144,6 +154,8 @@ namespace utils
 	 * \param incy The integer spacing of elements in y
 	 *********************************************************************/
 	void matrix_vector_multiply (int m, int n, double alpha, double *a, double *x, double beta, double *y, int lda = -1, int incx = 1, int incy = 1);
+
+	void matrix_matrix_multiply (int m, int n, int k, double alpha, double *a, double *b, double beta, double *c, int lda = -1, int ldb = -1, int ldc = -1);
 
 	void diagonal_multiply (int n, float alpha, float *a, float *x, float beta, float *y, int inca = 1, int incx = 1, int incy = 1);
 

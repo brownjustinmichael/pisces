@@ -64,14 +64,14 @@ namespace one_d
 			// Set up plans in order
 			element <datatype>::add_pre_plan (new diffusion <datatype> (*grids [0], diffusion_coeff, alpha, pointer (velocity), pointer (vel_implicit_rhs)));
 
-			element <datatype>::add_inverse_transform (new fftw_cosine <datatype> (*grids [0], pointer (velocity)));
-			element <datatype>::add_forward_transform (new fftw_cosine <datatype> (*grids [0], pointer (velocity)));
+			element <datatype>::add_inverse_vertical_transform (new fftw_cosine <datatype> (*grids [0], pointer (velocity)));
+			element <datatype>::add_forward_vertical_transform (new fftw_cosine <datatype> (*grids [0], pointer (velocity)));
 			if (advection_coeff != 0.0) {
 				element <datatype>::add_post_plan (new advec <datatype> (*grids [0], advection_coeff, pointer (velocity), pointer (vel_explicit_rhs)));
 			}
 		
 			// Set up solver
-			element <datatype>::add_solver (new solver <datatype> (*grids [0], messenger_ptr, inputParams["n_iterations"].asInt, timestep, pointer (velocity), pointer (vel_explicit_rhs), pointer (vel_implicit_rhs)));
+			element <datatype>::add_solver (new iterative_solver <datatype> (*grids [0], messenger_ptr, inputParams["n_iterations"].asInt, timestep, pointer (velocity), pointer (vel_explicit_rhs), pointer (vel_implicit_rhs)));
 		
 			normal_stream->to_file ();
 		

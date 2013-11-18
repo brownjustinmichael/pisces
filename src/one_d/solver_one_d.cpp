@@ -18,7 +18,7 @@
 namespace one_d
 {
 	template <class datatype>
-	solver <datatype>::solver (bases::grid <datatype> &i_grid, bases::messenger* i_messenger_ptr, int i_n_iterations, datatype& i_timestep, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out, int i_flags) : 
+	iterative_solver <datatype>::iterative_solver (bases::grid <datatype> &i_grid, bases::messenger* i_messenger_ptr, int i_n_iterations, datatype& i_timestep, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out, int i_flags) : 
 	bases::solver <datatype> (i_flags), 
 	explicit_plan <datatype> (i_grid, i_data_in, i_data_out),
 	messenger_ptr (i_messenger_ptr),
@@ -64,10 +64,8 @@ namespace one_d
 	}
 	
 	template <class datatype>
-	void solver <datatype>::_factorize () {
+	void iterative_solver <datatype>::_factorize () {
 		int info;
-		
-		DEBUG ("factoring..." << matrix [126]);
 		
 		TRACE ("Factorizing...");
 		
@@ -91,7 +89,7 @@ namespace one_d
 	}
 	
 	template <class datatype>
-	void solver <datatype>::execute (int &element_flags) {
+	void iterative_solver <datatype>::execute (int &element_flags) {
 		int info;
 		int beta_0 = 1.5, beta_1 = -0.5;
 		
@@ -174,10 +172,79 @@ namespace one_d
 		utils::copy (n, &data_temp [0], data_out);
 		utils::copy (n, explicit_rhs, &previous_rhs [0]);
 		flags |= first_run;
+		element_flags |= transformed_vertical;
 		
 		TRACE ("Solve complete.")
 	}
 	
-	template class solver <double>;
-	template class solver <float>;
+	template class iterative_solver <double>;
+	template class iterative_solver <float>;
+	
+	// template <class datatype>
+	// solver <datatype>::solver (bases::grid <datatype> &i_grid, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out, int i_flags) :
+	// bases::solver <datatype> (i_flags), 
+	// explicit_plan <datatype> (i_grid, i_data_in, i_data_out),
+	// messenger_ptr (i_messenger_ptr),
+	// timestep (i_timestep), 
+	// alpha_0 (grid.alpha_0), 
+	// alpha_n (grid.alpha_n), 
+	// positions (&(grid.position ())),
+	// n_iterations (i_n_iterations),
+	// excess_0 (grid.excess_0), 
+	// excess_n (grid.excess_n) {
+	// 	temp_n = n - 2 - excess_0 - excess_n;
+	// 	factorized_matrix.resize (temp_n * temp_n, 0.0);
+	// 	edge_vector_0.resize ((n - 2 - excess_0 - excess_n) * (excess_0 + 1), 0.0);
+	// 	edge_vector_n.resize ((n - 2 - excess_0 - excess_n) * (excess_n + 1), 0.0);
+	// 	hedge_vector_0.resize (n * (excess_0 + 1), 0.0);
+	// 	hedge_vector_n.resize (n * (excess_n + 1), 0.0);
+	// 	if (messenger_ptr->get_id == 0) {
+	// 		boundary_matrix.resize (((2 + excess_0 + excess_n) * messenger_ptr->get_np () - 2) * ((2 + excess_0 + excess_n) * messenger_ptr->get_np () - 2));
+	// 	}
+	// }
+	// 
+	// template <class datatype>
+	// void solver <datatype>::_factorize () {
+	// 	int info;
+	// 	
+	// 	TRACE ("Factorizing...");
+	// 	
+	// 	utils::copy (temp_n * temp_n, default_matrix + (excess_0 + 1) * (n + 1), &factorized_matrix [0]);
+	// 	utils::scale (n * (excess_0 + 1), 0.0, &xhedge_vector [0]);
+	// 	utils::scale (n * (excess_n + 1), 0.0, &xhedge_vector [0]);
+	// 	for (int i = 0; i < excess_0 + 1; ++i) {
+	// 		utils::copy (temp_n, default_matrix + (excess_0 + 1) + i * n, &edge_vector_0 [i * temp_n]);
+	// 	}
+	// 	{
+	// 		int j = 0;
+	// 		for (int i = n - 2 - excess_n; i < n; ++i) {
+	// 			utils::copy (temp_n, default_matrix + (excess_0 + 1) + i * n, &edge_vector_0 [j * temp_n]);
+	// 			j += 1;
+	// 		}
+	// 	}
+	// 	utils::copy (n * (excess_0 + 1), default_matrix, &hedge_vector_0 [0]);
+	// 	utils::copy (n * (excess_n + 1), default_matrix, &hedge_vector_0 [0]);
+	// 	
+	// 	
+	// 	utils::add_scaled (n, alpha_0 * timestep, matrix + excess_0, &hedge_vector_0 [0]);	
+	// 	utils::add_scaled (n, (alpha_0 - 1) * timestep, matrix + excess_0, &hedge_vector_0 [0]);	
+	// 	for (int i = excess_0 + 1; i < n - excess_n - 1; ++i) {
+	// 		utils::add_scaled (temp_n, timestep, matrix + (excess_0 + 1) * (n + 1) + i, &factorized_matrix [i], n, n);
+	// 	}
+	// 	utils::add_scaled (temp_n, timestep, matrix)
+	// 	utils::add_scaled (n, alpha_n * timestep, matrix + n - 1 - excess_n, &hedge_vector_n [n * (excess_0)]);
+	// 	utils::add_scaled (n, (alpha_n - 1) * timestep, matrix + n - 1 - excess_n, &xhedge_vector_n [n * (excess_0)]);
+	// 
+	// 	utils::matrix_factorize (temp_n, temp_n, &factorized_matrix [(excess_0 + 1) * n + 1 + excess_0], &ipiv [0], &info, n);
+	// 	
+	// 	utils::
+	// 	
+	// 	if (info != 0) {
+	// 		ERROR ("Unable to invert matrix");
+	// 		throw 0; // For now, kill the program. 
+	// 		/*
+	// 			TODO Replace this with a more useful exception that can be handled
+	// 		*/
+	// 	}
+	// }
 } /* one_d */
