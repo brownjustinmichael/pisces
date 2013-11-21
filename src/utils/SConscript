@@ -21,7 +21,6 @@ if not include_mp:
 
 objects.append (env.Object ("interpolate.cpp"))
 
-
 objects.append (env.Object ("block_solver.cpp"))
 
 objects.append (env.Object ("io.cpp"))

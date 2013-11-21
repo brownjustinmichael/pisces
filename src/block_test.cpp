@@ -13,12 +13,13 @@
 #include "utils/block_solver.hpp"
 #include "utils/utils.hpp"
 #include "bases/messenger.hpp"
+#include <omp.h>
 
 int main (int argc, char *argv[])
 {
 	bases::messenger mess (&argc, &argv, 2);
 
-	int n = 100, nrhs = 100, ntop = 0, nbot = 0;
+	int n = 1000, nrhs = 10000, ntimes = 10, ntop = 0, nbot = 0;
 	if (mess.get_id () != 0) {
 		ntop = 2;
 	}
@@ -63,15 +64,17 @@ int main (int argc, char *argv[])
 	
 	utils::matrix_copy (lda, lda, &a [0], &acopy [0], lda, lda);
 	
-	const clock_t begin = clock ();
+	double begin = omp_get_wtime ();
 
 	utils::p_block_matrix_factorize (&mess, n, ntop, nbot, &a [0], &ipiv [0], &x [0], &xipiv [0], &ns [0], &info, lda, ldx);
 
-	const clock_t mid = clock ();
+	double mid = omp_get_wtime ();
 
-	utils::p_block_matrix_solve (&mess, n, ntop, nbot, &a [0], &ipiv [0], &b [0], &x [0], &xipiv [0], &ns [0], &info, nrhs, lda, ldx, ldb);
+	for (int i = 0; i < ntimes; ++i) {
+		utils::p_block_matrix_solve (&mess, n, ntop, nbot, &a [0], &ipiv [0], &b [0], &x [0], &xipiv [0], &ns [0], &info, nrhs, lda, ldx, ldb);
+	}
 	
-	const clock_t end = clock ();
+	double end = omp_get_wtime ();
 	
 	utils::matrix_matrix_multiply (lda, nrhs, lda, -1.0, &acopy [0], &b [0], 1.0, &bcopy [0]);
 	
@@ -97,7 +100,7 @@ int main (int argc, char *argv[])
 	// 	printf ("\n");
 	// }
 	
-	printf ("[%d]: Time: %f + %f = %f\n", mess.get_id (), float (mid - begin)/CLOCKS_PER_SEC, float (end - mid)/CLOCKS_PER_SEC, float (end - begin)/CLOCKS_PER_SEC);
+	printf ("[%d]: Time: %f + %f = %f\n", mess.get_id (), (mid - begin), (end - mid), (end - begin));
 
 	// int nm = 5, nbtot = 0, info, ntot = 0, ncur = 0;
 	// std::vector <int> n (nm);

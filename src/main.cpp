@@ -115,15 +115,6 @@ int main (int argc, char *argv[])
 		excess_n = 1;
 	}
 	int name = id;
-
-	// if (id != 0) {
-	// 	TRACE ("Adding boundary to " << name << " at 0 at processor " << id - 1);
-	// 	process_messenger.add_boundary (one_d::edge_0, id - 1);
-	// }
-	// if (id != n_elements - 1) {
-	// 	TRACE ("Adding boundary to " << name << " at n - 1 at processor " << id + 1);
-	// 	process_messenger.add_boundary (one_d::edge_n, id + 1);
-	// }
 	
 	int m = n - 1;
 	

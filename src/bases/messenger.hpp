@@ -142,6 +142,9 @@ namespace bases
 		template <class datatype>
 		void send (int n, datatype* data, int edge);
 		
+		template <class datatype>
+		void send (int n, datatype* data, int process, int tag);
+		
 		/*!**********************************************************************
 		 * \brief Add recv action in the datatype queue
 		 * 
@@ -156,6 +159,9 @@ namespace bases
 		 ************************************************************************/
 		template <class datatype>
 		void recv (int n, datatype* data, int edge);
+		
+		template <class datatype>
+		void recv (int n, datatype* data, int process, int tag);
 		
 		template <class datatype>
 		void gather (int n, datatype* data_in, datatype* data_out = NULL);

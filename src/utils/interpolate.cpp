@@ -11,25 +11,73 @@
 
 namespace utils
 {
-	double interpolate (int n, double* dx, double* dy, double x) {
+	void interpolate (int n, int m, double* x, double* y, double* in, double* out, int ldy, int ldout) {
 		TRACE ("Interpolating...");
-		int i = 1;
-		/*
-			TODO Allow for reverse dx as well
-		*/
-		if (x < dx [0] || x > dx [n - 1]) {
-			throw 0;
+		if (ldy == -1) {
+			ldy = m;
+		}
+		if (ldout == -1) {
+			ldout = n;
+		}
+		for (int k = 0; k < n; ++k) {
+			int i = 1;
 			/*
-				TODO better exception?
+				TODO Allow for reverse dx as well
 			*/
+			if (in [k] < x [0] || in [k] > x [m - 1]) {
+				FATAL ("Interpolation out of range.");
+				throw 0;
+				/*
+					TODO better exception?
+				*/
+			}
+			while (in [k] > x [i]) {
+				++i;
+			}
+			if (in [k] == x [i]) {
+				for (int j = 0; j < m; ++j) {
+					out [j * ldout + k] = y [j * ldy + i];
+				}
+			} else {
+				for (int j = 0; j < m; ++j) {
+					out [j * ldout + k] = (y [j * ldy + i] - y [j * ldy + i - 1]) / (x [i] - x [i - 1]) * (in [k] - x [i]) + y [j * ldy + i];
+				}
+			}
 		}
-		while (x < dx [i]) {
-			++i;
+	}
+	
+	void interpolate (int n, int m, float* x, float* y, float* in, float* out, int ldy, int ldout) {
+		TRACE ("Interpolating...");
+		if (ldy == -1) {
+			ldy = m;
 		}
-		if (x == dx [i]) {
-			return dy [i];
-		} else {
-			return (dy [i] - dy [i - 1]) / (dx [i] - dx [i - 1]) * (x - dx [i]) + dy [i];
+		if (ldout == -1) {
+			ldout = n;
+		}
+		for (int k = 0; k < n; ++k) {
+			int i = 1;
+			/*
+				TODO Allow for reverse dx as well
+			*/
+			if (in [k] < x [0] || in [k] > x [n - 1]) {
+				FATAL ("Interpolation out of range.");
+				throw 0;
+				/*
+					TODO better exception?
+				*/
+			}
+			while (in [k] > x [i]) {
+				++i;
+			}
+			if (in [k] == x [i]) {
+				for (int j = 0; j < m; ++j) {
+					out [j * ldy + k] = y [j * ldy + i];
+				}
+			} else {
+				for (int j = 0; j < m; ++j) {
+					out [j * ldy + k] += (y [j * ldy + i] - y [j * ldy + i - 1]) / (x [i] - x [i - 1]) * (in [j] - x [i]) + y [j * ldy + i];
+				}
+			}
 		}
 	}
 	

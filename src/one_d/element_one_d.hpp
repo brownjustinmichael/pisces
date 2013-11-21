@@ -91,7 +91,7 @@ namespace one_d
 			}
 			scalars [name].resize (n, 0.0);
 			if (initial_conditions) {
-				utils::copy (n, initial_conditions, &(scalars [name]) [0]);
+				utils::copy (n, initial_conditions, this->pointer (name));
 			}
 			for (std::map <int, int>::iterator i_edge = edge_map.begin (); i_edge != edge_map.end (); ++i_edge) {
 				fixed_points [i_edge->first] [name] = scalars [name] [i_edge->second];

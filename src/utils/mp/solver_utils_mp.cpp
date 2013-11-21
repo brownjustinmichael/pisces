@@ -101,7 +101,7 @@ namespace utils
 		if (ldb == -1) {
 			ldb = n;
 		}
-#pragma omp parallel
+#pragma omp parallel shared(a,b)
 		{
 			int i = omp_get_thread_num ();
 			int nn = nrhs / omp_get_num_threads ();
@@ -148,7 +148,7 @@ namespace utils
 		if (ldb == -1) {
 			ldb = n;
 		}
-#pragma omp parallel
+#pragma omp parallel shared(a,b)
 		{
 			int i = omp_get_thread_num ();
 			int nn = nrhs / omp_get_num_threads ();

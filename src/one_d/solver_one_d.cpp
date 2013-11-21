@@ -11,6 +11,7 @@
 #include "solver_one_d.hpp"
 #include "../utils/utils.hpp"
 #include "../utils/solver_utils.hpp"
+#include "../utils/block_solver.hpp"
 #include "../utils/interpolate.hpp"
 #include "../bases/messenger.hpp"
 #include "element_one_d.hpp"
@@ -180,71 +181,92 @@ namespace one_d
 	template class iterative_solver <double>;
 	template class iterative_solver <float>;
 	
-	// template <class datatype>
-	// solver <datatype>::solver (bases::grid <datatype> &i_grid, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out, int i_flags) :
-	// bases::solver <datatype> (i_flags), 
-	// explicit_plan <datatype> (i_grid, i_data_in, i_data_out),
-	// messenger_ptr (i_messenger_ptr),
-	// timestep (i_timestep), 
-	// alpha_0 (grid.alpha_0), 
-	// alpha_n (grid.alpha_n), 
-	// positions (&(grid.position ())),
-	// n_iterations (i_n_iterations),
-	// excess_0 (grid.excess_0), 
-	// excess_n (grid.excess_n) {
-	// 	temp_n = n - 2 - excess_0 - excess_n;
-	// 	factorized_matrix.resize (temp_n * temp_n, 0.0);
-	// 	edge_vector_0.resize ((n - 2 - excess_0 - excess_n) * (excess_0 + 1), 0.0);
-	// 	edge_vector_n.resize ((n - 2 - excess_0 - excess_n) * (excess_n + 1), 0.0);
-	// 	hedge_vector_0.resize (n * (excess_0 + 1), 0.0);
-	// 	hedge_vector_n.resize (n * (excess_n + 1), 0.0);
-	// 	if (messenger_ptr->get_id == 0) {
-	// 		boundary_matrix.resize (((2 + excess_0 + excess_n) * messenger_ptr->get_np () - 2) * ((2 + excess_0 + excess_n) * messenger_ptr->get_np () - 2));
-	// 	}
-	// }
-	// 
-	// template <class datatype>
-	// void solver <datatype>::_factorize () {
-	// 	int info;
-	// 	
-	// 	TRACE ("Factorizing...");
-	// 	
-	// 	utils::copy (temp_n * temp_n, default_matrix + (excess_0 + 1) * (n + 1), &factorized_matrix [0]);
-	// 	utils::scale (n * (excess_0 + 1), 0.0, &xhedge_vector [0]);
-	// 	utils::scale (n * (excess_n + 1), 0.0, &xhedge_vector [0]);
-	// 	for (int i = 0; i < excess_0 + 1; ++i) {
-	// 		utils::copy (temp_n, default_matrix + (excess_0 + 1) + i * n, &edge_vector_0 [i * temp_n]);
-	// 	}
-	// 	{
-	// 		int j = 0;
-	// 		for (int i = n - 2 - excess_n; i < n; ++i) {
-	// 			utils::copy (temp_n, default_matrix + (excess_0 + 1) + i * n, &edge_vector_0 [j * temp_n]);
-	// 			j += 1;
-	// 		}
-	// 	}
-	// 	utils::copy (n * (excess_0 + 1), default_matrix, &hedge_vector_0 [0]);
-	// 	utils::copy (n * (excess_n + 1), default_matrix, &hedge_vector_0 [0]);
-	// 	
-	// 	
-	// 	utils::add_scaled (n, alpha_0 * timestep, matrix + excess_0, &hedge_vector_0 [0]);	
-	// 	utils::add_scaled (n, (alpha_0 - 1) * timestep, matrix + excess_0, &hedge_vector_0 [0]);	
-	// 	for (int i = excess_0 + 1; i < n - excess_n - 1; ++i) {
-	// 		utils::add_scaled (temp_n, timestep, matrix + (excess_0 + 1) * (n + 1) + i, &factorized_matrix [i], n, n);
-	// 	}
-	// 	utils::add_scaled (temp_n, timestep, matrix)
-	// 	utils::add_scaled (n, alpha_n * timestep, matrix + n - 1 - excess_n, &hedge_vector_n [n * (excess_0)]);
-	// 	utils::add_scaled (n, (alpha_n - 1) * timestep, matrix + n - 1 - excess_n, &xhedge_vector_n [n * (excess_0)]);
-	// 
-	// 	utils::matrix_factorize (temp_n, temp_n, &factorized_matrix [(excess_0 + 1) * n + 1 + excess_0], &ipiv [0], &info, n);
-	// 	
-	// 	utils::
-	// 	
-	// 	if (info != 0) {
-	// 		ERROR ("Unable to invert matrix");
-	// 		throw 0; // For now, kill the program. 
-	// 		/*
-	// 			TODO Replace this with a more useful exception that can be handled
-	// 		*/
-	// 	}
-	// }
+	template <class datatype>
+	solver <datatype>::solver (bases::grid <datatype> &i_grid, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out, int i_flags) :
+	bases::solver <datatype> (i_flags), 
+	explicit_plan <datatype> (i_grid, i_data_in, i_data_out),
+	messenger_ptr (i_messenger_ptr),
+	timestep (i_timestep), 
+	alpha_0 (grid.alpha_0), 
+	alpha_n (grid.alpha_n), 
+	positions (&(grid.position ())),
+	excess_0 (grid.excess_0), 
+	excess_n (grid.excess_n),
+	default_matrix (i_grid.get_data (0)), 
+	matrix (i_grid.matrix_ptr ()) {
+		TRACE ("Instantiating...");
+		if (messenger_ptr->get_id () - 1 >= 0) {
+			messenger_ptr->template send <int> (1, &excess_0, messenger_ptr->get_id () - 1, 0);
+			messenger_ptr->template recv <int> (1, &ex_excess_0, messenger_ptr->get_id () - 1, 0);
+			positions_0.resize (ex_excess_0);
+			messenger_ptr->template send <datatype> (excess_0, positions, messenger_ptr->get_id () - 1, 0);
+			messenger_ptr->template recv <datatype> (ex_excess_0, &positions_0 [0], messenger_ptr->get_id () - 1, 0);
+		} else {
+			ex_excess_0 = 0;
+		}
+		if (messenger_ptr->get_id () + 1 < messenger_ptr->get_np ()) {
+			messenger_ptr->template send <int> (1, &excess_n, messenger_ptr->get_id () + 1, 0);
+			messenger_ptr->template recv <int> (1, &ex_excess_n, messenger_ptr->get_id () + 1, 0);
+			positions_n.resize (ex_excess_n);
+			messenger_ptr->template send <datatype> (excess_n, &(positions [n - 1 - excess_n]), messenger_ptr->get_id () + 1, 0);
+			messenger_ptr->template recv <datatype> (ex_excess_n, &positions_n [0], messenger_ptr->get_id () + 1, 0);
+		} else {
+			ex_excess_n = 0;
+		}
+		int ns0 = excess_0 + ex_excess_0;
+		if (messenger_ptr->get_id () == 0) {
+			ns.resize (messenger_ptr->get_np ());
+			messenger_ptr->template gather <int> (1, &ns0, &ns [0]);
+			int ntot = 0;
+			for (int i = 0; i < messenger_ptr->get_np (); ++i) {
+				ntot += ns [i];
+			}
+			boundary_matrix.resize (ntot * ntot);
+			bipiv.resize (ntot);
+		} else {
+			messenger_ptr->template gather <int> (1, &ns0, NULL);
+			boundary_matrix.resize ((excess_0 + ex_excess_0 + excess_n + ex_excess_n) * (excess_0 + ex_excess_0 + excess_n + ex_excess_n));
+		}
+		
+		factorized_matrix.resize ((n + ex_excess_0 + ex_excess_n) * (n + ex_excess_0 + ex_excess_n), 0.0);
+		ipiv.resize (n);
+		data_temp.resize (n + ex_excess_0 + ex_excess_n);
+	}
+	
+	template <class datatype>
+	void solver <datatype>::_factorize () {
+		int info;
+		DEBUG ("Factorizing..." << messenger_ptr->get_id ());
+		
+		utils::matrix_copy (n, n, default_matrix, &factorized_matrix [ex_excess_0 * (n + ex_excess_0 + ex_excess_n + 1)], n, n + ex_excess_0 + ex_excess_n);
+		
+		utils::add_scaled (n, alpha_0 * timestep, matrix + excess_0, &factorized_matrix [ex_excess_0 * (n + ex_excess_0 + ex_excess_n + 1) + excess_0], n, n + ex_excess_0 + ex_excess_n);	
+		utils::matrix_add_scaled (n - excess_n - excess_0 - 2, n, timestep, matrix + excess_0 + 1, &factorized_matrix [ex_excess_0 * (n + ex_excess_0 + ex_excess_n + 1) + excess_0 + 1], n, n + ex_excess_0 + ex_excess_n);
+		utils::add_scaled (n, alpha_n * timestep, matrix + n - 1 - excess_n, &factorized_matrix [ex_excess_0 * (n + ex_excess_0 + n + ex_excess_0 + ex_excess_n + 1) + n - excess_n], n, n + ex_excess_0 + ex_excess_n);
+		
+		DEBUG ("Interpolating..." << messenger_ptr->get_id ());
+		
+		utils::interpolate (ex_excess_0, n, positions, default_matrix, &positions_0 [0], &factorized_matrix [ex_excess_0 * (n + ex_excess_0 + ex_excess_n)], n, n + ex_excess_0 + ex_excess_n);
+		utils::interpolate (ex_excess_n, n, positions, default_matrix, &positions_n [0], &factorized_matrix [ex_excess_0 * (n + ex_excess_0 + ex_excess_n + 1) + n], n, n + ex_excess_0 + ex_excess_n);
+
+		DEBUG ("Entering..." << ((int) boundary_matrix.size ()));
+
+		utils::p_block_matrix_factorize (messenger_ptr, n - excess_0 - excess_n, excess_0 + ex_excess_0, excess_n + ex_excess_n, &factorized_matrix [0], &ipiv [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, n + ex_excess_0 + ex_excess_n, sqrt ((int) boundary_matrix.size ()));
+		
+		if (info != 0) {
+			ERROR ("Unable to invert matrix");
+			throw 0; // For now, kill the program. 
+			/*
+				TODO Replace this with a more useful exception that can be handled
+			*/
+		}
+		DEBUG ("Done.");
+	}
+	
+	template <class datatype>
+	void solver <datatype>::execute (int &element_flags) {
+	}
+	
+	template class solver <double>;
+	template class solver <float>;
 } /* one_d */

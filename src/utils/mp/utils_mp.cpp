@@ -148,25 +148,17 @@ namespace utils
 	
 	void matrix_copy (int n, int m, float *x, float *y, int ldx, int ldy) {
 		int ione = 1;
-#pragma omp parallel
-		{
-			int i = omp_get_thread_num ();
-			while (i < m) {
-				scopy_ (&n, x + i * ldx, &ione, y + i * ldy, &ione);
-				i += omp_get_num_threads ();
-			}
+#pragma omp parallel for shared(x,y)
+		for (int i = 0; i < m; ++i) {
+			scopy_ (&n, x + i * ldx, &ione, y + i * ldy, &ione);
 		}
 	}
 
 	void matrix_copy (int n, int m, double *x, double *y, int ldx, int ldy) {
 		int ione = 1;
-#pragma omp parallel
-		{
-			int i = omp_get_thread_num ();
-			while (i < m) {
-				dcopy_ (&n, x + i * ldx, &ione, y + i * ldy, &ione);
-				i += omp_get_num_threads ();
-			}
+#pragma omp parallel for shared(x,y)
+		for (int i = 0; i < m; ++i) {
+			dcopy_ (&n, x + i * ldx, &ione, y + i * ldy, &ione);
 		}
 	}
 	
@@ -202,25 +194,17 @@ namespace utils
 	
 	void matrix_add_scaled (int n, int m, float da, float *dx, float *dy, int ldx, int ldy) {
 		int ione = 1;
-#pragma omp parallel
-		{
-			int i = omp_get_thread_num ();
-			while (i < m) {
-				saxpy_ (&n, &da, dx + i * ldx, &ione, dy + i * ldy, &ione);
-				i += omp_get_num_threads ();
-			}
+#pragma omp parallel for shared(dx,dy)
+		for (int i = 0; i < m; ++i) {
+			saxpy_ (&n, &da, dx + i * ldx, &ione, dy + i * ldy, &ione);
 		}
 	}
 	
 	void matrix_add_scaled (int n, int m, double da, double *dx, double *dy, int ldx, int ldy) {
 		int ione = 1;
-#pragma omp parallel
-		{
-			int i = omp_get_thread_num ();
-			while (i < m) {
-				daxpy_ (&n, &da, dx + i * ldx, &ione, dy + i * ldy, &ione);
-				i += omp_get_num_threads ();
-			}
+#pragma omp parallel for shared(dx,dy)
+		for (int i = 0; i < m; ++i) {
+			daxpy_ (&n, &da, dx + i * ldx, &ione, dy + i * ldy, &ione);
 		}
 	}
 	

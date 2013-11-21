@@ -87,6 +87,16 @@ namespace bases
 	}
 	
 	template <class datatype>
+	void messenger::send (int n, datatype *data, int process, int tag) {
+#ifdef _MPI
+		MPI::COMM_WORLD.Send (data, n, mpi_type <datatype> (), process, tag);
+#else // _MPI
+		FATAL ("Send used without MPI environment. Exiting.");
+		throw 0;
+#endif // _MPI
+	}
+	
+	template <class datatype>
 	void messenger::recv (int n, datatype* data, int edge) {
 		TRACE ("Adding message to queue.");
 		if (data_queue [edge_to_index (recv_mode, edge)]) {
@@ -103,6 +113,16 @@ namespace bases
 		data_queue [edge_to_index (recv_mode, edge)] = data;
 		n_queue [edge_to_index (recv_mode, edge)] = n;
 		data_check <datatype> ();
+	}
+	
+	template <class datatype>
+	void messenger::recv (int n, datatype *data, int process, int tag) {
+#ifdef _MPI
+		MPI::COMM_WORLD.Recv (data, n, mpi_type <datatype> (), process, tag);
+#else // _MPI
+		FATAL ("Send used without MPI environment. Exiting.");
+		throw 0;
+#endif // _MPI
 	}
 
 	template <class datatype>
@@ -290,6 +310,14 @@ namespace bases
 	template void messenger::send <double> (int n, double* data, int edge);
 	template void messenger::send <float> (int n, float* data, int edge);
 	template void messenger::send <int> (int n, int* data, int edge);
+	
+	template void messenger::send <double> (int n, double* data, int process, int tag);
+	template void messenger::send <float> (int n, float* data, int process, int tag);
+	template void messenger::send <int> (int n, int* data, int process, int tag);
+	
+	template void messenger::recv <double> (int n, double* data, int process, int tag);
+	template void messenger::recv <float> (int n, float* data, int process, int tag);
+	template void messenger::recv <int> (int n, int* data, int process, int tag);
 	
 	template void messenger::recv <double> (int n, double* data, int edge);
 	template void messenger::recv <float> (int n, float* data, int edge);
