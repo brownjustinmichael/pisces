@@ -3,7 +3,7 @@ n_iterations 10
 diffusion_coeff 0.001
 advection_coeff 1.0
 courant_factor 0.8
-timesteps 300
+timesteps 10
 output_every 10
 gridpoints 32
 time_step_size 0.01
