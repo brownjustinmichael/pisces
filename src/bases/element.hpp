@@ -12,10 +12,10 @@
 #ifndef ELEMENT_HPP_IUTSU4TQ
 #define ELEMENT_HPP_IUTSU4TQ
 
+#include "messenger.hpp"
 #include <string>
 #include <cassert>
 #include <memory>
-#include "messenger.hpp"
 #include "plan.hpp"
 #include "solver.hpp"
 #include "../utils/io.hpp"

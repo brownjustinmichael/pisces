@@ -6,8 +6,9 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include <cassert>
 #include "element.hpp"
+
+#include <cassert>
 #include "../config.hpp"
 #include "solver.hpp"
 #include "../utils/utils.hpp"
