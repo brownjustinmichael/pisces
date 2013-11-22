@@ -18,45 +18,26 @@
 #define IO_HPP_C1E9B6EF
 
 namespace io
-{	
-	/*!*******************************************************************
-	 * \brief A class for reading experiment parameters out of a parameter file
-	 * 
-	 *********************************************************************/
-	union types
+{
+	template <class datatype>
+	class parameters
 	{
-		unsigned long asULong;
-		int asInt;
-		double asDouble;
-
-		types () {asULong = 0;}
-		types (int in) {asInt = in;}
-		types (double in) {asDouble = in;}
-
-		operator int() {return asInt;}
-		operator double() {return asDouble;}
-	};
-	
-	typedef std::map<std::string,io::types> parameter_map;
-
-	class read_params_txt
-	{
-	private:
+	public:
 		std::string filename;
 
-		double diffusion_coeff;
-		double advection_coeff;
+		datatype diffusion_coeff;
+		datatype advection_coeff;
 		int timesteps;
 		int gridpoints;
-		std::vector<std::string> val_names;
-		std::map<std::string, types> inputParam;
+		int output_every;
+		int n_iterations;
+		int n, nmp, nrhs, nb;
+		datatype max_timestep, courant_factor;
+		datatype scale, width, mean, sigma;
 
-	public:
-
-		read_params_txt (std::string i_filename);
-		virtual ~read_params_txt () {}
-
-		std::map<std::string, types> load_params () {return inputParam;}
+		parameters (std::string i_filename);
+		
+		virtual ~parameters () {}
 	};
 	
 	class format

@@ -1,0 +1,126 @@
+file /Users/justinbrown/Dropbox/pisces/src/SConscript,line 12:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cxx... 
+scons: Configure: ".sconf_temp/conftest_0.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_0.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_0.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_0.o -c -D_MPI -fopenmp -Wall -g -std=c++0x -fopenmp .sconf_temp/conftest_0.c
+  |
+scons: Configure: Building ".sconf_temp/conftest_0" failed in a previous run and all its sources are up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_0 -fopenmp -fopenmp .sconf_temp/conftest_0.o -llog4cxx
+  |
+scons: Configure: (cached) no
+
+
+file /Users/justinbrown/Dropbox/pisces/src/utils/SConscript,line 7:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library lapack... 
+scons: Configure: ".sconf_temp/conftest_1.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_1.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_1.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1.o -c -D_MPI -fopenmp -Wall -g -std=c++0x -fopenmp .sconf_temp/conftest_1.c
+  |
+scons: Configure: ".sconf_temp/conftest_1" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_1 -fopenmp -fopenmp .sconf_temp/conftest_1.o -lfftw3 -lfftw3f -llapack
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C library blas... 
+scons: Configure: ".sconf_temp/conftest_2.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_2.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_2.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_2.o -c -D_MPI -fopenmp -Wall -g -std=c++0x -fopenmp .sconf_temp/conftest_2.c
+  |
+scons: Configure: ".sconf_temp/conftest_2" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_2 -fopenmp -fopenmp .sconf_temp/conftest_2.o -lfftw3 -lfftw3f -llapack -lblas
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C library atlas... 
+scons: Configure: ".sconf_temp/conftest_3.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_3.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_3.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_3.o -c -D_MPI -fopenmp -Wall -g -std=c++0x -fopenmp .sconf_temp/conftest_3.c
+  |
+scons: Configure: ".sconf_temp/conftest_3" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_3 -fopenmp -fopenmp .sconf_temp/conftest_3.o -lfftw3 -lfftw3f -llapack -lblas -latlas
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C library netcdf_c++... 
+scons: Configure: ".sconf_temp/conftest_4.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_4.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_4.o" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_4.o -c -D_MPI -fopenmp -Wall -g -std=c++0x -fopenmp .sconf_temp/conftest_4.c
+  |
+scons: Configure: ".sconf_temp/conftest_4" is up to date.
+scons: Configure: The original builder output was:
+  |gcc -o .sconf_temp/conftest_4 -fopenmp -fopenmp .sconf_temp/conftest_4.o -lfftw3 -lfftw3f -llapack -lblas -latlas -lnetcdf_c++
+  |
+scons: Configure: (cached) yes
+
+

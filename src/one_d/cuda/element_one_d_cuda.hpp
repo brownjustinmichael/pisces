@@ -31,7 +31,7 @@ namespace cuda
 			class fft_element : public ::one_d::chebyshev::element <datatype>
 			{
 			public:
-				fft_element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& i_input_Params, bases::messenger* i_messenger_ptr, int i_flags);
+				fft_element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameters <datatype>& i_input_Params, bases::messenger* i_messenger_ptr, int i_flags);
 		
 				virtual ~fft_element () {}
 		
@@ -64,7 +64,7 @@ namespace cuda
 				using ::one_d::chebyshev::element <datatype>::cell;
 				using ::one_d::chebyshev::element <datatype>::timestep;
 				using ::one_d::chebyshev::element <datatype>::boundary_weights;
-				using ::one_d::chebyshev::element <datatype>::inputParams;
+				using ::one_d::chebyshev::element <datatype>::params;
 				using ::one_d::chebyshev::element <datatype>::grid;
 				using ::one_d::chebyshev::element <datatype>::pointer;
 				using ::one_d::chebyshev::element <datatype>::messenger_ptr;

@@ -84,7 +84,6 @@ namespace utils
 	
 	void matrix_solve (int n, double* a, int* ipiv, double* b, int *info, int nrhs, int lda, int ldb) {
 		char charN = 'N';
-		
 		if (!info) {
 			int iinfo;
 			info = &iinfo;
@@ -108,7 +107,11 @@ namespace utils
 			if (n % omp_get_num_threads () > i) {
 				nn += 1;
 			}
-			dgetrs_ (&charN, &n, &nn, a, &lda, ipiv, b + (i * (n / omp_get_num_threads ()) + std::min (i, n % omp_get_num_threads ())) * ldb, &ldb, info);
+			if (i == 0) {
+				printf ("TOTAL PROCESSES IN SOLVE: %d\n", omp_get_num_threads ());
+			}
+			double begin = omp_get_wtime ();
+			dgetrs_ (&charN, &n, &nn, a, &lda, ipiv, b + (i * (nrhs / omp_get_num_threads ()) + std::min (i, n % omp_get_num_threads ())) * ldb, &ldb, info);
 		}
 	}
 	

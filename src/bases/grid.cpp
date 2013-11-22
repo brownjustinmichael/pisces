@@ -104,7 +104,6 @@ namespace bases
 		}
 		
 	template class grid <double>;
-	template class grid <float>;
 	} /* chebyshev */
 
 	namespace fourier
@@ -148,7 +147,6 @@ namespace bases
 		}
 		
 	template class grid <double>;
-	template class grid <float>;
 	} /* fourier */
 } /* bases */
 

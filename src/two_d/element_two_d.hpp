@@ -32,8 +32,8 @@ namespace two_d
 	class element : public bases::element <datatype>
 	{
 	public:
-		element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
-		bases::element <datatype> (i_name, 2, i_inputParams, i_messenger_ptr, i_flags),
+		element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_flags) : 
+		bases::element <datatype> (i_name, 2, i_params, i_messenger_ptr, i_flags),
 		axis_n (i_axis_n),
 		axis_m (i_axis_m),
 		n (axis_n->n), m (axis_m->n) {
@@ -214,8 +214,8 @@ namespace two_d
 				/*!*******************************************************************
 				 * \copydoc one_d::element::element ()
 				 *********************************************************************/
-				element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
-				two_d::element <datatype> (i_axis_n, i_axis_m, i_name, i_inputParams, i_messenger_ptr, i_flags) {
+				element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_flags) : 
+				two_d::element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_messenger_ptr, i_flags) {
 					TRACE ("Instantiating...");
 					
 					two_d::element <datatype>::set_grid (new bases::fourier::grid <datatype> (axis_n, sqrt (2.0 / (n - 1.0))), 0);
@@ -235,14 +235,14 @@ namespace two_d
 				using two_d::element <datatype>::m;
 				using two_d::element <datatype>::axis_n;
 				using two_d::element <datatype>::axis_m;
-				using two_d::element <datatype>::inputParams;
+				using two_d::element <datatype>::params;
 			};
 			
 			template <class datatype>
 			class advection_diffusion_element : public element <datatype>
 			{
 			public:
-				advection_diffusion_element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags);
+				advection_diffusion_element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_flags);
 				
 				virtual ~advection_diffusion_element () {}
 			
@@ -250,7 +250,7 @@ namespace two_d
 			
 			private:
 				using element <datatype>::flags;
-				using element <datatype>::inputParams;
+				using element <datatype>::params;
 				using element <datatype>::initialize;
 				using element <datatype>::n;
 				using element <datatype>::m;

@@ -6,25 +6,28 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
+#include "bases/messenger.hpp"
+#include "utils/io.hpp"
 #include <vector>
 #include <stdio.h>
 #include <cstdlib>
 #include <ctime>
 #include "utils/block_solver.hpp"
 #include "utils/utils.hpp"
-#include "bases/messenger.hpp"
 #include <omp.h>
 
 int main (int argc, char *argv[])
 {
 	bases::messenger mess (&argc, &argv, 2);
+	io::parameters <double> params ("../input/block_parameters.txt");
+	omp_set_num_threads(params.nmp);
 
-	int n = 1000, nrhs = 10000, ntimes = 10, ntop = 0, nbot = 0;
+	int n = params.n, nrhs = params.nrhs, ntimes = params.timesteps, ntop = 0, nbot = 0;
 	if (mess.get_id () != 0) {
-		ntop = 2;
+		ntop = params.nb;
 	}
 	if (mess.get_id () != mess.get_np () - 1) {
-		nbot = 2;
+		nbot = params.nb;
 	}
 	int lda = n + ntop + nbot, ldx = 0, ldb = lda;
 	
@@ -76,7 +79,7 @@ int main (int argc, char *argv[])
 	
 	double end = omp_get_wtime ();
 	
-	utils::matrix_matrix_multiply (lda, nrhs, lda, -1.0, &acopy [0], &b [0], 1.0, &bcopy [0]);
+	// utils::matrix_matrix_multiply (lda, nrhs, lda, -1.0, &acopy [0], &b [0], 1.0, &bcopy [0]);
 	
 	// for (int i = 0; i < lda; ++i) {
 	// 	printf ("%d ", mess.get_id ());

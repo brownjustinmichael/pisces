@@ -53,8 +53,8 @@ namespace one_d
 		 * \param i_position_n The datatype position of index n - 1 - excess_n
 		 * \copydoc bases::element <datatype>::element ()
 		 *********************************************************************/
-		element (bases::axis *i_axis_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
-		bases::element <datatype> (i_name, 1, i_inputParams, i_messenger_ptr, i_flags),
+		element (bases::axis *i_axis_n, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_flags) : 
+		bases::element <datatype> (i_name, 1, i_params, i_messenger_ptr, i_flags),
 		axis_n (i_axis_n),
 		n (axis_n->n) {
 			cell.resize (n);
@@ -153,8 +153,8 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc one_d::element::element ()
 			 *********************************************************************/
-			element (bases::axis *i_axis_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
-			one_d::element <datatype> (i_axis_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
+			element (bases::axis *i_axis_n, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_flags) : 
+			one_d::element <datatype> (i_axis_n, i_name, i_params, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
 				one_d::element <datatype>::set_grid (new bases::chebyshev::grid <datatype> (axis_n, messenger_ptr->linked (edge_0), messenger_ptr->linked (edge_n)));
 				initialize (position);
@@ -167,7 +167,7 @@ namespace one_d
 			using one_d::element <datatype>::n;
 			using one_d::element <datatype>::axis_n;
 			using one_d::element <datatype>::grids;
-			using one_d::element <datatype>::inputParams;
+			using one_d::element <datatype>::params;
 			using one_d::element <datatype>::messenger_ptr;
 		};
 		
@@ -186,7 +186,7 @@ namespace one_d
 			 * \param i_excess_n The integer number of points evaluated in the adjacent element
 			 * \copydoc element::element ()
 			 *********************************************************************/
-			advection_diffusion_element (bases::axis *i_axis_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags);
+			advection_diffusion_element (bases::axis *i_axis_n, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_flags);
 			
 			virtual ~advection_diffusion_element () {}
 			
@@ -200,7 +200,7 @@ namespace one_d
 			using element <datatype>::normal_stream;
 			using element <datatype>::cell;
 			using element <datatype>::timestep;
-			using element <datatype>::inputParams;
+			using element <datatype>::params;
 			using element <datatype>::grids;
 			using bases::element <datatype>::pointer;
 			using element <datatype>::messenger_ptr;
@@ -219,8 +219,8 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc one_d::element::element ()
 			 *********************************************************************/
-			element (bases::axis i_axis_n, int i_name, io::parameter_map& i_inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
-			one_d::element <datatype> (i_axis_n, i_name, i_inputParams, i_messenger_ptr, i_flags) {
+			element (bases::axis i_axis_n, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_flags) : 
+			one_d::element <datatype> (i_axis_n, i_name, i_params, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
 				one_d::element <datatype>::set_grid (new bases::fourier::grid <datatype> (axis_n, messenger_ptr->linked (edge_0), messenger_ptr->linked (edge_n)));
 				initialize (position);
@@ -233,7 +233,7 @@ namespace one_d
 			using one_d::element <datatype>::n;
 			using one_d::element <datatype>::axis_n;
 			using one_d::element <datatype>::grids;
-			using one_d::element <datatype>::inputParams;
+			using one_d::element <datatype>::params;
 			using one_d::element <datatype>::messenger_ptr;
 		};
 	} /* fourier */

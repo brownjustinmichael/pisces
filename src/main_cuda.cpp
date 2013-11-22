@@ -39,12 +39,12 @@ int main (int argc, char *argv[])
 	TRACE ("Command line arguments read, beginning setup.");
 	
 		
-	io::parameter_map inputParams;
+	io::parameters <datatype> params;
 	io::read_params_txt parameters ("../input/parameters.txt");
-	inputParams = parameters.load_params();
+	params = parameters.load_params();
 	
 	
-	int n = inputParams ["gridpoints"].asInt / n_elements;
+	int n = params ["gridpoints"].asInt / n_elements;
 	double position_0 = -1.0 + 2.0 / n_elements * id;
 	double position_n = -1.0 + 2.0 / n_elements * (id + 1);
 	int excess_0;
@@ -70,7 +70,7 @@ int main (int argc, char *argv[])
 		process_messenger.add_boundary (one_d::edge_n, id + 1);
 	}
 	
-	cuda::one_d::chebyshev::fft_element <double> element (n, excess_0, position_0, excess_n, position_n, name, inputParams, &process_messenger, 0x00);
+	cuda::one_d::chebyshev::fft_element <double> element (n, excess_0, position_0, excess_n, position_n, name, params, &process_messenger, 0x00);
 	
 	element.setup ();
 	

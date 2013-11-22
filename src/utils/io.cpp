@@ -18,53 +18,51 @@
 
 namespace io
 {
-	/****************** BEGIN: read_parameter *******************/
-
-	read_params_txt::read_params_txt (std::string i_filename)
-	{
-		std::string temp;
-		filename = i_filename;
-
-		std::ifstream input_stream (filename);
-
-		if (input_stream.is_open())
-		{
-			input_stream >> temp;
-			input_stream >> inputParam[temp].asInt;			// n_elements
-			input_stream >> temp;
-			input_stream >> inputParam[temp].asInt;			// n_iterations
-			input_stream >> temp;
-			input_stream >> inputParam[temp].asDouble;		// diffusion_coeff 
-			input_stream >> temp;
-			input_stream >> inputParam[temp].asDouble;		// advection_coeff
-			input_stream >> temp; 
-			input_stream >> inputParam[temp].asDouble;		// courant_factor
-			input_stream >> temp; 
-			input_stream >> inputParam[temp].asInt;			// timesteps
-			input_stream >> temp;
-			input_stream >> inputParam[temp].asInt;			// output_every
-			input_stream >> temp;
-			input_stream >> inputParam[temp].asInt;			// gridpoints
-			input_stream >> temp;
-			input_stream >> inputParam[temp].asDouble;		// time_step_size
-			input_stream >> temp;
-			input_stream >> inputParam[temp].asDouble;		// init_cond_scale
-			input_stream >> temp;
-			input_stream >> inputParam[temp].asDouble;		// init_cond_width
-			input_stream >> temp;
-			input_stream >> inputParam[temp].asDouble;		// init_cond_mean
-			input_stream >> temp;
-			input_stream >> inputParam[temp].asDouble;		// init_cond_sigma
-
-			input_stream.close();
-		}
-		else
-		{
-			std::cout << "Cannot open parameter file!" << std::endl;
-			throw 0;
+	template <class datatype>
+	parameters <datatype>::parameters (std::string i_filename) {
+		std::string word;
+		std::ifstream input_stream (i_filename);
+		
+		while (!(input_stream.eof ())) {
+			input_stream >> word;
+			if (word == "diffusion_coeff") {
+				input_stream >> diffusion_coeff;
+			} else if (word == "advection_coeff") {
+				input_stream >> advection_coeff;
+			} else if (word == "courant_factor") {
+				input_stream >> courant_factor;
+			} else if (word == "timesteps") {
+				input_stream >> timesteps;
+			} else if (word == "output_every") {
+				input_stream >> output_every;
+			} else if (word == "gridpoints") {
+				input_stream >> gridpoints;
+			} else if (word == "n_iterations") {
+				input_stream >> n_iterations;
+			} else if (word == "max_timestep") {
+				input_stream >> max_timestep;
+			} else if (word == "scale") {
+				input_stream >> scale;
+			} else if (word == "width") {
+				input_stream >> width;
+			} else if (word == "mean") {
+				input_stream >> mean;
+			} else if (word == "sigma") {
+				input_stream >> sigma;
+			} else if (word == "n") {
+				input_stream >> n;
+			} else if (word == "nrhs") {
+				input_stream >> nrhs;
+			} else if (word == "nmp") {
+				input_stream >> nmp;
+			} else if (word == "nb") {
+				input_stream >> nb;
+			}
 		}
 	}
-	/****************** END: read_parameter *********************/
+	
+	template class parameters <double>;
+	template class parameters <float>;
 	
 	namespace one_d
 	{

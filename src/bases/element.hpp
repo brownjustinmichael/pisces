@@ -37,16 +37,15 @@ namespace bases
 		/*!*******************************************************************
 		* \param i_name The string representation of the element
 		* \param n_boundaries The integer number of boundaries (must be a multiple of 2)
-		* \param i_inputParams The parameter object that contains the input parameters of the run
+		* \param i_params The parameter object that contains the input parameters of the run
 		* \param i_messenger_ptr A pointer to a messenger object
 		* \param i_flags An integer set of execution flags
 		*********************************************************************/
-		element (int i_name, int i_dimensions, io::parameter_map& i_inputParams, messenger* i_messenger_ptr, int i_flags) : 
-		inputParams (i_inputParams),
+		element (int i_name, int i_dimensions, io::parameters <datatype>& i_params, messenger* i_messenger_ptr, int i_flags) : 
+		params (i_params),
 		flags (i_flags) {
 			name = i_name;
 			grids.resize (i_dimensions);
-			inputParams = i_inputParams;
 			messenger_ptr = i_messenger_ptr;
 			timestep = 0.0;
 			duration = 0.0;
@@ -329,7 +328,7 @@ namespace bases
 		
 	protected:
 		int name; //!< An integer representation of the element, to be used in file output
-		io::parameter_map& inputParams; //!< The map that contains the input parameters
+		io::parameters <datatype>& params; //!< The map that contains the input parameters
 		messenger* messenger_ptr; //!< A pointer to the messenger object
 		
 		int flags; //!< An integer set of execution flags

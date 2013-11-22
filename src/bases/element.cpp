@@ -18,8 +18,8 @@ namespace bases
 	void element <datatype>::run () {
 		TRACE ("Running...");
 		
-		for (int j = 0; j < inputParams ["timesteps"].asInt; ++j) {
-			INFO ("Timestep " << j << " of " << inputParams ["timesteps"].asInt);
+		for (int j = 0; j < params.timesteps; ++j) {
+			INFO ("Timestep " << j << " of " << params.timesteps);
 			
 			TRACE ("Calculating...");
 		
@@ -71,5 +71,4 @@ namespace bases
 	}
 	
 	template class element <double>;
-	template class element <float>;
 } /* bases */

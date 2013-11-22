@@ -19,8 +19,8 @@ namespace cuda
 		namespace chebyshev
 		{
 			template <class datatype>
-			fft_element <datatype>::fft_element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameter_map& inputParams, bases::messenger* i_messenger_ptr, int i_flags) : 
-			::one_d::chebyshev::element <datatype> (i_n, i_excess_0, i_position_0, i_excess_n, i_position_n, i_name, inputParams, i_messenger_ptr, i_flags),
+			fft_element <datatype>::fft_element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameters <datatype>& params, bases::messenger* i_messenger_ptr, int i_flags) : 
+			::one_d::chebyshev::element <datatype> (i_n, i_excess_0, i_position_0, i_excess_n, i_position_n, i_name, params, i_messenger_ptr, i_flags),
 			excess_0 (i_excess_0),
 			excess_n (i_excess_n) {
 
@@ -41,18 +41,18 @@ namespace cuda
 	
 			template <class datatype>
 			void fft_element <datatype>::setup () {
-				datatype diffusion_coeff = (datatype) inputParams["diffusion_coeff"].asDouble;
+				datatype diffusion_coeff = (datatype) params["diffusion_coeff"].asDouble;
 				datatype alpha = 0.5;
 				
 				// Set up output
 				std::ostringstream convert;
 				convert << name;
-				normal_stream.reset (new io::incremental_output <datatype>  ("../output/normal_" + convert.str () + "_", ".dat", 4, new io::header, n, inputParams["output_every"].asInt));
+				normal_stream.reset (new io::incremental_output <datatype>  ("../output/normal_" + convert.str () + "_", ".dat", 4, new io::header, n, params["output_every"].asInt));
 				normal_stream->template append <int> ("i", &cell [0]);
 				normal_stream->template append <datatype> ("x", pointer (position));
 				normal_stream->template append <datatype> ("u", pointer (velocity));
 				
-				transform_stream.reset (new io::incremental_output <datatype>  ("../output/transform_" + convert.str () + "_", ".dat", 4, new io::header, n, inputParams["output_every"].asInt));
+				transform_stream.reset (new io::incremental_output <datatype>  ("../output/transform_" + convert.str () + "_", ".dat", 4, new io::header, n, params["output_every"].asInt));
 				normal_stream->template append <int> ("i", &cell [0]);
 				normal_stream->template append <datatype> ("x", pointer (position));
 				normal_stream->template append <datatype> ("u", pointer (velocity));
@@ -74,11 +74,11 @@ namespace cuda
 			template <class datatype>
 			datatype fft_element <datatype>::calculate_timestep () {
 				datatype t_timestep;
-				t_timestep = inputParams["time_step_size"].asDouble;
+				t_timestep = params["time_step_size"].asDouble;
 				for (int i = 1; i < n - 1; ++i) {
 					t_timestep = std::min (t_timestep, (datatype) (std::abs (((*this) (position, i - 1) - (*this) (position, i + 1)) / (*this) (velocity, i))));
 				}
-				t_timestep *= inputParams["courant_factor"].asDouble;
+				t_timestep *= params["courant_factor"].asDouble;
 				if (t_timestep < timestep || t_timestep > 2.0 * timestep) {
 					return t_timestep;
 				} else {

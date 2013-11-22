@@ -18,8 +18,6 @@ if conf.CheckLib ("log4cxx"):
     env.Append (CPPFLAGS = ["-D_LOG4CXX"])
     env.Append (NVCCFLAGS = ["-D_LOG4CXX"])
 
-conf.CheckLib ("pthread")
-
 env = conf.Finish ()
 
 path = os.path.dirname (inspect.getfile (inspect.currentframe ()))

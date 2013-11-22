@@ -24,8 +24,6 @@ namespace utils
 		if (lda == -1) {
 			lda = n + ntop + nbot;
 		}
-		
-		printf ("Beginning...");
 				
 		std::vector <int> ns2;
 		if (id == 0) {
