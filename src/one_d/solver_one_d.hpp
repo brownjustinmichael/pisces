@@ -9,16 +9,12 @@
 #ifndef SOLVER_HPP_N0BUAX6H
 #define SOLVER_HPP_N0BUAX6H
 
+#include "../bases/messenger.hpp"
 #include <vector>
 #include <memory>
 #include "plan_one_d.hpp"
 #include "../bases/solver.hpp"
 #include "../utils/utils.hpp"
-
-namespace bases
-{
-	class messenger;
-} /* bases */
 
 namespace one_d
 {

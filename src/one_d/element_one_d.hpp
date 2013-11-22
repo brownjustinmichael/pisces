@@ -9,15 +9,16 @@
 #ifndef ELEMENT_HPP_3SURDTOH
 #define ELEMENT_HPP_3SURDTOH
 
+#include "../bases/messenger.hpp"
 #include <string>
 #include <sstream>
 #include <vector>
 #include <map>
 #include <cmath>
-#include "../config.hpp"
 #include "../bases/element.hpp"
 #include "../utils/utils.hpp"
 #include "../bases/grid.hpp"
+#include "../config.hpp"
 	
 namespace one_d
 {

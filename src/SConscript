@@ -2,6 +2,7 @@ import os, inspect
 Import ("env")
 Import ("include_cuda")
 Import ("include_mp")
+Import ("log4cxx")
 
 def directory (path, dirname):
     if dirname [len (path) + 1:] == "":
@@ -14,9 +15,10 @@ conf = Configure (env)
 objects = []
 cuda_objects = []
 
-if conf.CheckLib ("log4cxx"):
-    env.Append (CPPFLAGS = ["-D_LOG4CXX"])
-    env.Append (NVCCFLAGS = ["-D_LOG4CXX"])
+if log4cxx:
+    if conf.CheckLib ("log4cxx"):
+        env.Append (CPPFLAGS = ["-D_LOG4CXX"])
+        env.Append (NVCCFLAGS = ["-D_LOG4CXX"])
 
 env = conf.Finish ()
 
@@ -27,6 +29,10 @@ for dirname, dirnames, filenames in os.walk (path):
         env.SConscript('%s/SConscript' % os.path.join (dirname, subdirname), variant_dir = os.path.join (".", directory (path, dirname) + subdirname), duplicate = 0, exports = {'env': env, "objects": objects, "cuda_objects" : cuda_objects, "include_cuda" : include_cuda, "include_mp": include_mp})
 
 objects.append (env.Object ("config.cpp"))
+
+conf = Configure (env)
+
+conf.CheckLib ("gfortan")
 
 env.Default (env.Program(target = "../run/main", source = (["main.cpp"] + objects)))
 

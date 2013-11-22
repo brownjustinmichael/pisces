@@ -15,10 +15,10 @@
 #include <string>
 #include <cassert>
 #include <memory>
+#include "messenger.hpp"
 #include "plan.hpp"
 #include "solver.hpp"
 #include "../utils/io.hpp"
-#include "messenger.hpp"
 #include "grid.hpp"
 #include "../config.hpp"
 

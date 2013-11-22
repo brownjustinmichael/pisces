@@ -9,12 +9,12 @@
 #ifndef MESSENGER_HPP_JNOTV271
 #define MESSENGER_HPP_JNOTV271
 
-#include <cassert>
-#include <algorithm>
-#include <vector>
 #ifdef _MPI
 #include "mpi.h"
 #endif // _MPI
+#include <cassert>
+#include <algorithm>
+#include <vector>
 #include "../config.hpp"
 #include "../utils/utils.hpp"
 

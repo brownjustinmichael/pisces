@@ -6,14 +6,15 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
+#include "solver_one_d.hpp"
+
+#include "../bases/messenger.hpp"
 #include <cmath>
 #include "../config.hpp"
-#include "solver_one_d.hpp"
 #include "../utils/utils.hpp"
 #include "../utils/solver_utils.hpp"
 #include "../utils/block_solver.hpp"
 #include "../utils/interpolate.hpp"
-#include "../bases/messenger.hpp"
 #include "element_one_d.hpp"
 
 namespace one_d

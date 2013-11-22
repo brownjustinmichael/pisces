@@ -6,13 +6,14 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
+#include "element_one_d.hpp"
+
 #include <cmath>
 #include <cassert>
 #include <string>
 #include <algorithm>
 #include <memory>
 #include "../config.hpp"
-#include "element_one_d.hpp"
 #include "diffusion_one_d.hpp"
 #include "advection_one_d.hpp"
 #include "solver_one_d.hpp"
