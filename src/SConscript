@@ -29,7 +29,7 @@ for dirname, dirnames, filenames in os.walk (path):
 objects.append (env.Object ("config.cpp"))
 
 conf = Configure (env)
-conf.CheckLib ("gfortan")
+conf.CheckLib ("gfortran")
 env = conf.Finish ()
 
 env.Default (env.Program(target = "../run/main", source = (["main.cpp"] + objects)))
