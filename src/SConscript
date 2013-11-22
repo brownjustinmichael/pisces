@@ -10,17 +10,15 @@ def directory (path, dirname):
     else:
         return dirname [len (path) + 1:] + "/"
 
-conf = Configure (env)
-
 objects = []
 cuda_objects = []
 
 if log4cxx:
+    conf = Configure (env)
     if conf.CheckLib ("log4cxx"):
         env.Append (CPPFLAGS = ["-D_LOG4CXX"])
         env.Append (NVCCFLAGS = ["-D_LOG4CXX"])
-
-env = conf.Finish ()
+    env = conf.Finish ()
 
 path = os.path.dirname (inspect.getfile (inspect.currentframe ()))
 
@@ -31,8 +29,8 @@ for dirname, dirnames, filenames in os.walk (path):
 objects.append (env.Object ("config.cpp"))
 
 conf = Configure (env)
-
 conf.CheckLib ("gfortan")
+env = conf.Finish ()
 
 env.Default (env.Program(target = "../run/main", source = (["main.cpp"] + objects)))
 
