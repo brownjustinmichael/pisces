@@ -176,6 +176,22 @@ namespace utils
 		dscal_ (&n, &a, x, &incx);
 	}
 	
+	void matrix_copy (int n, int m, float a, float *x, int ldx) {
+		int ione = 1;
+#pragma omp parallel for shared(x)
+		for (int i = 0; i < m; ++i) {
+			sscal_ (&n, &a, x + i * ldx, &ione);
+		}
+	}
+	
+	void matrix_copy (int n, int m, double a, double *x, int ldx) {
+		int ione = 1;
+#pragma omp parallel for shared(x)
+		for (int i = 0; i < m; ++i) {
+			dscal_ (&n, &a, x + i * ldx, &ione);
+		}
+	}
+	
 	float dot (int n, float* dx, float* dy, int incx, int incy) {
 		return sdot_ (&n, dx, &incx, dy, &incy);
 	}

@@ -66,6 +66,9 @@ namespace utils
 	 * \param incx The integer spacing of elements in dx
 	 *********************************************************************/
 	void scale (int n, double a, double* x, int incx = 1);
+	
+	void matrix_scale (int n, int m, float a, float *x, int ldx);
+	void matrix_scale (int n, int m, double a, double *x, int ldx);
 
 	/*!*******************************************************************
 	 * \brief Takes the dot product of two arrays

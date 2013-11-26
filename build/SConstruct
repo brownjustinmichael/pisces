@@ -6,7 +6,7 @@ env = Environment (ENV = os.environ)
 include_cuda = False
 include_mpi = True
 include_mp = True
-log4cxx = False
+logger = "log4cxx"
 
 if include_mpi:
     env ["CXX"] = "mpicxx"
@@ -26,4 +26,4 @@ if include_cuda:
 env.Append (CPPFLAGS = ["-Wall", "-g", "-std=c++0x", "-fopenmp"])
 env.Append (LINKFLAGS = ["-fopenmp"])
 
-env.SConscript ("../src/SConscript", variant_dir = ".", duplicate = 0, exports = {"env": env, "include_cuda": include_cuda, "include_mp": include_mp, "log4cxx": log4cxx})
+env.SConscript ("../src/SConscript", variant_dir = ".", duplicate = 0, exports = {"env": env, "include_cuda": include_cuda, "include_mp": include_mp, "logger": logger})

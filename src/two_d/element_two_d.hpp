@@ -11,6 +11,7 @@
 
 
 #include <cmath>
+#include <sstream>
 #include "../bases/element.hpp"
 #include "../utils/io.hpp"
 #include "../config.hpp"

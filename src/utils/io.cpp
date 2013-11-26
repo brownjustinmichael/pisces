@@ -22,43 +22,29 @@ namespace io
 	parameters <datatype>::parameters (std::string i_filename) {
 		std::string word;
 		std::ifstream input_stream (i_filename);
+		std::map <std::string, std::string> read_map;
 		
 		while (!(input_stream.eof ())) {
 			input_stream >> word;
-			if (word == "diffusion_coeff") {
-				input_stream >> diffusion_coeff;
-			} else if (word == "advection_coeff") {
-				input_stream >> advection_coeff;
-			} else if (word == "courant_factor") {
-				input_stream >> courant_factor;
-			} else if (word == "timesteps") {
-				input_stream >> timesteps;
-			} else if (word == "output_every") {
-				input_stream >> output_every;
-			} else if (word == "gridpoints") {
-				input_stream >> gridpoints;
-			} else if (word == "n_iterations") {
-				input_stream >> n_iterations;
-			} else if (word == "max_timestep") {
-				input_stream >> max_timestep;
-			} else if (word == "scale") {
-				input_stream >> scale;
-			} else if (word == "width") {
-				input_stream >> width;
-			} else if (word == "mean") {
-				input_stream >> mean;
-			} else if (word == "sigma") {
-				input_stream >> sigma;
-			} else if (word == "n") {
-				input_stream >> n;
-			} else if (word == "nrhs") {
-				input_stream >> nrhs;
-			} else if (word == "nmp") {
-				input_stream >> nmp;
-			} else if (word == "nb") {
-				input_stream >> nb;
-			}
+			input_stream >> read_map [word];
 		}
+		
+		diffusion_coeff = atof (read_map ["diffusion_coeff"].c_str ());
+		advection_coeff = atof (read_map ["advection_coeff"].c_str ());
+		courant_factor = atof (read_map ["courant_factor"].c_str ());
+		timesteps = atoi (read_map ["timesteps"].c_str ());
+		output_every = atoi (read_map ["output_every"].c_str ());
+		gridpoints = atoi (read_map ["gridpoints"].c_str ());
+		n_iterations = atoi (read_map ["n_iterations"].c_str ());
+		max_timestep = atof (read_map ["max_timestep"].c_str ());
+		scale = atof (read_map ["scale"].c_str ());
+		mean = atof (read_map ["mean"].c_str ());
+		width = atof (read_map ["width"].c_str ());
+		sigma = atof (read_map ["sigma"].c_str ());
+		n = atoi (read_map ["n"].c_str ());
+		nrhs = atoi (read_map ["nrhs"].c_str ());
+		nmp = atoi (read_map ["nmp"].c_str ());
+		nb = atoi (read_map ["nb"].c_str ());
 	}
 	
 	template class parameters <double>;

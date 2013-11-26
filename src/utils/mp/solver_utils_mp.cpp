@@ -104,11 +104,8 @@ namespace utils
 		{
 			int i = omp_get_thread_num ();
 			int nn = nrhs / omp_get_num_threads ();
-			if (n % omp_get_num_threads () > i) {
+			if (nrhs % omp_get_num_threads () > i) {
 				nn += 1;
-			}
-			if (i == 0) {
-				printf ("TOTAL PROCESSES IN SOLVE: %d\n", omp_get_num_threads ());
 			}
 			double begin = omp_get_wtime ();
 			dgetrs_ (&charN, &n, &nn, a, &lda, ipiv, b + (i * (nrhs / omp_get_num_threads ()) + std::min (i, n % omp_get_num_threads ())) * ldb, &ldb, info);

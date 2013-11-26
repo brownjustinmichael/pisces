@@ -7,24 +7,15 @@ set rmargin at screen 0.95
 
 set xrange [-1:1]
 
-plot_file (i, n) = sprintf ("normal_%04d.dat", n)
+plot_file (i, n) = sprintf ("output_%02i_%04d.dat", i, n)
 
 unset key
 
-do for [i =0:4:1] {
-	set yrange [-0.1:1.1]
+set yrange [-0.1:10.1]
 
-	set tmargin at screen 0.95
-	set bmargin at screen 0.55
-	
-	plot for [n = 0:99:plot_every] plot_file (i, n) u 2:3 w lp
-	
-	set yrange [-1:1]
+set tmargin at screen 0.95
+set bmargin at screen 0.05
 
-	set tmargin at screen 0.45
-	set bmargin at screen 0.05
-	
-	plot for [n = 0:99:plot_every] plot_file (i, n) u 2:4 w lp
-}
+plot for [i = 0:1] for [n = 0:10:plot_every] plot_file (i, n) u 2:($3 + n) w lp ls n
 
 unset multiplot

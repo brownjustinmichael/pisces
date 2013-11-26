@@ -40,7 +40,7 @@ namespace one_d
 		 * \param i_name_rhs The integer representation of the matrix right-hand-side
 		 * \copydoc bases::solver <datatype>::solver ()
 		 *********************************************************************/
-		iterative_solver (bases::grid <datatype> &i_grid, bases::messenger* i_messenger_ptr, int i_n_iterations, datatype& i_timestep, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out = NULL, int i_flags = 0x00);
+		iterative_solver (bases::grid <datatype> &i_grid, bases::messenger* i_messenger_ptr, int i_n_iterations, datatype& i_timestep, datatype& i_alpha_0, datatype& i_aplha_n, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out = NULL, int i_flags = 0x00);
 		
 		virtual ~iterative_solver () {}
 		
@@ -113,7 +113,7 @@ namespace one_d
 		 * \param i_name_rhs The integer representation of the matrix right-hand-side
 		 * \copydoc bases::solver <datatype>::solver ()
 		 *********************************************************************/
-		solver (bases::grid <datatype> &i_grid, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out = NULL, int i_flags = 0x00);
+		solver (bases::grid <datatype> &i_grid, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_aplha_n, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out = NULL, int i_flags = 0x00);
 	
 		virtual ~solver () {
 		}

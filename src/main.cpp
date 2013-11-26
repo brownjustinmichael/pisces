@@ -81,19 +81,7 @@ int main (int argc, char *argv[])
 	id = process_messenger.get_id ();
 	n_elements = process_messenger.get_np ();
 
-	log_config::update_name (id);
-
-	// The program runs through the execution flags.
-	while ((argc > 1) && (argv [1] [0] == '-')) {
-		switch (argv [1] [1]) {
-			// Debug switch
-			case 'D':
-				log_config::update_severity (atoi (&(argv [1] [2])));
-				break;
-		}
-		--argc;
-		++argv;
-	}
+	log_config log_config_instance (&argc, &argv, id);
 	
 	io::parameters <double> params ("../input/parameters.txt");
 

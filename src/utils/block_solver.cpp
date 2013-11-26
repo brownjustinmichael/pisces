@@ -60,7 +60,7 @@ namespace utils
 		
 		matrix_solve (n, am, ipiv, al, info, ntop, lda, lda);
 		matrix_solve (n, am, ipiv, ar, info, nbot, lda, lda);
-		
+
 		matrix_matrix_multiply (ntop, ntop, n, -1.0, at, al, 1.0, x, lda, lda, ldb);
 		matrix_matrix_multiply (nbot, ntop, n, -1.0, ab, al, 1.0, x + ntop, lda, lda, ldb);
 		matrix_matrix_multiply (ntop, nbot, n, -1.0, at, ar, 1.0, x + ntop * ldx, lda, lda, ldb);
@@ -128,7 +128,7 @@ namespace utils
 
 		matrix_add_scaled (ntop, nrhs, 1.0, b, &y [0], ldb, ntop + nbot);
 		matrix_add_scaled (nbot, nrhs, 1.0, b + ntop + n, &y [ntop], ldb, ntop + nbot);
-				
+		
 		matrix_solve (n, am, ipiv, b + ntop, info, nrhs, lda, ldb);
 		
 		matrix_matrix_multiply (ntop, nrhs, n, -1.0, at, b + ntop, 1.0, &y [0], lda, ldb, ntop + nbot);

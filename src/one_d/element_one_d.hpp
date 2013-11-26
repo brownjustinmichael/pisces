@@ -15,6 +15,7 @@
 #include <vector>
 #include <map>
 #include <cmath>
+#include "transform_one_d.hpp"
 #include "../bases/element.hpp"
 #include "../utils/utils.hpp"
 #include "../bases/grid.hpp"
@@ -66,11 +67,17 @@ namespace one_d
 			edge_map [edge_0] = 0;
 			edge_map [edge_n] = n - 1;
 			
-			if (i_messenger_ptr->linked (edge_0)) {
+			if (i_messenger_ptr->get_id () == 0) {
 				fixed_points [edge_0];
+				alpha_0 = 0.0;
+			} else {
+				alpha_0 = 0.5;
 			}
-			if (i_messenger_ptr->linked (edge_n)) {
+			if (i_messenger_ptr->get_id () == i_messenger_ptr->get_np () - 1) {
 				fixed_points [edge_n];
+				alpha_n = 0.0;
+			} else {
+				alpha_n = 0.5;
 			}
 			
 			std::ostringstream convert;
@@ -87,10 +94,13 @@ namespace one_d
 		virtual void initialize (int name, datatype* initial_conditions = NULL, int flags = 0x00) {
 			TRACE ("Initializing " << name << "...");
 			
+			scalars [name].resize (n, 0.0);
 			if (name == position) {
 				initial_conditions = &(grids [0]->position ());
+			} else {
+				element <datatype>::add_inverse_vertical_transform (new fftw_cosine <datatype> (*grids [0], pointer (velocity)));
+				element <datatype>::add_forward_vertical_transform (new fftw_cosine <datatype> (*grids [0], pointer (velocity)));
 			}
-			scalars [name].resize (n, 0.0);
 			if (initial_conditions) {
 				utils::copy (n, initial_conditions, this->pointer (name));
 			}
@@ -133,8 +143,10 @@ namespace one_d
 		using bases::element <datatype>::name;
 		using bases::element <datatype>::failsafe_dump;
 		using bases::element <datatype>::messenger_ptr;
+		using bases::element <datatype>::pointer;
 		
 		bases::axis *axis_n;
+		datatype alpha_0, alpha_n;
 		int &n;
 		std::vector<int> cell; //!< An integer array for tracking each cell number for output
 		
@@ -205,6 +217,8 @@ namespace one_d
 			using element <datatype>::grids;
 			using bases::element <datatype>::pointer;
 			using element <datatype>::messenger_ptr;
+			using element <datatype>::alpha_0;
+			using element <datatype>::alpha_n;
 		};
 	} /* chebyshev */
 	
