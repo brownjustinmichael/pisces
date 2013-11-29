@@ -55,24 +55,24 @@ namespace one_d
 			initialize (vel_implicit_rhs);
 			
 			// Set up output
-			std::ostringstream filestream;
-			filestream << "../output/output_" << std::setfill ('0') << std::setw (2) << name << "_%04i.dat";
-			normal_stream.reset (new io::incremental (new io::one_d::ascii (n), filestream.str (), params.output_every));
-			normal_stream->template append <int> ("i", &(cell [0]));
-			normal_stream->template append <datatype> ("x", pointer (position));
-			normal_stream->template append <datatype> ("u", pointer (velocity));
-			normal_stream->template append <datatype> ("rhs", pointer (vel_explicit_rhs));
+			// std::ostringstream filestream;
+			// filestream << "../output/output_" << std::setfill ('0') << std::setw (2) << name << "_%04i.dat";
+			// normal_stream.reset (new io::incremental (new io::one_d::ascii (n), filestream.str (), params.output_every));
+			// normal_stream->template append <int> ("i", &(cell [0]));
+			// normal_stream->template append <datatype> ("x", pointer (position));
+			// normal_stream->template append <datatype> ("u", pointer (velocity));
+			// normal_stream->template append <datatype> ("rhs", pointer (vel_explicit_rhs));
 			
 			// Set up plans in order
-			element <datatype>::add_pre_plan (new diffusion <datatype> (*grids [0], diffusion_coeff, alpha, pointer (velocity), pointer (vel_implicit_rhs)));
+			// element <datatype>::add_pre_plan (new diffusion <datatype> (*grids [0], diffusion_coeff, alpha, pointer (velocity), pointer (vel_implicit_rhs)));
 			if (advection_coeff != 0.0) {
-				element <datatype>::add_post_plan (new advec <datatype> (*grids [0], advection_coeff, pointer (velocity), pointer (vel_explicit_rhs)));
+				// element <datatype>::add_post_plan (new advec <datatype> (*grids [0], advection_coeff, pointer (velocity), pointer (vel_explicit_rhs)));
 			}
 		
 			// Set up solver
 			element <datatype>::add_solver (new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, pointer (velocity), pointer (vel_explicit_rhs), pointer (vel_implicit_rhs)));
 		
-			normal_stream->to_file ();
+			// normal_stream->to_file ();
 		
 			TRACE ("Initialized.");
 		}

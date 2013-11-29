@@ -1,44 +1,43 @@
-// main.cpp
-
-#include "log4cpp/Category.hh"
-#include "log4cpp/Appender.hh"
-#include "log4cpp/FileAppender.hh"
-#include "log4cpp/OstreamAppender.hh"
-#include "log4cpp/Layout.hh"
-#include "log4cpp/BasicLayout.hh"
-#include "log4cpp/Priority.hh"
-
-int main(int argc, char** argv) {
-	log4cpp::Appender *appender1 = new log4cpp::OstreamAppender("console", &std::cout);
-	appender1->setLayout(new log4cpp::BasicLayout());
-
-	log4cpp::Appender *appender2 = new log4cpp::FileAppender("default", "program.log");
-	appender2->setLayout(new log4cpp::BasicLayout());
-
-	log4cpp::Category& root = log4cpp::Category::getRoot();
-	root.setPriority(log4cpp::Priority::WARN);
-	root.addAppender(appender1);
-
-	log4cpp::Category& sub1 = log4cpp::Category::getInstance(std::string("sub1"));
-	sub1.addAppender(appender2);
-
-	// use of functions for logging messages
-	root.error("root error");
-	root.info("root info");
-	sub1.error("sub1 error");
-	sub1.warn("sub1 warn");
-
-	// printf-style for logging variables
-	root.warn("%d + %d == %s ?", 1, 1, "two");
-
-	// use of streams for logging messages
-	root << log4cpp::Priority::ERROR << "Streamed root error";
-	root << log4cpp::Priority::INFO << "Streamed root info";
-	sub1 << log4cpp::Priority::ERROR << "Streamed sub1 error";
-	sub1 << log4cpp::Priority::WARN << "Streamed sub1 warn";
-
-	// or this way:
-	root.errorStream() << "Another streamed error";
-
-	return 0;
+#include <log4cplus/logger.h>
+#include <log4cplus/loggingmacros.h>
+#include <log4cplus/configurator.h>
+#include <iomanip>
+#include <iostream>
+using namespace std;
+using namespace log4cplus;
+Logger logger = Logger::getInstance(LOG4CPLUS_TEXT("main"));
+void printMessages()
+{
+    LOG4CPLUS_TRACE(logger, "printMessages()");
+    LOG4CPLUS_DEBUG(logger, "This is a DEBUG message");
+    LOG4CPLUS_INFO(logger, "This is a INFO message");
+    LOG4CPLUS_WARN(logger, "This is a WARN message");
+    LOG4CPLUS_ERROR(logger, "This is a ERROR message");
+    LOG4CPLUS_FATAL(logger, "This is a FATAL message");
+}
+int
+main()
+{
+    initialize();
+    BasicConfigurator config;
+    config.configure();
+    logger.setLogLevel(TRACE_LOG_LEVEL);
+    cout << "*** calling printMessages() with TRACE set: ***" << endl;
+    printMessages();
+    logger.setLogLevel(DEBUG_LOG_LEVEL);
+    cout << "\n*** calling printMessages() with DEBUG set: ***" << endl;
+    printMessages();
+    logger.setLogLevel(INFO_LOG_LEVEL);
+    cout << "\n*** calling printMessages() with INFO set: ***" << endl;
+    printMessages();
+    logger.setLogLevel(WARN_LOG_LEVEL);
+    cout << "\n*** calling printMessages() with WARN set: ***" << endl;
+    printMessages();
+    logger.setLogLevel(ERROR_LOG_LEVEL);
+    cout << "\n*** calling printMessages() with ERROR set: ***" << endl;
+    printMessages();
+    logger.setLogLevel(FATAL_LOG_LEVEL);
+    cout << "\n*** calling printMessages() with FATAL set: ***" << endl;
+    printMessages();
+    return 0;
 }

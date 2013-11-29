@@ -19,7 +19,7 @@ extern log4cxx::LoggerPtr logger;
  * \def TRACE(int,str)
  * Logs a trace-level logging statement
  *********************************************************************/
-#define TRACE(str) LOG4CXX_TRACE(logger,str)
+#define TRACE(str) LOG4CXX_TRACE(logger, str);
 /*!*******************************************************************
  * \def DEBUG(int,str)
  * Logs a debug-level logging statement

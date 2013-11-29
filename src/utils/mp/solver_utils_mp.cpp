@@ -89,7 +89,7 @@ namespace utils
 			info = &iinfo;
 		}
 		
-		if (n == 0) {
+		if (n == 0 || nrhs == 0) {
 			return;
 		}
 		
@@ -107,7 +107,6 @@ namespace utils
 			if (nrhs % omp_get_num_threads () > i) {
 				nn += 1;
 			}
-			double begin = omp_get_wtime ();
 			dgetrs_ (&charN, &n, &nn, a, &lda, ipiv, b + (i * (nrhs / omp_get_num_threads ()) + std::min (i, n % omp_get_num_threads ())) * ldb, &ldb, info);
 		}
 	}

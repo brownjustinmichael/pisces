@@ -31,7 +31,7 @@ namespace cuda
 		
 		template <class datatype>
 		void solver <datatype>::_factorize () {
-			DEBUG ("Factorizing...");
+			TRACE ("Factorizing...");
 			
 			::one_d::solver <datatype>::_factorize ();
 			

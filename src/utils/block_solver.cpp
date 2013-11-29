@@ -24,7 +24,7 @@ namespace utils
 		if (lda == -1) {
 			lda = n + ntop + nbot;
 		}
-				
+		
 		std::vector <int> ns2;
 		if (id == 0) {
 			ns2.resize (np);
@@ -50,7 +50,7 @@ namespace utils
 		if (ldx < ntop + nbot) {
 			throw 0;
 		}
-		
+				
 		matrix_add_scaled (ntop, ntop, 1.0, a, x, lda, ldb);
 		matrix_add_scaled (nbot, ntop, 1.0, a + ntop + n, x + ntop, lda, ldb);
 		matrix_add_scaled (ntop, nbot, 1.0, a + (ntop + n) * lda, x + ntop * ldb, lda, ldb);
@@ -60,12 +60,12 @@ namespace utils
 		
 		matrix_solve (n, am, ipiv, al, info, ntop, lda, lda);
 		matrix_solve (n, am, ipiv, ar, info, nbot, lda, lda);
-
+	
 		matrix_matrix_multiply (ntop, ntop, n, -1.0, at, al, 1.0, x, lda, lda, ldb);
 		matrix_matrix_multiply (nbot, ntop, n, -1.0, ab, al, 1.0, x + ntop, lda, lda, ldb);
 		matrix_matrix_multiply (ntop, nbot, n, -1.0, at, ar, 1.0, x + ntop * ldx, lda, lda, ldb);
 		matrix_matrix_multiply (nbot, nbot, n, -1.0, ab, ar, 1.0, x + ntop * (ldx + 1), lda, lda, ldb);
-		
+				
 		if (messenger_ptr->get_id () == 0) {
 			std::vector <double> buffer (n2tot);
 			messenger_ptr->gatherv <double> ((ntop + nbot) * (ntop + nbot), x, &ns2 [0], &buffer [0]);
@@ -128,12 +128,12 @@ namespace utils
 
 		matrix_add_scaled (ntop, nrhs, 1.0, b, &y [0], ldb, ntop + nbot);
 		matrix_add_scaled (nbot, nrhs, 1.0, b + ntop + n, &y [ntop], ldb, ntop + nbot);
-		
+				
 		matrix_solve (n, am, ipiv, b + ntop, info, nrhs, lda, ldb);
-		
+				
 		matrix_matrix_multiply (ntop, nrhs, n, -1.0, at, b + ntop, 1.0, &y [0], lda, ldb, ntop + nbot);
 		matrix_matrix_multiply (nbot, nrhs, n, -1.0, ab, b + ntop, 1.0, &y [ntop], lda, ldb, ntop + nbot);
-	
+			
 		if (id == 0) {
 			int ycur = 0, bcur = 0;
 			std::vector <double> buffer (nrhs * 2 * ldy);

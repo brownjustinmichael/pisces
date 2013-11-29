@@ -86,7 +86,9 @@ namespace one_d
 			failsafe_dump->append ("i", &cell [0]);
 		}
 		
-		virtual ~element () {}
+		virtual ~element () {
+			// printf ("Destroying one_d element\n");
+		}
 	
 		/*!*******************************************************************
 		 * \copydoc bases::element <datatype>::initialize ()

@@ -10,16 +10,17 @@
 #define CONFIG_H_95CWOMPS
 
 #include "config_log4cxx.hpp"
+#include "config_log4cplus.hpp"
 #include <iostream>
 
 extern int severity;
 
 /*!*******************************************************************
  * \def TRACE(int,str)
- * Logs a trace-level logging statement
+ * Logs a debug-level logging statement
  *********************************************************************/
 #ifndef TRACE
-#define TRACE(str) if(severity==0){std::cout<<"TRACE "<<str<<std::endl;}else{}
+#define TRACE(str) if(severity<=0){std::cout<<"TRACE "<<str<<std::endl;}else{}
 #endif
 /*!*******************************************************************
  * \def DEBUG(int,str)
@@ -63,6 +64,10 @@ extern int severity;
 class log_config {
 public:
 	log_config (int* argc, char*** argv, int id = 0);
+	
+	virtual ~log_config () {
+		printf ("Destroying log config\n");
+	}
 };
 
 #endif /* end of include guard: CONFIG_H_95CWOMPS */

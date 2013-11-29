@@ -36,7 +36,7 @@ namespace two_d
 				std::vector <datatype> init (n * m);
 				datatype height;
 				height = std::max (scale * std::exp (- (width / 2.0 - mean) * (width / 2.0 - mean) / 2.0 / sigma / sigma), scale * std::exp (- (- width / 2.0 - mean) * (- width / 2.0 - mean) / 2.0 / sigma / sigma));
-				DEBUG ("scale " << scale << " width " << width << " mean " << mean << " sigma " << sigma << " height " << height);
+				TRACE ("scale " << scale << " width " << width << " mean " << mean << " sigma " << sigma << " height " << height);
 				for (int i = 0; i < n; ++i) {
 					for (int j = 0; j < m; ++j) {
 						init [i * m + j] = scale * (std::exp (- ((*this) (x_position, i, j) - mean) * ((*this) (x_position, i, j) - mean) / 2.0 / sigma / sigma) - height) * (std::exp (- ((*this) (z_position, i, j) - mean) * ((*this) (z_position, i, j) - mean) / 2.0 / sigma / sigma) - height);
@@ -57,14 +57,14 @@ namespace two_d
 				normal_stream->template append <datatype> ("w", pointer (velocity));
 				normal_stream->template append <datatype> ("rhs", pointer (vel_implicit_rhs));
 			
-				transform_stream.reset (new io::incremental (new io::two_d::netcdf (n, m), "../output/transform_%04i.cdf", params.output_every));
-				transform_stream->template append <int> ("i", &cell_n [0]);
-				transform_stream->template append <int> ("j", &cell_m [0]);
-				transform_stream->template append <datatype> ("x", pointer (x_position));
-				transform_stream->template append <datatype> ("z", pointer (z_position));
-				transform_stream->template append <datatype> ("w", pointer (velocity));
-				transform_stream->template append <datatype> ("rhs", pointer (vel_implicit_rhs));
-			
+				// transform_stream.reset (new io::incremental (new io::two_d::netcdf (n, m), "../output/transform_%04i.cdf", params.output_every));
+				// transform_stream->template append <int> ("i", &cell_n [0]);
+				// transform_stream->template append <int> ("j", &cell_m [0]);
+				// transform_stream->template append <datatype> ("x", pointer (x_position));
+				// transform_stream->template append <datatype> ("z", pointer (z_position));
+				// transform_stream->template append <datatype> ("w", pointer (velocity));
+				// transform_stream->template append <datatype> ("rhs", pointer (vel_implicit_rhs));
+				// 			
 				// Set up plans in order
 				element <datatype>::add_pre_plan (new vertical_diffusion <datatype> (*grids [0], *grids [1], 0.1 * diffusion_coeff, alpha, pointer (velocity), pointer (vel_implicit_rhs)));
 				element <datatype>::add_mid_plan (new horizontal_diffusion <datatype> (*grids [0], *grids [1], diffusion_coeff, alpha, pointer (velocity), pointer (vel_implicit_rhs)));

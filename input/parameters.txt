@@ -4,7 +4,7 @@ advection_coeff 1.0
 courant_factor 0.8
 timesteps 10
 output_every 1
-gridpoints 64
+gridpoints 8
 max_timestep 0.0
 scale 1.0
 width 2.0

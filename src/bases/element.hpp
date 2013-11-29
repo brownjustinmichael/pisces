@@ -51,7 +51,43 @@ namespace bases
 			duration = 0.0;
 		}
 		
-		virtual ~element () {}
+		virtual ~element () {
+			printf ("Destroying bases element\n");
+			printf ("Destroying %p\n", &name);
+			printf ("Destroying %p\n", &messenger_ptr);
+			printf ("Destroying %p\n", &duration);
+			printf ("Destroying %p\n", &timestep);
+			printf ("Destroying %p\n", &scalars);
+			printf ("Destroying %p\n", &grids);
+			printf ("Destroying %p\n", &*failsafe_dump);
+			printf ("Destroying %p\n", &*normal_stream);
+			// printf ("Destroying %p\n", &*transform_stream);
+			for (int i = 0; i < (int) forward_horizontal_transforms.size (); ++i) {
+				printf ("Destroying %p\n", &*forward_horizontal_transforms [i]);
+			}
+			for (int i = 0; i < (int) inverse_horizontal_transforms.size (); ++i) {
+				printf ("Destroying %p\n", &*inverse_horizontal_transforms [i]);
+			}
+			for (int i = 0; i < (int) forward_vertical_transforms.size (); ++i) {
+				printf ("Destroying %p\n", &*forward_vertical_transforms [i]);
+			}
+			for (int i = 0; i < (int) inverse_vertical_transforms.size (); ++i) {
+				printf ("Destroying %p\n", &*inverse_vertical_transforms [i]);
+			}
+			for (int i = 0; i < (int) solvers.size (); ++i) {
+				printf ("Destroying %p\n", &*solvers [i]);
+			}
+			for (int i = 0; i < (int) pre_transform_plans.size (); ++i) {
+				printf ("Destroying %p\n", &*pre_transform_plans [i]);
+			}
+			for (int i = 0; i < (int) mid_transform_plans.size (); ++i) {
+				printf ("Destroying %p\n", &*mid_transform_plans [i]);
+			}
+			for (int i = 0; i < (int) post_transform_plans.size (); ++i) {
+				printf ("Destroying %p\n", &*post_transform_plans [i]);
+			}
+			printf ("Last\n");
+		}
 		
 		/*!*******************************************************************
 		 * \brief Get the datatype reference to the named scalar
@@ -108,6 +144,7 @@ namespace bases
 		 * TODO This assumes 1 equation. It should be generalized for multiple equations.
 		 *********************************************************************/
 		inline void add_solver (solver <datatype>* i_solver) {
+			DEBUG ("Adding solver " << i_solver);
 			solvers.push_back (std::shared_ptr <solver <datatype>> (i_solver));
 		}
 
@@ -245,9 +282,9 @@ namespace bases
 			if (normal_stream) {
 				normal_stream->to_file ();
 			}
-			if (transform_stream) {
-				transform_stream->to_file ();
-			}
+			// if (transform_stream) {
+			// 	transform_stream->to_file ();
+			// }
 		}
 
 		virtual void factorize () {
@@ -265,7 +302,10 @@ namespace bases
 			t_timestep = calculate_timestep ();
 			messenger_ptr->min (&t_timestep);
 			
+			DEBUG ("Entering solvers.");
+			
 			for (int i = 0; i < (int) solvers.size (); ++i) {
+				DEBUG ("Executing solver." << &*solvers [i]);
 				solvers [i]->execute (flags);
 			}
 			
@@ -341,10 +381,9 @@ namespace bases
 		
 		std::shared_ptr <io::output> failsafe_dump; //!< An implementation to dump in case of failure
 		std::shared_ptr <io::output> normal_stream; //!< An implementation to output in normal space
-		std::shared_ptr <io::output> transform_stream; //!< An implementation to output in transform space
+		// std::shared_ptr <io::output> transform_stream; //!< An implementation to output in transform space
 
 	private:
-		// std::vector<plan <datatype>* > transforms; //!< A shared pointer to the forward transform
 		std::vector<std::shared_ptr<plan <datatype> > > forward_horizontal_transforms; //!< A shared pointer to the forward transform
 		std::vector<std::shared_ptr<plan <datatype> > > inverse_horizontal_transforms; //!< A shared pointer to the forward transform
 		std::vector<std::shared_ptr<plan <datatype> > > forward_vertical_transforms; //!< A shared pointer to the forward transform

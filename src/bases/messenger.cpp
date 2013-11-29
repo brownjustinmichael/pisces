@@ -57,6 +57,7 @@ namespace bases
 	}
 	
 	messenger::~messenger () {
+		printf ("Destroying bases messenger\n");
 #ifdef _MPI
 		MPI::Finalize ();
 #endif // _MPI

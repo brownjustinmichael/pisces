@@ -129,7 +129,7 @@ namespace utils
 			info = &iinfo;
 		}
 		
-		if (n == 0) {
+		if (n == 0 || nrhs == 0) {
 			return;
 		}
 		

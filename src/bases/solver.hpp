@@ -34,12 +34,15 @@ namespace bases
 		solver (int i_flags = 0x00) : 
 		flags (i_flags) {}
 		
-		virtual ~solver () {}
+		virtual ~solver () {
+			printf ("Destroying bases solver\n");
+		}
 			
 		/*!*******************************************************************
 		 * \brief Solve the matrix equation
 		 *********************************************************************/
 		virtual void execute (int &element_flags) {
+			TRACE ("Executing...");
 			if (!(flags & factorized)) {
 				factorize ();
 			}

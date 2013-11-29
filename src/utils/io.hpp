@@ -45,7 +45,9 @@ namespace io
 	public:
 		format () {}
 		
-		virtual ~format () {}
+		virtual ~format () {
+			printf ("Destroying format\n");
+		}
 		
 		virtual void to_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs) = 0;
 	};
@@ -64,7 +66,9 @@ namespace io
 		format_ptr (i_format_ptr),
 		file_name (i_file_name) {};
 		
-		virtual ~output (){}
+		virtual ~output () {
+			printf ("Destroying output\n");
+		}
 		
 		/*!*******************************************************************
 		 * \brief Append a datatype array to the list to be output

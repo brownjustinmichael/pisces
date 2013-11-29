@@ -54,7 +54,7 @@ namespace bases
 		alpha_0 (linked_0 ? 0.5 : 0.0),
 		alpha_n (linked_n ? 0.5 : 0.0),
 		derivs (i_derivs) {
-			TRACE ("Instantiating...")
+			TRACE ("Instantiating...");
 
 			data.resize (derivs);
 			positions.resize (n);
@@ -63,7 +63,7 @@ namespace bases
 				data [i].resize (n * n);
 			}
 
-			TRACE ("Instantiated...")
+			TRACE ("Instantiated...");
 		}
 		
 		/*
@@ -74,7 +74,9 @@ namespace bases
 			TODO If printing grids can be done logically, it would be nice to put cell in here, too.
 		*/
 	
-		virtual ~grid () {}
+		virtual ~grid () {
+			printf ("Destroying base grid\n");
+		}
 		
 		datatype& position (int index = 0) {
 			return positions [index];

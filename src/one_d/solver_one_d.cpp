@@ -202,19 +202,23 @@ namespace one_d
 			positions_0.resize (ex_excess_0);
 			messenger_ptr->template send <datatype> (excess_0, positions, messenger_ptr->get_id () - 1, 0);
 			messenger_ptr->template recv <datatype> (ex_excess_0, &positions_0 [0], messenger_ptr->get_id () - 1, 0);
+			ntop = 1;
 		} else {
 			ex_excess_0 = 0;
+			ntop = 0;
 		}
 		if (messenger_ptr->get_id () + 1 < messenger_ptr->get_np ()) {
 			messenger_ptr->template send <int> (1, &excess_n, messenger_ptr->get_id () + 1, 0);
 			messenger_ptr->template recv <int> (1, &ex_excess_n, messenger_ptr->get_id () + 1, 0);
 			positions_n.resize (ex_excess_n);
-			messenger_ptr->template send <datatype> (excess_n, &(positions [n - 1 - excess_n]), messenger_ptr->get_id () + 1, 0);
+			messenger_ptr->template send <datatype> (excess_n, &(positions [n - excess_n]), messenger_ptr->get_id () + 1, 0);
 			messenger_ptr->template recv <datatype> (ex_excess_n, &positions_n [0], messenger_ptr->get_id () + 1, 0);
+			nbot = 1;
 		} else {
 			ex_excess_n = 0;
+			nbot = 0;
 		}
-		int ns0 = excess_0 + ex_excess_0;
+		int ns0 = excess_0 + ex_excess_0 + ntop * 2;
 		if (messenger_ptr->get_id () == 0) {
 			ns.resize (messenger_ptr->get_np ());
 			messenger_ptr->template gather <int> (1, &ns0, &ns [0]);
@@ -226,38 +230,43 @@ namespace one_d
 			bipiv.resize (ntot);
 		} else {
 			messenger_ptr->template gather <int> (1, &ns0, NULL);
-			boundary_matrix.resize ((excess_0 + ex_excess_0 + excess_n + ex_excess_n) * (excess_0 + ex_excess_0 + excess_n + ex_excess_n));
+			boundary_matrix.resize ((excess_0 + ex_excess_0 + excess_n + ex_excess_n + 2 * (nbot + ntop)) * (excess_0 + ex_excess_0 + excess_n + ex_excess_n + 2 * (nbot + ntop)));
 		}
-		factorized_matrix.resize ((n + ex_excess_0 + ex_excess_n) * (n + ex_excess_0 + ex_excess_n), 0.0);
-		ipiv.resize (n);
-		data_temp.resize (n + ex_excess_0 + ex_excess_n);
+		factorized_matrix.resize ((n + ex_excess_0 + ex_excess_n + nbot + ntop) * (n + ex_excess_0 + ex_excess_n + nbot + ntop), 0.0);
+		ipiv.resize (n); // Should be n - ntop - nbot - excess_0 - excess_n
+		data_temp.resize (n + ex_excess_0 + ex_excess_n + nbot + ntop);
 	}
 	
 	template <class datatype>
 	void solver <datatype>::_factorize () {
 		int info;
-		DEBUG ("Factorizing..." << messenger_ptr->get_id ());
+		TRACE ("Factorizing..." << messenger_ptr->get_id ());
 		
-		utils::matrix_copy (n, n, default_matrix, &factorized_matrix [ex_excess_0 * (n + ex_excess_0 + ex_excess_n + 1)], n, n + ex_excess_0 + ex_excess_n);
+		utils::interpolate (ex_excess_0, n, positions, default_matrix, &positions_0 [0], &factorized_matrix [(ntop + ex_excess_0) * (n + ex_excess_0 + ex_excess_n + nbot + ntop) + ntop], n, n + ex_excess_0 + ex_excess_n + nbot + ntop);
+		utils::matrix_copy (n, n, default_matrix, &factorized_matrix [(ntop + ex_excess_0) * (n + ex_excess_0 + ex_excess_n + nbot + ntop + 1)], n, n + ex_excess_0 + ex_excess_n + nbot + ntop);
+		utils::interpolate (ex_excess_n, n, positions, default_matrix, &positions_n [0], &factorized_matrix [(ntop + ex_excess_0) * (n + ex_excess_0 + ex_excess_n + nbot + ntop + 1) + n], n, n + ex_excess_0 + ex_excess_n + nbot + ntop);
+				
+		utils::matrix_add_scaled (ntop, n, alpha_0 * timestep, matrix + excess_0, &factorized_matrix [(ntop + ex_excess_0) * (n + ex_excess_0 + ex_excess_n + ntop + nbot)], n, n + ex_excess_0 + ex_excess_n + ntop + nbot);	
+		utils::matrix_add_scaled (ntop, n, alpha_0 * timestep, matrix + excess_0, &factorized_matrix [(ntop + ex_excess_0) * (n + ex_excess_0 + ex_excess_n + ntop + nbot + 1) + excess_0], n, n + ex_excess_0 + ex_excess_n + ntop + nbot);	
+		utils::matrix_add_scaled (n - excess_n - excess_0 - ntop - nbot, n, timestep, matrix + excess_0 + ntop, &factorized_matrix [(ntop + ex_excess_0) * (n + ex_excess_0 + ex_excess_n + ntop + nbot + 1) + ntop + excess_0], n, n + ex_excess_0 + ex_excess_n + ntop + nbot);
+		utils::matrix_add_scaled (nbot, n, alpha_n * timestep, matrix + n - nbot - excess_n, &factorized_matrix [(ntop + ex_excess_0) * (n + ex_excess_0 + n + ex_excess_0 + ex_excess_n + 1) + n - nbot - excess_n], n, n + ex_excess_0 + ex_excess_n + ntop + nbot);
+		utils::matrix_add_scaled (nbot, n, alpha_n * timestep, matrix + n - nbot - excess_n, &factorized_matrix [(ntop + ex_excess_0) * (n + ex_excess_0 + n + ex_excess_0 + ex_excess_n + 1) + n + ex_excess_n], n, n + ex_excess_0 + ex_excess_n + ntop + nbot);
 		
-		utils::add_scaled (n, alpha_0 * timestep, matrix + excess_0, &factorized_matrix [ex_excess_0 * (n + ex_excess_0 + ex_excess_n + 1) + excess_0], n, n + ex_excess_0 + ex_excess_n);	
-		utils::matrix_add_scaled (n - excess_n - excess_0 - 2, n, timestep, matrix + excess_0 + 1, &factorized_matrix [ex_excess_0 * (n + ex_excess_0 + ex_excess_n + 1) + excess_0 + 1], n, n + ex_excess_0 + ex_excess_n);
-		utils::add_scaled (n, alpha_n * timestep, matrix + n - 1 - excess_n, &factorized_matrix [ex_excess_0 * (n + ex_excess_0 + n + ex_excess_0 + ex_excess_n + 1) + n - excess_n], n, n + ex_excess_0 + ex_excess_n);
-		
-		DEBUG ("Interpolating..." << messenger_ptr->get_id ());
-		
-		utils::interpolate (ex_excess_0, n, positions, default_matrix, &positions_0 [0], &factorized_matrix [ex_excess_0 * (n + ex_excess_0 + ex_excess_n)], n, n + ex_excess_0 + ex_excess_n);
-		utils::interpolate (ex_excess_n, n, positions, default_matrix, &positions_n [0], &factorized_matrix [ex_excess_0 * (n + ex_excess_0 + ex_excess_n + 1) + n], n, n + ex_excess_0 + ex_excess_n);
-
 		DEBUG ("Entering..." << ((int) boundary_matrix.size ()));
 		
-		for (int i = 0; i < n + ex_excess_0 + ex_excess_n; ++i) {
-			for (int j = 0; j < n + ex_excess_0 + ex_excess_n; ++j) {
-				DEBUG (" " << i << j << factorized_matrix [i * (n + ex_excess_0 + ex_excess_n) + j])
+		for (int i = 0; i < ex_excess_0; ++i) {
+			DEBUG ("POS0: " << i << " " << positions_0 [i])
+		}
+		for (int i = 0; i < ex_excess_n; ++i) {
+			DEBUG ("POSN: " << i << " " << positions_n [i])
+		}
+		for (int i = 0; i < n + ex_excess_0 + ex_excess_n + ntop + nbot; ++i) {
+			for (int j = 0; j < n + ex_excess_0 + ex_excess_n + ntop + nbot; ++j) {
+				DEBUG ("MATRIX: " << i << " " << j << " " << factorized_matrix [i * (n + ex_excess_0 + ex_excess_n + ntop + nbot) + j])
 			}
 		}
 		
-		utils::p_block_matrix_factorize (messenger_ptr, n - excess_0 - excess_n, excess_0 + ex_excess_0, excess_n + ex_excess_n, &factorized_matrix [0], &ipiv [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, n + ex_excess_0 + ex_excess_n, sqrt ((int) boundary_matrix.size ()));
+		utils::p_block_matrix_factorize (messenger_ptr, n - excess_0 - excess_n - ntop - nbot, excess_0 + ex_excess_0 + 2 * ntop, excess_n + ex_excess_n + 2 * nbot, &factorized_matrix [0], &ipiv [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, n + ex_excess_0 + ex_excess_n + ntop + nbot, sqrt ((int) boundary_matrix.size ()));
 		
 		if (info != 0) {
 			ERROR ("Unable to invert matrix");
@@ -266,25 +275,28 @@ namespace one_d
 				TODO Replace this with a more useful exception that can be handled
 			*/
 		}
-		DEBUG ("Done.");
+		TRACE ("Done.");
 	}
 	
 	template <class datatype>
 	void solver <datatype>::execute (int &element_flags) {
 		int info;
 		TRACE ("Executing solve...");
-		utils::scale (n + ex_excess_0 + ex_excess_n, 0.0, &data_temp [0]);
-		utils::copy (n, data_in, &data_temp [ex_excess_0]);
-		utils::add_scaled (n, timestep, implicit_rhs, &data_temp [ex_excess_0]);
-		utils::add_scaled (n, timestep, explicit_rhs, &data_temp [ex_excess_0]);
-		data_temp [ex_excess_0 + excess_0] *= alpha_0;
-		data_temp [n + ex_excess_0 + excess_0 - excess_n] *= alpha_n;
+		utils::scale (n + ex_excess_0 + ex_excess_n + ntop + nbot, 0.0, &data_temp [0]);
+		utils::copy (n, data_in, &data_temp [ex_excess_0 + ntop]);
+		utils::add_scaled (n, timestep, implicit_rhs, &data_temp [ex_excess_0 + ntop]);
+		utils::add_scaled (n, timestep, explicit_rhs, &data_temp [ex_excess_0 + ntop]);
+		// interpolate the values in the excess regions from this
+		data_temp [ntop + ex_excess_0 + excess_0] *= alpha_0;
+		data_temp [0] = data_temp [ntop + ex_excess_0 + excess_0];
+		data_temp [n - nbot + ex_excess_0 + ntop - excess_n] *= alpha_n;
+		data_temp [n + ex_excess_0 + ntop + ex_excess_n] = data_temp [n - nbot + ex_excess_0 + ntop - excess_n];
 		
-		TRACE ("Entering block solver.");
+		DEBUG ("Entering block solver.");
 		
-		utils::p_block_matrix_solve (messenger_ptr, n - excess_0 - excess_n, excess_0 + ex_excess_0, excess_n + ex_excess_n, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, 1, n + ex_excess_0 + ex_excess_n, sqrt ((int) boundary_matrix.size ()));
+		utils::p_block_matrix_solve (messenger_ptr, n - excess_0 - excess_n - ntop - nbot, excess_0 + ex_excess_0 + 2 * ntop, excess_n + ex_excess_n + 2 * nbot, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, 1, n + ex_excess_0 + ex_excess_n + ntop + nbot, sqrt ((int) boundary_matrix.size ()));
 
-		utils::copy (n, &data_temp [ex_excess_0], data_out);
+		utils::copy (n, &data_temp [ex_excess_0 + ntop], data_out);
 		
 		element_flags |= transformed_vertical;
 	}

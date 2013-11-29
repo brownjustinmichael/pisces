@@ -19,7 +19,15 @@ if logger.lower () == "log4cxx":
         env.Append (CPPFLAGS = ["-D_LOG4CXX"])
         env.Append (NVCCFLAGS = ["-D_LOG4CXX"])
     else:
-        log4cxx == "none"
+        logger == "none"
+    env = conf.Finish ()
+elif logger.lower () == "log4cplus":
+    conf = Configure (env)
+    if conf.CheckLib ("log4cplus"):
+        env.Append (CPPFLAGS = ["-D_LOG4CPLUS"])
+        env.Append (NVCCFLAGS = ["-D_LOG4CPLUS"])
+    else:
+        logger == "none"
     env = conf.Finish ()
 
 path = os.path.dirname (inspect.getfile (inspect.currentframe ()))
@@ -30,6 +38,8 @@ for dirname, dirnames, filenames in os.walk (path):
 
 if logger.lower () == "log4cxx":
     objects.append (env.Object ("config_log4cxx.cpp"))
+elif logger.lower () == "log4cplus":
+    objects.append (env.Object ("config_log4cplus.cpp"))
 else:
     objects.append (env.Object ("config.cpp"))
     

@@ -62,7 +62,9 @@ namespace bases
 	class plan
 	{
 	public:
-		virtual ~plan () {}
+		virtual ~plan () {
+			printf ("Destroying bases plan\n");
+		}
 		
 		/*!*******************************************************************
 		* \brief Operate the plan on the data arrays contained in the class
@@ -81,7 +83,9 @@ public:
 	flag (i_flag),
 	boolean (i_boolean) {}
 	
-	virtual ~change_flag () {}
+	virtual ~change_flag () {
+		printf ("Destroying change flag\n");
+	}
 	
 	virtual void execute (int &element_flags) {
 		if (boolean) {

@@ -29,7 +29,9 @@ namespace one_d
 		 *********************************************************************/
 		fftw_cosine (bases::grid <datatype> &i_grid, datatype* i_data_in, datatype* i_data_out = NULL);
 		
-		virtual ~fftw_cosine () {}
+		virtual ~fftw_cosine () {
+			printf ("Destroying one_d transform\n");
+		}
 		
 		/*!*******************************************************************
 		 * \copydoc bases::transform::execute ()

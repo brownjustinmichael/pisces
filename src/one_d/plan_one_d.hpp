@@ -35,7 +35,9 @@ namespace one_d
 		data_in (i_data_in),
 		data_out (i_data_out ? i_data_out : i_data_in) {}
 
-		virtual ~explicit_plan () {}
+		virtual ~explicit_plan () {
+			printf ("Destroying one_d explicit plan\n");
+		}
 
 		/*!*******************************************************************
 		 * \copydoc bases::plan::execute ()
@@ -68,7 +70,9 @@ namespace one_d
 		explicit_plan <datatype> (i_grid, i_data_in, i_data_out),  
 		matrix (grid.matrix_ptr ()) {}
 
-		virtual ~implicit_plan () {}
+		virtual ~implicit_plan () {
+			printf ("Destroying one_d implicit plan\n");
+		}
 	
 		/*!*******************************************************************
 		 * \copydoc plan::execute ()
