@@ -322,17 +322,21 @@ namespace one_d
 		if (ntop != 0) {
 			data_temp [ntop + ex_excess_0 + excess_0] *= alpha_0;
 			data_temp [0] = data_temp [ntop + ex_excess_0 + excess_0];
+			// data_temp [ntop + ex_excess_0 + excess_0] += data_in [excess_0];
 		} else {
 			data_temp [0] = value_0;
 		}
 		if (nbot != 0) {
 			data_temp [lda - 1 - nbot - ex_excess_n - excess_n] *= alpha_n;
 			data_temp [lda - 1] = data_temp [lda - 1 - nbot - ex_excess_n - excess_n];
+			// data_temp [lda - 1 - nbot - ex_excess_n - excess_n] += data_in [n - 1 - excess_n];
 		} else {
 			data_temp [n - 1 + ntop + ex_excess_0] = value_n;
 		}
 
-		utils::add_scaled (n - 2 + ntop + nbot, 1.0, data_in + 1 - ntop, &data_temp [ex_excess_0 + 1]);
+		utils::add_scaled (n - 2 + ntop + nbot - excess_0 - excess_n, 1.0, data_in + 1 - ntop + excess_0, &data_temp [ex_excess_0 + 1 + excess_0]);
+		utils::interpolate (ex_excess_0, 1, n, 1.0, positions, data_in, &positions_0 [0], &data_temp [1]);
+		utils::interpolate (ex_excess_n, 1, n, 1.0, positions, data_in, &positions_n [0], &data_temp [lda - 1 - ex_excess_n]);
 		
 		for (int i = 0; i < lda; ++i) {
 			DEBUG ("RHS = " << data_temp [i]);

@@ -71,7 +71,7 @@ namespace one_d
 		
 			// Set up solver
 			element <datatype>::add_solver (new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, pointer (velocity), pointer (vel_explicit_rhs), pointer (vel_implicit_rhs)));
-			// element <datatype>::add_solver (new iterative_solver <datatype> (*grids [0], messenger_ptr, 1, timestep, alpha_0, alpha_n, pointer (velocity), pointer (vel_explicit_rhs), pointer (vel_implicit_rhs)));
+			// element <datatype>::add_solver (new iterative_solver <datatype> (*grids [0], messenger_ptr, 10, timestep, alpha_0, alpha_n, pointer (velocity), pointer (vel_explicit_rhs), pointer (vel_implicit_rhs)));
 			
 		
 			normal_stream->to_file ();

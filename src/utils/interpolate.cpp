@@ -36,11 +36,11 @@ namespace utils
 			}
 			if (in [k] == x [i]) {
 				for (int j = 0; j < m; ++j) {
-					out [j * ldout + k] = alpha * y [j * ldy + i];
+					out [j * ldout + k] += alpha * y [j * ldy + i];
 				}
 			} else {
 				for (int j = 0; j < m; ++j) {
-					out [j * ldout + k] = alpha * ((y [j * ldy + i] - y [j * ldy + i - 1]) / (x [i] - x [i - 1]) * (in [k] - x [i]) + y [j * ldy + i]);
+					out [j * ldout + k] += alpha * ((y [j * ldy + i] - y [j * ldy + i - 1]) / (x [i] - x [i - 1]) * (in [k] - x [i]) + y [j * ldy + i]);
 				}
 			}
 		}
@@ -71,11 +71,11 @@ namespace utils
 			}
 			if (in [k] == x [i]) {
 				for (int j = 0; j < m; ++j) {
-					out [j * ldy + k] = alpha * y [j * ldy + i];
+					out [j * ldy + k] += alpha * y [j * ldy + i];
 				}
 			} else {
 				for (int j = 0; j < m; ++j) {
-					out [j * ldy + k] = alpha * ((y [j * ldy + i] - y [j * ldy + i - 1]) / (x [i] - x [i - 1]) * (in [j] - x [i]) + y [j * ldy + i]);
+					out [j * ldy + k] += alpha * ((y [j * ldy + i] - y [j * ldy + i - 1]) / (x [i] - x [i - 1]) * (in [j] - x [i]) + y [j * ldy + i]);
 				}
 			}
 		}
