@@ -75,7 +75,7 @@ namespace bases
 		*/
 	
 		virtual ~grid () {
-			printf ("Destroying base grid\n");
+			// printf ("Destroying base grid\n");
 		}
 		
 		datatype& position (int index = 0) {

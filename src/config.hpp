@@ -66,7 +66,7 @@ public:
 	log_config (int* argc, char*** argv, int id = 0);
 	
 	virtual ~log_config () {
-		printf ("Destroying log config\n");
+		// printf ("Destroying log config\n");
 	}
 };
 

@@ -16,7 +16,7 @@
 log4cplus::BasicConfigurator config;
 log4cplus::Logger logger = log4cplus::Logger::getRoot ();
 log4cplus::SharedAppenderPtr append;
-int severity = 1;
+int severity = 2;
 
 log4cplus::LogLevel int_to_severity (int severity_index) {
 	switch (severity_index) {

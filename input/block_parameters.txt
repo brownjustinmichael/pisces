@@ -1,5 +1,5 @@
 timesteps 10
-n 1000
-nrhs 10000
+n 10
+nrhs 1
 nmp 2
 nb 2

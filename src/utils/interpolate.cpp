@@ -11,7 +11,7 @@
 
 namespace utils
 {
-	void interpolate (int n, int m, double* x, double* y, double* in, double* out, int ldy, int ldout) {
+	void interpolate (int n, int m, int l, double alpha, double* x, double* y, double* in, double* out, int ldy, int ldout) {
 		TRACE ("Interpolating...");
 		if (ldy == -1) {
 			ldy = m;
@@ -24,7 +24,7 @@ namespace utils
 			/*
 				TODO Allow for reverse dx as well
 			*/
-			if (in [k] < x [0] || in [k] > x [m - 1]) {
+			if (in [k] < x [0] || in [k] > x [l - 1]) {
 				FATAL ("Interpolation out of range.");
 				throw 0;
 				/*
@@ -36,17 +36,17 @@ namespace utils
 			}
 			if (in [k] == x [i]) {
 				for (int j = 0; j < m; ++j) {
-					out [j * ldout + k] = y [j * ldy + i];
+					out [j * ldout + k] = alpha * y [j * ldy + i];
 				}
 			} else {
 				for (int j = 0; j < m; ++j) {
-					out [j * ldout + k] = (y [j * ldy + i] - y [j * ldy + i - 1]) / (x [i] - x [i - 1]) * (in [k] - x [i]) + y [j * ldy + i];
+					out [j * ldout + k] = alpha * ((y [j * ldy + i] - y [j * ldy + i - 1]) / (x [i] - x [i - 1]) * (in [k] - x [i]) + y [j * ldy + i]);
 				}
 			}
 		}
 	}
 	
-	void interpolate (int n, int m, float* x, float* y, float* in, float* out, int ldy, int ldout) {
+	void interpolate (int n, int m, int l, float alpha, float* x, float* y, float* in, float* out, int ldy, int ldout) {
 		TRACE ("Interpolating...");
 		if (ldy == -1) {
 			ldy = m;
@@ -59,7 +59,7 @@ namespace utils
 			/*
 				TODO Allow for reverse dx as well
 			*/
-			if (in [k] < x [0] || in [k] > x [n - 1]) {
+			if (in [k] < x [0] || in [k] > x [l - 1]) {
 				FATAL ("Interpolation out of range.");
 				throw 0;
 				/*
@@ -71,11 +71,11 @@ namespace utils
 			}
 			if (in [k] == x [i]) {
 				for (int j = 0; j < m; ++j) {
-					out [j * ldy + k] = y [j * ldy + i];
+					out [j * ldy + k] = alpha * y [j * ldy + i];
 				}
 			} else {
 				for (int j = 0; j < m; ++j) {
-					out [j * ldy + k] += (y [j * ldy + i] - y [j * ldy + i - 1]) / (x [i] - x [i - 1]) * (in [j] - x [i]) + y [j * ldy + i];
+					out [j * ldy + k] = alpha * ((y [j * ldy + i] - y [j * ldy + i - 1]) / (x [i] - x [i - 1]) * (in [j] - x [i]) + y [j * ldy + i]);
 				}
 			}
 		}

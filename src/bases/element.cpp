@@ -47,13 +47,14 @@ namespace bases
 			}
 		
 			TRACE ("Calculation complete.");
+
+			// execute_boundaries ();
+
 			
 			if (normal_stream) {
 				TRACE ("Writing to file...");
 				normal_stream->to_file ();
 			}
-
-			execute_boundaries ();
 			
 			TRACE ("Updating...");
 			

@@ -51,10 +51,10 @@ namespace utils
 			throw 0;
 		}
 				
-		matrix_add_scaled (ntop, ntop, 1.0, a, x, lda, ldb);
-		matrix_add_scaled (nbot, ntop, 1.0, a + ntop + n, x + ntop, lda, ldb);
-		matrix_add_scaled (ntop, nbot, 1.0, a + (ntop + n) * lda, x + ntop * ldb, lda, ldb);
-		matrix_add_scaled (nbot, nbot, 1.0, a + (ntop + n) * (lda + 1), x + ntop * (ldb + 1), lda, ldb);
+		matrix_copy (ntop, ntop, a, x, lda, ldb);
+		matrix_copy (nbot, ntop, a + ntop + n, x + ntop, lda, ldb);
+		matrix_copy (ntop, nbot, a + (ntop + n) * lda, x + ntop * ldb, lda, ldb);
+		matrix_copy (nbot, nbot, a + (ntop + n) * (lda + 1), x + ntop * (ldb + 1), lda, ldb);
 		
 		matrix_factorize (n, n, am, ipiv, info, lda);
 		

@@ -36,7 +36,7 @@ namespace one_d
 		data_out (i_data_out ? i_data_out : i_data_in) {}
 
 		virtual ~explicit_plan () {
-			printf ("Destroying one_d explicit plan\n");
+			// printf ("Destroying one_d explicit plan\n");
 		}
 
 		/*!*******************************************************************
@@ -71,7 +71,7 @@ namespace one_d
 		matrix (grid.matrix_ptr ()) {}
 
 		virtual ~implicit_plan () {
-			printf ("Destroying one_d implicit plan\n");
+			// printf ("Destroying one_d implicit plan\n");
 		}
 	
 		/*!*******************************************************************

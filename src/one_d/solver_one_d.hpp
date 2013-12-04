@@ -116,7 +116,7 @@ namespace one_d
 		solver (bases::grid <datatype> &i_grid, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_aplha_n, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out = NULL, int i_flags = 0x00);
 	
 		virtual ~solver () {
-			printf ("Destroying one_d solver\n");
+			// printf ("Destroying one_d solver\n");
 		}
 	
 		/*!*******************************************************************
@@ -141,6 +141,7 @@ namespace one_d
 		datatype& timestep; //!< A datatype reference to the current timestep
 		datatype& alpha_0; //!< A datatype reference to the current edge_0 weight
 		datatype& alpha_n; //!< A datatype reference to the current edge_n weight
+		datatype value_0, value_n;
 
 		datatype* positions;
 		int temp_n;

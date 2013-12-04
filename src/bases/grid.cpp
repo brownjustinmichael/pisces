@@ -39,7 +39,8 @@ namespace bases
 				positions [0] = (position_0 + position_n) / 2.0;
 			}
 			
-			width = positions [n] - positions [0];
+			
+			width = positions [n - 1] - positions [0];
 	
 			for (d = 0; d < 3; ++d) {
 				for (k = 0; k < n; ++k) {

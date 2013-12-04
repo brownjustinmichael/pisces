@@ -52,41 +52,41 @@ namespace bases
 		}
 		
 		virtual ~element () {
-			printf ("Destroying bases element\n");
-			printf ("Destroying %p\n", &name);
-			printf ("Destroying %p\n", &messenger_ptr);
-			printf ("Destroying %p\n", &duration);
-			printf ("Destroying %p\n", &timestep);
-			printf ("Destroying %p\n", &scalars);
-			printf ("Destroying %p\n", &grids);
-			printf ("Destroying %p\n", &*failsafe_dump);
-			printf ("Destroying %p\n", &*normal_stream);
-			// printf ("Destroying %p\n", &*transform_stream);
-			for (int i = 0; i < (int) forward_horizontal_transforms.size (); ++i) {
-				printf ("Destroying %p\n", &*forward_horizontal_transforms [i]);
-			}
-			for (int i = 0; i < (int) inverse_horizontal_transforms.size (); ++i) {
-				printf ("Destroying %p\n", &*inverse_horizontal_transforms [i]);
-			}
-			for (int i = 0; i < (int) forward_vertical_transforms.size (); ++i) {
-				printf ("Destroying %p\n", &*forward_vertical_transforms [i]);
-			}
-			for (int i = 0; i < (int) inverse_vertical_transforms.size (); ++i) {
-				printf ("Destroying %p\n", &*inverse_vertical_transforms [i]);
-			}
-			for (int i = 0; i < (int) solvers.size (); ++i) {
-				printf ("Destroying %p\n", &*solvers [i]);
-			}
-			for (int i = 0; i < (int) pre_transform_plans.size (); ++i) {
-				printf ("Destroying %p\n", &*pre_transform_plans [i]);
-			}
-			for (int i = 0; i < (int) mid_transform_plans.size (); ++i) {
-				printf ("Destroying %p\n", &*mid_transform_plans [i]);
-			}
-			for (int i = 0; i < (int) post_transform_plans.size (); ++i) {
-				printf ("Destroying %p\n", &*post_transform_plans [i]);
-			}
-			printf ("Last\n");
+			// printf ("Destroying bases element\n");
+			// printf ("Destroying %p\n", &name);
+			// printf ("Destroying %p\n", &messenger_ptr);
+			// printf ("Destroying %p\n", &duration);
+			// printf ("Destroying %p\n", &timestep);
+			// printf ("Destroying %p\n", &scalars);
+			// printf ("Destroying %p\n", &grids);
+			// printf ("Destroying %p\n", &*failsafe_dump);
+			// printf ("Destroying %p\n", &*normal_stream);
+			// // printf ("Destroying %p\n", &*transform_stream);
+			// for (int i = 0; i < (int) forward_horizontal_transforms.size (); ++i) {
+			// 	printf ("Destroying %p\n", &*forward_horizontal_transforms [i]);
+			// }
+			// for (int i = 0; i < (int) inverse_horizontal_transforms.size (); ++i) {
+			// 	printf ("Destroying %p\n", &*inverse_horizontal_transforms [i]);
+			// }
+			// for (int i = 0; i < (int) forward_vertical_transforms.size (); ++i) {
+			// 	printf ("Destroying %p\n", &*forward_vertical_transforms [i]);
+			// }
+			// for (int i = 0; i < (int) inverse_vertical_transforms.size (); ++i) {
+			// 	printf ("Destroying %p\n", &*inverse_vertical_transforms [i]);
+			// }
+			// for (int i = 0; i < (int) solvers.size (); ++i) {
+			// 	printf ("Destroying %p\n", &*solvers [i]);
+			// }
+			// for (int i = 0; i < (int) pre_transform_plans.size (); ++i) {
+			// 	printf ("Destroying %p\n", &*pre_transform_plans [i]);
+			// }
+			// for (int i = 0; i < (int) mid_transform_plans.size (); ++i) {
+			// 	printf ("Destroying %p\n", &*mid_transform_plans [i]);
+			// }
+			// for (int i = 0; i < (int) post_transform_plans.size (); ++i) {
+			// 	printf ("Destroying %p\n", &*post_transform_plans [i]);
+			// }
+			// printf ("Last\n");
 		}
 		
 		/*!*******************************************************************
@@ -144,7 +144,6 @@ namespace bases
 		 * TODO This assumes 1 equation. It should be generalized for multiple equations.
 		 *********************************************************************/
 		inline void add_solver (solver <datatype>* i_solver) {
-			DEBUG ("Adding solver " << i_solver);
 			solvers.push_back (std::shared_ptr <solver <datatype>> (i_solver));
 		}
 
@@ -301,11 +300,8 @@ namespace bases
 			datatype t_timestep;
 			t_timestep = calculate_timestep ();
 			messenger_ptr->min (&t_timestep);
-			
-			DEBUG ("Entering solvers.");
-			
+						
 			for (int i = 0; i < (int) solvers.size (); ++i) {
-				DEBUG ("Executing solver." << &*solvers [i]);
 				solvers [i]->execute (flags);
 			}
 			

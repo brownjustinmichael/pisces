@@ -46,7 +46,7 @@ namespace io
 		format () {}
 		
 		virtual ~format () {
-			printf ("Destroying format\n");
+			// printf ("Destroying format\n");
 		}
 		
 		virtual void to_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs) = 0;
@@ -67,7 +67,7 @@ namespace io
 		file_name (i_file_name) {};
 		
 		virtual ~output () {
-			printf ("Destroying output\n");
+			// printf ("Destroying output\n");
 		}
 		
 		/*!*******************************************************************

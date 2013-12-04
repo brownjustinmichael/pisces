@@ -19,8 +19,8 @@ namespace utils
 	 * \param y The double array of dependent variables
 	 * \param x_0 The double value at which to interpolate
 	 ************************************************************************/
-	void interpolate (int n, int m, double* x, double* y, double* in, double* out, int ldy = -1, int ldout = -1);
-	void interpolate (int n, int m, float* x, float* y, float* in, float* out, int ldy = -1, int ldout = -1);
+	void interpolate (int n, int m, int l, double alpha, double* x, double* y, double* in, double* out, int ldy = -1, int ldout = -1);
+	void interpolate (int n, int m, int l, float alpha, float* x, float* y, float* in, float* out, int ldy = -1, int ldout = -1);
 	
 	/*!**********************************************************************
 	 * \brief Interpolate a matrix multiplication at x_0

@@ -46,7 +46,8 @@ enum plan_flags {
 	unchanged_timestep = 0x400,
 	implicit_set = 0x4000,
 	transformed_horizontal = 0x10,
-	transformed_vertical = 0x8000
+	transformed_vertical = 0x8000,
+	no_transform = 0x01
 };
 
 namespace bases
@@ -63,7 +64,7 @@ namespace bases
 	{
 	public:
 		virtual ~plan () {
-			printf ("Destroying bases plan\n");
+			// printf ("Destroying bases plan\n");
 		}
 		
 		/*!*******************************************************************

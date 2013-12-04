@@ -27,7 +27,7 @@ namespace one_d
 		diffusion (bases::grid <datatype> &i_grid, datatype i_coeff, datatype i_alpha, datatype* i_data_in, datatype* i_data_out = NULL);
 		
 		virtual ~diffusion () {
-			printf ("Destroying one_d diffusion\n");
+			// printf ("Destroying one_d diffusion\n");
 		}
 		
 		void execute (int &element_flags);

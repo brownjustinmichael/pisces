@@ -51,18 +51,18 @@ int main (int argc, char *argv[])
 	srand (2);
 	
 	for (int i = 0; i < lda; ++i) {
-		// printf ("%d ", mess.get_id ());
+		printf ("%d ", mess.get_id ());
 		for (int j = 0; j < lda; ++j) {
 			a [j * lda + i] = rand () % 100;
-			// printf ("%f ", a [j * lda + i]);
+			printf ("%f ", a [j * lda + i]);
 		}
-		// printf ("= ");
+		printf ("= ");
 		for (int j = 0; j < nrhs; ++j) {
 			b [j * ldb + i] = rand () % 100;
 			bcopy [j * ldb + i] = b [j * ldb + i];
-			// printf ("%f ", b [j * ldb + i]);
+			printf ("%f ", b [j * ldb + i]);
 		}
-		// printf ("\n");
+		printf ("\n");
 	}
 	
 	utils::matrix_copy (lda, lda, &a [0], &acopy [0], lda, lda);
@@ -73,8 +73,16 @@ int main (int argc, char *argv[])
 
 	// double mid = omp_get_wtime ();
 
-	for (int i = 0; i < ntimes; ++i) {
-		utils::p_block_matrix_solve (&mess, n, ntop, nbot, &a [0], &ipiv [0], &b [0], &x [0], &xipiv [0], &ns [0], &info, nrhs, lda, ldx, ldb);
+	utils::p_block_matrix_solve (&mess, n, ntop, nbot, &a [0], &ipiv [0], &b [0], &x [0], &xipiv [0], &ns [0], &info, nrhs, lda, ldx, ldb);
+	
+	utils::matrix_matrix_multiply (n + ntop + nbot, nrhs, n + ntop + nbot, 1.0, &acopy [0], &b [0], -1.0, &bcopy [0]);
+	
+	for (int i = 0; i < lda; ++i) {
+		printf ("%d ", mess.get_id ());
+		for (int j = 0; j < nrhs; ++j) {
+			printf ("%f", bcopy [j * ldb + i]);
+		}
+		printf ("\n");
 	}
 	
 	return 0;

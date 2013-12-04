@@ -28,7 +28,7 @@ namespace one_d
 	template <>
 	void fftw_cosine <double>::execute (int &element_flags) {
 		TRACE ("Executing FFT...");
-		
+
 		fftw_execute (fourier_plan);
 		
 		for (int i = 0; i < n; ++i) {

@@ -99,7 +99,7 @@ namespace one_d
 			scalars [name].resize (n, 0.0);
 			if (name == position) {
 				initial_conditions = &(grids [0]->position ());
-			} else {
+			} else if (!(flags & no_transform)) {
 				element <datatype>::add_inverse_vertical_transform (new fftw_cosine <datatype> (*grids [0], pointer (velocity)));
 				element <datatype>::add_forward_vertical_transform (new fftw_cosine <datatype> (*grids [0], pointer (velocity)));
 			}
@@ -135,6 +135,7 @@ namespace one_d
 			for (typename std::map <int, std::map <int, datatype> >::iterator i_edge = fixed_points.begin (); i_edge != fixed_points.end (); ++i_edge) {
 				for (typename std::map <int, datatype>::iterator iter = (i_edge->second).begin (); iter != (i_edge->second).end (); ++iter) {
 					(*this) (iter->first, edge_map [i_edge->first]) = iter->second;
+					DEBUG ("Setting " << iter->first << " to " << iter->second << " at " << edge_map [i_edge->first] << " of " << n);
 				}
 			}
 		}

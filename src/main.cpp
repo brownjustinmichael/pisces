@@ -93,12 +93,12 @@ int main (int argc, char *argv[])
 	if (id == 0) {
 		excess_0 = 0;
 	} else {
-		excess_0 = 0;
+		excess_0 = 1;
 	}
 	if (id == n_elements - 1) {
 		excess_n = 0;
 	} else {
-		excess_n = 0;
+		excess_n = 1;
 	}
 	int name = id;
 	
