@@ -204,6 +204,12 @@ namespace utils
 	
 	void matrix_add_scaled (int n, int m, float da, float *dx, float *dy, int ldx, int ldy) {
 		int ione = 1;
+		if (ldx == -1) {
+			ldx = n;
+		}
+		if (ldy == -1) {
+			ldy = n;
+		}
 		for (int i = 0; i < m; ++i) {
 			saxpy_ (&n, &da, dx + i * ldx, &ione, dy + i * ldy, &ione);
 		}
@@ -211,6 +217,12 @@ namespace utils
 	
 	void matrix_add_scaled (int n, int m, double da, double *dx, double *dy, int ldx, int ldy) {
 		int ione = 1;
+		if (ldx == -1) {
+			ldx = n;
+		}
+		if (ldy == -1) {
+			ldy = n;
+		}
 		for (int i = 0; i < m; ++i) {
 			daxpy_ (&n, &da, dx + i * ldx, &ione, dy + i * ldy, &ione);
 		}

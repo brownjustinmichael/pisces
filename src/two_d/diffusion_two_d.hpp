@@ -37,16 +37,19 @@ namespace two_d
 			
 				void execute (int &element_flags) {	
 					TRACE ("Operating...");
+					std::stringstream debug;
 					if (element_flags & x_solve) {
+
 						for (int j = 0; j < m; ++j) {
 							for (int i = 0; i < n; ++i) {
-								data_out [i * m + j] += coeff * (1.0 - alpha) * pioL2 * (datatype) ((i / 2) * (i / 2)) * data_in [i * m + j];
+								data_out [i * m + j] -= coeff * (1.0 - alpha) * pioL2 * (datatype) ((i / 2) * (i / 2)) * data_in [i * m + j];
 							}
 						}
+
 					} else {
 						for (int j = 0; j < m; ++j) {
 							for (int i = 0; i < n; ++i) {
-								data_out [i * m + j] += coeff * pioL2 * (datatype) ((i / 2) * (i / 2)) * data_in [i * m + j];
+								data_out [i * m + j] -= coeff * pioL2 * (datatype) ((i / 2) * (i / 2)) * data_in [i * m + j];
 							}
 						}
 					}
@@ -83,15 +86,24 @@ namespace two_d
 			
 				void execute (int &element_flags) {	
 					TRACE ("Operating...");
+					std::stringstream debug;
 					
 					if (element_flags & z_solve) {
 						for (int i = 0; i < n; ++i) {
 							utils::matrix_vector_multiply (m, m, coeff * (1.0 - alpha), grid_m.get_data (2), data_in + i * m, 1.0, data_out + i * m);
 						}
 					} else {
+
 						for (int i = 0; i < n; ++i) {
 							utils::matrix_vector_multiply (m, m, coeff, grid_m.get_data (2), data_in + i * m, 1.0, data_out + i * m);
 						}
+						// for (int i = 0; i < m; ++i) {
+						// 	for (int j = 0; j < n; ++j) {
+						// 		debug << data_out [j * m + i] << " ";
+						// 	}
+						// 	DEBUG ("OUT: " << debug.str ());
+						// 	debug.str ("");
+						// }
 					}
 					
 					TRACE ("Operation complete.");

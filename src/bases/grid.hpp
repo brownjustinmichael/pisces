@@ -45,14 +45,12 @@ namespace bases
 		 * \param i_rows The integer number of rows in the grid
 		 * \param i_cols The integer number of columns in the grid
 		 *********************************************************************/
-		grid (axis *i_axis_ptr, int i_derivs, bool linked_0 = false, bool linked_n = false) :
+		grid (axis *i_axis_ptr, int i_derivs) :
 		n (i_axis_ptr->n),
 		excess_0 (i_axis_ptr->excess_0),
 		excess_n (i_axis_ptr->excess_n),
 		position_0 (i_axis_ptr->position_0),
 		position_n (i_axis_ptr->position_n),
-		alpha_0 (linked_0 ? 0.5 : 0.0),
-		alpha_n (linked_n ? 0.5 : 0.0),
 		derivs (i_derivs) {
 			TRACE ("Instantiating...");
 
@@ -118,7 +116,6 @@ namespace bases
 		int n;
 		int excess_0, excess_n;
 		datatype position_0, position_n;
-		datatype alpha_0, alpha_n;
 	
 	protected:
 		std::vector <datatype> positions;
@@ -146,7 +143,7 @@ namespace bases
 			 * \param i_scale A datatype by which the grid should be scaled
 			 * \param i_width The datatype width of the collocation region
 			 *********************************************************************/
-			grid (axis *i_axis_ptr, bool linked_0 = false, bool linked_n = false);
+			grid (axis *i_axis_ptr);
 	
 			virtual ~grid () {};
 			
@@ -217,7 +214,7 @@ namespace bases
 			 * \param i_scale A datatype by which the grid should be scaled
 			 * \param i_width The datatype width of the collocation region
 			 *********************************************************************/
-			grid (axis *i_axis_ptr, bool linked_0 = false, bool linked_n = false);
+			grid (axis *i_axis_ptr);
 	
 			virtual ~grid () {};
 			

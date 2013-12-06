@@ -99,9 +99,6 @@ namespace one_d
 			scalars [name].resize (n, 0.0);
 			if (name == position) {
 				initial_conditions = &(grids [0]->position ());
-			} else if (!(flags & no_transform)) {
-				element <datatype>::add_inverse_vertical_transform (new fftw_cosine <datatype> (*grids [0], pointer (velocity)));
-				element <datatype>::add_forward_vertical_transform (new fftw_cosine <datatype> (*grids [0], pointer (velocity)));
 			}
 			if (initial_conditions) {
 				utils::copy (n, initial_conditions, this->pointer (name));
@@ -124,18 +121,6 @@ namespace one_d
 			for (typename std::map <int, std::vector <datatype> >::iterator iter = scalars.begin (); iter != scalars.end (); ++iter) {
 				if (iter->first < 0) {
 					utils::scale (n, 0.0, &(iter->second [0]));
-				}
-			}
-		}
-		
-		/*!*******************************************************************
-		 * \copydoc bases::element <datatype>::execute_boundaries ()
-		 *********************************************************************/
-		inline void execute_boundaries () {
-			for (typename std::map <int, std::map <int, datatype> >::iterator i_edge = fixed_points.begin (); i_edge != fixed_points.end (); ++i_edge) {
-				for (typename std::map <int, datatype>::iterator iter = (i_edge->second).begin (); iter != (i_edge->second).end (); ++iter) {
-					(*this) (iter->first, edge_map [i_edge->first]) = iter->second;
-					DEBUG ("Setting " << iter->first << " to " << iter->second << " at " << edge_map [i_edge->first] << " of " << n);
 				}
 			}
 		}
@@ -172,11 +157,20 @@ namespace one_d
 			element (bases::axis *i_axis_n, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_flags) : 
 			one_d::element <datatype> (i_axis_n, i_name, i_params, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
-				one_d::element <datatype>::set_grid (new bases::chebyshev::grid <datatype> (axis_n, messenger_ptr->linked (edge_0), messenger_ptr->linked (edge_n)));
+				one_d::element <datatype>::set_grid (new bases::chebyshev::grid <datatype> (axis_n));
 				initialize (position);
 				TRACE ("Instantiated.");
 			}
 			virtual ~element () {}
+			
+			virtual void initialize (int name, datatype* initial_conditions = NULL, int flags = 0x00) {
+				TRACE ("Initializing " << name << "...");
+				one_d::element <datatype>::initialize (name, initial_conditions, flags);
+				if (!(flags & no_transform) && (name != position)) {
+					element <datatype>::add_inverse_vertical_transform (new fftw_cosine <datatype> (*grids [0], pointer (name)));
+					element <datatype>::add_forward_vertical_transform (new fftw_cosine <datatype> (*grids [0], pointer (name)));
+				}
+			}
 			
 		protected:
 			using one_d::element <datatype>::initialize;
@@ -185,6 +179,7 @@ namespace one_d
 			using one_d::element <datatype>::grids;
 			using one_d::element <datatype>::params;
 			using one_d::element <datatype>::messenger_ptr;
+			using one_d::element <datatype>::pointer;
 		};
 		
 		/*!*******************************************************************
@@ -240,7 +235,7 @@ namespace one_d
 			element (bases::axis i_axis_n, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_flags) : 
 			one_d::element <datatype> (i_axis_n, i_name, i_params, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
-				one_d::element <datatype>::set_grid (new bases::fourier::grid <datatype> (axis_n, messenger_ptr->linked (edge_0), messenger_ptr->linked (edge_n)));
+				one_d::element <datatype>::set_grid (new bases::fourier::grid <datatype> (axis_n));
 				initialize (position);
 				TRACE ("Instantiated.");
 			}

@@ -84,9 +84,8 @@ namespace one_d
 			datatype t_timestep;
 			t_timestep = params.max_timestep;
 			for (int i = 1; i < n - 1; ++i) {
-				t_timestep = std::min (t_timestep, (datatype) (std::abs (((*this) (position, i - 1) - (*this) (position, i + 1)) / (*this) (velocity, i)) / params.advection_coeff));
+				t_timestep = std::min (t_timestep, (datatype) (std::abs (((*this) (position, i - 1) - (*this) (position, i + 1)) / (*this) (velocity, i)) / params.advection_coeff * params.courant_factor));
 			}
-			t_timestep *= params.courant_factor;
 			if (t_timestep < timestep || t_timestep > 2.0 * timestep) {
 				return t_timestep;
 			} else {

@@ -333,15 +333,6 @@ namespace bases
 			return (datatype) 0.0;
 		}
 		
-		/*!*******************************************************************
-		 * \brief Execute the boundary conditions
-		 * 
-		 * In general, this should be overwritten in subclasses.
-		 * 
-		 * TODO I'm not entirely enthused about this method.
-		 *********************************************************************/
-		virtual void execute_boundaries () = 0;
-		
 		/*!**********************************************************************
 		 * \brief The main function call of the class
 		 * 

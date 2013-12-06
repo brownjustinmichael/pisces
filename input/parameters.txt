@@ -1,9 +1,9 @@
 n_iterations 10
-diffusion_coeff 1.0
+diffusion_coeff 0.1
 advection_coeff 0.0
 courant_factor 0.8
-timesteps 10
-output_every 1
+timesteps 1000
+output_every 100
 gridpoints 64
 max_timestep 0.01
 scale 1.0

@@ -43,8 +43,8 @@ namespace two_d
 					}
 				}
 				initialize (velocity, &init [0]);
-				initialize (vel_explicit_rhs);
-				initialize (vel_implicit_rhs);
+				initialize (vel_explicit_rhs, NULL, no_transform);
+				initialize (vel_implicit_rhs, NULL, no_transform);
 			
 				// Set up output
 				std::stringstream convert;
@@ -66,16 +66,13 @@ namespace two_d
 				// transform_stream->template append <datatype> ("rhs", pointer (vel_implicit_rhs));
 				// 			
 				// Set up plans in order
-				element <datatype>::add_pre_plan (new vertical_diffusion <datatype> (*grids [0], *grids [1], 0.1 * diffusion_coeff, alpha, pointer (velocity), pointer (vel_implicit_rhs)));
+				element <datatype>::add_pre_plan (new vertical_diffusion <datatype> (*grids [0], *grids [1], diffusion_coeff, alpha, pointer (velocity), pointer (vel_implicit_rhs)));
 				element <datatype>::add_mid_plan (new horizontal_diffusion <datatype> (*grids [0], *grids [1], diffusion_coeff, alpha, pointer (velocity), pointer (vel_implicit_rhs)));
 
-				element <datatype>::add_forward_horizontal_transform (new horizontal_transform <datatype> (*grids [0], *grids [1], pointer (velocity)));
-				element <datatype>::add_inverse_horizontal_transform (new horizontal_transform <datatype> (*grids [0], *grids [1], pointer (velocity), NULL, inverse));
-				element <datatype>::add_forward_vertical_transform (new vertical_transform <datatype> (*grids [0], *grids [1], pointer (velocity)));
-				element <datatype>::add_inverse_vertical_transform (new vertical_transform <datatype> (*grids [0], *grids [1], pointer (velocity), NULL, inverse));
+
 		
 				// Set up solver
-				element <datatype>::add_solver (new solver <datatype> (*grids [0], *grids [1], messenger_ptr, params.n_iterations, timestep, pointer (velocity), pointer (vel_explicit_rhs), pointer (vel_implicit_rhs)));
+				element <datatype>::add_solver (new solver <datatype> (*grids [0], *grids [1], messenger_ptr, params.n_iterations, timestep, alpha_0, alpha_n, pointer (velocity), pointer (vel_explicit_rhs), pointer (vel_implicit_rhs)));
 		
 				normal_stream->to_file ();
 				

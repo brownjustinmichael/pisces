@@ -12,6 +12,7 @@
 
 #include <cmath>
 #include <sstream>
+#include "transform_two_d.hpp"
 #include "../bases/element.hpp"
 #include "../utils/io.hpp"
 #include "../config.hpp"
@@ -67,6 +68,9 @@ namespace two_d
 			edge_next [edge_mm] = 1;
 			edge_size [edge_mm] = n;
 			
+			alpha_0 = 0.0;
+			alpha_n = 0.0;
+			
 			cell_n.resize (n * m);
 			cell_m.resize (n * m);
 			for (int i = 0; i < n; ++i) {
@@ -115,7 +119,7 @@ namespace two_d
 		 *********************************************************************/
 		virtual void initialize (int name, datatype* initial_conditions = NULL, int flags = 0x00) {
 			TRACE ("Initializing " << name << "...");
-			
+
 			if (name == x_position) {
 				initial_conditions = &(grids [0]->position ());
 				flags |= uniform_m;
@@ -144,10 +148,6 @@ namespace two_d
 					utils::copy (n * m, initial_conditions, pointer (name));
 				}
 			}
-			for (typename std::map <int, std::map <int, std::vector <datatype> > >::iterator iter = fixed_points.begin (); iter != fixed_points.end (); ++iter) {
-				iter->second [name].resize (edge_size [iter->first]);
-				utils::copy (edge_size [iter->first], pointer (name, edge_index [iter->first]), &(iter->second [name] [0]), edge_next [iter->first]);
-			}
 			
 			TRACE ("Initialized.");
 		}
@@ -169,21 +169,6 @@ namespace two_d
 			TRACE ("Explicit reset end.");
 		}
 	
-		/*!*******************************************************************
-		 * \copydoc bases::element <datatype>::execute_boundaries ()
-		 *********************************************************************/
-		inline void execute_boundaries () {
-			TRACE ("Executing boundaries...");
-			
-			for (typename std::map <int, std::map <int, std::vector <datatype> > >::iterator iter = fixed_points.begin (); iter != fixed_points.end (); ++iter) {
-				for (typename std::map <int, std::vector <datatype> >::iterator i_name = iter->second.begin (); i_name != iter->second.end (); ++i_name) {
-					utils::copy (edge_size [iter->first], &(i_name->second [0]), pointer (i_name->first, edge_index [iter->first]), 1, edge_next [iter->first]);
-				}
-			}
-			
-			TRACE ("Boundaries executed.");
-		}
-	
 	protected:
 		using bases::element <datatype>::scalars;
 		using bases::element <datatype>::grids;
@@ -194,6 +179,7 @@ namespace two_d
 		bases::axis *axis_n, *axis_m;
 		int &n; //!< The number of elements in each 1D array
 		int &m;
+		datatype alpha_0, alpha_n;
 		std::map <int, datatype> positions; //!< A vector of the edge positions
 		std::map <int, int> excesses; //!< A vector of the edge positions
 		std::vector<int> cell_n; //!< An integer array for tracking each cell number for output
@@ -202,7 +188,6 @@ namespace two_d
 		std::map <int, int> edge_index;
 		std::map <int, int> edge_next;
 		std::map <int, int> edge_size;
-		std::map <int, std::map <int, std::vector <datatype> > > fixed_points;
 	};
 	
 	namespace fourier
@@ -220,14 +205,25 @@ namespace two_d
 				two_d::element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_messenger_ptr, i_flags) {
 					TRACE ("Instantiating...");
 					
-					two_d::element <datatype>::set_grid (new bases::fourier::grid <datatype> (axis_n, sqrt (2.0 / (n - 1.0))), 0);
-					two_d::element <datatype>::set_grid (new bases::chebyshev::grid <datatype> (axis_m, sqrt (2.0 / (m - 1.0))), 1);
+					two_d::element <datatype>::set_grid (new bases::fourier::grid <datatype> (axis_n));
+					two_d::element <datatype>::set_grid (new bases::chebyshev::grid <datatype> (axis_m), 1);
 					initialize (x_position);
 					initialize (z_position);
 					
 					TRACE ("Instantiated.");
 				}
 				virtual ~element () {}
+				
+				virtual void initialize (int name, datatype* initial_conditions = NULL, int flags = 0x00) {
+					TRACE ("Initializing...");
+					two_d::element <datatype>::initialize (name, initial_conditions, flags);
+				    if (!(flags & no_transform) && (name != x_position) && (name != z_position)) {
+		   				element <datatype>::add_forward_horizontal_transform (new horizontal_transform <datatype> (*grids [0], *grids [1], pointer (name)));
+		   				element <datatype>::add_inverse_horizontal_transform (new horizontal_transform <datatype> (*grids [0], *grids [1], pointer (name), NULL, inverse));
+		   				element <datatype>::add_forward_vertical_transform (new vertical_transform <datatype> (*grids [0], *grids [1], pointer (name)));
+		   				element <datatype>::add_inverse_vertical_transform (new vertical_transform <datatype> (*grids [0], *grids [1], pointer (name), NULL, inverse));
+		   			}
+				}
 		
 			protected:
 				using two_d::element <datatype>::initialize;
@@ -238,6 +234,8 @@ namespace two_d
 				using two_d::element <datatype>::axis_n;
 				using two_d::element <datatype>::axis_m;
 				using two_d::element <datatype>::params;
+				using two_d::element <datatype>::pointer;
+				using two_d::element <datatype>::grids;
 			};
 			
 			template <class datatype>
@@ -265,6 +263,8 @@ namespace two_d
 				using element <datatype>::pointer;
 				using element <datatype>::messenger_ptr;
 				using element <datatype>::timestep;
+				using element <datatype>::alpha_0;
+				using element <datatype>::alpha_n;
 			};
 		} /* chebyshev */
 	} /* fourier */

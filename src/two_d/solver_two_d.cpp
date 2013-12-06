@@ -18,13 +18,13 @@ namespace two_d
 		namespace chebyshev
 		{
 			template <class datatype>
-			solver <datatype>:: solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, bases::messenger* i_messenger_ptr, int i_n_iterations, datatype& i_timestep, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out, int i_flags) : 
+			solver <datatype>:: solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, bases::messenger* i_messenger_ptr, int i_n_iterations, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out, int i_flags) : 
 			bases::solver <datatype> (i_flags),
 			explicit_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out), 
 			messenger_ptr (i_messenger_ptr), 
 			timestep (i_timestep), 
-			alpha_0 (grid_m.alpha_0), 
-			alpha_n (grid_m.alpha_n),
+			alpha_0 (i_alpha_0), 
+			alpha_n (i_alpha_n),
 			n_iterations (i_n_iterations), 
 			excess_0 (grid_m.excess_0),
 			excess_n (grid_m.excess_n),
@@ -70,6 +70,7 @@ namespace two_d
 			template <class datatype>
 			void solver <datatype>::execute (int &element_flags) {
 				TRACE ("Executing...");
+				std::stringstream debug;
 
 				utils::scale (n * m, 0.0, &data_temp [0]);
 
@@ -82,8 +83,16 @@ namespace two_d
 				
 				if (element_flags & x_solve) {
 					TRACE ("Solving in n direction...");
-					for (int j = 0; j < m; ++j) {
-						utils::diagonal_multiply (n, 1.0, &horizontal_minus_matrix [0], data_in + j, timestep / 2.0, &data_temp [j], 1, m, m);
+					
+					for (int i = 0; i < m; ++i) {
+						for (int j = 0; j < n; ++j) {
+							debug << data_temp [j * m + i] << " ";
+						}
+						DEBUG ("RHS: " << debug.str ());
+						debug.str ("");
+					}
+					for (int j = 1; j < m - 1; ++j) {
+						utils::diagonal_multiply (n, 1.0, &horizontal_minus_matrix [0], data_in + j, 1.0, &data_temp [j], 1, m, m);
 						utils::diagonal_solve (n, &horizontal_plus_matrix [0], &data_temp [0] + j, 1, m);
 					}
 					utils::copy (n * m, &data_temp [0], data_out);
@@ -95,14 +104,14 @@ namespace two_d
 					TRACE ("Solving in m direction...");
 					
 					int info;
-					utils::add_scaled (n * m, 1.0, data_in, &data_temp [0]);
+					utils::matrix_add_scaled (m - 2, n, 1.0, data_in + 1, &data_temp [1], m, m);
 					
 					TRACE ("Beginning matrix solve...");
 			
 					utils::matrix_solve (m, &factorized_matrix [0], &ipiv [0], &data_temp [0], &info, n, m, m);
 		
 					TRACE ("Matrix solve complete.");
-		
+					
 					for (int i = 0; i < n; ++i) {
 						for (int j = 0; j < m; ++j) {
 							if (std::isnan (data_temp [i * m + j])) {

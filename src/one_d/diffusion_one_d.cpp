@@ -31,9 +31,17 @@ namespace one_d
 	void diffusion <datatype>::execute (int &element_flags) {	
 		TRACE ("Operating...");
 		
+		for (int i = 0; i < n; ++i) {
+			DEBUG ("BEFORE: " << data_out [i]);
+		}
+		
 		// Set up and evaluate the explicit part of the diffusion equation
 		utils::matrix_vector_multiply (n, n, coeff * (1.0 - alpha), grid.get_data (2), data_in, 1.0, data_out, n);
 
+		for (int i = 0; i < n; ++i) {
+			DEBUG ("AFTER: " << data_out [i]);
+		}
+		
 		TRACE ("Operation complete.");
 	}
 	
