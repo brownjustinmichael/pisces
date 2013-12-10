@@ -68,8 +68,16 @@ namespace two_d
 			edge_next [edge_mm] = 1;
 			edge_size [edge_mm] = n;
 			
-			alpha_0 = 0.0;
-			alpha_n = 0.0;
+			if (i_messenger_ptr->get_id () == 0) {
+				alpha_0 = 0.0;
+			} else {
+				alpha_0 = 0.5;
+			}
+			if (i_messenger_ptr->get_id () == i_messenger_ptr->get_np () - 1) {
+				alpha_n = 0.0;
+			} else {
+				alpha_n = 0.5;
+			}
 			
 			cell_n.resize (n * m);
 			cell_m.resize (n * m);

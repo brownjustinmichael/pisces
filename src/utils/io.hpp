@@ -25,7 +25,7 @@ namespace io
 	public:
 		std::string filename;
 
-		datatype diffusion_coeff;
+		datatype diffusion_coeff, nonlinear_diffusion_coeff;
 		datatype advection_coeff;
 		int timesteps;
 		int gridpoints;
@@ -34,6 +34,7 @@ namespace io
 		int n, nmp, nrhs, nb;
 		datatype max_timestep, courant_factor;
 		datatype scale, width, mean, sigma;
+		std::string output;
 
 		parameters (std::string i_filename);
 		

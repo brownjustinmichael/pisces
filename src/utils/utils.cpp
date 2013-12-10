@@ -153,6 +153,12 @@ namespace utils
 
 	void matrix_copy (int n, int m, double *x, double *y, int ldx, int ldy) {
 		int ione = 1;
+		if (ldx == -1) {
+			ldx = n;
+		}
+		if (ldy == -1) {
+			ldy = n;
+		}
 		for (int i = 0; i < m; ++i) {
 			dcopy_ (&n, x + i * ldx, &ione, y + i * ldy, &ione);
 		}

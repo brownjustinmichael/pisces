@@ -19,13 +19,16 @@ namespace utils
 		if (ldout == -1) {
 			ldout = n;
 		}
+		if (alpha == 0.0) {
+			return;
+		}
 		for (int k = 0; k < n; ++k) {
 			int i = 1;
 			/*
 				TODO Allow for reverse dx as well
 			*/
 			if (in [k] < x [0] || in [k] > x [l - 1]) {
-				FATAL ("Interpolation out of range.");
+				FATAL ("Interpolation out of range: " << in [k] << " not between " << x [0] << " and " << x [l - 1]);
 				throw 0;
 				/*
 					TODO better exception?

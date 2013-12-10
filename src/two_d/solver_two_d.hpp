@@ -28,7 +28,7 @@ namespace two_d
 			class solver : public bases::solver <datatype>, explicit_plan <datatype>
 			{
 			public:
-				solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, bases::messenger* i_messenger_ptr, int i_n_iterations, datatype& i_timestep, datatype& i_alpha_0, datatype& i_aplha_n, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out = NULL, int i_flags = 0x00);
+				solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_aplha_n, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out = NULL, int i_flags = 0x00);
 				
 				virtual ~solver () {}
 				
@@ -50,31 +50,31 @@ namespace two_d
 				datatype& timestep; //!< A datatype reference to the current timestep
 				datatype& alpha_0; //!< A datatype reference to the current edge_0 weight
 				datatype& alpha_n; //!< A datatype reference to the current edge_n weight
+				std::vector <datatype> values_0, values_n;
 
 				datatype* positions;
-				int n_iterations;
+				int temp_n;
 				int excess_0; //!< The integer number of elements to recv from edge_0
 				int excess_n; //!< The integer number of elements to recv from edge_n
-				int expected_excess_0; //!< The integer number of elements to send to edge_0
-				int expected_excess_n; //!< The integer number of elements to send to edge_n
-		
+				int ex_excess_0; //!< The integer number of elements to send to edge_0
+				int ex_excess_n; //!< The integer number of elements to send to edge_n
+				int ntop, nbot;
+	
 				datatype* explicit_rhs; //!< The datatype array of the right-hand-side of the matrix equation
 				datatype* implicit_rhs; //!< The datatype array of the right-hand-side of the matrix equation
 				datatype* default_matrix; //!< The datatype array of the non-timestep dependent matrix component
-		
-				std::vector <datatype> error_0; //!< A datatype vector to be recved from edge_0
-				std::vector <datatype> error_n; //!< A datatype vector to be recved from edge_n
-				std::vector <datatype> out_error_0; //!< A datatype vector to be sent to edge_0
-				std::vector <datatype> out_error_n; //!< A datatype vector to be sent to edge_n
+				datatype* matrix; //!< The datatype array of the matrix component to be timestep-multiplied
+	
 				std::vector <datatype> data_temp; //!< A datatype vector to be used in lieu of data_out for non-updating steps
 				std::vector <datatype> positions_0; //!< A datatype vector of excess positions from edge_0
 				std::vector <datatype> positions_n; //!< A datatype vector of excess positions from edge_n
 				std::vector <datatype> factorized_matrix; //!< A datatype vector containing the factorized sum of default matrix and timestep * matrix
-				std::vector <datatype> horizontal_plus_matrix;
-				std::vector <datatype> horizontal_minus_matrix;
+				std::vector <datatype> boundary_matrix; //!< A datatype vector containing the factorized sum of default matrix and timestep * matrix
 				std::vector <datatype> previous_rhs;
+				std::vector <int> ns;
 				std::vector <int> ipiv; //!< A vector of integers needed to calculate the factorization
-				
+				std::vector <int> bipiv; //!< A vector of integers needed to calculate the factorization
+				std::vector <datatype> horizontal_plus_matrix, horizontal_minus_matrix;
 			};
 		} /* chebyshev */
 	} /* fourier */

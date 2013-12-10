@@ -1,12 +1,15 @@
 n_iterations 10
 diffusion_coeff 0.1
+nonlinear_diffusion_coeff 0.0
 advection_coeff 0.0
 courant_factor 0.8
-timesteps 1000
-output_every 100
+timesteps 10
+output_every 1
 gridpoints 64
 max_timestep 0.01
 scale 1.0
 width 2.0
 mean 0.0
 sigma 0.1
+
+output output

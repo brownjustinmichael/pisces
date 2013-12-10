@@ -113,7 +113,7 @@ namespace bases
 		 * \param name The integer name from the index enumeration
 		 * \param index The integer index of interest	
 		 * 
-		 * For simplicity, this may need to be overloaded in higher dimensions.
+		 * For simplicity, this could be overloaded in higher dimensions.
 		 * 
 		 * \return A datatype reference to the given index of the named scalar
 		 *********************************************************************/
@@ -121,6 +121,17 @@ namespace bases
 			return (&((*this) [name])) [index];
 		}
 		
+		
+		/*!**********************************************************************
+		 * \brief Get the pointer to a given named scalar index
+		 * 
+		 * \param name The integer name from the index enumeration
+		 * \param index The integer index of interest
+		 * 
+		 * For simplicity, this could be overloaded in higher dimensions.
+		 * 
+		 * \return A pointer to the given index of the named scalar
+		 ************************************************************************/
 		virtual datatype* pointer (int name, int index = 0) {
 			return &((*this) [name]) + index;
 		}
@@ -129,55 +140,65 @@ namespace bases
 		 * \brief Set the collocation grid.
 		 * 
 		 * \param i_grid A shared_ptr to a grid object
-		 * 
-		 * TODO This assumes 1D n^3. Either the grid should be moved to a subclass or made more general
+		 * \param index The dimensional index to apply the grid.
 		 *********************************************************************/
 		inline void set_grid (grid <datatype>* i_grid, int index = 0) {
 			grids [index] = std::shared_ptr <grid <datatype>> (i_grid);
 		}
 
 		/*!*******************************************************************
-		 * \brief Set the matrix solver.
+		 * \brief Add a matrix solver.
 		 * 
-		 * \param i_solver A shared_ptr to a solver object
-		 * 
-		 * TODO This assumes 1 equation. It should be generalized for multiple equations.
+		 * \param i_solver A pointer to a solver object
 		 *********************************************************************/
 		inline void add_solver (solver <datatype>* i_solver) {
 			solvers.push_back (std::shared_ptr <solver <datatype>> (i_solver));
 		}
 
 		/*!*******************************************************************
-		 * \brief Set the transform operation
+		 * \brief Add a forward horizontal transform operation
 		 * 
-		 * \param i_plan A shared_ptr to the transform object
-		 * 
-		 * TODO This assumes one scalar field. It should be generalized.
+		 * \param i_plan A pointer to a plan object
 		 *********************************************************************/
 		inline void add_forward_horizontal_transform (plan <datatype>* i_plan) {
 			forward_horizontal_transforms.push_back (std::shared_ptr <plan <datatype>> (i_plan));
 			// transforms.push_back (i_plan));
 		}
 		
+		/*!*******************************************************************
+		 * \brief Add an inverse horizontal transform operation
+		 * 
+		 * \param i_plan A pointer to a plan object
+		 *********************************************************************/
 		inline void add_inverse_horizontal_transform (plan <datatype>* i_plan) {
 			inverse_horizontal_transforms.push_back (std::shared_ptr <plan <datatype>> (i_plan));
 			// transforms.push_back (i_plan));
 		}
-
+		
+		/*!*******************************************************************
+		 * \brief Add a forward vertical transform operation
+		 * 
+		 * \param i_plan A pointer to a plan object
+		 *********************************************************************/
 		inline void add_forward_vertical_transform (plan <datatype>* i_plan) {
 			forward_vertical_transforms.push_back (std::shared_ptr <plan <datatype>> (i_plan));
 			// transforms.push_back (i_plan));
 		}
 		
+		/*!*******************************************************************
+		 * \brief Add an inverse vertical transform operation
+		 * 
+		 * \param i_plan A pointer to a plan object
+		 *********************************************************************/
 		inline void add_inverse_vertical_transform (plan <datatype>* i_plan) {
 			inverse_vertical_transforms.push_back (std::shared_ptr <plan <datatype>> (i_plan));
 			// transforms.push_back (i_plan));
 		}
 
 		/*!*******************************************************************
-		 * \brief Adds a plan to be executed in order
+		 * \brief Adds a plan to be executed before either transform in order
 		 * 
-		 * \param i_plan A shared pointer to the plan to add
+		 * \param i_plan A pointer to the plan to add
 		 *********************************************************************/
 		inline void add_pre_plan (plan <datatype>* i_plan) {
 			TRACE ("Adding plan...");
@@ -185,6 +206,12 @@ namespace bases
 			TRACE ("Added.");
 		}
 		
+		
+		/*!*******************************************************************
+		 * \brief Adds a plan to be executed after the vertical transform
+		 * 
+		 * \param i_plan A pointer to the plan to add
+		 *********************************************************************/
 		inline void add_mid_plan (plan <datatype>* i_plan) {
 			TRACE ("Adding plan...");
 			mid_transform_plans.push_back (std::shared_ptr <plan <datatype>> (i_plan));
@@ -192,9 +219,9 @@ namespace bases
 		}
 
 		/*!*******************************************************************
-		 * \brief Adds a plan to be executed in order
+		 * \brief Adds a plan to be executed after both transforms in order
 		 * 
-		 * \param i_plan A shared pointer to the plan to add
+		 * \param i_plan A pointer to the plan to add
 		 *********************************************************************/
 		inline void add_post_plan (plan <datatype>* i_plan) {
 			TRACE ("Adding plan...");
@@ -207,6 +234,7 @@ namespace bases
 		 * 
 		 * \param name The integer name index to be initialized
 		 * \param initial_conditions The datatype array of initial conditions
+		 * \param flags A set of binary flags
 		 *********************************************************************/
 		virtual void initialize (int name, datatype* initial_conditions = NULL, int flags = 0x00) = 0;
 		
@@ -230,12 +258,7 @@ namespace bases
 		}
 		
 		/*!**********************************************************************
-		 * \brief Transform from spectral space to physical space
-		 * 
-		 * In some cases, like the cosine transform, this can work in reverse.
-		 * 
-		 * TODO Multiple transforms and batch transforms should be possible
-		 * TODO Need implementation if reverse transform is not forward transform
+		 * \brief Transform the element forward in the horizontal direction
 		 ************************************************************************/
 		virtual void transform_horizontal_forward () {
 			TRACE ("Transforming...");
@@ -247,6 +270,9 @@ namespace bases
 			}
 		}
 		
+		/*!**********************************************************************
+		 * \brief Transform the element backward in the horizontal direction
+		 ************************************************************************/
 		virtual void transform_horizontal_inverse () {
 			TRACE ("Inverting...");
 			if (flags & transformed_horizontal) {
@@ -257,6 +283,9 @@ namespace bases
 			}
 		}
 		
+		/*!**********************************************************************
+		 * \brief Transform the element forward in the vertical direction
+		 ************************************************************************/
 		virtual void transform_vertical_forward () {
 			TRACE ("Transforming...");
 			if (!(flags & transformed_vertical)) {
@@ -267,6 +296,9 @@ namespace bases
 			}
 		}
 		
+		/*!**********************************************************************
+		 * \brief Transform the element backward in the vertical direction
+		 ************************************************************************/
 		virtual void transform_vertical_inverse () {
 			TRACE ("Inverting...");
 			if (flags & transformed_vertical) {
@@ -277,6 +309,9 @@ namespace bases
 			}
 		}
 		
+		/*!**********************************************************************
+		 * \brief Output to file
+		 ************************************************************************/
 		virtual void output () {
 			if (normal_stream) {
 				normal_stream->to_file ();
@@ -286,6 +321,9 @@ namespace bases
 			// }
 		}
 
+		/*!**********************************************************************
+		 * \brief Factorize all solvers
+		 ************************************************************************/
 		virtual void factorize () {
 			if (!(flags & factorized)) {
 				for (int i = 0; i < (int) solvers.size (); ++i) {
@@ -295,6 +333,9 @@ namespace bases
 			}
 		}
 		
+		/*!**********************************************************************
+		 * \brief Execute all solvers
+		 ************************************************************************/
 		virtual void solve () {
 			TRACE ("Beginning solve...");
 			datatype t_timestep;
@@ -363,23 +404,27 @@ namespace bases
 		datatype duration; //!< The datatype total simulated time
 		datatype timestep; //!< The datatype timestep length
 
-		std::map <int, std::vector <datatype> > scalars; //!< A vector of scalar vectors
-		std::vector <std::shared_ptr <grid <datatype> > > grids; //!< A shared pointer to the collocation grid
+		std::map <int, std::vector <datatype> > scalars; //!< A map of scalar vectors
+		std::vector <std::shared_ptr <grid <datatype> > > grids; //!< A vector of shared pointers to the collocation grids
 		
 		std::shared_ptr <io::output> failsafe_dump; //!< An implementation to dump in case of failure
 		std::shared_ptr <io::output> normal_stream; //!< An implementation to output in normal space
 		// std::shared_ptr <io::output> transform_stream; //!< An implementation to output in transform space
 
 	private:
-		std::vector<std::shared_ptr<plan <datatype> > > forward_horizontal_transforms; //!< A shared pointer to the forward transform
-		std::vector<std::shared_ptr<plan <datatype> > > inverse_horizontal_transforms; //!< A shared pointer to the forward transform
-		std::vector<std::shared_ptr<plan <datatype> > > forward_vertical_transforms; //!< A shared pointer to the forward transform
-		std::vector<std::shared_ptr<plan <datatype> > > inverse_vertical_transforms; //!< A shared pointer to the forward transform
+		std::vector<std::shared_ptr<plan <datatype> > > forward_horizontal_transforms; //!< A vector of shared pointers to the forward horizontal transforms
+		std::vector<std::shared_ptr<plan <datatype> > > inverse_horizontal_transforms; //!< A vector of shared pointers to the inverse horizontal transforms
+		std::vector<std::shared_ptr<plan <datatype> > > forward_vertical_transforms; //!< A vector of shared pointers to the forward vertical transforms
+		std::vector<std::shared_ptr<plan <datatype> > > inverse_vertical_transforms; //!< A vector of shared pointers to the inverse vertical transforms
 		std::vector<std::shared_ptr<solver <datatype> > > solvers; //!< A vector of shared pointers to the matrix solvers
 		
-		std::vector <std::shared_ptr <plan <datatype> > > pre_transform_plans; //!< A vector of shared pointers of plans to be executed
-		std::vector <std::shared_ptr <plan <datatype> > > mid_transform_plans; //!< A vector of shared pointers of plans to be executed
-		std::vector <std::shared_ptr <plan <datatype> > > post_transform_plans; //!< A vector of shared pointers of plans to be executed
+		/*
+			TODO Make solvers a map so that matrices are easy access
+		*/
+		
+		std::vector <std::shared_ptr <plan <datatype> > > pre_transform_plans; //!< A vector of shared pointers of plans to be executed before the transforms
+		std::vector <std::shared_ptr <plan <datatype> > > mid_transform_plans; //!< A vector of shared pointers of plans to be executed after the vertical transform
+		std::vector <std::shared_ptr <plan <datatype> > > post_transform_plans; //!< A vector of shared pointers of plans to be executed after both transforms
 	};
 } /* bases */
 

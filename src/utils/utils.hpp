@@ -33,9 +33,9 @@ namespace utils
 	 *********************************************************************/
 	void copy (int n, double* x, double* y, int incx = 1, int incy = 1);
 	
-	void matrix_copy (int n, int m, float *x, float *y, int ldx, int ldy);
+	void matrix_copy (int n, int m, float *x, float *y, int ldx = -1, int ldy = -1);
 	
-	void matrix_copy (int n, int m, double *x, double *y, int ldx, int ldy);
+	void matrix_copy (int n, int m, double *x, double *y, int ldx = -1, int ldy = -1);
 	
 	/*!*******************************************************************
 	 * \brief Scales a float array by a constant

@@ -86,8 +86,10 @@ int main (int argc, char *argv[])
 	io::parameters <double> params ("../input/parameters.txt");
 
 	int n = params.gridpoints / n_elements + 1;
-	double position_0 = -1.0 + 2.0 / n_elements * id;
-	double position_n = -1.0 + 2.0 / n_elements * (id + 1);
+	double position_m0 = -1.0 + 2.0 / n_elements * id;
+	double position_mm = -1.0 + 2.0 / n_elements * (id + 1);
+	double position_n0 = -1.0;
+	double position_nn = 1.0;
 	int excess_0;
 	int excess_n;
 	if (id == 0) {
@@ -102,12 +104,12 @@ int main (int argc, char *argv[])
 	}
 	int name = id;
 	
-	int m = n - 1;
+	int m = params.gridpoints;
 	
-	bases::axis horizontal_axis (m, excess_0, position_0, excess_n, position_n);
-	bases::axis vertical_axis (n , excess_0, position_0, excess_n, position_n);
+	bases::axis horizontal_axis (m, 0, position_n0, 0, position_nn);
+	bases::axis vertical_axis (n, excess_0, position_m0, excess_n, position_mm);
 	
-	// one_d::chebyshev::advection_diffusion_element <double> element (&vertical_axis, name, params, &process_messenger, 0x00);
+	// one_d::chebyshev::nonlinear_diffusion_element <double> element (&vertical_axis, name, params, &process_messenger, 0x00);
 	two_d::fourier::chebyshev::advection_diffusion_element <double> element (&horizontal_axis, &vertical_axis, name, params, &process_messenger, 0x00);
 	
 	try {

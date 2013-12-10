@@ -233,7 +233,10 @@ namespace bases
 	
 			datatype scale; //!< A datatype by which the collocation grid should be scaled
 			datatype width; //!< The datatype width of the collocation region
-			std::vector <datatype> matrix;
+			std::vector <datatype> matrix; //!< A vector matrix for use with a single solver
+			/*
+				TODO put matrix into solver class
+			*/
 			std::vector<bool> exists_array; //!< A bool vector containing whether the points exist
 			datatype pioN; //!< The datatype 3.14159.../N, for use in calculations
 		};

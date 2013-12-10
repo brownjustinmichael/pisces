@@ -22,7 +22,7 @@ int main (int argc, char *argv[])
 	io::parameters <double> params ("../input/block_parameters.txt");
 	// omp_set_num_threads(params.nmp);
 
-	int n = params.n, nrhs = params.nrhs, ntimes = params.timesteps, ntop = 0, nbot = 0;
+	int n = params.n, nrhs = params.nrhs, ntop = 0, nbot = 0;
 	if (mess.get_id () != 0) {
 		ntop = params.nb;
 	}

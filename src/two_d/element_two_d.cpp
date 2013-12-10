@@ -11,6 +11,7 @@
 #include "transform_two_d.hpp"
 #include "solver_two_d.hpp"
 #include <sstream>
+#include <iomanip>
 
 namespace two_d
 {
@@ -47,9 +48,9 @@ namespace two_d
 				initialize (vel_implicit_rhs, NULL, no_transform);
 			
 				// Set up output
-				std::stringstream convert;
-				convert << name;
-				normal_stream.reset (new io::incremental (new io::two_d::netcdf (n, m), "../output/normal_%04i.cdf", params.output_every));
+				std::ostringstream filestream;
+				filestream << "../output/output_" << std::setfill ('0') << std::setw (2) << name << "_%04i.cdf";
+				normal_stream.reset (new io::incremental (new io::two_d::netcdf (n, m), filestream.str (), params.output_every));
 				normal_stream->template append <int> ("i", &cell_n [0]);
 				normal_stream->template append <int> ("j", &cell_m [0]);
 				normal_stream->template append <datatype> ("x", pointer (x_position));
@@ -72,7 +73,7 @@ namespace two_d
 
 		
 				// Set up solver
-				element <datatype>::add_solver (new solver <datatype> (*grids [0], *grids [1], messenger_ptr, params.n_iterations, timestep, alpha_0, alpha_n, pointer (velocity), pointer (vel_explicit_rhs), pointer (vel_implicit_rhs)));
+				element <datatype>::add_solver (new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, pointer (velocity), pointer (vel_explicit_rhs), pointer (vel_implicit_rhs)));
 		
 				normal_stream->to_file ();
 				

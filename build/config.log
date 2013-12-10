@@ -126,7 +126,7 @@ scons: Configure: The original builder output was:
   |
 scons: Configure: (cached) yes
 
-scons: Configure: Checking for C library atlas... 
+scons: Configure: Checking for C library netcdf_c++... 
 scons: Configure: ".sconf_temp/conftest_5.c" is up to date.
 scons: Configure: The original builder output was:
   |.sconf_temp/conftest_5.c <-
@@ -146,11 +146,11 @@ scons: Configure: The original builder output was:
   |
 scons: Configure: ".sconf_temp/conftest_5" is up to date.
 scons: Configure: The original builder output was:
-  |gcc -o .sconf_temp/conftest_5 .sconf_temp/conftest_5.o -llog4cplus -lfftw3 -lfftw3f -llapack -lblas -latlas
+  |gcc -o .sconf_temp/conftest_5 .sconf_temp/conftest_5.o -llog4cplus -lfftw3 -lfftw3f -llapack -lblas -lnetcdf_c++
   |
 scons: Configure: (cached) yes
 
-scons: Configure: Checking for C library netcdf_c++... 
+scons: Configure: Checking for C library netcdf... 
 scons: Configure: ".sconf_temp/conftest_6.c" is up to date.
 scons: Configure: The original builder output was:
   |.sconf_temp/conftest_6.c <-
@@ -170,11 +170,11 @@ scons: Configure: The original builder output was:
   |
 scons: Configure: ".sconf_temp/conftest_6" is up to date.
 scons: Configure: The original builder output was:
-  |gcc -o .sconf_temp/conftest_6 .sconf_temp/conftest_6.o -llog4cplus -lfftw3 -lfftw3f -llapack -lblas -latlas -lnetcdf_c++
+  |gcc -o .sconf_temp/conftest_6 .sconf_temp/conftest_6.o -llog4cplus -lfftw3 -lfftw3f -llapack -lblas -lnetcdf_c++ -lnetcdf
   |
 scons: Configure: (cached) yes
 
-scons: Configure: Checking for C library netcdf... 
+scons: Configure: Checking for C library irc... 
 scons: Configure: ".sconf_temp/conftest_7.c" is up to date.
 scons: Configure: The original builder output was:
   |.sconf_temp/conftest_7.c <-
@@ -192,13 +192,13 @@ scons: Configure: ".sconf_temp/conftest_7.o" is up to date.
 scons: Configure: The original builder output was:
   |gcc -o .sconf_temp/conftest_7.o -c -D_MPI -Wall -g -std=c++0x -D_LOG4CPLUS .sconf_temp/conftest_7.c
   |
-scons: Configure: ".sconf_temp/conftest_7" is up to date.
+scons: Configure: Building ".sconf_temp/conftest_7" failed in a previous run and all its sources are up to date.
 scons: Configure: The original builder output was:
-  |gcc -o .sconf_temp/conftest_7 .sconf_temp/conftest_7.o -llog4cplus -lfftw3 -lfftw3f -llapack -lblas -latlas -lnetcdf_c++ -lnetcdf
+  |gcc -o .sconf_temp/conftest_7 .sconf_temp/conftest_7.o -llog4cplus -lfftw3 -lfftw3f -llapack -lblas -lnetcdf_c++ -lnetcdf -lirc
   |
-scons: Configure: (cached) yes
+scons: Configure: (cached) no
 
-scons: Configure: Checking for C library irc... 
+scons: Configure: Checking for C library imf... 
 scons: Configure: ".sconf_temp/conftest_8.c" is up to date.
 scons: Configure: The original builder output was:
   |.sconf_temp/conftest_8.c <-
@@ -218,11 +218,14 @@ scons: Configure: The original builder output was:
   |
 scons: Configure: Building ".sconf_temp/conftest_8" failed in a previous run and all its sources are up to date.
 scons: Configure: The original builder output was:
-  |gcc -o .sconf_temp/conftest_8 .sconf_temp/conftest_8.o -llog4cplus -lfftw3 -lfftw3f -llapack -lblas -latlas -lnetcdf_c++ -lnetcdf -lirc
+  |gcc -o .sconf_temp/conftest_8 .sconf_temp/conftest_8.o -llog4cplus -lfftw3 -lfftw3f -llapack -lblas -lnetcdf_c++ -lnetcdf -limf
   |
 scons: Configure: (cached) no
 
-scons: Configure: Checking for C library imf... 
+
+file /Users/justinbrown/Dropbox/pisces/src/SConscript,line 46:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library gfortran... 
 scons: Configure: ".sconf_temp/conftest_9.c" is up to date.
 scons: Configure: The original builder output was:
   |.sconf_temp/conftest_9.c <-
@@ -240,36 +243,9 @@ scons: Configure: ".sconf_temp/conftest_9.o" is up to date.
 scons: Configure: The original builder output was:
   |gcc -o .sconf_temp/conftest_9.o -c -D_MPI -Wall -g -std=c++0x -D_LOG4CPLUS .sconf_temp/conftest_9.c
   |
-scons: Configure: Building ".sconf_temp/conftest_9" failed in a previous run and all its sources are up to date.
+scons: Configure: ".sconf_temp/conftest_9" is up to date.
 scons: Configure: The original builder output was:
-  |gcc -o .sconf_temp/conftest_9 .sconf_temp/conftest_9.o -llog4cplus -lfftw3 -lfftw3f -llapack -lblas -latlas -lnetcdf_c++ -lnetcdf -limf
-  |
-scons: Configure: (cached) no
-
-
-file /Users/justinbrown/Dropbox/pisces/src/SConscript,line 46:
-	Configure(confdir = .sconf_temp)
-scons: Configure: Checking for C library gfortran... 
-scons: Configure: ".sconf_temp/conftest_10.c" is up to date.
-scons: Configure: The original builder output was:
-  |.sconf_temp/conftest_10.c <-
-  |  |
-  |  |
-  |  |
-  |  |int
-  |  |main() {
-  |  |  
-  |  |return 0;
-  |  |}
-  |  |
-  |
-scons: Configure: ".sconf_temp/conftest_10.o" is up to date.
-scons: Configure: The original builder output was:
-  |gcc -o .sconf_temp/conftest_10.o -c -D_MPI -Wall -g -std=c++0x -D_LOG4CPLUS .sconf_temp/conftest_10.c
-  |
-scons: Configure: ".sconf_temp/conftest_10" is up to date.
-scons: Configure: The original builder output was:
-  |gcc -o .sconf_temp/conftest_10 .sconf_temp/conftest_10.o -llog4cplus -lfftw3 -lfftw3f -llapack -lblas -latlas -lnetcdf_c++ -lnetcdf -lgfortran
+  |gcc -o .sconf_temp/conftest_9 .sconf_temp/conftest_9.o -llog4cplus -lfftw3 -lfftw3f -llapack -lblas -lnetcdf_c++ -lnetcdf -lgfortran
   |
 scons: Configure: (cached) yes
 

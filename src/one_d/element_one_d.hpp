@@ -218,6 +218,43 @@ namespace one_d
 			using element <datatype>::alpha_0;
 			using element <datatype>::alpha_n;
 		};
+		
+		/*!*******************************************************************
+		 * \brief A simple implementation of the element class with diffusion
+		 * 
+		 * This class contains a full element's capacity to run a single 
+		 * element diffusion in 1D with constant timestep.
+		 *********************************************************************/
+		template <class datatype>
+		class nonlinear_diffusion_element : public element <datatype>
+		{
+		public:
+			/*!*******************************************************************
+			 * \param i_excess_0 The integer number of points evaluated in the adjacent element
+			 * \param i_excess_n The integer number of points evaluated in the adjacent element
+			 * \copydoc element::element ()
+			 *********************************************************************/
+			nonlinear_diffusion_element (bases::axis *i_axis_n, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_flags);
+		
+			virtual ~nonlinear_diffusion_element () {}
+		
+			virtual datatype calculate_timestep ();
+	
+		private:
+			using element <datatype>::initialize;
+			using element <datatype>::n;
+			using element <datatype>::flags;
+			using element <datatype>::name;
+			using element <datatype>::normal_stream;
+			using element <datatype>::cell;
+			using element <datatype>::timestep;
+			using element <datatype>::params;
+			using element <datatype>::grids;
+			using bases::element <datatype>::pointer;
+			using element <datatype>::messenger_ptr;
+			using element <datatype>::alpha_0;
+			using element <datatype>::alpha_n;
+		};
 	} /* chebyshev */
 	
 	namespace fourier

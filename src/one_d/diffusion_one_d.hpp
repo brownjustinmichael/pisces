@@ -41,6 +41,28 @@ namespace one_d
 		using implicit_plan <datatype>::matrix;
 		using implicit_plan <datatype>::grid;
 	};
+	
+	template <class datatype>
+	class nonlinear_diffusion : public implicit_plan <datatype>
+	{
+	public:
+		nonlinear_diffusion (bases::grid <datatype> &i_grid, datatype i_coeff, datatype* i_data_in, datatype* i_data_out = NULL);
+		
+		virtual ~nonlinear_diffusion () {
+			// printf ("Destroying one_d nonlinear_diffusion\n");
+		}
+		
+		void execute (int &element_flags);
+	
+	private:
+		datatype coeff;
+		datatype alpha;
+		using implicit_plan <datatype>::n;
+		using implicit_plan <datatype>::data_in;
+		using implicit_plan <datatype>::data_out;
+		using implicit_plan <datatype>::matrix;
+		using implicit_plan <datatype>::grid;
+	};
 } /* oned */
 
 #endif /* end of include guard: DIFFUSION_ONE_D_H_1AIIK1RA */

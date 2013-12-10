@@ -31,21 +31,37 @@ namespace one_d
 	void diffusion <datatype>::execute (int &element_flags) {	
 		TRACE ("Operating...");
 		
-		for (int i = 0; i < n; ++i) {
-			DEBUG ("BEFORE: " << data_out [i]);
-		}
-		
 		// Set up and evaluate the explicit part of the diffusion equation
 		utils::matrix_vector_multiply (n, n, coeff * (1.0 - alpha), grid.get_data (2), data_in, 1.0, data_out, n);
 
-		for (int i = 0; i < n; ++i) {
-			DEBUG ("AFTER: " << data_out [i]);
-		}
-		
 		TRACE ("Operation complete.");
 	}
 	
 	template class diffusion <double>;
 	template class diffusion <float>;
+	
+	template <class datatype>
+	nonlinear_diffusion <datatype>::nonlinear_diffusion (bases::grid <datatype> &i_grid, datatype i_coeff, datatype* i_data_in, datatype* i_data_out) :
+	implicit_plan <datatype> (i_grid, i_data_in, i_data_out),
+	coeff (i_coeff) {
+		TRACE ("Initialized.");
+	}
+
+	template <class datatype>
+	void nonlinear_diffusion <datatype>::execute (int &element_flags) {	
+		TRACE ("Operating...");
+		
+		// Set up and evaluate the explicit part of the nonlinear diffusion equation
+		for (int i = 1; i < n - 1; ++i) {
+			data_out [i] += 2.0 * coeff * data_in [i] * ((data_in [i + 1] - data_in [i]) / (grid.position (i + 1) - grid.position (i)) - (data_in [i] - data_in [i - 1]) / (grid.position (i) - grid.position (i - 1))) / (grid.position (i + 1) - grid.position (i - 1));
+			data_out [i] += coeff * (data_in [i + 1] - data_in [i - 1]) / (grid.position (i + 1) - grid.position (i - 1)) * (data_in [i + 1] - data_in [i - 1]) / (grid.position (i + 1) - grid.position (i - 1));
+			DEBUG ("New " << i << " " << data_out [i]);
+		}
+
+		TRACE ("Operation complete.");
+	}
+	
+	template class nonlinear_diffusion <double>;
+	template class nonlinear_diffusion <float>;
 } /* one_d */
 

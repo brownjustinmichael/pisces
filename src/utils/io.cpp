@@ -30,6 +30,7 @@ namespace io
 		}
 		
 		diffusion_coeff = atof (read_map ["diffusion_coeff"].c_str ());
+		nonlinear_diffusion_coeff = atof (read_map ["nonlinear_diffusion_coeff"].c_str ());
 		advection_coeff = atof (read_map ["advection_coeff"].c_str ());
 		courant_factor = atof (read_map ["courant_factor"].c_str ());
 		timesteps = atoi (read_map ["timesteps"].c_str ());
@@ -45,6 +46,7 @@ namespace io
 		nrhs = atoi (read_map ["nrhs"].c_str ());
 		nmp = atoi (read_map ["nmp"].c_str ());
 		nb = atoi (read_map ["nb"].c_str ());
+		output = read_map ["output"].c_str ();
 	}
 	
 	template class parameters <double>;

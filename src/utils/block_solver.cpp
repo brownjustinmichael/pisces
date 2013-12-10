@@ -134,7 +134,7 @@ namespace utils
 
 		matrix_add_scaled (ntop, nrhs, 1.0, b, &y [0], ldb, ntop + nbot);
 		matrix_add_scaled (nbot, nrhs, 1.0, b + ntop + n, &y [ntop], ldb, ntop + nbot);
-				
+		
 		matrix_solve (n, am, ipiv, b + ntop, info, nrhs, lda, ldb);
 				
 		matrix_matrix_multiply (ntop, nrhs, n, -1.0, at, b + ntop, 1.0, &y [0], lda, ldb, ntop + nbot);
