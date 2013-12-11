@@ -148,7 +148,6 @@ namespace two_d
 					
 				if (element_flags & x_solve) {
 					TRACE ("Solving in n direction...");
-					std::stringstream debug;
 					for (int j = 0; j < m; ++j) {
 						utils::diagonal_multiply (n, 1.0, &horizontal_minus_matrix [0], data_in + j, 1.0, &data_temp [ntop + ex_excess_0 + j], 1, m, lda);
 						utils::diagonal_solve (n, &horizontal_plus_matrix [0], &data_temp [ntop + ex_excess_0 + j], 1, lda);
