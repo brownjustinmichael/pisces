@@ -11,7 +11,7 @@ plot_file (i, n) = sprintf ("linear_%02i_%04d.dat", i, n)
 
 unset key
 
-set yrange [-0.1:2.1]
+set yrange [-0.1:2.6]
 
 set tmargin at screen 0.95
 set bmargin at screen 0.05

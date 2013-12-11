@@ -49,7 +49,7 @@ namespace two_d
 			
 				// Set up output
 				std::ostringstream filestream;
-				filestream << "../output/output_" << std::setfill ('0') << std::setw (2) << name << "_%04i.cdf";
+				filestream << "../output/" + params.output + "_" << std::setfill ('0') << std::setw (2) << name << "_%04i.cdf";
 				normal_stream.reset (new io::incremental (new io::two_d::netcdf (n, m), filestream.str (), params.output_every));
 				normal_stream->template append <int> ("i", &cell_n [0]);
 				normal_stream->template append <int> ("j", &cell_m [0]);

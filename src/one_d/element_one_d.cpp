@@ -112,12 +112,12 @@ namespace one_d
 			std::vector <datatype> init (n);
 			datatype height, temp;
 			for (int i = 0; i < n; ++i) {
-				if ((*this) (position, i) < 0.0) {
-					init [i] = 0.0;
-				} else {
-					init [i] = 1.0;
-				}
-				// init [i] = ((*this) (position, i) - (*this) (position)) * scale;
+				// if ((*this) (position, i) < 0.0) {
+				// 	init [i] = 0.0;
+				// } else {
+				// 	init [i] = 1.0;
+				// }
+				init [i] = ((*this) (position, i) - (*this) (position)) * scale;
 			}
 			height = std::max (scale * std::exp (- (width / 2.0 - mean) * (width / 2.0 - mean) / 2.0 / sigma / sigma), scale * std::exp (- (- width / 2.0 - mean) * (- width / 2.0 - mean) / 2.0 / sigma / sigma));
 			for (int i = 0; i < n; ++i) {

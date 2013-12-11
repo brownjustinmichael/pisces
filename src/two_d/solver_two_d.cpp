@@ -191,8 +191,8 @@ namespace two_d
 					utils::matrix_copy (m, n, &data_temp [ex_excess_0 + ntop], data_out, lda, m);
 					
 					element_flags |= transformed_vertical;
-					// element_flags &= ~z_solve;
-					// element_flags |= x_solve;
+					element_flags &= ~z_solve;
+					element_flags |= x_solve;
 						
 					TRACE ("Solve complete.")
 				}

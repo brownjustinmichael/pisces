@@ -4,4 +4,4 @@ Import ("include_mp")
 
 if include_mp:
     objects.append (env.Object ("utils_mp.cpp"))
-    objects.append (env.Object ("solver_utils_mp.cpp"))
+    # objects.append (env.Object ("solver_utils_mp.cpp"))

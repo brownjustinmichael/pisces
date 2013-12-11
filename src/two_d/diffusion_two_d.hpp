@@ -27,7 +27,7 @@ namespace two_d
 				coeff (i_coeff),
 				alpha (i_alpha),
 				flags (i_flags) {
-					pioL2 = (std::acos (-1.0) * std::acos (-1.0) / (i_grid_n.position (n - 1) - i_grid_n.position (0)) / (i_grid_n.position (n - 1) - i_grid_n.position (0)));
+					pioL2 = 4.0 * (std::acos (-1.0) * std::acos (-1.0) / (i_grid_n.position (n - 1) - i_grid_n.position (0)) / (i_grid_n.position (n - 1) - i_grid_n.position (0)));
 					for (int i = 0; i < n; ++i) {
 						matrix_n [i] = coeff * alpha * pioL2 * (datatype) ((i / 2) * (i / 2));
 					}
@@ -42,14 +42,14 @@ namespace two_d
 
 						for (int j = 0; j < m; ++j) {
 							for (int i = 0; i < n; ++i) {
-								// data_out [i * m + j] -= coeff * (1.0 - alpha) * pioL2 * (datatype) ((i / 2) * (i / 2)) * data_in [i * m + j];
+								data_out [i * m + j] -= coeff * (1.0 - alpha) * pioL2 * (datatype) ((i / 2) * (i / 2)) * data_in [i * m + j];
 							}
 						}
 
 					} else {
 						for (int j = 0; j < m; ++j) {
 							for (int i = 0; i < n; ++i) {
-								// data_out [i * m + j] -= coeff * pioL2 * (datatype) ((i / 2) * (i / 2)) * data_in [i * m + j];
+								data_out [i * m + j] -= coeff * pioL2 * (datatype) ((i / 2) * (i / 2)) * data_in [i * m + j];
 							}
 						}
 					}
