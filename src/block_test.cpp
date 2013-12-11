@@ -12,9 +12,9 @@
 #include <stdio.h>
 #include <cstdlib>
 #include <ctime>
+#include <chrono>
 #include "utils/block_solver.hpp"
 #include "utils/utils.hpp"
-#include <omp.h>
 
 int main (int argc, char *argv[])
 {
@@ -51,40 +51,53 @@ int main (int argc, char *argv[])
 	srand (2);
 	
 	for (int i = 0; i < lda; ++i) {
-		printf ("%d ", mess.get_id ());
+		// printf ("%d ", mess.get_id ());
 		for (int j = 0; j < lda; ++j) {
 			a [j * lda + i] = rand () % 100;
-			printf ("%f ", a [j * lda + i]);
+			// printf ("%f ", a [j * lda + i]);
 		}
-		printf ("= ");
+		// printf ("= ");
 		for (int j = 0; j < nrhs; ++j) {
 			b [j * ldb + i] = rand () % 100;
 			bcopy [j * ldb + i] = b [j * ldb + i];
-			printf ("%f ", b [j * ldb + i]);
+			// printf ("%f ", b [j * ldb + i]);
 		}
-		printf ("\n");
+		// printf ("\n");
 	}
 	
 	utils::matrix_copy (lda, lda, &a [0], &acopy [0], lda, lda);
 	
-	// double begin = omp_get_wtime ();
+	clock_t cbegin, cmid, cend;
+	std::chrono::time_point <std::chrono::system_clock> begin, mid, end;
+	
+	cbegin = clock ();
+	begin = std::chrono::system_clock::now ();
 
 	utils::p_block_matrix_factorize (mess.get_id (), mess.get_np (), n, ntop, nbot, &a [0], &ipiv [0], &x [0], &xipiv [0], &ns [0], &info, lda, ldx);
 
-	// double mid = omp_get_wtime ();
-
+	cmid = clock ();
+	mid = std::chrono::system_clock::now ();
+	
 	utils::p_block_matrix_solve (mess.get_id (), mess.get_np (), n, ntop, nbot, &a [0], &ipiv [0], &b [0], &x [0], &xipiv [0], &ns [0], &info, nrhs, lda, ldx, ldb);
+	
+	cend = clock ();
+	end = std::chrono::system_clock::now ();
 	
 	utils::matrix_matrix_multiply (n + ntop + nbot, nrhs, n + ntop + nbot, 1.0, &acopy [0], &b [0], -1.0, &bcopy [0]);
 	
-	for (int i = 0; i < lda; ++i) {
-		printf ("%d ", mess.get_id ());
-		for (int j = 0; j < nrhs; ++j) {
-			printf ("%f", bcopy [j * ldb + i]);
-		}
-		printf ("\n");
-	}
+	// for (int i = 0; i < lda; ++i) {
+	// 	printf ("%d ", mess.get_id ());
+	// 	for (int j = 0; j < nrhs; ++j) {
+	// 		printf ("%f ", bcopy [j * ldb + i]);
+	// 	}
+	// 	printf ("\n");
+	// }
 	
+	std::chrono::duration <double> mb = mid - begin;
+	std::chrono::duration <double> em = end - mid;
+	std::chrono::duration <double> eb = end - begin;
+	printf ("CPU Time: %f + %f = %f\n", ((double) (cmid - cbegin))/CLOCKS_PER_SEC, ((double) (cend - cmid))/CLOCKS_PER_SEC, ((double) (cend - cbegin))/CLOCKS_PER_SEC);
+	printf ("Wall Time: %f + %f = %f\n", (double) mb.count (), (double) em.count (), (double) eb.count ());
 	return 0;
 }
 
