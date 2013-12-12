@@ -9,10 +9,13 @@ conf = Configure (env)
 if include_cuda:
     conf.CheckLib ("cublas")
 
-conf.CheckLib ("lapack")
-if not conf.CheckLib ("blas"):
+if not conf.CheckLib ("ptlapack"):
+    conf.CheckLib ("lapack")
+if not conf.CheckLib ("ptf77blas"):
+    conf.CheckLib ("blas")
+if not conf.CheckLib ("ptcblas"):
     conf.CheckLib ("cblas")
-    conf.CheckLib ("f77blas")
+
 for lib in ["atlas", "netcdf_c++", "netcdf", "irc", "imf"]:
     conf.CheckLib (lib)
 
