@@ -11,7 +11,7 @@ if include_cuda:
 
 conf.CheckLib ("lapack")
 if not conf.CheckLib ("blas"):
-    conf.CheckLib ("f77blas")
+    conf.CheckLib ("cblas")
 for lib in ["atlas", "netcdf_c++", "netcdf", "irc", "imf"]:
     conf.CheckLib (lib)
 
