@@ -25,14 +25,14 @@ namespace io
 	public:
 		std::string filename;
 
-		datatype diffusion_coeff, nonlinear_diffusion_coeff;
+		datatype x_diffusion_coeff, z_diffusion_coeff, nonlinear_diffusion_coeff;
 		datatype advection_coeff;
 		int timesteps;
 		int gridpoints;
 		int output_every;
 		int n_iterations;
 		int n, nmp, nrhs, nb;
-		datatype max_timestep, courant_factor;
+		datatype max_timestep, courant_factor, implicit_alpha;
 		datatype scale, width, mean, sigma;
 		std::string output;
 

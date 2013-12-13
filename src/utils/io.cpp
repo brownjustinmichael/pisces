@@ -29,7 +29,8 @@ namespace io
 			input_stream >> read_map [word];
 		}
 		
-		diffusion_coeff = atof (read_map ["diffusion_coeff"].c_str ());
+		z_diffusion_coeff = atof (read_map ["z_diffusion_coeff"].c_str ());
+		x_diffusion_coeff = atof (read_map ["x_diffusion_coeff"].c_str ());
 		nonlinear_diffusion_coeff = atof (read_map ["nonlinear_diffusion_coeff"].c_str ());
 		advection_coeff = atof (read_map ["advection_coeff"].c_str ());
 		courant_factor = atof (read_map ["courant_factor"].c_str ());
@@ -42,6 +43,7 @@ namespace io
 		mean = atof (read_map ["mean"].c_str ());
 		width = atof (read_map ["width"].c_str ());
 		sigma = atof (read_map ["sigma"].c_str ());
+		implicit_alpha = atof (read_map ["implicit_alpha"].c_str ());
 		n = atoi (read_map ["n"].c_str ());
 		nrhs = atoi (read_map ["nrhs"].c_str ());
 		nmp = atoi (read_map ["nmp"].c_str ());

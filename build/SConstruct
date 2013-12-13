@@ -5,7 +5,7 @@ env = Environment (ENV = os.environ)
 
 include_cuda = False
 include_mpi = True
-include_mp = True
+include_mp = False
 logger = "log4cplus"
 
 if include_mpi:

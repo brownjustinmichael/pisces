@@ -28,7 +28,7 @@ namespace two_d
 				alpha (i_alpha),
 				flags (i_flags) {
 					pioL2 = 4.0 * (std::acos (-1.0) * std::acos (-1.0) / (i_grid_n.position (n - 1) - i_grid_n.position (0)) / (i_grid_n.position (n - 1) - i_grid_n.position (0)));
-					for (int i = 0; i < n; ++i) {
+					for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
 						matrix_n [i] = coeff * alpha * pioL2 * (datatype) ((i / 2) * (i / 2));
 					}
 				}
@@ -41,14 +41,14 @@ namespace two_d
 					if (element_flags & x_solve) {
 
 						for (int j = 0; j < m; ++j) {
-							for (int i = 0; i < n; ++i) {
+							for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
 								data_out [i * m + j] -= coeff * (1.0 - alpha) * pioL2 * (datatype) ((i / 2) * (i / 2)) * data_in [i * m + j];
 							}
 						}
 
 					} else {
 						for (int j = 0; j < m; ++j) {
-							for (int i = 0; i < n; ++i) {
+							for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
 								data_out [i * m + j] -= coeff * pioL2 * (datatype) ((i / 2) * (i / 2)) * data_in [i * m + j];
 							}
 						}
@@ -88,13 +88,9 @@ namespace two_d
 					TRACE ("Operating...");
 					
 					if (element_flags & z_solve) {
-						for (int i = 0; i < n; ++i) {
-							utils::matrix_vector_multiply (m, m, coeff * (1.0 - alpha), grid_m.get_data (2), data_in + i * m, 1.0, data_out + i * m);
-						}
+						utils::matrix_matrix_multiply (m, 2 * (n / 2 + 1), m, coeff * (1.0 - alpha), grid_m.get_data (2), data_in, 1.0, data_out, m);
 					} else {
-						for (int i = 0; i < n; ++i) {
-							utils::matrix_vector_multiply (m, m, coeff, grid_m.get_data (2), data_in + i * m, 1.0, data_out + i * m);
-						}
+						utils::matrix_matrix_multiply (m, 2 * (n / 2 + 1), m, coeff, grid_m.get_data (2), data_in, 1.0, data_out, m);
 					}
 					
 					TRACE ("Operation complete.");

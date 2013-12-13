@@ -115,7 +115,7 @@ namespace bases
 			int d, m, k;
 			scale = sqrt (2.0 / (n - 1));
 			pioN = std::acos (-1.0) / (n - 1);
-			matrix.resize (n);
+			matrix.resize (2 * (n / 2 + 1));
 	
 			TRACE ("Instantiating...");
 	
@@ -128,7 +128,7 @@ namespace bases
 			}
 			
 			
-			width = positions [n] - positions [0];
+			width = positions [n - 1] - positions [0];
 	
 			for (k = 0; k < n; ++k) {
 				for (m = 0; m < n; ++m) {

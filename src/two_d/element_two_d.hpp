@@ -170,7 +170,7 @@ namespace two_d
 			
 			for (typename std::map <int, std::vector <datatype> >::iterator iter = scalars.begin (); iter != scalars.end (); ++iter) {
 				if (iter->first < 0) {
-					utils::scale (n * m, 0.0, &(iter->second) [0]);
+					utils::scale ((2 * (n / 2 + 1)) * m, 0.0, &(iter->second) [0]);
 				}
 			}
 			

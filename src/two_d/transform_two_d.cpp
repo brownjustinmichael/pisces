@@ -102,7 +102,7 @@ namespace two_d
 				
 				fftwf_r2r_kind kind = FFTW_REDFT00;
 
-				z_plan_float = fftwf_plan_many_r2r (1, &m, n, data_in, NULL, 1, m, data_out, NULL, 1, m, &kind, FFTW_ESTIMATE);
+				z_plan_float = fftwf_plan_many_r2r (1, &m, 2 * (n / 2 + 1), data_in, NULL, 1, m, data_out, NULL, 1, m, &kind, FFTW_ESTIMATE);
 			}
 			
 			template <>
@@ -116,7 +116,7 @@ namespace two_d
 
 				fftwf_r2r_kind kind = FFTW_REDFT00;
 
-				z_plan = fftw_plan_many_r2r (1, &m, n, data_in, NULL, 1, m, data_out, NULL, 1, m, &kind, FFTW_ESTIMATE);
+				z_plan = fftw_plan_many_r2r (1, &m, 2 * (n / 2 + 1), data_in, NULL, 1, m, data_out, NULL, 1, m, &kind, FFTW_ESTIMATE);
 			}
 			
 			template <>

@@ -22,8 +22,9 @@ namespace two_d
 			template <class datatype>
 			advection_diffusion_element <datatype>::advection_diffusion_element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters <datatype>& params, bases::messenger* i_messenger_ptr, int i_flags) : 
 			element <datatype> (i_axis_n, i_axis_m, i_name, params, i_messenger_ptr, i_flags) {
-				datatype diffusion_coeff = params.diffusion_coeff;
-				datatype alpha = 1.0;
+				datatype x_diffusion_coeff = params.x_diffusion_coeff;
+				datatype z_diffusion_coeff = params.z_diffusion_coeff;
+				datatype alpha = params.implicit_alpha;
 		
 				assert (n > 0);
 				assert (m > 0);
@@ -58,19 +59,9 @@ namespace two_d
 				normal_stream->template append <datatype> ("w", pointer (velocity));
 				normal_stream->template append <datatype> ("rhs", pointer (vel_implicit_rhs));
 			
-				// transform_stream.reset (new io::incremental (new io::two_d::netcdf (n, m), "../output/transform_%04i.cdf", params.output_every));
-				// transform_stream->template append <int> ("i", &cell_n [0]);
-				// transform_stream->template append <int> ("j", &cell_m [0]);
-				// transform_stream->template append <datatype> ("x", pointer (x_position));
-				// transform_stream->template append <datatype> ("z", pointer (z_position));
-				// transform_stream->template append <datatype> ("w", pointer (velocity));
-				// transform_stream->template append <datatype> ("rhs", pointer (vel_implicit_rhs));
-				// 			
 				// Set up plans in order
-				element <datatype>::add_pre_plan (new vertical_diffusion <datatype> (*grids [0], *grids [1], diffusion_coeff, alpha, pointer (velocity), pointer (vel_implicit_rhs)));
-				element <datatype>::add_mid_plan (new horizontal_diffusion <datatype> (*grids [0], *grids [1], diffusion_coeff, alpha, pointer (velocity), pointer (vel_implicit_rhs)));
-
-
+				element <datatype>::add_pre_plan (new vertical_diffusion <datatype> (*grids [0], *grids [1], z_diffusion_coeff, alpha, pointer (velocity), pointer (vel_implicit_rhs)));
+				element <datatype>::add_mid_plan (new horizontal_diffusion <datatype> (*grids [0], *grids [1], x_diffusion_coeff, alpha, pointer (velocity), pointer (vel_implicit_rhs)));
 		
 				// Set up solver
 				element <datatype>::add_solver (new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, pointer (velocity), pointer (vel_explicit_rhs), pointer (vel_implicit_rhs)));
