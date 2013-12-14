@@ -59,6 +59,16 @@ namespace two_d
 				normal_stream->template append <datatype> ("w", pointer (velocity));
 				normal_stream->template append <datatype> ("rhs", pointer (vel_implicit_rhs));
 			
+				filestream.str ("");
+				filestream << "../output/" + params.output + "_t_" << std::setfill ('0') << std::setw (2) << name << "_%04i.cdf";
+				transform_stream.reset (new io::incremental (new io::two_d::netcdf (n, m), filestream.str (), params.output_every));
+				transform_stream->template append <int> ("i", &cell_n [0]);
+				transform_stream->template append <int> ("j", &cell_m [0]);
+				transform_stream->template append <datatype> ("x", pointer (x_position));
+				transform_stream->template append <datatype> ("z", pointer (z_position));
+				transform_stream->template append <datatype> ("w", pointer (velocity));
+				transform_stream->template append <datatype> ("rhs", pointer (vel_implicit_rhs));
+							
 				// Set up plans in order
 				element <datatype>::add_pre_plan (new vertical_diffusion <datatype> (*grids [0], *grids [1], z_diffusion_coeff, alpha, pointer (velocity), pointer (vel_implicit_rhs)));
 				element <datatype>::add_mid_plan (new horizontal_diffusion <datatype> (*grids [0], *grids [1], x_diffusion_coeff, alpha, pointer (velocity), pointer (vel_implicit_rhs)));

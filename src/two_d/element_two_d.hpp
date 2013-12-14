@@ -264,7 +264,7 @@ namespace two_d
 				using element <datatype>::m;
 				using element <datatype>::name;
 				using element <datatype>::normal_stream;
-				// using element <datatype>::transform_stream;
+				using element <datatype>::transform_stream;
 				using element <datatype>::cell_n;
 				using element <datatype>::cell_m;
 				using element <datatype>::grids;

@@ -409,7 +409,7 @@ namespace bases
 		
 		std::shared_ptr <io::output> failsafe_dump; //!< An implementation to dump in case of failure
 		std::shared_ptr <io::output> normal_stream; //!< An implementation to output in normal space
-		// std::shared_ptr <io::output> transform_stream; //!< An implementation to output in transform space
+		std::shared_ptr <io::output> transform_stream; //!< An implementation to output in transform space
 
 	private:
 		std::vector<std::shared_ptr<plan <datatype> > > forward_horizontal_transforms; //!< A vector of shared pointers to the forward horizontal transforms

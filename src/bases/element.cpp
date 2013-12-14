@@ -48,8 +48,6 @@ namespace bases
 		
 			TRACE ("Calculation complete.");
 
-			// execute_boundaries ();
-
 			
 			if (normal_stream) {
 				TRACE ("Writing to file...");
@@ -63,10 +61,10 @@ namespace bases
 			solve ();
 			
 			// Output in transform space
-			// if (transform_stream) {
-			// 	TRACE ("Writing to file...");
-			// 	transform_stream->to_file ();
-			// }
+			if (transform_stream) {
+				TRACE ("Writing to file...");
+				transform_stream->to_file ();
+			}
 		
 			TRACE ("Update complete");
 		}

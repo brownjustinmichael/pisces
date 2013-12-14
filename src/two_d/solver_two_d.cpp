@@ -85,8 +85,8 @@ namespace two_d
 				TRACE ("Factorizing...");
 				
 				for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
-					horizontal_plus_matrix [i] = 1.0 + timestep / 2.0 * grid_n.matrix_ptr () [i];
-					horizontal_minus_matrix [i] = 1.0 - timestep / 2.0 * grid_n.matrix_ptr () [i];
+					horizontal_plus_matrix [i] = 1.0 + timestep * grid_n.matrix_ptr () [i];
+					horizontal_minus_matrix [i] = 1.0 - timestep * grid_n.matrix_ptr () [i];
 				}
 						
 				utils::matrix_copy (m, m, default_matrix, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1)], m, lda);
@@ -129,8 +129,8 @@ namespace two_d
 				}
 				
 										
-				utils::matrix_add_scaled (m - excess_0 - excess_n, 2 * (n / 2 + 1), timestep / 2.0, implicit_rhs + excess_0, &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
-				utils::matrix_add_scaled (m - excess_0 - excess_n, 2 * (n / 2 + 1), timestep / 2.0, explicit_rhs + excess_0, &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
+				utils::matrix_add_scaled (m - excess_0 - excess_n, 2 * (n / 2 + 1), timestep, implicit_rhs + excess_0, &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
+				utils::matrix_add_scaled (m - excess_0 - excess_n, 2 * (n / 2 + 1), timestep, explicit_rhs + excess_0, &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
 								
 				if (ntop != 0) {
 					utils::interpolate (ex_excess_0, 2 * (n / 2 + 1), m - excess_0 - excess_n, 1.0, positions + excess_0, &data_temp [ex_excess_0 + ntop + excess_0], &positions_0 [0], &data_temp [ntop], lda, lda);
@@ -150,8 +150,11 @@ namespace two_d
 				if (element_flags & x_solve) {
 					TRACE ("Solving in n direction...");
 
+					utils::matrix_add_scaled (m - 2 + ntop + nbot - excess_0 - excess_n, 2 * (n / 2 + 1), 1.0, data_in + 1 - ntop + excess_0, &data_temp [ex_excess_0 + 1 + excess_0], m, lda);
+					utils::interpolate (ex_excess_0, 2 * (n / 2 + 1), m, 1.0, positions, data_in, &positions_0 [0], &data_temp [1], m, lda);
+					utils::interpolate (ex_excess_n, 2 * (n / 2 + 1), m, 1.0, positions, data_in, &positions_n [0], &data_temp [lda - 1 - ex_excess_n], m, lda);
 					for (int j = 0; j < m; ++j) {
-						utils::diagonal_multiply (2 * (n / 2 + 1), 1.0, &horizontal_minus_matrix [0], data_in + j, 1.0, &data_temp [ntop + ex_excess_0 + j], 1, m, lda);
+						// utils::diagonal_multiply (2 * (n / 2 + 1), 1.0, &horizontal_minus_matrix [0], data_in + j, 1.0, &data_temp [ntop + ex_excess_0 + j], 1, m, lda);
 						utils::diagonal_solve (2 * (n / 2 + 1), &horizontal_plus_matrix [0], &data_temp [ntop + ex_excess_0 + j], 1, lda);
 					}
 					utils::matrix_copy (m, 2 * (n / 2 + 1), &data_temp [ntop + ex_excess_0], data_out, lda);

@@ -99,7 +99,7 @@ namespace one_d
 		element <datatype> (i_axis_n, i_name, params, i_messenger_ptr, i_flags) {
 			datatype diffusion_coeff = params.z_diffusion_coeff;
 			datatype advection_coeff = params.advection_coeff; 
-			datatype alpha = 0.5;
+			datatype alpha = params.implicit_alpha;
 		
 			assert (n > 0);
 		
@@ -169,10 +169,10 @@ namespace one_d
 		datatype nonlinear_diffusion_element <datatype>::calculate_timestep () {
 			datatype t_timestep;
 			t_timestep = params.max_timestep;
-			for (int i = 1; i < n - 1; ++i) {
-				t_timestep = std::min (t_timestep, (datatype) (std::abs (((*this) (position, i - 1) - (*this) (position, i + 1)) / (*this) (velocity, i)) / params.advection_coeff * params.courant_factor));
-				t_timestep = std::min (t_timestep, (datatype) std::abs (((*this) (position, i + 1) - (*this) (position, i - 1)) * ((*this) (position, i + 1) - (*this) (position, i - 1)) / 2.0 / params.nonlinear_diffusion_coeff / (*this) (velocity, i) * params.courant_factor));
-			}
+			// for (int i = 1; i < n - 1; ++i) {
+			// 	t_timestep = std::min (t_timestep, (datatype) (std::abs (((*this) (position, i - 1) - (*this) (position, i + 1)) / (*this) (velocity, i)) / params.advection_coeff * params.courant_factor));
+			// 	t_timestep = std::min (t_timestep, (datatype) std::abs (((*this) (position, i + 1) - (*this) (position, i - 1)) * ((*this) (position, i + 1) - (*this) (position, i - 1)) / 2.0 / params.nonlinear_diffusion_coeff / (*this) (velocity, i) * params.courant_factor));
+			// }
 			if (t_timestep < timestep || t_timestep > 2.0 * timestep) {
 				return t_timestep;
 			} else {
