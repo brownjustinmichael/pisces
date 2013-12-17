@@ -26,6 +26,11 @@ namespace two_d
 		edge_mm = 3 // Start at 0, m, increment by 1
 	};
 	
+	enum solve_flags {
+		x_solve = 0x20,
+		z_solve = 0x80
+	};
+	
 	enum initialize_flags {
 		uniform_n = 0x01,
 		uniform_m = 0x02
@@ -173,6 +178,13 @@ namespace two_d
 					utils::scale ((2 * (n / 2 + 1)) * m, 0.0, &(iter->second) [0]);
 				}
 			}
+			if (flags & z_solve) {
+				flags &= ~z_solve;
+				flags |= x_solve;
+			} else {
+				flags &= ~x_solve;
+				flags |= z_solve;
+			}
 			
 			TRACE ("Explicit reset end.");
 		}
@@ -183,6 +195,7 @@ namespace two_d
 		using bases::element <datatype>::name;
 		using bases::element <datatype>::failsafe_dump;
 		using bases::element <datatype>::messenger_ptr;
+		using bases::element <datatype>::flags;
 		
 		bases::axis *axis_n, *axis_m;
 		int &n; //!< The number of elements in each 1D array

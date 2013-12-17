@@ -12,6 +12,10 @@
 #include "../bases/plan.hpp"
 #include "solver_two_d.hpp"
 
+/*
+	TODO Should non-axis diffusion be in the explicit or implicit rhs?
+*/
+
 namespace two_d
 {
 	namespace fourier

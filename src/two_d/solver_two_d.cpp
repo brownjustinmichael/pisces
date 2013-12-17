@@ -75,7 +75,7 @@ namespace two_d
 					boundary_matrix.resize ((excess_0 + ex_excess_0 + excess_n + ex_excess_n + 2 * (nbot + ntop)) * (excess_0 + ex_excess_0 + excess_n + ex_excess_n + 2 * (nbot + ntop)));
 				}
 				factorized_matrix.resize ((m + ex_excess_0 + ex_excess_n + nbot + ntop) * (m + ex_excess_0 + ex_excess_n + nbot + ntop), 0.0);
-				ipiv.resize (m); // Should be n - ntop - nbot - excess_0 - excess_n
+				ipiv.resize (m); // TODO Should be n - ntop - nbot - excess_0 - excess_n
 				data_temp.resize ((m + ex_excess_0 + ex_excess_n + nbot + ntop) * (2 * (n / 2 + 1)));
 			}
 			
@@ -128,47 +128,80 @@ namespace two_d
 					flags |= first_run;
 				}
 				
-										
 				utils::matrix_add_scaled (m - excess_0 - excess_n, 2 * (n / 2 + 1), timestep, implicit_rhs + excess_0, &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
 				utils::matrix_add_scaled (m - excess_0 - excess_n, 2 * (n / 2 + 1), timestep, explicit_rhs + excess_0, &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
 								
 				if (ntop != 0) {
 					utils::interpolate (ex_excess_0, 2 * (n / 2 + 1), m - excess_0 - excess_n, 1.0, positions + excess_0, &data_temp [ex_excess_0 + ntop + excess_0], &positions_0 [0], &data_temp [ntop], lda, lda);
-					utils::scale (2 * (n / 2 + 1), alpha_0, &data_temp [ntop + ex_excess_0 + excess_0], lda);
-					utils::copy (2 * (n / 2 + 1), &data_temp [0], &data_temp [ntop + ex_excess_0 + excess_0], lda, lda);
+					utils::scale (2 * (n / 2 + 1), alpha_0, &data_temp [0] + ntop + ex_excess_0 + excess_0, lda);
+					utils::copy (2 * (n / 2 + 1), &data_temp [ntop + ex_excess_0 + excess_0], &data_temp [0], lda, lda);
 				} else {
 					utils::copy (2 * (n / 2 + 1), &values_0 [0], &data_temp [0], 1, lda);
 				}
 				if (nbot != 0) {
 					utils::interpolate (ex_excess_n, 2 * (n / 2 + 1), m - excess_0 - excess_n, 1.0, positions + excess_0, &data_temp [ex_excess_0 + ntop + excess_0], &positions_n [0], &data_temp [lda - nbot - ex_excess_n], lda, lda);
-					utils::scale (2 * (n / 2 + 1), alpha_n, &data_temp [lda - 1 - nbot - ex_excess_n - excess_n], lda);
-					utils::copy (2 * (n / 2 + 1), &data_temp [lda - 1], &data_temp [lda - 1 - nbot - ex_excess_n - excess_n], lda, lda);
+					utils::scale (2 * (n / 2 + 1), alpha_n, &data_temp [0] + lda - 2 * nbot - ex_excess_n - excess_n, lda);
+					utils::copy (2 * (n / 2 + 1), &data_temp [0] + lda - 2 * nbot - ex_excess_n - excess_n, &data_temp [0] + lda - nbot, lda, lda);
 				} else {
 					utils::copy (2 * (n / 2 + 1), &values_n [0], &data_temp [m - 1 + ntop + ex_excess_0], 1, lda);
 				}
-					
+				
+
+				utils::matrix_add_scaled (m - 2 + ntop + nbot - excess_0 - excess_n, 2 * (n / 2 + 1), 1.0, data_in + 1 - ntop + excess_0, &data_temp [ex_excess_0 + 1 + excess_0], m, lda);
+				utils::interpolate (ex_excess_0, 2 * (n / 2 + 1), m, 1.0, positions, data_in, &positions_0 [0], &data_temp [1], m, lda);
+				utils::interpolate (ex_excess_n, 2 * (n / 2 + 1), m, 1.0, positions, data_in, &positions_n [0], &data_temp [lda - 1 - ex_excess_n], m, lda);
+				
 				if (element_flags & x_solve) {
 					TRACE ("Solving in n direction...");
+					
+					std::vector <datatype> buffer_0 ((excess_0 > ex_excess_0 ? excess_0 + ntop : ex_excess_0 + ntop) * 2 * (n / 2 + 1));
+					std::vector <datatype> buffer_n ((excess_n > ex_excess_n ? excess_n + nbot : ex_excess_n + nbot) * 2 * (n / 2 + 1));
+					
+					for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
+						for (int j = 0; j < ex_excess_0 + ntop; ++j) {
+							buffer_0 [j * 2 * (n / 2 + 1) + i] = data_temp [i * lda + j];
+						}
+					}
+					
+					if (messenger_ptr->get_id () - 1 >= 0) {
+						messenger_ptr->send ((ex_excess_0 + ntop) * 2 * (n / 2 + 1), &buffer_0 [0], messenger_ptr->get_id () - 1, 0);
+					}
+					if (messenger_ptr->get_id () + 1 < messenger_ptr->get_np ()) {
+						messenger_ptr->recv ((excess_n + nbot) * 2 * (n / 2 + 1), &buffer_n [0], messenger_ptr->get_id () + 1, 0);
+					}
+					
+					for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
+						for (int j = 0; j < ex_excess_n + nbot; ++j) {
+							data_temp [(i + 1) * lda - 2 * nbot - ex_excess_n - excess_n + j] += buffer_n [j * 2 * (n / 2 + 1) + i];
+						}
+					}
+					for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
+						for (int j = 0; j < excess_n + nbot; ++j) {
+							buffer_n [j * 2 * (n / 2 + 1) + i] = data_temp [(i + 1) * lda - nbot - ex_excess_n + j];
+						}
+					}
+					
+					if (messenger_ptr->get_id () + 1 < messenger_ptr->get_np ()) {
+						messenger_ptr->send ((ex_excess_n + nbot) * 2 * (n / 2 + 1), &buffer_n [0], messenger_ptr->get_id () + 1, 1);
+					}
+					if (messenger_ptr->get_id () - 1 >= 0) {
+						messenger_ptr->recv ((excess_0 + ntop) * 2 * (n / 2 + 1), &buffer_0 [0], messenger_ptr->get_id () - 1, 1);
+					}
 
-					utils::matrix_add_scaled (m - 2 + ntop + nbot - excess_0 - excess_n, 2 * (n / 2 + 1), 1.0, data_in + 1 - ntop + excess_0, &data_temp [ex_excess_0 + 1 + excess_0], m, lda);
-					utils::interpolate (ex_excess_0, 2 * (n / 2 + 1), m, 1.0, positions, data_in, &positions_0 [0], &data_temp [1], m, lda);
-					utils::interpolate (ex_excess_n, 2 * (n / 2 + 1), m, 1.0, positions, data_in, &positions_n [0], &data_temp [lda - 1 - ex_excess_n], m, lda);
+					for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
+						for (int j = 0; j < ex_excess_0 + ntop; ++j) {
+							data_temp [i * lda + ntop + ex_excess_0 + j] += buffer_0 [j * 2 * (n / 2 + 1) + i];
+						}
+					}
+
 					for (int j = 0; j < m; ++j) {
-						// utils::diagonal_multiply (2 * (n / 2 + 1), 1.0, &horizontal_minus_matrix [0], data_in + j, 1.0, &data_temp [ntop + ex_excess_0 + j], 1, m, lda);
 						utils::diagonal_solve (2 * (n / 2 + 1), &horizontal_plus_matrix [0], &data_temp [ntop + ex_excess_0 + j], 1, lda);
 					}
 					utils::matrix_copy (m, 2 * (n / 2 + 1), &data_temp [ntop + ex_excess_0], data_out, lda);
-					
-					element_flags &= ~x_solve;
-					element_flags |= z_solve;
-					
+
 				} else if (element_flags & z_solve) {
 					TRACE ("Solving in m direction...");
-					utils::matrix_add_scaled (m - 2 + ntop + nbot - excess_0 - excess_n, 2 * (n / 2 + 1), 1.0, data_in + 1 - ntop + excess_0, &data_temp [ex_excess_0 + 1 + excess_0], m, lda);
-					utils::interpolate (ex_excess_0, 2 * (n / 2 + 1), m, 1.0, positions, data_in, &positions_0 [0], &data_temp [1], m, lda);
-					utils::interpolate (ex_excess_n, 2 * (n / 2 + 1), m, 1.0, positions, data_in, &positions_n [0], &data_temp [lda - 1 - ex_excess_n], m, lda);
-					TRACE ("Beginning matrix solve...");
-						
+
 					utils::p_block_matrix_solve (messenger_ptr->get_id (), messenger_ptr->get_np (), m - excess_0 - excess_n - ntop - nbot, excess_0 + ex_excess_0 + 2 * ntop, excess_n + ex_excess_n + 2 * nbot, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, 2 * (n / 2 + 1), lda, sqrt ((int) boundary_matrix.size ()), lda);
 					
 					TRACE ("Matrix solve complete.");
@@ -194,9 +227,7 @@ namespace two_d
 					utils::matrix_copy (m, 2 * (n / 2 + 1), &data_temp [ex_excess_0 + ntop], data_out, lda, m);
 					
 					element_flags |= transformed_vertical;
-					element_flags &= ~z_solve;
-					element_flags |= x_solve;
-						
+					
 					TRACE ("Solve complete.")
 				}
 				TRACE ("Execution complete.");

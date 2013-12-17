@@ -11,15 +11,11 @@
 
 #include "../bases/messenger.hpp"
 #include "../bases/solver.hpp"
+#include "element_two_d.hpp"
 #include "plan_two_d.hpp"
 
 namespace two_d
 {
-	enum solve_flags {
-		x_solve = 0x20,
-		z_solve = 0x80
-	};
-	
 	namespace fourier
 	{
 		namespace chebyshev
