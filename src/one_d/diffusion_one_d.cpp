@@ -17,8 +17,8 @@
 namespace one_d
 {
 	template <class datatype>
-	diffusion <datatype>::diffusion (bases::grid <datatype> &i_grid, datatype i_coeff, datatype i_alpha, datatype* i_data_in, datatype* i_data_out) :
-	implicit_plan <datatype> (i_grid, i_data_in, i_data_out),
+	diffusion <datatype>::diffusion (bases::grid <datatype> &i_grid, datatype i_coeff, datatype i_alpha, datatype* i_matrix, datatype* i_data_in, datatype* i_data_out) :
+	implicit_plan <datatype> (i_grid, i_matrix, i_data_in, i_data_out),
 	coeff (i_coeff), 
 	alpha (i_alpha) {
 		for (int i = 0; i < n; ++i) {
@@ -42,7 +42,7 @@ namespace one_d
 	
 	template <class datatype>
 	nonlinear_diffusion <datatype>::nonlinear_diffusion (bases::grid <datatype> &i_grid, datatype i_coeff, datatype* i_data_in, datatype* i_data_out) :
-	implicit_plan <datatype> (i_grid, i_data_in, i_data_out),
+	explicit_plan <datatype> (i_grid, i_data_in, i_data_out),
 	coeff (i_coeff) {
 		TRACE ("Initialized.");
 	}

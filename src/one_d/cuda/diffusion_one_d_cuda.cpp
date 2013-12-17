@@ -28,7 +28,7 @@ namespace cuda
 			TRACE ("Operating...");
 		
 			// Set up and evaluate the explicit part of the diffusion equation
-			utils::matrix_vector_multiply (n, n, coeff, deriv_matrix.pointer (), data_in, 1.0, data_out, n);
+			utils::matrix_vector_multiply (n, n, coeff, deriv_matrix.ptr (), data_in, 1.0, data_out, n);
 
 			TRACE ("Operation complete.");
 		}

@@ -29,6 +29,14 @@ namespace two_d
 				virtual ~solver () {}
 				
 				void execute (int &element_flags);
+				
+				datatype *matrix_ptr (int index = 0) {
+					if (index == 0) {
+						return &horizontal_matrix [0];
+					} else {
+						return &matrix [0];
+					}
+				}
 			
 			private:
 				void _factorize ();
@@ -59,7 +67,6 @@ namespace two_d
 				datatype* explicit_rhs; //!< The datatype array of the right-hand-side of the matrix equation
 				datatype* implicit_rhs; //!< The datatype array of the right-hand-side of the matrix equation
 				datatype* default_matrix; //!< The datatype array of the non-timestep dependent matrix component
-				datatype* matrix; //!< The datatype array of the matrix component to be timestep-multiplied
 	
 				std::vector <datatype> data_temp; //!< A datatype vector to be used in lieu of data_out for non-updating steps
 				std::vector <datatype> positions_0; //!< A datatype vector of excess positions from edge_0
@@ -70,7 +77,9 @@ namespace two_d
 				std::vector <int> ns;
 				std::vector <int> ipiv; //!< A vector of integers needed to calculate the factorization
 				std::vector <int> bipiv; //!< A vector of integers needed to calculate the factorization
-				std::vector <datatype> horizontal_plus_matrix, horizontal_minus_matrix;
+				std::vector <datatype> matrix;
+				std::vector <datatype> horizontal_matrix;
+				std::vector <datatype> factorized_horizontal_matrix;
 			};
 		} /* chebyshev */
 	} /* fourier */

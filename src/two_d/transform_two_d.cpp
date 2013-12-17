@@ -12,6 +12,18 @@
 
 namespace two_d
 {
+	// fftw_configure::fftw_configure (int i_n_threads), n_threads (i_n_threads) {
+	// 	
+	// 	if (n_threads != 1) {
+	// 		fftw_init_threads ();
+	// 		fftw_plan_with_nthreads (n_threads);
+	// 	}
+	// }
+	// 
+	// fftw_configure::~fftw_configure () {
+	// 	fftw_cleanup_threads ();
+	// }
+	
 	namespace fourier
 	{
 		namespace chebyshev

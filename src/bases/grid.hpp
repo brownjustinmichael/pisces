@@ -84,8 +84,6 @@ namespace bases
 			return positions [index];
 		}
 		
-		virtual datatype *matrix_ptr () = 0;
-	
 		/*!*******************************************************************
 		 * \brief An indexing operation into the grid, for convenience
 		 * 
@@ -147,10 +145,6 @@ namespace bases
 	
 			virtual ~grid () {};
 			
-			datatype *matrix_ptr () {
-				return &matrix [0];
-			}
-	
 		private:
 			using bases::grid <datatype>::n;
 			using bases::grid <datatype>::excess_0;
@@ -162,7 +156,6 @@ namespace bases
 	
 			datatype scale; //!< A datatype by which the collocation grid should be scaled
 			datatype width; //!< The datatype width of the collocation region
-			std::vector <datatype> matrix;
 			std::vector<bool> exists_array; //!< A bool vector containing whether the points exist
 			datatype pioN; //!< The datatype 3.14159.../N, for use in calculations
 	
@@ -218,10 +211,6 @@ namespace bases
 	
 			virtual ~grid () {};
 			
-			datatype *matrix_ptr () {
-				return &matrix [0];
-			}
-	
 		private:
 			using bases::grid <datatype>::n;
 			using bases::grid <datatype>::excess_0;
@@ -233,7 +222,6 @@ namespace bases
 	
 			datatype scale; //!< A datatype by which the collocation grid should be scaled
 			datatype width; //!< The datatype width of the collocation region
-			std::vector <datatype> matrix; //!< A vector matrix for use with a single solver
 			/*
 				TODO put matrix into solver class
 			*/

@@ -66,10 +66,10 @@ namespace two_d
 		 * \param i_matrix The datatype matrix to be updated
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		implicit_plan (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out) :
+		implicit_plan (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype *i_matrix_n, datatype *i_matrix_m, datatype* i_data_in, datatype* i_data_out) :
 		explicit_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out), 
-		matrix_n (grid_n.matrix_ptr ()),
-		matrix_m (grid_m.matrix_ptr ()) {}
+		matrix_n (i_matrix_n),
+		matrix_m (i_matrix_m) {}
 
 		virtual ~implicit_plan () {}
 

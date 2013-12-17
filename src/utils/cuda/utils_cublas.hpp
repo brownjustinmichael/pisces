@@ -21,7 +21,7 @@ namespace cuda
 		
 			~vector ();
 		
-			datatype* pointer () {
+			datatype* ptr () {
 				return vect;
 			}
 			

@@ -66,9 +66,9 @@ namespace one_d
 		 * \param i_matrix The datatype matrix to be updated
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		implicit_plan (bases::grid <datatype> &i_grid, datatype* i_data_in, datatype* i_data_out) :
+		implicit_plan (bases::grid <datatype> &i_grid, datatype *i_matrix, datatype* i_data_in, datatype* i_data_out) :
 		explicit_plan <datatype> (i_grid, i_data_in, i_data_out),  
-		matrix (grid.matrix_ptr ()) {}
+		matrix (i_matrix) {}
 
 		virtual ~implicit_plan () {
 			// printf ("Destroying one_d implicit plan\n");

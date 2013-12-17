@@ -101,7 +101,7 @@ namespace one_d
 				initial_conditions = &(grids [0]->position ());
 			}
 			if (initial_conditions) {
-				utils::copy (n, initial_conditions, this->pointer (name));
+				utils::copy (n, initial_conditions, this->ptr (name));
 			}
 			for (std::map <int, int>::iterator i_edge = edge_map.begin (); i_edge != edge_map.end (); ++i_edge) {
 				fixed_points [i_edge->first] [name] = scalars [name] [i_edge->second];
@@ -131,7 +131,7 @@ namespace one_d
 		using bases::element <datatype>::name;
 		using bases::element <datatype>::failsafe_dump;
 		using bases::element <datatype>::messenger_ptr;
-		using bases::element <datatype>::pointer;
+		using bases::element <datatype>::ptr;
 		
 		bases::axis *axis_n;
 		datatype alpha_0, alpha_n;
@@ -167,8 +167,8 @@ namespace one_d
 				TRACE ("Initializing " << name << "...");
 				one_d::element <datatype>::initialize (name, initial_conditions, flags);
 				if (!(flags & no_transform) && (name != position)) {
-					element <datatype>::add_inverse_vertical_transform (new fftw_cosine <datatype> (*grids [0], pointer (name)));
-					element <datatype>::add_forward_vertical_transform (new fftw_cosine <datatype> (*grids [0], pointer (name)));
+					element <datatype>::add_inverse_vertical_transform (new fftw_cosine <datatype> (*grids [0], ptr (name)));
+					element <datatype>::add_forward_vertical_transform (new fftw_cosine <datatype> (*grids [0], ptr (name)));
 				}
 			}
 			
@@ -179,7 +179,7 @@ namespace one_d
 			using one_d::element <datatype>::grids;
 			using one_d::element <datatype>::params;
 			using one_d::element <datatype>::messenger_ptr;
-			using one_d::element <datatype>::pointer;
+			using one_d::element <datatype>::ptr;
 		};
 		
 		/*!*******************************************************************
@@ -213,7 +213,8 @@ namespace one_d
 			using element <datatype>::timestep;
 			using element <datatype>::params;
 			using element <datatype>::grids;
-			using bases::element <datatype>::pointer;
+			using bases::element <datatype>::ptr;
+			using bases::element <datatype>::matrix_ptr;
 			using element <datatype>::messenger_ptr;
 			using element <datatype>::alpha_0;
 			using element <datatype>::alpha_n;
@@ -250,7 +251,8 @@ namespace one_d
 			using element <datatype>::timestep;
 			using element <datatype>::params;
 			using element <datatype>::grids;
-			using bases::element <datatype>::pointer;
+			using bases::element <datatype>::ptr;
+			using bases::element <datatype>::matrix_ptr;
 			using element <datatype>::messenger_ptr;
 			using element <datatype>::alpha_0;
 			using element <datatype>::alpha_n;

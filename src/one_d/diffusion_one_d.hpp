@@ -24,7 +24,7 @@ namespace one_d
 	class diffusion : public implicit_plan <datatype>
 	{
 	public:
-		diffusion (bases::grid <datatype> &i_grid, datatype i_coeff, datatype i_alpha, datatype* i_data_in, datatype* i_data_out = NULL);
+		diffusion (bases::grid <datatype> &i_grid, datatype i_coeff, datatype i_alpha, datatype *i_matrix, datatype* i_data_in, datatype* i_data_out = NULL);
 		
 		virtual ~diffusion () {
 			// printf ("Destroying one_d diffusion\n");
@@ -43,7 +43,7 @@ namespace one_d
 	};
 	
 	template <class datatype>
-	class nonlinear_diffusion : public implicit_plan <datatype>
+	class nonlinear_diffusion : public explicit_plan <datatype>
 	{
 	public:
 		nonlinear_diffusion (bases::grid <datatype> &i_grid, datatype i_coeff, datatype* i_data_in, datatype* i_data_out = NULL);
@@ -57,11 +57,10 @@ namespace one_d
 	private:
 		datatype coeff;
 		datatype alpha;
-		using implicit_plan <datatype>::n;
-		using implicit_plan <datatype>::data_in;
-		using implicit_plan <datatype>::data_out;
-		using implicit_plan <datatype>::matrix;
-		using implicit_plan <datatype>::grid;
+		using explicit_plan <datatype>::n;
+		using explicit_plan <datatype>::data_in;
+		using explicit_plan <datatype>::data_out;
+		using explicit_plan <datatype>::grid;
 	};
 } /* oned */
 

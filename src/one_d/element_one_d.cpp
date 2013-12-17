@@ -59,18 +59,18 @@ namespace one_d
 			filestream << "../output/output_" << std::setfill ('0') << std::setw (2) << name << "_%04i.dat";
 			normal_stream.reset (new io::incremental (new io::one_d::ascii (n), filestream.str (), params.output_every));
 			normal_stream->template append <int> ("i", &(cell [0]));
-			normal_stream->template append <datatype> ("x", pointer (position));
-			normal_stream->template append <datatype> ("u", pointer (velocity));
-			normal_stream->template append <datatype> ("rhs", pointer (vel_explicit_rhs));
+			normal_stream->template append <datatype> ("x", ptr (position));
+			normal_stream->template append <datatype> ("u", ptr (velocity));
+			normal_stream->template append <datatype> ("rhs", ptr (vel_explicit_rhs));
+			
+			// Set up solver
+			element <datatype>::add_solver (velocity, new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, ptr (velocity), ptr (vel_explicit_rhs), ptr (vel_implicit_rhs)));
 			
 			// Set up plans in order
-			element <datatype>::add_pre_plan (new diffusion <datatype> (*grids [0], diffusion_coeff, alpha, pointer (velocity), pointer (vel_implicit_rhs)));
+			element <datatype>::add_pre_plan (new diffusion <datatype> (*grids [0], diffusion_coeff, alpha, matrix_ptr (velocity), ptr (velocity), ptr (vel_implicit_rhs)));
 			if (advection_coeff != 0.0) {
-				element <datatype>::add_post_plan (new advec <datatype> (*grids [0], advection_coeff, pointer (velocity), pointer (vel_explicit_rhs)));
+				element <datatype>::add_post_plan (new advec <datatype> (*grids [0], advection_coeff, ptr (velocity), ptr (vel_explicit_rhs)));
 			}
-		
-			// Set up solver
-			element <datatype>::add_solver (new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, pointer (velocity), pointer (vel_explicit_rhs), pointer (vel_implicit_rhs)));
 			
 		
 			normal_stream->to_file ();
@@ -143,22 +143,22 @@ namespace one_d
 			filestream << "../output/" + params.output + "_" << std::setfill ('0') << std::setw (2) << name << "_%04i.dat";
 			normal_stream.reset (new io::incremental (new io::one_d::ascii (n), filestream.str (), params.output_every));
 			normal_stream->template append <int> ("i", &(cell [0]));
-			normal_stream->template append <datatype> ("x", pointer (position));
-			normal_stream->template append <datatype> ("u", pointer (velocity));
-			normal_stream->template append <datatype> ("rhs", pointer (vel_explicit_rhs));
+			normal_stream->template append <datatype> ("x", ptr (position));
+			normal_stream->template append <datatype> ("u", ptr (velocity));
+			normal_stream->template append <datatype> ("rhs", ptr (vel_explicit_rhs));
+			
+
+			// Set up solver
+			element <datatype>::add_solver (velocity, new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, ptr (velocity), ptr (vel_explicit_rhs), ptr (vel_implicit_rhs)));
 			
 			// Set up plans in order
-			element <datatype>::add_pre_plan (new diffusion <datatype> (*grids [0], diffusion_coeff, alpha, pointer (velocity), pointer (vel_implicit_rhs)));
+			element <datatype>::add_pre_plan (new diffusion <datatype> (*grids [0], diffusion_coeff, alpha, matrix_ptr (velocity), ptr (velocity), ptr (vel_implicit_rhs)));
 			if (params.nonlinear_diffusion_coeff != 0.0) {
-				element <datatype>::add_post_plan (new nonlinear_diffusion <datatype> (*grids [0], params.nonlinear_diffusion_coeff, pointer (velocity), pointer (vel_explicit_rhs)));
+				element <datatype>::add_post_plan (new nonlinear_diffusion <datatype> (*grids [0], params.nonlinear_diffusion_coeff, ptr (velocity), ptr (vel_explicit_rhs)));
 			}
 			if (advection_coeff != 0.0) {
-				element <datatype>::add_post_plan (new advec <datatype> (*grids [0], advection_coeff, pointer (velocity), pointer (vel_explicit_rhs)));
+				element <datatype>::add_post_plan (new advec <datatype> (*grids [0], advection_coeff, ptr (velocity), ptr (vel_explicit_rhs)));
 			}
-		
-			// Set up solver
-			element <datatype>::add_solver (new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, pointer (velocity), pointer (vel_explicit_rhs), pointer (vel_implicit_rhs)));
-			
 		
 			normal_stream->to_file ();
 		

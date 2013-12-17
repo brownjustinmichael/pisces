@@ -32,10 +32,10 @@ namespace two_d
 			excess_n (grid_m.excess_n),
 			explicit_rhs (i_explicit_rhs),
 			implicit_rhs (i_implicit_rhs),
-			default_matrix (grid_m.get_data (0)), 
-			matrix (grid_m.matrix_ptr ()) {
-				horizontal_plus_matrix.resize (2 * (n / 2 + 1));
-				horizontal_minus_matrix.resize (2 * (n / 2 + 1));
+			default_matrix (grid_m.get_data (0)) {
+				horizontal_matrix.resize (2 * (n / 2 + 1));
+				factorized_horizontal_matrix.resize (2 * (n / 2 + 1));
+				matrix.resize (m * m);
 				values_0.resize (2 * (n / 2 + 1));
 				values_n.resize (2 * (n / 2 + 1));
 				if (messenger_ptr->get_id () - 1 >= 0) {
@@ -85,22 +85,21 @@ namespace two_d
 				TRACE ("Factorizing...");
 				
 				for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
-					horizontal_plus_matrix [i] = 1.0 + timestep * grid_n.matrix_ptr () [i];
-					horizontal_minus_matrix [i] = 1.0 - timestep * grid_n.matrix_ptr () [i];
+					factorized_horizontal_matrix [i] = 1.0 + timestep * horizontal_matrix [i];
 				}
 						
 				utils::matrix_copy (m, m, default_matrix, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1)], m, lda);
 
-				utils::matrix_add_scaled (m - excess_n - excess_0 - 2, m, timestep, matrix + excess_0 + 1, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + 1 + excess_0], m, lda);
+				utils::matrix_add_scaled (m - excess_n - excess_0 - 2, m, timestep, &matrix [0] + excess_0 + 1, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + 1 + excess_0], m, lda);
 				if (ntop != 0) {
-					utils::matrix_add_scaled (ntop, m, alpha_0 * timestep, matrix + excess_0, &factorized_matrix [(ntop + ex_excess_0) * lda], m, m + ex_excess_0 + ex_excess_n + ntop + nbot);
-					utils::interpolate (ex_excess_0, m, m, timestep, positions, matrix, &positions_0 [0], &factorized_matrix [(ntop + ex_excess_0) * lda + ntop], m, lda);
-					utils::matrix_add_scaled (ntop, m, alpha_0 * timestep, matrix + excess_0, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + excess_0], m, m + ex_excess_0 + ex_excess_n + ntop + nbot);
+					utils::matrix_add_scaled (ntop, m, alpha_0 * timestep, &matrix [0] + excess_0, &factorized_matrix [(ntop + ex_excess_0) * lda], m, m + ex_excess_0 + ex_excess_n + ntop + nbot);
+					utils::interpolate (ex_excess_0, m, m, timestep, positions, &matrix [0], &positions_0 [0], &factorized_matrix [(ntop + ex_excess_0) * lda + ntop], m, lda);
+					utils::matrix_add_scaled (ntop, m, alpha_0 * timestep, &matrix [0] + excess_0, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + excess_0], m, m + ex_excess_0 + ex_excess_n + ntop + nbot);
 				}
 				if (nbot != 0) {
-					utils::matrix_add_scaled (nbot, m, alpha_n * timestep, matrix + m - nbot - excess_n, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + m - nbot - excess_n], m, lda);
-					utils::interpolate (ex_excess_n, m, m, timestep, positions, matrix, &positions_n [0], &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + m], m, lda);
-					utils::matrix_add_scaled (nbot, m, alpha_n * timestep, matrix + m - nbot - excess_n, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + m + ex_excess_n], m, lda);
+					utils::matrix_add_scaled (nbot, m, alpha_n * timestep, &matrix [0] + m - nbot - excess_n, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + m - nbot - excess_n], m, lda);
+					utils::interpolate (ex_excess_n, m, m, timestep, positions, &matrix [0], &positions_n [0], &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + m], m, lda);
+					utils::matrix_add_scaled (nbot, m, alpha_n * timestep, &matrix [0] + m - nbot - excess_n, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + m + ex_excess_n], m, lda);
 				}
 
 				utils::p_block_matrix_factorize (messenger_ptr->get_id (), messenger_ptr->get_np (), m - excess_0 - excess_n - ntop - nbot, excess_0 + ex_excess_0 + 2 * ntop, excess_n + ex_excess_n + 2 * nbot, &factorized_matrix [0], &ipiv [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, lda, sqrt ((int) boundary_matrix.size ()));
@@ -195,7 +194,7 @@ namespace two_d
 					}
 
 					for (int j = 0; j < m; ++j) {
-						utils::diagonal_solve (2 * (n / 2 + 1), &horizontal_plus_matrix [0], &data_temp [ntop + ex_excess_0 + j], 1, lda);
+						utils::diagonal_solve (2 * (n / 2 + 1), &factorized_horizontal_matrix [0], &data_temp [ntop + ex_excess_0 + j], 1, lda);
 					}
 					utils::matrix_copy (m, 2 * (n / 2 + 1), &data_temp [ntop + ex_excess_0], data_out, lda);
 

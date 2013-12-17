@@ -42,7 +42,7 @@ namespace cuda
 					
 					TRACE ("Resetting explicit part...");
 					
-					utils::scale (n, (datatype) 0.0, rhs_dev.pointer ());
+					utils::scale (n, (datatype) 0.0, rhs_dev.ptr ());
 				}
 				
 				inline void implicit_reset () {
@@ -66,7 +66,7 @@ namespace cuda
 				using ::one_d::chebyshev::element <datatype>::boundary_weights;
 				using ::one_d::chebyshev::element <datatype>::params;
 				using ::one_d::chebyshev::element <datatype>::grid;
-				using ::one_d::chebyshev::element <datatype>::pointer;
+				using ::one_d::chebyshev::element <datatype>::ptr;
 				using ::one_d::chebyshev::element <datatype>::messenger_ptr;
 
 				int excess_0, excess_n;

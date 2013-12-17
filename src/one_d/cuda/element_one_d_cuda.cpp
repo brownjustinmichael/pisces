@@ -34,7 +34,7 @@ namespace cuda
 				data_dev.resize (2 * n);
 				rhs_dev.resize (n);
 				
-				data_dev.copy_to_device (n, pointer (velocity));
+				data_dev.copy_to_device (n, ptr (velocity));
 		
 				TRACE ("Initialized.");
 			}
@@ -49,25 +49,25 @@ namespace cuda
 				convert << name;
 				normal_stream.reset (new io::incremental_output <datatype>  ("../output/normal_" + convert.str () + "_", ".dat", 4, new io::header, n, params["output_every"].asInt));
 				normal_stream->template append <int> ("i", &cell [0]);
-				normal_stream->template append <datatype> ("x", pointer (position));
-				normal_stream->template append <datatype> ("u", pointer (velocity));
+				normal_stream->template append <datatype> ("x", ptr (position));
+				normal_stream->template append <datatype> ("u", ptr (velocity));
 				
 				transform_stream.reset (new io::incremental_output <datatype>  ("../output/transform_" + convert.str () + "_", ".dat", 4, new io::header, n, params["output_every"].asInt));
 				normal_stream->template append <int> ("i", &cell [0]);
-				normal_stream->template append <datatype> ("x", pointer (position));
-				normal_stream->template append <datatype> ("u", pointer (velocity));
+				normal_stream->template append <datatype> ("x", ptr (position));
+				normal_stream->template append <datatype> ("u", ptr (velocity));
 		
 				transform_stream->to_file ();
 				
 				this->add_implicit_plan (new ::one_d::implicit_diffusion <datatype> (- diffusion_coeff * alpha, n, &*grid, &matrix [0]));
 				
-				this->add_pre_plan (new explicit_diffusion <datatype> (diffusion_coeff * (1.0 - alpha), n, &*grid, data_dev.pointer (), rhs_dev.pointer ()));
+				this->add_pre_plan (new explicit_diffusion <datatype> (diffusion_coeff * (1.0 - alpha), n, &*grid, data_dev.ptr (), rhs_dev.ptr ()));
 		
-				this->add_transform (new fftw_cosine <datatype> (n, data_dev.pointer ()));
-				this->add_post_plan (new transfer <datatype> (n, data_dev.pointer (), &((*this) [velocity])));
+				this->add_transform (new fftw_cosine <datatype> (n, data_dev.ptr ()));
+				this->add_post_plan (new transfer <datatype> (n, data_dev.ptr (), &((*this) [velocity])));
 				
 				// Set up solver
-				this->add_solver (new solver <datatype> (messenger_ptr, n, excess_0, excess_n, timestep, boundary_weights [::one_d::edge_0], boundary_weights [::one_d::edge_n], pointer (position), grid->get_data (0), &matrix [0], data_dev.pointer (), rhs_dev.pointer ()));
+				this->add_solver (new solver <datatype> (messenger_ptr, n, excess_0, excess_n, timestep, boundary_weights [::one_d::edge_0], boundary_weights [::one_d::edge_n], ptr (position), grid->get_data (0), &matrix [0], data_dev.ptr (), rhs_dev.ptr ()));
 		
 			}
 	

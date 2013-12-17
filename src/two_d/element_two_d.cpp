@@ -54,28 +54,29 @@ namespace two_d
 				normal_stream.reset (new io::incremental (new io::two_d::netcdf (n, m), filestream.str (), params.output_every));
 				normal_stream->template append <int> ("i", &cell_n [0]);
 				normal_stream->template append <int> ("j", &cell_m [0]);
-				normal_stream->template append <datatype> ("x", pointer (x_position));
-				normal_stream->template append <datatype> ("z", pointer (z_position));
-				normal_stream->template append <datatype> ("w", pointer (velocity));
-				normal_stream->template append <datatype> ("rhs", pointer (vel_implicit_rhs));
+				normal_stream->template append <datatype> ("x", ptr (x_position));
+				normal_stream->template append <datatype> ("z", ptr (z_position));
+				normal_stream->template append <datatype> ("w", ptr (velocity));
+				normal_stream->template append <datatype> ("rhs", ptr (vel_implicit_rhs));
 			
 				filestream.str ("");
 				filestream << "../output/" + params.output + "_t_" << std::setfill ('0') << std::setw (2) << name << "_%04i.cdf";
 				transform_stream.reset (new io::incremental (new io::two_d::netcdf (n, m), filestream.str (), params.output_every));
 				transform_stream->template append <int> ("i", &cell_n [0]);
 				transform_stream->template append <int> ("j", &cell_m [0]);
-				transform_stream->template append <datatype> ("x", pointer (x_position));
-				transform_stream->template append <datatype> ("z", pointer (z_position));
-				transform_stream->template append <datatype> ("w", pointer (velocity));
-				transform_stream->template append <datatype> ("rhs", pointer (vel_implicit_rhs));
+				transform_stream->template append <datatype> ("x", ptr (x_position));
+				transform_stream->template append <datatype> ("z", ptr (z_position));
+				transform_stream->template append <datatype> ("w", ptr (velocity));
+				transform_stream->template append <datatype> ("rhs", ptr (vel_implicit_rhs));
 							
-				// Set up plans in order
-				element <datatype>::add_pre_plan (new vertical_diffusion <datatype> (*grids [0], *grids [1], z_diffusion_coeff, alpha, pointer (velocity), pointer (vel_implicit_rhs)));
-				element <datatype>::add_mid_plan (new horizontal_diffusion <datatype> (*grids [0], *grids [1], x_diffusion_coeff, alpha, pointer (velocity), pointer (vel_implicit_rhs)));
-		
 				// Set up solver
-				element <datatype>::add_solver (new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, pointer (velocity), pointer (vel_explicit_rhs), pointer (vel_implicit_rhs)));
+				element <datatype>::add_solver (velocity, new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, ptr (velocity), ptr (vel_explicit_rhs), ptr (vel_implicit_rhs)));
 		
+				// Set up plans in order
+				element <datatype>::add_pre_plan (new vertical_diffusion <datatype> (*grids [0], *grids [1], z_diffusion_coeff, alpha, matrix_ptr (velocity, 0), matrix_ptr (velocity, 1), ptr (velocity), ptr (vel_implicit_rhs)));
+				element <datatype>::add_mid_plan (new horizontal_diffusion <datatype> (*grids [0], *grids [1], x_diffusion_coeff, alpha, matrix_ptr (velocity, 0), matrix_ptr (velocity, 1), ptr (velocity), ptr (vel_implicit_rhs)));
+		
+
 				normal_stream->to_file ();
 				
 				flags |= x_solve;

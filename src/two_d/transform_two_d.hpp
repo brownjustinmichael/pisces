@@ -20,6 +20,17 @@ namespace two_d
 		inverse = 0x02
 	};
 	
+	// class fftw_configure
+	// {
+	// public:
+	// 	fftw_configure (int n_threads);
+	// 	
+	// 	virtual ~fftw_configure ();
+	// 
+	// private:
+	// 	int n_threads;
+	// };
+	
 	namespace fourier
 	{
 		namespace chebyshev

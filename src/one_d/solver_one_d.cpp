@@ -32,9 +32,9 @@ namespace one_d
 	excess_n (grid.excess_n),
 	explicit_rhs (i_explicit_rhs),
 	implicit_rhs (i_implicit_rhs),
-	default_matrix (i_grid.get_data (0)), 
-	matrix (i_grid.matrix_ptr ()) {
+	default_matrix (i_grid.get_data (0)) {
 		TRACE ("Instantiating...");
+		matrix.resize (n * n);
 		if (messenger_ptr->get_id () - 1 >= 0) {
 			messenger_ptr->template send <int> (1, &excess_0, messenger_ptr->get_id () - 1, 0);
 			messenger_ptr->template recv <int> (1, &ex_excess_0, messenger_ptr->get_id () - 1, 0);
@@ -74,6 +74,7 @@ namespace one_d
 		factorized_matrix.resize ((n + ex_excess_0 + ex_excess_n + nbot + ntop) * (n + ex_excess_0 + ex_excess_n + nbot + ntop), 0.0);
 		ipiv.resize (n); // Should be n - ntop - nbot - excess_0 - excess_n
 		data_temp.resize (n + ex_excess_0 + ex_excess_n + nbot + ntop);
+		TRACE ("Instantiated.");
 	}
 	
 	template <class datatype>
@@ -84,16 +85,16 @@ namespace one_d
 		
 		utils::matrix_copy (n, n, default_matrix, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1)], n, lda);
 
-		utils::matrix_add_scaled (n - excess_n - excess_0 - 2, n, timestep, matrix + excess_0 + 1, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + 1 + excess_0], n, lda);
+		utils::matrix_add_scaled (n - excess_n - excess_0 - 2, n, timestep, &matrix [excess_0 + 1], &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + 1 + excess_0], n, lda);
 		if (ntop != 0) {
-			utils::matrix_add_scaled (ntop, n, alpha_0 * timestep, matrix + excess_0, &factorized_matrix [(ntop + ex_excess_0) * lda], n, n + ex_excess_0 + ex_excess_n + ntop + nbot);
-			utils::interpolate (ex_excess_0, n, n, timestep, positions, matrix, &positions_0 [0], &factorized_matrix [(ntop + ex_excess_0) * lda + ntop], n, lda);
-			utils::matrix_add_scaled (ntop, n, alpha_0 * timestep, matrix + excess_0, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + excess_0], n, n + ex_excess_0 + ex_excess_n + ntop + nbot);
+			utils::matrix_add_scaled (ntop, n, alpha_0 * timestep, &matrix [excess_0], &factorized_matrix [(ntop + ex_excess_0) * lda], n, n + ex_excess_0 + ex_excess_n + ntop + nbot);
+			utils::interpolate (ex_excess_0, n, n, timestep, positions, &matrix [0], &positions_0 [0], &factorized_matrix [(ntop + ex_excess_0) * lda + ntop], n, lda);
+			utils::matrix_add_scaled (ntop, n, alpha_0 * timestep, &matrix [excess_0], &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + excess_0], n, n + ex_excess_0 + ex_excess_n + ntop + nbot);
 		}
 		if (nbot != 0) {
-			utils::matrix_add_scaled (nbot, n, alpha_n * timestep, matrix + n - nbot - excess_n, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + n - nbot - excess_n], n, lda);
-			utils::interpolate (ex_excess_n, n, n, timestep, positions, matrix, &positions_n [0], &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + n], n, lda);
-			utils::matrix_add_scaled (nbot, n, alpha_n * timestep, matrix + n - nbot - excess_n, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + n + ex_excess_n], n, lda);
+			utils::matrix_add_scaled (nbot, n, alpha_n * timestep, &matrix [n - nbot - excess_n], &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + n - nbot - excess_n], n, lda);
+			utils::interpolate (ex_excess_n, n, n, timestep, positions, &matrix [0], &positions_n [0], &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + n], n, lda);
+			utils::matrix_add_scaled (nbot, n, alpha_n * timestep, &matrix [n - nbot - excess_n], &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + n + ex_excess_n], n, lda);
 		}
 		
 		utils::p_block_matrix_factorize (messenger_ptr->get_id (), messenger_ptr->get_np (), n - excess_0 - excess_n - ntop - nbot, excess_0 + ex_excess_0 + 2 * ntop, excess_n + ex_excess_n + 2 * nbot, &factorized_matrix [0], &ipiv [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, lda, sqrt ((int) boundary_matrix.size ()));

@@ -25,7 +25,6 @@ namespace bases
 			scale = sqrt (2.0 / (n - 1));
 			pioN = std::acos (-1.0) / (n - 1);
 			exists_array.resize (n * n * 3, false);
-			matrix.resize (n * n);
 	
 			TRACE ("Instantiating...");
 			
@@ -115,7 +114,6 @@ namespace bases
 			int d, m, k;
 			scale = sqrt (2.0 / (n - 1));
 			pioN = std::acos (-1.0) / (n - 1);
-			matrix.resize (2 * (n / 2 + 1));
 	
 			TRACE ("Instantiating...");
 	

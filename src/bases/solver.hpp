@@ -59,6 +59,8 @@ namespace bases
 			flags |= factorized;
 		}
 		
+		virtual datatype *matrix_ptr (int index = 0) = 0;
+		
 	protected:
 		virtual void _factorize () = 0;
 		

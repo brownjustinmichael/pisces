@@ -123,8 +123,8 @@ namespace two_d
 			return bases::element <datatype>::operator() (name, i * m + j);
 		}
 		
-		inline datatype* pointer (int name, int i = 0, int j = 0) {
-			return bases::element <datatype>::pointer (name, i * m + j);
+		inline datatype* ptr (int name, int i = 0, int j = 0) {
+			return bases::element <datatype>::ptr (name, i * m + j);
 		}
 	
 		/*!*******************************************************************
@@ -151,14 +151,14 @@ namespace two_d
 					}
 				} else if (flags & uniform_m) {
 					for (int j = 0; j < m; ++j) {
-						utils::copy (n, initial_conditions, pointer (name, 0, j), 1, m);
+						utils::copy (n, initial_conditions, ptr (name, 0, j), 1, m);
 					}
 				} else if (flags & uniform_n) {
 					for (int i = 0; i < n; ++i) {
-						utils::copy (m, initial_conditions, pointer (name, i, 0));
+						utils::copy (m, initial_conditions, ptr (name, i, 0));
 					}
 				} else {
-					utils::copy (n * m, initial_conditions, pointer (name));
+					utils::copy (n * m, initial_conditions, ptr (name));
 				}
 			}
 			
@@ -239,10 +239,10 @@ namespace two_d
 					TRACE ("Initializing...");
 					two_d::element <datatype>::initialize (name, initial_conditions, flags);
 				    if (!(flags & no_transform) && (name != x_position) && (name != z_position)) {
-		   				element <datatype>::add_forward_horizontal_transform (new horizontal_transform <datatype> (*grids [0], *grids [1], pointer (name)));
-		   				element <datatype>::add_inverse_horizontal_transform (new horizontal_transform <datatype> (*grids [0], *grids [1], pointer (name), NULL, inverse));
-		   				element <datatype>::add_forward_vertical_transform (new vertical_transform <datatype> (*grids [0], *grids [1], pointer (name)));
-		   				element <datatype>::add_inverse_vertical_transform (new vertical_transform <datatype> (*grids [0], *grids [1], pointer (name), NULL, inverse));
+		   				element <datatype>::add_forward_horizontal_transform (new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name)));
+		   				element <datatype>::add_inverse_horizontal_transform (new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, inverse));
+		   				element <datatype>::add_forward_vertical_transform (new vertical_transform <datatype> (*grids [0], *grids [1], ptr (name)));
+		   				element <datatype>::add_inverse_vertical_transform (new vertical_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, inverse));
 		   			}
 				}
 		
@@ -255,7 +255,7 @@ namespace two_d
 				using two_d::element <datatype>::axis_n;
 				using two_d::element <datatype>::axis_m;
 				using two_d::element <datatype>::params;
-				using two_d::element <datatype>::pointer;
+				using two_d::element <datatype>::ptr;
 				using two_d::element <datatype>::grids;
 			};
 			
@@ -281,7 +281,8 @@ namespace two_d
 				using element <datatype>::cell_n;
 				using element <datatype>::cell_m;
 				using element <datatype>::grids;
-				using element <datatype>::pointer;
+				using element <datatype>::ptr;
+				using element <datatype>::matrix_ptr;
 				using element <datatype>::messenger_ptr;
 				using element <datatype>::timestep;
 				using element <datatype>::alpha_0;

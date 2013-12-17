@@ -132,7 +132,7 @@ namespace bases
 		 * 
 		 * \return A pointer to the given index of the named scalar
 		 ************************************************************************/
-		virtual datatype* pointer (int name, int index = 0) {
+		virtual datatype* ptr (int name, int index = 0) {
 			return &((*this) [name]) + index;
 		}
 		
@@ -151,8 +151,13 @@ namespace bases
 		 * 
 		 * \param i_solver A pointer to a solver object
 		 *********************************************************************/
-		inline void add_solver (solver <datatype>* i_solver) {
-			solvers.push_back (std::shared_ptr <solver <datatype>> (i_solver));
+		inline void add_solver (int i_name, solver <datatype>* i_solver) {
+			solvers [i_name] = std::shared_ptr <solver <datatype>> (i_solver);
+			TRACE ("Solver added.");
+		}
+		
+		inline datatype *matrix_ptr (int i_name, int index = 0) {
+			return solvers [i_name]->matrix_ptr (index);
 		}
 
 		/*!*******************************************************************
@@ -277,10 +282,13 @@ namespace bases
 			TRACE ("Inverting...");
 			if (flags & transformed_horizontal) {
 				for (int i = 0; i < (int) inverse_horizontal_transforms.size (); ++i) {
+					DEBUG ("PrePoint " << i);
+					DEBUG ("Point " << &*(inverse_horizontal_transforms [i]));
 					inverse_horizontal_transforms [i]->execute (flags);
 				}
 				flags &= ~transformed_horizontal;
 			}
+			TRACE ("Done.");
 		}
 		
 		/*!**********************************************************************
@@ -326,8 +334,9 @@ namespace bases
 		 ************************************************************************/
 		virtual void factorize () {
 			if (!(flags & factorized)) {
-				for (int i = 0; i < (int) solvers.size (); ++i) {
-					solvers [i]->factorize ();
+				typedef typename std::map<int, std::shared_ptr<solver <datatype> > >::iterator iterator; 
+				for (iterator iter = solvers.begin (); iter != solvers.end (); iter++) {
+					iter->second->factorize ();
 				}
 				flags |= factorized;
 			}
@@ -341,9 +350,10 @@ namespace bases
 			datatype t_timestep;
 			t_timestep = calculate_timestep ();
 			messenger_ptr->min (&t_timestep);
-						
-			for (int i = 0; i < (int) solvers.size (); ++i) {
-				solvers [i]->execute (flags);
+			
+			typedef typename std::map<int, std::shared_ptr<solver <datatype> > >::iterator iterator; 
+			for (iterator iter = solvers.begin (); iter != solvers.end (); iter++) {
+				iter->second->execute (flags);
 			}
 			
 			duration += timestep;
@@ -416,7 +426,7 @@ namespace bases
 		std::vector<std::shared_ptr<plan <datatype> > > inverse_horizontal_transforms; //!< A vector of shared pointers to the inverse horizontal transforms
 		std::vector<std::shared_ptr<plan <datatype> > > forward_vertical_transforms; //!< A vector of shared pointers to the forward vertical transforms
 		std::vector<std::shared_ptr<plan <datatype> > > inverse_vertical_transforms; //!< A vector of shared pointers to the inverse vertical transforms
-		std::vector<std::shared_ptr<solver <datatype> > > solvers; //!< A vector of shared pointers to the matrix solvers
+		std::map<int, std::shared_ptr<solver <datatype> > > solvers; //!< A vector of shared pointers to the matrix solvers
 		
 		/*
 			TODO Make solvers a map so that matrices are easy access

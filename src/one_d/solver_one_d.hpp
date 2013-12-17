@@ -50,6 +50,10 @@ namespace one_d
 		 * \copydoc bases::solver <datatype>::execute ()
 		 *********************************************************************/
 		void execute (int &element_flags);
+		
+		datatype *matrix_ptr (int index = 0) {
+			return &matrix [0];
+		}
 	
 	protected:
 		/*!*******************************************************************
@@ -71,6 +75,7 @@ namespace one_d
 		datatype value_0, value_n;
 
 		datatype* positions;
+		std::vector <datatype> matrix;
 		int temp_n;
 		int excess_0; //!< The integer number of elements to recv from edge_0
 		int excess_n; //!< The integer number of elements to recv from edge_n
@@ -81,7 +86,6 @@ namespace one_d
 		datatype* explicit_rhs; //!< The datatype array of the right-hand-side of the matrix equation
 		datatype* implicit_rhs; //!< The datatype array of the right-hand-side of the matrix equation
 		datatype* default_matrix; //!< The datatype array of the non-timestep dependent matrix component
-		datatype* matrix; //!< The datatype array of the matrix component to be timestep-multiplied
 	
 		std::vector <datatype> data_temp; //!< A datatype vector to be used in lieu of data_out for non-updating steps
 		std::vector <datatype> positions_0; //!< A datatype vector of excess positions from edge_0
