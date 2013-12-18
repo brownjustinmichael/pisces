@@ -7,6 +7,7 @@
  ************************************************************************/
 
 #include "element_two_d.hpp"
+#include "advection_two_d.hpp"
 #include "diffusion_two_d.hpp"
 #include "transform_two_d.hpp"
 #include "solver_two_d.hpp"
@@ -44,9 +45,14 @@ namespace two_d
 						init [i * m + j] = scale * (std::exp (- ((*this) (x_position, i, j) - mean) * ((*this) (x_position, i, j) - mean) / 2.0 / sigma / sigma) - height) * (std::exp (- ((*this) (z_position, i, j) - mean) * ((*this) (z_position, i, j) - mean) / 2.0 / sigma / sigma) - height);
 					}
 				}
-				initialize (velocity, &init [0]);
-				initialize (vel_explicit_rhs, NULL, no_transform);
-				initialize (vel_implicit_rhs, NULL, no_transform);
+				initialize (x_velocity, &init [0]);
+				initialize (z_velocity, &init [0]);
+				initialize (x_vel_explicit_rhs, NULL, no_transform);
+				initialize (x_vel_implicit_rhs, NULL, no_transform);
+				initialize (x_vel_real_rhs, NULL, only_forward_horizontal);
+				initialize (z_vel_explicit_rhs, NULL, no_transform);
+				initialize (z_vel_implicit_rhs, NULL, no_transform);
+				initialize (z_vel_real_rhs, NULL, only_forward_horizontal);
 			
 				// Set up output
 				std::ostringstream filestream;
@@ -56,8 +62,8 @@ namespace two_d
 				normal_stream->template append <int> ("j", &cell_m [0]);
 				normal_stream->template append <datatype> ("x", ptr (x_position));
 				normal_stream->template append <datatype> ("z", ptr (z_position));
-				normal_stream->template append <datatype> ("w", ptr (velocity));
-				normal_stream->template append <datatype> ("rhs", ptr (vel_implicit_rhs));
+				normal_stream->template append <datatype> ("u", ptr (x_velocity));
+				normal_stream->template append <datatype> ("w", ptr (z_velocity));
 			
 				filestream.str ("");
 				filestream << "../output/" + params.output + "_t_" << std::setfill ('0') << std::setw (2) << name << "_%04i.cdf";
@@ -66,27 +72,46 @@ namespace two_d
 				transform_stream->template append <int> ("j", &cell_m [0]);
 				transform_stream->template append <datatype> ("x", ptr (x_position));
 				transform_stream->template append <datatype> ("z", ptr (z_position));
-				transform_stream->template append <datatype> ("w", ptr (velocity));
-				transform_stream->template append <datatype> ("rhs", ptr (vel_implicit_rhs));
+				transform_stream->template append <datatype> ("u", ptr (x_velocity));
+				transform_stream->template append <datatype> ("w", ptr (z_velocity));
 							
 				// Set up solver
-				element <datatype>::add_solver (velocity, new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, ptr (velocity), ptr (vel_explicit_rhs), ptr (vel_implicit_rhs)));
+				// element <datatype>::add_solver (x_velocity, new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, ptr (x_velocity), ptr (x_vel_explicit_rhs), ptr (x_vel_real_rhs), ptr (x_vel_implicit_rhs)));
+				element <datatype>::add_solver (z_velocity, new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, ptr (z_velocity), ptr (z_vel_explicit_rhs), ptr (z_vel_real_rhs), ptr (z_vel_implicit_rhs)));
 		
 				// Set up plans in order
-				element <datatype>::add_pre_plan (new vertical_diffusion <datatype> (*grids [0], *grids [1], z_diffusion_coeff, alpha, matrix_ptr (velocity, 0), matrix_ptr (velocity, 1), ptr (velocity), ptr (vel_implicit_rhs)));
-				element <datatype>::add_mid_plan (new horizontal_diffusion <datatype> (*grids [0], *grids [1], x_diffusion_coeff, alpha, matrix_ptr (velocity, 0), matrix_ptr (velocity, 1), ptr (velocity), ptr (vel_implicit_rhs)));
-		
-
-				normal_stream->to_file ();
+				// element <datatype>::add_pre_plan (new vertical_diffusion <datatype> (*grids [0], *grids [1], x_diffusion_coeff, alpha, matrix_ptr (x_velocity, 0), matrix_ptr (x_velocity, 1), ptr (x_velocity), ptr (x_vel_implicit_rhs)));
+				// element <datatype>::add_mid_plan (new horizontal_diffusion <datatype> (*grids [0], *grids [1], x_diffusion_coeff, alpha, matrix_ptr (x_velocity, 0), matrix_ptr (x_velocity, 1), ptr (x_velocity), ptr (x_vel_implicit_rhs)));
+				// if (params.advection_coeff != 0.0) {
+				// 	element <datatype>::add_post_plan (new advection <datatype> (*grids [0], *grids [1], params.advection_coeff, ptr (x_velocity), ptr (x_velocity), ptr (x_velocity), ptr (x_vel_real_rhs)));
+				// }
 				
-				flags |= x_solve;
+				element <datatype>::add_pre_plan (new vertical_diffusion <datatype> (*grids [0], *grids [1], z_diffusion_coeff, alpha, matrix_ptr (z_velocity, 0), matrix_ptr (z_velocity, 1), ptr (z_velocity), ptr (z_vel_implicit_rhs)));
+				element <datatype>::add_mid_plan (new horizontal_diffusion <datatype> (*grids [0], *grids [1], x_diffusion_coeff, alpha, matrix_ptr (z_velocity, 0), matrix_ptr (z_velocity, 1), ptr (z_velocity), ptr (z_vel_implicit_rhs)));
+				if (params.advection_coeff != 0.0) {
+					element <datatype>::add_post_plan (new advection <datatype> (*grids [0], *grids [1], params.advection_coeff, ptr (x_velocity), ptr (z_velocity), ptr (z_velocity), ptr (z_vel_real_rhs)));
+				}
 		
 				TRACE ("Initialized.");
 			}
 			
 			template <class datatype>
 			datatype advection_diffusion_element <datatype>::calculate_timestep () {
-				return params.max_timestep;
+				datatype t_timestep = params.max_timestep;
+				if (params.advection_coeff != 0.0) {
+					for (int i = 1; i < n - 1; ++i) {
+						for (int j = 1; j < m - 1; ++j) {
+							t_timestep = std::min (t_timestep, (datatype) (0.5 * std::abs (((*this) (x_position, i + 1, j) - (*this) (x_position, i - 1, j)) / (*this) (x_velocity, i, j) / params.advection_coeff) * params.courant_factor));
+							t_timestep = std::min (t_timestep, (datatype) (0.5 * std::abs (((*this) (z_position, i, j + 1) - (*this) (z_position, i, j - 1)) / (*this) (z_velocity, i, j) / params.advection_coeff) * params.courant_factor));
+							// t_timestep = std::min (t_timestep, (datatype) std::abs (((*this) (position, i + 1) - (*this) (position, i - 1)) * ((*this) (position, i + 1) - (*this) (position, i - 1)) / 2.0 / params.nonlinear_diffusion_coeff / (*this) (velocity, i) * params.courant_factor));
+						}
+					}
+				}
+				if (t_timestep < timestep || t_timestep > 2.0 * timestep) {
+					return t_timestep;
+				} else {
+					return timestep;
+				}
 			}
 			
 			template class element <double>;

@@ -24,7 +24,7 @@ namespace two_d
 			class solver : public bases::solver <datatype>, explicit_plan <datatype>
 			{
 			public:
-				solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_aplha_n, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out = NULL, int i_flags = 0x00);
+				solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_aplha_n, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_real_rhs, datatype* i_implicit_rhs, datatype* i_data_out = NULL, int i_flags = 0x00);
 				
 				virtual ~solver () {}
 				
@@ -65,6 +65,7 @@ namespace two_d
 				int ntop, nbot;
 	
 				datatype* explicit_rhs; //!< The datatype array of the right-hand-side of the matrix equation
+				datatype* real_rhs; //!< The datatype array of the right-hand-side of the matrix equation
 				datatype* implicit_rhs; //!< The datatype array of the right-hand-side of the matrix equation
 				datatype* default_matrix; //!< The datatype array of the non-timestep dependent matrix component
 	

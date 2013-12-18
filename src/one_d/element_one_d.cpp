@@ -170,7 +170,7 @@ namespace one_d
 			datatype t_timestep;
 			t_timestep = params.max_timestep;
 			// for (int i = 1; i < n - 1; ++i) {
-			// 	t_timestep = std::min (t_timestep, (datatype) (std::abs (((*this) (position, i - 1) - (*this) (position, i + 1)) / (*this) (velocity, i)) / params.advection_coeff * params.courant_factor));
+			// 	t_timestep = std::min (t_timestep, (datatype) (std::abs (((*this) (position, i - 1) - (*this) (position, i + 1)) / (*this) (velocity, i) / params.advection_coeff) * params.courant_factor));
 			// 	t_timestep = std::min (t_timestep, (datatype) std::abs (((*this) (position, i + 1) - (*this) (position, i - 1)) * ((*this) (position, i + 1) - (*this) (position, i - 1)) / 2.0 / params.nonlinear_diffusion_coeff / (*this) (velocity, i) * params.courant_factor));
 			// }
 			if (t_timestep < timestep || t_timestep > 2.0 * timestep) {

@@ -111,8 +111,8 @@ int main (int argc, char *argv[])
 	
 	DEBUG ("m = " << m << " n = " << n);
 	
-	// one_d::chebyshev::advection_diffusion_element <double> element (&vertical_axis, name, params, &process_messenger, 0x00);
-	two_d::fourier::chebyshev::advection_diffusion_element <double> element (&horizontal_axis, &vertical_axis, name, params, &process_messenger, 0x00);
+	one_d::chebyshev::advection_diffusion_element <double> element (&vertical_axis, name, params, &process_messenger, 0x00);
+	// two_d::fourier::chebyshev::advection_diffusion_element <double> element (&horizontal_axis, &vertical_axis, name, params, &process_messenger, 0x00);
 	
 	try {
 		element.run ();

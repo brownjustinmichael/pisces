@@ -351,6 +351,8 @@ namespace bases
 			t_timestep = calculate_timestep ();
 			messenger_ptr->min (&t_timestep);
 			
+			transform_horizontal_forward ();
+			
 			typedef typename std::map<int, std::shared_ptr<solver <datatype> > >::iterator iterator; 
 			for (iterator iter = solvers.begin (); iter != solvers.end (); iter++) {
 				iter->second->execute (flags);
@@ -366,9 +368,7 @@ namespace bases
 				flags |= unchanged_timestep;
 			}
 			timestep = t_timestep;
-			if (!(flags & transformed_vertical)) {
-				transform_vertical_forward ();
-			}
+			transform_vertical_forward ();
 			TRACE ("Solve complete.");
 		}
 		
@@ -380,9 +380,7 @@ namespace bases
 		 * 
 		 * \return The datatype recommended timestep for the next timestep
 		 ************************************************************************/
-		virtual datatype calculate_timestep () {
-			return (datatype) 0.0;
-		}
+		virtual datatype calculate_timestep () = 0;
 		
 		/*!**********************************************************************
 		 * \brief The main function call of the class
