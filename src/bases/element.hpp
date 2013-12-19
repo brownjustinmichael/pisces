@@ -282,8 +282,6 @@ namespace bases
 			TRACE ("Inverting...");
 			if (flags & transformed_horizontal) {
 				for (int i = 0; i < (int) inverse_horizontal_transforms.size (); ++i) {
-					DEBUG ("PrePoint " << i);
-					DEBUG ("Point " << &*(inverse_horizontal_transforms [i]));
 					inverse_horizontal_transforms [i]->execute (flags);
 				}
 				flags &= ~transformed_horizontal;

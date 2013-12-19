@@ -83,6 +83,7 @@ namespace one_d
 		TRACE ("Factorizing..." << messenger_ptr->get_id ());
 		std::stringstream debug;
 		
+		utils::matrix_scale (lda, lda, 0.0, &factorized_matrix [0], lda);
 		utils::matrix_copy (n, n, default_matrix, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1)], n, lda);
 
 		utils::matrix_add_scaled (n - excess_n - excess_0 - 2, n, timestep, &matrix [excess_0 + 1], &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + 1 + excess_0], n, lda);
@@ -96,6 +97,8 @@ namespace one_d
 			utils::interpolate (ex_excess_n, n, n, timestep, positions, &matrix [0], &positions_n [0], &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + n], n, lda);
 			utils::matrix_add_scaled (nbot, n, alpha_n * timestep, &matrix [n - nbot - excess_n], &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + n + ex_excess_n], n, lda);
 		}
+		
+
 		
 		utils::p_block_matrix_factorize (messenger_ptr->get_id (), messenger_ptr->get_np (), n - excess_0 - excess_n - ntop - nbot, excess_0 + ex_excess_0 + 2 * ntop, excess_n + ex_excess_n + 2 * nbot, &factorized_matrix [0], &ipiv [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, lda, sqrt ((int) boundary_matrix.size ()));
 		
