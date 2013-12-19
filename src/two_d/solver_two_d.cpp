@@ -20,7 +20,7 @@ namespace two_d
 		namespace chebyshev
 		{
 			template <class datatype>
-			solver <datatype>:: solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out, int i_flags) : 
+			solver <datatype>:: solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_real_rhs, datatype* i_implicit_rhs, datatype* i_data_out, int i_flags) : 
 			bases::solver <datatype> (i_flags),
 			explicit_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out), 
 			messenger_ptr (i_messenger_ptr), 
@@ -31,6 +31,7 @@ namespace two_d
 			excess_0 (grid_m.excess_0), 
 			excess_n (grid_m.excess_n),
 			explicit_rhs (i_explicit_rhs),
+			real_rhs (i_real_rhs),
 			implicit_rhs (i_implicit_rhs),
 			default_matrix (grid_m.get_data (0)) {
 				horizontal_matrix.resize (2 * (n / 2 + 1));
@@ -87,7 +88,8 @@ namespace two_d
 				for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
 					factorized_horizontal_matrix [i] = 1.0 + timestep * horizontal_matrix [i];
 				}
-						
+				
+				utils::matrix_scale (lda, lda, 0.0, &factorized_matrix [0], lda);
 				utils::matrix_copy (m, m, default_matrix, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1)], m, lda);
 
 				utils::matrix_add_scaled (m - excess_n - excess_0 - 2, m, timestep, &matrix [0] + excess_0 + 1, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + 1 + excess_0], m, lda);
@@ -128,6 +130,7 @@ namespace two_d
 				}
 				
 				utils::matrix_add_scaled (m - excess_0 - excess_n, 2 * (n / 2 + 1), timestep, implicit_rhs + excess_0, &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
+				utils::matrix_add_scaled (m - excess_0 - excess_n, 2 * (n / 2 + 1), timestep, real_rhs + excess_0, &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
 				utils::matrix_add_scaled (m - excess_0 - excess_n, 2 * (n / 2 + 1), timestep, explicit_rhs + excess_0, &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
 								
 				if (ntop != 0) {

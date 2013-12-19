@@ -146,6 +146,12 @@ namespace utils
 	
 	void matrix_copy (int n, int m, float *x, float *y, int ldx, int ldy) {
 		int ione = 1;
+		if (ldx == -1) {
+			ldx = n;
+		}
+		if (ldy == -1) {
+			ldy = n;
+		}
 		for (int i = 0; i < m; ++i) {
 			scopy_ (&n, x + i * ldx, &ione, y + i * ldy, &ione);
 		}
@@ -180,6 +186,9 @@ namespace utils
 	
 	void matrix_scale (int n, int m, float a, float* x, int ldx) {
 		int ione = 1;
+		if (ldx == -1) {
+			ldx = n;
+		}
 		for (int i = 0; i < m; ++i) {
 			sscal_ (&n, &a, x + i * ldx, &ione);
 		}
@@ -187,6 +196,9 @@ namespace utils
 
 	void matrix_scale (int n, int m, double a, double* x, int ldx) {
 		int ione = 1;
+		if (ldx == -1) {
+			ldx = n;
+		}
 		for (int i = 0; i < m; ++i) {
 			dscal_ (&n, &a, x + i * ldx, &ione);
 		}

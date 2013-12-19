@@ -34,8 +34,12 @@ enum index {
 	composition = 22, comp = 22,
 	
 	rhs = -01,
-	vel_explicit_rhs = -11,
-	vel_implicit_rhs = -15,
+	x_vel_explicit_rhs = -11,
+	x_vel_real_rhs = -12,
+	x_vel_implicit_rhs = -13,
+	vel_explicit_rhs = -16, z_vel_explicit_rhs = -16,
+	vel_real_rhs = -17, z_vel_real_rhs = -17,
+	vel_implicit_rhs = -18, z_vel_implicit_rhs = -18,
 	temp_rhs = -21
 };
 
@@ -47,7 +51,8 @@ enum plan_flags {
 	implicit_set = 0x4000,
 	transformed_horizontal = 0x10,
 	transformed_vertical = 0x8000,
-	no_transform = 0x01
+	no_transform = 0x01,
+	only_forward_horizontal = 0x02
 };
 
 namespace bases
@@ -100,5 +105,4 @@ private:
 	int flag;
 	bool boolean;
 };
-
 #endif /* end of include guard: PLAN_HPP_S9YPWHOM */

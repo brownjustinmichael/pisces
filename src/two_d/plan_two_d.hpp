@@ -11,6 +11,7 @@
 
 #include "../bases/grid.hpp"
 #include "../bases/plan.hpp"
+#include "../utils/utils.hpp"
 
 namespace two_d
 {
@@ -70,6 +71,10 @@ namespace two_d
 		explicit_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out), 
 		matrix_n (i_matrix_n),
 		matrix_m (i_matrix_m) {}
+		
+		/*
+			TODO Take solver object instead of matrices
+		*/
 
 		virtual ~implicit_plan () {}
 
@@ -82,6 +87,28 @@ namespace two_d
 		using explicit_plan <datatype>::grid_m;
 		datatype *matrix_n; //!< A datatype pointer to the input data
 		datatype *matrix_m; //!< A datatype pointer to the input data
+	};
+	
+	template <class datatype>
+	class add_scaled : public explicit_plan <datatype>
+	{
+	public:
+		add_scaled (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype i_coeff, datatype *i_data_in, datatype *i_data_out) :
+		explicit_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out),
+		coeff (i_coeff) {}
+		
+		virtual ~add_scaled () {}
+		
+		virtual void execute (int &element_flags) {
+			utils::matrix_add_scaled (m, 2 * (n / 2 + 1), coeff, data_in, data_out);
+		}
+	
+	private:
+		using explicit_plan <datatype>::n;
+		using explicit_plan <datatype>::m;
+		using explicit_plan <datatype>::data_in;
+		using explicit_plan <datatype>::data_out;
+		datatype coeff;
 	};
 } /* two_d */
 

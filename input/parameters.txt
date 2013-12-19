@@ -1,11 +1,10 @@
-n_iterations 10
-x_diffusion_coeff 0.1
-z_diffusion_coeff 0.1
+x_diffusion_coeff 0.001
+z_diffusion_coeff 0.001
 nonlinear_diffusion_coeff 0.00
-advection_coeff 0.0
-courant_factor 0.1
-timesteps 100
-output_every 10
+advection_coeff 1.0
+courant_factor 0.8
+timesteps 1000
+output_every 100
 gridpoints 64
 max_timestep 0.01
 scale 1.0

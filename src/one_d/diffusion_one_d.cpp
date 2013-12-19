@@ -55,7 +55,6 @@ namespace one_d
 		for (int i = 1; i < n - 1; ++i) {
 			data_out [i] += 2.0 * coeff * data_in [i] * ((data_in [i + 1] - data_in [i]) / (grid.position (i + 1) - grid.position (i)) - (data_in [i] - data_in [i - 1]) / (grid.position (i) - grid.position (i - 1))) / (grid.position (i + 1) - grid.position (i - 1));
 			data_out [i] += coeff * (data_in [i + 1] - data_in [i - 1]) / (grid.position (i + 1) - grid.position (i - 1)) * (data_in [i + 1] - data_in [i - 1]) / (grid.position (i + 1) - grid.position (i - 1));
-			DEBUG ("New " << i << " " << data_out [i]);
 		}
 
 		TRACE ("Operation complete.");
