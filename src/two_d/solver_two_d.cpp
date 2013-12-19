@@ -88,7 +88,8 @@ namespace two_d
 				for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
 					factorized_horizontal_matrix [i] = 1.0 + timestep * horizontal_matrix [i];
 				}
-						
+				
+				utils::matrix_scale (lda, lda, 0.0, &factorized_matrix [0], lda);
 				utils::matrix_copy (m, m, default_matrix, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1)], m, lda);
 
 				utils::matrix_add_scaled (m - excess_n - excess_0 - 2, m, timestep, &matrix [0] + excess_0 + 1, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + 1 + excess_0], m, lda);

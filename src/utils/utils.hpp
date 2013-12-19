@@ -67,8 +67,8 @@ namespace utils
 	 *********************************************************************/
 	void scale (int n, double a, double* x, int incx = 1);
 	
-	void matrix_scale (int n, int m, float a, float *x, int ldx);
-	void matrix_scale (int n, int m, double a, double *x, int ldx);
+	void matrix_scale (int n, int m, float a, float *x, int ldx = -1);
+	void matrix_scale (int n, int m, double a, double *x, int ldx = -1);
 
 	/*!*******************************************************************
 	 * \brief Takes the dot product of two arrays
@@ -120,9 +120,9 @@ namespace utils
 	 *********************************************************************/
 	void add_scaled (int n, double da, double *x, double *y, int incx = 1, int incy = 1);
 	
-	void matrix_add_scaled (int n, int m, float da, float *dx, float *dy, int ldx, int ldy);
+	void matrix_add_scaled (int n, int m, float da, float *dx, float *dy, int ldx = -1, int ldy = -1);
 	
-	void matrix_add_scaled (int n, int m, double da, double *dx, double *dy, int ldx, int ldy);
+	void matrix_add_scaled (int n, int m, double da, double *dx, double *dy, int ldx = -1, int ldy = -1);
 	
 	/*!*******************************************************************
 	 * \brief Perform the matrix-vector multiplication y = alpha * a * x + beta * y

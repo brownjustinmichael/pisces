@@ -76,15 +76,15 @@ namespace two_d
 				transform_stream->template append <datatype> ("w", ptr (z_velocity));
 							
 				// Set up solver
-				// element <datatype>::add_solver (x_velocity, new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, ptr (x_velocity), ptr (x_vel_explicit_rhs), ptr (x_vel_real_rhs), ptr (x_vel_implicit_rhs)));
+				element <datatype>::add_solver (x_velocity, new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, ptr (x_velocity), ptr (x_vel_explicit_rhs), ptr (x_vel_real_rhs), ptr (x_vel_implicit_rhs)));
 				element <datatype>::add_solver (z_velocity, new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, ptr (z_velocity), ptr (z_vel_explicit_rhs), ptr (z_vel_real_rhs), ptr (z_vel_implicit_rhs)));
 		
 				// Set up plans in order
-				// element <datatype>::add_pre_plan (new vertical_diffusion <datatype> (*grids [0], *grids [1], x_diffusion_coeff, alpha, matrix_ptr (x_velocity, 0), matrix_ptr (x_velocity, 1), ptr (x_velocity), ptr (x_vel_implicit_rhs)));
-				// element <datatype>::add_mid_plan (new horizontal_diffusion <datatype> (*grids [0], *grids [1], x_diffusion_coeff, alpha, matrix_ptr (x_velocity, 0), matrix_ptr (x_velocity, 1), ptr (x_velocity), ptr (x_vel_implicit_rhs)));
-				// if (params.advection_coeff != 0.0) {
-				// 	element <datatype>::add_post_plan (new advection <datatype> (*grids [0], *grids [1], params.advection_coeff, ptr (x_velocity), ptr (x_velocity), ptr (x_velocity), ptr (x_vel_real_rhs)));
-				// }
+				element <datatype>::add_pre_plan (new vertical_diffusion <datatype> (*grids [0], *grids [1], x_diffusion_coeff, alpha, matrix_ptr (x_velocity, 0), matrix_ptr (x_velocity, 1), ptr (x_velocity), ptr (x_vel_implicit_rhs)));
+				element <datatype>::add_mid_plan (new horizontal_diffusion <datatype> (*grids [0], *grids [1], x_diffusion_coeff, alpha, matrix_ptr (x_velocity, 0), matrix_ptr (x_velocity, 1), ptr (x_velocity), ptr (x_vel_implicit_rhs)));
+				if (params.advection_coeff != 0.0) {
+					element <datatype>::add_post_plan (new advection <datatype> (*grids [0], *grids [1], params.advection_coeff, ptr (x_velocity), ptr (x_velocity), ptr (x_velocity), ptr (x_vel_real_rhs)));
+				}
 				
 				element <datatype>::add_pre_plan (new vertical_diffusion <datatype> (*grids [0], *grids [1], z_diffusion_coeff, alpha, matrix_ptr (z_velocity, 0), matrix_ptr (z_velocity, 1), ptr (z_velocity), ptr (z_vel_implicit_rhs)));
 				element <datatype>::add_mid_plan (new horizontal_diffusion <datatype> (*grids [0], *grids [1], x_diffusion_coeff, alpha, matrix_ptr (z_velocity, 0), matrix_ptr (z_velocity, 1), ptr (z_velocity), ptr (z_vel_implicit_rhs)));
