@@ -43,6 +43,7 @@ namespace io
 		width = atof (read_map ["width"].c_str ());
 		sigma = atof (read_map ["sigma"].c_str ());
 		implicit_alpha = atof (read_map ["implicit_alpha"].c_str ());
+		implicit_allowance = atof (read_map ["implicit_allowance"].c_str ());
 		n = atoi (read_map ["n"].c_str ());
 		nrhs = atoi (read_map ["nrhs"].c_str ());
 		nmp = atoi (read_map ["nmp"].c_str ());

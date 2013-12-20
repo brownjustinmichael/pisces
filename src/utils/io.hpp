@@ -32,7 +32,7 @@ namespace io
 		int output_every;
 		int n_iterations;
 		int n, nmp, nrhs, nb;
-		datatype max_timestep, courant_factor, implicit_alpha;
+		datatype max_timestep, courant_factor, implicit_alpha, implicit_allowance;
 		datatype scale, width, mean, sigma;
 		std::string output;
 

@@ -129,6 +129,11 @@ namespace two_d
 			void solver <datatype>::execute (int &element_flags) {
 				int info, lda = m + ex_excess_0 + ex_excess_n + nbot + ntop;
 				TRACE ("Executing solve...");
+				
+				/*
+					TODO Add timestep check here?
+				*/
+				
 				utils::scale ((2 * (n / 2 + 1)) * lda, 0.0, &data_temp [0]);
 				std::stringstream debug;
 						
