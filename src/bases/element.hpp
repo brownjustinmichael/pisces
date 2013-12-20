@@ -171,41 +171,21 @@ namespace bases
 		 * 
 		 * \param i_plan A pointer to a plan object
 		 *********************************************************************/
-		inline void add_forward_horizontal_transform (plan <datatype>* i_plan) {
-			forward_horizontal_transforms.push_back (std::shared_ptr <plan <datatype>> (i_plan));
-			// transforms.push_back (i_plan));
+		inline void add_transform (int i_name, plan <datatype>* i_plan, int i_flags) {
+			if (i_flags & forward_horizontal)) {
+				forward_horizontal_transforms [i_name] = std::shared_ptr <plan <datatype>> (i_plan);
+			}
+			if (i_flags & forward_vertical) {
+				forward_vertical_transforms [i_name] = std::shared_ptr <plan <datatype>> (i_plan);
+			}
+			if (i_flags & inverse_horizontal) {
+				inverse_horizontal_transforms [i_name] = std::shared_ptr <plan <datatype>> (i_plan);
+			}
+			if (i_flags & inverse_vertical) {
+				inverse_vertical_transforms [i_name] = std::shared_ptr <plan <datatype>> (i_plan);
+			}
 		}
 		
-		/*!*******************************************************************
-		 * \brief Add an inverse horizontal transform operation
-		 * 
-		 * \param i_plan A pointer to a plan object
-		 *********************************************************************/
-		inline void add_inverse_horizontal_transform (plan <datatype>* i_plan) {
-			inverse_horizontal_transforms.push_back (std::shared_ptr <plan <datatype>> (i_plan));
-			// transforms.push_back (i_plan));
-		}
-		
-		/*!*******************************************************************
-		 * \brief Add a forward vertical transform operation
-		 * 
-		 * \param i_plan A pointer to a plan object
-		 *********************************************************************/
-		inline void add_forward_vertical_transform (plan <datatype>* i_plan) {
-			forward_vertical_transforms.push_back (std::shared_ptr <plan <datatype>> (i_plan));
-			// transforms.push_back (i_plan));
-		}
-		
-		/*!*******************************************************************
-		 * \brief Add an inverse vertical transform operation
-		 * 
-		 * \param i_plan A pointer to a plan object
-		 *********************************************************************/
-		inline void add_inverse_vertical_transform (plan <datatype>* i_plan) {
-			inverse_vertical_transforms.push_back (std::shared_ptr <plan <datatype>> (i_plan));
-			// transforms.push_back (i_plan));
-		}
-
 		/*!*******************************************************************
 		 * \brief Adds a plan to be executed before either transform in order
 		 * 
@@ -260,60 +240,46 @@ namespace bases
 		 *********************************************************************/
 		virtual void explicit_reset () {
 			TRACE ("Resetting explicits...");
-			transform_horizontal_forward ();
-			transform_vertical_forward ();
+			transform (forward_horizontal | forward_vertical);
 		}
 		
 		/*!**********************************************************************
 		 * \brief Transform the element forward in the horizontal direction
 		 ************************************************************************/
-		virtual void transform_horizontal_forward () {
+		virtual void transform (int i_flags) {
 			TRACE ("Transforming...");
-			if (!(element_flags [state] &  transformed_horizontal)) {
-				for (int i = 0; i < (int) forward_horizontal_transforms.size (); ++i) {
-					forward_horizontal_transforms [i]->execute (element_flags);
+			typedef typename std::map <int, std::shared_ptr <plan <datatype> > >::iterator iterator; 
+			if (i_flags & forward_horizontal)) {
+				for (iterator iter = forward_horizontal_transforms.begin (); iter != forward_horizontal_transforms.end (); iter++) {
+					if (!(element_flags [iter->first] & transformed_horizontal)) {
+						iter->second->execute (element_flags);
+						element_flags [iter->first] |= transformed_horizontal;
+					}
 				}
-				element_flags [state] |= transformed_horizontal;
 			}
-		}
-		
-		/*!**********************************************************************
-		 * \brief Transform the element backward in the horizontal direction
-		 ************************************************************************/
-		virtual void transform_horizontal_inverse () {
-			TRACE ("Inverting...");
-			if (element_flags [state] &  transformed_horizontal) {
-				for (int i = 0; i < (int) inverse_horizontal_transforms.size (); ++i) {
-					inverse_horizontal_transforms [i]->execute (element_flags);
+			if (i_flags & forward_vertical) {
+				for (iterator iter = forward_vertical_transforms.begin (); iter != forward_vertical_transforms.end (); iter++) {
+					if (!(element_flags [iter->first] & transformed_vertical)) {
+						iter->second->execute (element_flags);
+					}
+					element_flags [iter->first] |= transformed_vertical;
 				}
-				element_flags [state] &= ~transformed_horizontal;
 			}
-			TRACE ("Done.");
-		}
-		
-		/*!**********************************************************************
-		 * \brief Transform the element forward in the vertical direction
-		 ************************************************************************/
-		virtual void transform_vertical_forward () {
-			TRACE ("Transforming...");
-			if (!(element_flags [state] &  transformed_vertical)) {
-				for (int i = 0; i < (int) forward_vertical_transforms.size (); ++i) {
-					forward_vertical_transforms [i]->execute (element_flags);
+			if (i_flags & inverse_horizontal) {
+				for (iterator iter = inverse_horizontal_transforms.begin (); iter != inverse_horizontal_transforms.end (); iter++) {
+					if (element_flags [iter->first] & transformed_horizontal) {
+						iter->second->execute (element_flags);
+					}
+					element_flags [iter->first] &= ~transformed_horizontal;
 				}
-				element_flags [state] |= transformed_vertical;
 			}
-		}
-		
-		/*!**********************************************************************
-		 * \brief Transform the element backward in the vertical direction
-		 ************************************************************************/
-		virtual void transform_vertical_inverse () {
-			TRACE ("Inverting...");
-			if (element_flags [state] &  transformed_vertical) {
-				for (int i = 0; i < (int) inverse_vertical_transforms.size (); ++i) {
-					inverse_vertical_transforms [i]->execute (element_flags);
+			if (i_flags & inverse_vertical) {
+				for (iterator iter = inverse_vertical_transforms.begin (); iter != inverse_vertical_transforms.end (); iter++) {
+					if (element_flags [iter->first] & transformed_vertical) {
+						iter->second->execute (element_flags);
+					}
+					element_flags [iter->first] &= ~transformed_vertical;
 				}
-				element_flags [state] &= ~transformed_vertical;
 			}
 		}
 		
@@ -351,7 +317,7 @@ namespace bases
 			t_timestep = calculate_timestep ();
 			messenger_ptr->min (&t_timestep);
 			
-			transform_horizontal_forward ();
+			transform (forward_horizontal);
 			
 			typedef typename std::map<int, std::shared_ptr<solver <datatype> > >::iterator iterator; 
 			for (iterator iter = solvers.begin (); iter != solvers.end (); iter++) {
@@ -368,7 +334,7 @@ namespace bases
 				element_flags [state] |= unchanged_timestep;
 			}
 			timestep = t_timestep;
-			transform_vertical_forward ();
+			transform (forward_vertical);
 			TRACE ("Solve complete.");
 		}
 		
@@ -419,11 +385,11 @@ namespace bases
 		std::shared_ptr <io::output> transform_stream; //!< An implementation to output in transform space
 
 	private:
-		std::vector<std::shared_ptr<plan <datatype> > > forward_horizontal_transforms; //!< A vector of shared pointers to the forward horizontal transforms
-		std::vector<std::shared_ptr<plan <datatype> > > inverse_horizontal_transforms; //!< A vector of shared pointers to the inverse horizontal transforms
-		std::vector<std::shared_ptr<plan <datatype> > > forward_vertical_transforms; //!< A vector of shared pointers to the forward vertical transforms
-		std::vector<std::shared_ptr<plan <datatype> > > inverse_vertical_transforms; //!< A vector of shared pointers to the inverse vertical transforms
-		std::map<int, std::shared_ptr<solver <datatype> > > solvers; //!< A vector of shared pointers to the matrix solvers
+		std::map <int, std::shared_ptr <plan <datatype> > > forward_horizontal_transforms; //!< A vector of shared pointers to the forward horizontal transforms
+		std::map <int, std::shared_ptr <plan <datatype> > > inverse_horizontal_transforms; //!< A vector of shared pointers to the inverse horizontal transforms
+		std::map <int, std::shared_ptr <plan <datatype> > > forward_vertical_transforms; //!< A vector of shared pointers to the forward vertical transforms
+		std::map <int, std::shared_ptr <plan <datatype> > > inverse_vertical_transforms; //!< A vector of shared pointers to the inverse vertical transforms
+		std::map <int, std::shared_ptr <solver <datatype> > > solvers; //!< A vector of shared pointers to the matrix solvers
 		
 		/*
 			TODO Make solvers a map so that matrices are easy access

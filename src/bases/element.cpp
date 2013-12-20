@@ -32,13 +32,13 @@ namespace bases
 				pre_transform_plans [i]->execute (element_flags);
 			}
 			
-			transform_vertical_inverse ();
+			transform (inverse_vertical);
 			
 			for (int i = 0; i < (int) mid_transform_plans.size (); ++i) {
 				mid_transform_plans [i]->execute (element_flags);
 			}
 			
-			transform_horizontal_inverse ();
+			transform (inverse_horizontal);
 
 			factorize ();
 			

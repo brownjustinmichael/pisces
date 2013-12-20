@@ -63,6 +63,13 @@ enum plan_flags {
 	only_forward_horizontal = 0x08
 };
 
+enum transform_flags {
+	forward_horizontal = 0x01,
+	forward_vertical = 0x02,
+	inverse_horizontal = 0x04,
+	inverse_vertical = 0x08
+}
+
 namespace bases
 {
 	typedef std::map <int, int> flags;
