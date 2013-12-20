@@ -29,6 +29,7 @@ enum index {
 	vel = 11, x_velocity = 11, x_vel = 11,
 	y_velocity = 12, y_vel = 12,
 	velocity = 13, z_velocity = 13, z_vel = 13,
+	stream = 14, streamfunction = 14,
 	pressure = 20, pres = 20,
 	temperature = 21, temp = 21,
 	composition = 22, comp = 22,
@@ -40,7 +41,12 @@ enum index {
 	vel_explicit_rhs = -16, z_vel_explicit_rhs = -16,
 	vel_real_rhs = -17, z_vel_real_rhs = -17,
 	vel_implicit_rhs = -18, z_vel_implicit_rhs = -18,
-	temp_rhs = -21
+	temp_explicit_rhs = -21,
+	temp_implicit_rhs = -22,
+	temp_real_rhs = -23,
+	stream_explicit_rhs = -31,
+	stream_implicit_rhs = -32,
+	stream_real_rhs = -33
 };
 
 /*!*******************************************************************
@@ -51,8 +57,8 @@ enum plan_flags {
 	implicit_set = 0x4000,
 	transformed_horizontal = 0x10,
 	transformed_vertical = 0x8000,
-	no_transform = 0x01,
-	only_forward_horizontal = 0x02
+	no_transform = 0x04,
+	only_forward_horizontal = 0x08
 };
 
 namespace bases

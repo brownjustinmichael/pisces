@@ -133,6 +133,9 @@ namespace bases
 		 * \return A pointer to the given index of the named scalar
 		 ************************************************************************/
 		virtual datatype* ptr (int name, int index = 0) {
+			/*
+				TODO It would be nice to check if name exists...
+			*/
 			return &((*this) [name]) + index;
 		}
 		
@@ -157,6 +160,9 @@ namespace bases
 		}
 		
 		inline datatype *matrix_ptr (int i_name, int index = 0) {
+			/*
+				TODO It would be nice to check if name exists...
+			*/
 			return solvers [i_name]->matrix_ptr (index);
 		}
 

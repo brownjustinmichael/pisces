@@ -29,8 +29,7 @@ namespace io
 			input_stream >> read_map [word];
 		}
 		
-		z_diffusion_coeff = atof (read_map ["z_diffusion_coeff"].c_str ());
-		x_diffusion_coeff = atof (read_map ["x_diffusion_coeff"].c_str ());
+		diffusion_coeff = atof (read_map ["diffusion_coeff"].c_str ());
 		nonlinear_diffusion_coeff = atof (read_map ["nonlinear_diffusion_coeff"].c_str ());
 		advection_coeff = atof (read_map ["advection_coeff"].c_str ());
 		courant_factor = atof (read_map ["courant_factor"].c_str ());

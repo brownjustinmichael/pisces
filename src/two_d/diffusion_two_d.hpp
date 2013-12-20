@@ -31,6 +31,7 @@ namespace two_d
 				coeff (i_coeff),
 				alpha (i_alpha),
 				flags (i_flags) {
+					TRACE ("Instantiating...");
 					pioL2 = 4.0 * (std::acos (-1.0) * std::acos (-1.0) / (i_grid_n.position (n - 1) - i_grid_n.position (0)) / (i_grid_n.position (n - 1) - i_grid_n.position (0)));
 					for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
 						matrix_n [i] = coeff * alpha * pioL2 * (datatype) ((i / 2) * (i / 2));
@@ -125,6 +126,7 @@ namespace two_d
 				coeff (i_coeff),
 				alpha (i_alpha),
 				flags (i_flags) {
+					TRACE ("Instantiating...");
 					for (int j = 0; j < m; ++j) {
 						utils::add_scaled (m, -coeff * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
 					}

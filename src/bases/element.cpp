@@ -19,7 +19,7 @@ namespace bases
 	void element <datatype>::run () {
 		TRACE ("Running...");
 		
-		for (int j = 0; j < params.timesteps; ++j) {
+		for (int j = 0; j <= params.timesteps; ++j) {
 			INFO ("Timestep " << j << " of " << params.timesteps);
 			
 			TRACE ("Calculating...");

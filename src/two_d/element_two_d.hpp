@@ -242,13 +242,16 @@ namespace two_d
 				virtual void initialize (int name, datatype* initial_conditions = NULL, int flags = 0x00) {
 					TRACE ("Initializing...");
 					two_d::element <datatype>::initialize (name, initial_conditions, flags);
-				    if (!(flags & no_transform) && (name != x_position) && (name != z_position)) {
-		   				element <datatype>::add_forward_horizontal_transform (new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name)));
-						element <datatype>::add_inverse_horizontal_transform (new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, inverse));
-						element <datatype>::add_forward_vertical_transform (new vertical_transform <datatype> (*grids [0], *grids [1], ptr (name)));
-						element <datatype>::add_inverse_vertical_transform (new vertical_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, inverse));
-					} else if (flags & only_forward_horizontal) {
-						element <datatype>::add_forward_horizontal_transform (new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name)));
+					if ((name != x_position) && (name != z_position)) {
+					    if (flags & only_forward_horizontal) {
+							element <datatype>::add_forward_horizontal_transform (new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name)));
+						} else if (!(flags & no_transform)) {
+							DEBUG ("Adding all transforms for " << name);
+			   				element <datatype>::add_forward_horizontal_transform (new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name)));
+							element <datatype>::add_inverse_horizontal_transform (new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, inverse));
+							element <datatype>::add_forward_vertical_transform (new vertical_transform <datatype> (*grids [0], *grids [1], ptr (name)));
+							element <datatype>::add_inverse_vertical_transform (new vertical_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, inverse));
+						}
 					}
 				}
 		
@@ -272,6 +275,36 @@ namespace two_d
 				advection_diffusion_element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_flags);
 				
 				virtual ~advection_diffusion_element () {}
+			
+				datatype calculate_timestep ();
+			
+			private:
+				using element <datatype>::flags;
+				using element <datatype>::params;
+				using element <datatype>::initialize;
+				using element <datatype>::n;
+				using element <datatype>::m;
+				using element <datatype>::name;
+				using element <datatype>::normal_stream;
+				using element <datatype>::transform_stream;
+				using element <datatype>::cell_n;
+				using element <datatype>::cell_m;
+				using element <datatype>::grids;
+				using element <datatype>::ptr;
+				using element <datatype>::matrix_ptr;
+				using element <datatype>::messenger_ptr;
+				using element <datatype>::timestep;
+				using element <datatype>::alpha_0;
+				using element <datatype>::alpha_n;
+			};
+			
+			template <class datatype>
+			class convection_element : public element <datatype>
+			{
+			public:
+				convection_element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_flags);
+				
+				virtual ~convection_element () {}
 			
 				datatype calculate_timestep ();
 			

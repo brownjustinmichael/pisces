@@ -83,6 +83,7 @@ namespace two_d
 			template <class datatype>
 			void solver <datatype>::_factorize () {
 				int info, lda = m + ex_excess_0 + ex_excess_n + nbot + ntop;
+				std::stringstream debug;
 				TRACE ("Factorizing...");
 				
 				for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
@@ -103,6 +104,14 @@ namespace two_d
 					utils::interpolate (ex_excess_n, m, m, timestep, positions, &matrix [0], &positions_n [0], &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + m], m, lda);
 					utils::matrix_add_scaled (nbot, m, alpha_n * timestep, &matrix [0] + m - nbot - excess_n, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + m + ex_excess_n], m, lda);
 				}
+				
+				// for (int i = 0; i < lda; ++i) {
+				// 	for (int j = 0; j < lda; ++j) {
+				// 		debug << factorized_matrix [j * lda + i] << " ";
+				// 	}
+				// 	DEBUG ("MAT: " << debug.str ());
+				// 	debug.str ("");
+				// }
 
 				utils::p_block_matrix_factorize (messenger_ptr->get_id (), messenger_ptr->get_np (), m - excess_0 - excess_n - ntop - nbot, excess_0 + ex_excess_0 + 2 * ntop, excess_n + ex_excess_n + 2 * nbot, &factorized_matrix [0], &ipiv [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, lda, sqrt ((int) boundary_matrix.size ()));
 				
@@ -204,7 +213,24 @@ namespace two_d
 				} else if (element_flags & z_solve) {
 					TRACE ("Solving in m direction...");
 
+					// for (int i = 0; i < lda; ++i) {
+					// 	for (int j = 0; j < 2 * (n / 2 + 1); ++j) {
+					// 		debug << data_temp [j * lda + i] << " ";
+					// 	}
+					// 	DEBUG ("RHS: " << debug.str ());
+					// 	debug.str ("");
+					// }
+
 					utils::p_block_matrix_solve (messenger_ptr->get_id (), messenger_ptr->get_np (), m - excess_0 - excess_n - ntop - nbot, excess_0 + ex_excess_0 + 2 * ntop, excess_n + ex_excess_n + 2 * nbot, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, 2 * (n / 2 + 1), lda, sqrt ((int) boundary_matrix.size ()), lda);
+					
+					
+					// for (int i = 0; i < lda; ++i) {
+					// 	for (int j = 0; j < 2 * (n / 2 + 1); ++j) {
+					// 		debug << data_temp [j * lda + i] << " ";
+					// 	}
+					// 	DEBUG ("OUT: " << debug.str ());
+					// 	debug.str ("");
+					// }
 					
 					TRACE ("Matrix solve complete.");
 					
