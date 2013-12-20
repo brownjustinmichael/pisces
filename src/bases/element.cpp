@@ -29,13 +29,13 @@ namespace bases
 			TRACE ("Executing plans...");
 		
 			for (int i = 0; i < (int) pre_transform_plans.size (); ++i) {
-				pre_transform_plans [i]->execute (flags);
+				pre_transform_plans [i]->execute (element_flags);
 			}
 			
 			transform_vertical_inverse ();
 			
 			for (int i = 0; i < (int) mid_transform_plans.size (); ++i) {
-				mid_transform_plans [i]->execute (flags);
+				mid_transform_plans [i]->execute (element_flags);
 			}
 			
 			transform_horizontal_inverse ();
@@ -43,7 +43,7 @@ namespace bases
 			factorize ();
 			
 			for (int i = 0; i < (int) post_transform_plans.size (); ++i) {
-				post_transform_plans [i]->execute (flags);
+				post_transform_plans [i]->execute (element_flags);
 			}
 		
 			TRACE ("Calculation complete.");

@@ -77,7 +77,7 @@ namespace two_d
 			}
 			
 			template <>
-			void horizontal_transform <float>::execute (int &element_flags) {
+			void horizontal_transform <float>::execute (bases::flags &element_flags) {
 				TRACE ("Executing...");
 		
 				fftwf_execute (x_plan_float);
@@ -88,7 +88,7 @@ namespace two_d
 			}
 			
 			template <>
-			void horizontal_transform <double>::execute (int &element_flags) {
+			void horizontal_transform <double>::execute (bases::flags &element_flags) {
 				TRACE ("Executing...");
 		
 				fftw_execute (x_plan);
@@ -132,7 +132,7 @@ namespace two_d
 			}
 			
 			template <>
-			void vertical_transform <float>::execute (int &element_flags) {
+			void vertical_transform <float>::execute (bases::flags &element_flags) {
 				TRACE ("Executing...");
 		
 				if (m > 1 && !(flags & ignore_m)) {
@@ -145,7 +145,7 @@ namespace two_d
 			}
 			
 			template <>
-			void vertical_transform <double>::execute (int &element_flags) {
+			void vertical_transform <double>::execute (bases::flags &element_flags) {
 				TRACE ("Executing...");
 		
 				if (m > 1 && !(flags & ignore_m)) {

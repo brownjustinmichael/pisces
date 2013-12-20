@@ -13,6 +13,7 @@
 #define PLAN_HPP_S9YPWHOM
 
 #include "../config.hpp"
+#include <map>
 
 /*!*******************************************************************
  * \brief A set of indices to be used with the element scalars for convenience
@@ -21,7 +22,8 @@
  * equivalent to a NULL pointer.
  *********************************************************************/
 enum index {
-	null = 00,
+	null = 0x0,
+	state = 0x0,
 	
 	x_position = 01, x_pos = 01,
 	y_position = 02, y_pos = 02, 
@@ -63,6 +65,8 @@ enum plan_flags {
 
 namespace bases
 {
+	typedef std::map <int, int> flags;
+	
 	/*!*******************************************************************
 	* \brief The basic functional unit, containing a recipe for execution
 	* 
@@ -83,7 +87,7 @@ namespace bases
 		* 
 		* The plan class serves as a wrapper for this function.
 		*********************************************************************/
-		virtual void execute (int &element_flags) = 0;
+		virtual void execute (bases::flags &element_flags) = 0;
 	};
 } /* bases */
 
@@ -99,11 +103,11 @@ public:
 		printf ("Destroying change flag\n");
 	}
 	
-	virtual void execute (int &element_flags) {
+	virtual void execute (bases::flags &element_flags) {
 		if (boolean) {
-			element_flags |= flag;
+			element_flags [state] |= flag;
 		} else {
-			element_flags &= ~flag;
+			element_flags [state] &= ~flag;
 		}
 	}
 

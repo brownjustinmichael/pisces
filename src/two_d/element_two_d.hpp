@@ -26,12 +26,12 @@ namespace two_d
 		edge_mm = 3 // Start at 0, m, increment by 1
 	};
 	
-	enum solve_flags {
+	enum solve_element_flags {
 		x_solve = 0x20,
 		z_solve = 0x80
 	};
 	
-	enum initialize_flags {
+	enum initialize_element_flags {
 		uniform_n = 0x01,
 		uniform_m = 0x02
 	};
@@ -40,8 +40,8 @@ namespace two_d
 	class element : public bases::element <datatype>
 	{
 	public:
-		element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_flags) : 
-		bases::element <datatype> (i_name, 2, i_params, i_messenger_ptr, i_flags),
+		element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
+		bases::element <datatype> (i_name, 2, i_params, i_messenger_ptr, i_element_flags),
 		axis_n (i_axis_n),
 		axis_m (i_axis_m),
 		n (axis_n->n), m (axis_m->n) {
@@ -134,30 +134,30 @@ namespace two_d
 		/*!*******************************************************************
 		 * \copydoc bases::element <datatype>::initialize ()
 		 *********************************************************************/
-		virtual void initialize (int name, datatype* initial_conditions = NULL, int flags = 0x00) {
+		virtual void initialize (int name, datatype* initial_conditions = NULL, int element_flags = 0x00) {
 			TRACE ("Initializing " << name << "...");
 
 			if (name == x_position) {
 				initial_conditions = &(grids [0]->position ());
-				flags |= uniform_m;
+				element_flags |= uniform_m;
 			} else if (name == z_position) {
 				initial_conditions = &(grids [1]->position ());
-				flags |= uniform_n;
+				element_flags |= uniform_n;
 			}
 			// Size allowing for real FFT buffer
 			scalars [name].resize (2 * (n / 2 + 1) * m, 0.0);
 			if (initial_conditions) {
-				if ((flags & uniform_m) && (flags & uniform_n)) {
+				if ((element_flags & uniform_m) && (element_flags & uniform_n)) {
 					for (int i = 0; i < n; ++i) {
 						for (int j = 0; j < m; ++j) {
 							(*this) (name, i, j) = *initial_conditions;
 						}
 					}
-				} else if (flags & uniform_m) {
+				} else if (element_flags & uniform_m) {
 					for (int j = 0; j < m; ++j) {
 						utils::copy (n, initial_conditions, ptr (name, 0, j), 1, m);
 					}
-				} else if (flags & uniform_n) {
+				} else if (element_flags & uniform_n) {
 					for (int i = 0; i < n; ++i) {
 						utils::copy (m, initial_conditions, ptr (name, i, 0));
 					}
@@ -182,12 +182,12 @@ namespace two_d
 					utils::scale ((2 * (n / 2 + 1)) * m, 0.0, &(iter->second) [0]);
 				}
 			}
-			if (flags & z_solve) {
-				flags &= ~z_solve;
-				flags |= x_solve;
+			if (element_flags [state] & z_solve) {
+				element_flags [state] &= ~z_solve;
+				element_flags [state] |= x_solve;
 			} else {
-				flags &= ~x_solve;
-				flags |= z_solve;
+				element_flags [state] &= ~x_solve;
+				element_flags [state] |= z_solve;
 			}
 			
 			TRACE ("Explicit reset end.");
@@ -199,7 +199,7 @@ namespace two_d
 		using bases::element <datatype>::name;
 		using bases::element <datatype>::failsafe_dump;
 		using bases::element <datatype>::messenger_ptr;
-		using bases::element <datatype>::flags;
+		using bases::element <datatype>::element_flags;
 		
 		bases::axis *axis_n, *axis_m;
 		int &n; //!< The number of elements in each 1D array
@@ -226,8 +226,8 @@ namespace two_d
 				/*!*******************************************************************
 				 * \copydoc one_d::element::element ()
 				 *********************************************************************/
-				element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_flags) : 
-				two_d::element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_messenger_ptr, i_flags) {
+				element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
+				two_d::element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_messenger_ptr, i_element_flags) {
 					TRACE ("Instantiating...");
 					
 					two_d::element <datatype>::set_grid (new bases::fourier::grid <datatype> (axis_n));
@@ -239,13 +239,13 @@ namespace two_d
 				}
 				virtual ~element () {}
 				
-				virtual void initialize (int name, datatype* initial_conditions = NULL, int flags = 0x00) {
+				virtual void initialize (int name, datatype* initial_conditions = NULL, int element_flags = 0x00) {
 					TRACE ("Initializing...");
-					two_d::element <datatype>::initialize (name, initial_conditions, flags);
+					two_d::element <datatype>::initialize (name, initial_conditions, element_flags);
 					if ((name != x_position) && (name != z_position)) {
-					    if (flags & only_forward_horizontal) {
+					    if (element_flags & only_forward_horizontal) {
 							element <datatype>::add_forward_horizontal_transform (new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name)));
-						} else if (!(flags & no_transform)) {
+						} else if (!(element_flags & no_transform)) {
 							DEBUG ("Adding all transforms for " << name);
 			   				element <datatype>::add_forward_horizontal_transform (new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name)));
 							element <datatype>::add_inverse_horizontal_transform (new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, inverse));
@@ -272,14 +272,14 @@ namespace two_d
 			class advection_diffusion_element : public element <datatype>
 			{
 			public:
-				advection_diffusion_element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_flags);
+				advection_diffusion_element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_element_flags);
 				
 				virtual ~advection_diffusion_element () {}
 			
 				datatype calculate_timestep ();
 			
 			private:
-				using element <datatype>::flags;
+				using element <datatype>::element_flags;
 				using element <datatype>::params;
 				using element <datatype>::initialize;
 				using element <datatype>::n;
@@ -302,14 +302,14 @@ namespace two_d
 			class convection_element : public element <datatype>
 			{
 			public:
-				convection_element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_flags);
+				convection_element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_element_flags);
 				
 				virtual ~convection_element () {}
 			
 				datatype calculate_timestep ();
 			
 			private:
-				using element <datatype>::flags;
+				using element <datatype>::element_flags;
 				using element <datatype>::params;
 				using element <datatype>::initialize;
 				using element <datatype>::n;

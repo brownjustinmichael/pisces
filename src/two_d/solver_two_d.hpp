@@ -28,7 +28,7 @@ namespace two_d
 				
 				virtual ~solver () {}
 				
-				void execute (int &element_flags);
+				void execute (bases::flags &element_flags);
 				
 				datatype *matrix_ptr (int index = 0) {
 					if (index == 0) {

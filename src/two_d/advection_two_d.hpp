@@ -31,7 +31,7 @@ namespace two_d
 				
 				virtual ~advection () {}
 				
-				virtual void execute (int &element_flags) {
+				virtual void execute (bases::flags &element_flags) {
 					for (int j = 1; j < m - 1; ++j) {
 						for (int i = 1; i < n - 1; ++i) {
 							data_out [i * m + j] += coeff * (vel_n [i * m + j] * (data_in [(i + 1) * m + j] - data_in [(i - 1) * m + j]) / (pos_n [i + 1] - pos_n [i - 1]) + vel_m [i * m + j] * (data_in [i * m + j + 1] - data_in [i * m + j - 1]) / (pos_m [j + 1] - pos_n [j - 1]));
@@ -62,7 +62,7 @@ namespace two_d
 				
 				virtual ~stream_advection () {}
 				
-				virtual void execute (int &element_flags) {
+				virtual void execute (bases::flags &element_flags) {
 					for (int j = 1; j < m - 1; ++j) {
 						for (int i = 1; i < n - 1; ++i) {
 							data_out [i * m + j] += coeff * ((stream [(i + 1) * m + j] - stream [(i - 1) * m + j]) * (data_in [i * m + j + 1] - data_in [i * m + j - 1]) + (stream [i * m + j + 1] - stream [i * m + j - 1]) * (data_in [(i + 1) * m + j] - data_in [(i - 1) * m + j])) / (pos_m [j + 1] - pos_n [j - 1]) / (pos_n [i + 1] - pos_n [i - 1]);

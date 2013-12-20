@@ -41,7 +41,7 @@ namespace bases
 		/*!*******************************************************************
 		 * \brief Solve the matrix equation
 		 *********************************************************************/
-		virtual void execute (int &element_flags) {
+		virtual void execute (bases::flags &element_flags) {
 			TRACE ("Executing...");
 			if (!(flags & factorized)) {
 				factorize ();

@@ -49,7 +49,7 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::solver <datatype>::execute ()
 		 *********************************************************************/
-		void execute (int &element_flags);
+		void execute (bases::flags &element_flags);
 		
 		datatype *matrix_ptr (int index = 0) {
 			return &matrix [0];

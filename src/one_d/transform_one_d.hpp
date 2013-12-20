@@ -36,7 +36,7 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::transform::execute ()
 		 *********************************************************************/
-		void execute (int &element_flags);
+		void execute (bases::flags &element_flags);
 	
 	private:		
 		using explicit_plan <datatype>::n;

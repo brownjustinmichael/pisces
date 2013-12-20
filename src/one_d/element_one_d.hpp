@@ -206,7 +206,7 @@ namespace one_d
 		private:
 			using element <datatype>::initialize;
 			using element <datatype>::n;
-			using element <datatype>::flags;
+			using element <datatype>::element_flags;
 			using element <datatype>::name;
 			using element <datatype>::normal_stream;
 			using element <datatype>::cell;
@@ -244,7 +244,7 @@ namespace one_d
 		private:
 			using element <datatype>::initialize;
 			using element <datatype>::n;
-			using element <datatype>::flags;
+			using element <datatype>::element_flags;
 			using element <datatype>::name;
 			using element <datatype>::normal_stream;
 			using element <datatype>::cell;

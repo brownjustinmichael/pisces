@@ -39,11 +39,11 @@ namespace bases
 		* \param n_boundaries The integer number of boundaries (must be a multiple of 2)
 		* \param i_params The parameter object that contains the input parameters of the run
 		* \param i_messenger_ptr A pointer to a messenger object
-		* \param i_flags An integer set of execution flags
+		* \param i_element_flags An integer set of execution element_flags
 		*********************************************************************/
-		element (int i_name, int i_dimensions, io::parameters <datatype>& i_params, messenger* i_messenger_ptr, int i_flags) : 
-		params (i_params),
-		flags (i_flags) {
+		element (int i_name, int i_dimensions, io::parameters <datatype>& i_params, messenger* i_messenger_ptr, int i_element_flags) : 
+		params (i_params) {
+			element_flags [state] = i_element_flags;
 			name = i_name;
 			grids.resize (i_dimensions);
 			messenger_ptr = i_messenger_ptr;
@@ -245,9 +245,9 @@ namespace bases
 		 * 
 		 * \param name The integer name index to be initialized
 		 * \param initial_conditions The datatype array of initial conditions
-		 * \param flags A set of binary flags
+		 * \param element_flags A set of binary element_flags
 		 *********************************************************************/
-		virtual void initialize (int name, datatype* initial_conditions = NULL, int flags = 0x00) = 0;
+		virtual void initialize (int name, datatype* initial_conditions = NULL, int element_flags = 0x00) = 0;
 		
 		/*!*******************************************************************
 		 * \brief Reset every scalar index < 0 and converts to spectral space
@@ -260,12 +260,8 @@ namespace bases
 		 *********************************************************************/
 		virtual void explicit_reset () {
 			TRACE ("Resetting explicits...");
-			if (!(flags & transformed_horizontal)) {
-				transform_horizontal_forward ();
-			}
-			if (!(flags & transformed_vertical)) {
-				transform_vertical_forward ();
-			}
+			transform_horizontal_forward ();
+			transform_vertical_forward ();
 		}
 		
 		/*!**********************************************************************
@@ -273,11 +269,11 @@ namespace bases
 		 ************************************************************************/
 		virtual void transform_horizontal_forward () {
 			TRACE ("Transforming...");
-			if (!(flags & transformed_horizontal)) {
+			if (!(element_flags [state] &  transformed_horizontal)) {
 				for (int i = 0; i < (int) forward_horizontal_transforms.size (); ++i) {
-					forward_horizontal_transforms [i]->execute (flags);
+					forward_horizontal_transforms [i]->execute (element_flags);
 				}
-				flags |= transformed_horizontal;
+				element_flags [state] |= transformed_horizontal;
 			}
 		}
 		
@@ -286,11 +282,11 @@ namespace bases
 		 ************************************************************************/
 		virtual void transform_horizontal_inverse () {
 			TRACE ("Inverting...");
-			if (flags & transformed_horizontal) {
+			if (element_flags [state] &  transformed_horizontal) {
 				for (int i = 0; i < (int) inverse_horizontal_transforms.size (); ++i) {
-					inverse_horizontal_transforms [i]->execute (flags);
+					inverse_horizontal_transforms [i]->execute (element_flags);
 				}
-				flags &= ~transformed_horizontal;
+				element_flags [state] &= ~transformed_horizontal;
 			}
 			TRACE ("Done.");
 		}
@@ -300,11 +296,11 @@ namespace bases
 		 ************************************************************************/
 		virtual void transform_vertical_forward () {
 			TRACE ("Transforming...");
-			if (!(flags & transformed_vertical)) {
+			if (!(element_flags [state] &  transformed_vertical)) {
 				for (int i = 0; i < (int) forward_vertical_transforms.size (); ++i) {
-					forward_vertical_transforms [i]->execute (flags);
+					forward_vertical_transforms [i]->execute (element_flags);
 				}
-				flags |= transformed_vertical;
+				element_flags [state] |= transformed_vertical;
 			}
 		}
 		
@@ -313,11 +309,11 @@ namespace bases
 		 ************************************************************************/
 		virtual void transform_vertical_inverse () {
 			TRACE ("Inverting...");
-			if (flags & transformed_vertical) {
+			if (element_flags [state] &  transformed_vertical) {
 				for (int i = 0; i < (int) inverse_vertical_transforms.size (); ++i) {
-					inverse_vertical_transforms [i]->execute (flags);
+					inverse_vertical_transforms [i]->execute (element_flags);
 				}
-				flags &= ~transformed_vertical;
+				element_flags [state] &= ~transformed_vertical;
 			}
 		}
 		
@@ -337,12 +333,12 @@ namespace bases
 		 * \brief Factorize all solvers
 		 ************************************************************************/
 		virtual void factorize () {
-			if (!(flags & factorized)) {
+			if (!(element_flags [state] &  factorized)) {
 				typedef typename std::map<int, std::shared_ptr<solver <datatype> > >::iterator iterator; 
 				for (iterator iter = solvers.begin (); iter != solvers.end (); iter++) {
 					iter->second->factorize ();
 				}
-				flags |= factorized;
+				element_flags [state] |= factorized;
 			}
 		}
 		
@@ -359,17 +355,17 @@ namespace bases
 			
 			typedef typename std::map<int, std::shared_ptr<solver <datatype> > >::iterator iterator; 
 			for (iterator iter = solvers.begin (); iter != solvers.end (); iter++) {
-				iter->second->execute (flags);
+				iter->second->execute (element_flags);
 			}
 			
 			duration += timestep;
 			INFO ("TOTAL TIME: " << duration);
 			if (t_timestep != timestep) {
-				flags &= ~unchanged_timestep;
-				flags &= ~factorized;
+				element_flags [state] &= ~unchanged_timestep;
+				element_flags [state] &= ~factorized;
 				INFO ("Updating timestep: " << t_timestep);
 			} else {
-				flags |= unchanged_timestep;
+				element_flags [state] |= unchanged_timestep;
 			}
 			timestep = t_timestep;
 			transform_vertical_forward ();
@@ -411,12 +407,11 @@ namespace bases
 		io::parameters <datatype>& params; //!< The map that contains the input parameters
 		messenger* messenger_ptr; //!< A pointer to the messenger object
 		
-		int flags; //!< An integer set of execution flags
-
 		datatype duration; //!< The datatype total simulated time
 		datatype timestep; //!< The datatype timestep length
 
 		std::map <int, std::vector <datatype> > scalars; //!< A map of scalar vectors
+		flags element_flags;
 		std::vector <std::shared_ptr <grid <datatype> > > grids; //!< A vector of shared pointers to the collocation grids
 		
 		std::shared_ptr <io::output> failsafe_dump; //!< An implementation to dump in case of failure

@@ -40,10 +40,10 @@ namespace two_d
 				
 				virtual ~horizontal_diffusion () {}
 			
-				void execute (int &element_flags) {	
+				void execute (bases::flags &element_flags) {	
 					TRACE ("Operating...");
 					std::stringstream debug;
-					if (element_flags & x_solve) {
+					if (element_flags [state] &  x_solve) {
 						if (1.0 - alpha != 0.0) {
 							for (int j = 0; j < m; ++j) {
 								for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
@@ -89,10 +89,10 @@ namespace two_d
 				
 				virtual ~vertical_diffusion () {}
 			
-				void execute (int &element_flags) {	
+				void execute (bases::flags &element_flags) {	
 					TRACE ("Operating...");
 					
-					if (element_flags & z_solve) {
+					if (element_flags [state] &  z_solve) {
 						if (1.0 - alpha != 0.0) {
 							utils::matrix_matrix_multiply (m, 2 * (n / 2 + 1), m, coeff * (1.0 - alpha), grid_m.get_data (2), data_in, 1.0, data_out, m);
 						}
@@ -134,10 +134,10 @@ namespace two_d
 				
 				virtual ~finite_vertical_diffusion () {}
 			
-				void execute (int &element_flags) {	
+				void execute (bases::flags &element_flags) {	
 					TRACE ("Operating...");
 					
-					if (element_flags & z_solve) {
+					if (element_flags [state] &  z_solve) {
 						if (1.0 - alpha != 0.0) {
 							for (int i = 1; i < m - 1; ++i) {
 								datatype pos_m1 = grid_m.position (i - 1);

@@ -46,7 +46,7 @@ namespace two_d
 				
 				virtual ~horizontal_transform () {}
 				
-				virtual void execute (int &element_flags);
+				virtual void execute (bases::flags &element_flags);
 			
 			protected:
 				using explicit_plan <datatype>::n;
@@ -73,7 +73,7 @@ namespace two_d
 				
 				virtual ~vertical_transform () {}
 				
-				virtual void execute (int &element_flags);
+				virtual void execute (bases::flags &element_flags);
 			
 			protected:
 				using explicit_plan <datatype>::n;

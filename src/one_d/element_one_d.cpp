@@ -25,8 +25,8 @@ namespace one_d
 	namespace chebyshev
 	{
 		template <class datatype>
-		advection_diffusion_element <datatype>::advection_diffusion_element (bases::axis *i_axis_n, int i_name, io::parameters <datatype>& params, bases::messenger* i_messenger_ptr, int i_flags) : 
-		element <datatype> (i_axis_n, i_name, params, i_messenger_ptr, i_flags) {
+		advection_diffusion_element <datatype>::advection_diffusion_element (bases::axis *i_axis_n, int i_name, io::parameters <datatype>& params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
+		element <datatype> (i_axis_n, i_name, params, i_messenger_ptr, i_element_flags) {
 			datatype diffusion_coeff = params.diffusion_coeff;
 			datatype advection_coeff = params.advection_coeff; 
 			datatype alpha = params.implicit_alpha;
@@ -94,8 +94,8 @@ namespace one_d
 		template class advection_diffusion_element <double>;
 		
 		template <class datatype>
-		nonlinear_diffusion_element <datatype>::nonlinear_diffusion_element (bases::axis *i_axis_n, int i_name, io::parameters <datatype>& params, bases::messenger* i_messenger_ptr, int i_flags) : 
-		element <datatype> (i_axis_n, i_name, params, i_messenger_ptr, i_flags) {
+		nonlinear_diffusion_element <datatype>::nonlinear_diffusion_element (bases::axis *i_axis_n, int i_name, io::parameters <datatype>& params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
+		element <datatype> (i_axis_n, i_name, params, i_messenger_ptr, i_element_flags) {
 			datatype diffusion_coeff = params.diffusion_coeff;
 			datatype advection_coeff = params.advection_coeff; 
 			datatype alpha = params.implicit_alpha;

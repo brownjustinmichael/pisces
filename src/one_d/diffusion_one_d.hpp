@@ -30,7 +30,7 @@ namespace one_d
 			// printf ("Destroying one_d diffusion\n");
 		}
 		
-		void execute (int &element_flags);
+		void execute (bases::flags &element_flags);
 	
 	private:
 		datatype coeff;
@@ -52,7 +52,7 @@ namespace one_d
 			// printf ("Destroying one_d nonlinear_diffusion\n");
 		}
 		
-		void execute (int &element_flags);
+		void execute (bases::flags &element_flags);
 	
 	private:
 		datatype coeff;

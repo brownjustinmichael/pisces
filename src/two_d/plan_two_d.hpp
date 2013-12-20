@@ -43,7 +43,7 @@ namespace two_d
 		/*!*******************************************************************
 		 * \copydoc bases::plan::execute ()
 		 *********************************************************************/
-		virtual void execute (int &element_flags) = 0;
+		virtual void execute (bases::flags &element_flags) = 0;
 
 		int n; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
 		int m;
@@ -81,7 +81,7 @@ namespace two_d
 		/*!*******************************************************************
 		 * \copydoc plan::execute ()
 		 *********************************************************************/
-		virtual void execute (int &element_flags) = 0;
+		virtual void execute (bases::flags &element_flags) = 0;
 
 		using explicit_plan <datatype>::grid_n;
 		using explicit_plan <datatype>::grid_m;
@@ -99,7 +99,7 @@ namespace two_d
 		
 		virtual ~add_scaled () {}
 		
-		virtual void execute (int &element_flags) {
+		virtual void execute (bases::flags &element_flags) {
 			utils::matrix_add_scaled (m, 2 * (n / 2 + 1), coeff, data_in, data_out);
 		}
 	
