@@ -34,6 +34,16 @@ namespace bases
 	class element
 	{
 	public:
+		typedef typename std::map <int, std::shared_ptr<solver <datatype> > >::iterator iterator;
+		
+		iterator begin () {
+			return solvers.begin ();
+		}
+		
+		iterator end () {
+			return solvers.end ();
+		}
+		
 		/*!*******************************************************************
 		* \param i_name The string representation of the element
 		* \param n_boundaries The integer number of boundaries (must be a multiple of 2)
@@ -205,40 +215,6 @@ namespace bases
 			inverse_vertical_transforms.push_back (std::shared_ptr <plan <datatype>> (i_plan));
 			// transforms.push_back (i_plan));
 		}
-
-		/*!*******************************************************************
-		 * \brief Adds a plan to be executed before either transform in order
-		 * 
-		 * \param i_plan A pointer to the plan to add
-		 *********************************************************************/
-		inline void add_pre_plan (plan <datatype>* i_plan) {
-			TRACE ("Adding plan...");
-			pre_transform_plans.push_back (std::shared_ptr <plan <datatype>> (i_plan));
-			TRACE ("Added.");
-		}
-		
-		
-		/*!*******************************************************************
-		 * \brief Adds a plan to be executed after the vertical transform
-		 * 
-		 * \param i_plan A pointer to the plan to add
-		 *********************************************************************/
-		inline void add_mid_plan (plan <datatype>* i_plan) {
-			TRACE ("Adding plan...");
-			mid_transform_plans.push_back (std::shared_ptr <plan <datatype>> (i_plan));
-			TRACE ("Added.");
-		}
-
-		/*!*******************************************************************
-		 * \brief Adds a plan to be executed after both transforms in order
-		 * 
-		 * \param i_plan A pointer to the plan to add
-		 *********************************************************************/
-		inline void add_post_plan (plan <datatype>* i_plan) {
-			TRACE ("Adding plan...");
-			post_transform_plans.push_back (std::shared_ptr <plan <datatype>> (i_plan));
-			TRACE ("Added.");
-		}
 		
 		/*!*******************************************************************
 		 * \brief Initialize the scalar name
@@ -338,8 +314,7 @@ namespace bases
 		 ************************************************************************/
 		virtual void factorize () {
 			if (!(flags & factorized)) {
-				typedef typename std::map<int, std::shared_ptr<solver <datatype> > >::iterator iterator; 
-				for (iterator iter = solvers.begin (); iter != solvers.end (); iter++) {
+				for (iterator iter = begin (); iter != end (); iter++) {
 					iter->second->factorize ();
 				}
 				flags |= factorized;
@@ -357,8 +332,7 @@ namespace bases
 			
 			transform_horizontal_forward ();
 			
-			typedef typename std::map<int, std::shared_ptr<solver <datatype> > >::iterator iterator; 
-			for (iterator iter = solvers.begin (); iter != solvers.end (); iter++) {
+			for (iterator iter = begin (); iter != end (); iter++) {
 				iter->second->execute (flags);
 			}
 			
@@ -422,21 +396,13 @@ namespace bases
 		std::shared_ptr <io::output> failsafe_dump; //!< An implementation to dump in case of failure
 		std::shared_ptr <io::output> normal_stream; //!< An implementation to output in normal space
 		std::shared_ptr <io::output> transform_stream; //!< An implementation to output in transform space
+		std::map<int, std::shared_ptr<solver <datatype> > > solvers; //!< A vector of shared pointers to the matrix solvers
 
 	private:
 		std::vector<std::shared_ptr<plan <datatype> > > forward_horizontal_transforms; //!< A vector of shared pointers to the forward horizontal transforms
 		std::vector<std::shared_ptr<plan <datatype> > > inverse_horizontal_transforms; //!< A vector of shared pointers to the inverse horizontal transforms
 		std::vector<std::shared_ptr<plan <datatype> > > forward_vertical_transforms; //!< A vector of shared pointers to the forward vertical transforms
 		std::vector<std::shared_ptr<plan <datatype> > > inverse_vertical_transforms; //!< A vector of shared pointers to the inverse vertical transforms
-		std::map<int, std::shared_ptr<solver <datatype> > > solvers; //!< A vector of shared pointers to the matrix solvers
-		
-		/*
-			TODO Make solvers a map so that matrices are easy access
-		*/
-		
-		std::vector <std::shared_ptr <plan <datatype> > > pre_transform_plans; //!< A vector of shared pointers of plans to be executed before the transforms
-		std::vector <std::shared_ptr <plan <datatype> > > mid_transform_plans; //!< A vector of shared pointers of plans to be executed after the vertical transform
-		std::vector <std::shared_ptr <plan <datatype> > > post_transform_plans; //!< A vector of shared pointers of plans to be executed after both transforms
 	};
 } /* bases */
 

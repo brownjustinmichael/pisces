@@ -81,10 +81,10 @@ namespace two_d
 				element <datatype>::add_solver (temp, new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, ptr (temp), ptr (temp_explicit_rhs), ptr (temp_real_rhs), ptr (temp_implicit_rhs)));
 		
 				// Set up plans in order
-				element <datatype>::add_pre_plan (new vertical_diffusion <datatype> (*grids [0], *grids [1], params.diffusion_coeff, params.implicit_alpha, matrix_ptr (temp, 0), matrix_ptr (temp, 1), ptr (temp), ptr (temp_implicit_rhs)));
-				element <datatype>::add_mid_plan (new horizontal_diffusion <datatype> (*grids [0], *grids [1], params.diffusion_coeff, params.implicit_alpha, matrix_ptr (temp, 0), matrix_ptr (temp, 1), ptr (temp), ptr (temp_implicit_rhs)));
+				solvers [temp]->add_pre_plan (new vertical_diffusion <datatype> (*grids [0], *grids [1], params.diffusion_coeff, params.implicit_alpha, matrix_ptr (temp, 0), matrix_ptr (temp, 1), ptr (temp), ptr (temp_implicit_rhs)));
+				solvers [temp]->add_mid_plan (new horizontal_diffusion <datatype> (*grids [0], *grids [1], params.diffusion_coeff, params.implicit_alpha, matrix_ptr (temp, 0), matrix_ptr (temp, 1), ptr (temp), ptr (temp_implicit_rhs)));
 				if (params.advection_coeff != 0.0) {
-					element <datatype>::add_post_plan (new advection <datatype> (*grids [0], *grids [1], params.advection_coeff, ptr (x_velocity), ptr (z_velocity), ptr (temp), ptr (temp_real_rhs)));
+					solvers [temp]->add_post_plan (new advection <datatype> (*grids [0], *grids [1], params.advection_coeff, ptr (x_velocity), ptr (z_velocity), ptr (temp), ptr (temp_real_rhs)));
 				}
 		
 				TRACE ("Initialized.");
@@ -170,10 +170,10 @@ namespace two_d
 				element <datatype>::add_solver (temp, new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, ptr (temp), ptr (temp_explicit_rhs), ptr (temp_real_rhs), ptr (temp_implicit_rhs)));
 		
 				// Set up plans in order
-				element <datatype>::add_pre_plan (new vertical_diffusion <datatype> (*grids [0], *grids [1], params.diffusion_coeff, params.implicit_alpha, matrix_ptr (temp, 0), matrix_ptr (temp, 1), ptr (temp), ptr (temp_implicit_rhs)));
-				element <datatype>::add_mid_plan (new horizontal_diffusion <datatype> (*grids [0], *grids [1], params.diffusion_coeff, params.implicit_alpha, matrix_ptr (temp, 0), matrix_ptr (temp, 1), ptr (temp), ptr (temp_implicit_rhs)));
+				solvers [temp]->add_pre_plan (new vertical_diffusion <datatype> (*grids [0], *grids [1], params.diffusion_coeff, params.implicit_alpha, matrix_ptr (temp, 0), matrix_ptr (temp, 1), ptr (temp), ptr (temp_implicit_rhs)));
+				solvers [temp]->add_mid_plan (new horizontal_diffusion <datatype> (*grids [0], *grids [1], params.diffusion_coeff, params.implicit_alpha, matrix_ptr (temp, 0), matrix_ptr (temp, 1), ptr (temp), ptr (temp_implicit_rhs)));
 				if (params.advection_coeff != 0.0) {
-					element <datatype>::add_post_plan (new stream_advection <datatype> (*grids [0], *grids [1], params.advection_coeff, ptr (stream), ptr (temp), ptr (temp_real_rhs)));
+					solvers [temp]->add_post_plan (new stream_advection <datatype> (*grids [0], *grids [1], params.advection_coeff, ptr (stream), ptr (temp), ptr (temp_real_rhs)));
 				}
 		
 				TRACE ("Initialized.");
