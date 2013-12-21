@@ -296,6 +296,7 @@ namespace two_d
 				using element <datatype>::timestep;
 				using element <datatype>::alpha_0;
 				using element <datatype>::alpha_n;
+				using element <datatype>::solvers;
 			};
 			
 			template <class datatype>
@@ -326,6 +327,7 @@ namespace two_d
 				using element <datatype>::timestep;
 				using element <datatype>::alpha_0;
 				using element <datatype>::alpha_n;
+				using element <datatype>::solvers;
 			};
 		} /* chebyshev */
 	} /* fourier */

@@ -17,7 +17,7 @@
 namespace one_d
 {
 	template <class datatype>
-	diffusion <datatype>::diffusion (bases::grid <datatype> &i_grid, datatype i_coeff, datatype i_alpha, datatype* i_matrix, datatype* i_data_in, datatype* i_data_out) :
+	diffusion <datatype>::diffusion (bases::grid <datatype> &i_grid, datatype i_coeff, datatype i_alpha, datatype *i_matrix, datatype *i_data_in, datatype *i_data_out) :
 	implicit_plan <datatype> (i_grid, i_matrix, i_data_in, i_data_out),
 	coeff (i_coeff), 
 	alpha (i_alpha) {
@@ -28,7 +28,18 @@ namespace one_d
 	}
 
 	template <class datatype>
-	void diffusion <datatype>::execute (bases::flags &element_flags) {	
+	diffusion <datatype>::diffusion (bases::solver <datatype> &i_solver, datatype i_coeff, datatype i_alpha) :
+	implicit_plan <datatype> (i_solver),
+	coeff (i_coeff), 
+	alpha (i_alpha) {
+		for (int i = 0; i < n; ++i) {
+			utils::add_scaled (n, -coeff * alpha, grid.get_data (2) + i, matrix + i, n, n);
+		}
+		TRACE ("Initialized.");
+	}
+
+	template <class datatype>
+	void diffusion <datatype>::execute (int &element_flags) {	
 		TRACE ("Operating...");
 		
 		// Set up and evaluate the explicit part of the diffusion equation
@@ -41,8 +52,8 @@ namespace one_d
 	template class diffusion <float>;
 	
 	template <class datatype>
-	nonlinear_diffusion <datatype>::nonlinear_diffusion (bases::grid <datatype> &i_grid, datatype i_coeff, datatype* i_data_in, datatype* i_data_out) :
-	explicit_plan <datatype> (i_grid, i_data_in, i_data_out),
+	nonlinear_diffusion <datatype>::nonlinear_diffusion (bases::solver <datatype> &i_solver, datatype i_coeff) :
+	explicit_plan <datatype> (i_solver),
 	coeff (i_coeff) {
 		TRACE ("Initialized.");
 	}

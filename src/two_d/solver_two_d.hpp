@@ -21,10 +21,10 @@ namespace two_d
 		namespace chebyshev
 		{
 			template <class datatype>
-			class solver : public bases::solver <datatype>, explicit_plan <datatype>
+			class solver : public bases::solver <datatype>
 			{
 			public:
-				solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_aplha_n, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_real_rhs, datatype* i_implicit_rhs, datatype* i_data_out = NULL, int i_flags = 0x00);
+				solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_aplha_n, datatype* i_data, datatype* i_explicit_rhs, datatype* i_real_rhs, datatype* i_implicit_rhs, int i_flags = 0x00);
 				
 				virtual ~solver () {}
 				
@@ -37,17 +37,39 @@ namespace two_d
 						return &matrix [0];
 					}
 				}
+		
+				datatype *data_ptr () {
+					return data;
+				}
+		
+				datatype *rhs_ptr (int index = 0) {
+					if (index == 0) {
+						return implicit_rhs;
+					} else if (index == 1) {
+						return explicit_rhs;
+					} else {
+						return real_rhs;
+					}
+				}
+		
+				bases::grid <datatype> *grid_ptr (int index = 0) {
+					if (index == 0) {
+						return &grid_n;
+					} else {
+						return &grid_m;
+					}
+				}
+		
 			
 			private:
 				void _factorize ();
 		
-				using explicit_plan <datatype>::n;
-				using explicit_plan <datatype>::m;
-				using explicit_plan <datatype>::data_in;
-				using explicit_plan <datatype>::data_out;
-				using bases::solver <datatype>::flags;
-				using explicit_plan <datatype>::grid_n;
-				using explicit_plan <datatype>::grid_m;
+				int n;
+				int m;
+				datatype *data;
+				int flags;
+				bases::grid <datatype> &grid_n;
+				bases::grid <datatype> &grid_m;
 
 				bases::messenger* messenger_ptr;
 		

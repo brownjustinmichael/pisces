@@ -30,7 +30,10 @@ namespace two_d
 		{
 			template <>
 			horizontal_transform <float>::horizontal_transform (bases::grid <float> &i_grid_n, bases::grid <float> &i_grid_m, float* i_data_in, float* i_data_out, int i_flags) :
-			explicit_plan <float> (i_grid_n, i_grid_m, i_data_in, i_data_out),
+			n (i_grid_n.n), 
+			m (i_grid_m.n), 
+			data_in (i_data_in),
+			data_out (i_data_out ? i_data_out : i_data_in),
 			flags (i_flags) {
 				scalar = 1.0 / std::sqrt (n);
 				
@@ -54,7 +57,10 @@ namespace two_d
 			
 			template <>
 			horizontal_transform <double>::horizontal_transform (bases::grid <double> &i_grid_n, bases::grid <double> &i_grid_m, double* i_data_in, double* i_data_out, int i_flags) :
-			explicit_plan <double> (i_grid_n, i_grid_m, i_data_in, i_data_out),
+			n (i_grid_n.n), 
+			m (i_grid_m.n), 
+			data_in (i_data_in),
+			data_out (i_data_out ? i_data_out : i_data_in),
 			flags (i_flags) {
 				scalar = 1.0 / std::sqrt (n);
 								
@@ -105,7 +111,10 @@ namespace two_d
 			
 			template <>
 			vertical_transform <float>::vertical_transform (bases::grid <float> &i_grid_n, bases::grid <float> &i_grid_m, float* i_data_in, float* i_data_out, int i_flags) :
-			explicit_plan <float> (i_grid_n, i_grid_m, i_data_in, i_data_out),
+			n (i_grid_n.n), 
+			m (i_grid_m.n), 
+			data_in (i_data_in),
+			data_out (i_data_out ? i_data_out : i_data_in),
 			flags (i_flags) {
 				scalar = 1.0;
 				if (m > 1 && !(flags & ignore_m)) {
@@ -119,7 +128,10 @@ namespace two_d
 			
 			template <>
 			vertical_transform <double>::vertical_transform (bases::grid <double> &i_grid_n, bases::grid <double> &i_grid_m, double* i_data_in, double* i_data_out, int i_flags) :
-			explicit_plan <double> (i_grid_n, i_grid_m, i_data_in, i_data_out),
+			n (i_grid_n.n), 
+			m (i_grid_m.n), 
+			data_in (i_data_in),
+			data_out (i_data_out ? i_data_out : i_data_in),
 			flags (i_flags) {
 				scalar = 1.0;
 				if (m > 1 && !(flags & ignore_m)) {

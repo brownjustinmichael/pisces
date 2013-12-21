@@ -67,9 +67,9 @@ namespace one_d
 			element <datatype>::add_solver (velocity, new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, ptr (velocity), ptr (vel_explicit_rhs), ptr (vel_implicit_rhs)));
 			
 			// Set up plans in order
-			element <datatype>::add_pre_plan (new diffusion <datatype> (*grids [0], diffusion_coeff, alpha, matrix_ptr (velocity), ptr (velocity), ptr (vel_implicit_rhs)));
+			solvers [velocity]->add_pre_plan (new diffusion <datatype> (*solvers [velocity], diffusion_coeff, alpha));
 			if (advection_coeff != 0.0) {
-				element <datatype>::add_post_plan (new advec <datatype> (*grids [0], advection_coeff, ptr (velocity), ptr (vel_explicit_rhs)));
+				solvers [velocity]->add_post_plan (new advection <datatype> (*solvers [velocity], advection_coeff));
 			}
 			
 			normal_stream->to_file ();
@@ -151,12 +151,12 @@ namespace one_d
 			element <datatype>::add_solver (velocity, new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, ptr (velocity), ptr (vel_explicit_rhs), ptr (vel_implicit_rhs)));
 			
 			// Set up plans in order
-			element <datatype>::add_pre_plan (new diffusion <datatype> (*grids [0], diffusion_coeff, alpha, matrix_ptr (velocity), ptr (velocity), ptr (vel_implicit_rhs)));
+			solvers [velocity]->add_pre_plan (new diffusion <datatype> (*solvers [velocity], diffusion_coeff, alpha));
 			if (params.nonlinear_diffusion_coeff != 0.0) {
-				element <datatype>::add_post_plan (new nonlinear_diffusion <datatype> (*grids [0], params.nonlinear_diffusion_coeff, ptr (velocity), ptr (vel_explicit_rhs)));
+				solvers [velocity]->add_post_plan (new nonlinear_diffusion <datatype> (*solvers [velocity], params.nonlinear_diffusion_coeff));
 			}
 			if (advection_coeff != 0.0) {
-				element <datatype>::add_post_plan (new advec <datatype> (*grids [0], advection_coeff, ptr (velocity), ptr (vel_explicit_rhs)));
+				solvers [velocity]->add_post_plan (new advection <datatype> (*solvers [velocity], advection_coeff));
 			}
 		
 			normal_stream->to_file ();
