@@ -28,22 +28,22 @@ namespace bases
 		
 			TRACE ("Executing plans...");
 		
-			for (int i = 0; i < (int) pre_transform_plans.size (); ++i) {
-				pre_transform_plans [i]->execute (flags);
+			for (iterator iter = begin (); iter != end (); iter++) {
+				iter->second->execute_pre_plans (flags);
 			}
 			
 			transform_vertical_inverse ();
 			
-			for (int i = 0; i < (int) mid_transform_plans.size (); ++i) {
-				mid_transform_plans [i]->execute (flags);
+			for (iterator iter = begin (); iter != end (); iter++) {
+				iter->second->execute_mid_plans (flags);
 			}
 			
 			transform_horizontal_inverse ();
 
 			factorize ();
 			
-			for (int i = 0; i < (int) post_transform_plans.size (); ++i) {
-				post_transform_plans [i]->execute (flags);
+			for (iterator iter = begin (); iter != end (); iter++) {
+				iter->second->execute_post_plans (flags);
 			}
 		
 			TRACE ("Calculation complete.");

@@ -20,6 +20,10 @@ namespace two_d
 		inverse = 0x02
 	};
 	
+	
+	/*
+		TODO 
+	*/
 	// class fftw_configure
 	// {
 	// public:
@@ -36,7 +40,7 @@ namespace two_d
 		namespace chebyshev
 		{
 			template <class datatype>
-			class horizontal_transform : public explicit_plan <datatype>
+			class horizontal_transform : public bases::plan <datatype>
 			{
 			public:
 				/*!**********************************************************************
@@ -49,10 +53,10 @@ namespace two_d
 				virtual void execute (int &element_flags);
 			
 			protected:
-				using explicit_plan <datatype>::n;
-				using explicit_plan <datatype>::m;
-				using explicit_plan <datatype>::data_in;
-				using explicit_plan <datatype>::data_out;
+				int n;
+				int m;
+				datatype *data_in;
+				datatype *data_out;
 				
 				int flags;
 				datatype scalar;
@@ -63,7 +67,7 @@ namespace two_d
 			};
 			
 			template <class datatype>
-			class vertical_transform : public explicit_plan <datatype>
+			class vertical_transform : public bases::plan <datatype>
 			{
 			public:
 				/*!**********************************************************************
@@ -76,10 +80,10 @@ namespace two_d
 				virtual void execute (int &element_flags);
 			
 			protected:
-				using explicit_plan <datatype>::n;
-				using explicit_plan <datatype>::m;
-				using explicit_plan <datatype>::data_in;
-				using explicit_plan <datatype>::data_out;
+				int n;
+				int m;
+				datatype *data_in;
+				datatype *data_out;
 				
 				int flags;
 				datatype scalar;

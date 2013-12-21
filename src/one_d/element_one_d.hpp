@@ -218,6 +218,8 @@ namespace one_d
 			using element <datatype>::messenger_ptr;
 			using element <datatype>::alpha_0;
 			using element <datatype>::alpha_n;
+			using element <datatype>::solvers;
+			
 		};
 		
 		/*!*******************************************************************
@@ -256,6 +258,7 @@ namespace one_d
 			using element <datatype>::messenger_ptr;
 			using element <datatype>::alpha_0;
 			using element <datatype>::alpha_n;
+			using element <datatype>::solvers;
 		};
 	} /* chebyshev */
 	
@@ -287,6 +290,7 @@ namespace one_d
 			using one_d::element <datatype>::grids;
 			using one_d::element <datatype>::params;
 			using one_d::element <datatype>::messenger_ptr;
+			using one_d::element <datatype>::solvers;
 		};
 	} /* fourier */
 } /* one_d */

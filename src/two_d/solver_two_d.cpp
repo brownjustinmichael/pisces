@@ -20,9 +20,13 @@ namespace two_d
 		namespace chebyshev
 		{
 			template <class datatype>
-			solver <datatype>:: solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_real_rhs, datatype* i_implicit_rhs, datatype* i_data_out, int i_flags) : 
+			solver <datatype>:: solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_data, datatype* i_explicit_rhs, datatype* i_real_rhs, datatype* i_implicit_rhs, int i_flags) : 
 			bases::solver <datatype> (i_flags),
-			explicit_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out), 
+			n (i_grid_n.n), 
+			m (i_grid_m.n),
+			data (i_data),
+			grid_n (i_grid_n),
+			grid_m (i_grid_m),
 			messenger_ptr (i_messenger_ptr), 
 			timestep (i_timestep), 
 			alpha_0 (i_alpha_0), 
@@ -138,8 +142,8 @@ namespace two_d
 				std::stringstream debug;
 						
 				if (!(flags & first_run)) {
-					utils::copy (2 * (n / 2 + 1), &data_in [0], &values_0 [0], m);
-					utils::copy (2 * (n / 2 + 1), &data_in [m - 1], &values_n [0], m);
+					utils::copy (2 * (n / 2 + 1), &data [0], &values_0 [0], m);
+					utils::copy (2 * (n / 2 + 1), &data [m - 1], &values_n [0], m);
 					flags |= first_run;
 				}
 				
@@ -163,9 +167,9 @@ namespace two_d
 				}
 				
 
-				utils::matrix_add_scaled (m - 2 + ntop + nbot - excess_0 - excess_n, 2 * (n / 2 + 1), 1.0, data_in + 1 - ntop + excess_0, &data_temp [ex_excess_0 + 1 + excess_0], m, lda);
-				utils::interpolate (ex_excess_0, 2 * (n / 2 + 1), m, 1.0, positions, data_in, &positions_0 [0], &data_temp [1], m, lda);
-				utils::interpolate (ex_excess_n, 2 * (n / 2 + 1), m, 1.0, positions, data_in, &positions_n [0], &data_temp [lda - 1 - ex_excess_n], m, lda);
+				utils::matrix_add_scaled (m - 2 + ntop + nbot - excess_0 - excess_n, 2 * (n / 2 + 1), 1.0, data + 1 - ntop + excess_0, &data_temp [ex_excess_0 + 1 + excess_0], m, lda);
+				utils::interpolate (ex_excess_0, 2 * (n / 2 + 1), m, 1.0, positions, data, &positions_0 [0], &data_temp [1], m, lda);
+				utils::interpolate (ex_excess_n, 2 * (n / 2 + 1), m, 1.0, positions, data, &positions_n [0], &data_temp [lda - 1 - ex_excess_n], m, lda);
 				
 				if (element_flags & x_solve) {
 					TRACE ("Solving in n direction...");
@@ -213,7 +217,7 @@ namespace two_d
 					for (int j = 0; j < m; ++j) {
 						utils::diagonal_solve (2 * (n / 2 + 1), &factorized_horizontal_matrix [0], &data_temp [ntop + ex_excess_0 + j], 1, lda);
 					}
-					utils::matrix_copy (m, 2 * (n / 2 + 1), &data_temp [ntop + ex_excess_0], data_out, lda);
+					utils::matrix_copy (m, 2 * (n / 2 + 1), &data_temp [ntop + ex_excess_0], data, lda);
 
 				} else if (element_flags & z_solve) {
 					TRACE ("Solving in m direction...");
@@ -257,7 +261,7 @@ namespace two_d
 					}
 							
 					TRACE ("Updating...");
-					utils::matrix_copy (m, 2 * (n / 2 + 1), &data_temp [ex_excess_0 + ntop], data_out, lda, m);
+					utils::matrix_copy (m, 2 * (n / 2 + 1), &data_temp [ex_excess_0 + ntop], data, lda, m);
 					
 					element_flags |= transformed_vertical;
 					

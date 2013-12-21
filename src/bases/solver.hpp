@@ -9,14 +9,19 @@
 #ifndef SOLVER_HPP_BDH126SH
 #define SOLVER_HPP_BDH126SH
 	
+#include <memory>
 #include "plan.hpp"
+#include "grid.hpp"
 
 /*!*******************************************************************
  * \brief Execution flags used by the solver class
  *********************************************************************/
 enum solver_flags {
+	implicit_rhs = 0x00,
+	explicit_rhs = 0x01,
+	real_rhs = 0x02,
 	factorized = 0x08,
-	first_run = 0x10
+	first_run = 0x10,
 };
 
 namespace bases
@@ -37,14 +42,55 @@ namespace bases
 		virtual ~solver () {
 			// printf ("Destroying bases solver\n");
 		}
-			
+		
 		/*!*******************************************************************
-		 * \brief Solve the matrix equation
+		 * \brief Adds a plan to be executed before either transform in order
+		 * 
+		 * \param i_plan A pointer to the plan to add
 		 *********************************************************************/
-		virtual void execute (int &element_flags) {
-			TRACE ("Executing...");
-			if (!(flags & factorized)) {
-				factorize ();
+		inline void add_pre_plan (plan <datatype>* i_plan) {
+			TRACE ("Adding plan...");
+			pre_transform_plans.push_back (std::shared_ptr <plan <datatype>> (i_plan));
+			TRACE ("Added.");
+		}
+	
+		/*!*******************************************************************
+		 * \brief Adds a plan to be executed after the vertical transform
+		 * 
+		 * \param i_plan A pointer to the plan to add
+		 *********************************************************************/
+		inline void add_mid_plan (plan <datatype>* i_plan) {
+			TRACE ("Adding plan...");
+			mid_transform_plans.push_back (std::shared_ptr <plan <datatype>> (i_plan));
+			TRACE ("Added.");
+		}
+
+		/*!*******************************************************************
+		 * \brief Adds a plan to be executed after both transforms in order
+		 * 
+		 * \param i_plan A pointer to the plan to add
+		 *********************************************************************/
+		inline void add_post_plan (plan <datatype>* i_plan) {
+			TRACE ("Adding plan...");
+			post_transform_plans.push_back (std::shared_ptr <plan <datatype>> (i_plan));
+			TRACE ("Added.");
+		}
+		
+		inline void execute_pre_plans (int &element_flags) {
+			for (int i = 0; i < (int) pre_transform_plans.size (); ++i) {
+				pre_transform_plans [i]->execute (element_flags);
+			}
+		}
+		
+		inline void execute_mid_plans (int &element_flags) {
+			for (int i = 0; i < (int) mid_transform_plans.size (); ++i) {
+				mid_transform_plans [i]->execute (element_flags);
+			}
+		}
+		
+		inline void execute_post_plans (int &element_flags) {
+			for (int i = 0; i < (int) post_transform_plans.size (); ++i) {
+				post_transform_plans [i]->execute (element_flags);
 			}
 		}
 		
@@ -54,17 +100,36 @@ namespace bases
 		 * This method does not check first whether the matrix has been factorized, 
 		 * according to the execution flags.
 		 *********************************************************************/
-		virtual void factorize () {
+		void factorize () {
 			_factorize ();
 			flags |= factorized;
 		}
 		
 		virtual datatype *matrix_ptr (int index = 0) = 0;
 		
+		virtual datatype *data_ptr () = 0;
+		
+		virtual datatype *rhs_ptr (int index = 0) = 0;
+		
+		virtual grid <datatype> *grid_ptr (int index = 0) = 0;
+		
+		/*!*******************************************************************
+		 * \brief Solve the matrix equation
+		 *********************************************************************/
+		virtual void execute (int &element_flags) {
+			TRACE ("Executing...");
+			if (!(element_flags & factorized)) {
+				factorize ();
+			}
+		}
+		
 	protected:
 		virtual void _factorize () = 0;
-		
+
 		int flags;
+		std::vector <std::shared_ptr <plan <datatype> > > pre_transform_plans; //!< A vector of shared pointers of plans to be executed before the transforms
+		std::vector <std::shared_ptr <plan <datatype> > > mid_transform_plans; //!< A vector of shared pointers of plans to be executed after the vertical transform
+		std::vector <std::shared_ptr <plan <datatype> > > post_transform_plans; //!< A vector of shared pointers of plans to be executed after both transforms
 	};
 } /* bases */
 

@@ -21,13 +21,21 @@ namespace two_d
 			class advection : public two_d::explicit_plan <datatype>
 			{
 			public:
-				advection (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype i_coeff, datatype* i_vel_n, datatype *i_vel_m, datatype* i_data_in = NULL, datatype *i_data_out = NULL) :
+				advection (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype i_coeff, datatype* i_vel_n, datatype *i_vel_m, datatype *i_data_in, datatype *i_data_out = NULL) :
 				explicit_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out),
 				coeff (-i_coeff),
 				vel_n (i_vel_n),
 				vel_m (i_vel_m),
-				pos_n (&(i_grid_n.position ())),
-				pos_m (&(i_grid_m.position ())) {}
+				pos_n (&(grid_n.position ())),
+				pos_m (&(grid_m.position ())) {}
+				
+				advection (bases::solver <datatype> &i_solver, datatype i_coeff, datatype* i_vel_n, datatype *i_vel_m) :
+				explicit_plan <datatype> (i_solver),
+				coeff (-i_coeff),
+				vel_n (i_vel_n),
+				vel_m (i_vel_m),
+				pos_n (&(grid_n.position ())),
+				pos_m (&(grid_m.position ())) {}
 				
 				virtual ~advection () {}
 				
@@ -45,6 +53,8 @@ namespace two_d
 				datatype *pos_n, *pos_m;
 				using explicit_plan <datatype>::n;
 				using explicit_plan <datatype>::m;
+				using explicit_plan <datatype>::grid_n;
+				using explicit_plan <datatype>::grid_m;
 				using explicit_plan <datatype>::data_in;
 				using explicit_plan <datatype>::data_out;
 			};
@@ -53,12 +63,19 @@ namespace two_d
 			class stream_advection : public two_d::explicit_plan <datatype>
 			{
 			public:
-				stream_advection (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype i_coeff, datatype *i_stream, datatype* i_data_in = NULL, datatype *i_data_out = NULL) :
+				stream_advection (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype i_coeff, datatype* i_stream, datatype *i_data_in, datatype *i_data_out = NULL) :
 				explicit_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out),
 				coeff (-i_coeff),
 				stream (i_stream),
-				pos_n (&(i_grid_n.position ())),
-				pos_m (&(i_grid_m.position ())) {}
+				pos_n (&(grid_n.position ())),
+				pos_m (&(grid_m.position ())) {}
+				
+				stream_advection (bases::solver <datatype> &i_solver, datatype i_coeff, datatype *i_stream) :
+				explicit_plan <datatype> (i_solver),
+				coeff (-i_coeff),
+				stream (i_stream),
+				pos_n (&(grid_n.position ())),
+				pos_m (&(grid_m.position ())) {}
 				
 				virtual ~stream_advection () {}
 				
@@ -76,6 +93,8 @@ namespace two_d
 				datatype *pos_n, *pos_m;
 				using explicit_plan <datatype>::n;
 				using explicit_plan <datatype>::m;
+				using explicit_plan <datatype>::grid_n;
+				using explicit_plan <datatype>::grid_m;
 				using explicit_plan <datatype>::data_in;
 				using explicit_plan <datatype>::data_out;
 			};
