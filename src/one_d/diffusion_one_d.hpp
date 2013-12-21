@@ -24,6 +24,8 @@ namespace one_d
 	class diffusion : public implicit_plan <datatype>
 	{
 	public:
+		diffusion (bases::grid <datatype> &i_grid, datatype i_coeff, datatype i_alpha, datatype *i_matrix, datatype *i_data_in, datatype *i_data_out = NULL);
+
 		diffusion (bases::solver <datatype> &i_solver, datatype i_coeff, datatype i_alpha);
 		
 		virtual ~diffusion () {

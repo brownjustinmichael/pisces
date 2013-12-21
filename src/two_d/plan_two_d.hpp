@@ -25,6 +25,14 @@ namespace two_d
 	class explicit_plan : public bases::plan <datatype>
 	{
 	public:
+		explicit_plan (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype *i_data_in, datatype *i_data_out = NULL) :
+		n (i_grid_n.n),
+		m (i_grid_m.n),
+		grid_n (i_grid_n),
+		grid_m (i_grid_m),
+		data_in (i_data_in),
+		data_out (i_data_out ? i_data_out : i_data_in) {}
+
 		/*!*******************************************************************
 		 * \param i_n The integer number of elements in the data
 		 * \param i_data_in The integer scalar index of the input
@@ -62,6 +70,14 @@ namespace two_d
 	class real_plan : public bases::plan <datatype>
 	{
 	public:
+		real_plan (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype *i_data_in, datatype *i_data_out = NULL) :
+		n (i_grid_n.n),
+		m (i_grid_m.n),
+		grid_n (i_grid_n),
+		grid_m (i_grid_m),
+		data_in (i_data_in),
+		data_out (i_data_out ? i_data_out : i_data_in) {}
+
 		/*!*******************************************************************
 		 * \param i_n The integer number of elements in the data
 		 * \param i_data_in The integer scalar index of the input
@@ -99,6 +115,11 @@ namespace two_d
 	class implicit_plan : public explicit_plan <datatype>
 	{
 	public:
+		implicit_plan (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype *i_matrix_n, datatype *i_matrix_m, datatype *i_data_in, datatype *i_data_out = NULL) :
+		explicit_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out),  
+		matrix_n (i_matrix_n),  
+		matrix_m (i_matrix_m) {}
+
 		/*!*******************************************************************
 		 * \param i_n The integer number of elements in a row of the square i_matrix
 		 * \param i_grid A shared pointer to the collocation grid object

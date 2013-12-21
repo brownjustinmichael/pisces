@@ -69,7 +69,7 @@ namespace one_d
 			// Set up plans in order
 			solvers [velocity]->add_pre_plan (new diffusion <datatype> (*solvers [velocity], diffusion_coeff, alpha));
 			if (advection_coeff != 0.0) {
-				solvers [velocity]->add_post_plan (new advec <datatype> (*solvers [velocity], advection_coeff));
+				solvers [velocity]->add_post_plan (new advection <datatype> (*solvers [velocity], advection_coeff));
 			}
 			
 			normal_stream->to_file ();
@@ -156,7 +156,7 @@ namespace one_d
 				solvers [velocity]->add_post_plan (new nonlinear_diffusion <datatype> (*solvers [velocity], params.nonlinear_diffusion_coeff));
 			}
 			if (advection_coeff != 0.0) {
-				solvers [velocity]->add_post_plan (new advec <datatype> (*solvers [velocity], advection_coeff));
+				solvers [velocity]->add_post_plan (new advection <datatype> (*solvers [velocity], advection_coeff));
 			}
 		
 			normal_stream->to_file ();

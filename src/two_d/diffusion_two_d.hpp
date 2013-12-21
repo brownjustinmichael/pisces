@@ -26,6 +26,17 @@ namespace two_d
 			class horizontal_diffusion : public implicit_plan <datatype>
 			{
 			public:
+				horizontal_diffusion (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype i_coeff, datatype i_alpha, datatype *i_matrix_n, datatype *i_matrix_m, datatype *i_data_in, datatype *i_data_out = NULL) : 
+				implicit_plan <datatype> (i_grid_n, i_grid_m, i_matrix_n, i_matrix_m, i_data_in, i_data_out),
+				coeff (i_coeff),
+				alpha (i_alpha) {
+					TRACE ("Instantiating...");
+					pioL2 = 4.0 * (std::acos (-1.0) * std::acos (-1.0) / (grid_n.position (n - 1) - grid_n.position (0)) / (grid_n.position (n - 1) - grid_n.position (0)));
+					for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
+						matrix_n [i] = coeff * alpha * pioL2 * (datatype) ((i / 2) * (i / 2));
+					}
+				}
+				
 				horizontal_diffusion (bases::solver <datatype> &i_solver, datatype i_coeff, datatype i_alpha) :
 				implicit_plan <datatype> (i_solver),
 				coeff (i_coeff),
@@ -76,6 +87,15 @@ namespace two_d
 			class vertical_diffusion : public implicit_plan <datatype>
 			{
 			public:
+				vertical_diffusion (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype i_coeff, datatype i_alpha, datatype *i_matrix_n, datatype *i_matrix_m, datatype *i_data_in, datatype *i_data_out = NULL) : 
+				implicit_plan <datatype> (i_grid_n, i_grid_m, i_matrix_n, i_matrix_m, i_data_in, i_data_out),
+				coeff (i_coeff),
+				alpha (i_alpha) {
+					for (int j = 0; j < m; ++j) {
+						utils::add_scaled (m, -coeff * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
+					}
+				}
+				
 				vertical_diffusion (bases::solver <datatype> &i_solver, datatype i_coeff, datatype i_alpha) :
 				implicit_plan <datatype> (i_solver),
 				coeff (i_coeff),

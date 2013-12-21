@@ -16,7 +16,25 @@
 namespace one_d
 {
 	template <class datatype>
-	advec <datatype>::advec (bases::solver <datatype> &i_solver, datatype i_c) : 
+	advection <datatype>::advection (bases::grid <datatype> &i_grid, datatype i_c, datatype *i_data_in, datatype *i_data_out) :
+	explicit_plan <datatype> (i_grid, i_data_in, i_data_out) {
+		TRACE ("Instantiating...");
+		datatype pi = std::acos(-1.0);
+		c = i_c;
+		
+		fac.resize(n,0.0);
+
+		fac [0] = std::sin(((n - 1.5)*pi)/(n-1));
+		for (int i = 1; i < n; i++)
+		{
+			fac [i] = std::sin(((n - i - 1)*pi)/(n-1));
+		}
+		fac [n - 1] = std::sin((.5*pi)/(n-1));
+		TRACE ("Instantiated.");
+	}
+	
+	template <class datatype>
+	advection <datatype>::advection (bases::solver <datatype> &i_solver, datatype i_c) : 
 	explicit_plan <datatype> (i_solver)
 	{
 		TRACE ("Instantiating...");
@@ -35,7 +53,7 @@ namespace one_d
 	}
 
 	template <class datatype>
-	void advec <datatype>::execute(int &element_flags)
+	void advection <datatype>::execute(int &element_flags)
 	{
 		datatype scalar = -c;
 		
@@ -62,6 +80,6 @@ namespace one_d
 		data_out [n - 1] += (scalar/fac [n - 1])*(data_in [n - 1] - data_in [n - 2])*data_in [n - 1];
 	}
 	
-	template class advec <double>;
-	template class advec <float>;
+	template class advection <double>;
+	template class advection <float>;
 }

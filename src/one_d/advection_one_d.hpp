@@ -19,7 +19,7 @@
 namespace one_d
 {
 	template <class datatype>
-	class advec : public explicit_plan <datatype>
+	class advection : public explicit_plan <datatype>
 	{
 	private:
 		using explicit_plan <datatype>::n;
@@ -30,10 +30,11 @@ namespace one_d
 		std::vector<datatype> fac;
 
 	public:
+		advection (bases::grid <datatype> &i_grid, datatype i_c, datatype *i_data_in, datatype *i_data_out = NULL);	//constuctor initializes private members to point to input and output vectors
 
-		advec (bases::solver <datatype> &i_solver, datatype i_c);	//constuctor initializes private members to point to input and output vectors
+		advection (bases::solver <datatype> &i_solver, datatype i_c);	//constuctor initializes private members to point to input and output vectors
 		
-		virtual ~advec () {
+		virtual ~advection () {
 			// printf ("Destroying one_d advection\n");
 		}
 		

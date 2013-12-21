@@ -24,6 +24,12 @@ namespace one_d
 	class explicit_plan : public bases::plan <datatype>
 	{
 	public:
+		explicit_plan (bases::grid <datatype> &i_grid, datatype *i_data_in, datatype *i_data_out = NULL) : 
+		n (i_grid.n),
+		grid (i_grid),
+		data_in (i_data_in),
+		data_out (i_data_out ? i_data_out : i_data_in) {}
+		
 		/*!*******************************************************************
 		 * \param i_n The integer number of elements in the data
 		 * \param i_data_in The integer scalar index of the input
@@ -62,6 +68,10 @@ namespace one_d
 	class implicit_plan : public explicit_plan <datatype>
 	{
 	public:
+		implicit_plan (bases::grid <datatype> &i_grid, datatype *i_matrix, datatype *i_data_in, datatype *i_data_out = NULL) :
+		explicit_plan <datatype> (i_grid, i_data_in, i_data_out),  
+		matrix (i_matrix) {}
+		
 		/*!*******************************************************************
 		 * \param i_n The integer number of elements in a row of the square i_matrix
 		 * \param i_grid A shared pointer to the collocation grid object
