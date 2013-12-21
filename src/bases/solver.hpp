@@ -11,13 +11,17 @@
 	
 #include <memory>
 #include "plan.hpp"
+#include "grid.hpp"
 
 /*!*******************************************************************
  * \brief Execution flags used by the solver class
  *********************************************************************/
 enum solver_flags {
+	implicit_rhs = 0x00,
+	explicit_rhs = 0x01,
+	real_rhs = 0x02,
 	factorized = 0x08,
-	first_run = 0x10
+	first_run = 0x10,
 };
 
 namespace bases
@@ -89,7 +93,26 @@ namespace bases
 				post_transform_plans [i]->execute (element_flags);
 			}
 		}
-			
+		
+		/*!*******************************************************************
+		 * \brief Factorize the matrix equation
+		 * 
+		 * This method does not check first whether the matrix has been factorized, 
+		 * according to the execution flags.
+		 *********************************************************************/
+		void factorize () {
+			_factorize ();
+			flags |= factorized;
+		}
+		
+		virtual datatype *matrix_ptr (int index = 0) = 0;
+		
+		virtual datatype *data_ptr () = 0;
+		
+		virtual datatype *rhs_ptr (int index = 0) = 0;
+		
+		virtual grid <datatype> *grid_ptr (int index = 0) = 0;
+		
 		/*!*******************************************************************
 		 * \brief Solve the matrix equation
 		 *********************************************************************/
@@ -100,22 +123,9 @@ namespace bases
 			}
 		}
 		
-		/*!*******************************************************************
-		 * \brief Factorize the matrix equation
-		 * 
-		 * This method does not check first whether the matrix has been factorized, 
-		 * according to the execution flags.
-		 *********************************************************************/
-		virtual void factorize () {
-			_factorize ();
-			flags |= factorized;
-		}
-		
-		virtual datatype *matrix_ptr (int index = 0) = 0;
-		
 	protected:
 		virtual void _factorize () = 0;
-		
+
 		int flags;
 		std::vector <std::shared_ptr <plan <datatype> > > pre_transform_plans; //!< A vector of shared pointers of plans to be executed before the transforms
 		std::vector <std::shared_ptr <plan <datatype> > > mid_transform_plans; //!< A vector of shared pointers of plans to be executed after the vertical transform

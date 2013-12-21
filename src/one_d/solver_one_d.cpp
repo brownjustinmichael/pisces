@@ -20,9 +20,11 @@
 namespace one_d
 {
 	template <class datatype>
-	solver <datatype>::solver (bases::grid <datatype> &i_grid, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out, int i_flags) :
+	solver <datatype>::solver (bases::grid <datatype> &i_grid, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_data, datatype* i_explicit_rhs, datatype* i_implicit_rhs, int i_flags) :
 	bases::solver <datatype> (i_flags), 
-	explicit_plan <datatype> (i_grid, i_data_in, i_data_out),
+	n (i_grid.n),
+	grid (i_grid),
+	data (i_data),
 	messenger_ptr (i_messenger_ptr),
 	timestep (i_timestep), 
 	alpha_0 (i_alpha_0), 
@@ -98,8 +100,6 @@ namespace one_d
 			utils::matrix_add_scaled (nbot, n, alpha_n * timestep, &matrix [n - nbot - excess_n], &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + n + ex_excess_n], n, lda);
 		}
 		
-
-		
 		utils::p_block_matrix_factorize (messenger_ptr->get_id (), messenger_ptr->get_np (), n - excess_0 - excess_n - ntop - nbot, excess_0 + ex_excess_0 + 2 * ntop, excess_n + ex_excess_n + 2 * nbot, &factorized_matrix [0], &ipiv [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, lda, sqrt ((int) boundary_matrix.size ()));
 		
 		if (info != 0) {
@@ -119,8 +119,8 @@ namespace one_d
 		utils::scale (lda, 0.0, &data_temp [0]);
 		
 		if (!(flags & first_run)) {
-			value_0 = data_in [0];
-			value_n = data_in [n - 1];
+			value_0 = data [0];
+			value_n = data [n - 1];
 			flags |= first_run;
 		}
 		
@@ -131,25 +131,25 @@ namespace one_d
 		if (ntop != 0) {
 			data_temp [ntop + ex_excess_0 + excess_0] *= alpha_0;
 			data_temp [0] = data_temp [ntop + ex_excess_0 + excess_0];
-			// data_temp [ntop + ex_excess_0 + excess_0] += data_in [excess_0];
+			// data_temp [ntop + ex_excess_0 + excess_0] += data [excess_0];
 		} else {
 			data_temp [0] = value_0;
 		}
 		if (nbot != 0) {
 			data_temp [lda - 1 - nbot - ex_excess_n - excess_n] *= alpha_n;
 			data_temp [lda - 1] = data_temp [lda - 1 - nbot - ex_excess_n - excess_n];
-			// data_temp [lda - 1 - nbot - ex_excess_n - excess_n] += data_in [n - 1 - excess_n];
+			// data_temp [lda - 1 - nbot - ex_excess_n - excess_n] += data [n - 1 - excess_n];
 		} else {
 			data_temp [n - 1 + ntop + ex_excess_0] = value_n;
 		}
 
-		utils::add_scaled (n - 2 + ntop + nbot - excess_0 - excess_n, 1.0, data_in + 1 - ntop + excess_0, &data_temp [ex_excess_0 + 1 + excess_0]);
-		utils::interpolate (ex_excess_0, 1, n, 1.0, positions, data_in, &positions_0 [0], &data_temp [1]);
-		utils::interpolate (ex_excess_n, 1, n, 1.0, positions, data_in, &positions_n [0], &data_temp [lda - 1 - ex_excess_n]);
+		utils::add_scaled (n - 2 + ntop + nbot - excess_0 - excess_n, 1.0, data + 1 - ntop + excess_0, &data_temp [ex_excess_0 + 1 + excess_0]);
+		utils::interpolate (ex_excess_0, 1, n, 1.0, positions, data, &positions_0 [0], &data_temp [1]);
+		utils::interpolate (ex_excess_n, 1, n, 1.0, positions, data, &positions_n [0], &data_temp [lda - 1 - ex_excess_n]);
 
 		utils::p_block_matrix_solve (messenger_ptr->get_id (), messenger_ptr->get_np (), n - excess_0 - excess_n - ntop - nbot, excess_0 + ex_excess_0 + 2 * ntop, excess_n + ex_excess_n + 2 * nbot, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, 1, lda, sqrt ((int) boundary_matrix.size ()));
 		
-		utils::copy (n, &data_temp [ex_excess_0 + ntop], data_out);
+		utils::copy (n, &data_temp [ex_excess_0 + ntop], data);
 		
 		element_flags |= transformed_vertical;
 	}

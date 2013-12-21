@@ -16,8 +16,8 @@
 namespace one_d
 {
 	template <class datatype>
-	advec <datatype>::advec (bases::grid <datatype> &i_grid, datatype i_c, datatype* i_data_in, datatype* i_data_out) : 
-	explicit_plan <datatype> (i_grid, i_data_in, i_data_out)
+	advec <datatype>::advec (bases::solver <datatype> &i_solver, datatype i_c) : 
+	explicit_plan <datatype> (i_solver)
 	{
 		TRACE ("Instantiating...");
 		datatype pi = std::acos(-1.0);

@@ -26,7 +26,7 @@ namespace one_d
 	 * iterated.
 	 *********************************************************************/
 	template <class datatype>
-	class solver : public bases::solver <datatype>, public explicit_plan <datatype>
+	class solver : public bases::solver <datatype>
 	{
 	public:
 		/*!*******************************************************************
@@ -40,32 +40,47 @@ namespace one_d
 		 * \param i_name_rhs The integer representation of the matrix right-hand-side
 		 * \copydoc bases::solver <datatype>::solver ()
 		 *********************************************************************/
-		solver (bases::grid <datatype> &i_grid, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_aplha_n, datatype* i_data_in, datatype* i_explicit_rhs, datatype* i_implicit_rhs, datatype* i_data_out = NULL, int i_flags = 0x00);
+		solver (bases::grid <datatype> &i_grid, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_aplha_n, datatype* i_data, datatype* i_explicit_rhs, datatype* i_implicit_rhs, int i_flags = 0x00);
 	
 		virtual ~solver () {
 			// printf ("Destroying one_d solver\n");
 		}
-	
+
+		datatype *matrix_ptr (int index = 0) {
+			return &matrix [0];
+		}
+		
+		datatype *data_ptr () {
+			return data;
+		}
+		
+		datatype *rhs_ptr (int index = 0) {
+			if (index == 0) {
+				return implicit_rhs;
+			} else {
+				return explicit_rhs;
+			}
+		}
+		
+		bases::grid <datatype> *grid_ptr (int index = 0) {
+			return &grid;
+		}
+		
 		/*!*******************************************************************
 		 * \copydoc bases::solver <datatype>::execute ()
 		 *********************************************************************/
 		void execute (int &element_flags);
-		
-		datatype *matrix_ptr (int index = 0) {
-			return &matrix [0];
-		}
-	
+			
 	protected:
 		/*!*******************************************************************
 		 * \copydoc bases::solver <datatype>::factorize ()
 		 *********************************************************************/
 		void _factorize ();
 	
-		using explicit_plan <datatype>::n;
-		using explicit_plan <datatype>::data_in;
-		using explicit_plan <datatype>::data_out;
+		int &n;
+		bases::grid <datatype> &grid;
+		datatype *data;
 		using bases::solver <datatype>::flags;
-		using explicit_plan <datatype>::grid;
 
 		bases::messenger* messenger_ptr;
 	
