@@ -36,7 +36,7 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::transform::execute ()
 		 *********************************************************************/
-		void execute (int &element_flags);
+		void execute (int &element_flags, int &component_flags);
 		
 	protected:
 		int n;

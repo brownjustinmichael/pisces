@@ -38,7 +38,7 @@ namespace one_d
 			// printf ("Destroying one_d advection\n");
 		}
 		
-		void execute (bases::flags &element_flags);
+		void execute (int &element_flags, int &component_flags);
 	};
 }
 

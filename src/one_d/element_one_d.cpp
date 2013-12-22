@@ -27,9 +27,6 @@ namespace one_d
 		template <class datatype>
 		advection_diffusion_element <datatype>::advection_diffusion_element (bases::axis *i_axis_n, int i_name, io::parameters <datatype>& params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
 		element <datatype> (i_axis_n, i_name, params, i_messenger_ptr, i_element_flags) {
-			datatype diffusion_coeff = params.diffusion_coeff;
-			datatype advection_coeff = params.advection_coeff; 
-			datatype alpha = params.implicit_alpha;
 		
 			assert (n > 0);
 		
@@ -67,13 +64,11 @@ namespace one_d
 			element <datatype>::add_solver (velocity, new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, ptr (velocity), ptr (vel_explicit_rhs), ptr (vel_implicit_rhs)));
 			
 			// Set up plans in order
-			solvers [velocity]->add_pre_plan (new diffusion <datatype> (*solvers [velocity], diffusion_coeff, alpha));
-			if (advection_coeff != 0.0) {
-				solvers [velocity]->add_post_plan (new advection <datatype> (*solvers [velocity], advection_coeff));
+			solvers [velocity]->add_pre_plan (new diffusion <datatype> (*solvers [velocity], params.diffusion_coeff, params.implicit_alpha));
+			if (params.advection_coeff != 0.0) {
+				solvers [velocity]->add_post_plan (new advection <datatype> (*solvers [velocity], params.advection_coeff));
 			}
-			
-			normal_stream->to_file ();
-		
+								
 			TRACE ("Initialized.");
 		}
 		
@@ -81,8 +76,10 @@ namespace one_d
 		datatype advection_diffusion_element <datatype>::calculate_timestep () {
 			datatype t_timestep;
 			t_timestep = params.max_timestep;
-			for (int i = 1; i < n - 1; ++i) {
-				t_timestep = std::min (t_timestep, (datatype) (std::abs (((*this) (position, i - 1) - (*this) (position, i + 1)) / (*this) (velocity, i) / params.advection_coeff) * params.courant_factor));
+			if (params.advection_coeff != 0.0) {
+				for (int i = 1; i < n - 1; ++i) {
+					t_timestep = std::min (t_timestep, (datatype) (std::abs (((*this) (position, i - 1) - (*this) (position, i + 1)) / (*this) (velocity, i) / params.advection_coeff) * params.courant_factor));
+				}
 			}
 			if (t_timestep < timestep || t_timestep > 2.0 * timestep) {
 				return t_timestep;

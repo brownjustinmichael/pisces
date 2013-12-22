@@ -49,7 +49,7 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::plan::execute ()
 		 *********************************************************************/
-		virtual void execute (int &element_flags) = 0;
+		virtual void execute (int &element_flags, int &component_flags) = 0;
 
 	protected:
 
@@ -91,7 +91,7 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc plan::execute ()
 		 *********************************************************************/
-		virtual void execute (int &element_flags) = 0;
+		virtual void execute (int &element_flags, int &component_flags) = 0;
 	
 	protected:
 		using explicit_plan <datatype>::grid;

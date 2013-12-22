@@ -52,7 +52,7 @@ namespace two_d
 		/*!*******************************************************************
 		 * \copydoc bases::plan::execute ()
 		 *********************************************************************/
-		virtual void execute (int &element_flags) = 0;
+		virtual void execute (int &element_flags, int &component_flags) = 0;
 
 		int n; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
 		int m;
@@ -97,7 +97,7 @@ namespace two_d
 		/*!*******************************************************************
 		 * \copydoc bases::plan::execute ()
 		 *********************************************************************/
-		virtual void execute (bases::flags &element_flags) = 0;
+		virtual void execute (int &element_flags, int &component_flags) = 0;
 
 		int n; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
 		int m;
@@ -142,7 +142,7 @@ namespace two_d
 		/*!*******************************************************************
 		 * \copydoc plan::execute ()
 		 *********************************************************************/
-		virtual void execute (bases::flags &element_flags) = 0;
+		virtual void execute (int &element_flags, int &component_flags) = 0;
 
 		using explicit_plan <datatype>::grid_n;
 		using explicit_plan <datatype>::grid_m;

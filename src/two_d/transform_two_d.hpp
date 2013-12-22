@@ -50,7 +50,7 @@ namespace two_d
 				
 				virtual ~horizontal_transform () {}
 				
-				virtual void execute (bases::flags &element_flags);
+				virtual void execute (int &element_flags, int &component_flags);
 			
 			protected:
 				int n;
@@ -77,7 +77,7 @@ namespace two_d
 				
 				virtual ~vertical_transform () {}
 				
-				virtual void execute (bases::flags &element_flags);
+				virtual void execute (int &element_flags, int &component_flags);
 			
 			protected:
 				int n;

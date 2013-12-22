@@ -40,7 +40,7 @@ namespace bases
 		flags (i_flags) {}
 		
 		virtual ~solver () {
-			// printf ("Destroying bases solver\n");
+			printf ("Destroying bases solver\n");
 		}
 		
 		/*!*******************************************************************
@@ -76,21 +76,21 @@ namespace bases
 			TRACE ("Added.");
 		}
 		
-		inline void execute_pre_plans (int &element_flags) {
+		inline void execute_pre_plans (int &element_flags, int &component_flags) {
 			for (int i = 0; i < (int) pre_transform_plans.size (); ++i) {
-				pre_transform_plans [i]->execute (element_flags);
+				pre_transform_plans [i]->execute (element_flags, component_flags);
 			}
 		}
 		
-		inline void execute_mid_plans (int &element_flags) {
+		inline void execute_mid_plans (int &element_flags, int &component_flags) {
 			for (int i = 0; i < (int) mid_transform_plans.size (); ++i) {
-				mid_transform_plans [i]->execute (element_flags);
+				mid_transform_plans [i]->execute (element_flags, component_flags);
 			}
 		}
 		
-		inline void execute_post_plans (int &element_flags) {
+		inline void execute_post_plans (int &element_flags, int &component_flags) {
 			for (int i = 0; i < (int) post_transform_plans.size (); ++i) {
-				post_transform_plans [i]->execute (element_flags);
+				post_transform_plans [i]->execute (element_flags, component_flags);
 			}
 		}
 		
@@ -116,7 +116,7 @@ namespace bases
 		/*!*******************************************************************
 		 * \brief Solve the matrix equation
 		 *********************************************************************/
-		virtual void execute (int &element_flags) {
+		virtual void execute (int &element_flags, int &component_flags) {
 			TRACE ("Executing...");
 			if (!(element_flags & factorized)) {
 				factorize ();

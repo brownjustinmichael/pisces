@@ -72,30 +72,6 @@ namespace bases
 			// printf ("Destroying %p\n", &*failsafe_dump);
 			// printf ("Destroying %p\n", &*normal_stream);
 			// // printf ("Destroying %p\n", &*transform_stream);
-			// for (int i = 0; i < (int) forward_horizontal_transforms.size (); ++i) {
-			// 	printf ("Destroying %p\n", &*forward_horizontal_transforms [i]);
-			// }
-			// for (int i = 0; i < (int) inverse_horizontal_transforms.size (); ++i) {
-			// 	printf ("Destroying %p\n", &*inverse_horizontal_transforms [i]);
-			// }
-			// for (int i = 0; i < (int) forward_vertical_transforms.size (); ++i) {
-			// 	printf ("Destroying %p\n", &*forward_vertical_transforms [i]);
-			// }
-			// for (int i = 0; i < (int) inverse_vertical_transforms.size (); ++i) {
-			// 	printf ("Destroying %p\n", &*inverse_vertical_transforms [i]);
-			// }
-			// for (int i = 0; i < (int) solvers.size (); ++i) {
-			// 	printf ("Destroying %p\n", &*solvers [i]);
-			// }
-			// for (int i = 0; i < (int) pre_transform_plans.size (); ++i) {
-			// 	printf ("Destroying %p\n", &*pre_transform_plans [i]);
-			// }
-			// for (int i = 0; i < (int) mid_transform_plans.size (); ++i) {
-			// 	printf ("Destroying %p\n", &*mid_transform_plans [i]);
-			// }
-			// for (int i = 0; i < (int) post_transform_plans.size (); ++i) {
-			// 	printf ("Destroying %p\n", &*post_transform_plans [i]);
-			// }
 			// printf ("Last\n");
 		}
 		
@@ -182,17 +158,19 @@ namespace bases
 		 * \param i_plan A pointer to a plan object
 		 *********************************************************************/
 		inline void add_transform (int i_name, plan <datatype>* i_plan, int i_flags) {
-			if (i_flags & forward_horizontal)) {
-				forward_horizontal_transforms [i_name] = std::shared_ptr <plan <datatype>> (i_plan);
+			TRACE ("Adding transform...");
+			std::shared_ptr <plan <datatype>> plan_ptr = std::shared_ptr <plan <datatype>> (i_plan);
+			if (i_flags & forward_horizontal) {
+				forward_horizontal_transforms [i_name] = plan_ptr;
 			}
 			if (i_flags & forward_vertical) {
-				forward_vertical_transforms [i_name] = std::shared_ptr <plan <datatype>> (i_plan);
+				forward_vertical_transforms [i_name] = plan_ptr;
 			}
 			if (i_flags & inverse_horizontal) {
-				inverse_horizontal_transforms [i_name] = std::shared_ptr <plan <datatype>> (i_plan);
+				inverse_horizontal_transforms [i_name] = plan_ptr;
 			}
 			if (i_flags & inverse_vertical) {
-				inverse_vertical_transforms [i_name] = std::shared_ptr <plan <datatype>> (i_plan);
+				inverse_vertical_transforms [i_name] = plan_ptr;
 			}
 		}
 		
@@ -225,10 +203,10 @@ namespace bases
 		virtual void transform (int i_flags) {
 			TRACE ("Transforming...");
 			typedef typename std::map <int, std::shared_ptr <plan <datatype> > >::iterator iterator; 
-			if (i_flags & forward_horizontal)) {
+			if (i_flags & forward_horizontal) {
 				for (iterator iter = forward_horizontal_transforms.begin (); iter != forward_horizontal_transforms.end (); iter++) {
 					if (!(element_flags [iter->first] & transformed_horizontal)) {
-						iter->second->execute (element_flags);
+						iter->second->execute (element_flags [state], element_flags [iter->first]);
 						element_flags [iter->first] |= transformed_horizontal;
 					}
 				}
@@ -236,7 +214,7 @@ namespace bases
 			if (i_flags & forward_vertical) {
 				for (iterator iter = forward_vertical_transforms.begin (); iter != forward_vertical_transforms.end (); iter++) {
 					if (!(element_flags [iter->first] & transformed_vertical)) {
-						iter->second->execute (element_flags);
+						iter->second->execute (element_flags [state], element_flags [iter->first]);
 					}
 					element_flags [iter->first] |= transformed_vertical;
 				}
@@ -244,7 +222,7 @@ namespace bases
 			if (i_flags & inverse_horizontal) {
 				for (iterator iter = inverse_horizontal_transforms.begin (); iter != inverse_horizontal_transforms.end (); iter++) {
 					if (element_flags [iter->first] & transformed_horizontal) {
-						iter->second->execute (element_flags);
+						iter->second->execute (element_flags [state], element_flags [iter->first]);
 					}
 					element_flags [iter->first] &= ~transformed_horizontal;
 				}
@@ -252,7 +230,7 @@ namespace bases
 			if (i_flags & inverse_vertical) {
 				for (iterator iter = inverse_vertical_transforms.begin (); iter != inverse_vertical_transforms.end (); iter++) {
 					if (element_flags [iter->first] & transformed_vertical) {
-						iter->second->execute (element_flags);
+						iter->second->execute (element_flags [state], element_flags [iter->first]);
 					}
 					element_flags [iter->first] &= ~transformed_vertical;
 				}
@@ -275,11 +253,11 @@ namespace bases
 		 * \brief Factorize all solvers
 		 ************************************************************************/
 		virtual void factorize () {
-			if (!(flags & factorized)) {
-				for (iterator iter = begin (); iter != end (); iter++) {
+			for (iterator iter = begin (); iter != end (); iter++) {
+				if (!(element_flags [state] & factorized)) {
 					iter->second->factorize ();
 				}
-				element_flags [state] |= factorized;
+				element_flags [iter->first] |= factorized;
 			}
 		}
 		
@@ -295,14 +273,16 @@ namespace bases
 			transform (forward_horizontal);
 
 			for (iterator iter = begin (); iter != end (); iter++) {
-				iter->second->execute (flags);
+				iter->second->execute (element_flags [state], element_flags [iter->first]);
 			}
 			
 			duration += timestep;
 			INFO ("TOTAL TIME: " << duration);
 			if (t_timestep != timestep) {
 				element_flags [state] &= ~unchanged_timestep;
-				element_flags [state] &= ~factorized;
+				for (iterator iter = begin (); iter != end (); iter++) {
+					element_flags [iter->first] &= ~factorized;
+				}
 				INFO ("Updating timestep: " << t_timestep);
 			} else {
 				element_flags [state] |= unchanged_timestep;
@@ -360,10 +340,10 @@ namespace bases
 		std::map<int, std::shared_ptr<solver <datatype> > > solvers; //!< A vector of shared pointers to the matrix solvers
 
 	private:
-		std::vector<std::shared_ptr<plan <datatype> > > forward_horizontal_transforms; //!< A vector of shared pointers to the forward horizontal transforms
-		std::vector<std::shared_ptr<plan <datatype> > > inverse_horizontal_transforms; //!< A vector of shared pointers to the inverse horizontal transforms
-		std::vector<std::shared_ptr<plan <datatype> > > forward_vertical_transforms; //!< A vector of shared pointers to the forward vertical transforms
-		std::vector<std::shared_ptr<plan <datatype> > > inverse_vertical_transforms; //!< A vector of shared pointers to the inverse vertical transforms
+		std::map <int, std::shared_ptr<plan <datatype> > > forward_horizontal_transforms; //!< A vector of shared pointers to the forward horizontal transforms
+		std::map <int, std::shared_ptr<plan <datatype> > > inverse_horizontal_transforms; //!< A vector of shared pointers to the inverse horizontal transforms
+		std::map <int, std::shared_ptr<plan <datatype> > > forward_vertical_transforms; //!< A vector of shared pointers to the forward vertical transforms
+		std::map <int, std::shared_ptr<plan <datatype> > > inverse_vertical_transforms; //!< A vector of shared pointers to the inverse vertical transforms
 	};
 } /* bases */
 

@@ -242,15 +242,18 @@ namespace two_d
 				virtual void initialize (int name, datatype* initial_conditions = NULL, int element_flags = 0x00) {
 					TRACE ("Initializing...");
 					two_d::element <datatype>::initialize (name, initial_conditions, element_flags);
+					/*
+						TODO Fix flaggin
+					*/
 					if ((name != x_position) && (name != z_position)) {
 					    if (element_flags & only_forward_horizontal) {
-							element <datatype>::add_forward_horizontal_transform (new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name)));
+							element <datatype>::add_transform (name, new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name)), forward_horizontal);
 						} else if (!(element_flags & no_transform)) {
 							DEBUG ("Adding all transforms for " << name);
-			   				element <datatype>::add_forward_horizontal_transform (new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name)));
-							element <datatype>::add_inverse_horizontal_transform (new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, inverse));
-							element <datatype>::add_forward_vertical_transform (new vertical_transform <datatype> (*grids [0], *grids [1], ptr (name)));
-							element <datatype>::add_inverse_vertical_transform (new vertical_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, inverse));
+			   				element <datatype>::add_transform (name, new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name)), forward_horizontal);
+							element <datatype>::add_transform (name, new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, inverse), inverse_horizontal);
+							element <datatype>::add_transform (name, new vertical_transform <datatype> (*grids [0], *grids [1], ptr (name)), forward_vertical);
+							element <datatype>::add_transform (name, new vertical_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, inverse), inverse_vertical);
 						}
 					}
 				}

@@ -113,7 +113,7 @@ namespace one_d
 	}
 	
 	template <class datatype>
-	void solver <datatype>::execute (bases::flags &element_flags) {
+	void solver <datatype>::execute (int &element_flags, int &component_flags) {
 		int info, lda = n + ex_excess_0 + ex_excess_n + nbot + ntop;
 		TRACE ("Executing solve...");
 		utils::scale (lda, 0.0, &data_temp [0]);
@@ -151,7 +151,7 @@ namespace one_d
 		
 		utils::copy (n, &data_temp [ex_excess_0 + ntop], data);
 		
-		element_flags [state] |= transformed_vertical;
+		component_flags |= transformed_vertical;
 	}
 	
 	template class solver <double>;

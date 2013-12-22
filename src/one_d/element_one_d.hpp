@@ -167,8 +167,7 @@ namespace one_d
 				TRACE ("Initializing " << name << "...");
 				one_d::element <datatype>::initialize (name, initial_conditions, flags);
 				if (!(flags & no_transform) && (name != position)) {
-					element <datatype>::add_inverse_vertical_transform (new fftw_cosine <datatype> (*grids [0], ptr (name)));
-					element <datatype>::add_forward_vertical_transform (new fftw_cosine <datatype> (*grids [0], ptr (name)));
+					element <datatype>::add_transform (name, new fftw_cosine <datatype> (*grids [0], ptr (name)), forward_vertical | inverse_vertical);
 				}
 			}
 			
