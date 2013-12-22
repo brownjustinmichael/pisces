@@ -53,7 +53,7 @@ namespace one_d
 	}
 
 	template <class datatype>
-	void advection <datatype>::execute(int &element_flags)
+	void advection <datatype>::execute(int &element_flags, int &component_flags)
 	{
 		datatype scalar = -c;
 		

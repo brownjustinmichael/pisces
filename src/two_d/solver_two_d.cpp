@@ -130,7 +130,7 @@ namespace two_d
 			}
 			
 			template <class datatype>
-			void solver <datatype>::execute (int &element_flags) {
+			void solver <datatype>::execute (int &element_flags, int &component_flags) {
 				int info, lda = m + ex_excess_0 + ex_excess_n + nbot + ntop;
 				TRACE ("Executing solve...");
 				
@@ -171,7 +171,7 @@ namespace two_d
 				utils::interpolate (ex_excess_0, 2 * (n / 2 + 1), m, 1.0, positions, data, &positions_0 [0], &data_temp [1], m, lda);
 				utils::interpolate (ex_excess_n, 2 * (n / 2 + 1), m, 1.0, positions, data, &positions_n [0], &data_temp [lda - 1 - ex_excess_n], m, lda);
 				
-				if (element_flags & x_solve) {
+				if (element_flags &  x_solve) {
 					TRACE ("Solving in n direction...");
 					
 					std::vector <datatype> buffer_0 ((excess_0 > ex_excess_0 ? excess_0 + ntop : ex_excess_0 + ntop) * 2 * (n / 2 + 1));
@@ -219,7 +219,7 @@ namespace two_d
 					}
 					utils::matrix_copy (m, 2 * (n / 2 + 1), &data_temp [ntop + ex_excess_0], data, lda);
 
-				} else if (element_flags & z_solve) {
+				} else if (element_flags &  z_solve) {
 					TRACE ("Solving in m direction...");
 
 					// for (int i = 0; i < lda; ++i) {
@@ -263,7 +263,7 @@ namespace two_d
 					TRACE ("Updating...");
 					utils::matrix_copy (m, 2 * (n / 2 + 1), &data_temp [ex_excess_0 + ntop], data, lda, m);
 					
-					element_flags |= transformed_vertical;
+					component_flags |= transformed_vertical;
 					
 					TRACE ("Solve complete.")
 				}

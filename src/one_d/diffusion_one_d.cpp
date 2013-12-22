@@ -39,7 +39,7 @@ namespace one_d
 	}
 
 	template <class datatype>
-	void diffusion <datatype>::execute (int &element_flags) {	
+	void diffusion <datatype>::execute (int &element_flags, int &component_flags) {	
 		TRACE ("Operating...");
 		
 		// Set up and evaluate the explicit part of the diffusion equation
@@ -59,7 +59,7 @@ namespace one_d
 	}
 
 	template <class datatype>
-	void nonlinear_diffusion <datatype>::execute (int &element_flags) {	
+	void nonlinear_diffusion <datatype>::execute (int &element_flags, int &component_flags) {	
 		TRACE ("Operating...");
 		
 		// Set up and evaluate the explicit part of the nonlinear diffusion equation

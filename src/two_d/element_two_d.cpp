@@ -21,8 +21,8 @@ namespace two_d
 		namespace chebyshev
 		{
 			template <class datatype>
-			advection_diffusion_element <datatype>::advection_diffusion_element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters <datatype>& params, bases::messenger* i_messenger_ptr, int i_flags) : 
-			element <datatype> (i_axis_n, i_axis_m, i_name, params, i_messenger_ptr, i_flags) {
+			advection_diffusion_element <datatype>::advection_diffusion_element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters <datatype>& params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
+			element <datatype> (i_axis_n, i_axis_m, i_name, params, i_messenger_ptr, i_element_flags) {
 		
 				assert (n > 0);
 				assert (m > 0);
@@ -122,8 +122,8 @@ namespace two_d
 			template class advection_diffusion_element <double>;
 			
 			template <class datatype>
-			convection_element <datatype>::convection_element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters <datatype>& params, bases::messenger* i_messenger_ptr, int i_flags) : 
-			element <datatype> (i_axis_n, i_axis_m, i_name, params, i_messenger_ptr, i_flags) {
+			convection_element <datatype>::convection_element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters <datatype>& params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
+			element <datatype> (i_axis_n, i_axis_m, i_name, params, i_messenger_ptr, i_element_flags) {
 		
 				assert (n > 0);
 				assert (m > 0);

@@ -13,6 +13,7 @@
 #define PLAN_HPP_S9YPWHOM
 
 #include "../config.hpp"
+#include <map>
 
 /*!*******************************************************************
  * \brief A set of indices to be used with the element scalars for convenience
@@ -21,7 +22,8 @@
  * equivalent to a NULL pointer.
  *********************************************************************/
 enum index {
-	null = 00,
+	null = 0x0,
+	state = 0x0,
 	
 	x_position = 01, x_pos = 01,
 	y_position = 02, y_pos = 02, 
@@ -61,8 +63,17 @@ enum plan_flags {
 	only_forward_horizontal = 0x08
 };
 
+enum transform_flags {
+	forward_horizontal = 0x01,
+	forward_vertical = 0x02,
+	inverse_horizontal = 0x04,
+	inverse_vertical = 0x08
+};
+
 namespace bases
 {
+	typedef std::map <int, int> flags;
+	
 	/*!*******************************************************************
 	* \brief The basic functional unit, containing a recipe for execution
 	* 
@@ -83,7 +94,7 @@ namespace bases
 		* 
 		* The plan class serves as a wrapper for this function.
 		*********************************************************************/
-		virtual void execute (int &element_flags) = 0;
+		virtual void execute (int &element_flags, int &component_flags) = 0;
 	};
 } /* bases */
 #endif /* end of include guard: PLAN_HPP_S9YPWHOM */

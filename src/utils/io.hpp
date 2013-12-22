@@ -92,6 +92,7 @@ namespace io
 		 * datatype representation in C++.
 		 *********************************************************************/
 		virtual void to_file () {
+			TRACE ("Sending to file...");
 			format_ptr->to_file (file_name, (int) names.size (), &names [0], &types [0], &data_ptrs [0]);
 		}
 		
@@ -115,6 +116,7 @@ namespace io
 		virtual ~incremental () {}
 	
 		void to_file () {
+			TRACE ("Sending to file...");
 			if (count % output_every == 0) {
 				char buffer [100];
 				snprintf (buffer, 100, file_format.c_str (), count / output_every);

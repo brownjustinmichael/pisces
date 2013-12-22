@@ -50,7 +50,7 @@ namespace two_d
 				
 				virtual ~horizontal_diffusion () {}
 			
-				void execute (int &element_flags) {	
+				void execute (int &element_flags, int &component_flags) {	
 					TRACE ("Operating...");
 					std::stringstream debug;
 					if (element_flags & x_solve) {
@@ -107,7 +107,7 @@ namespace two_d
 				
 				virtual ~vertical_diffusion () {}
 			
-				void execute (int &element_flags) {	
+				void execute (int &element_flags, int &component_flags) {	
 					TRACE ("Operating...");
 					
 					if (element_flags & z_solve) {
@@ -150,7 +150,7 @@ namespace two_d
 				
 				virtual ~finite_vertical_diffusion () {}
 			
-				void execute (int &element_flags) {	
+				void execute (int &element_flags, int &component_flags) {	
 					TRACE ("Operating...");
 					
 					if (element_flags & z_solve) {

@@ -167,8 +167,7 @@ namespace one_d
 				TRACE ("Initializing " << name << "...");
 				one_d::element <datatype>::initialize (name, initial_conditions, flags);
 				if (!(flags & no_transform) && (name != position)) {
-					element <datatype>::add_inverse_vertical_transform (new fftw_cosine <datatype> (*grids [0], ptr (name)));
-					element <datatype>::add_forward_vertical_transform (new fftw_cosine <datatype> (*grids [0], ptr (name)));
+					element <datatype>::add_transform (name, new fftw_cosine <datatype> (*grids [0], ptr (name)), forward_vertical | inverse_vertical);
 				}
 			}
 			
@@ -206,7 +205,7 @@ namespace one_d
 		private:
 			using element <datatype>::initialize;
 			using element <datatype>::n;
-			using element <datatype>::flags;
+			using element <datatype>::element_flags;
 			using element <datatype>::name;
 			using element <datatype>::normal_stream;
 			using element <datatype>::cell;
@@ -246,7 +245,7 @@ namespace one_d
 		private:
 			using element <datatype>::initialize;
 			using element <datatype>::n;
-			using element <datatype>::flags;
+			using element <datatype>::element_flags;
 			using element <datatype>::name;
 			using element <datatype>::normal_stream;
 			using element <datatype>::cell;

@@ -29,25 +29,25 @@ namespace bases
 			TRACE ("Executing plans...");
 		
 			for (iterator iter = begin (); iter != end (); iter++) {
-				iter->second->execute_pre_plans (flags);
+				iter->second->execute_pre_plans (element_flags [state], element_flags [iter->first]);
 			}
 			
-			transform_vertical_inverse ();
+			transform (inverse_vertical);
 			
 			for (iterator iter = begin (); iter != end (); iter++) {
-				iter->second->execute_mid_plans (flags);
+				iter->second->execute_mid_plans (element_flags [state], element_flags [iter->first]);
 			}
 			
-			transform_horizontal_inverse ();
-
+			transform (inverse_horizontal);
+		
 			factorize ();
 			
 			for (iterator iter = begin (); iter != end (); iter++) {
-				iter->second->execute_post_plans (flags);
+				iter->second->execute_post_plans (element_flags [state], element_flags [iter->first]);
 			}
 		
 			TRACE ("Calculation complete.");
-
+		
 			
 			if (normal_stream) {
 				TRACE ("Writing to file...");
@@ -55,7 +55,7 @@ namespace bases
 			}
 			
 			TRACE ("Updating...");
-
+		
 			solve ();
 			
 			// Output in transform space
