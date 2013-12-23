@@ -5,7 +5,7 @@ env = Environment (ENV = os.environ)
 
 include_cuda = False
 include_mpi = True
-include_mp = False
+include_mp = True
 logger = "log4cplus"
 
 if include_mpi:
@@ -18,6 +18,7 @@ if include_mpi:
 if include_mp:
     env.Append (CPPFLAGS = ["-fopenmp"])
     env.Append (LINKFLAGS = ["-fopenmp"])
+    env.Append (CPPFLAGS = ["-D_MP"])
 
 if include_cuda:
     env.Tool ('cuda')

@@ -2,8 +2,8 @@ diffusion_coeff 0.01
 nonlinear_diffusion_coeff 0.00
 advection_coeff 1.0
 courant_factor 0.1
-timesteps 100
-output_every 10
+timesteps 300
+output_every 30
 gridpoints 64
 max_timestep 0.1
 scale 1.0

@@ -159,6 +159,7 @@ namespace bases
 		 *********************************************************************/
 		inline void add_transform (int i_name, plan <datatype>* i_plan, int i_flags) {
 			TRACE ("Adding transform...");
+			transforms.push_back (i_name);
 			std::shared_ptr <plan <datatype>> plan_ptr = std::shared_ptr <plan <datatype>> (i_plan);
 			if (i_flags & forward_horizontal) {
 				forward_horizontal_transforms [i_name] = plan_ptr;
@@ -181,7 +182,9 @@ namespace bases
 		 * \param initial_conditions The datatype array of initial conditions
 		 * \param element_flags A set of binary element_flags
 		 *********************************************************************/
-		virtual void initialize (int name, datatype* initial_conditions = NULL, int element_flags = 0x00) = 0;
+		virtual void initialize (int i_name, datatype* initial_conditions = NULL, int i_flags = 0x00) {
+			element_flags [i_name] = 0x00;
+		}
 		
 		/*!*******************************************************************
 		 * \brief Reset every scalar index < 0 and converts to spectral space
@@ -202,37 +205,31 @@ namespace bases
 		 ************************************************************************/
 		virtual void transform (int i_flags) {
 			TRACE ("Transforming...");
-			typedef typename std::map <int, std::shared_ptr <plan <datatype> > >::iterator iterator; 
-			if (i_flags & forward_horizontal) {
-				for (iterator iter = forward_horizontal_transforms.begin (); iter != forward_horizontal_transforms.end (); iter++) {
-					if (!(element_flags [iter->first] & transformed_horizontal)) {
-						iter->second->execute (element_flags [state], element_flags [iter->first]);
-						element_flags [iter->first] |= transformed_horizontal;
+			typedef typename std::vector <int>::iterator iterator; 
+			for (iterator iter = transforms.begin (); iter != transforms.end (); iter++) {
+				if (i_flags & forward_horizontal) {
+					if (!(element_flags [*iter] & transformed_horizontal) && forward_horizontal_transforms [*iter]) {
+						forward_horizontal_transforms [*iter]->execute (element_flags [state], element_flags [*iter]);
 					}
+					element_flags [*iter] |= transformed_horizontal;
 				}
-			}
-			if (i_flags & forward_vertical) {
-				for (iterator iter = forward_vertical_transforms.begin (); iter != forward_vertical_transforms.end (); iter++) {
-					if (!(element_flags [iter->first] & transformed_vertical)) {
-						iter->second->execute (element_flags [state], element_flags [iter->first]);
+				if (i_flags & forward_vertical) {
+					if (!(element_flags [*iter] & transformed_vertical) && forward_vertical_transforms [*iter]) {
+						forward_vertical_transforms [*iter]->execute (element_flags [state], element_flags [*iter]);
 					}
-					element_flags [iter->first] |= transformed_vertical;
+					element_flags [*iter] |= transformed_vertical;
 				}
-			}
-			if (i_flags & inverse_horizontal) {
-				for (iterator iter = inverse_horizontal_transforms.begin (); iter != inverse_horizontal_transforms.end (); iter++) {
-					if (element_flags [iter->first] & transformed_horizontal) {
-						iter->second->execute (element_flags [state], element_flags [iter->first]);
+				if (i_flags & inverse_horizontal) {
+					if (element_flags [*iter] & transformed_horizontal && inverse_horizontal_transforms [*iter]) {
+						inverse_horizontal_transforms [*iter]->execute (element_flags [state], element_flags [*iter]);
 					}
-					element_flags [iter->first] &= ~transformed_horizontal;
+					element_flags [*iter] &= ~transformed_horizontal;
 				}
-			}
-			if (i_flags & inverse_vertical) {
-				for (iterator iter = inverse_vertical_transforms.begin (); iter != inverse_vertical_transforms.end (); iter++) {
-					if (element_flags [iter->first] & transformed_vertical) {
-						iter->second->execute (element_flags [state], element_flags [iter->first]);
+				if (i_flags & inverse_vertical) {
+					if (element_flags [*iter] & transformed_vertical && inverse_vertical_transforms [*iter]) {
+						inverse_vertical_transforms [*iter]->execute (element_flags [state], element_flags [*iter]);
 					}
-					element_flags [iter->first] &= ~transformed_vertical;
+					element_flags [*iter] &= ~transformed_vertical;
 				}
 			}
 		}
@@ -340,6 +337,8 @@ namespace bases
 		std::map<int, std::shared_ptr<solver <datatype> > > solvers; //!< A vector of shared pointers to the matrix solvers
 
 	private:
+		std::vector <int> transforms;
+		
 		std::map <int, std::shared_ptr<plan <datatype> > > forward_horizontal_transforms; //!< A vector of shared pointers to the forward horizontal transforms
 		std::map <int, std::shared_ptr<plan <datatype> > > inverse_horizontal_transforms; //!< A vector of shared pointers to the inverse horizontal transforms
 		std::map <int, std::shared_ptr<plan <datatype> > > forward_vertical_transforms; //!< A vector of shared pointers to the forward vertical transforms

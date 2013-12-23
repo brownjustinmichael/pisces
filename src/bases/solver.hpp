@@ -40,7 +40,7 @@ namespace bases
 		flags (i_flags) {}
 		
 		virtual ~solver () {
-			printf ("Destroying bases solver\n");
+			// printf ("Destroying bases solver\n");
 		}
 		
 		/*!*******************************************************************

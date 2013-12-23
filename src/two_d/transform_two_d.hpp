@@ -20,20 +20,16 @@ namespace two_d
 		inverse = 0x02
 	};
 	
-	
-	/*
-		TODO 
-	*/
-	// class fftw_configure
-	// {
-	// public:
-	// 	fftw_configure (int n_threads);
-	// 	
-	// 	virtual ~fftw_configure ();
-	// 
-	// private:
-	// 	int n_threads;
-	// };
+	class fftw_configure
+	{
+	public:
+		fftw_configure ();
+		
+		virtual ~fftw_configure ();
+		
+	private:
+		bool threads;
+	};
 	
 	namespace fourier
 	{
@@ -46,6 +42,8 @@ namespace two_d
 				/*!**********************************************************************
 				 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
 				 ************************************************************************/
+				horizontal_transform (int n, int m, datatype* i_data_in, datatype* i_data_out = NULL, int i_flags = 0x00);
+
 				horizontal_transform (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out = NULL, int i_flags = 0x00);
 				
 				virtual ~horizontal_transform () {}
@@ -73,6 +71,8 @@ namespace two_d
 				/*!**********************************************************************
 				 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
 				 ************************************************************************/
+				vertical_transform (int n, int m, datatype* i_data_in, datatype* i_data_out = NULL, int i_flags = 0x00);
+
 				vertical_transform (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out = NULL, int i_flags = 0x00);
 				
 				virtual ~vertical_transform () {}

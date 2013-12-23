@@ -7,9 +7,12 @@
  ************************************************************************/
 
 #include "bases/messenger.hpp"
+#include "bases/plan.hpp"
 #include "one_d/element_one_d.hpp"
 #include "two_d/element_two_d.hpp"
 #include "config.hpp"
+#include "two_d/transform_two_d.hpp"
+#include <memory>
 
 /*!*******************************************************************
  * \mainpage
@@ -108,9 +111,9 @@ int main (int argc, char *argv[])
 	
 	bases::axis horizontal_axis (m, 0, position_n0, 0, position_nn);
 	bases::axis vertical_axis (n, excess_0, position_m0, excess_n, position_mm);
-
+	
 	// one_d::chebyshev::advection_diffusion_element <double> element (&vertical_axis, name, params, &process_messenger, 0x00);
-	two_d::fourier::chebyshev::advection_diffusion_element <double> element (&horizontal_axis, &vertical_axis, name, params, &process_messenger, 0x00);
+	two_d::fourier::chebyshev::convection_element <double> element (&horizontal_axis, &vertical_axis, name, params, &process_messenger, 0x00);
 
 	try {
 		element.run ();

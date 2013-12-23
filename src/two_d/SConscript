@@ -1,10 +1,18 @@
 Import ("env")
 Import ("objects")
 Import ("cuda_objects")
+Import ("include_mp")
 
-for lib in ["fftw3", "fftw3f"]:
-    if lib not in env ['LIBS']:
-        env.Append (LIBS = lib)
+conf = Configure (env)
+
+conf.CheckLib ("fftw3")
+conf.CheckLib ("fftw3f")
+        
+conf.CheckLib ("fftw3_omp")
+conf.CheckLib ("fftw3f_omp")
+conf.CheckLib ("m")
+    
+env = conf.Finish ()
 
 objects.append (env.Object ("element_two_d.cpp"))
 

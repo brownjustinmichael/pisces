@@ -134,30 +134,31 @@ namespace two_d
 		/*!*******************************************************************
 		 * \copydoc bases::element <datatype>::initialize ()
 		 *********************************************************************/
-		virtual void initialize (int name, datatype* initial_conditions = NULL, int element_flags = 0x00) {
+		virtual void initialize (int name, datatype* initial_conditions = NULL, int i_flags = 0x00) {
 			TRACE ("Initializing " << name << "...");
 
+			bases::element <datatype>::initialize (name, initial_conditions, i_flags);
 			if (name == x_position) {
 				initial_conditions = &(grids [0]->position ());
-				element_flags |= uniform_m;
+				i_flags |= uniform_m;
 			} else if (name == z_position) {
 				initial_conditions = &(grids [1]->position ());
-				element_flags |= uniform_n;
+				i_flags |= uniform_n;
 			}
 			// Size allowing for real FFT buffer
 			scalars [name].resize (2 * (n / 2 + 1) * m, 0.0);
 			if (initial_conditions) {
-				if ((element_flags & uniform_m) && (element_flags & uniform_n)) {
+				if ((i_flags & uniform_m) && (i_flags & uniform_n)) {
 					for (int i = 0; i < n; ++i) {
 						for (int j = 0; j < m; ++j) {
 							(*this) (name, i, j) = *initial_conditions;
 						}
 					}
-				} else if (element_flags & uniform_m) {
+				} else if (i_flags & uniform_m) {
 					for (int j = 0; j < m; ++j) {
 						utils::copy (n, initial_conditions, ptr (name, 0, j), 1, m);
 					}
-				} else if (element_flags & uniform_n) {
+				} else if (i_flags & uniform_n) {
 					for (int i = 0; i < n; ++i) {
 						utils::copy (m, initial_conditions, ptr (name, i, 0));
 					}
@@ -247,6 +248,7 @@ namespace two_d
 					*/
 					if ((name != x_position) && (name != z_position)) {
 					    if (element_flags & only_forward_horizontal) {
+							DEBUG ("Adding only forward_horizontal to " << name);
 							element <datatype>::add_transform (name, new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name)), forward_horizontal);
 						} else if (!(element_flags & no_transform)) {
 							DEBUG ("Adding all transforms for " << name);

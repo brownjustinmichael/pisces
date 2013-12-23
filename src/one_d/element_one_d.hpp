@@ -96,6 +96,7 @@ namespace one_d
 		virtual void initialize (int name, datatype* initial_conditions = NULL, int flags = 0x00) {
 			TRACE ("Initializing " << name << "...");
 			
+			bases::element <datatype>::initialize (name, initial_conditions, flags);
 			scalars [name].resize (n, 0.0);
 			if (name == position) {
 				initial_conditions = &(grids [0]->position ());

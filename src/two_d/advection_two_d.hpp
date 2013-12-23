@@ -41,9 +41,11 @@ namespace two_d
 				
 				virtual void execute (int &element_flags, int &component_flags) {
 					for (int j = 1; j < m - 1; ++j) {
+						data_out [j] += coeff * (vel_n [j] * (data_in [1 * m + j] - data_in [j]) / (pos_n [1] - pos_n [0]) + vel_m [j] * (data_in [j + 1] - data_in [j - 1]) / (pos_m [j + 1] - pos_m [j - 1]));
 						for (int i = 1; i < n - 1; ++i) {
-							data_out [i * m + j] += coeff * (vel_n [i * m + j] * (data_in [(i + 1) * m + j] - data_in [(i - 1) * m + j]) / (pos_n [i + 1] - pos_n [i - 1]) + vel_m [i * m + j] * (data_in [i * m + j + 1] - data_in [i * m + j - 1]) / (pos_m [j + 1] - pos_n [j - 1]));
+							data_out [i * m + j] += coeff * (vel_n [i * m + j] * (data_in [(i + 1) * m + j] - data_in [(i - 1) * m + j]) / (pos_n [i + 1] - pos_n [i - 1]) + vel_m [i * m + j] * (data_in [i * m + j + 1] - data_in [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]));
 						}
+						data_out [(n - 1) * m + j] += coeff * (vel_n [(n - 1) * m + j] * (data_in [(n - 1) * m + j] - data_in [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]) + vel_m [(n - 1) * m + j] * (data_in [(n - 1) * m + j + 1] - data_in [(n - 1) * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]));
 					}
 				}
 			
@@ -80,10 +82,22 @@ namespace two_d
 				virtual ~stream_advection () {}
 				
 				virtual void execute (int &element_flags, int &component_flags) {
-					for (int j = 1; j < m - 1; ++j) {
-						for (int i = 1; i < n - 1; ++i) {
-							data_out [i * m + j] += coeff * ((stream [(i + 1) * m + j] - stream [(i - 1) * m + j]) * (data_in [i * m + j + 1] - data_in [i * m + j - 1]) + (stream [i * m + j + 1] - stream [i * m + j - 1]) * (data_in [(i + 1) * m + j] - data_in [(i - 1) * m + j])) / (pos_m [j + 1] - pos_n [j - 1]) / (pos_n [i + 1] - pos_n [i - 1]);
+					std::stringstream debug;
+					
+					for (int i = 0; i < m; ++i) {
+						for (int j = 0; j < n; ++j) {
+							debug << stream [j * m + i] << " ";
 						}
+						DEBUG (debug.str ());
+						debug.str ("");
+					}
+					
+					for (int j = 1; j < m - 1; ++j) {
+						data_out [j] += coeff * ((stream [m + j] - stream [j]) * (data_in [j + 1] - data_in [j - 1]) - (stream [j + 1] - stream [j - 1]) * (data_in [m + j] - data_in [j])) / (pos_n [1] - pos_n [0]) / (pos_m [j + 1] - pos_m [j - 1]);
+						for (int i = 1; i < n - 1; ++i) {
+							data_out [i * m + j] += coeff * ((stream [(i + 1) * m + j] - stream [(i - 1) * m + j]) * (data_in [i * m + j + 1] - data_in [i * m + j - 1]) - (stream [i * m + j + 1] - stream [i * m + j - 1]) * (data_in [(i + 1) * m + j] - data_in [(i - 1) * m + j])) / (pos_m [j + 1] - pos_m [j - 1]) / (pos_n [i + 1] - pos_n [i - 1]);
+						}
+						data_out [(n - 1) * m + j] += coeff * ((stream [(n - 1) * m + j] - stream [(n - 2) * m + j]) * (data_in [(n - 1) * m + j + 1] - data_in [(n - 1) * m + j - 1]) - (stream [(n - 1) * m + j + 1] - stream [(n - 1) * m + j - 1]) * (data_in [(n - 1) * m + j] - data_in [(n - 2) * m + j])) / (pos_n [n - 1] - pos_n [n - 2]) / (pos_m [j + 1] - pos_m [j - 1]);
 					}
 				}
 			

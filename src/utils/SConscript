@@ -21,8 +21,7 @@ for lib in ["atlas", "netcdf_c++", "netcdf", "irc", "imf"]:
 
 env = conf.Finish ()
 
-if not include_mp:
-    objects.append (env.Object ("utils.cpp"))
+objects.append (env.Object ("utils.cpp"))
 objects.append (env.Object ("solver_utils.cpp"))
 
 objects.append (env.Object ("interpolate.cpp"))

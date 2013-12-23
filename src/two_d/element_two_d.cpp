@@ -48,7 +48,7 @@ namespace two_d
 					init [i] = scale * ((*this) (x_position, i, 0)) + 1.0;
 				}
 				initialize (x_velocity, &init [0], uniform_n);
-				initialize (z_velocity, &init [0], uniform_n & uniform_m);
+				initialize (z_velocity, &init [0], uniform_n | uniform_m);
 				initialize (temp_explicit_rhs, NULL, no_transform);
 				initialize (temp_implicit_rhs, NULL, no_transform);
 				initialize (temp_real_rhs, NULL, only_forward_horizontal);
@@ -65,6 +65,7 @@ namespace two_d
 				normal_stream->template append <datatype> ("u", ptr (x_velocity));
 				normal_stream->template append <datatype> ("w", ptr (z_velocity));
 				normal_stream->template append <datatype> ("T", ptr (temp));
+				normal_stream->template append <datatype> ("rhs", ptr (temp_real_rhs));
 			
 				filestream.str ("");
 				filestream << "../output/" + params.output + "_t_" << std::setfill ('0') << std::setw (2) << name << "_%04i.cdf";
@@ -76,6 +77,7 @@ namespace two_d
 				transform_stream->template append <datatype> ("u", ptr (x_velocity));
 				transform_stream->template append <datatype> ("w", ptr (z_velocity));
 				transform_stream->template append <datatype> ("T", ptr (temp));
+				transform_stream->template append <datatype> ("rhs", ptr (temp_real_rhs));
 							
 				// Set up solver
 				element <datatype>::add_solver (temp, new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, ptr (temp), ptr (temp_explicit_rhs), ptr (temp_real_rhs), ptr (temp_implicit_rhs)));
@@ -144,10 +146,21 @@ namespace two_d
 					}
 				}
 				initialize (temp, &init [0]);
-				for (int i = 0; i < n; ++i) {
-					init [i] = scale * ((*this) (x_position, i, 0)) + 1.0;
+				for (int i = 0; i < m; ++i) {
+					init [i] = scale * ((*this) (z_position, 0, i)) + 1.0;
 				}
 				initialize (stream, &init [0], uniform_n);
+				
+				std::stringstream debug;
+				
+				for (int i = 0; i < m; ++i) {
+					for (int j = 0; j < 2 * (n / 2 + 1); ++j) {
+						debug << (*this) (stream, i, j) << " ";
+					}
+					DEBUG (debug.str ());
+					debug.str ("");
+				}
+				
 				initialize (stream_explicit_rhs, NULL, no_transform);
 				initialize (stream_implicit_rhs, NULL, no_transform);
 				initialize (stream_real_rhs, NULL, only_forward_horizontal);
@@ -165,6 +178,9 @@ namespace two_d
 				normal_stream->template append <datatype> ("z", ptr (z_position));
 				normal_stream->template append <datatype> ("phi", ptr (stream));
 				normal_stream->template append <datatype> ("T", ptr (temp));
+				normal_stream->template append <datatype> ("e_rhs", ptr (temp_explicit_rhs));
+				normal_stream->template append <datatype> ("i_rhs", ptr (temp_implicit_rhs));
+				normal_stream->template append <datatype> ("r_rhs", ptr (temp_real_rhs));
 			
 				// Set up solver
 				element <datatype>::add_solver (temp, new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, ptr (temp), ptr (temp_explicit_rhs), ptr (temp_real_rhs), ptr (temp_implicit_rhs)));

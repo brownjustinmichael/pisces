@@ -147,6 +147,14 @@ namespace two_d
 					flags |= first_run;
 				}
 				
+				// for (int i = 0; i < m; ++i) {
+				// 	for (int j = 0; j < n; ++j) {
+				// 		debug << real_rhs [j * m + i] << " ";
+				// 	}
+				// 	DEBUG (debug.str ());
+				// 	debug.str ("");
+				// }
+				
 				utils::matrix_add_scaled (m - excess_0 - excess_n, 2 * (n / 2 + 1), timestep, implicit_rhs + excess_0, &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
 				utils::matrix_add_scaled (m - excess_0 - excess_n, 2 * (n / 2 + 1), timestep, real_rhs + excess_0, &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
 				utils::matrix_add_scaled (m - excess_0 - excess_n, 2 * (n / 2 + 1), timestep, explicit_rhs + excess_0, &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
