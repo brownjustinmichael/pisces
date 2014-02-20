@@ -12,34 +12,39 @@
 #include <iostream>
 #include <memory>
 #include <typeinfo>
+#include "exceptions.hpp"
 #include "../config.hpp"
+#include <yaml-cpp/yaml.h>
+
 
 #ifndef IO_HPP_C1E9B6EF
 #define IO_HPP_C1E9B6EF
 
 namespace io
-{
-	template <class datatype>
-	class parameters
+{	
+	class parameters : public YAML::Node
 	{
 	public:
-		std::string filename;
-
-		datatype diffusion_coeff, nonlinear_diffusion_coeff;
-		datatype advection_coeff;
-		int timesteps;
-		int gridpoints;
-		int output_every;
-		int n_iterations;
-		int n, nmp, nrhs, nb;
-		datatype max_timestep, courant_factor, implicit_alpha, implicit_allowance;
-		datatype scale, width, mean, sigma;
-		std::string output;
-
-		parameters (std::string i_filename);
+		parameters (std::string filename) {
+			YAML::Node::operator= (YAML::LoadFile (filename));
+		}
 		
 		virtual ~parameters () {}
+		
+		YAML::Node operator [] (std::string key);
+		
+		template <typename datatype>
+		const datatype get (std::string key) {
+			if (operator[] (key).IsDefined ()) {
+				return operator [] (key).as <datatype> ();
+			} else {
+				throw exceptions::key_does_not_exist (key);
+			}
+		}
+		
+		using YAML::Node::operator=;
 	};
+	
 	
 	class format
 	{
@@ -50,7 +55,11 @@ namespace io
 			// printf ("Destroying format\n");
 		}
 		
-		virtual void to_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs) = 0;
+		virtual std::string extension () = 0;
+		
+		virtual void to_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) = 0;
+		
+		virtual void from_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) = 0;
 	};
 	
 	/*!*******************************************************************
@@ -84,6 +93,14 @@ namespace io
 			data_ptrs.push_back ((void *) data_ptr);
 		}
 		
+		template <class datatype>
+		void append_scalar (std::string name, datatype *data_ptr) {
+			TRACE ("Appending " << name << " to output...");
+			scalar_types.push_back (&typeid (datatype));
+			scalar_names.push_back (name);
+			scalar_ptrs.push_back ((void *) data_ptr);
+		}
+		
 		/*!*******************************************************************
 		 * \brief A virtual function to output the data to file
 		 * 
@@ -93,15 +110,18 @@ namespace io
 		 *********************************************************************/
 		virtual void to_file () {
 			TRACE ("Sending to file...");
-			format_ptr->to_file (file_name, (int) names.size (), &names [0], &types [0], &data_ptrs [0]);
+			format_ptr->to_file (file_name + format_ptr->extension (), (int) names.size (), &names [0], &types [0], &data_ptrs [0], (int) scalar_names.size (), &scalar_names [0], &scalar_types [0], &scalar_ptrs [0]);
 		}
 		
 	protected:
 		std::shared_ptr <format> format_ptr;
 		std::string file_name;
 		std::vector <std::string> names;
+		std::vector <std::string> scalar_names;
 		std::vector <const std::type_info*> types;
+		std::vector <const std::type_info*> scalar_types;
 		std::vector <void *> data_ptrs; //!< A vector of integer pointers to the arrays of data
+		std::vector <void *> scalar_ptrs; //!< A vector of integer pointers to the arrays of data
 	};
 	
 	class incremental : public output
@@ -118,8 +138,8 @@ namespace io
 		void to_file () {
 			TRACE ("Sending to file...");
 			if (count % output_every == 0) {
-				char buffer [100];
-				snprintf (buffer, 100, file_format.c_str (), count / output_every);
+				char buffer [file_format.size () * 2];
+				snprintf (buffer, file_format.size () * 2, file_format.c_str (), count / output_every);
 				file_name = buffer;
 				output::to_file ();
 			}
@@ -130,6 +150,61 @@ namespace io
 		std::string file_format;
 		int output_every;
 		int count;
+	};
+	
+	class input
+	{
+	public:
+		input (format* i_format_ptr, std::string i_file_name = "in") :
+		format_ptr (i_format_ptr),
+		file_name (i_file_name) {};
+		
+		virtual ~input () {
+			// printf ("Destroying input\n");
+		}
+		
+		/*!*******************************************************************
+		 * \brief Append a datatype array to the list to be output
+		 * 
+		 * \param data_ptr A datatype pointer to the data to be the new column
+		 *********************************************************************/
+		template <class datatype>
+		void append (std::string name, datatype *data_ptr) {
+			TRACE ("Appending " << name << " to input...");
+			types.push_back (&typeid (datatype));
+			names.push_back (name);
+			data_ptrs.push_back ((void *) data_ptr);
+		}
+		
+		template <class datatype>
+		void append_scalar (std::string name, datatype *data_ptr) {
+			TRACE ("Appending " << name << " to output...");
+			scalar_types.push_back (&typeid (datatype));
+			scalar_names.push_back (name);
+			scalar_ptrs.push_back ((void *) data_ptr);
+		}
+		
+		/*!*******************************************************************
+		 * \brief A virtual function to output the data to file
+		 * 
+		 * This function should be overwritten by subclasses, though it may 
+		 * contain a call to this function, which will output with default 
+		 * datatype representation in C++.
+		 *********************************************************************/
+		virtual void from_file () {
+			TRACE ("Sending to file...");
+			format_ptr->from_file (file_name + format_ptr->extension (), (int) names.size (), &names [0], &types [0], &data_ptrs [0], (int) scalar_names.size (), &scalar_names [0], &scalar_types [0], &scalar_ptrs [0]);
+		}
+		
+	protected:
+		std::shared_ptr <format> format_ptr;
+		std::string file_name;
+		std::vector <std::string> names;
+		std::vector <const std::type_info*> types;
+		std::vector <void *> data_ptrs; //!< A vector of integer pointers to the arrays of data
+		std::vector <std::string> scalar_names;
+		std::vector <const std::type_info*> scalar_types;
+		std::vector <void *> scalar_ptrs; //!< A vector of integer pointers to the arrays of data
 	};
 	
 	namespace one_d
@@ -151,11 +226,15 @@ namespace io
 			n (i_n) {}
 		
 			~ascii () {}
+			
+			std::string extension () {return ".dat";}
 		
 			/*!*******************************************************************
 			 * \brief Outputs to file_name
 			 *********************************************************************/
-			void to_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs);
+			void to_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs);
+		
+			void from_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs);
 		
 		protected:
 			int n;
@@ -164,6 +243,24 @@ namespace io
 		/*
 			TODO Make legible headers
 		*/
+		
+		class netcdf : public format
+		{
+		public:
+			netcdf (int i_n) :
+			n (i_n) {}
+		
+			virtual ~netcdf () {}
+			
+			std::string extension () {return ".cdf";}
+			
+			void to_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs);
+
+			void from_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs);
+	
+		protected:
+			int n;
+		};
 	} /* one_d */
 	
 	namespace two_d
@@ -171,12 +268,18 @@ namespace io
 		class netcdf : public format
 		{
 		public:
-			netcdf (int i_n, int i_m) :
-			n (i_n), m (i_m) {}
+			netcdf (int i_n = 0, int i_m = 0) :
+			n (i_n), m (i_m) {
+				// if (n == 0)
+			}
 		
 			virtual ~netcdf () {}
 		
-			void to_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs);
+			std::string extension () {return ".cdf";}
+		
+			void to_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs);
+
+			void from_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs);
 	
 		protected:
 			int n, m;

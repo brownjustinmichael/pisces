@@ -54,6 +54,10 @@ extern "C" void scopy_ (int *n, float *x, int *incx, float *y, int *incy);
  *********************************************************************/
 extern "C" void dcopy_ (int *n, double *x, int *incx, double *y, int *incy);
 
+extern "C" void sswap_ (int *n, float *x, int *incx, float *y, int *incy);
+
+extern "C" void dswap_ (int *n, double *x, int *incx, double *y, int *incy);
+
 /*!*******************************************************************
  * \brief Function from BLAS that scales a float array
  * 
@@ -167,6 +171,40 @@ namespace utils
 		}
 		for (int i = 0; i < m; ++i) {
 			dcopy_ (&n, x + i * ldx, &ione, y + i * ldy, &ione);
+		}
+	}
+	
+	void swap (int n, float* x, float* y, int incx, int incy) {
+		sswap_ (&n, x, &incx, y, &incy);
+	}
+	
+	void swap (int n, double* x, double* y, int incx, int incy) {
+		dswap_ (&n, x, &incx, y, &incy);
+	}
+	
+	void matrix_swap (int n, int m, float *x, float *y, int ldx, int ldy) {
+		int ione = 1;
+		if (ldx == -1) {
+			ldx = n;
+		}
+		if (ldy == -1) {
+			ldy = n;
+		}
+		for (int i = 0; i < m; ++i) {
+			sswap_ (&n, x + i * ldx, &ione, y + i * ldy, &ione);
+		}
+	}
+
+	void matrix_swap (int n, int m, double *x, double *y, int ldx, int ldy) {
+		int ione = 1;
+		if (ldx == -1) {
+			ldx = n;
+		}
+		if (ldy == -1) {
+			ldy = n;
+		}
+		for (int i = 0; i < m; ++i) {
+			dswap_ (&n, x + i * ldx, &ione, y + i * ldy, &ione);
 		}
 	}
 	

@@ -1,29 +1,13 @@
 import os
 import SCons.Conftest
 
-env = Environment (ENV = os.environ)
-
 include_cuda = False
 include_mpi = True
+include_vt = False
 include_mp = True
+include_opencl = True
 logger = "log4cplus"
 
-if include_mpi:
-    env ["CXX"] = "mpicxx"
+env = Environment (ENV = os.environ)
 
-    env.Append (CPPFLAGS = ["-D_MPI"])
-    if include_cuda:
-        env.Append (NVCCFLAGS = ["-D_MPI"])
-        
-if include_mp:
-    env.Append (CPPFLAGS = ["-fopenmp"])
-    env.Append (LINKFLAGS = ["-fopenmp"])
-    env.Append (CPPFLAGS = ["-D_MP"])
-
-if include_cuda:
-    env.Tool ('cuda')
-    env.Append (NVCCFLAGS = ["-g", "-arch=sm_20"])
-
-env.Append (CPPFLAGS = ["-Wall", "-g", "-std=c++0x"])
-
-env.SConscript ("../src/SConscript", variant_dir = ".", duplicate = 0, exports = {"env": env, "include_cuda": include_cuda, "include_mp": include_mp, "logger": logger})
+env.SConscript ("../src/SConscript", variant_dir = ".", duplicate = 0, exports = {"env": env, "include_cuda": include_cuda, "include_mp": include_mp, "include_vt":include_vt, "include_opencl":include_opencl, "include_mpi":include_mpi, "logger": logger})

@@ -66,6 +66,18 @@ namespace utils
 	 *********************************************************************/
 	void matrix_solve (int n, float* a, int* ipiv, float* b, int *info = NULL, int nrhs = 1, int lda = -1, int ldb = -1);
 	
+	void tridiagonal_solve (int n, float *sub, float *diag, float *sup, float *b, int *info = NULL, int nrhs = 1, int ldb = -1);
+
+	void tridiagonal_solve (int n, double *sub, double *diag, double *sup, double *b, int *info = NULL, int nrhs = 1, int ldb = -1);
+	
+	void tridiagonal_solve (int n, double *dl, double *d, double *du, double *du2, int *ipiv, double *b, int *info = NULL, int nrhs = 1, int ldb = -1);
+	
+	void tridiagonal_factorize (int n, double *dl, double *d, double *du, double *du2, int *ipiv, int *info = NULL);
+	
+	void tridiagonal_solve (int n, float *dl, float *d, float *du, float *du2, int *ipiv, float *b, int *info = NULL, int nrhs = 1, int ldb = -1);
+	
+	void tridiagonal_factorize (int n, float *dl, float *d, float *du, float *du2, int *ipiv, int *info = NULL);
+	
 	void diagonal_solve (int n, double *a, double *b, int inca = 1, int incb = 1);
 
 	void diagonal_solve (int n, float *a, float *b, int inca = 1, int incb = 1);

@@ -16,6 +16,35 @@
 
 namespace two_d
 {
+	namespace fourier
+	{
+		namespace chebyshev
+		{
+			enum mode {
+				mode_flag = 0x10
+			};
+			
+			template <typename datatype>
+		    struct horizontal_grid { typedef bases::fourier::grid <datatype> type; };
+			
+			template <typename datatype>
+		    struct vertical_grid { typedef bases::chebyshev::grid <datatype> type; };
+		} /* chebyshev */
+		
+		namespace cosine
+		{
+			enum mode {
+				mode_flag = 0x20
+			};
+
+			template <typename datatype>
+		    struct horizontal_grid { typedef bases::fourier::grid <datatype> type; };
+			
+			template <typename datatype>
+		    struct vertical_grid { typedef bases::cosine::grid <datatype> type; };
+		} /* chebyshev */
+	} /* fourier */
+	
 	/*!*******************************************************************
 	 * \brief A subclass of plan, specific to explicit methods
 	 * 
@@ -25,8 +54,10 @@ namespace two_d
 	class explicit_plan : public bases::plan <datatype>
 	{
 	public:
-		explicit_plan (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype *i_data_in, datatype *i_data_out = NULL) :
+		explicit_plan (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) :
+		bases::plan <datatype> (i_element_flags, i_component_flags),
 		n (i_grid_n.n),
+		ldn (i_grid_n.ld),
 		m (i_grid_m.n),
 		grid_n (i_grid_n),
 		grid_m (i_grid_m),
@@ -40,7 +71,9 @@ namespace two_d
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
 		explicit_plan (bases::solver <datatype> &i_solver) :
+		bases::plan <datatype> (i_solver.element_flags, i_solver.component_flags),
 		n (i_solver.grid_ptr (0)->n),
+		ldn (i_solver.grid_ptr (0)->ld),
 		m (i_solver.grid_ptr (1)->n),
 		grid_n (*(i_solver.grid_ptr (0))),
 		grid_m (*(i_solver.grid_ptr (1))),
@@ -52,9 +85,10 @@ namespace two_d
 		/*!*******************************************************************
 		 * \copydoc bases::plan::execute ()
 		 *********************************************************************/
-		virtual void execute (int &element_flags, int &component_flags) = 0;
+		virtual void execute () = 0;
 
 		int n; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
+		int ldn;
 		int m;
 		bases::grid <datatype> &grid_n, &grid_m;
 		datatype* data_in; //!< A datatype pointer to the input data
@@ -70,8 +104,10 @@ namespace two_d
 	class real_plan : public bases::plan <datatype>
 	{
 	public:
-		real_plan (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype *i_data_in, datatype *i_data_out = NULL) :
+		real_plan (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) :
+		bases::plan <datatype> (i_element_flags, i_component_flags),
 		n (i_grid_n.n),
+		ldn (i_grid_n.ld),
 		m (i_grid_m.n),
 		grid_n (i_grid_n),
 		grid_m (i_grid_m),
@@ -85,7 +121,9 @@ namespace two_d
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
 		real_plan (bases::solver <datatype> &i_solver) :
+		bases::plan <datatype> (i_solver.element_flags, i_solver.component_flags),
 		n (i_solver.grid_ptr (0)->n),
+		ldn (i_solver.grid_ptr (0)->ld),
 		m (i_solver.grid_ptr (1)->n),
 		grid_n (*(i_solver.grid_ptr (0))),
 		grid_m (*(i_solver.grid_ptr (1))),
@@ -97,9 +135,10 @@ namespace two_d
 		/*!*******************************************************************
 		 * \copydoc bases::plan::execute ()
 		 *********************************************************************/
-		virtual void execute (int &element_flags, int &component_flags) = 0;
+		virtual void execute () = 0;
 
 		int n; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
+		int ldn;
 		int m;
 		bases::grid <datatype> &grid_n, &grid_m;
 		datatype* data_in; //!< A datatype pointer to the input data
@@ -115,8 +154,8 @@ namespace two_d
 	class implicit_plan : public explicit_plan <datatype>
 	{
 	public:
-		implicit_plan (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype *i_matrix_n, datatype *i_matrix_m, datatype *i_data_in, datatype *i_data_out = NULL) :
-		explicit_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out),  
+		implicit_plan (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype *i_matrix_n, datatype *i_matrix_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) :
+		explicit_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out, i_element_flags, i_component_flags),  
 		matrix_n (i_matrix_n),  
 		matrix_m (i_matrix_m) {}
 
@@ -133,22 +172,46 @@ namespace two_d
 			data_out = i_solver.rhs_ptr (implicit_rhs);
 		}
 		
-		/*
-			TODO Take solver object instead of matrices
-		*/
-
 		virtual ~implicit_plan () {}
 
 		/*!*******************************************************************
 		 * \copydoc plan::execute ()
 		 *********************************************************************/
-		virtual void execute (int &element_flags, int &component_flags) = 0;
+		virtual void execute () = 0;
 
 		using explicit_plan <datatype>::grid_n;
 		using explicit_plan <datatype>::grid_m;
 		using explicit_plan <datatype>::data_out;
 		datatype *matrix_n; //!< A datatype pointer to the input data
 		datatype *matrix_m; //!< A datatype pointer to the input data
+	};
+	
+	template <class datatype>
+	class scale_plan : public explicit_plan <datatype>
+	{
+	public:
+		scale_plan (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype *i_data_in, datatype *i_data_out, datatype i_coeff, int *i_element_flags = NULL, int *i_component_flags = NULL) :
+		explicit_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out, i_element_flags, i_component_flags),
+		coeff (i_coeff) {}
+		
+		virtual ~scale_plan () {}
+		
+		virtual void execute () {
+			if (data_out == data_in) {
+				utils::scale (m * ldn, coeff, data_out);
+			} else {
+				utils::scale (m * ldn, 0.0, data_out);
+				utils::add_scaled (m * ldn, coeff, data_in, data_out);
+			}
+		}
+	
+	private:
+		using explicit_plan <datatype>::n;
+		using explicit_plan <datatype>::ldn;
+		using explicit_plan <datatype>::m;
+		using explicit_plan <datatype>::data_in;
+		using explicit_plan <datatype>::data_out;
+		datatype coeff;
 	};
 } /* two_d */
 

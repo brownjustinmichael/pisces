@@ -24,8 +24,10 @@ namespace one_d
 	class explicit_plan : public bases::plan <datatype>
 	{
 	public:
-		explicit_plan (bases::grid <datatype> &i_grid, datatype *i_data_in, datatype *i_data_out = NULL) : 
+		explicit_plan (bases::grid <datatype> &i_grid, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : 
+		bases::plan <datatype> (i_element_flags, i_component_flags),
 		n (i_grid.n),
+		ld (i_grid.ld),
 		grid (i_grid),
 		data_in (i_data_in),
 		data_out (i_data_out ? i_data_out : i_data_in) {}
@@ -37,10 +39,12 @@ namespace one_d
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
 		explicit_plan (bases::solver <datatype> &i_solver) : 
+		bases::plan <datatype> (i_solver.element_flags, i_solver.component_flags),
 		n (i_solver.grid_ptr ()->n),
+		ld (i_solver.grid_ptr ()->ld),
 		grid (*(i_solver.grid_ptr ())),
 		data_in (i_solver.data_ptr ()),
-		data_out (i_solver.rhs_ptr (1)) {}
+		data_out (i_solver.rhs_ptr (explicit_rhs)) {}
 
 		virtual ~explicit_plan () {
 			// printf ("Destroying one_d explicit plan\n");
@@ -49,11 +53,11 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::plan::execute ()
 		 *********************************************************************/
-		virtual void execute (int &element_flags, int &component_flags) = 0;
+		virtual void execute () = 0;
 
 	protected:
 
-		int &n; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
+		int &n, &ld; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
 		bases::grid <datatype> &grid;
 		datatype* data_in; //!< A datatype pointer to the input data
 		datatype* data_out; //!< A datatype pointer to the output data
@@ -68,7 +72,7 @@ namespace one_d
 	class implicit_plan : public explicit_plan <datatype>
 	{
 	public:
-		implicit_plan (bases::grid <datatype> &i_grid, datatype *i_matrix, datatype *i_data_in, datatype *i_data_out = NULL) :
+		implicit_plan (bases::grid <datatype> &i_grid, datatype *i_matrix, datatype *i_data_in, datatype *i_data_out = NULL, int *element_flags = NULL, int *component_flags = NULL) :
 		explicit_plan <datatype> (i_grid, i_data_in, i_data_out),  
 		matrix (i_matrix) {}
 		
@@ -91,7 +95,7 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc plan::execute ()
 		 *********************************************************************/
-		virtual void execute (int &element_flags, int &component_flags) = 0;
+		virtual void execute () = 0;
 	
 	protected:
 		using explicit_plan <datatype>::grid;

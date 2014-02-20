@@ -63,11 +63,13 @@ extern int severity;
  *********************************************************************/
 class log_config {
 public:
-	log_config (int* argc, char*** argv, int id = 0);
+	log_config ();
 	
 	virtual ~log_config () {
 		// printf ("Destroying log config\n");
 	}
+	
+	static void configure (int *argc, char ***argv, int id = 0);
 };
 
 #endif /* end of include guard: CONFIG_H_95CWOMPS */

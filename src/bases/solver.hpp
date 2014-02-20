@@ -21,7 +21,7 @@ enum solver_flags {
 	explicit_rhs = 0x01,
 	real_rhs = 0x02,
 	factorized = 0x08,
-	first_run = 0x10,
+	first_run = 0x100,
 };
 
 namespace bases
@@ -36,8 +36,8 @@ namespace bases
 		/*!*******************************************************************
 		 * \copydoc explicit_plan::explicit_plan ()
 		 *********************************************************************/
-		solver (int i_flags = 0x00) : 
-		flags (i_flags) {}
+		solver (int *i_element_flags, int *i_component_flags) : 
+		plan <datatype> (i_element_flags, i_component_flags) {}
 		
 		virtual ~solver () {
 			// printf ("Destroying bases solver\n");
@@ -76,21 +76,39 @@ namespace bases
 			TRACE ("Added.");
 		}
 		
-		inline void execute_pre_plans (int &element_flags, int &component_flags) {
+		inline void add_pre_solve_plan (std::shared_ptr <plan <datatype>> i_plan) {
+			TRACE ("Adding plan...");
+			pre_solve_plans.push_back (i_plan);
+			TRACE ("Added.");
+		}
+
+		inline void add_pre_solve_plan (plan <datatype>* i_plan) {
+			TRACE ("Adding plan...");
+			pre_solve_plans.push_back (std::shared_ptr <plan <datatype>> (i_plan));
+			TRACE ("Added.");
+		}
+		
+		inline void execute_pre_plans () {
 			for (int i = 0; i < (int) pre_transform_plans.size (); ++i) {
-				pre_transform_plans [i]->execute (element_flags, component_flags);
+				pre_transform_plans [i]->execute ();
 			}
 		}
 		
-		inline void execute_mid_plans (int &element_flags, int &component_flags) {
+		inline void execute_mid_plans () {
 			for (int i = 0; i < (int) mid_transform_plans.size (); ++i) {
-				mid_transform_plans [i]->execute (element_flags, component_flags);
+				mid_transform_plans [i]->execute ();
 			}
 		}
 		
-		inline void execute_post_plans (int &element_flags, int &component_flags) {
+		inline void execute_post_plans () {
 			for (int i = 0; i < (int) post_transform_plans.size (); ++i) {
-				post_transform_plans [i]->execute (element_flags, component_flags);
+				post_transform_plans [i]->execute ();
+			}
+		}
+		
+		inline void execute_pre_solve_plans () {
+			for (int i = 0; i < (int) pre_solve_plans.size (); ++i) {
+				pre_solve_plans [i]->execute ();
 			}
 		}
 		
@@ -102,8 +120,10 @@ namespace bases
 		 *********************************************************************/
 		void factorize () {
 			_factorize ();
-			flags |= factorized;
+			*component_flags |= factorized;
 		}
+		
+		virtual void reset () = 0;
 		
 		virtual datatype *matrix_ptr (int index = 0) = 0;
 		
@@ -116,20 +136,26 @@ namespace bases
 		/*!*******************************************************************
 		 * \brief Solve the matrix equation
 		 *********************************************************************/
-		virtual void execute (int &element_flags, int &component_flags) {
+		void execute () {
 			TRACE ("Executing...");
-			if (!(element_flags & factorized)) {
+			if (!(*component_flags & factorized)) {
 				factorize ();
+			} else {
 			}
+			_solve ();
+			reset ();
 		}
 		
+		using bases::plan <datatype>::element_flags;
+		using bases::plan <datatype>::component_flags;
 	protected:
 		virtual void _factorize () = 0;
+		virtual void _solve () = 0;
 
-		int flags;
 		std::vector <std::shared_ptr <plan <datatype> > > pre_transform_plans; //!< A vector of shared pointers of plans to be executed before the transforms
 		std::vector <std::shared_ptr <plan <datatype> > > mid_transform_plans; //!< A vector of shared pointers of plans to be executed after the vertical transform
 		std::vector <std::shared_ptr <plan <datatype> > > post_transform_plans; //!< A vector of shared pointers of plans to be executed after both transforms
+		std::vector <std::shared_ptr <plan <datatype> > > pre_solve_plans; //!< A vector of shared pointers of plans to be executed after both transforms
 	};
 } /* bases */
 

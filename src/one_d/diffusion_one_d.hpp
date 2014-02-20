@@ -24,7 +24,7 @@ namespace one_d
 	class diffusion : public implicit_plan <datatype>
 	{
 	public:
-		diffusion (bases::grid <datatype> &i_grid, datatype i_coeff, datatype i_alpha, datatype *i_matrix, datatype *i_data_in, datatype *i_data_out = NULL);
+		diffusion (bases::grid <datatype> &i_grid, datatype i_coeff, datatype i_alpha, datatype *i_matrix, datatype *i_data_in, datatype *i_data_out = NULL, int *element_flags = NULL, int *component_flags = NULL);
 
 		diffusion (bases::solver <datatype> &i_solver, datatype i_coeff, datatype i_alpha);
 		
@@ -32,12 +32,13 @@ namespace one_d
 			// printf ("Destroying one_d diffusion\n");
 		}
 		
-		void execute (int &element_flags, int &component_flags);
+		void execute ();
 	
 	private:
 		datatype coeff;
 		datatype alpha;
 		using implicit_plan <datatype>::n;
+		using implicit_plan <datatype>::ld;
 		using implicit_plan <datatype>::data_in;
 		using implicit_plan <datatype>::data_out;
 		using implicit_plan <datatype>::matrix;
@@ -54,7 +55,7 @@ namespace one_d
 			// printf ("Destroying one_d nonlinear_diffusion\n");
 		}
 		
-		void execute (int &element_flags, int &component_flags);
+		void execute ();
 	
 	private:
 		datatype coeff;

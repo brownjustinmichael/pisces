@@ -43,6 +43,7 @@ namespace bases
 		MPI::Init (*argc, *argv);
 		np = MPI::COMM_WORLD.Get_size ();
 		id = MPI::COMM_WORLD.Get_rank ();
+		MPI::COMM_WORLD.Set_errhandler(MPI::ERRORS_THROW_EXCEPTIONS);
 #else
 		np = 1;
 		id = 0;

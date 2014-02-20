@@ -22,23 +22,25 @@
 	
 namespace one_d
 {
-	namespace chebyshev
+	namespace cosine
 	{
 		template <class datatype>
-		advection_diffusion_element <datatype>::advection_diffusion_element (bases::axis *i_axis_n, int i_name, io::parameters <datatype>& params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
-		element <datatype> (i_axis_n, i_name, params, i_messenger_ptr, i_element_flags) {
+		advection_diffusion_element <datatype>::advection_diffusion_element (bases::axis *i_axis_n, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
+		element <datatype> (i_axis_n, i_name, i_params, i_messenger_ptr, i_element_flags) {
 		
 			assert (n > 0);
 		
 			TRACE ("Initializing...");
-			
-			datatype scale = params.scale;
-			datatype width = params.width;
-			datatype mean = params.mean;
-			datatype sigma = params.sigma;
+			io::parameters& nparams = params;
+			advection_coeff = nparams.get <datatype> ("velocity.advection");
+			cfl = nparams.get <datatype> ("time.cfl");
+			datatype scale = nparams.get <datatype> ("init.scale");
+			datatype mean = nparams.get <datatype> ("init.mean");
+			datatype sigma = nparams.get <datatype> ("init.sigma");
+			datatype width = nparams.get <datatype> ("grid.z.width");
 			std::vector <datatype> init (n);
 			datatype height, temp;
-			height = std::max (scale * std::exp (- (width / 2.0 - mean) * (width / 2.0 - mean) / 2.0 / sigma / sigma), scale * std::exp (- (- width / 2.0 - mean) * (- width / 2.0 - mean) / 2.0 / sigma / sigma));
+			height = std::max (scale * std::exp (- (-width / 2.0 - mean) * (-width / 2.0 - mean) / 2.0 / sigma / sigma), scale * std::exp (- (width / 2.0 - mean) * (width / 2.0 - mean) / 2.0 / sigma / sigma));
 			for (int i = 0; i < n; ++i) {
 				temp = scale * std::exp (- ((*this) (position, i) - mean) * ((*this) (position, i) - mean) / 2.0 / sigma / sigma) - height;
 				if (temp > 0.0) {
@@ -47,64 +49,111 @@ namespace one_d
 					init [i] = 0.0;
 				}
 			}
-			initialize (velocity, &init [0]);
-			initialize (vel_explicit_rhs, NULL, no_transform);
-			initialize (vel_implicit_rhs, NULL, no_transform);
-			
+			position_ptr = ptr (position);
+			velocity_ptr = initialize (velocity, &init [0]);
+
 			// Set up output
 			std::ostringstream filestream;
-			filestream << "../output/output_" << std::setfill ('0') << std::setw (2) << name << "_%04i.dat";
-			normal_stream.reset (new io::incremental (new io::one_d::ascii (n), filestream.str (), params.output_every));
+			filestream << "../output/" + nparams.get <std::string> ("output.file") << "_" << std::setfill ('0') << std::setw (2) << name << "_%04i";
+			normal_stream.reset (new io::incremental (new io::one_d::netcdf (n), filestream.str (), nparams.get <int> ("output.every")));
 			normal_stream->template append <int> ("i", &(cell [0]));
 			normal_stream->template append <datatype> ("x", ptr (position));
 			normal_stream->template append <datatype> ("u", ptr (velocity));
-			normal_stream->template append <datatype> ("rhs", ptr (vel_explicit_rhs));
 			
-			// Set up solver
-			element <datatype>::add_solver (velocity, new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, ptr (velocity), ptr (vel_explicit_rhs), ptr (vel_implicit_rhs)));
-			
-			// Set up plans in order
-			solvers [velocity]->add_pre_plan (new diffusion <datatype> (*solvers [velocity], params.diffusion_coeff, params.implicit_alpha));
-			if (params.advection_coeff != 0.0) {
-				solvers [velocity]->add_post_plan (new advection <datatype> (*solvers [velocity], params.advection_coeff));
+			// // Set up solver
+			element <datatype>::add_solver (velocity, new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, ptr (velocity), &element_flags [state], &element_flags [velocity]));
+			// 
+			// // Set up plans in order
+			solvers [velocity]->add_pre_plan (new diffusion <datatype> (*solvers [velocity], nparams.get <datatype> ("velocity.diffusion"), nparams.get <datatype> ("time.alpha")));
+			if (nparams.get <datatype> ("velocity.advection") != 0.0) {
+				solvers [velocity]->add_post_plan (new advection <datatype> (*solvers [velocity], nparams.get <datatype> ("velocity.advection")));
 			}
 								
 			TRACE ("Initialized.");
 		}
 		
 		template <class datatype>
-		datatype advection_diffusion_element <datatype>::calculate_timestep () {
-			datatype t_timestep;
-			t_timestep = params.max_timestep;
-			if (params.advection_coeff != 0.0) {
-				for (int i = 1; i < n - 1; ++i) {
-					t_timestep = std::min (t_timestep, (datatype) (std::abs (((*this) (position, i - 1) - (*this) (position, i + 1)) / (*this) (velocity, i) / params.advection_coeff) * params.courant_factor));
+		datatype advection_diffusion_element <datatype>::calculate_timestep (int i) {
+			return (std::abs ((position_ptr [i - 1] - position_ptr [i + 1]) / velocity_ptr [i] / advection_coeff) * cfl);
+		}
+		
+		template class advection_diffusion_element <double>;
+	}
+	
+	namespace chebyshev
+	{
+		template <class datatype>
+		advection_diffusion_element <datatype>::advection_diffusion_element (bases::axis *i_axis_n, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
+		element <datatype> (i_axis_n, i_name, i_params, i_messenger_ptr, i_element_flags) {
+		
+			assert (n > 0);
+			io::parameters& nparams = params;
+			advection_coeff = nparams.get <datatype> ("velocity.advection");
+			cfl = nparams.get <datatype> ("time.cfl");
+		
+			TRACE ("Initializing...");
+			datatype scale = nparams.get <datatype> ("init.scale");
+			datatype mean = nparams.get <datatype> ("init.mean");
+			datatype sigma = nparams.get <datatype> ("init.sigma");
+			datatype width = nparams.get <datatype> ("grid.z.width");
+			std::vector <datatype> init (n);
+			datatype height, temp;
+			height = std::max (scale * std::exp (- (-width / 2.0 - mean) * (-width / 2.0 - mean) / 2.0 / sigma / sigma), scale * std::exp (- (width / 2.0 - mean) * (width / 2.0 - mean) / 2.0 / sigma / sigma));
+			for (int i = 0; i < n; ++i) {
+				temp = scale * std::exp (- ((*this) (position, i) - mean) * ((*this) (position, i) - mean) / 2.0 / sigma / sigma) - height;
+				if (temp > 0.0) {
+					init [i] = temp;
+				} else {
+					init [i] = 0.0;
 				}
 			}
-			if (t_timestep < timestep || t_timestep > 2.0 * timestep) {
-				return t_timestep;
-			} else {
-				return timestep;
+			position_ptr = ptr (position);
+			velocity_ptr = initialize (velocity, &init [0]);
+			
+			// Set up output
+			std::ostringstream filestream;
+			filestream << "../output/" + nparams.get <std::string> ("output.file") << "_" << std::setfill ('0') << std::setw (2) << name << "_%04i";
+			normal_stream.reset (new io::incremental (new io::one_d::netcdf (n), filestream.str (), nparams.get <int> ("output.every")));
+			normal_stream->template append <int> ("i", &(cell [0]));
+			normal_stream->template append <datatype> ("x", ptr (position));
+			normal_stream->template append <datatype> ("u", ptr (velocity));
+			
+			// // Set up solver
+			element <datatype>::add_solver (velocity, new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, ptr (velocity), &element_flags [state], &element_flags [velocity]));
+			// 
+			// // Set up plans in order
+			solvers [velocity]->add_pre_plan (new diffusion <datatype> (*solvers [velocity], nparams.get <datatype> ("velocity.diffusion"), nparams.get <datatype> ("time.alpha")));
+			if (nparams.get <datatype> ("velocity.advection") != 0.0) {
+				solvers [velocity]->add_post_plan (new advection <datatype> (*solvers [velocity], nparams.get <datatype> ("velocity.advection")));
 			}
+			
+			TRACE ("Initialized.");
+		}
+		
+		template <class datatype>
+		datatype advection_diffusion_element <datatype>::calculate_timestep (int i) {
+			return (std::abs ((position_ptr [i - 1] - position_ptr [i + 1]) / velocity_ptr [i] / advection_coeff) * cfl);
 		}
 		
 		template class advection_diffusion_element <double>;
 		
 		template <class datatype>
-		nonlinear_diffusion_element <datatype>::nonlinear_diffusion_element (bases::axis *i_axis_n, int i_name, io::parameters <datatype>& params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
+		nonlinear_diffusion_element <datatype>::nonlinear_diffusion_element (bases::axis *i_axis_n, int i_name, io::parameters& params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
 		element <datatype> (i_axis_n, i_name, params, i_messenger_ptr, i_element_flags) {
-			datatype diffusion_coeff = params.diffusion_coeff;
-			datatype advection_coeff = params.advection_coeff; 
-			datatype alpha = params.implicit_alpha;
+			io::parameters& nparams = params;
+			advection_coeff = nparams.get <datatype> ("velocity.advection");
+			cfl = nparams.get <datatype> ("time.cfl");
+			datatype diffusion_coeff = nparams.get <datatype> ("velocity.diffusion");
+			datatype alpha = nparams.get <datatype> ("time.alpha");
 		
 			assert (n > 0);
 		
 			TRACE ("Initializing...");
 			
-			datatype scale = params.scale;
-			datatype width = params.width;
-			datatype mean = params.mean - 0.5;
-			datatype sigma = params.sigma;
+			datatype scale = nparams.get <datatype> ("init.scale");
+			datatype width = nparams.get <datatype> ("grid.width");
+			datatype mean = nparams.get <datatype> ("init.mean") - 0.5;
+			datatype sigma = nparams.get <datatype> ("init.sigma");
 			std::vector <datatype> init (n);
 			datatype height, temp;
 			for (int i = 0; i < n; ++i) {
@@ -122,7 +171,7 @@ namespace one_d
 					init [i] += temp;
 				}
 			}
-			mean = params.mean + 0.5;
+			mean = nparams.get <datatype> ("init.mean") + 0.5;
 			height = std::max (scale * std::exp (- (width / 2.0 - mean) * (width / 2.0 - mean) / 2.0 / sigma / sigma), scale * std::exp (- (- width / 2.0 - mean) * (- width / 2.0 - mean) / 2.0 / sigma / sigma));
 			for (int i = 0; i < n; ++i) {
 				temp = scale * std::exp (- ((*this) (position, i) - mean) * ((*this) (position, i) - mean) / 2.0 / sigma / sigma) - height;
@@ -130,27 +179,24 @@ namespace one_d
 					init [i] += temp;
 				}
 			}
-			initialize (velocity, &init [0]);
-			initialize (vel_explicit_rhs, NULL, no_transform);
-			initialize (vel_implicit_rhs, NULL, no_transform);
+			position_ptr = ptr (position);
+			velocity_ptr = initialize (velocity, &init [0]);
 			
 			// Set up output
 			std::ostringstream filestream;
-			filestream << "../output/" + params.output + "_" << std::setfill ('0') << std::setw (2) << name << "_%04i.dat";
-			normal_stream.reset (new io::incremental (new io::one_d::ascii (n), filestream.str (), params.output_every));
+			filestream << "../output/" + nparams.get <std::string> ("output.file") + "_" << std::setfill ('0') << std::setw (2) << name << "_%04i";
+			normal_stream.reset (new io::incremental (new io::one_d::netcdf (n), filestream.str (), nparams.get <int> ("output.every")));
 			normal_stream->template append <int> ("i", &(cell [0]));
 			normal_stream->template append <datatype> ("x", ptr (position));
-			normal_stream->template append <datatype> ("u", ptr (velocity));
-			normal_stream->template append <datatype> ("rhs", ptr (vel_explicit_rhs));
-			
+			normal_stream->template append <datatype> ("u", ptr (velocity));			
 
 			// Set up solver
-			element <datatype>::add_solver (velocity, new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, ptr (velocity), ptr (vel_explicit_rhs), ptr (vel_implicit_rhs)));
+			element <datatype>::add_solver (velocity, new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, ptr (velocity), &element_flags [state], &element_flags [velocity]));
 			
 			// Set up plans in order
 			solvers [velocity]->add_pre_plan (new diffusion <datatype> (*solvers [velocity], diffusion_coeff, alpha));
-			if (params.nonlinear_diffusion_coeff != 0.0) {
-				solvers [velocity]->add_post_plan (new nonlinear_diffusion <datatype> (*solvers [velocity], params.nonlinear_diffusion_coeff));
+			if (nparams.get <datatype> ("velocity.nonlinear") != 0.0) {
+				solvers [velocity]->add_post_plan (new nonlinear_diffusion <datatype> (*solvers [velocity], nparams.get <datatype> ("velocity.nonlinear")));
 			}
 			if (advection_coeff != 0.0) {
 				solvers [velocity]->add_post_plan (new advection <datatype> (*solvers [velocity], advection_coeff));
@@ -162,18 +208,14 @@ namespace one_d
 		}
 		
 		template <class datatype>
-		datatype nonlinear_diffusion_element <datatype>::calculate_timestep () {
+		datatype nonlinear_diffusion_element <datatype>::calculate_timestep (int i) {
 			datatype t_timestep;
-			t_timestep = params.max_timestep;
-			// for (int i = 1; i < n - 1; ++i) {
-			// 	t_timestep = std::min (t_timestep, (datatype) (std::abs (((*this) (position, i - 1) - (*this) (position, i + 1)) / (*this) (velocity, i) / params.advection_coeff) * params.courant_factor));
-			// 	t_timestep = std::min (t_timestep, (datatype) std::abs (((*this) (position, i + 1) - (*this) (position, i - 1)) * ((*this) (position, i + 1) - (*this) (position, i - 1)) / 2.0 / params.nonlinear_diffusion_coeff / (*this) (velocity, i) * params.courant_factor));
-			// }
-			if (t_timestep < timestep || t_timestep > 2.0 * timestep) {
-				return t_timestep;
-			} else {
-				return timestep;
-			}
+			io::parameters& nparams = params;
+			datatype advection_coeff = nparams.get <datatype> ("velocity.advection");
+			datatype cfl = nparams.get <datatype> ("time.cfl");
+			datatype nonlinear = nparams.get <datatype> ("velocity.nonlinear");
+			t_timestep = nparams.get <datatype> ("time.max");
+			return std::min (std::abs ((position_ptr [i - 1] - position_ptr [i + 1]) / velocity_ptr [i] / advection_coeff) * cfl, std::abs ((*this) (position, i + 1) - (*this) (position, i - 1)) * ((*this) (position, i + 1) - (*this) (position, i - 1)) / 2.0 / nonlinear / (*this) (velocity, i) * cfl);
 		}
 		
 		template class nonlinear_diffusion_element <double>;

@@ -22,3 +22,5 @@ objects.append (env.Object ("transform_two_d.cpp"))
 
 objects.append (env.Object ("solver_two_d.cpp"))
 
+objects.append (env.Object ("boussinesq_two_d.cpp"))
+

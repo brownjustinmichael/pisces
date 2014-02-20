@@ -18,6 +18,8 @@ log4cplus::Logger logger = log4cplus::Logger::getRoot ();
 log4cplus::SharedAppenderPtr append;
 int severity = 2;
 
+log_config log_config_instance;
+
 log4cplus::LogLevel int_to_severity (int severity_index) {
 	switch (severity_index) {
 		case 0:
@@ -35,18 +37,22 @@ log4cplus::LogLevel int_to_severity (int severity_index) {
 	}
 }
 
-log_config::log_config (int* argc, char*** argv, int id) {
+log_config::log_config () {
 	config.configure();
-	
-	while ((*argc > 1) && ((*argv) [1] [0] == '-')) {
-		switch ((*argv) [1] [1]) {
-			case 'D':
-				severity = atoi (&((*argv) [1] [2]));
-				break;
+    logger.setLogLevel (int_to_severity (severity));
+}
+
+void log_config::configure (int* argc, char*** argv, int id) {
+	for (int i = 0; i < *argc; ++i) {
+		if (((*argv) [i] [0] == '-') && ((*argv) [i] [1] == 'D')) {
+			severity = atoi (&((*argv) [i] [2]));
+			--*argc;
+			for (int j = i; j < *argc; ++j) {
+				(*argv) [j] = (*argv) [j + 1];
+			}
 		}
-		--*argc;
-		++*argv;
-	}
+	}	
+
 	std::ostringstream convert;
 	convert << id;
     logger.setLogLevel (int_to_severity (severity));
