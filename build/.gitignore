@@ -1,4 +1,5 @@
-*.o
-*/*.o
-.sconsign.dblite
-.sconf_temp/*
+*
+
+!SConstruct
+!Doxyfile
+!cuda.py
