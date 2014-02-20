@@ -15,31 +15,32 @@ namespace two_d
 {
 	namespace fourier
 	{
-		namespace chebyshev
-		{
+		// namespace chebyshev
+		// {
 			template <class datatype>
 			class advection : public two_d::real_plan <datatype>
 			{
 			public:
-				advection (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype i_coeff, datatype* i_vel_n, datatype *i_vel_m, datatype *i_data_in, datatype *i_data_out = NULL) :
-				real_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out),
+				advection (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype i_coeff, datatype* i_vel_n, datatype *i_vel_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) :
+				real_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out, i_element_flags, i_component_flags),
 				coeff (-i_coeff),
 				vel_n (i_vel_n),
 				vel_m (i_vel_m),
-				pos_n (&(grid_n.position ())),
-				pos_m (&(grid_m.position ())) {}
+				pos_n (&(grid_n [0])),
+				pos_m (&(grid_m [0])) {}
 				
 				advection (bases::solver <datatype> &i_solver, datatype i_coeff, datatype* i_vel_n, datatype *i_vel_m) :
 				real_plan <datatype> (i_solver),
 				coeff (-i_coeff),
 				vel_n (i_vel_n),
 				vel_m (i_vel_m),
-				pos_n (&(grid_n.position ())),
-				pos_m (&(grid_m.position ())) {}
+				pos_n (&(grid_n [0])),
+				pos_m (&(grid_m [0])) {}
 				
 				virtual ~advection () {}
 				
-				virtual void execute (int &element_flags, int &component_flags) {
+				virtual void execute () {
+					#pragma omp parallel for
 					for (int j = 1; j < m - 1; ++j) {
 						data_out [j] += coeff * (vel_n [j] * (data_in [1 * m + j] - data_in [j]) / (pos_n [1] - pos_n [0]) + vel_m [j] * (data_in [j + 1] - data_in [j - 1]) / (pos_m [j + 1] - pos_m [j - 1]));
 						for (int i = 1; i < n - 1; ++i) {
@@ -65,33 +66,23 @@ namespace two_d
 			class stream_advection : public two_d::real_plan <datatype>
 			{
 			public:
-				stream_advection (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype i_coeff, datatype* i_stream, datatype *i_data_in, datatype *i_data_out = NULL) :
-				real_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out),
+				stream_advection (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype i_coeff, datatype* i_stream, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) :
+				real_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out, i_element_flags, i_component_flags),
 				coeff (-i_coeff),
 				stream (i_stream),
-				pos_n (&(grid_n.position ())),
-				pos_m (&(grid_m.position ())) {}
+				pos_n (&(grid_n [0])),
+				pos_m (&(grid_m [0])) {}
 				
 				stream_advection (bases::solver <datatype> &i_solver, datatype i_coeff, datatype *i_stream) :
 				real_plan <datatype> (i_solver),
 				coeff (-i_coeff),
 				stream (i_stream),
-				pos_n (&(grid_n.position ())),
-				pos_m (&(grid_m.position ())) {}
+				pos_n (&(grid_n [0])),
+				pos_m (&(grid_m [0])) {}
 				
 				virtual ~stream_advection () {}
 				
-				virtual void execute (int &element_flags, int &component_flags) {
-					std::stringstream debug;
-					
-					for (int i = 0; i < m; ++i) {
-						for (int j = 0; j < n; ++j) {
-							debug << stream [j * m + i] << " ";
-						}
-						DEBUG (debug.str ());
-						debug.str ("");
-					}
-					
+				virtual void execute () {
 					for (int j = 1; j < m - 1; ++j) {
 						data_out [j] += coeff * ((stream [m + j] - stream [j]) * (data_in [j + 1] - data_in [j - 1]) - (stream [j + 1] - stream [j - 1]) * (data_in [m + j] - data_in [j])) / (pos_n [1] - pos_n [0]) / (pos_m [j + 1] - pos_m [j - 1]);
 						for (int i = 1; i < n - 1; ++i) {
@@ -112,7 +103,7 @@ namespace two_d
 				using real_plan <datatype>::data_in;
 				using real_plan <datatype>::data_out;
 			};
-		} /* chebyshev */
+		// } /* chebyshev */
 	} /* fourier */
 } /* two_d */
 

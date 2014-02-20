@@ -9,10 +9,16 @@
 #include "bases/messenger.hpp"
 #include "bases/plan.hpp"
 #include "one_d/element_one_d.hpp"
-#include "two_d/element_two_d.hpp"
+#include "two_d/boussinesq_two_d.hpp"
 #include "config.hpp"
 #include "two_d/transform_two_d.hpp"
 #include <memory>
+#include <omp.h>
+#include <ctime>
+#include <chrono>
+#ifdef VTRACE
+#include "vt_user.h"
+#endif
 
 /*!*******************************************************************
  * \mainpage
@@ -76,53 +82,71 @@
  *********************************************************************/
 int main (int argc, char *argv[])
 {
-	int id = 0, n_elements = 1;
-	
-	// Initialize messenger
-	bases::messenger process_messenger (&argc, &argv, 2);
-
-	id = process_messenger.get_id ();
-	n_elements = process_messenger.get_np ();
-
-	log_config log_config_instance (&argc, &argv, id);
-	
-	io::parameters <double> params ("../input/parameters.txt");
-
-	int n = params.gridpoints / n_elements + 1;
-	double position_m0 = -1.0 + 2.0 / n_elements * id;
-	double position_mm = -1.0 + 2.0 / n_elements * (id + 1);
-	double position_n0 = -1.0;
-	double position_nn = 1.0;
-	int excess_0;
-	int excess_n;
-	if (id == 0) {
-		excess_0 = 0;
-	} else {
-		excess_0 = 1;
-	}
-	if (id == n_elements - 1) {
-		excess_n = 0;
-	} else {
-		excess_n = 1;
-	}
-	int name = id;
-	
-	int m = params.gridpoints;
-	
-	bases::axis horizontal_axis (m, 0, position_n0, 0, position_nn);
-	bases::axis vertical_axis (n, excess_0, position_m0, excess_n, position_mm);
-	
-	// one_d::chebyshev::advection_diffusion_element <double> element (&vertical_axis, name, params, &process_messenger, 0x00);
-	two_d::fourier::chebyshev::convection_element <double> element (&horizontal_axis, &vertical_axis, name, params, &process_messenger, 0x00);
-
 	try {
-		element.run ();
-	} catch (...) {
+		int id = 0, n_elements = 1;
+
+		// Initialize messenger
+		bases::messenger process_messenger (&argc, &argv, 2);
+
+		id = process_messenger.get_id ();
+		n_elements = process_messenger.get_np ();
+
+		log_config::configure (&argc, &argv);
+	
+		io::parameters config ("../input/config.yaml");
+		if (!config ["time.steps"].IsDefined ()) config ["time.steps"] = 1;
+		if (!config ["grid.x.points"].IsDefined ()) config ["grid.x.points"] = 64;
+		if (!config ["grid.z.points"].IsDefined ()) config ["grid.z.points"] = 64;
+	
+		omp_set_num_threads (config.get <int> ("parallel.maxthreads"));
+
+		int m = config.get <int> ("grid.z.points") / n_elements + 1;
+		double position_m0 = -config.get <double> ("grid.z.width") / 2.0 + config.get <double> ("grid.z.width") / n_elements * id;
+		double position_mm = -config.get <double> ("grid.z.width") / 2.0 + config.get <double> ("grid.z.width") / n_elements * (id + 1);
+		double position_n0 = -config.get <double> ("grid.x.width") / 2.0;
+		double position_nn = config.get <double> ("grid.x.width") / 2.0;
+		int excess_0;
+		int excess_n;
+		if (id == 0) {
+			excess_0 = 0;
+		} else {
+			excess_0 = 1;
+		}
+		if (id == n_elements - 1) {
+			excess_n = 0;
+		} else {
+			excess_n = 1;
+		}
+		int name = id;
+		
+		
+		int n = config.get <int> ("grid.x.points");
+	
+		bases::axis horizontal_axis (n, position_n0, position_nn);
+		bases::axis vertical_axis (m, position_m0, position_mm, excess_0, excess_n);
+	
+		// one_d::cosine::advection_diffusion_element <double> element (&vertical_axis, name, config, &process_messenger, 0x00);
+		two_d::fourier::cosine::boussinesq_element <double> element (&horizontal_axis, &vertical_axis, name, config, &process_messenger, 0x00);
+
+		clock_t cbegin, cend;
+		std::chrono::time_point <std::chrono::system_clock> begin, end;
+
+		cbegin = clock ();
+		begin = std::chrono::system_clock::now ();
+
+		element.run (config.get <int> ("time.steps"));
+	
+		cend = clock ();
+		end = std::chrono::system_clock::now ();
+	
+		std::chrono::duration <double> eb = end - begin;
+	
+		INFO ("Main complete. CPU Time: " << ((double) (cend - cbegin))/CLOCKS_PER_SEC << " Wall Time: " << (double) eb.count () << " Efficiency: " << (((double) (cend - cbegin))/CLOCKS_PER_SEC / (double) eb.count () / omp_get_max_threads () * 100.) << "%");
+	} catch (std::exception& except) {
+		FATAL (except.what ());
 		FATAL ("Fatal error occurred. Check log.");
 		return 1;
 	}
-	
-	INFO ("Main complete.");
 	
 	return 0;
 }

@@ -55,7 +55,7 @@ namespace one_d
 		 * \param i_position_n The datatype position of index n - 1 - excess_n
 		 * \copydoc bases::element <datatype>::element ()
 		 *********************************************************************/
-		element (bases::axis *i_axis_n, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_flags) : 
+		element (bases::axis *i_axis_n, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_flags) : 
 		bases::element <datatype> (i_name, 1, i_params, i_messenger_ptr, i_flags),
 		axis_n (i_axis_n),
 		n (axis_n->n) {
@@ -64,17 +64,12 @@ namespace one_d
 				cell [i] = i;
 			}
 			
-			edge_map [edge_0] = 0;
-			edge_map [edge_n] = n - 1;
-			
 			if (i_messenger_ptr->get_id () == 0) {
-				fixed_points [edge_0];
 				alpha_0 = 0.0;
 			} else {
 				alpha_0 = 0.5;
 			}
 			if (i_messenger_ptr->get_id () == i_messenger_ptr->get_np () - 1) {
-				fixed_points [edge_n];
 				alpha_n = 0.0;
 			} else {
 				alpha_n = 0.5;
@@ -82,8 +77,10 @@ namespace one_d
 			
 			std::ostringstream convert;
 			convert << name;
-			failsafe_dump.reset (new io::output (new io::one_d::ascii (n), "dump.dat"));
+			failsafe_dump.reset (new io::output (new io::one_d::netcdf (n), "dump"));
 			failsafe_dump->append ("i", &cell [0]);
+			
+			max_timestep = i_params.get <datatype> ("time.max");
 		}
 		
 		virtual ~element () {
@@ -93,25 +90,22 @@ namespace one_d
 		/*!*******************************************************************
 		 * \copydoc bases::element <datatype>::initialize ()
 		 *********************************************************************/
-		virtual void initialize (int name, datatype* initial_conditions = NULL, int flags = 0x00) {
+		virtual datatype *_initialize (int name, datatype* initial_conditions = NULL, int flags = 0x00) {
 			TRACE ("Initializing " << name << "...");
 			
-			bases::element <datatype>::initialize (name, initial_conditions, flags);
-			scalars [name].resize (n, 0.0);
+			scalars [name].resize ((*grids [0]).ld, 0.0);
 			if (name == position) {
-				initial_conditions = &(grids [0]->position ());
+				initial_conditions = &((*grids [0]) [0]);
 			}
 			if (initial_conditions) {
 				utils::copy (n, initial_conditions, this->ptr (name));
-			}
-			for (std::map <int, int>::iterator i_edge = edge_map.begin (); i_edge != edge_map.end (); ++i_edge) {
-				fixed_points [i_edge->first] [name] = scalars [name] [i_edge->second];
 			}
 			std::stringstream stream;
 			stream << name;
 			failsafe_dump->template append <datatype> (stream.str (), &(scalars [name]) [0]);
 
 			TRACE ("Initialized " << name << ".");
+			return this->ptr (name);
 		}
 		
 		/*!*******************************************************************
@@ -126,21 +120,43 @@ namespace one_d
 			}
 		}
 		
+		virtual datatype calculate_timestep (int i) = 0;
+		
+		inline datatype calculate_min_timestep () {
+			datatype shared_min = max_timestep;
+			#pragma omp parallel 
+			{
+				datatype min = std::numeric_limits <datatype>::max ();
+				#pragma omp for nowait
+					for (int i = 1; i < n - 1; ++i) {
+						min = std::min (calculate_timestep (i), min);
+					}
+				#pragma omp critical 
+				{
+					shared_min = std::min (shared_min, min);
+				}
+			}
+			if (shared_min < timestep || shared_min > 2.0 * timestep) {
+				return shared_min * 0.8;
+			} else {
+				return timestep;
+			}
+		}
+		
 	protected:
 		using bases::element <datatype>::scalars;
+		using bases::element <datatype>::params;
 		using bases::element <datatype>::grids;
 		using bases::element <datatype>::name;
 		using bases::element <datatype>::failsafe_dump;
 		using bases::element <datatype>::messenger_ptr;
 		using bases::element <datatype>::ptr;
+		using bases::element <datatype>::timestep;
 		
 		bases::axis *axis_n;
-		datatype alpha_0, alpha_n;
+		datatype alpha_0, alpha_n, max_timestep;
 		int &n;
 		std::vector<int> cell; //!< An integer array for tracking each cell number for output
-		
-		std::map <int, int> edge_map;
-		std::map <int, std::map <int, datatype> > fixed_points;
 	};
 
 	namespace chebyshev
@@ -155,20 +171,30 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc one_d::element::element ()
 			 *********************************************************************/
-			element (bases::axis *i_axis_n, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_flags) : 
+			element (bases::axis *i_axis_n, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_flags) : 
 			one_d::element <datatype> (i_axis_n, i_name, i_params, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
-				one_d::element <datatype>::set_grid (new bases::chebyshev::grid <datatype> (axis_n));
+				// one_d::element <datatype>::set_grid (new bases::chebyshev::grid <datatype> (axis_n));
 				initialize (position);
 				TRACE ("Instantiated.");
 			}
 			virtual ~element () {}
 			
-			virtual void initialize (int name, datatype* initial_conditions = NULL, int flags = 0x00) {
+			virtual datatype *_initialize (int name, datatype* initial_conditions = NULL, int flags = 0x00) {
 				TRACE ("Initializing " << name << "...");
-				one_d::element <datatype>::initialize (name, initial_conditions, flags);
+				one_d::element <datatype>::_initialize (name, initial_conditions, flags);
 				if (!(flags & no_transform) && (name != position)) {
-					element <datatype>::add_transform (name, new fftw_cosine <datatype> (*grids [0], ptr (name)), forward_vertical | inverse_vertical);
+					// element <datatype>::add_transform (name, new transform <datatype> (*grids [0], ptr (name), NULL, 0x00, &element_flags [state], &element_flags [name]), forward_vertical | inverse_vertical);
+					element <datatype>::add_transform (name, new master_transform <datatype> (*grids [0], ptr (name), NULL, forward_vertical | inverse_vertical, &element_flags [state], &element_flags [name]));
+				}
+				return this->ptr (name);
+			}
+			
+			virtual std::shared_ptr <bases::grid <datatype>> generate_grid (int index) {
+				if (index == 0) {
+					return std::shared_ptr <bases::grid <datatype>> (new bases::chebyshev::grid <datatype> (axis_n));
+				} else {
+					throw 0;
 				}
 			}
 			
@@ -179,6 +205,147 @@ namespace one_d
 			using one_d::element <datatype>::grids;
 			using one_d::element <datatype>::params;
 			using one_d::element <datatype>::messenger_ptr;
+			using one_d::element <datatype>::ptr;
+			using one_d::element <datatype>::element_flags;
+		};
+		
+
+		
+		/*!*******************************************************************
+		 * \brief A simple implementation of the element class with diffusion
+		 * 
+		 * This class contains a full element's capacity to run a single 
+		 * element diffusion in 1D with constant timestep.
+		 *********************************************************************/
+		template <class datatype>
+		class nonlinear_diffusion_element : public element <datatype>
+		{
+		public:
+			/*!*******************************************************************
+			 * \param i_excess_0 The integer number of points evaluated in the adjacent element
+			 * \param i_excess_n The integer number of points evaluated in the adjacent element
+			 * \copydoc element::element ()
+			 *********************************************************************/
+			nonlinear_diffusion_element (bases::axis *i_axis_n, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_flags);
+		
+			virtual ~nonlinear_diffusion_element () {}
+		
+			virtual datatype calculate_timestep (int i);
+	
+		private:
+			using element <datatype>::initialize;
+			using element <datatype>::n;
+			using element <datatype>::element_flags;
+			using element <datatype>::name;
+			using element <datatype>::normal_stream;
+			using element <datatype>::cell;
+			using element <datatype>::timestep;
+			using element <datatype>::params;
+			using element <datatype>::grids;
+			using bases::element <datatype>::ptr;
+			using bases::element <datatype>::matrix_ptr;
+			using element <datatype>::messenger_ptr;
+			using element <datatype>::alpha_0;
+			using element <datatype>::alpha_n;
+			using element <datatype>::solvers;
+			
+			datatype advection_coeff, cfl;
+			datatype *position_ptr, *velocity_ptr;
+		};
+		
+		
+		/*!*******************************************************************
+		 * \brief A simple implementation of the element class with diffusion
+		 * 
+		 * This class contains a full element's capacity to run a single 
+		 * element diffusion in 1D with constant timestep.
+		 *********************************************************************/
+		template <class datatype>
+		class advection_diffusion_element : public element <datatype>
+		{
+		public:
+			/*!*******************************************************************
+			 * \param i_excess_0 The integer number of points evaluated in the adjacent element
+			 * \param i_excess_n The integer number of points evaluated in the adjacent element
+			 * \copydoc element::element ()
+			 *********************************************************************/
+			advection_diffusion_element (bases::axis *i_axis_n, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_flags);
+		
+			virtual ~advection_diffusion_element () {}
+		
+			virtual datatype calculate_timestep (int i);
+	
+		private:
+			using element <datatype>::initialize;
+			using element <datatype>::n;
+			using element <datatype>::element_flags;
+			using element <datatype>::name;
+			using element <datatype>::normal_stream;
+			using element <datatype>::cell;
+			using element <datatype>::timestep;
+			using bases::element <datatype>::params;
+			using element <datatype>::grids;
+			using bases::element <datatype>::ptr;
+			using bases::element <datatype>::matrix_ptr;
+			using element <datatype>::messenger_ptr;
+			using element <datatype>::alpha_0;
+			using element <datatype>::alpha_n;
+			using element <datatype>::solvers;
+		
+			datatype advection_coeff, cfl;
+			datatype *position_ptr, *velocity_ptr;
+		};
+	} /* chebyshev */
+	
+	namespace cosine
+	{
+		/*!*******************************************************************
+		 * \brief A Fourier implementation of the 1D element class
+		 *********************************************************************/
+		template <class datatype>
+		class element : public one_d::element <datatype>
+		{
+		public:
+			/*!*******************************************************************
+			 * \copydoc one_d::element::element ()
+			 *********************************************************************/
+			element (bases::axis *i_axis_n, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_flags) : 
+			one_d::element <datatype> (i_axis_n, i_name, i_params, i_messenger_ptr, i_flags) {
+				TRACE ("Instantiating...");
+				// one_d::element <datatype>::set_grid (new bases::fourier::grid <datatype> (axis_n));
+				initialize (position);
+				TRACE ("Instantiated.");
+			}
+			virtual ~element () {}
+		
+			virtual datatype *_initialize (int name, datatype* initial_conditions = NULL, int flags = 0x00) {
+				TRACE ("Initializing " << name << "...");
+				one_d::element <datatype>::_initialize (name, initial_conditions, flags);
+				if (!(flags & no_transform) && (name != position)) {
+					// element <datatype>::add_transform (name, new transform <datatype> (*grids [0], ptr (name), NULL, 0x00, &element_flags [state], &element_flags [name]), forward_vertical | inverse_vertical);
+					element <datatype>::add_transform (name, new master_transform <datatype> (*grids [0], ptr (name), NULL, forward_vertical | inverse_vertical, &element_flags [state], &element_flags [name]));
+					
+				}
+				return this->ptr (name);
+			}
+			
+			virtual std::shared_ptr <bases::grid <datatype>> generate_grid (int index) {
+				if (index == 0) {
+					return std::shared_ptr <bases::grid <datatype>> (new bases::cosine::grid <datatype> (axis_n));
+				} else {
+					throw 0;
+				}
+			}
+		
+		protected:
+			using one_d::element <datatype>::initialize;
+			using one_d::element <datatype>::element_flags;
+			using one_d::element <datatype>::n;
+			using one_d::element <datatype>::axis_n;
+			using one_d::element <datatype>::grids;
+			using one_d::element <datatype>::params;
+			using one_d::element <datatype>::messenger_ptr;
+			using one_d::element <datatype>::solvers;
 			using one_d::element <datatype>::ptr;
 		};
 		
@@ -197,12 +364,12 @@ namespace one_d
 			 * \param i_excess_n The integer number of points evaluated in the adjacent element
 			 * \copydoc element::element ()
 			 *********************************************************************/
-			advection_diffusion_element (bases::axis *i_axis_n, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_flags);
-			
+			advection_diffusion_element (bases::axis *i_axis_n, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_flags);
+	
 			virtual ~advection_diffusion_element () {}
-			
-			virtual datatype calculate_timestep ();
-		
+	
+			virtual datatype calculate_timestep (int i);
+
 		private:
 			using element <datatype>::initialize;
 			using element <datatype>::n;
@@ -211,7 +378,7 @@ namespace one_d
 			using element <datatype>::normal_stream;
 			using element <datatype>::cell;
 			using element <datatype>::timestep;
-			using element <datatype>::params;
+			using bases::element <datatype>::params;
 			using element <datatype>::grids;
 			using bases::element <datatype>::ptr;
 			using bases::element <datatype>::matrix_ptr;
@@ -220,79 +387,10 @@ namespace one_d
 			using element <datatype>::alpha_n;
 			using element <datatype>::solvers;
 			
+			datatype advection_coeff, cfl;
+			datatype *position_ptr, *velocity_ptr;
 		};
-		
-		/*!*******************************************************************
-		 * \brief A simple implementation of the element class with diffusion
-		 * 
-		 * This class contains a full element's capacity to run a single 
-		 * element diffusion in 1D with constant timestep.
-		 *********************************************************************/
-		template <class datatype>
-		class nonlinear_diffusion_element : public element <datatype>
-		{
-		public:
-			/*!*******************************************************************
-			 * \param i_excess_0 The integer number of points evaluated in the adjacent element
-			 * \param i_excess_n The integer number of points evaluated in the adjacent element
-			 * \copydoc element::element ()
-			 *********************************************************************/
-			nonlinear_diffusion_element (bases::axis *i_axis_n, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_flags);
-		
-			virtual ~nonlinear_diffusion_element () {}
-		
-			virtual datatype calculate_timestep ();
-	
-		private:
-			using element <datatype>::initialize;
-			using element <datatype>::n;
-			using element <datatype>::element_flags;
-			using element <datatype>::name;
-			using element <datatype>::normal_stream;
-			using element <datatype>::cell;
-			using element <datatype>::timestep;
-			using element <datatype>::params;
-			using element <datatype>::grids;
-			using bases::element <datatype>::ptr;
-			using bases::element <datatype>::matrix_ptr;
-			using element <datatype>::messenger_ptr;
-			using element <datatype>::alpha_0;
-			using element <datatype>::alpha_n;
-			using element <datatype>::solvers;
-		};
-	} /* chebyshev */
-	
-	namespace fourier
-	{
-		/*!*******************************************************************
-		 * \brief A Fourier implementation of the 1D element class
-		 *********************************************************************/
-		template <class datatype>
-		class element : public one_d::element <datatype>
-		{
-		public:
-			/*!*******************************************************************
-			 * \copydoc one_d::element::element ()
-			 *********************************************************************/
-			element (bases::axis i_axis_n, int i_name, io::parameters <datatype>& i_params, bases::messenger* i_messenger_ptr, int i_flags) : 
-			one_d::element <datatype> (i_axis_n, i_name, i_params, i_messenger_ptr, i_flags) {
-				TRACE ("Instantiating...");
-				one_d::element <datatype>::set_grid (new bases::fourier::grid <datatype> (axis_n));
-				initialize (position);
-				TRACE ("Instantiated.");
-			}
-			virtual ~element () {}
-		
-		protected:
-			using one_d::element <datatype>::initialize;
-			using one_d::element <datatype>::n;
-			using one_d::element <datatype>::axis_n;
-			using one_d::element <datatype>::grids;
-			using one_d::element <datatype>::params;
-			using one_d::element <datatype>::messenger_ptr;
-			using one_d::element <datatype>::solvers;
-		};
-	} /* fourier */
+	} /* cosine */
 } /* one_d */
 
 #endif /* end of include guard: ELEMENT_HPP_3SURDTOH */

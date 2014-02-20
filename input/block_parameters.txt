@@ -1,5 +1,0 @@
-timesteps 10
-n 10000
-nrhs 10
-nmp 2
-nb 2

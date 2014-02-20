@@ -37,6 +37,14 @@ namespace utils
 	
 	void matrix_copy (int n, int m, double *x, double *y, int ldx = -1, int ldy = -1);
 	
+	void swap (int n, float *x, float *y, int incx = 1, int incy = 1);
+
+	void swap (int n, double *x, double *y, int incx = 1, int incy = 1);
+
+	void matrix_swap (int n, int m, float *x, float *y, int ldx = -1, int ldy = -1);
+
+	void matrix_swap (int n, int m, double *x, double *y, int ldx = -1, int ldy = -1);
+	
 	/*!*******************************************************************
 	 * \brief Scales a float array by a constant
 	 * 

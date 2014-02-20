@@ -12,47 +12,59 @@
 namespace one_d
 {
 	template <>
-	fftw_cosine <double>::fftw_cosine (bases::grid <double> &i_grid, double* i_data_in, double* i_data_out) :
+	transform <double>::transform (bases::grid <double> &i_grid, double* i_data_in, double* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags) :
+	bases::plan <double> (i_element_flags, i_component_flags),
 	n (i_grid.n),
 	data_in (i_data_in),
 	data_out (i_data_out ? i_data_out : i_data_in) {
 		scalar = 1.0 / std::sqrt (2.0 * (n - 1));
 		fourier_plan = fftw_plan_r2r_1d (n, data_in, data_out, FFTW_REDFT00, FFTW_ESTIMATE);
 	}
-	
+
 	template <>
-	fftw_cosine <float>::fftw_cosine (bases::grid <float> &i_grid, float* i_data_in, float* i_data_out) :
+	transform <float>::transform (bases::grid <float> &i_grid, float* i_data_in, float* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags) :
+	bases::plan <float> (i_element_flags, i_component_flags),
 	n (i_grid.n),
 	data_in (i_data_in),
 	data_out (i_data_out ? i_data_out : i_data_in) {
 		scalar = 1.0 / std::sqrt (2.0 * (n - 1));
 		fourier_plan_float = fftwf_plan_r2r_1d (n, data_in, data_out, FFTW_REDFT00, FFTW_ESTIMATE);
 	}
-	
+
 	template <>
-	void fftw_cosine <double>::execute (int &element_flags, int &component_flags) {
+	void transform <double>::execute () {
 		TRACE ("Executing FFT...");
 
 		fftw_execute (fourier_plan);
-		
+	
 		for (int i = 0; i < n; ++i) {
 			data_out [i] *= scalar;
 		}
-		
-	}
 	
+		if (!(*component_flags & transformed_vertical)) {
+			*component_flags |= transformed_vertical;
+		} else {
+			*component_flags &= ~transformed_vertical;
+		}
+	}
+
 	template <>
-	void fftw_cosine <float>::execute (int &element_flags, int &component_flags) {
+	void transform <float>::execute () {
 		TRACE ("Executing FFT...");
-		
+
 		fftwf_execute (fourier_plan_float);
-		
+	
 		for (int i = 0; i < n; ++i) {
 			data_out [i] *= scalar;
 		}
-		
-	}
 	
-	template class fftw_cosine <double>;
-	template class fftw_cosine <float>;
+		if (!(*component_flags & transformed_vertical)) {
+			*component_flags |= transformed_vertical;
+		} else {
+			*component_flags &= ~transformed_vertical;
+		}
+	}
+
+	template class transform <double>;
+	template class transform <float>;
 } /* one_d */

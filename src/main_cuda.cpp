@@ -39,9 +39,7 @@ int main (int argc, char *argv[])
 	TRACE ("Command line arguments read, beginning setup.");
 	
 		
-	io::parameters <datatype> params;
-	io::read_params_txt parameters ("../input/parameters.txt");
-	params = parameters.load_params();
+	io::parameters params ("../input/parameters.txt");
 	
 	
 	int n = params ["gridpoints"].asInt / n_elements;

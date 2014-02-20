@@ -31,7 +31,7 @@ namespace cuda
 			class fft_element : public ::one_d::chebyshev::element <datatype>
 			{
 			public:
-				fft_element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameters <datatype>& i_input_Params, bases::messenger* i_messenger_ptr, int i_flags);
+				fft_element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameters& i_input_Params, bases::messenger* i_messenger_ptr, int i_flags);
 		
 				virtual ~fft_element () {}
 		

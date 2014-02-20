@@ -7,6 +7,7 @@
  ************************************************************************/
 
 #include "solver_utils.hpp"
+#include "exceptions.hpp"
 
 /*!*******************************************************************
  * \brief Function from LAPACK that factorizes the matrix a by LU decomposition
@@ -62,11 +63,26 @@ extern "C" void sgetrf_ (int *m, int *n, float *a, int *lda, int *ipiv, int *inf
  *********************************************************************/
 extern "C" void sgetrs_ (char *trans, int *n, int *nrhs, float *a, int *lda, int *ipiv, float *b, int *ldb, int *info);
 
+extern "C" void sgetrs_ (char *trans, int *n, int *nrhs, float *a, int *lda, int *ipiv, float *b, int *ldb, int *info);
+
+extern "C" void sgtsv_ (int *n, int *nrhs, float *sub, float *diag, float *sup, float *b, int *ldb, int *info);
+
+extern "C" void dgtsv_ (int *n, int *nrhs, double *sub, double *diag, double *sup, double *b, int *ldb, int *info);
+
+extern "C" void dgttrf_ (int *n, double *dl, double *d, double *du, double *du2, int *ipiv, int *info);
+
+extern "C" void dgttrs_ (char *trans, int *n, int *nrhs, double *dl, double *d, double *du, double *du2, int *ipiv, double *b, int *ldb, int *info);
+
+extern "C" void sgttrf_ (int *n, float *dl, float *d, float *du, float *du2, int *ipiv, int *info);
+
+extern "C" void sgttrs_ (char *trans, int *n, int *nrhs, float *dl, float *d, float *du, float *du2, int *ipiv, float *b, int *ldb, int *info);
+
+
 namespace utils
 {
 	void matrix_factorize (int m, int n, double* a, int *ipiv, int *info, int lda) {
+		int iinfo;
 		if (!info) {
-			int iinfo;
 			info = &iinfo;
 		}
 		
@@ -79,13 +95,17 @@ namespace utils
 		}
 		
 		dgetrf_ (&m, &n, a, &lda, ipiv, info);
+		
+		if (*info != 0) {
+			throw exceptions::cannot_factor ();
+		}
 	}
 	
 	void matrix_solve (int n, double* a, int* ipiv, double* b, int *info, int nrhs, int lda, int ldb) {
 		char charN = 'N';
+		int iinfo;
 		
 		if (!info) {
-			int iinfo;
 			info = &iinfo;
 		}
 		
@@ -102,11 +122,15 @@ namespace utils
 		}
 		
 		dgetrs_ (&charN, &n, &nrhs, a, &lda, ipiv, b, &ldb, info);
+		
+		if (*info != 0) {
+			throw exceptions::cannot_solve ();
+		}
 	}
 	
 	void matrix_factorize (int m, int n, float* a, int *ipiv, int *info, int lda) {
+		int iinfo;
 		if (!info) {
-			int iinfo;
 			info = &iinfo;
 		}
 		
@@ -119,13 +143,17 @@ namespace utils
 		}
 		
 		sgetrf_ (&m, &n, a, &lda, ipiv, info);
+		
+		if (*info != 0) {
+			throw exceptions::cannot_factor ();
+		}
 	}
 	
 	void matrix_solve (int n, float* a, int* ipiv, float* b, int *info, int nrhs, int lda, int ldb) {
 		char charN = 'N';
+		int iinfo;
 		
 		if (!info) {
-			int iinfo;
 			info = &iinfo;
 		}
 		
@@ -142,8 +170,123 @@ namespace utils
 		}
 				
 		sgetrs_ (&charN, &n, &nrhs, a, &lda, ipiv, b, &ldb, info);
+		
+		if (*info != 0) {
+			throw exceptions::cannot_solve ();
+		}
 	}
 	
+	void tridiagonal_factorize (int n, double *dl, double *d, double *du, double *du2, int *ipiv, int *info) {
+		int iinfo;
+		if (!info) {
+			info = &iinfo;
+		}
+		
+		// printf ("POINTER: %i %p %p %p %p %p\n", n, dl, d, du, du2, info);
+		
+		// for (int i = 0; i < n; ++i) {
+		// 	printf ("%f %f %f \n", dl [i], d [i], du [i]);
+		// }		
+		dgttrf_ (&n, dl, d, du, du2, ipiv, info);
+		
+		if (*info != 0) {
+			throw exceptions::cannot_factor ();
+		}
+	}
+	
+	void tridiagonal_solve (int n, double *dl, double *d, double *du, double *du2, int *ipiv, double *b, int *info, int nrhs, int ldb) {
+		char charN = 'N';
+		int iinfo;
+		
+		if (n == 0) {
+			return;
+		}
+		
+		if (!info) {
+			info = &iinfo;
+		}
+		if (ldb == -1) {
+			ldb = n;
+		}
+
+		dgttrs_ (&charN, &n, &nrhs, dl, d, du, du2, ipiv, b, &ldb, info);
+		
+		if (*info != 0) {
+			throw exceptions::cannot_solve ();
+		}
+	}
+
+	void tridiagonal_factorize (int n, float *dl, float *d, float *du, float *du2, int *ipiv, int *info) {
+		int iinfo;
+		
+		if (!info) {
+			info = &iinfo;
+		}
+		sgttrf_ (&n, dl, d, du, du2, ipiv, info);
+		
+		if (*info != 0) {
+			throw exceptions::cannot_factor ();
+		}
+	}
+	
+	void tridiagonal_solve (int n, float *dl, float *d, float *du, float *du2, int *ipiv, float *b, int *info, int nrhs, int ldb) {
+		char charN = 'N';
+		int iinfo;
+		
+		if (n == 0) {
+			return;
+		}
+		
+		if (!info) {
+			info = &iinfo;
+		}
+		if (ldb == -1) {
+			ldb = n;
+		}
+		
+		sgttrs_ (&charN, &n, &nrhs, dl, d, du, du2, ipiv, b, &ldb, info);
+		
+		if (*info != 0) {
+			throw exceptions::cannot_solve ();
+		}
+	}
+
+	void tridiagonal_solve (int n, float *sub, float *diag, float *sup, float *b, int *info, int nrhs, int ldb) {
+		int iinfo;
+		if (!info) {
+			info = &iinfo;
+		}
+		
+		if (ldb == -1) {
+			ldb = n;
+		}
+	
+		sgtsv_ (&n, &nrhs, sub, diag, sup, b, &ldb, info);
+		
+		if (*info != 0) {
+			throw exceptions::cannot_solve ();
+		}
+	}
+	
+	void tridiagonal_solve (int n, double *sub, double *diag, double *sup, double *b, int *info, int nrhs, int ldb) {
+		int iinfo;
+		if (!info) {
+			info = &iinfo;
+		}
+		
+		if (ldb == -1) {
+			ldb = n;
+		}
+	
+		dgtsv_ (&n, &nrhs, sub, diag, sup, b, &ldb, info);
+		
+		if (*info != 0) {
+			throw exceptions::cannot_solve ();
+		}
+	}
+
+
+
 	void diagonal_solve (int n, float *a, float *b, int inca, int incb) {
 		for (int i = 0; i < n; ++i) {
 			b [i * incb] /= a [i * inca]; 

@@ -1,7 +1,10 @@
 import os, inspect
 Import ("env")
 Import ("include_cuda")
+Import ("include_opencl")
 Import ("include_mp")
+Import ("include_mpi")
+Import ("include_vt")
 Import ("logger")
 
 def directory (path, dirname):
@@ -9,6 +12,36 @@ def directory (path, dirname):
         return ""
     else:
         return dirname [len (path) + 1:] + "/"
+        
+if include_mpi:
+    env ["CXX"] = "mpicxx"
+
+    env.Append (CPPFLAGS = ["-D_MPI"])
+    if include_cuda:
+        env.Append (NVCCFLAGS = ["-D_MPI"])
+        
+if include_vt:
+    env ["CXX"] = "vtcxx"
+    env.Append (CPPFLAGS = ["-DVTRACE"])
+    env.Append (VTFLAGS = ["-vt:cxx", "mpicxx"])
+    conf = Configure (env)
+    conf.CheckLib ("mpi")
+    conf.CheckLib ("mpi_cxx")
+    env = conf.Finish ()
+        
+if include_mp:
+    env.Append (CPPFLAGS = ["-fopenmp"])
+    env.Append (CPPFLAGS = ["-D_MP"])
+env.Append (LINKFLAGS = ["-fopenmp"])
+
+if include_cuda:
+    env.Tool ('cuda')
+    env.Append (NVCCFLAGS = ["-g", "-arch=sm_20"])
+    
+if include_opencl:
+    env.Append (CPPFLAGS = ["-framework", "OpenCL"])
+
+env.Append (CPPFLAGS = ["-Wall", "-g", "-std=c++0x"])
 
 objects = []
 cuda_objects = []
@@ -47,7 +80,12 @@ conf = Configure (env)
 conf.CheckLib ("gfortran")
 env = conf.Finish ()
 
+if include_vt:
+    env.Append (CPPFLAGS = env ["VTFLAGS"])
+
 env.Default (env.Program(target = "../run/main", source = (["main.cpp"] + objects)))
+
+env.Default (env.Program(target = "../run/init", source = (["init.cpp"] + objects)))
 
 env.Default (env.Program(target = "../run/block_test", source = (["block_test.cpp"] + objects)))
 

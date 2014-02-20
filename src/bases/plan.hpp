@@ -35,6 +35,7 @@ enum index {
 	pressure = 20, pres = 20,
 	temperature = 21, temp = 21,
 	composition = 22, comp = 22,
+	test = 100, test_x = 101, text_z = 103,
 	
 	rhs = -01,
 	x_vel_explicit_rhs = -11,
@@ -60,22 +61,17 @@ enum plan_flags {
 	transformed_horizontal = 0x10,
 	transformed_vertical = 0x8000,
 	no_transform = 0x04,
-	only_forward_horizontal = 0x08
-};
-
-enum transform_flags {
-	forward_horizontal = 0x01,
-	forward_vertical = 0x02,
-	inverse_horizontal = 0x04,
-	inverse_vertical = 0x08
+	only_forward_horizontal = 0x08,
+	changed = 0x10000
 };
 
 namespace bases
 {
-	typedef std::map <int, int> flags;
-	
 	/*!*******************************************************************
 	* \brief The basic functional unit, containing a recipe for execution
+	* 
+	* \param i_element_flags A pointer to the integer global flags
+	* \param i_component_flags A pointer to the integer local flags
 	* 
 	* An implemented plan class contains the operator and the addresses of 
 	* all the relevant data arrays to operate on. Each plan need be 
@@ -85,6 +81,10 @@ namespace bases
 	class plan
 	{
 	public:
+		plan <datatype> (int *i_element_flags = NULL, int *i_component_flags = NULL) :
+		element_flags (i_element_flags),
+		component_flags (i_component_flags)  {}
+		
 		virtual ~plan () {
 			// printf ("Destroying bases plan\n");
 		}
@@ -94,7 +94,10 @@ namespace bases
 		* 
 		* The plan class serves as a wrapper for this function.
 		*********************************************************************/
-		virtual void execute (int &element_flags, int &component_flags) = 0;
+		virtual void execute () = 0;
+		
+		int *element_flags; //!< A pointer to the integer global flags
+		int *component_flags; //!< A pointer to the integer local flags
 	};
 } /* bases */
 #endif /* end of include guard: PLAN_HPP_S9YPWHOM */
