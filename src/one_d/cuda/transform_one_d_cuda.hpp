@@ -22,15 +22,15 @@ namespace cuda
 		 * \brief \copybrief bases::explicit_plan <double>
 		 *********************************************************************/
 		template <class datatype>
-		class fftw_cosine : public bases::plan <datatype>
+		class transform : public bases::plan <datatype>
 		{
 		public:
 			/*!*******************************************************************
 			 * \copydoc bases::explicit_plan <double>::explicit_plan ()
 			 *********************************************************************/
-			fftw_cosine (int i_n, datatype* i_data_dev);
+			transform (int i_n, datatype* i_data_dev);
 		
-			virtual ~fftw_cosine ();
+			virtual ~transform ();
 		
 			/*!*******************************************************************
 			 * \copydoc bases::explicit_plan <double>::execute ()
