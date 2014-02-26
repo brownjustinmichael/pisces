@@ -128,6 +128,28 @@ int main (int argc, char *argv[])
 		// one_d::cosine::advection_diffusion_element <double> element (&vertical_axis, name, config, &process_messenger, 0x00);
 		two_d::fourier::cosine::boussinesq_element <double> element (&horizontal_axis, &vertical_axis, name, config, &process_messenger, 0x00);
 
+		io::virtual_dump dump;
+
+		io::output virtual_output (new io::two_d::virtual_format (&dump, n, m));
+		
+		virtual_output.append <double> ("x", element.ptr (x_position));
+		virtual_output.append <double> ("z", element.ptr (z_position));
+		virtual_output.append <double> ("u", element.ptr (x_velocity));
+		virtual_output.append <double> ("w", element.ptr (z_velocity));
+		virtual_output.append <double> ("T", element.ptr (temp));
+		virtual_output.append <double> ("P", element.ptr (pressure));
+		virtual_output.append_scalar <int> ("n", &n);
+		
+		virtual_output.to_file ();
+		
+		
+		for (int i = 0; i < n; ++i) {
+			for (int j = 0; j < m; ++j) {
+				printf ("%f ", dump.index <double> ("T", i, j));
+			}
+			printf ("\n");
+		}
+
 		clock_t cbegin, cend;
 		std::chrono::time_point <std::chrono::system_clock> begin, end;
 
@@ -140,7 +162,7 @@ int main (int argc, char *argv[])
 		end = std::chrono::system_clock::now ();
 	
 		std::chrono::duration <double> eb = end - begin;
-	
+			
 		INFO ("Main complete. CPU Time: " << ((double) (cend - cbegin))/CLOCKS_PER_SEC << " Wall Time: " << (double) eb.count () << " Efficiency: " << (((double) (cend - cbegin))/CLOCKS_PER_SEC / (double) eb.count () / omp_get_max_threads () * 100.) << "%");
 	} catch (std::exception& except) {
 		FATAL (except.what ());

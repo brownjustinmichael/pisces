@@ -27,6 +27,7 @@ namespace two_d
 			
 				datatype calculate_timestep (int i, int j);
 			
+				using element <datatype>::ptr;
 			private:
 				using element <datatype>::element_flags;
 				using element <datatype>::params;
@@ -39,7 +40,6 @@ namespace two_d
 				using element <datatype>::cell_n;
 				using element <datatype>::cell_m;
 				using element <datatype>::grids;
-				using element <datatype>::ptr;
 				using element <datatype>::matrix_ptr;
 				using element <datatype>::messenger_ptr;
 				using element <datatype>::timestep;

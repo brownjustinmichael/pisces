@@ -174,6 +174,21 @@ namespace utils
 		}
 	}
 	
+	void matrix_copy (int n, int m, int *x, int *y, int ldx, int ldy) {
+		int ione = 1;
+		if (ldx == -1) {
+			ldx = n;
+		}
+		if (ldy == -1) {
+			ldy = n;
+		}
+		for (int i = 0; i < m; ++i) {
+			for (int j = 0; j < n; ++j) {
+				y [i * ldy + j] = x [i * ldx + j];
+			}
+		}
+	}
+	
 	void swap (int n, float* x, float* y, int incx, int incy) {
 		sswap_ (&n, x, &incx, y, &incy);
 	}
