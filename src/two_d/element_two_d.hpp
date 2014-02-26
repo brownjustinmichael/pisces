@@ -276,6 +276,7 @@ namespace two_d
 					return this->ptr (name);
 				}
 		
+				using two_d::element <datatype>::ptr;
 			protected:
 				using two_d::element <datatype>::initialize;
 				using two_d::element <datatype>::element_flags;
@@ -286,7 +287,6 @@ namespace two_d
 				using two_d::element <datatype>::axis_n;
 				using two_d::element <datatype>::axis_m;
 				using two_d::element <datatype>::params;
-				using two_d::element <datatype>::ptr;
 				using two_d::element <datatype>::grids;
 				
 				int transform_threads;
@@ -347,6 +347,7 @@ namespace two_d
 					return this->ptr (name);
 				}
 		
+				using two_d::element <datatype>::ptr;
 			protected:
 				using two_d::element <datatype>::initialize;
 				using two_d::element <datatype>::element_flags;
@@ -357,7 +358,6 @@ namespace two_d
 				using two_d::element <datatype>::axis_n;
 				using two_d::element <datatype>::axis_m;
 				using two_d::element <datatype>::params;
-				using two_d::element <datatype>::ptr;
 				using two_d::element <datatype>::grids;
 				
 				int transform_threads;

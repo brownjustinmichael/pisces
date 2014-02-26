@@ -7,6 +7,7 @@
  ************************************************************************/
 
 #include <vector>
+#include <array>
 #include <map>
 #include <string>
 #include <iostream>
@@ -15,13 +16,79 @@
 #include "exceptions.hpp"
 #include "../config.hpp"
 #include <yaml-cpp/yaml.h>
-
+#include "utils.hpp"
 
 #ifndef IO_HPP_C1E9B6EF
 #define IO_HPP_C1E9B6EF
 
 namespace io
 {	
+	class virtual_dump
+	{
+	public:
+		virtual_dump () {}
+		
+		virtual ~virtual_dump () {}
+		
+		template <class datatype>
+		void add_var (std::string name, int n = 1, int m = 1) {
+			TRACE ("ADDING VAR");
+			if (typeid (datatype) == typeid (double)) {
+				double_map [name].resize (n * m);
+			} else if (typeid (datatype) == typeid (float)) {
+				float_map [name].resize (n * m);
+			} else if (typeid (datatype) == typeid (int)) {
+				int_map [name].resize (n * m);
+			} else {
+				throw 0;
+			}
+			dims [name] [0] = n;
+			dims [name] [1] = m;
+			TRACE ("name " << name << " " << dims [name] [0] << " " << dims [name] [1]);
+		}
+		
+		template <class datatype>
+		void put (std::string name, void *data, int n = 1, int m = 1, int ldm = -1) {
+			TRACE ("Putting " << name);
+			ldm = ldm == -1 ? m : ldm;
+			if (typeid (datatype) == typeid (double)) {
+				utils::matrix_copy (m, n, (double *) data, &(double_map [name] [0]), ldm, dims [name] [1]);
+			} else if (typeid (datatype) == typeid (float)) {
+				utils::matrix_copy (m, n, (float *) data, &(float_map [name] [0]), ldm, dims [name] [1]);
+			} else if (typeid (datatype) == typeid (int)) {
+				DEBUG ("Pointer " << &(int_map [name] [0]));
+				utils::matrix_copy (m, n, (int *) data, &(int_map [name] [0]), ldm, dims [name] [1]);
+			} else {
+				throw 0;
+			}
+			TRACE ("Done.");
+		}
+		
+		template <class datatype>
+		void get (std::string name, void *data, int n = 1, int m = 1, int ldm = -1) {
+			TRACE ("Getting...");
+			ldm = ldm == -1 ? m : ldm;
+			if (typeid (datatype) == typeid (double)) {
+				utils::matrix_copy (m, n, &(double_map [name] [0]), (double *) data, dims [name] [1], ldm);
+			} else if (typeid (datatype) == typeid (float)) {
+				utils::matrix_copy (m, n, &(float_map [name] [0]), (float *) data, dims [name] [1], ldm);
+			} else if (typeid (datatype) == typeid (int)) {
+				utils::matrix_copy (m, n, &(int_map [name] [0]), (int *) data, dims [name] [1], ldm);
+			} else {
+				throw 0;
+			}
+		}
+		
+		template <class datatype>
+		datatype &index (std::string name, int i = 0, int j = 0);
+			
+	private:
+		std::map <std::string, std::vector <int>> int_map;
+		std::map <std::string, std::vector <float>> float_map;
+		std::map <std::string, std::vector <double>> double_map;
+		std::map <std::string, std::array <int, 2>> dims;
+	};
+	
 	class parameters : public YAML::Node
 	{
 	public:
@@ -265,6 +332,80 @@ namespace io
 	
 	namespace two_d
 	{
+		class virtual_format : public format
+		{
+		public:
+			virtual_format (virtual_dump *i_dump, int i_n, int i_m) :
+			dump (i_dump), n (i_n), m (i_m) {}
+		
+			~virtual_format () {}
+		
+			std::string extension () {return "";}
+		
+			void to_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
+				for (int i = 0; i < n_data_ptrs; ++i) {
+					if (*types [i] == typeid (double)) {
+						dump->add_var <double> (names [i], n, m);
+						dump->put <double> (names [i], (double *) data_ptrs [i], n, m);
+					} else if (*types [i] == typeid (float)) {
+						dump->add_var <float> (names [i], n, m);
+						dump->put <float> (names [i], (float *) data_ptrs [i], n, m);
+					} else if (*types [i] == typeid (int)) {
+						dump->add_var <int> (names [i], n, m);
+						dump->put <int> (names [i], (int *) data_ptrs [i], n, m);
+					} else {
+						throw 0;
+					}
+				}
+				
+				for (int i = 0; i < n_scalar_ptrs; ++i) {
+					if (*scalar_types [i] == typeid (double)) {
+						dump->add_var <double> (scalar_names [i]);
+						dump->put <double> (scalar_names [i], (double *) scalar_ptrs [i]);
+					} else if (*scalar_types [i] == typeid (float)) {
+						dump->add_var <float> (scalar_names [i]);
+						dump->put <float> (scalar_names [i], (float *) scalar_ptrs [i]);
+					} else if (*scalar_types [i] == typeid (int)) {
+						dump->add_var <int> (scalar_names [i]);
+						dump->put <int> (scalar_names [i], (int *) scalar_ptrs [i]);
+					} else {
+						throw 0;
+					}
+				}
+			}
+			
+			void from_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
+				for (int i = 0; i < n_data_ptrs; ++i) {
+					if (*types [i] == typeid (double)) {
+						dump->get <double> (names [i], (double *) data_ptrs [i], n, m);
+					} else if (*types [i] == typeid (float)) {
+						dump->get <float> (names [i], (float *) data_ptrs [i], n, m);
+					} else if (*types [i] == typeid (int)) {
+						dump->get <int> (names [i], (int *) data_ptrs [i], n, m);
+					} else {
+						throw 0;
+					}
+				}
+				
+				for (int i = 0; i < n_scalar_ptrs; ++i) {
+					if (*scalar_types [i] == typeid (double)) {
+						dump->get <double> (scalar_names [i], (double *) scalar_ptrs [i]);
+					} else if (*scalar_types [i] == typeid (float)) {
+						dump->get <float> (scalar_names [i], (float *) scalar_ptrs [i]);
+					} else if (*scalar_types [i] == typeid (int)) {
+						dump->get <int> (scalar_names [i], (int *) scalar_ptrs [i]);
+					} else {
+						throw 0;
+					}
+				}
+			}
+		
+		private:
+			virtual_dump *dump;
+			int n, m;
+		};
+	
+		
 		class netcdf : public format
 		{
 		public:
