@@ -15,6 +15,9 @@
 #include <chrono>
 #include "utils/block_solver.hpp"
 #include "utils/utils.hpp"
+#ifdef VTRACE
+#include "vt_user.h"
+#endif
 
 int main (int argc, char *argv[])
 {
@@ -141,6 +144,10 @@ int main (int argc, char *argv[])
 	
 	srand (2);
 	
+	unsigned int vtid;
+	vtid = VT_MARKER_DEF("TIME",1);
+	VT_MARKER(vtid, "BEGIN");
+	 
 	for (int i = 0; i < lda; ++i) {
 		// printf ("%d ", mess.get_id ());
 		for (int j = 0; j < lda; ++j) {
@@ -161,18 +168,39 @@ int main (int argc, char *argv[])
 	clock_t cbegin, cmid, cend;
 	std::chrono::time_point <std::chrono::system_clock> begin, mid, end;
 	
-	cbegin = clock ();
-	begin = std::chrono::system_clock::now ();
+	std::chrono::duration <double> mb, em, eb;
+	double cmb = 0.0, cem = 0.0, ceb = 0.0;
 	
-	utils::p_block_matrix_factorize (mess.get_id (), mess.get_np (), n, ntop, nbot, &a [0], &ipiv [0], &x [0], &xipiv [0], &ns [0], &info, lda, ldx);
+	for (int i = 0; i < config.get <int> ("time.steps"); ++i) {
+		vtid = VT_MARKER_DEF("TIME",1);
+		VT_MARKER(vtid, "FACTORIZE");
+		cbegin = clock ();
+		begin = std::chrono::system_clock::now ();
+		
+		utils::p_block_matrix_factorize (mess.get_id (), mess.get_np (), n, ntop, nbot, &a [0], &ipiv [0], &x [0], &xipiv [0], &ns [0], &info, lda, ldx);
 	
-	cmid = clock ();
-	mid = std::chrono::system_clock::now ();
+		cmid = clock ();
+		mid = std::chrono::system_clock::now ();
+		
+		mb += mid - begin;
+		cmb += cmid - cbegin;
+		
+		vtid = VT_MARKER_DEF("TIME",1);
+		VT_MARKER(vtid, "SOLVE");
+		
+		utils::p_block_matrix_solve (mess.get_id (), mess.get_np (), n, ntop, nbot, &a [0], &ipiv [0], &b [0], &x [0], &xipiv [0], &ns [0], &info, nrhs, lda, ldx, ldb);
 	
-	utils::p_block_matrix_solve (mess.get_id (), mess.get_np (), n, ntop, nbot, &a [0], &ipiv [0], &b [0], &x [0], &xipiv [0], &ns [0], &info, nrhs, lda, ldx, ldb);
+		cend = clock ();
+		end = std::chrono::system_clock::now ();
+		
+		em += end - mid;
+		eb += end - begin;
+		cem += cend - cmid;
+		ceb += cend - cbegin;
+	}
 	
-	cend = clock ();
-	end = std::chrono::system_clock::now ();
+	vtid = VT_MARKER_DEF("TIME",1);
+	VT_MARKER(vtid, "DONE");
 	
 	utils::matrix_matrix_multiply (n + ntop + nbot, nrhs, n + ntop + nbot, 1.0, &acopy [0], &b [0], -1.0, &bcopy [0]);
 	
@@ -184,11 +212,9 @@ int main (int argc, char *argv[])
 	// 	printf ("\n");
 	// }
 	
-	std::chrono::duration <double> mb = mid - begin;
-	std::chrono::duration <double> em = end - mid;
-	std::chrono::duration <double> eb = end - begin;
-	printf ("CPU Time: %f + %f = %f\n", ((double) (cmid - cbegin))/CLOCKS_PER_SEC, ((double) (cend - cmid))/CLOCKS_PER_SEC, ((double) (cend - cbegin))/CLOCKS_PER_SEC);
-	printf ("Wall Time: %f + %f = %f\n", (double) mb.count (), (double) em.count (), (double) eb.count ());
+	
+	printf ("[%i] Avg CPU Time: %f + %f = %f\n", id, ((double) (cmb))/CLOCKS_PER_SEC/config.get <int> ("time.steps"), ((double) (cem))/CLOCKS_PER_SEC/config.get <int> ("time.steps"), ((double) (ceb))/CLOCKS_PER_SEC/config.get <int> ("time.steps"));
+	printf ("[%i] Avg Wall Time: %f + %f = %f\n", id, (double) mb.count ()/config.get <int> ("time.steps"), (double) em.count ()/config.get <int> ("time.steps"), (double) eb.count ()/config.get <int> ("time.steps"));
 	return 0;
 }
 
