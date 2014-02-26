@@ -3,7 +3,7 @@ import SCons.Conftest
 
 include_cuda = False
 include_mpi = True
-include_vt = False
+include_vt = True
 include_mp = True
 include_opencl = False
 logger = "log4cplus"
