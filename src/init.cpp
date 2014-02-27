@@ -29,7 +29,14 @@ int main (int argc, char *argv[])
 
 		log_config::configure (&argc, &argv);
 	
-		io::parameters config ("../input/config.yaml");
+		std::string config_filename;
+		
+		if (argc <= 1) {
+			config_filename = "../input/config.yaml";
+		} else {
+			config_filename = argv [1];
+		}
+		io::parameters config (config_filename);
 		if (!config ["grid.x.points"].IsDefined ()) config ["grid.x.points"] = 64;
 		if (!config ["grid.z.points"].IsDefined ()) config ["grid.z.points"] = 64;
 

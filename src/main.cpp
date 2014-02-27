@@ -92,8 +92,14 @@ int main (int argc, char *argv[])
 		n_elements = process_messenger.get_np ();
 
 		log_config::configure (&argc, &argv);
-	
-		io::parameters config ("../input/config.yaml");
+		std::string config_filename;
+		
+		if (argc <= 1) {
+			config_filename = "../input/config.yaml";
+		} else {
+			config_filename = argv [1];
+		}
+		io::parameters config (config_filename);
 		if (!config ["time.steps"].IsDefined ()) config ["time.steps"] = 1;
 		if (!config ["grid.x.points"].IsDefined ()) config ["grid.x.points"] = 64;
 		if (!config ["grid.z.points"].IsDefined ()) config ["grid.z.points"] = 64;
