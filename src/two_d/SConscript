@@ -7,10 +7,6 @@ conf = Configure (env)
 
 conf.CheckLib ("fftw3")
 conf.CheckLib ("fftw3f")
-        
-conf.CheckLib ("fftw3_omp")
-conf.CheckLib ("fftw3f_omp")
-conf.CheckLib ("m")
     
 env = conf.Finish ()
 
