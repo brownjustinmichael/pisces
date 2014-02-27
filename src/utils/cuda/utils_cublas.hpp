@@ -13,34 +13,6 @@ namespace cuda
 {
 	namespace utils
 	{
-		template <class datatype>
-		struct vector 
-		{
-		public:
-			vector (int i_n = 0, datatype *x = NULL, int incx = 1);
-		
-			~vector ();
-		
-			datatype* ptr () {
-				return vect;
-			}
-			
-			void resize (int i_n);
-		
-			int size () {
-				return n;
-			}
-		
-			void copy_to_device (int n, datatype* x, int incx = 1);
-		
-			void copy_to_host (int n, datatype* x, int incx = 1);
-		
-		private:
-			int n;
-			datatype* vect;
-			int inc_vect;
-		};
-		
 		void copy (int n, float* x, float* y, int incx = 1, int incy = 1);
 	
 		void copy (int n, double* x, double* y, int incx = 1, int incy = 1);

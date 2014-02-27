@@ -7,7 +7,7 @@ if include_cuda:
         if lib not in env ['LIBS']:
             env.Append (LIBS = lib)
             
-    cuda_objects.append (env.Object ("element_one_d_cuda.cpp"))
+    # cuda_objects.append (env.Object ("element_one_d_cuda.cpp"))
     cuda_objects.append (env.Object ("transform_one_d_cuda.cu"))
-    cuda_objects.append (env.Object ("solver_one_d_cuda.cu"))
-    cuda_objects.append (env.Object ("diffusion_one_d_cuda.cpp"))
+    # cuda_objects.append (env.Object ("solver_one_d_cuda.cu"))
+    # cuda_objects.append (env.Object ("diffusion_one_d_cuda.cpp"))

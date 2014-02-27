@@ -134,7 +134,7 @@ namespace bases
 		int derivs; //!< The integer number of derivatives deep the collocation grid runs
 	
 	private:
-		std::vector<std::vector<datatype>> data; //!< A double vector containing the vectors of collocation data
+		std::vector<std::vector<datatype> > data; //!< A double vector containing the vectors of collocation data
 	};
 	
 	namespace chebyshev

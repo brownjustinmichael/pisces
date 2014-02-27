@@ -1,5 +1,5 @@
 /*!**********************************************************************
- * \file utils_cuda.cuh
+ * \file utils_cuda.hpp
  * /Users/justinbrown/Dropbox/pisces/src
  * 
  * Created by Justin Brown on 2013-08-26.
@@ -8,6 +8,12 @@
 
 #ifndef UTILS_CUDA_CUH_AGOKALSC
 #define UTILS_CUDA_CUH_AGOKALSC
+
+#include <stddef.h>
+
+/*
+	TODO HANDLE_ERROR should be in a cuh file
+*/
 
 #define HANDLE_ERROR(status) \
 {cudaError_t result = status; \
@@ -38,16 +44,50 @@ switch (result) { \
 	case cudaErrorUnknown: FATAL ("Unknown error."); throw 0; \
 	default: if (result != cudaSuccess) {FATAL ("Other problem: " << result << " " << cudaErrorInvalidDevicePointer); throw 0;}}}
 
-#define HANDLE_STATUS(status) \
-{cublasStatus_t result = status; \
-switch (result) { \
-	case CUBLAS_STATUS_NOT_INITIALIZED: FATAL ("CUBLAS didn't initialize correctly."); throw 0; \
-	case CUBLAS_STATUS_ALLOC_FAILED: FATAL ("CUBLAS allocation failed."); throw 0; \
-	case CUBLAS_STATUS_INVALID_VALUE: FATAL ("CUBLAS unsupported value or parameter."); throw 0; \
-	case CUBLAS_STATUS_ARCH_MISMATCH: FATAL ("CUBLAS feature absent in current architecture."); throw 0; \
-	case CUBLAS_STATUS_MAPPING_ERROR: FATAL ("CUBLAS access to GPU memory failed."); throw 0; \
-	case CUBLAS_STATUS_EXECUTION_FAILED: FATAL ("CUBLAS failed to execute."); throw 0; \
-	case CUBLAS_STATUS_INTERNAL_ERROR: FATAL ("CUBLAS internal operation failed."); throw 0;}}
+#define DEVICE_ID cuda::config::device ()
 
+namespace cuda
+{
+	class config
+	{
+	public:
+		config (int argc = 0, const char **argv = NULL);
+	
+		virtual ~config ();
+		
+		int device () {
+			return device_id;
+		}
+	private:
+		static int device_id;
+	};
+	
+	template <class datatype>
+	class vector 
+	{
+	public:
+		vector (int i_n = 0, datatype *x = NULL);
+	
+		~vector ();
+	
+		datatype* ptr () {
+			return data_device;
+		}
+		
+		void resize (int i_n);
+	
+		int size () {
+			return n;
+		}
+	
+		void copy_to_device (int n, datatype* x);
+	
+		void copy_to_host (int n, datatype* x);
+	
+	private:
+		int n;
+		datatype* data_device;
+	};
+} /* cuda */
 
 #endif /* end of include guard: UTILS_CUDA_CUH_AGOKALSC */
