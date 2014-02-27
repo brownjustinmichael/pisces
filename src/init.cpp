@@ -6,10 +6,10 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
+#include "bases/messenger.hpp"
 #include "config.hpp"
 #include "two_d/plan_two_d.hpp"
 #include "bases/grid.hpp"
-#include "bases/messenger.hpp"
 #include "utils/io.hpp"
 #include <sstream>
 #include <iomanip>
