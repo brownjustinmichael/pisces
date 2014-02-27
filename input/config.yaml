@@ -3,13 +3,13 @@ init:
     mean: 0.0
     sigma: 15.0
 grid:
-    nrhs: 400
+    nrhs: 4096
     nb: 1
     x:
         points: 64
         width: 100.0
     z:
-        points: 640
+        points: 64
         width: 100.0
 time:
     steps: 10
