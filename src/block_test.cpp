@@ -20,7 +20,14 @@
 int main (int argc, char *argv[])
 {
 	bases::messenger mess (&argc, &argv, 2);
-	io::parameters config ("../input/config.yaml");
+	std::string config_filename;
+	
+	if (argc <= 1) {
+		config_filename = "../input/config.yaml";
+	} else {
+		config_filename = argv [1];
+	}
+	io::parameters config (config_filename);
 	// io::parameters <double> params ("../input/block_parameters.txt");
 	// omp_set_num_threads(params.nmp);
 
