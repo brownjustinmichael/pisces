@@ -14,10 +14,8 @@
 #include <ctime>
 #include <chrono>
 #include "utils/block_solver.hpp"
+#include "utils/solver_utils.hpp"
 #include "utils/utils.hpp"
-#ifdef VTRACE
-#include "vt_user.h"
-#endif
 
 int main (int argc, char *argv[])
 {
@@ -144,10 +142,6 @@ int main (int argc, char *argv[])
 	
 	srand (2);
 	
-	unsigned int vtid;
-	vtid = VT_MARKER_DEF("TIME",1);
-	VT_MARKER(vtid, "BEGIN");
-	 
 	for (int i = 0; i < lda; ++i) {
 		// printf ("%d ", mess.get_id ());
 		for (int j = 0; j < lda; ++j) {
@@ -165,6 +159,23 @@ int main (int argc, char *argv[])
 	
 	utils::matrix_copy (lda, lda, &a [0], &acopy [0], lda, lda);
 	
+	clock_t corig_begin, corig_end;
+	std::chrono::time_point <std::chrono::system_clock> orig_begin, orig_end;
+	
+	corig_begin = clock ();
+	orig_begin = std::chrono::system_clock::now ();
+	
+	utils::matrix_factorize (n, n, &a [0], &ipiv [0], &info, lda);
+	utils::matrix_solve (n, &a [0], &ipiv [0], &b [0], &info, nrhs, lda, ldb);
+	
+	corig_end = clock ();
+	orig_end = std::chrono::system_clock::now ();
+	
+	std::chrono::duration <double> orig_total = orig_end - orig_begin;
+	
+	printf ("[%i] Orig CPU Time: %f\n", id, ((double) (corig_end - corig_begin))/CLOCKS_PER_SEC);
+	printf ("[%i] Orig Wall Time: %f\n", id, (double) orig_total.count ());
+	
 	clock_t cbegin, cmid, cend;
 	std::chrono::time_point <std::chrono::system_clock> begin, mid, end;
 	
@@ -172,8 +183,6 @@ int main (int argc, char *argv[])
 	double cmb = 0.0, cem = 0.0, ceb = 0.0;
 	
 	for (int i = 0; i < config.get <int> ("time.steps"); ++i) {
-		vtid = VT_MARKER_DEF("TIME",1);
-		VT_MARKER(vtid, "FACTORIZE");
 		cbegin = clock ();
 		begin = std::chrono::system_clock::now ();
 		
@@ -184,9 +193,6 @@ int main (int argc, char *argv[])
 		
 		mb += mid - begin;
 		cmb += cmid - cbegin;
-		
-		vtid = VT_MARKER_DEF("TIME",1);
-		VT_MARKER(vtid, "SOLVE");
 		
 		utils::p_block_matrix_solve (mess.get_id (), mess.get_np (), n, ntop, nbot, &a [0], &ipiv [0], &b [0], &x [0], &xipiv [0], &ns [0], &info, nrhs, lda, ldx, ldb);
 	
@@ -199,9 +205,6 @@ int main (int argc, char *argv[])
 		ceb += cend - cbegin;
 	}
 	
-	vtid = VT_MARKER_DEF("TIME",1);
-	VT_MARKER(vtid, "DONE");
-	
 	utils::matrix_matrix_multiply (n + ntop + nbot, nrhs, n + ntop + nbot, 1.0, &acopy [0], &b [0], -1.0, &bcopy [0]);
 	
 	// for (int i = 0; i < lda; ++i) {
@@ -211,7 +214,6 @@ int main (int argc, char *argv[])
 	// 	}
 	// 	printf ("\n");
 	// }
-	
 	
 	printf ("[%i] Avg CPU Time: %f + %f = %f\n", id, ((double) (cmb))/CLOCKS_PER_SEC/config.get <int> ("time.steps"), ((double) (cem))/CLOCKS_PER_SEC/config.get <int> ("time.steps"), ((double) (ceb))/CLOCKS_PER_SEC/config.get <int> ("time.steps"));
 	printf ("[%i] Avg Wall Time: %f + %f = %f\n", id, (double) mb.count ()/config.get <int> ("time.steps"), (double) em.count ()/config.get <int> ("time.steps"), (double) eb.count ()/config.get <int> ("time.steps"));
