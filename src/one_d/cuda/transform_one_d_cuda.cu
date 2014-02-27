@@ -10,7 +10,17 @@
 #include <cufft.h>
 #include "transform_one_d_cuda.hpp"
 #include "../../utils/cuda/utils_cublas.hpp"
-#include "../../utils/cuda/utils_cuda.cuh"
+#include "../../utils/cuda/utils_cuda.hpp"
+
+class cuda_config
+{
+public:
+	cuda_config ();
+	virtual ~cuda_config ();
+
+private:
+	/* data */
+};
 
 #define HANDLE_CUFFT(status) \
 {cufftResult result = status; \
@@ -63,78 +73,60 @@ __global__ void symmetrize (int n, float* data) {
 	}
 }
 
-namespace cuda
+namespace one_d
 {
-	namespace one_d
-	{
-		template <>
-		transform <double>::transform (int i_n, double* i_data_dev) : 
-		n (i_n),
-		data_real (i_data_dev) {
-			TRACE ("Instantiating...");
-			HANDLE_ERROR (cudaMalloc ((void **) &data_complex, n * sizeof (cufftDoubleComplex)));
-			cu_plan = new cufftHandle;
-			HANDLE_CUFFT (cufftPlan1d((cufftHandle*) cu_plan, 2 * n - 2, CUFFT_D2Z, 1));
-			scalar = sqrt (1.0 / 2.0 / ((double) n - 1.0));
-			TRACE ("Instantiated.");
-		}
-		
-		template <>
-		transform <float>::transform (int i_n, float* i_data_dev) : 
-		n (i_n),
-		data_real (i_data_dev) {
-			TRACE ("Instantiating...");
-			HANDLE_ERROR (cudaMalloc ((void **) &data_complex, n * sizeof (cufftComplex)));
-			cu_plan = new cufftHandle;
-			HANDLE_CUFFT (cufftPlan1d((cufftHandle*) cu_plan, 2 * n - 2, CUFFT_R2C, 1));
-			scalar = sqrt (1.0 / 2.0 / ((float) n - 1.0));
-			
-			HANDLE_ERROR (cudaDeviceSynchronize ());
-			
-			TRACE ("Instantiated.");
-		}
-		
-		template <class datatype>
-		transform <datatype>::~transform () {
-			cufftDestroy (*((cufftHandle *) cu_plan));
-			delete (cufftHandle*) cu_plan;
-			cudaFree (data_complex);
-		}
-		
-		template <>
-		void transform <double>::execute () {
-			symmetrize <<<1, std::min (n, 512)>>> (n, (double *) data_real);
-			
-			HANDLE_CUFFT (cufftExecD2Z(*((cufftHandle *) cu_plan), (double*) data_real, (cufftDoubleComplex*) data_complex));
-			
-			complex_to_real <<<1, std::min (n, 512)>>> (n, (cufftDoubleComplex*) data_complex, (double*) data_real);
-			
-			utils::scale (n, scalar, (double*) data_real);
-		}
-		
-		template <>
-		void transform <float>::execute () {
-			symmetrize <<<1, std::min (n, 512)>>> (n, (float *) data_real);
-			
-			HANDLE_CUFFT (cufftExecR2C(*((cufftHandle *) cu_plan), (float*) data_real, (cufftComplex*) data_complex));
-			
-			complex_to_real <<<1, std::min (n, 512)>>> (n, (cufftComplex*) data_complex, (float*) data_real);
-			
-			utils::scale (n, scalar, (float*) data_real);
-		}
-		
-		template <class datatype>
-		transfer <datatype>::transfer (int i_n, datatype* i_data_dev, datatype* i_data) :
-		n (i_n),
-		data_dev (i_data_dev),
-		data (i_data) {}
-		
-		template <class datatype>
-		void transfer <datatype>::execute () {
-			cudaMemcpy (data, data_dev, n * sizeof (datatype), cudaMemcpyDeviceToHost);
-		}
-		
-		template class transfer <double>;
-		template class transfer <float>;
-	} /* one_d */
-} /* cuda */
+	template <>
+	transform <double>::transform (bases::grid <double> &i_grid, double* i_data_in, double* i_data_out, int i_flags, int *element_flags, int *component_flags) : 
+	n (i_grid.n),
+	data_in (i_data_in),
+	data_out (i_data_out) {
+		TRACE ("Instantiating...");
+		HANDLE_ERROR (cudaMalloc ((void **) &data_complex, n * sizeof (cufftDoubleComplex)));
+		cu_plan = new cufftHandle;
+		HANDLE_CUFFT (cufftPlan1d((cufftHandle*) cu_plan, 2 * n - 2, CUFFT_D2Z, 1));
+		scalar = sqrt (1.0 / 2.0 / ((double) n - 1.0));
+		TRACE ("Instantiated.");
+	}
+	
+	template <>
+	transform <float>::transform (bases::grid <float> &i_grid, float* i_data_in, float* i_data_out, int i_flags, int *element_flags, int *component_flags) : 
+	n (i_grid.n),
+	data_in (i_data_in),
+	data_out (i_data_out) {
+		TRACE ("Instantiating...");
+		HANDLE_ERROR (cudaMalloc ((void **) &data_complex, n * sizeof (cufftComplex)));
+		cu_plan = new cufftHandle;
+		HANDLE_CUFFT (cufftPlan1d((cufftHandle*) cu_plan, 2 * n - 2, CUFFT_R2C, 1));
+		scalar = sqrt (1.0 / 2.0 / ((float) n - 1.0));
+		TRACE ("Instantiated.");
+	}
+	
+	template <class datatype>
+	transform <datatype>::~transform () {
+		cufftDestroy (*((cufftHandle *) cu_plan));
+		delete (cufftHandle*) cu_plan;
+		cudaFree (data_complex);
+	}
+	
+	template <>
+	void transform <double>::execute () {
+		// symmetrize <<<1, std::min (n, 512)>>> (n, (double *) data_in);
+		// 
+		// HANDLE_CUFFT (cufftExecD2Z(*((cufftHandle *) cu_plan), (double*) data_real, (cufftDoubleComplex*) data_complex));
+		// 
+		// complex_to_real <<<1, std::min (n, 512)>>> (n, (cufftDoubleComplex*) data_complex, (double*) data_real);
+		// 
+		// cublas::scale (n, scalar, (double*) data_real);
+	}
+	
+	template <>
+	void transform <float>::execute () {
+		// symmetrize <<<1, std::min (n, 512)>>> (n, (float *) data_real);
+		// 
+		// HANDLE_CUFFT (cufftExecR2C(*((cufftHandle *) cu_plan), (float*) data_real, (cufftComplex*) data_complex));
+		// 
+		// complex_to_real <<<1, std::min (n, 512)>>> (n, (cufftComplex*) data_complex, (float*) data_real);
+		// 
+		// cublas::scale (n, scalar, (float*) data_real);
+	}
+} /* one_d */

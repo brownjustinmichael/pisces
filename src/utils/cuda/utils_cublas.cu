@@ -18,54 +18,6 @@ namespace cuda
 {
 	namespace utils
 	{
-		template <class datatype>
-		vector <datatype>::vector (int i_n, datatype *x, int incx) {
-			inc_vect = 1;
-			n = i_n;
-			if (n != 0) {
-				HANDLE_ERROR (cudaMalloc ((void**) &vect, n * sizeof (datatype)));
-				if (x) {
-					copy_to_device (n, x, incx);
-				}
-			}
-		}
-		
-		template <class datatype>
-		vector <datatype>::~vector () {
-			if (n != 0) {
-				HANDLE_ERROR (cudaFree (vect));
-			}
-		}
-		
-		template <class datatype>
-		void vector <datatype>::resize (int i_n) {
-			if (n != 0) {
-				HANDLE_ERROR (cudaFree ((datatype*) vect));
-			}
-			if (i_n != 0) {
-				n = i_n;
-				HANDLE_ERROR (cudaMalloc ((void**) &vect, n * sizeof (datatype)));
-			}
-		}
-		
-		template <class datatype>
-		void vector <datatype>::copy_to_device (int i_n, datatype* x, int incx) {
-			if (i_n != 0 && n != 0) {
-				HANDLE_STATUS (cublasSetVector (i_n, sizeof (datatype), x, incx, vect, inc_vect));
-			} else if (n == 0) {
-				throw 0;
-			}
-		}
-	
-		template <class datatype>
-		void vector <datatype>::copy_to_host (int i_n, datatype* x, int incx) {
-			if (i_n != 0 && n != 0) {
-				HANDLE_STATUS (cublasGetVector (i_n, sizeof (datatype), vect, inc_vect, x, incx));
-			} else if (n == 0) {
-				throw 0;
-			}
-		}
-		
 		struct config
 		{
 		public:

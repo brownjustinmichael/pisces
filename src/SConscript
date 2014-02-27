@@ -37,6 +37,7 @@ env.Append (LINKFLAGS = ["-fopenmp"])
 if include_cuda:
     env.Tool ('cuda')
     env.Append (NVCCFLAGS = ["-g", "-arch=sm_20"])
+    env.Append (CPPFLAGS = ["-D_CUDA"])
     
 if include_opencl:
     env.Append (CPPFLAGS = ["-framework", "OpenCL"])

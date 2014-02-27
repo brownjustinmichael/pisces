@@ -9,6 +9,9 @@
 #ifndef FFTW_HPP_P3TP70YE
 #define FFTW_HPP_P3TP70YE
 
+#ifdef _CUDA
+#include "cuda/transform_one_d_cuda.hpp"
+#else
 #include <fftw3.h>
 #include <memory>
 #include "../config.hpp"
@@ -105,4 +108,5 @@ namespace one_d
 	};
 } /* one_d */
 
+#endif /* _CUDA */
 #endif /* end of include guard: FFTW_HPP_P3TP70YE */
