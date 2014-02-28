@@ -1,11 +1,11 @@
 import os
 import SCons.Conftest
 
-include_cuda = False
+include_cuda = True
 include_mpi = True
 include_vt = False
 include_mp = True
-include_opencl = True
+include_opencl = False
 logger = "log4cplus"
 
 env = Environment (ENV = os.environ)
