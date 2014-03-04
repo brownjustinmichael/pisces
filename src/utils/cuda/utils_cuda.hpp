@@ -43,51 +43,59 @@ switch (result) { \
 	case cudaErrorCudartUnloading: FATAL ("Cudart unloading error"); throw 0; \
 	case cudaErrorUnknown: FATAL ("Unknown error."); throw 0; \
 	default: if (result != cudaSuccess) {FATAL ("Other problem: " << result << " " << cudaErrorInvalidDevicePointer); throw 0;}}}
+	
+#define CUBLAS_HANDLE_ERROR(status) \
+{cublasStatus_t result = status; \
+switch (result) { \
+	default: if (result != CUBLAS_STATUS_SUCCESS) {FATAL ("Other problem: " << result << " " << cudaErrorInvalidDevicePointer); throw 0;}}}
 
 #define DEVICE_ID cuda::config::device ()
 
-namespace cuda
+namespace utils
 {
-	class config
+	namespace cuda
 	{
-	public:
-		config (int argc = 0, const char **argv = NULL);
+		class config
+		{
+		public:
+			config (int argc = 0, const char **argv = NULL);
 	
-		virtual ~config ();
+			virtual ~config ();
 		
-		int device () {
-			return device_id;
-		}
-	private:
-		static int device_id;
-	};
+			int device () {
+				return device_id;
+			}
+		private:
+			static int device_id;
+		};
 	
-	template <class datatype>
-	class vector 
-	{
-	public:
-		vector (int i_n = 0, datatype *x = NULL);
+		template <class datatype>
+		class vector 
+		{
+		public:
+			vector (int i_n = 0, datatype *x = NULL);
 	
-		~vector ();
+			~vector ();
 	
-		datatype* ptr () {
-			return data_device;
-		}
+			datatype* ptr () {
+				return data_device;
+			}
 		
-		void resize (int i_n);
+			void resize (int i_n);
 	
-		int size () {
-			return n;
-		}
+			int size () {
+				return n;
+			}
 	
-		void copy_to_device (int n, datatype* x);
+			void copy_to_device (int n, datatype* x);
 	
-		void copy_to_host (int n, datatype* x);
+			void copy_to_host (int n, datatype* x);
 	
-	private:
-		int n;
-		datatype* data_device;
-	};
-} /* cuda */
+		private:
+			int n;
+			datatype* data_device;
+		};
+	} /* cuda */
+} /* utils */
 
 #endif /* end of include guard: UTILS_CUDA_CUH_AGOKALSC */

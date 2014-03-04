@@ -215,20 +215,6 @@ namespace bases
 			if (!found) {
 				transforms.push_back (i_name);
 			}
-
-			// std::shared_ptr <plan <datatype>> plan_ptr = std::shared_ptr <plan <datatype>> (i_plan);
-			// if (i_flags & forward_horizontal) {
-			// 	forward_horizontal_transforms [i_name] = plan_ptr;
-			// }
-			// if (i_flags & forward_vertical) {
-			// 	forward_vertical_transforms [i_name] = plan_ptr;
-			// }
-			// if (i_flags & inverse_horizontal) {
-			// 	inverse_horizontal_transforms [i_name] = plan_ptr;
-			// }
-			// if (i_flags & inverse_vertical) {
-			// 	inverse_vertical_transforms [i_name] = plan_ptr;
-			// }
 			
 			master_transforms [i_name] = std::shared_ptr <master_transform <datatype>> (i_transform);
 		}
@@ -244,17 +230,6 @@ namespace bases
 		
 		void write_transform_data ();
 		void read_transform_data ();
-	
-		
-		/*!**********************************************************************
-		 * \brief Output to file
-		 ************************************************************************/
-		virtual void output () {
-			TRACE ("Writing to file...");
-			if (normal_stream) {
-				normal_stream->to_file ();
-			}
-		}
 
 		/*!**********************************************************************
 		 * \brief Factorize all solvers
@@ -278,9 +253,8 @@ namespace bases
 				solvers [*iter]->execute ();
 			}
 			// Make certain everything is fully transformed
-			write_transform_data ();
 			
-			transform (forward_vertical);
+			transform (forward_vertical | no_read);
 			TRACE ("Solve complete.");
 		}
 		

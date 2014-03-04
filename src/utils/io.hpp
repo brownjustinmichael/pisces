@@ -25,8 +25,10 @@ namespace io
 	class parameters : public YAML::Node
 	{
 	public:
-		parameters (std::string filename) {
-			YAML::Node::operator= (YAML::LoadFile (filename));
+		parameters (std::string filename = "") {
+			if (filename != "") {
+				YAML::Node::operator= (YAML::LoadFile (filename));
+			}
 		}
 		
 		virtual ~parameters () {}

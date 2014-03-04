@@ -86,7 +86,7 @@ int main (int argc, char *argv[])
 		int id = 0, n_elements = 1;
 
 		// Initialize messenger
-		bases::messenger process_messenger (&argc, &argv, 2);
+		bases::messenger process_messenger (&argc, &argv);
 
 		id = process_messenger.get_id ();
 		n_elements = process_messenger.get_np ();
@@ -125,8 +125,8 @@ int main (int argc, char *argv[])
 		bases::axis horizontal_axis (n, position_n0, position_nn);
 		bases::axis vertical_axis (m, position_m0, position_mm, excess_0, excess_n);
 	
-		// one_d::cosine::advection_diffusion_element <double> element (&vertical_axis, name, config, &process_messenger, 0x00);
-		two_d::fourier::cosine::boussinesq_element <double> element (&horizontal_axis, &vertical_axis, name, config, &process_messenger, 0x00);
+		one_d::cosine::advection_diffusion_element <double> element (&vertical_axis, name, config, &process_messenger, 0x00);
+		// two_d::fourier::cosine::boussinesq_element <double> element (&horizontal_axis, &vertical_axis, name, config, &process_messenger, 0x00);
 
 		clock_t cbegin, cend;
 		std::chrono::time_point <std::chrono::system_clock> begin, end;

@@ -22,7 +22,7 @@ int main (int argc, char *argv[])
 		int id = 0, n_elements = 1;
 
 		// Initialize messenger
-		bases::messenger process_messenger (&argc, &argv, 2);
+		bases::messenger process_messenger (&argc, &argv);
 
 		id = process_messenger.get_id ();
 		n_elements = process_messenger.get_np ();

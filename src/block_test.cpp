@@ -18,7 +18,7 @@
 
 int main (int argc, char *argv[])
 {
-	bases::messenger mess (&argc, &argv, 2);
+	bases::messenger mess (&argc, &argv);
 	io::parameters config ("../input/config.yaml");
 	// io::parameters <double> params ("../input/block_parameters.txt");
 	// omp_set_num_threads(params.nmp);

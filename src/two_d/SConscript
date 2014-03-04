@@ -1,6 +1,5 @@
 Import ("env")
 Import ("objects")
-Import ("cuda_objects")
 Import ("include_mp")
 
 conf = Configure (env)
