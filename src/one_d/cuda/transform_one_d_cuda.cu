@@ -21,7 +21,6 @@ switch (result) { \
 	case CUFFT_EXEC_FAILED: FATAL ("Failed to execute transform on cufft."); throw 0; \
 	default: if (status != CUFFT_SUCCESS) {FATAL ("Cufft Other problem."); throw 0;}}}
 
-
 __global__ void real_to_complex (int n, double* in, cufftDoubleComplex* out) {
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
 	while (tid < n) {
@@ -47,25 +46,27 @@ __global__ void complex_to_real (int n, cufftComplex* in, float* out) {
 	}
 }
 
-__global__ void symmetrize (int n, double* data) {
+__global__ void symmetrize (int n, double* data_in, double *data_out) {
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
 	while (tid < n - 1 && tid != 0) {
-		data [2 * n - 2 - tid] = data [tid];
+		data_out [tid] = data_in [tid];
+		data_out [2 * n - 2 - tid] = data_in [tid];
 		tid += blockDim.x * gridDim.x;
 	}
 }
 
-__global__ void symmetrize (int n, float* data) {
+__global__ void symmetrize (int n, float* data_in, float *data_out) {
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
 	while (tid < n - 1 && tid != 0) {
-		data [2 * n - 2 - tid] = data [tid];
+		data_out [tid] = data_in [tid];
+		data_out [2 * n - 2 - tid] = data_in [tid];
 		tid += blockDim.x * gridDim.x;
 	}
 }
 
-namespace cuda
+namespace one_d
 {
-	namespace one_d
+	namespace cuda
 	{
 		template <>
 		transform <double>::transform (bases::grid <double> &i_grid, double* i_data_in, double* i_data_out, int i_flags, int *element_flags, int *component_flags) : 
@@ -102,24 +103,24 @@ namespace cuda
 	
 		template <>
 		void transform <double>::execute () {
-			// symmetrize <<<1, std::min (n, 512)>>> (n, (double *) data_in);
-			// 
-			// HANDLE_CUFFT (cufftExecD2Z(*((cufftHandle *) cu_plan), (double*) data_real, (cufftDoubleComplex*) data_complex));
-			// 
-			// complex_to_real <<<1, std::min (n, 512)>>> (n, (cufftDoubleComplex*) data_complex, (double*) data_real);
-			// 
-			// cublas::scale (n, scalar, (double*) data_real);
+			symmetrize <<<1, std::min (n, 512)>>> (n, (double *) data_in, (double *) data_out);
+			
+			HANDLE_CUFFT (cufftExecD2Z(*((cufftHandle *) cu_plan), (double*) data_out, (cufftDoubleComplex*) data_complex));
+			
+			complex_to_real <<<1, std::min (n, 512)>>> (n, (cufftDoubleComplex*) data_complex, (double*) data_out);
+			
+			utils::cuda::cublas::scale (n, scalar, (double*) data_out);
 		}
 	
 		template <>
 		void transform <float>::execute () {
-			// symmetrize <<<1, std::min (n, 512)>>> (n, (float *) data_real);
-			// 
-			// HANDLE_CUFFT (cufftExecR2C(*((cufftHandle *) cu_plan), (float*) data_real, (cufftComplex*) data_complex));
-			// 
-			// complex_to_real <<<1, std::min (n, 512)>>> (n, (cufftComplex*) data_complex, (float*) data_real);
-			// 
-			// cublas::scale (n, scalar, (float*) data_real);
+			symmetrize <<<1, std::min (n, 512)>>> (n, (float *) data_in, (float *) data_out);
+			
+			HANDLE_CUFFT (cufftExecR2C(*((cufftHandle *) cu_plan), (float*) data_out, (cufftComplex*) data_complex));
+			
+			complex_to_real <<<1, std::min (n, 512)>>> (n, (cufftComplex*) data_complex, (float*) data_out);
+			
+			utils::cuda::cublas::scale (n, scalar, (float*) data_out);
 		}
-	} /* one_d */
-} /* cuda */
+	} /* cuda */
+} /* one_d */

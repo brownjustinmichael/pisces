@@ -14,9 +14,9 @@
 #include "../../utils/cuda/utils_cuda.hpp"
 #include "../../bases/transform.hpp"
 
-namespace cuda
+namespace one_d
 {
-	namespace one_d
+	namespace cuda
 	{
 		/*!*******************************************************************
 		 * An implementation of the transform class using FFTW3.
@@ -58,15 +58,15 @@ namespace cuda
 			ldn (i_grid.ld),
 			data_in (i_data_in),
 			data_out (i_data_out ? i_data_out : i_data_in) {
-				data.resize (ldn);
+				data.resize (2 * ldn);
 				if (i_flags & forward_vertical) {
-					forward_transform = new one_d::transform <datatype> (i_grid, &data [0], &data [0], 0x00, element_flags, component_flags);
+					forward_transform = new one_d::cuda::transform <datatype> (i_grid, data.ptr (), data.ptr (), 0x00, element_flags, component_flags);
 				}
 				if (i_flags & inverse_vertical) {
 					if (forward_transform) {
 						inverse_transform = forward_transform;
 					} else {
-						inverse_transform = new one_d::transform <datatype> (i_grid, &data [0], &data [0], inverse, element_flags, component_flags);
+						inverse_transform = new one_d::cuda::transform <datatype> (i_grid, data.ptr (), data.ptr (), inverse, element_flags, component_flags);
 					}
 				}
 			}
@@ -100,14 +100,14 @@ namespace cuda
 		private:
 			int &ldn;
 			datatype *data_in, *data_out;
-			cuda::vector <datatype> data;
+			utils::cuda::vector <datatype> data;
 	
 			bases::plan <datatype> *forward_transform;
 			bases::plan <datatype> *inverse_transform;
 	
 			using bases::master_transform <datatype>::component_flags;
 		};
-	} /* one_d */
-} /* cuda */
+	} /* cuda */
+} /* one_d */
 
 #endif /* end of include guard: FFTW_ONE_D_CUDA_HPP_G5118SR0 */

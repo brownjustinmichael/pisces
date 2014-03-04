@@ -1,6 +1,7 @@
 Import ("env")
-Import ("cuda_objects")
+Import ("objects")
 Import ("include_cuda")
 
 if include_cuda:
-    cuda_objects.append (env.Object ("utils_cuda.cu"))
+    objects.append (env.Object ("utils_cuda.cu"))
+    objects.append (env.Object ("utils_cublas.cu"))

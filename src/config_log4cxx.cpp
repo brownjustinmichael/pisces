@@ -59,3 +59,27 @@ void log_config::configure (int* argc, char*** argv, int id) {
 	logger->addAppender (new log4cxx::FileAppender (new log4cxx::PatternLayout ("%d %-5p %c{2}: %C (%M %L) - %m%n"), "process_" + convert.str () + ".log", false));
 }
 
+void log_config::trace (std::stringstream stream) {
+	LOG4CXX_TRACE (logger, stream);
+}
+
+void log_config::debug (std::stringstream stream) {
+	LOG4CXX_DEBUG (logger, stream);
+}
+
+void log_config::info (std::stringstream stream) {
+	LOG4CXX_INFO (logger, stream);
+}
+
+void log_config::warn (std::stringstream stream) {
+	LOG4CXX_WARN (logger, stream);
+}
+
+void log_config::error (std::stringstream stream) {
+	LOG4CXX_ERROR (logger, stream);
+}
+
+void log_config::fatal (std::stringstream stream) {
+	LOG4CXX_FATAL (logger, stream);
+}
+

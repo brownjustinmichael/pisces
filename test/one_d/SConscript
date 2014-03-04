@@ -1,0 +1,7 @@
+Import ("env")
+Import ("objects")
+Import ("none_config_object")
+     
+program = env.Program('test', ['transform_test_one_d.cpp'] + objects + none_config_object)
+test_alias = Alias('test', [program], program[0].path)
+AlwaysBuild (test_alias)

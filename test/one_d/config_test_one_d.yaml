@@ -1,0 +1,38 @@
+init:
+    scale: 1.0
+    mean: 0.0
+    sigma: 15.0
+grid:
+    nrhs: 4
+    nb: 1
+    x:
+        points: 64
+        width: 100.0
+    z:
+        points: 64
+        width: 100.0
+time:
+    steps: 100
+    max: 0.1
+    safety: 0.8
+    cfl: 0.1
+    alpha: 1.0
+    allow: 1000.0
+temperature:
+    diffusion: 1.0
+    advection: 1.0
+velocity:
+    diffusion: 0.1
+    advection: 10.0
+input:
+    file: input_%02i
+output:
+    file: output_%02i_%%04i
+    transform_file: output_t_%02i_%%04i
+    every: 1
+    merge_file: merge_%04i
+parallel:
+    maxthreads: 4
+    transform:
+        threads: 4
+        subthreads: 4

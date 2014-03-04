@@ -21,6 +21,8 @@ enum transform_flags {
 	inverse_vertical = 0x08,
 	ignore_m = 0x10,
 	inverse = 0x20,
+	no_write = 0x40,
+	no_read = 0x80
 };
 
 namespace bases
@@ -39,11 +41,21 @@ namespace bases
 		/*!*******************************************************************
 		 * \brief Solve the matrix equation
 		 *********************************************************************/
-		virtual void transform (int flags) = 0;
+		virtual void transform (int flags) {
+			if (!(flags & no_write)) {
+				write ();
+			}
+			_transform (flags);
+			if (!(flags & no_read)) {
+				read ();
+			}
+		}
 		
 		virtual void write () = 0;
 		
 		virtual void read () = 0;
+		
+		virtual void _transform (int flags) = 0;
 		
 		int *element_flags;
 		int *component_flags;

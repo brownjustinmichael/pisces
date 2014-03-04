@@ -141,14 +141,23 @@ extern "C" void dgemm_ (char *transa, char *transb, int *m, int *n, int *k, doub
 namespace utils
 {
 	void copy (int n, float* x, float* y, int incx, int incy) {
+		if (x == y && incx == incy) {
+			return;
+		}
 		scopy_ (&n, x, &incx, y, &incy);
 	}
 	
 	void copy (int n, double* x, double* y, int incx, int incy) {
+		if (x == y && incx == incy) {
+			return;
+		}
 		dcopy_ (&n, x, &incx, y, &incy);
 	}
 	
 	void matrix_copy (int n, int m, float *x, float *y, int ldx, int ldy) {
+		if (x == y && ldx == ldy) {
+			return;
+		}
 		int ione = 1;
 		if (ldx == -1) {
 			ldx = n;
@@ -162,6 +171,9 @@ namespace utils
 	}
 
 	void matrix_copy (int n, int m, double *x, double *y, int ldx, int ldy) {
+		if (x == y && ldx == ldy) {
+			return;
+		}
 		int ione = 1;
 		if (ldx == -1) {
 			ldx = n;
