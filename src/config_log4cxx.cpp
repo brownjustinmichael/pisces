@@ -39,7 +39,7 @@ log_config::log_config () {
 	logger->setLevel (int_to_severity (severity));
 }
 
-void log_config::configure (int* argc, char*** argv, int id) {
+void log_config::configure (int* argc, char*** argv, int id, std::string log_file) {
 	for (int i = 0; i < *argc; ++i) {
 		if (((*argv) [i] [0] == '-') && ((*argv) [i] [1] == 'D')) {
 			severity = atoi (&((*argv) [i] [2]));

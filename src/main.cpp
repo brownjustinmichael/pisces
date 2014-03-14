@@ -91,7 +91,7 @@ int main (int argc, char *argv[])
 		id = process_messenger.get_id ();
 		n_elements = process_messenger.get_np ();
 
-		log_config::configure (&argc, &argv);
+		log_config::configure (&argc, &argv, id, "process_%d.log");
 	
 		io::parameters config ("../input/config.yaml");
 		if (!config ["time.steps"].IsDefined ()) config ["time.steps"] = 1;
@@ -134,7 +134,14 @@ int main (int argc, char *argv[])
 		cbegin = clock ();
 		begin = std::chrono::system_clock::now ();
 
-		element.run (config.get <int> ("time.steps"));
+		element.transform (forward_vertical | no_read);
+		for (int i = 0; i < config.get <int> ("time.steps"); ++i) {
+			element.transform (inverse_vertical | no_read | no_write);
+			element.transform (forward_vertical | no_read | no_write);
+		}
+		element.transform (inverse_vertical | no_write);
+		
+		// element.run (config.get <int> ("time.steps"));
 	
 		cend = clock ();
 		end = std::chrono::system_clock::now ();
