@@ -30,7 +30,7 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc bases::transform::transform ()
 			 *********************************************************************/
-			transform (bases::grid <datatype> &i_grid, datatype* i_data_in, datatype* i_data_out, int i_flags, int *element_flags, int *component_flags);
+			transform (bases::grid <datatype> &i_grid, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags);
 
 			virtual ~transform ();
 
@@ -40,6 +40,8 @@ namespace one_d
 			void execute ();
 
 		protected:
+			using bases::plan <datatype>::element_flags;
+			using bases::plan <datatype>::component_flags;
 			int n;
 			void *data_in;
 			void *data_complex;
@@ -76,7 +78,8 @@ namespace one_d
 				delete (inverse_transform);
 			}
 	
-			void transform (int flags) {
+			void _transform (int flags) {
+				TRACE ("Transforming...");
 				if (flags & forward_vertical) {
 					if (!(*component_flags & transformed_vertical) && forward_transform) {
 						forward_transform->execute ();

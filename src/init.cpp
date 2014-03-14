@@ -27,7 +27,7 @@ int main (int argc, char *argv[])
 		id = process_messenger.get_id ();
 		n_elements = process_messenger.get_np ();
 
-		log_config::configure (&argc, &argv);
+		log_config::configure (&argc, &argv, id, "init_%d.log");
 	
 		io::parameters config ("../input/config.yaml");
 		if (!config ["grid.x.points"].IsDefined ()) config ["grid.x.points"] = 64;
