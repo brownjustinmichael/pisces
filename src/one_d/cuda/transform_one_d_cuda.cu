@@ -12,6 +12,8 @@
 #include "../../utils/cuda/utils_cublas.hpp"
 #include "../../utils/cuda/utils_cuda.hpp"
 
+#define M_PI 3.14159265358979323846
+
 #define HANDLE_CUFFT(status) \
 {cufftResult result = status; \
 switch (result) { \
@@ -64,6 +66,20 @@ __global__ void symmetrize (int n, float* data_in, float *data_out) {
 	}
 }
 
+__global__ void make_sines (int n, float *sines) {
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	while (tid < n - 1) {
+		sines [tid] = sin (tid * M_PI / n);
+	}
+}
+
+__global__ void make_sines (int n, double *sines) {
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	while (tid < n - 1) {
+		sines [tid] = sin (tid * M_PI / n);
+	}
+}
+
 namespace one_d
 {
 	namespace cuda
@@ -90,6 +106,8 @@ namespace one_d
 		data_out (i_data_out) {
 			TRACE ("Instantiating...");
 			HANDLE_ERROR (cudaMalloc ((void **) &data_complex, n * sizeof (cufftComplex)));
+			HANDLE_ERROR (cudaMalloc ((void **) &sines, n * sizeof (double)));
+			make_sines <<<1, std::min (n, 512)>>> (n, (double *) sines);
 			cu_plan = new cufftHandle;
 			HANDLE_CUFFT (cufftPlan1d((cufftHandle*) cu_plan, 2 * n - 2, CUFFT_R2C, 1));
 			scalar = sqrt (1.0 / 2.0 / ((float) n - 1.0));
@@ -106,7 +124,7 @@ namespace one_d
 		template <>
 		void transform <double>::execute () {
 			TRACE ("Executing");
-			symmetrize <<<1, std::min (n, 512)>>> (n, (double *) data_in, (double *) data_out);
+			symmetrize <<<1, std::min (n, 512)>>> (n, (double *) sines, (double *) data_in, (double *) data_out);
 			
 			HANDLE_CUFFT (cufftExecD2Z(*((cufftHandle *) cu_plan), (double*) data_out, (cufftDoubleComplex*) data_complex));
 			
