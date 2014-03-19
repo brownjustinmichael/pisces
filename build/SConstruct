@@ -1,7 +1,7 @@
 import os
 import SCons.Conftest
 
-include_cuda = True
+include_cuda = False
 include_mpi = True
 include_vt = False
 include_mp = True

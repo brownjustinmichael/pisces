@@ -26,6 +26,8 @@ namespace two_d
 				virtual ~boussinesq_element () {}
 			
 				datatype calculate_timestep (int i, int j);
+				
+				void setup (io::input *input_stream);
 			
 				using element <datatype>::ptr;
 			private:

@@ -35,21 +35,7 @@ enum index {
 	pressure = 20, pres = 20,
 	temperature = 21, temp = 21,
 	composition = 22, comp = 22,
-	test = 100, test_x = 101, text_z = 103,
-	
-	rhs = -01,
-	x_vel_explicit_rhs = -11,
-	x_vel_real_rhs = -12,
-	x_vel_implicit_rhs = -13,
-	vel_explicit_rhs = -16, z_vel_explicit_rhs = -16,
-	vel_real_rhs = -17, z_vel_real_rhs = -17,
-	vel_implicit_rhs = -18, z_vel_implicit_rhs = -18,
-	temp_explicit_rhs = -21,
-	temp_implicit_rhs = -22,
-	temp_real_rhs = -23,
-	stream_explicit_rhs = -31,
-	stream_implicit_rhs = -32,
-	stream_real_rhs = -33
+	test = 100, test_x = 101, text_z = 103
 };
 
 /*!*******************************************************************

@@ -23,7 +23,7 @@ namespace exceptions
 		/*!*******************************************************************
 		 * \brief Describe the nature of the exception
 		 *********************************************************************/
-		inline const char *what () {return "File couldn't be opened";}
+		inline const char *what () const throw () {return "File couldn't be opened";}
 	};
 	
 	class key_does_not_exist : public std::exception
@@ -47,25 +47,31 @@ namespace exceptions
 	class already_factorized : public std::exception
 	{
 	public:
-		inline const char *what () {return "Matrix already factorized";}
+		inline const char *what () const throw () {return "Matrix already factorized";}
 	};
 	
 	class cannot_factor : public std::exception
 	{
 	public:
-		inline const char *what () {return "Unable to factor matrix";}
+		virtual const char *what () const throw () {return "Unable to factor matrix";}
 	};
 	
 	class cannot_solve : public std::exception
 	{
 	public:
-		inline const char *what () {return "Unable to solve matrix";}
+		inline const char *what () const throw () {return "Unable to solve matrix";}
 	};
 	
 	class nan : public std::exception
 	{
 	public:
-		inline const char *what () {return "Nan detected";}
+		inline const char *what () const throw () {return "Nan detected";}
+	};
+	
+	class mpi_fatal : public std::exception
+	{
+	public:
+		inline const char *what () const throw () {return "One or more MPI Processes failed";}
 	};
 } /* exceptions */
 

@@ -14,6 +14,7 @@
 #include "../utils/utils.hpp"
 #include <omp.h>
 #include <yaml-cpp/yaml.h>
+#include "../utils/exceptions.hpp"
 
 #include <ctime>
 #include <chrono>
