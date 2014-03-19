@@ -55,6 +55,7 @@ namespace bases
 		int_data_queue.resize (2 * n_boundaries);
 		n_queue.resize (2 * n_boundaries);
 		process_queue.resize (2 * n_boundaries, -1);
+		stati.resize (np);
 	}
 	
 	messenger::~messenger () {
@@ -71,6 +72,8 @@ namespace bases
 	
 	template <class datatype>
 	void messenger::send (int n, datatype* data, int edge) {
+		int flags = 0;
+		check_all (&flags);
 		TRACE ("Adding message to queue.");
 		if (data_queue [edge_to_index (send_mode, edge)]) {
 			FATAL ("Message already in queue at this edge.");
@@ -90,6 +93,8 @@ namespace bases
 	
 	template <class datatype>
 	void messenger::send (int n, datatype *data, int process, int tag) {
+		int flags = 0;
+		check_all (&flags);
 #ifdef _MPI
 		MPI::COMM_WORLD.Send (data, n, mpi_type <datatype> (), process, tag);
 #else // _MPI
@@ -100,6 +105,8 @@ namespace bases
 	
 	template <class datatype>
 	void messenger::recv (int n, datatype* data, int edge) {
+		int flags = 0;
+		check_all (&flags);
 		TRACE ("Adding message to queue.");
 		if (data_queue [edge_to_index (recv_mode, edge)]) {
 			FATAL ("Message already in queue at this edge.");
@@ -119,6 +126,8 @@ namespace bases
 	
 	template <class datatype>
 	void messenger::recv (int n, datatype *data, int process, int tag) {
+		int flags = 0;
+		check_all (&flags);
 #ifdef _MPI
 		MPI::COMM_WORLD.Recv (data, n, mpi_type <datatype> (), process, tag);
 #else // _MPI
@@ -129,6 +138,8 @@ namespace bases
 
 	template <class datatype>
 	void messenger::data_check () {
+		int flags = 0;
+		check_all (&flags);
 		TRACE ("Running messenger check.");
 		while (data_queue [data_iter]) {
 			if (process_queue [data_iter] == -1 || n_queue [data_iter] == 0) {
@@ -166,6 +177,8 @@ namespace bases
 	
 	template <class datatype>
 	void messenger::min (datatype* data) {
+		int flags = 0;
+		check_all (&flags);
 		if (np != 1) {
 			std::vector <datatype> buffer (np);
 #ifdef _MPI
@@ -186,14 +199,48 @@ namespace bases
 		}
 	}
 	
+	void messenger::check_all (int *flags) {
+#ifdef _MPI
+		MPI::COMM_WORLD.Gather (flags, 1, mpi_type <int> (), &stati [0], 1, mpi_type <int> (), 0);
+#else // _MPI
+		FATAL ("Gather used without MPI environment. Exiting.");
+		throw 0;
+#endif // _MPI
+		if (id == 0) {
+			for (int i = 0; i < np; ++i) {
+				*flags |= stati [i];
+			}
+		}
+#ifdef _MPI
+		MPI::COMM_WORLD.Bcast (flags, 1, mpi_type <int> (), 0);
+#else // _MPI
+		FATAL ("Comm_world used without MPI environment. Exiting.");
+		throw 0;
+#endif // _MPI
+		if (*flags & mpi_fatal) {
+			throw 0;
+		}
+	}
+	
+	void messenger::kill_all () {
+		int flags = mpi_fatal;
+#ifdef _MPI
+		MPI::COMM_WORLD.Bcast (&flags, 1, mpi_type <int> (), 0);
+#else // _MPI
+		FATAL ("Comm_world used without MPI environment. Exiting.");
+		throw 0;
+#endif // _MPI
+	}
+	
 	template <class datatype>
 	void messenger::gather (int n, datatype* data_in, datatype* data_out) {
+		int flags = 0;
+		check_all (&flags);
 		if (!data_out) {
 			data_out = data_in;
 		}
 #ifdef _MPI
 		if (id == 0 && data_out == data_in) {
-			printf ("3Here...\n");
 			MPI::COMM_WORLD.Gather (MPI_IN_PLACE, n, mpi_type <datatype> (), data_in, n, mpi_type <datatype> (), 0);
 		} else {
 			MPI::COMM_WORLD.Gather (data_in, n, mpi_type <datatype> (), data_out, n, mpi_type <datatype> (), 0);
@@ -206,6 +253,8 @@ namespace bases
 	
 	template <class datatype>
 	void messenger::gatherv (int n, datatype* data_in, int *ns, datatype* data_out) {
+		int flags = 0;
+		check_all (&flags);
 		if (!data_out) {
 			data_out = data_in;
 		}
@@ -230,6 +279,8 @@ namespace bases
 	
 	template <class datatype>
 	void messenger::scatter (int n, datatype* data_in, datatype* data_out) {
+		int flags = 0;
+		check_all (&flags);
 		if (!data_out) {
 			data_out = data_in;
 		}
@@ -247,6 +298,8 @@ namespace bases
 	
 	template <class datatype>
 	void messenger::scatterv (int n, datatype* data_in, int* ns, datatype* data_out) {
+		int flags = 0;
+		check_all (&flags);
 		if (!data_out) {
 			data_out = data_in;
 		}
@@ -270,6 +323,8 @@ namespace bases
 	}
 	
 	bool messenger::bool_and (bool boolean) {
+		int flags = 0;
+		check_all (&flags);
 		int temp;
 		if (boolean) {
 			temp = 1;

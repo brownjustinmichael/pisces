@@ -76,19 +76,7 @@ namespace bases
 			duration = 0.0;
 		}
 		
-		virtual ~element () {
-			// printf ("Destroying bases element\n");
-			// printf ("Destroying %p\n", &name);
-			// printf ("Destroying %p\n", &messenger_ptr);
-			// printf ("Destroying %p\n", &duration);
-			// printf ("Destroying %p\n", &timestep);
-			// printf ("Destroying %p\n", &scalars);
-			// printf ("Destroying %p\n", &grids);
-			// printf ("Destroying %p\n", &*failsafe_dump);
-			// printf ("Destroying %p\n", &*normal_stream);
-			// // printf ("Destroying %p\n", &*transform_stream);
-			// printf ("Last\n");
-		}
+		virtual ~element () {}
 		
 		/*!*******************************************************************
 		 * \brief Get the datatype reference to the named scalar
@@ -245,6 +233,7 @@ namespace bases
 		void write_transform_data ();
 		void read_transform_data ();
 	
+		virtual void setup (io::input *input_stream) = 0;
 		
 		/*!**********************************************************************
 		 * \brief Output to file
@@ -336,10 +325,6 @@ namespace bases
 	private:
 		std::vector <int> transforms; //!< A vector of integer keys to the transform maps
 		std::map <int, std::shared_ptr <master_transform <datatype>>> master_transforms;
-		// std::map <int, std::shared_ptr<transform <datatype>>> forward_horizontal_transforms; //!< A vector of shared pointers to the forward horizontal transforms
-		// std::map <int, std::shared_ptr<transform <datatype>>> inverse_horizontal_transforms; //!< A vector of shared pointers to the inverse horizontal transforms
-		// std::map <int, std::shared_ptr<transform <datatype>>> forward_vertical_transforms; //!< A vector of shared pointers to the forward vertical transforms
-		// std::map <int, std::shared_ptr<transform <datatype>>> inverse_vertical_transforms; //!< A vector of shared pointers to the inverse vertical transforms
 	};
 } /* bases */
 

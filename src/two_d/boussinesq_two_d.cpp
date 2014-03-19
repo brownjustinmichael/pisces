@@ -37,24 +37,6 @@ namespace two_d
 				z_vel_ptr = initialize (z_velocity);
 				initialize (pressure);
 				
-				// Set up input
-				if (i_params ["input.file"].IsDefined ()) {
-					std::string file_format = "../input/" + i_params.get <std::string> ("input.file");
-					char buffer [file_format.size () * 2];
-					snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-
-					io::input input_stream (new io::two_d::netcdf (n, m), buffer);
-					input_stream.template append <datatype> ("T", ptr (temp));
-					input_stream.template append_scalar <datatype> ("t", &duration);
-					int mode;
-					input_stream.template append_scalar <int> ("mode", &mode);
-					input_stream.from_file ();
-					if (mode != mode_flag) {
-						FATAL ("Loading simulation in different mode.");
-						throw 0;
-					}
-				}
-				
 				// Set up output
 				{
 					std::string file_format = "../output/" + i_params.get <std::string> ("output.file");
@@ -127,6 +109,20 @@ namespace two_d
 			template <class datatype>
 			datatype boussinesq_element <datatype>::calculate_timestep (int i, int j) {
 				return std::min (std::abs ((x_ptr [(i + 1) * m + j] - x_ptr [(i - 1) * m + j]) / x_vel_ptr [i * m + j] / advection_coeff), std::abs ((z_ptr [i * m + j + 1] - z_ptr [i * m + j - 1]) / z_vel_ptr [i * m + j] / advection_coeff)) * cfl;
+			}
+			
+			template <class datatype>
+			void boussinesq_element <datatype>::setup (io::input *input_stream) {
+				// Set up input
+				input_stream->template append <datatype> ("T", ptr (temp));
+				input_stream->template append_scalar <datatype> ("t", &duration);
+				int mode;
+				input_stream->template append_scalar <int> ("mode", &mode);
+				input_stream->from_file ();
+				if (mode != mode_flag) {
+					FATAL ("Loading simulation in different mode.");
+					throw 0;
+				}
 			}
 			
 			template class boussinesq_element <double>;

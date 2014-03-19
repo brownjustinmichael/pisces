@@ -105,6 +105,7 @@ namespace io
 			if (operator[] (key).IsDefined ()) {
 				return operator [] (key).as <datatype> ();
 			} else {
+				DEBUG ("HERE");
 				throw exceptions::key_does_not_exist (key);
 			}
 		}

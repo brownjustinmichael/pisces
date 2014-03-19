@@ -26,6 +26,10 @@ enum modes {
 	recv_mode = 1
 };
 
+enum mpi_flags {
+	mpi_fatal = 0x01
+};
+
 namespace bases
 {	
 	/*!***********************************************************************
@@ -64,6 +68,10 @@ namespace bases
 		int get_np () {
 			return np;
 		}
+		
+		void check_all (int *flags);
+
+		void kill_all ();
 		
 		/*!**********************************************************************
 		 * \brief Return whether the specified edge is linked
@@ -200,6 +208,8 @@ namespace bases
 		 ************************************************************************/
 		template <class datatype>
 		void data_check ();
+		
+		std::vector <int> stati;
 		
 		int id; //!< The integer id of the current process
 		int np; //!< The integer number of total processes

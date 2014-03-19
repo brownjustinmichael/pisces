@@ -82,12 +82,12 @@
  *********************************************************************/
 int main (int argc, char *argv[])
 {
+	int id = 0, n_elements = 1;
+
+	// Initialize messenger
+	bases::messenger process_messenger (&argc, &argv, 2);
+
 	try {
-		int id = 0, n_elements = 1;
-
-		// Initialize messenger
-		bases::messenger process_messenger (&argc, &argv, 2);
-
 		id = process_messenger.get_id ();
 		n_elements = process_messenger.get_np ();
 
@@ -125,15 +125,25 @@ int main (int argc, char *argv[])
 		}
 		int name = id;
 		
-		
 		int n = config.get <int> ("grid.x.points");
-	
+		
 		bases::axis horizontal_axis (n, position_n0, position_nn);
 		bases::axis vertical_axis (m, position_m0, position_mm, excess_0, excess_n);
-	
+		
 		// one_d::cosine::advection_diffusion_element <double> element (&vertical_axis, name, config, &process_messenger, 0x00);
 		two_d::fourier::cosine::boussinesq_element <double> element (&horizontal_axis, &vertical_axis, name, config, &process_messenger, 0x00);
 
+		if (config ["input.file"].IsDefined ()) {
+			std::string file_format = "../input/" + config.get <std::string> ("input.file");
+			char buffer [file_format.size () * 2];
+			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
+
+			io::input input_stream (new io::two_d::netcdf (n, m), buffer);
+			element.setup (&input_stream);
+		} else {
+			element.setup (NULL);
+		}
+	
 		io::virtual_dump dump;
 
 		io::output virtual_output (new io::two_d::virtual_format (&dump, n, m));
@@ -147,14 +157,6 @@ int main (int argc, char *argv[])
 		virtual_output.append_scalar <int> ("n", &n);
 		
 		virtual_output.to_file ();
-		
-		
-		for (int i = 0; i < n; ++i) {
-			for (int j = 0; j < m; ++j) {
-				printf ("%f ", dump.index <double> ("T", i, j));
-			}
-			printf ("\n");
-		}
 
 		clock_t cbegin, cend;
 		std::chrono::time_point <std::chrono::system_clock> begin, end;
@@ -173,7 +175,12 @@ int main (int argc, char *argv[])
 	} catch (std::exception& except) {
 		FATAL (except.what ());
 		FATAL ("Fatal error occurred. Check log.");
+		process_messenger.kill_all ();
 		return 1;
+		
+		/*
+			TODO Last check all should be somewhere not defined by the user
+		*/
 	}
 	
 	return 0;
