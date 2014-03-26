@@ -73,6 +73,42 @@ namespace exceptions
 	public:
 		inline const char *what () const throw () {return "One or more MPI Processes failed";}
 	};
+	
+	class mesh_adapt : public std::exception
+	{
+	public:
+		inline const char *what () const throw () {return "Mesh adaptation needed";}
+	};
+	
+	namespace io
+	{
+		class bad_variables : public std::exception
+		{
+		public:
+			bad_variables (int i_n = 0, std::string *i_names = NULL) : n (i_n) {
+				names.resize (n);
+				for (int i = 0; i < n; ++i) {
+					names [i] = i_names [i];
+				}
+			}
+
+			~bad_variables () throw () {}
+
+			inline const char *what () const throw () {
+				std::stringstream message;
+				message << "Bad variable(s) ";
+				for (int i = 0; i < n - 1; ++i) {
+					message << names [i] << ", ";
+				}
+				message << names [n - 1];
+				return message.str ().c_str ();
+			}
+		
+		private:
+			int n;
+			std::vector <std::string> names;
+		};
+	} /* io */
 } /* exceptions */
 
 #endif /* end of include guard: EXCEPTIONS_HPP_82T7S9HQ */

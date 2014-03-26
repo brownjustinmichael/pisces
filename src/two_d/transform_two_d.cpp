@@ -25,7 +25,11 @@ namespace two_d
 		data_in (i_data_in),
 		data_out (i_data_out ? i_data_out : i_data_in),
 		flags (i_flags),
+#ifdef _MP
 		threads (i_threads ? i_threads : omp_get_max_threads ()) {
+#else
+		threads (i_threads ? i_threads : 1) {
+#endif
 			TRACE ("Initializing...");
 			scalar = 1.0 / std::sqrt (n);
 							
@@ -64,7 +68,11 @@ namespace two_d
 		data_in (i_data_in),
 		data_out (i_data_out ? i_data_out : i_data_in),
 		flags (i_flags),
+#ifdef _MP
 		threads (i_threads ? i_threads : omp_get_max_threads ()) {
+#else
+		threads (i_threads ? i_threads : 1) {
+#endif
 			TRACE ("Initializing...");
 			scalar = 1.0 / std::sqrt (n);
 							
@@ -110,7 +118,11 @@ namespace two_d
 		data_in (i_data_in),
 		data_out (i_data_out ? i_data_out : i_data_in),
 		flags (i_flags),
+#ifdef _MP
 		threads (i_threads ? i_threads : omp_get_max_threads ()) {
+#else
+		threads (i_threads ? i_threads : 1) {
+#endif
 			TRACE ("Initializing...");
 			scalar = 1.0 / std::sqrt (n);
 							
@@ -149,7 +161,11 @@ namespace two_d
 		data_in (i_data_in),
 		data_out (i_data_out ? i_data_out : i_data_in),
 		flags (i_flags),
+#ifdef _MP
 		threads (i_threads ? i_threads : omp_get_max_threads ()) {
+#else
+		threads (i_threads ? i_threads : 1) {
+#endif
 			TRACE ("Initializing...");
 			scalar = 1.0 / std::sqrt (n);
 							
@@ -240,7 +256,11 @@ namespace two_d
 		data_in (i_data_in),
 		data_out (i_data_out ? i_data_out : i_data_in),
 		flags (i_flags),
+#ifdef _MP
 		threads (i_threads ? i_threads : omp_get_max_threads ()) {
+#else
+		threads (i_threads ? i_threads : 1) {
+#endif
 			TRACE ("Initializing...");
 			scalar = 1.0;
 			if (m > 1 && !(flags & ignore_m)) {
@@ -267,7 +287,11 @@ namespace two_d
 		data_in (i_data_in),
 		data_out (i_data_out ? i_data_out : i_data_in),
 		flags (i_flags),
+#ifdef _MP
 		threads (i_threads ? i_threads : omp_get_max_threads ()) {
+#else
+		threads (i_threads ? i_threads : 1) {
+#endif
 			TRACE ("Initializing...");
 			scalar = 1.0;
 			if (m > 1 && !(flags & ignore_m)) {
@@ -299,7 +323,11 @@ namespace two_d
 		data_in (i_data_in),
 		data_out (i_data_out ? i_data_out : i_data_in),
 		flags (i_flags),
+#ifdef _MP
 		threads (i_threads ? i_threads : omp_get_max_threads ()) {
+#else
+		threads (i_threads ? i_threads : 1) {
+#endif
 			TRACE ("Initializing...");
 			scalar = 1.0;
 			if (m > 1 && !(flags & ignore_m)) {
@@ -326,7 +354,11 @@ namespace two_d
 		data_in (i_data_in),
 		data_out (i_data_out ? i_data_out : i_data_in),
 		flags (i_flags),
+#ifdef _MP
 		threads (i_threads ? i_threads : omp_get_max_threads ()) {
+#else
+		threads (i_threads ? i_threads : 1) {
+#endif
 			TRACE ("Initializing...");
 			scalar = 1.0;
 			if (m > 1 && !(flags & ignore_m)) {

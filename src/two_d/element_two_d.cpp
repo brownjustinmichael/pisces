@@ -14,7 +14,18 @@ namespace two_d
 	{
 		namespace cosine
 		{
+			template <class datatype>
+			int element <datatype>::mode = mode_flag;
+			
 			template class element <double>;
 		} /* cosine */
+		
+		namespace chebyshev
+		{
+			template <class datatype>
+			int element <datatype>::mode = mode_flag;
+
+			template class element <double>;
+		} /* chebyshev */
 	} /* fourier */
 } /* two_d */

@@ -16,6 +16,7 @@
 #include "exceptions.hpp"
 #include "../config.hpp"
 #include <yaml-cpp/yaml.h>
+#include <netcdfcpp.h>
 #include "utils.hpp"
 
 #ifndef IO_HPP_C1E9B6EF
@@ -105,7 +106,6 @@ namespace io
 			if (operator[] (key).IsDefined ()) {
 				return operator [] (key).as <datatype> ();
 			} else {
-				DEBUG ("HERE");
 				throw exceptions::key_does_not_exist (key);
 			}
 		}
@@ -117,17 +117,13 @@ namespace io
 	class format
 	{
 	public:
-		format () {}
-		
-		virtual ~format () {
-			// printf ("Destroying format\n");
-		}
+		virtual ~format () {}
 		
 		virtual std::string extension () = 0;
 		
-		virtual void to_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) = 0;
+		virtual void to_file (const char *file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) = 0;
 		
-		virtual void from_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) = 0;
+		virtual void from_file (const char *file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) = 0;
 	};
 	
 	/*!*******************************************************************
@@ -142,7 +138,7 @@ namespace io
 		 *********************************************************************/
 		output (format* i_format_ptr, std::string i_file_name = "out") :
 		format_ptr (i_format_ptr),
-		file_name (i_file_name) {};
+		file_name (i_file_name + format_ptr->extension ()) {};
 		
 		virtual ~output () {
 			// printf ("Destroying output\n");
@@ -156,14 +152,30 @@ namespace io
 		template <class datatype>
 		void append (std::string name, datatype *data_ptr) {
 			TRACE ("Appending " << name << " to output...");
-			types.push_back (&typeid (datatype));
+			for (int i = 0; i < (int) names.size (); ++i) {
+				if (names [i] == name) {
+					WARN ("Reuse of name " << name);
+					types [i] = &typeid (datatype);
+					data_ptrs [i] = (void *) data_ptr;
+					return;
+				}
+			}
 			names.push_back (name);
+			types.push_back (&typeid (datatype));
 			data_ptrs.push_back ((void *) data_ptr);
 		}
 		
 		template <class datatype>
 		void append_scalar (std::string name, datatype *data_ptr) {
 			TRACE ("Appending " << name << " to output...");
+			for (int i = 0; i < (int) scalar_names.size (); ++i) {
+				if (scalar_names [i] == name) {
+					WARN ("Reuse of name " << name);
+					scalar_types [i] = &typeid (datatype);
+					scalar_ptrs [i] = (void *) data_ptr;
+					return;
+				}
+			}
 			scalar_types.push_back (&typeid (datatype));
 			scalar_names.push_back (name);
 			scalar_ptrs.push_back ((void *) data_ptr);
@@ -178,7 +190,7 @@ namespace io
 		 *********************************************************************/
 		virtual void to_file () {
 			TRACE ("Sending to file...");
-			format_ptr->to_file (file_name + format_ptr->extension (), (int) names.size (), &names [0], &types [0], &data_ptrs [0], (int) scalar_names.size (), &scalar_names [0], &scalar_types [0], &scalar_ptrs [0]);
+			format_ptr->to_file (file_name.c_str (), (int) names.size (), &names [0], &types [0], &data_ptrs [0], (int) scalar_names.size (), &scalar_names [0], &scalar_types [0], &scalar_ptrs [0]);
 		}
 		
 	protected:
@@ -197,7 +209,7 @@ namespace io
 	public:
 		incremental (format* i_format_ptr, std::string i_file_format, int i_output_every = 1) :
 		output (i_format_ptr),
-		file_format (i_file_format),
+		file_format (i_file_format + format_ptr->extension ()),
 		output_every (i_output_every > 0 ? i_output_every : 1),
 		count (0) {}
 		
@@ -225,7 +237,7 @@ namespace io
 	public:
 		input (format* i_format_ptr, std::string i_file_name = "in") :
 		format_ptr (i_format_ptr),
-		file_name (i_file_name) {};
+		file_name (i_file_name + format_ptr->extension ()) {};
 		
 		virtual ~input () {
 			// printf ("Destroying input\n");
@@ -238,7 +250,7 @@ namespace io
 		 *********************************************************************/
 		template <class datatype>
 		void append (std::string name, datatype *data_ptr) {
-			TRACE ("Appending " << name << " to input...");
+			// TRACE ("Appending " << name << " to input...");
 			types.push_back (&typeid (datatype));
 			names.push_back (name);
 			data_ptrs.push_back ((void *) data_ptr);
@@ -246,7 +258,7 @@ namespace io
 		
 		template <class datatype>
 		void append_scalar (std::string name, datatype *data_ptr) {
-			TRACE ("Appending " << name << " to output...");
+			// TRACE ("Appending " << name << " to output...");
 			scalar_types.push_back (&typeid (datatype));
 			scalar_names.push_back (name);
 			scalar_ptrs.push_back ((void *) data_ptr);
@@ -260,12 +272,12 @@ namespace io
 		 * datatype representation in C++.
 		 *********************************************************************/
 		virtual void from_file () {
-			TRACE ("Sending to file...");
-			format_ptr->from_file (file_name + format_ptr->extension (), (int) names.size (), &names [0], &types [0], &data_ptrs [0], (int) scalar_names.size (), &scalar_names [0], &scalar_types [0], &scalar_ptrs [0]);
+			// TRACE ("Gathering from file...");
+			format_ptr->from_file (file_name.c_str (), (int) names.size (), &names [0], &types [0], &data_ptrs [0], (int) scalar_names.size (), &scalar_names [0], &scalar_types [0], &scalar_ptrs [0]);
 		}
 		
 	protected:
-		std::shared_ptr <format> format_ptr;
+		format *format_ptr;
 		std::string file_name;
 		std::vector <std::string> names;
 		std::vector <const std::type_info*> types;
@@ -300,9 +312,9 @@ namespace io
 			/*!*******************************************************************
 			 * \brief Outputs to file_name
 			 *********************************************************************/
-			void to_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs);
+			void to_file (const char *file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs);
 		
-			void from_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs);
+			void from_file (const char *file_name, int n_data_ptrs = 0, std::string *names = NULL, const std::type_info **types = NULL, void **data_ptrs = NULL, int n_scalar_ptrs = 0, std::string *scalar_names = NULL, const std::type_info **scalar_types = NULL, void **scalar_ptrs = NULL);
 		
 		protected:
 			int n;
@@ -322,9 +334,9 @@ namespace io
 			
 			std::string extension () {return ".cdf";}
 			
-			void to_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs);
-
-			void from_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs);
+			void to_file (const char *file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs);
+	
+			void from_file (const char *file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs);
 	
 		protected:
 			int n;
@@ -343,7 +355,8 @@ namespace io
 		
 			std::string extension () {return "";}
 		
-			void to_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
+			void to_file (const char *file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
+				std::vector <std::string> failures;
 				for (int i = 0; i < n_data_ptrs; ++i) {
 					if (*types [i] == typeid (double)) {
 						dump->add_var <double> (names [i], n, m);
@@ -375,7 +388,7 @@ namespace io
 				}
 			}
 			
-			void from_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
+			void from_file (const char *file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
 				for (int i = 0; i < n_data_ptrs; ++i) {
 					if (*types [i] == typeid (double)) {
 						dump->get <double> (names [i], (double *) data_ptrs [i], n, m);
@@ -405,7 +418,7 @@ namespace io
 			virtual_dump *dump;
 			int n, m;
 		};
-	
+			
 		
 		class netcdf : public format
 		{
@@ -419,12 +432,13 @@ namespace io
 		
 			std::string extension () {return ".cdf";}
 		
-			void to_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs);
+			void to_file (const char *file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs);
 
-			void from_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs);
+			void from_file (const char *file_name, int n_data_ptrs = 0, std::string *names = NULL, const std::type_info **types = NULL, void **data_ptrs = NULL, int n_scalar_ptrs = 0, std::string *scalar_names = NULL, const std::type_info **scalar_types = NULL, void **scalar_ptrs = NULL);
 	
 		protected:
 			int n, m;
+			std::vector <std::string> failures;
 		};
 		
 		/*

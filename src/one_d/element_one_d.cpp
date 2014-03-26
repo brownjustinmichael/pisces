@@ -25,6 +25,9 @@ namespace one_d
 	namespace cosine
 	{
 		template <class datatype>
+		int element <datatype>::mode = mode_flag;
+		
+		template <class datatype>
 		advection_diffusion_element <datatype>::advection_diffusion_element (bases::axis *i_axis_n, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
 		element <datatype> (i_axis_n, i_name, i_params, i_messenger_ptr, i_element_flags) {
 		
@@ -50,7 +53,7 @@ namespace one_d
 				}
 			}
 			position_ptr = ptr (position);
-			velocity_ptr = initialize (velocity, &init [0]);
+			velocity_ptr = initialize (velocity, "u", &init [0]);
 
 			// Set up output
 			std::ostringstream filestream;
@@ -83,6 +86,9 @@ namespace one_d
 	namespace chebyshev
 	{
 		template <class datatype>
+		int element <datatype>::mode = mode_flag;
+		
+		template <class datatype>
 		advection_diffusion_element <datatype>::advection_diffusion_element (bases::axis *i_axis_n, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
 		element <datatype> (i_axis_n, i_name, i_params, i_messenger_ptr, i_element_flags) {
 		
@@ -108,7 +114,7 @@ namespace one_d
 				}
 			}
 			position_ptr = ptr (position);
-			velocity_ptr = initialize (velocity, &init [0]);
+			velocity_ptr = initialize (velocity, "u", &init [0]);
 			
 			// Set up output
 			std::ostringstream filestream;
@@ -180,7 +186,7 @@ namespace one_d
 				}
 			}
 			position_ptr = ptr (position);
-			velocity_ptr = initialize (velocity, &init [0]);
+			velocity_ptr = initialize (velocity, "u", &init [0]);
 			
 			// Set up output
 			std::ostringstream filestream;

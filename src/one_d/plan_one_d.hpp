@@ -15,6 +15,20 @@
 
 namespace one_d
 {
+	namespace chebyshev
+	{
+		enum mode {
+			mode_flag = 0x01
+		};
+	} /* chebyshev */
+	
+	namespace cosine
+	{
+		enum mode {
+			mode_flag = 0x02
+		};
+	} /* chebyshev */
+	
 	/*!*******************************************************************
 	 * \brief A subclass of plan, specific to explicit methods
 	 * 

@@ -13,7 +13,7 @@ log_config log_config_instance;
 
 log_config::log_config () {}
 
-static void log_config::configure (int* argc, char*** argv, int id) {
+void log_config::configure (int* argc, char*** argv, int id) {
 	for (int i = 0; i < *argc; ++i) {
 		if (((*argv) [i] [0] == '-') && ((*argv) [i] [1] == 'D')) {
 			severity = atoi (&((*argv) [i] [2]));

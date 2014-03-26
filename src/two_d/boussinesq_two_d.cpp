@@ -32,46 +32,11 @@ namespace two_d
 				TRACE ("Initializing...");
 				x_ptr = ptr (x_position);
 				z_ptr = ptr (z_position);
-				initialize (temp);
-				x_vel_ptr = initialize (x_velocity);
-				z_vel_ptr = initialize (z_velocity);
-				initialize (pressure);
+				initialize (temp, "T");
+				x_vel_ptr = initialize (x_velocity, "u");
+				z_vel_ptr = initialize (z_velocity, "w");
+				initialize (pressure, "P");
 				
-				// Set up output
-				{
-					std::string file_format = "../output/" + i_params.get <std::string> ("output.file");
-					char buffer [file_format.size () * 2];
-					snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-
-					normal_stream.reset (new io::incremental (new io::two_d::netcdf (n, m), buffer, i_params.get <int> ("output.every")));
-					normal_stream->template append <int> ("i", &cell_n [0]);
-					normal_stream->template append <int> ("j", &cell_m [0]);
-					normal_stream->template append <datatype> ("x", ptr (x_position));
-					normal_stream->template append <datatype> ("z", ptr (z_position));
-					normal_stream->template append <datatype> ("u", ptr (x_velocity));
-					normal_stream->template append <datatype> ("w", ptr (z_velocity));
-					normal_stream->template append <datatype> ("T", ptr (temp));
-					normal_stream->template append <datatype> ("P", ptr (pressure));
-					normal_stream->template append_scalar <datatype> ("t", &duration);
-				}
-				
-				{
-					std::string file_format = "../output/" + i_params.get <std::string> ("output.transform_file");
-					char buffer [file_format.size () * 2];
-					snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-
-					transform_stream.reset (new io::incremental (new io::two_d::netcdf (n, m), buffer, i_params.get <int> ("output.every")));
-					transform_stream->template append <int> ("i", &cell_n [0]);
-					transform_stream->template append <int> ("j", &cell_m [0]);
-					transform_stream->template append <datatype> ("x", ptr (x_position));
-					transform_stream->template append <datatype> ("z", ptr (z_position));
-					transform_stream->template append <datatype> ("u", ptr (x_velocity));
-					transform_stream->template append <datatype> ("w", ptr (z_velocity));
-					transform_stream->template append <datatype> ("T", ptr (temp));
-					transform_stream->template append <datatype> ("P", ptr (pressure));
-					transform_stream->template append_scalar <datatype> ("t", &duration);
-				}
-
 				advection_coeff = std::max (i_params.get <datatype> ("temperature.advection"), i_params.get <datatype> ("velocity.advection"));
 				cfl = i_params.get <datatype> ("time.cfl");
 
@@ -109,20 +74,6 @@ namespace two_d
 			template <class datatype>
 			datatype boussinesq_element <datatype>::calculate_timestep (int i, int j) {
 				return std::min (std::abs ((x_ptr [(i + 1) * m + j] - x_ptr [(i - 1) * m + j]) / x_vel_ptr [i * m + j] / advection_coeff), std::abs ((z_ptr [i * m + j + 1] - z_ptr [i * m + j - 1]) / z_vel_ptr [i * m + j] / advection_coeff)) * cfl;
-			}
-			
-			template <class datatype>
-			void boussinesq_element <datatype>::setup (io::input *input_stream) {
-				// Set up input
-				input_stream->template append <datatype> ("T", ptr (temp));
-				input_stream->template append_scalar <datatype> ("t", &duration);
-				int mode;
-				input_stream->template append_scalar <int> ("mode", &mode);
-				input_stream->from_file ();
-				if (mode != mode_flag) {
-					FATAL ("Loading simulation in different mode.");
-					throw 0;
-				}
 			}
 			
 			template class boussinesq_element <double>;

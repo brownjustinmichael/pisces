@@ -17,7 +17,9 @@
 #include "../config.hpp"
 
 namespace io
-{
+{	
+	NcError error_instance (NcError::verbose_nonfatal);
+	
 	YAML::Node parameters::operator [] (std::string key) {
 		std::istringstream ss (key);
 		std::string token;
@@ -53,7 +55,7 @@ namespace io
 	
 	namespace one_d
 	{
-		void ascii::to_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
+		void ascii::to_file (const char *file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
 			int i, j;
 			std::ofstream file_stream; // A file stream object to be used when writing to file 
 		
@@ -61,7 +63,7 @@ namespace io
 				
 			INFO ("Outputting to file " << file_name << "...");
 		
-			file_stream.open (file_name.c_str ());
+			file_stream.open (file_name);
 		
 			if (! file_stream.is_open ()) {
 				exceptions::file_exception failure;
@@ -90,7 +92,7 @@ namespace io
 			TRACE ("Output to file.");
 		}
 		
-		void ascii::from_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
+		void ascii::from_file (const char *file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
 			// int i, j;
 			std::ofstream file_stream; // A file stream object to be used when writing to file 
 		
@@ -98,7 +100,7 @@ namespace io
 				
 			INFO ("Inputting from file " << file_name << "...");
 		
-			file_stream.open (file_name.c_str ());
+			file_stream.open (file_name);
 		
 			if (! file_stream.is_open ()) {
 				exceptions::file_exception failure;
@@ -131,11 +133,11 @@ namespace io
 			TRACE ("Output to file.");
 		}
 		
-		void netcdf::to_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
-			NcFile datafile (file_name.c_str (), NcFile::Replace);
+		void netcdf::to_file (const char *file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
+			NcFile datafile (file_name, NcFile::Replace);
 	
 			INFO ("Outputting to file " << file_name << "...");
-
+	
 			if (!datafile.is_valid ()) {
 				FATAL ("Unable to output.");
 				throw 0;
@@ -170,11 +172,11 @@ namespace io
 			}
 		}
 		
-		void netcdf::from_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
-			NcFile datafile (file_name.c_str (), NcFile::ReadOnly);
+		void netcdf::from_file (const char *file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
+			NcFile datafile (file_name, NcFile::ReadOnly);
 	
 			INFO ("Inputting from file " << file_name << "...");
-
+	
 			if (!datafile.is_valid ()) {
 				FATAL ("Could not open " << file_name);
 				throw 0;
@@ -206,76 +208,95 @@ namespace io
 	
 	namespace two_d
 	{
-		void netcdf::to_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
-			NcFile datafile (file_name.c_str (), NcFile::Replace);
-	
+		void netcdf::to_file (const char *file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
+			NcFile *datafile = new NcFile (file_name, NcFile::Replace);
+				
 			INFO ("Outputting to file " << file_name << "...");
-
-			if (!datafile.is_valid ()) {
+			
+			if (!datafile->is_valid ()) {
 				FATAL ("Unable to output.");
 				throw 0;
 			}
-	
-			NcDim* xDim = datafile.add_dim ("x", n);
-			NcDim* zDim = datafile.add_dim ("z", m);
-		
+				
+			NcDim* xDim = datafile->add_dim ("x", n);
+			NcDim* zDim = datafile->add_dim ("z", m);
+					
 			for (int j = 0; j < n_data_ptrs; ++j) {
 				if (*types [j] == typeid (int)) {
-					NcVar *data = datafile.add_var (names [j].c_str (), ncInt, xDim, zDim);
+					NcVar *data = datafile->add_var (names [j].c_str (), ncInt, xDim, zDim);
 					data->put ((int *) (data_ptrs [j]), n, m);
 				} else if (*types [j] == typeid (double)) {
-					NcVar *data = datafile.add_var (names [j].c_str (), ncDouble, xDim, zDim);
+					NcVar *data = datafile->add_var (names [j].c_str (), ncDouble, xDim, zDim);
 					data->put ((double *) (data_ptrs [j]), n, m);
 				} else if (*types [j] == typeid (float)) {
-					NcVar *data = datafile.add_var (names [j].c_str (), ncFloat, xDim, zDim);
+					NcVar *data = datafile->add_var (names [j].c_str (), ncFloat, xDim, zDim);
 					data->put ((float *) (data_ptrs [j]), n, m);
 				}
 			}
 			
 			for (int j = 0; j < n_scalar_ptrs; ++j) {
 				if (*scalar_types [j] == typeid (int)) {
-					NcVar *data = datafile.add_var (scalar_names [j].c_str (), ncInt);
+					NcVar *data = datafile->add_var (scalar_names [j].c_str (), ncInt);
 					data->put ((int *) (scalar_ptrs [j]));
 				} else if (*scalar_types [j] == typeid (double)) {
-					NcVar *data = datafile.add_var (scalar_names [j].c_str (), ncDouble);
+					NcVar *data = datafile->add_var (scalar_names [j].c_str (), ncDouble);
 					data->put ((double *) (scalar_ptrs [j]));
 				} else if (*scalar_types [j] == typeid (float)) {
-					NcVar *data = datafile.add_var (names [j].c_str (), ncFloat);
+					NcVar *data = datafile->add_var (names [j].c_str (), ncFloat);
 					data->put ((float *) (scalar_ptrs [j]));
 				}
 			}
+			
+			delete (datafile);
 		}
 		
-		void netcdf::from_file (std::string file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
-			NcFile datafile (file_name.c_str (), NcFile::ReadOnly);
-	
+		void netcdf::from_file (const char *file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
+			failures.resize (0);
+			NcFile *datafile = new NcFile (file_name, NcFile::ReadOnly);
+				
 			INFO ("Inputting from file " << file_name << "...");
 
-			if (!datafile.is_valid ()) {
+			if (!datafile->is_valid ()) {
 				FATAL ("Could not open " << file_name);
 				throw 0;
 			}
-	
+				
 			for (int j = 0; j < n_data_ptrs; ++j) {
-				NcVar *data = datafile.get_var (names [j].c_str ());
-				if (*types [j] == typeid (int)) {
-					data->get ((int *) (data_ptrs [j]), n, m);
-				} else if (*types [j] == typeid (double)) {
-					data->get ((double *) (data_ptrs [j]), n, m);
-				} else if (*types [j] == typeid (float)) {
-					data->get ((float *) (data_ptrs [j]), n, m);
+				NcVar *data = datafile->get_var (names [j].c_str ());
+				if (data && data->is_valid ()) {
+					if (*types [j] == typeid (int)) {
+						data->get ((int *) (data_ptrs [j]), n, m);
+					} else if (*types [j] == typeid (double)) {
+						data->get ((double *) (data_ptrs [j]), n, m);
+					} else if (*types [j] == typeid (float)) {
+						data->get ((float *) (data_ptrs [j]), n, m);
+					}
+				} else {
+					failures.push_back (names [j]);
+					WARN ("Variable " << names [j] << " not found in file " << file_name);
 				}
 			}
 			
 			for (int j = 0; j < n_scalar_ptrs; ++j) {
-				NcVar *data = datafile.get_var (scalar_names [j].c_str ());
-				if (*scalar_types [j] == typeid (int)) {
-					data->get ((int *) (scalar_ptrs [j]));
-				} else if (*scalar_types [j] == typeid (double)) {
-					data->get ((double *) (scalar_ptrs [j]));
-				} else if (*scalar_types [j] == typeid (float)) {
-					data->get ((float *) (scalar_ptrs [j]));
+				NcVar *data = datafile->get_var (scalar_names [j].c_str ());
+				if (data->is_valid ()) {
+					if (*scalar_types [j] == typeid (int)) {
+						data->get ((int *) (scalar_ptrs [j]));
+					} else if (*scalar_types [j] == typeid (double)) {
+						data->get ((double *) (scalar_ptrs [j]));
+					} else if (*scalar_types [j] == typeid (float)) {
+						data->get ((float *) (scalar_ptrs [j]));
+					}
+				} else {
+					failures.push_back (names [j]);
+					WARN ("Variable " << names [j] << " not found in file " << file_name);
 				}
+			}
+
+			delete (datafile);
+			
+			if (failures.size () > 0) {
+				throw exceptions::io::bad_variables ((int) failures.size (), &failures [0]);
 			}
 		}
 	} /* two_d */

@@ -6,10 +6,10 @@ grid:
     nrhs: 4096
     nb: 1
     x:
-        points: 64
+        points: 256
         width: 100.0
     z:
-        points: 64
+        points: 256
         width: 100.0
 time:
     steps: 10
