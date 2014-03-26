@@ -107,6 +107,7 @@ namespace two_d
 					}
 					data_out [(n - 1) * m + j] += coeff * (data_source [j] - data_source [(n - 2) * m + j]) * (data_source [j] - data_source [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]) / (pos_n [n - 1] - pos_n [n - 2]) / 4.0;
 				}
+				TRACE ("Execution complete.");
 			}
 		
 		private:

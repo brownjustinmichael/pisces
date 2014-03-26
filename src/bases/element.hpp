@@ -126,13 +126,14 @@ namespace bases
 		 * \param initial_conditions The datatype array of initial conditions
 		 * \param element_flags A set of binary element_flags
 		 *********************************************************************/
-		virtual datatype *initialize (int i_name, datatype* initial_conditions = NULL, int i_flags = 0x00) {
+		virtual datatype *initialize (int i_name, std::string i_str, datatype* initial_conditions = NULL, int i_flags = 0x00) {
 			element_flags [i_name] = 0x00;
 			for (int i = 0; i < dimensions; ++i) {
 				if (!grids [i]) {
 					grids [i] = generate_grid (i);
 				}
 			}
+			scalar_names [i_name] = i_str;
 			return _initialize (i_name, initial_conditions, i_flags);
 		}
 		
@@ -232,8 +233,50 @@ namespace bases
 		
 		void write_transform_data ();
 		void read_transform_data ();
+		
+		virtual int &get_mode () = 0;
 	
-		virtual void setup (io::input *input_stream) = 0;
+		void setup (io::input *input_stream) {
+			// Set up input
+			typedef typename std::map <int, std::vector <datatype> >::iterator iterator;
+			for (iterator iter = scalars.begin (); iter != scalars.end (); ++iter) {
+				input_stream->template append <datatype> (scalar_names [iter->first], ptr (iter->first));
+			}
+			input_stream->template append_scalar <datatype> ("t", &duration);
+			int mode;
+			input_stream->template append_scalar <int> ("mode", &mode);
+
+			try {
+				input_stream->from_file ();
+			} catch (exceptions::io::bad_variables &except) {
+				WARN (except.what ());
+			}
+
+			if (mode != get_mode ()) {
+				FATAL ("Loading simulation in different mode.");
+				throw 0;
+			}
+		}
+		
+		void setup_output (std::shared_ptr <io::output> output_stream, int flags = 0x00) {
+			/*
+				TODO This breaks if a pointer to an existing stream is passed, rather than a new instance
+			*/
+			typedef typename std::map <int, std::vector <datatype> >::iterator iterator;
+			for (iterator iter = scalars.begin (); iter != scalars.end (); ++iter) {
+				output_stream->template append <datatype> (scalar_names [iter->first], ptr (iter->first));
+			}
+			output_stream->template append_scalar <datatype> ("t", &duration);
+			output_stream->template append_scalar <int> ("mode", &(get_mode ()));
+			/*
+				TODO Check the mode output
+			*/
+			if (flags & transform_output) {
+				transform_stream = output_stream;
+			} else if (flags & normal_output) {
+				normal_stream = output_stream;
+			}
+		}
 		
 		/*!**********************************************************************
 		 * \brief Output to file
@@ -291,7 +334,7 @@ namespace bases
 		 * updates the values as necessary. Output, if desired, is specified by 
 		 * the output streams.
 		 ************************************************************************/
-		virtual void run (int n_steps);
+		virtual void run (int &n_steps);
 		
 		/*!*******************************************************************
 		 * \brief Output all information to a dump file in the current directory
@@ -312,6 +355,7 @@ namespace bases
 		datatype timestep; //!< The datatype timestep length
 
 		std::map <int, std::vector <datatype> > scalars; //!< A map of scalar vectors
+		std::map <int, std::string> scalar_names;
 		std::map <int, int> element_flags; //!< A map of integer flags
 		std::vector <std::shared_ptr <grid <datatype>>> grids; //!< A vector of shared pointers to the collocation grids
 		

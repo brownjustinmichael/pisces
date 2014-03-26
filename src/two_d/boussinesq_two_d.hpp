@@ -27,8 +27,6 @@ namespace two_d
 			
 				datatype calculate_timestep (int i, int j);
 				
-				void setup (io::input *input_stream);
-			
 				using element <datatype>::ptr;
 			private:
 				using element <datatype>::element_flags;
@@ -49,6 +47,8 @@ namespace two_d
 				using element <datatype>::alpha_0;
 				using element <datatype>::alpha_n;
 				using element <datatype>::solvers;
+				using element <datatype>::scalars;
+				using element <datatype>::scalar_names;
 				
 				datatype advection_coeff, cfl, *x_ptr, *z_ptr, *x_vel_ptr, *z_vel_ptr;
 			};

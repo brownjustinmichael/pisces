@@ -99,7 +99,7 @@ namespace bases
 		MPI::COMM_WORLD.Send (data, n, mpi_type <datatype> (), process, tag);
 #else // _MPI
 		FATAL ("Send used without MPI environment. Exiting.");
-		throw 0;
+		// throw 0;
 #endif // _MPI
 	}
 	
@@ -132,7 +132,7 @@ namespace bases
 		MPI::COMM_WORLD.Recv (data, n, mpi_type <datatype> (), process, tag);
 #else // _MPI
 		FATAL ("Send used without MPI environment. Exiting.");
-		throw 0;
+		// throw 0;
 #endif // _MPI
 	}
 
@@ -153,7 +153,7 @@ namespace bases
 					MPI::COMM_WORLD.Send (data_queue [data_iter], n_queue [data_iter], mpi_type <datatype> (), process_queue [data_iter], data_iter);
 #else // _MPI
 					FATAL ("Send used without MPI environment. Exiting.");
-					throw 0;
+					// throw 0;
 #endif // _MPI
 				} else {
 #ifdef _MPI
@@ -161,7 +161,7 @@ namespace bases
 					MPI::COMM_WORLD.Recv (data_queue [data_iter], n_queue [data_iter], mpi_type <datatype> (), process_queue [data_iter], data_iter);
 #else // _MPI
 					FATAL ("Send used without MPI environment. Exiting.");
-					throw 0;
+					// throw 0;
 #endif // _MPI
 				}
 			}
@@ -185,7 +185,7 @@ namespace bases
 			MPI::COMM_WORLD.Gather (data, 1, mpi_type <datatype> (), &buffer [0], 1, mpi_type <datatype> (), 0);
 #else // _MPI
 			FATAL ("Gather used without MPI environment. Exiting.");
-			throw 0;
+			// throw 0;
 #endif // _MPI
 			if (id == 0) {
 				*data = *std::min_element (buffer.begin (), buffer.end ());
@@ -194,7 +194,7 @@ namespace bases
 			MPI::COMM_WORLD.Bcast (data, 1, mpi_type <datatype> (), 0);
 #else // _MPI
 			FATAL ("Comm_world used without MPI environment. Exiting.");
-			throw 0;
+			// throw 0;
 #endif // _MPI
 		}
 	}
@@ -204,7 +204,7 @@ namespace bases
 		MPI::COMM_WORLD.Gather (flags, 1, mpi_type <int> (), &stati [0], 1, mpi_type <int> (), 0);
 #else // _MPI
 		FATAL ("Gather used without MPI environment. Exiting.");
-		throw 0;
+		// throw 0;
 #endif // _MPI
 		if (id == 0) {
 			for (int i = 0; i < np; ++i) {
@@ -215,7 +215,7 @@ namespace bases
 		MPI::COMM_WORLD.Bcast (flags, 1, mpi_type <int> (), 0);
 #else // _MPI
 		FATAL ("Comm_world used without MPI environment. Exiting.");
-		throw 0;
+		// throw 0;
 #endif // _MPI
 		if (*flags & mpi_fatal) {
 			throw 0;
@@ -228,7 +228,7 @@ namespace bases
 		MPI::COMM_WORLD.Bcast (&flags, 1, mpi_type <int> (), 0);
 #else // _MPI
 		FATAL ("Comm_world used without MPI environment. Exiting.");
-		throw 0;
+		// throw 0;
 #endif // _MPI
 	}
 	
@@ -247,7 +247,7 @@ namespace bases
 		}
 #else // _MPI
 		FATAL ("Gather used without MPI environment. Exiting.");
-		throw 0;
+		// throw 0;
 #endif // _MPI
 	}
 	
@@ -273,7 +273,7 @@ namespace bases
 		}
 #else // _MPI
 		FATAL ("Gather used without MPI environment. Exiting.");
-		throw 0;
+		// throw 0;
 #endif // _MPI
 	}
 	
@@ -292,7 +292,7 @@ namespace bases
 		}
 #else // _MPI
 		FATAL ("Scatter used without MPI environment. Exiting.");
-		throw 0;
+		// throw 0;
 #endif // _MPI
 	}
 	
@@ -318,7 +318,7 @@ namespace bases
 		}
 #else // _MPI
 		FATAL ("Scatter used without MPI environment. Exiting.");
-		throw 0;
+		// throw 0;
 #endif // _MPI
 	}
 	
@@ -340,7 +340,7 @@ namespace bases
 			MPI::COMM_WORLD.Gather (&temp, 1, MPI::INT, &buffer [0], 1, MPI::INT, 0);
 #else // _MPI
 			FATAL ("Gather used without MPI environment. Exiting.");
-			throw 0;
+			// throw 0;
 #endif // _MPI
 			if (id == 0) {
 				for (int i = 0; i < np; i++) {
@@ -353,7 +353,7 @@ namespace bases
 				MPI::COMM_WORLD.Bcast (&temp, 1, MPI::INT, 0);
 #else // _MPI
 				FATAL ("Bcast used without MPI environment. Exiting.");
-				throw 0;
+				// throw 0;
 #endif // _MPI
 			}
 		}

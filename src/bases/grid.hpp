@@ -54,24 +54,27 @@ namespace bases
 		 * \param i_axis_ptr A pointer to an axis object
 		 * \param i_derivs The integer number of derivatives in the grid
 		 *********************************************************************/
-		grid (axis *i_axis_ptr, int i_derivs, int i_ld = 0) :
+		grid (axis *i_axis_ptr, int i_derivs, int i_ld = 0, bool i_calculate_matrix = true) :
 		n (i_axis_ptr->n),
 		ld (i_ld),
 		excess_0 (i_axis_ptr->excess_0),
 		excess_n (i_axis_ptr->excess_n),
 		position_0 (i_axis_ptr->position_0),
 		position_n (i_axis_ptr->position_n),
-		derivs (i_derivs) {
+		derivs (i_derivs),
+		calculate_matrix (i_calculate_matrix) {
 			TRACE ("Instantiating...");
 			if (ld == 0) {
 				ld = n;
 			}
 
-			data.resize (derivs);
 			positions.resize (n + 1);
 
-			for (int i = 0; i < i_derivs; ++i) {
-				data [i].resize (ld * ld);
+			if (calculate_matrix) {
+				data.resize (derivs);
+				for (int i = 0; i < i_derivs; ++i) {
+					data [i].resize (ld * ld);
+				}
 			}
 
 			TRACE ("Instantiated...");
@@ -132,6 +135,7 @@ namespace bases
 	protected:
 		std::vector <datatype> positions; //!< A vector containing the positions along the axis
 		int derivs; //!< The integer number of derivatives deep the collocation grid runs
+		bool calculate_matrix;
 	
 	private:
 		std::vector<std::vector<datatype>> data; //!< A double vector containing the vectors of collocation data
@@ -165,6 +169,7 @@ namespace bases
 			using bases::grid <datatype>::position_n;
 			using bases::grid <datatype>::derivs;
 			using bases::grid <datatype>::positions;
+			using bases::grid <datatype>::calculate_matrix;
 	
 			datatype scale; //!< A datatype by which the collocation grid should be scaled
 			datatype width; //!< The datatype width of the collocation region
@@ -229,6 +234,7 @@ namespace bases
 			using bases::grid <datatype>::position_n;
 			using bases::grid <datatype>::derivs;
 			using bases::grid <datatype>::positions;
+			using bases::grid <datatype>::calculate_matrix;
 	
 			datatype scale; //!< A datatype by which the collocation grid should be scaled
 			datatype width; //!< The datatype width of the collocation region
@@ -265,6 +271,7 @@ namespace bases
 			using bases::grid <datatype>::position_n;
 			using bases::grid <datatype>::derivs;
 			using bases::grid <datatype>::positions;
+			using bases::grid <datatype>::calculate_matrix;
 	
 			datatype scale; //!< A datatype by which the collocation grid should be scaled
 			datatype width; //!< The datatype width of the collocation region

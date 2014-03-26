@@ -175,10 +175,14 @@ namespace one_d
 			one_d::element <datatype> (i_axis_n, i_name, i_params, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
 				// one_d::element <datatype>::set_grid (new bases::chebyshev::grid <datatype> (axis_n));
-				initialize (position);
+				initialize (position, "x");
 				TRACE ("Instantiated.");
 			}
 			virtual ~element () {}
+			
+			int &get_mode () {
+				return mode;
+			}
 			
 			virtual datatype *_initialize (int name, datatype* initial_conditions = NULL, int flags = 0x00) {
 				TRACE ("Initializing " << name << "...");
@@ -207,6 +211,8 @@ namespace one_d
 			using one_d::element <datatype>::messenger_ptr;
 			using one_d::element <datatype>::ptr;
 			using one_d::element <datatype>::element_flags;
+			
+			static int mode;
 		};
 		
 
@@ -312,17 +318,19 @@ namespace one_d
 			element (bases::axis *i_axis_n, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_flags) : 
 			one_d::element <datatype> (i_axis_n, i_name, i_params, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
-				// one_d::element <datatype>::set_grid (new bases::fourier::grid <datatype> (axis_n));
-				initialize (position);
+				initialize (position, "x");
 				TRACE ("Instantiated.");
 			}
 			virtual ~element () {}
+			
+			int &get_mode () {
+				return mode;
+			}
 		
 			virtual datatype *_initialize (int name, datatype* initial_conditions = NULL, int flags = 0x00) {
 				TRACE ("Initializing " << name << "...");
 				one_d::element <datatype>::_initialize (name, initial_conditions, flags);
 				if (!(flags & no_transform) && (name != position)) {
-					// element <datatype>::add_transform (name, new transform <datatype> (*grids [0], ptr (name), NULL, 0x00, &element_flags [state], &element_flags [name]), forward_vertical | inverse_vertical);
 					element <datatype>::add_transform (name, new master_transform <datatype> (*grids [0], ptr (name), NULL, forward_vertical | inverse_vertical, &element_flags [state], &element_flags [name]));
 					
 				}
@@ -347,6 +355,8 @@ namespace one_d
 			using one_d::element <datatype>::messenger_ptr;
 			using one_d::element <datatype>::solvers;
 			using one_d::element <datatype>::ptr;
+			
+			static int mode;
 		};
 		
 		/*!*******************************************************************

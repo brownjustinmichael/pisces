@@ -235,8 +235,8 @@ namespace two_d
 				element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
 				two_d::element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_messenger_ptr, i_element_flags) {
 					TRACE ("Instantiating...");
-					initialize (x_position);
-					initialize (z_position);
+					initialize (x_position, "x");
+					initialize (z_position, "z");
 					if (i_params ["parallel.transform.subthreads"].IsDefined ()) {
 						transform_threads = i_params.get <int> ("parallel.transform.subthreads");
 					} else {
@@ -245,6 +245,10 @@ namespace two_d
 					TRACE ("Instantiated.");
 				}
 				virtual ~element () {}
+				
+				int &get_mode () {
+					return mode;
+				}
 				
 				virtual std::shared_ptr <bases::grid <datatype>> generate_grid (int index = 0) {
 					if (index == 0) {
@@ -290,6 +294,7 @@ namespace two_d
 				using two_d::element <datatype>::grids;
 				
 				int transform_threads;
+				static int mode;
 			};
 		}
 		
@@ -305,8 +310,8 @@ namespace two_d
 				element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
 				two_d::element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_messenger_ptr, i_element_flags) {
 					TRACE ("Instantiating...");
-					initialize (x_position);
-					initialize (z_position);
+					initialize (x_position, "x");
+					initialize (z_position, "z");
 					
 					if (i_params ["parallel.transform.subthreads"].IsDefined ()) {
 						transform_threads = i_params.get <int> ("parallel.transform.subthreads");
@@ -315,7 +320,12 @@ namespace two_d
 					}
 					TRACE ("Instantiated.");
 				}
+				
 				virtual ~element () {}
+				
+				int &get_mode () {
+					return mode;
+				}
 				
 				virtual std::shared_ptr <bases::grid <datatype>> generate_grid (int index = 0) {
 					if (index == 0) {
@@ -361,6 +371,8 @@ namespace two_d
 				using two_d::element <datatype>::grids;
 				
 				int transform_threads;
+				
+				static int mode;
 			};
 		}
 	} /* fourier */

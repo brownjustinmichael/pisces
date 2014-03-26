@@ -48,7 +48,9 @@ enum plan_flags {
 	transformed_vertical = 0x8000,
 	no_transform = 0x04,
 	only_forward_horizontal = 0x08,
-	changed = 0x10000
+	changed = 0x10000,
+	transform_output = 0x20000,
+	normal_output = 0x40000
 };
 
 namespace bases

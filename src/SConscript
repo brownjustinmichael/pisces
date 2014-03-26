@@ -42,6 +42,7 @@ if include_opencl:
     env.Append (CPPFLAGS = ["-framework", "OpenCL"])
 
 env.Append (CPPFLAGS = ["-Wall", "-g", "-std=c++0x"])
+env.Append (LINKFLAGS = ["-Wall", "-g", "-std=c++0x"])
 
 objects = []
 cuda_objects = []
@@ -88,6 +89,3 @@ env.Default (env.Program(target = "../run/main", source = (["main.cpp"] + object
 env.Default (env.Program(target = "../run/init", source = (["init.cpp"] + objects)))
 
 env.Default (env.Program(target = "../run/block_test", source = (["block_test.cpp"] + objects)))
-
-if include_cuda:
-    env.Default (env.Program(target = "../run/main_cuda", source = (["main_cuda.cpp"] + objects + cuda_objects)))

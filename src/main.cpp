@@ -109,62 +109,89 @@ int main (int argc, char *argv[])
 		int m = config.get <int> ("grid.z.points") / n_elements + 1;
 		double position_m0 = -config.get <double> ("grid.z.width") / 2.0 + config.get <double> ("grid.z.width") / n_elements * id;
 		double position_mm = -config.get <double> ("grid.z.width") / 2.0 + config.get <double> ("grid.z.width") / n_elements * (id + 1);
-		double position_n0 = -config.get <double> ("grid.x.width") / 2.0;
-		double position_nn = config.get <double> ("grid.x.width") / 2.0;
-		int excess_0;
-		int excess_n;
-		if (id == 0) {
-			excess_0 = 0;
-		} else {
-			excess_0 = 1;
-		}
-		if (id == n_elements - 1) {
-			excess_n = 0;
-		} else {
-			excess_n = 1;
-		}
 		int name = id;
 		
 		int n = config.get <int> ("grid.x.points");
 		
-		bases::axis horizontal_axis (n, position_n0, position_nn);
-		bases::axis vertical_axis (m, position_m0, position_mm, excess_0, excess_n);
+		int n_steps = config.get <int> ("time.steps");
+		
+		bases::axis horizontal_axis (n, -config.get <double> ("grid.x.width") / 2.0, config.get <double> ("grid.x.width") / 2.0);
+		bases::axis vertical_axis (m, position_m0, position_mm, id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
 		
 		// one_d::cosine::advection_diffusion_element <double> element (&vertical_axis, name, config, &process_messenger, 0x00);
-		two_d::fourier::cosine::boussinesq_element <double> element (&horizontal_axis, &vertical_axis, name, config, &process_messenger, 0x00);
-
+		std::shared_ptr <bases::element <double>> element (new two_d::fourier::cosine::boussinesq_element <double> (&horizontal_axis, &vertical_axis, name, config, &process_messenger, 0x00));
+		
 		if (config ["input.file"].IsDefined ()) {
 			std::string file_format = "../input/" + config.get <std::string> ("input.file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-
 			io::input input_stream (new io::two_d::netcdf (n, m), buffer);
-			element.setup (&input_stream);
-		} else {
-			element.setup (NULL);
+
+			element->setup (&input_stream);
 		}
+		
+		// Set up output
+		std::shared_ptr <io::output> normal_stream;
+		if (config ["output.file"].IsDefined ()) {
+			std::string file_format = "../output/" + config.get <std::string> ("output.file");
+			char buffer [file_format.size () * 2];
+			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
+
+			normal_stream.reset (new io::incremental (new io::two_d::netcdf (n, m), buffer, config.get <int> ("output.every")));
+			element->setup_output (normal_stream, normal_output);
+		}
+		
+		std::shared_ptr <io::output> transform_stream;
+		if (config ["output.transform_file"].IsDefined ()) {
+			std::string file_format = "../output/" + config.get <std::string> ("output.transform_file");
+			char buffer [file_format.size () * 2];
+			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
+
+			transform_stream.reset (new io::incremental (new io::two_d::netcdf (n, m), buffer, config.get <int> ("output.every")));
+			element->setup_output (transform_stream, transform_output);
+		}
+		
+		/*
+			TODO Because the output files are not within the element anymore, they become useless once the element is destroyed. Ponder this.
+		*/
 	
-		io::virtual_dump dump;
-
-		io::output virtual_output (new io::two_d::virtual_format (&dump, n, m));
-		
-		virtual_output.append <double> ("x", element.ptr (x_position));
-		virtual_output.append <double> ("z", element.ptr (z_position));
-		virtual_output.append <double> ("u", element.ptr (x_velocity));
-		virtual_output.append <double> ("w", element.ptr (z_velocity));
-		virtual_output.append <double> ("T", element.ptr (temp));
-		virtual_output.append <double> ("P", element.ptr (pressure));
-		virtual_output.append_scalar <int> ("n", &n);
-		
-		virtual_output.to_file ();
-
 		clock_t cbegin, cend;
 		std::chrono::time_point <std::chrono::system_clock> begin, end;
 
 		cbegin = clock ();
 		begin = std::chrono::system_clock::now ();
 
-		element.run (config.get <int> ("time.steps"));
+		while (n_steps > 0) {
+			try {
+				element->run (n_steps);
+			} catch (exceptions::mesh_adapt &except) {
+				INFO ("Resetting grid...");
+				element->write_transform_data ();
+				element->transform (inverse_horizontal | inverse_vertical);
+				element->read_transform_data ();
+				/*
+					TODO Remove these when updating to the more recent version
+				*/
+				
+				io::virtual_dump dump;
+
+				std::shared_ptr <io::output> virtual_output (new io::output (new io::two_d::virtual_format (&dump, n, m)));
+				element->setup_output (virtual_output);
+		
+				virtual_output->to_file ();
+
+				io::input *virtual_input (new io::input (new io::two_d::virtual_format (&dump, n, m)));
+				
+				element.reset (new two_d::fourier::cosine::boussinesq_element <double> (&horizontal_axis, &vertical_axis, name, config, &process_messenger, 0x00));
+				element->setup (&*virtual_input);
+				if (normal_stream) {
+					element->setup_output (normal_stream, normal_output);
+				}
+				if (transform_stream) {
+					element->setup_output (transform_stream, transform_output);
+				}
+			}
+		}
 	
 		cend = clock ();
 		end = std::chrono::system_clock::now ();
@@ -172,15 +199,28 @@ int main (int argc, char *argv[])
 		std::chrono::duration <double> eb = end - begin;
 			
 		INFO ("Main complete. CPU Time: " << ((double) (cend - cbegin))/CLOCKS_PER_SEC << " Wall Time: " << (double) eb.count () << " Efficiency: " << (((double) (cend - cbegin))/CLOCKS_PER_SEC / (double) eb.count () / omp_get_max_threads () * 100.) << "%");
-	} catch (std::exception& except) {
-		FATAL (except.what ());
+	} catch (std::exception &except) {
 		FATAL ("Fatal error occurred. Check log.");
+		FATAL (except.what ());
 		process_messenger.kill_all ();
 		return 1;
 		
 		/*
 			TODO Last check all should be somewhere not defined by the user
 		*/
+	} catch (int &except) {
+		FATAL ("Fatal error occurred. Check log.");
+		FATAL (except);
+		process_messenger.kill_all ();
+		return 1;
+		
+		/*
+			TODO Last check all should be somewhere not defined by the user
+		*/
+	} catch (...) {
+		FATAL ("Last ditch...");
+		
+		return 1;
 	}
 	
 	return 0;
