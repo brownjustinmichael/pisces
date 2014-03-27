@@ -324,7 +324,11 @@ namespace bases
 		 * 
 		 * \return The datatype recommended timestep for the next timestep
 		 ************************************************************************/
-		virtual datatype calculate_min_timestep () = 0;
+		virtual datatype calculate_min_timestep (int i_n = -1, datatype *i_position = NULL, datatype *i_velocity = NULL, int flags = 0x00) = 0;
+		
+		/*
+			TODO Recast this to be more general, taking a map or dump instead of just vertical position and velocity
+		*/
 		
 		/*!**********************************************************************
 		 * \brief The main function call of the class

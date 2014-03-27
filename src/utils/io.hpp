@@ -41,11 +41,12 @@ namespace io
 			} else if (typeid (datatype) == typeid (int)) {
 				int_map [name].resize (n * m);
 			} else {
+				ERROR ("Unknown type");
 				throw 0;
 			}
 			dims [name] [0] = n;
 			dims [name] [1] = m;
-			TRACE ("name " << name << " " << dims [name] [0] << " " << dims [name] [1]);
+			TRACE ("Done.");
 		}
 		
 		template <class datatype>
@@ -57,9 +58,9 @@ namespace io
 			} else if (typeid (datatype) == typeid (float)) {
 				utils::matrix_copy (m, n, (float *) data, &(float_map [name] [0]), ldm, dims [name] [1]);
 			} else if (typeid (datatype) == typeid (int)) {
-				DEBUG ("Pointer " << &(int_map [name] [0]));
 				utils::matrix_copy (m, n, (int *) data, &(int_map [name] [0]), ldm, dims [name] [1]);
 			} else {
+				ERROR ("Unknown type");
 				throw 0;
 			}
 			TRACE ("Done.");
@@ -76,8 +77,10 @@ namespace io
 			} else if (typeid (datatype) == typeid (int)) {
 				utils::matrix_copy (m, n, &(int_map [name] [0]), (int *) data, dims [name] [1], ldm);
 			} else {
+				ERROR ("Unknown type");
 				throw 0;
 			}
+			TRACE ("Done.");
 		}
 		
 		template <class datatype>
