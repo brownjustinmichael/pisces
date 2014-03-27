@@ -12,6 +12,7 @@
 #include "two_d/boussinesq_two_d.hpp"
 #include "config.hpp"
 #include "two_d/transform_two_d.hpp"
+#include "utils/profile.hpp"
 #include <memory>
 #include <omp.h>
 #include <ctime>
@@ -91,7 +92,7 @@ int main (int argc, char *argv[])
 		id = process_messenger.get_id ();
 		n_elements = process_messenger.get_np ();
 
-		log_config::configure (&argc, &argv);
+		log_config::configure (&argc, &argv, id);
 		std::string config_filename;
 		
 		if (argc <= 1) {
@@ -179,6 +180,18 @@ int main (int argc, char *argv[])
 				element->setup_output (virtual_output);
 		
 				virtual_output->to_file ();
+				
+				std::vector <double> position_profile (m);
+				std::vector <double> velocity_profile (m);
+				
+				utils::profile <double> (m, n, &(dump.index <double> ("z")), &position_profile [0]);
+				utils::profile <double> (m, n, &(dump.index <double> ("w")), &velocity_profile [0]);
+				
+				for (int i = 0; i < m; ++i) {
+					velocity_profile [i]*= 100;
+					DEBUG (velocity_profile [i]);
+				}
+				DEBUG (element->calculate_min_timestep (m, &position_profile [0], &velocity_profile [0], profile_timestep));
 
 				io::input *virtual_input (new io::input (new io::two_d::virtual_format (&dump, n, m)));
 				

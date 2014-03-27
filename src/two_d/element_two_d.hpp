@@ -170,17 +170,25 @@ namespace two_d
 			TRACE ("Explicit reset end.");
 		}
 		
-		virtual datatype calculate_timestep (int i, int j) = 0;
+		virtual datatype calculate_timestep (int i, int j, datatype *i_position = NULL, datatype *i_velocity = NULL, int flags = 0x00) = 0;
 		
-		inline datatype calculate_min_timestep () {
+		inline datatype calculate_min_timestep (int i_m = -1, datatype *i_position = NULL, datatype *i_velocity = NULL, int flags = 0x00) {
 			double shared_min = max_timestep;
 			#pragma omp parallel 
 			{
 				double min = std::numeric_limits <double>::max ();
+				int nmin = 1, nmax = n - 1;
+				if (flags & profile_timestep) {
+					nmin = 0;
+					nmax = 1;
+				}
+				if (i_m == -1) {
+					i_m = m;
+				}
 				#pragma omp for nowait
-					for (int i = 1; i < n - 1; ++i) {
-						for (int j = 1; j < m - 1; ++j) {
-							min = std::min (calculate_timestep (i, j), min);
+					for (int j = 1; j < i_m - 1; ++j) {
+						for (int i = nmin; i < nmax; ++i) {
+							min = std::min (calculate_timestep (i, j, i_position, i_velocity, flags), min);
 						}
 					}
 				#pragma omp critical 

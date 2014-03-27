@@ -72,8 +72,12 @@ namespace two_d
 			}
 			
 			template <class datatype>
-			datatype boussinesq_element <datatype>::calculate_timestep (int i, int j) {
-				return std::min (std::abs ((x_ptr [(i + 1) * m + j] - x_ptr [(i - 1) * m + j]) / x_vel_ptr [i * m + j] / advection_coeff), std::abs ((z_ptr [i * m + j + 1] - z_ptr [i * m + j - 1]) / z_vel_ptr [i * m + j] / advection_coeff)) * cfl;
+			datatype boussinesq_element <datatype>::calculate_timestep (int i, int j, datatype *i_position, datatype *i_velocity, int flags) {
+				if (flags & profile_timestep) {
+					return std::abs ((i_position [j + 1] - i_position [j - 1]) / i_velocity [j] / advection_coeff) * cfl;
+				} else {
+					return std::min (std::abs ((x_ptr [(i + 1) * m + j] - x_ptr [(i - 1) * m + j]) / x_vel_ptr [i * m + j] / advection_coeff), std::abs ((z_ptr [i * m + j + 1] - z_ptr [i * m + j - 1]) / z_vel_ptr [i * m + j] / advection_coeff)) * cfl;
+				}
 			}
 			
 			template class boussinesq_element <double>;
