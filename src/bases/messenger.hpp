@@ -178,10 +178,16 @@ namespace bases
 		void gatherv (int n, datatype* data_in, int* ns, datatype* data_out = NULL);
 		
 		template <class datatype>
+		void allgather (int n, datatype *data_in, datatype *data_out = NULL);
+		
+		template <class datatype>
 		void scatter (int n, datatype* data_in, datatype* data_out = NULL);
 		
 		template <class datatype>
 		void scatterv (int n, datatype* data_in, int* ns, datatype* data_out = NULL);
+		
+		template <class datatype>
+		void allgatherv (int n, datatype* data_in, int* ns, datatype* data_out = NULL);
 		
 		/*!**********************************************************************
 		 * \brief Calculate a minimum across elements

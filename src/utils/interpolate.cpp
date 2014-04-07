@@ -11,78 +11,78 @@
 
 namespace utils
 {
-	void interpolate (int n, int m, int l, double alpha, double* x, double* y, double* in, double* out, int ldy, int ldout) {
-		TRACE ("Interpolating...");
-		if (ldy == -1) {
-			ldy = m;
-		}
-		if (ldout == -1) {
-			ldout = n;
-		}
-		if (alpha == 0.0) {
-			return;
-		}
-		for (int k = 0; k < n; ++k) {
-			int i = 1;
-			/*
-				TODO Allow for reverse dx as well
-			*/
-			if (in [k] < x [0] || in [k] > x [l - 1]) {
-				FATAL ("Interpolation out of range: " << in [k] << " not between " << x [0] << " and " << x [l - 1]);
-				throw 0;
-				/*
-					TODO better exception?
-				*/
-			}
-			while (in [k] > x [i]) {
-				++i;
-			}
-			if (in [k] == x [i]) {
-				for (int j = 0; j < m; ++j) {
-					out [j * ldout + k] += alpha * y [j * ldy + i];
-				}
-			} else {
-				for (int j = 0; j < m; ++j) {
-					out [j * ldout + k] += alpha * ((y [j * ldy + i] - y [j * ldy + i - 1]) / (x [i] - x [i - 1]) * (in [k] - x [i]) + y [j * ldy + i]);
-				}
-			}
-		}
-	}
-	
-	void interpolate (int n, int m, int l, float alpha, float* x, float* y, float* in, float* out, int ldy, int ldout) {
-		TRACE ("Interpolating...");
-		if (ldy == -1) {
-			ldy = m;
-		}
-		if (ldout == -1) {
-			ldout = n;
-		}
-		for (int k = 0; k < n; ++k) {
-			int i = 1;
-			/*
-				TODO Allow for reverse dx as well
-			*/
-			if (in [k] < x [0] || in [k] > x [l - 1]) {
-				FATAL ("Interpolation out of range.");
-				throw 0;
-				/*
-					TODO better exception?
-				*/
-			}
-			while (in [k] > x [i]) {
-				++i;
-			}
-			if (in [k] == x [i]) {
-				for (int j = 0; j < m; ++j) {
-					out [j * ldy + k] += alpha * y [j * ldy + i];
-				}
-			} else {
-				for (int j = 0; j < m; ++j) {
-					out [j * ldy + k] += alpha * ((y [j * ldy + i] - y [j * ldy + i - 1]) / (x [i] - x [i - 1]) * (in [j] - x [i]) + y [j * ldy + i]);
-				}
-			}
-		}
-	}
+	// void interpolate (int n, int m, int l, double alpha, double* x, double* y, double* in, double* out, int ldy, int ldout) {
+	// 	TRACE ("Interpolating...");
+	// 	if (ldy == -1) {
+	// 		ldy = m;
+	// 	}
+	// 	if (ldout == -1) {
+	// 		ldout = n;
+	// 	}
+	// 	if (alpha == 0.0) {
+	// 		return;
+	// 	}
+	// 	for (int k = 0; k < n; ++k) {
+	// 		int i = 1;
+	// 		/*
+	// 			TODO Allow for reverse dx as well
+	// 		*/
+	// 		if (in [k] < x [0] || in [k] > x [l - 1]) {
+	// 			FATAL ("Interpolation out of range: " << in [k] << " not between " << x [0] << " and " << x [l - 1]);
+	// 			throw 0;
+	// 			/*
+	// 				TODO better exception?
+	// 			*/
+	// 		}
+	// 		while (in [k] > x [i]) {
+	// 			++i;
+	// 		}
+	// 		if (in [k] == x [i]) {
+	// 			for (int j = 0; j < m; ++j) {
+	// 				out [j * ldout + k] += alpha * y [j * ldy + i];
+	// 			}
+	// 		} else {
+	// 			for (int j = 0; j < m; ++j) {
+	// 				out [j * ldout + k] += alpha * ((y [j * ldy + i] - y [j * ldy + i - 1]) / (x [i] - x [i - 1]) * (in [k] - x [i]) + y [j * ldy + i]);
+	// 			}
+	// 		}
+	// 	}
+	// }
+	// 
+	// void interpolate (int n, int m, int l, float alpha, float* x, float* y, float* in, float* out, int ldy, int ldout) {
+	// 	TRACE ("Interpolating...");
+	// 	if (ldy == -1) {
+	// 		ldy = m;
+	// 	}
+	// 	if (ldout == -1) {
+	// 		ldout = n;
+	// 	}
+	// 	for (int k = 0; k < n; ++k) {
+	// 		int i = 1;
+	// 		/*
+	// 			TODO Allow for reverse dx as well
+	// 		*/
+	// 		if (in [k] < x [0] || in [k] > x [l - 1]) {
+	// 			FATAL ("Interpolation out of range.");
+	// 			throw 0;
+	// 			/*
+	// 				TODO better exception?
+	// 			*/
+	// 		}
+	// 		while (in [k] > x [i]) {
+	// 			++i;
+	// 		}
+	// 		if (in [k] == x [i]) {
+	// 			for (int j = 0; j < m; ++j) {
+	// 				out [j * ldy + k] += alpha * y [j * ldy + i];
+	// 			}
+	// 		} else {
+	// 			for (int j = 0; j < m; ++j) {
+	// 				out [j * ldy + k] += alpha * ((y [j * ldy + i] - y [j * ldy + i - 1]) / (x [i] - x [i - 1]) * (in [j] - x [i]) + y [j * ldy + i]);
+	// 			}
+	// 		}
+	// 	}
+	// }
 	
 	double dot_interpolate (int n, double* dx, int m, double* dy, double* df, double x) {
 		TRACE ("Interpolating matrices...");

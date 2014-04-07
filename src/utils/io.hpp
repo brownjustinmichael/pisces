@@ -32,6 +32,12 @@ namespace io
 		virtual ~virtual_dump () {}
 		
 		template <class datatype>
+		typename std::map <std::string, std::vector <datatype>>::iterator begin ();
+		
+		template <class datatype>
+		typename std::map <std::string, std::vector <datatype>>::iterator end ();
+		
+		template <class datatype>
 		void add_var (std::string name, int n = 1, int m = 1) {
 			TRACE ("ADDING VAR");
 			if (typeid (datatype) == typeid (double)) {
@@ -86,11 +92,11 @@ namespace io
 		template <class datatype>
 		datatype &index (std::string name, int i = 0, int j = 0);
 			
+		std::map <std::string, std::array <int, 2>> dims;
 	private:
 		std::map <std::string, std::vector <int>> int_map;
 		std::map <std::string, std::vector <float>> float_map;
 		std::map <std::string, std::vector <double>> double_map;
-		std::map <std::string, std::array <int, 2>> dims;
 	};
 	
 	class parameters : public YAML::Node

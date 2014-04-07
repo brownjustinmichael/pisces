@@ -28,7 +28,7 @@ namespace bases
 		 * \param i_excess_0 The integer number of excess meshpoints around index 0
 		 * \param i_excess_n The integer number of excess meshpoints around index n - 1
 		 ************************************************************************/
-		axis (int i_n, double i_position_0, double i_position_n, int i_excess_0 = 0, int i_excess_n = 0) :
+		axis (int i_n = 0, double i_position_0 = 0.0, double i_position_n = 0.0, int i_excess_0 = 0, int i_excess_n = 0) :
 		n (i_n), excess_0 (i_excess_0), excess_n (i_excess_n), position_0 (i_position_0), position_n (i_position_n) {}
 		
 		int n; //!< The integer number of meshpoints along the axis

@@ -32,6 +32,35 @@ namespace io
 		return nodes [(int) nodes.size () - 1];
 	}
 	
+	template <>
+	std::map <std::string, std::vector <double>>::iterator virtual_dump::begin <double> () {
+		return double_map.begin ();
+	}
+	
+	template <>
+	std::map <std::string, std::vector <float>>::iterator virtual_dump::begin <float> () {
+		return float_map.begin ();
+	}
+	
+	template <>
+	std::map <std::string, std::vector <int>>::iterator virtual_dump::begin <int> () {
+		return int_map.begin ();
+	}
+	
+	template <>
+	std::map <std::string, std::vector <double>>::iterator virtual_dump::end <double> () {
+		return double_map.end ();
+	}
+	
+	template <>
+	std::map <std::string, std::vector <float>>::iterator virtual_dump::end <float> () {
+		return float_map.end ();
+	}
+	
+	template <>
+	std::map <std::string, std::vector <int>>::iterator virtual_dump::end <int> () {
+		return int_map.end ();
+	}
 	
 	template <>
 	double &virtual_dump::index <double> (std::string name, int i, int j) {

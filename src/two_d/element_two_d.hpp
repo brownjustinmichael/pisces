@@ -40,12 +40,12 @@ namespace two_d
 	class element : public bases::element <datatype>
 	{
 	public:
-		element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
+		element (bases::axis i_axis_n, bases::axis i_axis_m, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
 		bases::element <datatype> (i_name, 2, i_params, i_messenger_ptr, i_element_flags),
-		axis_n (i_axis_n),
-		axis_m (i_axis_m),
-		n (axis_n->n), m (axis_m->n) {
+		n (i_axis_n.n), m (i_axis_m.n) {
 			TRACE ("Instantiating...");
+			axes [0] = i_axis_n;
+			axes [1] = i_axis_m;
 			
 			if (i_messenger_ptr->get_id () == 0) {
 				alpha_0 = 0.0;
@@ -211,10 +211,10 @@ namespace two_d
 		using bases::element <datatype>::messenger_ptr;
 		using bases::element <datatype>::element_flags;
 		using bases::element <datatype>::timestep;
+		using bases::element <datatype>::axes;
 		
-		bases::axis *axis_n, *axis_m;
-		int &n; //!< The number of elements in each 1D array
-		int &m;
+		int n; //!< The number of elements in each 1D array
+		int m;
 		datatype alpha_0, alpha_n;
 		std::map <int, datatype> positions; //!< A vector of the edge positions
 		std::map <int, int> excesses; //!< A vector of the edge positions
@@ -240,7 +240,7 @@ namespace two_d
 				/*!*******************************************************************
 				 * \copydoc one_d::element::element ()
 				 *********************************************************************/
-				element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
+				element (bases::axis i_axis_n, bases::axis i_axis_m, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
 				two_d::element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_messenger_ptr, i_element_flags) {
 					TRACE ("Instantiating...");
 					initialize (x_position, "x");
@@ -258,11 +258,11 @@ namespace two_d
 					return mode;
 				}
 				
-				virtual std::shared_ptr <bases::grid <datatype>> generate_grid (int index = 0) {
+				virtual std::shared_ptr <bases::grid <datatype>> generate_grid (bases::axis *axis, int index = -1) {
 					if (index == 0) {
-						return std::shared_ptr <bases::grid <datatype>> (new typename horizontal_grid <datatype>::type (axis_n));
-					} else if (index == 1) {
-						return std::shared_ptr <bases::grid <datatype>> (new typename vertical_grid <datatype>::type (axis_m));
+						return std::shared_ptr <bases::grid <datatype>> (new typename horizontal_grid <datatype>::type (axis));
+					} else if (index == 1 || index == -1) {
+						return std::shared_ptr <bases::grid <datatype>> (new typename vertical_grid <datatype>::type (axis));
 					} else {
 						throw 0;
 					}
@@ -285,6 +285,7 @@ namespace two_d
 						// 	element <datatype>::add_transform (name, new vertical_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, inverse, &element_flags [state], &element_flags [name], i_threads), inverse_vertical);
 						// }
 					}
+					TRACE ("Initialized.");
 					return this->ptr (name);
 				}
 		
@@ -296,8 +297,6 @@ namespace two_d
 				using two_d::element <datatype>::excesses;
 				using two_d::element <datatype>::n;
 				using two_d::element <datatype>::m;
-				using two_d::element <datatype>::axis_n;
-				using two_d::element <datatype>::axis_m;
 				using two_d::element <datatype>::params;
 				using two_d::element <datatype>::grids;
 				
@@ -315,7 +314,7 @@ namespace two_d
 				/*!*******************************************************************
 				 * \copydoc one_d::element::element ()
 				 *********************************************************************/
-				element (bases::axis *i_axis_n, bases::axis *i_axis_m, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
+				element (bases::axis i_axis_n, bases::axis i_axis_m, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
 				two_d::element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_messenger_ptr, i_element_flags) {
 					TRACE ("Instantiating...");
 					initialize (x_position, "x");
@@ -335,11 +334,11 @@ namespace two_d
 					return mode;
 				}
 				
-				virtual std::shared_ptr <bases::grid <datatype>> generate_grid (int index = 0) {
+				virtual std::shared_ptr <bases::grid <datatype>> generate_grid (bases::axis *axis, int index = -1) {
 					if (index == 0) {
-						return std::shared_ptr <bases::grid <datatype>> (new typename horizontal_grid <datatype>::type (axis_n));
-					} else if (index == 1) {
-						return std::shared_ptr <bases::grid <datatype>> (new typename vertical_grid <datatype>::type (axis_m));
+						return std::shared_ptr <bases::grid <datatype>> (new typename horizontal_grid <datatype>::type (axis));
+					} else if (index == 1 || index == -1) {
+						return std::shared_ptr <bases::grid <datatype>> (new typename vertical_grid <datatype>::type (axis));
 					} else {
 						throw 0;
 					}
@@ -373,8 +372,6 @@ namespace two_d
 				using two_d::element <datatype>::excesses;
 				using two_d::element <datatype>::n;
 				using two_d::element <datatype>::m;
-				using two_d::element <datatype>::axis_n;
-				using two_d::element <datatype>::axis_m;
 				using two_d::element <datatype>::params;
 				using two_d::element <datatype>::grids;
 				
