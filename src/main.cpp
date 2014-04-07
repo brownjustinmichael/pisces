@@ -13,6 +13,7 @@
 #include "config.hpp"
 #include "two_d/transform_two_d.hpp"
 #include "utils/profile.hpp"
+#include "utils/rezone.hpp"
 #include <memory>
 #include <omp.h>
 #include <ctime>
@@ -91,7 +92,7 @@ int main (int argc, char *argv[])
 	try {
 		id = process_messenger.get_id ();
 		n_elements = process_messenger.get_np ();
-
+		
 		log_config::configure (&argc, &argv, id);
 		std::string config_filename;
 		
@@ -104,12 +105,16 @@ int main (int argc, char *argv[])
 		if (!config ["time.steps"].IsDefined ()) config ["time.steps"] = 1;
 		if (!config ["grid.x.points"].IsDefined ()) config ["grid.x.points"] = 64;
 		if (!config ["grid.z.points"].IsDefined ()) config ["grid.z.points"] = 64;
-	
+			
 		omp_set_num_threads (config.get <int> ("parallel.maxthreads"));
-
+		
 		int m = config.get <int> ("grid.z.points") / n_elements + 1;
-		double position_m0 = -config.get <double> ("grid.z.width") / 2.0 + config.get <double> ("grid.z.width") / n_elements * id;
-		double position_mm = -config.get <double> ("grid.z.width") / 2.0 + config.get <double> ("grid.z.width") / n_elements * (id + 1);
+		
+		std::vector <double> positions (n_elements + 1);
+		for (int i = 0; i < n_elements; ++i) {
+			positions [i] = -config.get <double> ("grid.z.width") / 2.0 + config.get <double> ("grid.z.width") / n_elements * i;
+		}
+		
 		int name = id;
 		
 		int n = config.get <int> ("grid.x.points");
@@ -117,17 +122,17 @@ int main (int argc, char *argv[])
 		int n_steps = config.get <int> ("time.steps");
 		
 		bases::axis horizontal_axis (n, -config.get <double> ("grid.x.width") / 2.0, config.get <double> ("grid.x.width") / 2.0);
-		bases::axis vertical_axis (m, position_m0, position_mm, id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
+		bases::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
 		
 		// one_d::cosine::advection_diffusion_element <double> element (&vertical_axis, name, config, &process_messenger, 0x00);
-		std::shared_ptr <bases::element <double>> element (new two_d::fourier::cosine::boussinesq_element <double> (&horizontal_axis, &vertical_axis, name, config, &process_messenger, 0x00));
+		std::shared_ptr <bases::element <double>> element (new two_d::fourier::cosine::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, &process_messenger, 0x00));
 		
 		if (config ["input.file"].IsDefined ()) {
 			std::string file_format = "../input/" + config.get <std::string> ("input.file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 			io::input input_stream (new io::two_d::netcdf (n, m), buffer);
-
+		
 			element->setup (&input_stream);
 		}
 		
@@ -137,7 +142,7 @@ int main (int argc, char *argv[])
 			std::string file_format = "../output/" + config.get <std::string> ("output.file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-
+		
 			normal_stream.reset (new io::incremental (new io::two_d::netcdf (n, m), buffer, config.get <int> ("output.every")));
 			element->setup_output (normal_stream, normal_output);
 		}
@@ -147,7 +152,7 @@ int main (int argc, char *argv[])
 			std::string file_format = "../output/" + config.get <std::string> ("output.transform_file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-
+		
 			transform_stream.reset (new io::incremental (new io::two_d::netcdf (n, m), buffer, config.get <int> ("output.every")));
 			element->setup_output (transform_stream, transform_output);
 		}
@@ -155,10 +160,10 @@ int main (int argc, char *argv[])
 		/*
 			TODO Because the output files are not within the element anymore, they become useless once the element is destroyed. Ponder this.
 		*/
-	
+			
 		clock_t cbegin, cend;
 		std::chrono::time_point <std::chrono::system_clock> begin, end;
-
+		
 		cbegin = clock ();
 		begin = std::chrono::system_clock::now ();
 
@@ -174,12 +179,21 @@ int main (int argc, char *argv[])
 					TODO Remove these when updating to the more recent version
 				*/
 				
-				io::virtual_dump dump;
-
+				io::virtual_dump dump, new_dump;
+				
 				std::shared_ptr <io::output> virtual_output (new io::output (new io::two_d::virtual_format (&dump, n, m)));
 				element->setup_output (virtual_output);
-		
+						
 				virtual_output->to_file ();
+				
+				for (int i = 1; i < n_elements; i++) {
+					positions [i] += config.get <double> ("grid.z.width") / n_elements * 0.1;
+				}
+				
+				bases::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
+				std::shared_ptr <bases::grid <double>> vertical_grid = element->generate_grid (&vertical_axis);
+				
+				utils::rezone (&process_messenger, &*(element->grids [1]), &*vertical_grid, &dump, &new_dump);
 				
 				std::vector <double> position_profile (m);
 				std::vector <double> velocity_profile (m);
@@ -192,10 +206,10 @@ int main (int argc, char *argv[])
 					DEBUG (velocity_profile [i]);
 				}
 				DEBUG (element->calculate_min_timestep (m, &position_profile [0], &velocity_profile [0], profile_timestep));
-
+				
 				io::input *virtual_input (new io::input (new io::two_d::virtual_format (&dump, n, m)));
 				
-				element.reset (new two_d::fourier::cosine::boussinesq_element <double> (&horizontal_axis, &vertical_axis, name, config, &process_messenger, 0x00));
+				element.reset (new two_d::fourier::cosine::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, &process_messenger, 0x00));
 				element->setup (&*virtual_input);
 				if (normal_stream) {
 					element->setup_output (normal_stream, normal_output);
@@ -208,7 +222,7 @@ int main (int argc, char *argv[])
 	
 		cend = clock ();
 		end = std::chrono::system_clock::now ();
-	
+			
 		std::chrono::duration <double> eb = end - begin;
 			
 		INFO ("Main complete. CPU Time: " << ((double) (cend - cbegin))/CLOCKS_PER_SEC << " Wall Time: " << (double) eb.count () << " Efficiency: " << (((double) (cend - cbegin))/CLOCKS_PER_SEC / (double) eb.count () / omp_get_max_threads () * 100.) << "%");

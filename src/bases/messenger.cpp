@@ -252,6 +252,25 @@ namespace bases
 	}
 	
 	template <class datatype>
+	void messenger::allgather (int n, datatype* data_in, datatype* data_out) {
+		int flags = 0;
+		check_all (&flags);
+		if (!data_out) {
+			data_out = data_in;
+		}
+#ifdef _MPI
+		if (id == 0 && data_out == data_in) {
+			MPI::COMM_WORLD.Allgather (MPI_IN_PLACE, n, mpi_type <datatype> (), data_in, n, mpi_type <datatype> ());
+		} else {
+			MPI::COMM_WORLD.Allgather (data_in, n, mpi_type <datatype> (), data_out, n, mpi_type <datatype> ());
+		}
+#else // _MPI
+		FATAL ("Gather used without MPI environment. Exiting.");
+		// throw 0;
+#endif // _MPI
+	}
+	
+	template <class datatype>
 	void messenger::gatherv (int n, datatype* data_in, int *ns, datatype* data_out) {
 		int flags = 0;
 		check_all (&flags);
@@ -270,6 +289,32 @@ namespace bases
 			MPI::COMM_WORLD.Gatherv (MPI_IN_PLACE, n, mpi_type <datatype> (), data_in, ns, &displs [0], mpi_type <datatype> (), 0);
 		} else {
 			MPI::COMM_WORLD.Gatherv (data_in, n, mpi_type <datatype> (), data_out, ns, &displs [0], mpi_type <datatype> (), 0);
+		}
+#else // _MPI
+		FATAL ("Gather used without MPI environment. Exiting.");
+		// throw 0;
+#endif // _MPI
+	}
+	
+	template <class datatype>
+	void messenger::allgatherv (int n, datatype* data_in, int *ns, datatype* data_out) {
+		int flags = 0;
+		check_all (&flags);
+		if (!data_out) {
+			data_out = data_in;
+		}
+#ifdef _MPI
+		std::vector <int> displs;
+		if (id == 0) {
+			displs.resize (np);
+			for (int i = 1; i < np; ++i) {
+				displs [i] = displs [i - 1] + ns [i - 1];
+			}
+		}
+		if (id == 0 && data_out == data_in) {
+			MPI::COMM_WORLD.Allgatherv (MPI_IN_PLACE, n, mpi_type <datatype> (), data_in, ns, &displs [0], mpi_type <datatype> ());
+		} else {
+			MPI::COMM_WORLD.Allgatherv (data_in, n, mpi_type <datatype> (), data_out, ns, &displs [0], mpi_type <datatype> ());
 		}
 #else // _MPI
 		FATAL ("Gather used without MPI environment. Exiting.");
@@ -392,9 +437,17 @@ namespace bases
 	template void messenger::gather <float> (int n, float* data_in, float* data_out);
 	template void messenger::gather <int> (int n, int* data_in, int* data_out);
 	
+	template void messenger::allgather <double> (int n, double* data_in, double* data_out);
+	template void messenger::allgather <float> (int n, float* data_in, float* data_out);
+	template void messenger::allgather <int> (int n, int* data_in, int* data_out);
+	
 	template void messenger::gatherv <double> (int n, double* data_in, int *ns, double* data_out);
 	template void messenger::gatherv <float> (int n, float* data_in, int *ns, float* data_out);
 	template void messenger::gatherv <int> (int n, int* data_in, int *ns, int* data_out);
+	
+	template void messenger::allgatherv <double> (int n, double* data_in, int *ns, double* data_out);
+	template void messenger::allgatherv <float> (int n, float* data_in, int *ns, float* data_out);
+	template void messenger::allgatherv <int> (int n, int* data_in, int *ns, int* data_out);
 	
 	template void messenger::scatter <double> (int n, double* data_in, double* data_out);
 	template void messenger::scatter <float> (int n, float* data_in, float* data_out);

@@ -71,6 +71,7 @@ namespace bases
 			element_flags [state] = i_element_flags;
 			name = i_name;
 			grids.resize (i_dimensions);
+			axes.resize (i_dimensions);
 			messenger_ptr = i_messenger_ptr;
 			timestep = 0.0;
 			duration = 0.0;
@@ -130,14 +131,14 @@ namespace bases
 			element_flags [i_name] = 0x00;
 			for (int i = 0; i < dimensions; ++i) {
 				if (!grids [i]) {
-					grids [i] = generate_grid (i);
+					grids [i] = generate_grid (&axes [i], i);
 				}
 			}
 			scalar_names [i_name] = i_str;
 			return _initialize (i_name, initial_conditions, i_flags);
 		}
 		
-		virtual std::shared_ptr <grid <datatype>> generate_grid (int index) = 0;
+		virtual std::shared_ptr <grid <datatype>> generate_grid (bases::axis *axis, int index = -1) = 0;
 		
 		/*!**********************************************************************
 		 * \brief Get the pointer to a given named scalar index
@@ -350,6 +351,8 @@ namespace bases
 			failsafe_dump->to_file ();
 		}
 		
+		std::vector <bases::axis> axes;
+		std::vector <std::shared_ptr <grid <datatype>>> grids; //!< A vector of shared pointers to the collocation grids
 	protected:
 		int name, dimensions; //!< An integer representation of the element, to be used in file output
 		io::parameters& params; //!< The map that contains the input parameters
@@ -361,7 +364,6 @@ namespace bases
 		std::map <int, std::vector <datatype> > scalars; //!< A map of scalar vectors
 		std::map <int, std::string> scalar_names;
 		std::map <int, int> element_flags; //!< A map of integer flags
-		std::vector <std::shared_ptr <grid <datatype>>> grids; //!< A vector of shared pointers to the collocation grids
 		
 		std::shared_ptr <io::output> failsafe_dump; //!< An implementation to dump in case of failure
 		std::shared_ptr <io::output> normal_stream; //!< An implementation to output in normal space

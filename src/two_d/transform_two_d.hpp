@@ -98,7 +98,6 @@ namespace two_d
 			ldm (i_grid_m.ld),
 			data_in (i_data_in),
 			data_out (i_data_out ? i_data_out : i_data_in) {
-				DEBUG ("NEW SIZE: " << ldn*ldm);
 				data.resize (ldn * ldm);
 				if (i_flags & forward_vertical) {
 					forward_vertical_transform = std::shared_ptr <bases::plan <datatype>> (new two_d::fourier::vertical_transform <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], 0x00, element_flags, component_flags, i_threads));
