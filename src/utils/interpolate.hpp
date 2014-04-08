@@ -26,10 +26,10 @@ namespace utils
 	 * \param out The double array of output dependent variables
 	 ************************************************************************/
 	template <class datatype>
-	void interpolate (int n, int m, int l, datatype alpha, datatype *x, datatype *y, datatype *in, datatype *out, int ldy = -1, int ldout = -1) {
+	void interpolate (int n, int m, int l, datatype alpha, datatype beta, datatype *x, datatype *y, datatype *in, datatype *out, int ldy = -1, int ldout = -1) {
 		TRACE ("Interpolating...");
 		if (ldy == -1) {
-			ldy = m;
+			ldy = l;
 		}
 		if (ldout == -1) {
 			ldout = n;
@@ -38,7 +38,7 @@ namespace utils
 			return;
 		}
 		for (int k = 0; k < n; ++k) {
-			int i = 1;
+			int i = 0;
 			/*
 				TODO Allow for reverse dx as well
 			*/
@@ -52,13 +52,15 @@ namespace utils
 			while (in [k] > x [i]) {
 				++i;
 			}
+			DEBUG ("Position " << in [k] << " is between " << x [i == 0 ? 0 : i - 1] << " and " << x [i]);
 			if (in [k] == x [i]) {
 				for (int j = 0; j < m; ++j) {
-					out [j * ldout + k] += alpha * y [j * ldy + i];
+					DEBUG ("From " << j * ldy + i << " " << y [j * ldy + i] << " to " << j * ldout + k)
+					out [j * ldout + k] = alpha * y [j * ldy + i] + beta * out [j * ldout + k];
 				}
 			} else {
 				for (int j = 0; j < m; ++j) {
-					out [j * ldout + k] += alpha * ((y [j * ldy + i] - y [j * ldy + i - 1]) / (x [i] - x [i - 1]) * (in [k] - x [i]) + y [j * ldy + i]);
+					out [j * ldout + k] = alpha * ((y [j * ldy + i] - y [j * ldy + i - 1]) / (x [i] - x [i - 1]) * (in [k] - x [i]) + y [j * ldy + i]) + beta * out [j * ldout + k];
 				}
 			}
 		}

@@ -16,7 +16,7 @@ def directory (path, dirname):
 if include_mpi:
     env ["CXX"] = "mpicxx"
 
-    env.Append (CPPFLAGS = ["-D_MPI"])
+    env.Append (CPPFLAGS = ["-D_MPI", "-fexceptions"])
     if include_cuda:
         env.Append (NVCCFLAGS = ["-D_MPI"])
         

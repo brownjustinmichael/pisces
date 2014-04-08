@@ -189,6 +189,32 @@ namespace utils
 		}
 	}
 	
+	void matrix_switch (int n, int m, float *x, float *y, int ldx, int ldy) {
+		int ione = 1;
+		if (ldx == -1) {
+			ldx = n;
+		}
+		if (ldy == -1) {
+			ldy = m;
+		}
+		for (int i = 0; i < m; ++i) {
+			scopy_ (&n, x + i * ldx, &ione, y + i, &ldy);
+		}
+	}
+	
+	void matrix_switch (int n, int m, double *x, double *y, int ldx, int ldy) {
+		int ione = 1;
+		if (ldx == -1) {
+			ldx = n;
+		}
+		if (ldy == -1) {
+			ldy = m;
+		}
+		for (int i = 0; i < m; ++i) {
+			dcopy_ (&n, x + i * ldx, &ione, y + i, &ldy);
+		}
+	}
+	
 	void swap (int n, float* x, float* y, int incx, int incy) {
 		sswap_ (&n, x, &incx, y, &incy);
 	}

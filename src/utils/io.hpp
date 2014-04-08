@@ -39,7 +39,7 @@ namespace io
 		
 		template <class datatype>
 		void add_var (std::string name, int n = 1, int m = 1) {
-			TRACE ("ADDING VAR");
+			TRACE ("Adding variable...");
 			if (typeid (datatype) == typeid (double)) {
 				double_map [name].resize (n * m);
 			} else if (typeid (datatype) == typeid (float)) {
@@ -57,7 +57,7 @@ namespace io
 		
 		template <class datatype>
 		void put (std::string name, void *data, int n = 1, int m = 1, int ldm = -1) {
-			TRACE ("Putting " << name);
+			TRACE ("Putting " << name << "...");
 			ldm = ldm == -1 ? m : ldm;
 			if (typeid (datatype) == typeid (double)) {
 				utils::matrix_copy (m, n, (double *) data, &(double_map [name] [0]), ldm, dims [name] [1]);
@@ -74,7 +74,7 @@ namespace io
 		
 		template <class datatype>
 		void get (std::string name, void *data, int n = 1, int m = 1, int ldm = -1) {
-			TRACE ("Getting...");
+			TRACE ("Getting " << name << "...");
 			ldm = ldm == -1 ? m : ldm;
 			if (typeid (datatype) == typeid (double)) {
 				utils::matrix_copy (m, n, &(double_map [name] [0]), (double *) data, dims [name] [1], ldm);

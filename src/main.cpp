@@ -111,7 +111,7 @@ int main (int argc, char *argv[])
 		int m = config.get <int> ("grid.z.points") / n_elements + 1;
 		
 		std::vector <double> positions (n_elements + 1);
-		for (int i = 0; i < n_elements; ++i) {
+		for (int i = 0; i < n_elements + 1; ++i) {
 			positions [i] = -config.get <double> ("grid.z.width") / 2.0 + config.get <double> ("grid.z.width") / n_elements * i;
 		}
 		
@@ -187,27 +187,15 @@ int main (int argc, char *argv[])
 				virtual_output->to_file ();
 				
 				for (int i = 1; i < n_elements; i++) {
-					positions [i] += config.get <double> ("grid.z.width") / n_elements * 0.1;
+					positions [i] += config.get <double> ("grid.z.width") / n_elements * 0.4;
 				}
-				
+								
 				bases::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
 				std::shared_ptr <bases::grid <double>> vertical_grid = element->generate_grid (&vertical_axis);
 				
 				utils::rezone (&process_messenger, &*(element->grids [1]), &*vertical_grid, &dump, &new_dump);
-				
-				std::vector <double> position_profile (m);
-				std::vector <double> velocity_profile (m);
-				
-				utils::profile <double> (m, n, &(dump.index <double> ("z")), &position_profile [0]);
-				utils::profile <double> (m, n, &(dump.index <double> ("w")), &velocity_profile [0]);
-				
-				for (int i = 0; i < m; ++i) {
-					velocity_profile [i]*= 100;
-					DEBUG (velocity_profile [i]);
-				}
-				DEBUG (element->calculate_min_timestep (m, &position_profile [0], &velocity_profile [0], profile_timestep));
-				
-				io::input *virtual_input (new io::input (new io::two_d::virtual_format (&dump, n, m)));
+								
+				io::input *virtual_input (new io::input (new io::two_d::virtual_format (&new_dump, n, m)));
 				
 				element.reset (new two_d::fourier::cosine::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, &process_messenger, 0x00));
 				element->setup (&*virtual_input);

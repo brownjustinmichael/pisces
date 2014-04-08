@@ -119,6 +119,7 @@ namespace bases
 		 * according to the execution flags.
 		 *********************************************************************/
 		void factorize () {
+			TRACE ("Factorizing...");
 			_factorize ();
 			*component_flags |= factorized;
 		}

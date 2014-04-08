@@ -64,21 +64,16 @@ namespace io
 	
 	template <>
 	double &virtual_dump::index <double> (std::string name, int i, int j) {
-		TRACE ("Indexing " << name << " " << &double_map [name] [i]);
-		TRACE (" " << dims [name] [0]);
 		return double_map [name] [i * dims [name] [1] + j];
-		TRACE ("Done.");
 	}
 	
 	template <>
 	float &virtual_dump::index <float> (std::string name, int i, int j) {
-		TRACE ("Indexing " << name);
 		return float_map [name] [i * dims [name] [1] + j];
 	}
 	
 	template <>
 	int &virtual_dump::index <int> (std::string name, int i, int j) {
-		TRACE ("Indexing " << name);
 		return int_map [name] [i * dims [name] [1] + j];
 	}
 	

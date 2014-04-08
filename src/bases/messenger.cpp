@@ -305,20 +305,18 @@ namespace bases
 		}
 #ifdef _MPI
 		std::vector <int> displs;
-		if (id == 0) {
-			displs.resize (np);
-			for (int i = 1; i < np; ++i) {
-				displs [i] = displs [i - 1] + ns [i - 1];
-			}
+		displs.resize (np);
+		for (int i = 1; i < np; ++i) {
+			displs [i] = displs [i - 1] + ns [i - 1];
 		}
-		if (id == 0 && data_out == data_in) {
+		if (data_out == data_in) {
 			MPI::COMM_WORLD.Allgatherv (MPI_IN_PLACE, n, mpi_type <datatype> (), data_in, ns, &displs [0], mpi_type <datatype> ());
 		} else {
-			MPI::COMM_WORLD.Allgatherv (data_in, n, mpi_type <datatype> (), data_out, ns, &displs [0], mpi_type <datatype> ());
+			MPI::COMM_WORLD.Allgatherv ((void *) data_in, n, mpi_type <datatype> (), (void *) data_out, ns, &displs [0], mpi_type <datatype> ());
 		}
 #else // _MPI
 		FATAL ("Gather used without MPI environment. Exiting.");
-		// throw 0;
+// 		// throw 0;
 #endif // _MPI
 	}
 	

@@ -89,7 +89,6 @@ namespace two_d
 		template <class datatype>
 		void solver <datatype>::_factorize () {
 			int info, lda = m + ex_excess_0 + ex_excess_n + nbot + ntop;
-			std::stringstream debug;
 			TRACE ("Factorizing...");
 			
 			for (int i = 0; i < ldn; ++i) {
@@ -102,12 +101,12 @@ namespace two_d
 			utils::matrix_add_scaled (m - excess_n - excess_0 - 2, m, timestep, &matrix [0] + excess_0 + 1, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + 1 + excess_0], m, lda);
 			if (ntop != 0) {
 				utils::matrix_add_scaled (ntop, m, alpha_0 * timestep, &matrix [0] + excess_0, &factorized_matrix [(ntop + ex_excess_0) * lda], m, m + ex_excess_0 + ex_excess_n + ntop + nbot);
-				utils::interpolate (ex_excess_0, m, m, timestep, positions, &matrix [0], &positions_0 [0], &factorized_matrix [(ntop + ex_excess_0) * lda + ntop], m, lda);
+				utils::interpolate (ex_excess_0, m, m, timestep, 1.0, positions, &matrix [0], &positions_0 [0], &factorized_matrix [(ntop + ex_excess_0) * lda + ntop], m, lda);
 				utils::matrix_add_scaled (ntop, m, alpha_0 * timestep, &matrix [0] + excess_0, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + excess_0], m, m + ex_excess_0 + ex_excess_n + ntop + nbot);
 			}
 			if (nbot != 0) {
 				utils::matrix_add_scaled (nbot, m, alpha_n * timestep, &matrix [0] + m - nbot - excess_n, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + m - nbot - excess_n], m, lda);
-				utils::interpolate (ex_excess_n, m, m, timestep, positions, &matrix [0], &positions_n [0], &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + m], m, lda);
+				utils::interpolate (ex_excess_n, m, m, timestep, 1.0, positions, &matrix [0], &positions_n [0], &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + m], m, lda);
 				utils::matrix_add_scaled (nbot, m, alpha_n * timestep, &matrix [0] + m - nbot - excess_n, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + m + ex_excess_n], m, lda);
 			}
 			
@@ -141,24 +140,23 @@ namespace two_d
 			utils::matrix_add_scaled (m - excess_0 - excess_n, ldn, timestep, &explicit_rhs_vec [excess_0], &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
 							
 			if (ntop != 0) {
-				utils::interpolate (ex_excess_0, ldn, m - excess_0 - excess_n, 1.0, positions + excess_0, &data_temp [ex_excess_0 + ntop + excess_0], &positions_0 [0], &data_temp [ntop], lda, lda);
+				utils::interpolate (ex_excess_0, ldn, m - excess_0 - excess_n, 1.0, 1.0, positions + excess_0, &data_temp [ex_excess_0 + ntop + excess_0], &positions_0 [0], &data_temp [ntop], lda, lda);
 				utils::scale (ldn, alpha_0, &data_temp [0] + ntop + ex_excess_0 + excess_0, lda);
 				utils::copy (ldn, &data_temp [ntop + ex_excess_0 + excess_0], &data_temp [0], lda, lda);
 			} else {
 				utils::copy (ldn, &values_0 [0], &data_temp [0], 1, lda);
 			}
 			if (nbot != 0) {
-				utils::interpolate (ex_excess_n, ldn, m - excess_0 - excess_n, 1.0, positions + excess_0, &data_temp [ex_excess_0 + ntop + excess_0], &positions_n [0], &data_temp [lda - nbot - ex_excess_n], lda, lda);
+				utils::interpolate (ex_excess_n, ldn, m - excess_0 - excess_n, 1.0, 1.0, positions + excess_0, &data_temp [ex_excess_0 + ntop + excess_0], &positions_n [0], &data_temp [lda - nbot - ex_excess_n], lda, lda);
 				utils::scale (ldn, alpha_n, &data_temp [0] + lda - 2 * nbot - ex_excess_n - excess_n, lda);
 				utils::copy (ldn, &data_temp [0] + lda - 2 * nbot - ex_excess_n - excess_n, &data_temp [0] + lda - nbot, lda, lda);
 			} else {
 				utils::copy (ldn, &values_n [0], &data_temp [m - 1 + ntop + ex_excess_0], 1, lda);
 			}
 			
-
 			utils::matrix_add_scaled (m - 2 + ntop + nbot - excess_0 - excess_n, ldn, 1.0, data + 1 - ntop + excess_0, &data_temp [ex_excess_0 + 1 + excess_0], m, lda);
-			utils::interpolate (ex_excess_0, ldn, m, 1.0, positions, data, &positions_0 [0], &data_temp [1], m, lda);
-			utils::interpolate (ex_excess_n, ldn, m, 1.0, positions, data, &positions_n [0], &data_temp [lda - 1 - ex_excess_n], m, lda);
+			utils::interpolate (ex_excess_0, ldn, m, 1.0, 1.0, positions, data, &positions_0 [0], &data_temp [1], m, lda);
+			utils::interpolate (ex_excess_n, ldn, m, 1.0, 1.0, positions, data, &positions_n [0], &data_temp [lda - 1 - ex_excess_n], m, lda);
 			
 			if (*element_flags & x_solve) {
 				TRACE ("Solving in n direction...");
@@ -288,6 +286,8 @@ namespace two_d
 		
 		template <class datatype>
 		void laplace_solver <datatype>::_factorize () {
+			TRACE ("Factorizing laplace solver...");
+			
 			double scalar = 4.0 * std::acos (-1.0) / (pos_n [n - 1] - pos_n [0]);
 			int mm = m;
 			int nbegin = excess_0;
