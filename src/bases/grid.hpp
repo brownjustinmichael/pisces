@@ -68,6 +68,10 @@ namespace bases
 				ld = n;
 			}
 
+			if (position_0 == position_n || n == 0) {
+				ERROR ("Grid has no physical extent.");
+				throw 0;
+			}
 			positions.resize (n + 1);
 
 			if (calculate_matrix) {
