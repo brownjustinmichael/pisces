@@ -35,6 +35,7 @@ namespace two_d
 		excess_0 (grid_m.excess_0), 
 		excess_n (grid_m.excess_n),
 		default_matrix (grid_m.get_data (0)) {
+			TRACE ("Building solver...");
 			horizontal_matrix.resize (ldn);
 			factorized_horizontal_matrix.resize (ldn);
 			matrix.resize (m * m);
@@ -84,6 +85,7 @@ namespace two_d
 			data_temp.resize ((m + ex_excess_0 + ex_excess_n + nbot + ntop) * (ldn));
 			
 			transform = std::shared_ptr <bases::plan <datatype> > (new horizontal_transform <datatype> (n, m, rhs_ptr (real_rhs), NULL, NULL, element_flags, &flags));
+			TRACE ("Solver built.");
 		}
 		
 		template <class datatype>

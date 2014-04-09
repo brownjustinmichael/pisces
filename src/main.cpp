@@ -127,6 +127,8 @@ int main (int argc, char *argv[])
 		// one_d::cosine::advection_diffusion_element <double> element (&vertical_axis, name, config, &process_messenger, 0x00);
 		std::shared_ptr <bases::element <double>> element (new two_d::fourier::cosine::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, &process_messenger, 0x00));
 		
+		TRACE ("Element constructed.");
+		
 		if (config ["input.file"].IsDefined ()) {
 			std::string file_format = "../input/" + config.get <std::string> ("input.file");
 			char buffer [file_format.size () * 2];

@@ -73,7 +73,7 @@ namespace bases
 	template <class datatype>
 	void messenger::send (int n, datatype* data, int edge) {
 		int flags = 0;
-		check_all (&flags);
+		// check_all (&flags);
 		TRACE ("Adding message to queue.");
 		if (data_queue [edge_to_index (send_mode, edge)]) {
 			FATAL ("Message already in queue at this edge.");
@@ -94,7 +94,7 @@ namespace bases
 	template <class datatype>
 	void messenger::send (int n, datatype *data, int process, int tag) {
 		int flags = 0;
-		check_all (&flags);
+		// check_all (&flags);
 #ifdef _MPI
 		MPI::COMM_WORLD.Send (data, n, mpi_type <datatype> (), process, tag);
 #else // _MPI
@@ -106,7 +106,7 @@ namespace bases
 	template <class datatype>
 	void messenger::recv (int n, datatype* data, int edge) {
 		int flags = 0;
-		check_all (&flags);
+		// check_all (&flags);
 		TRACE ("Adding message to queue.");
 		if (data_queue [edge_to_index (recv_mode, edge)]) {
 			FATAL ("Message already in queue at this edge.");
@@ -127,7 +127,7 @@ namespace bases
 	template <class datatype>
 	void messenger::recv (int n, datatype *data, int process, int tag) {
 		int flags = 0;
-		check_all (&flags);
+		// check_all (&flags);
 #ifdef _MPI
 		MPI::COMM_WORLD.Recv (data, n, mpi_type <datatype> (), process, tag);
 #else // _MPI
@@ -200,6 +200,7 @@ namespace bases
 	}
 	
 	void messenger::check_all (int *flags) {
+		TRACE ("Checking...")
 #ifdef _MPI
 		MPI::COMM_WORLD.Gather (flags, 1, mpi_type <int> (), &stati [0], 1, mpi_type <int> (), 0);
 #else // _MPI
@@ -220,6 +221,7 @@ namespace bases
 		if (*flags & mpi_fatal) {
 			throw 0;
 		}
+		TRACE ("Check complete.");
 	}
 	
 	void messenger::kill_all () {
