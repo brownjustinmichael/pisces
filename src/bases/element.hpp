@@ -235,7 +235,7 @@ namespace bases
 		void write_transform_data ();
 		void read_transform_data ();
 		
-		virtual int &get_mode () = 0;
+		virtual const int &get_mode () = 0;
 	
 		void setup (io::input *input_stream) {
 			// Set up input
@@ -252,9 +252,10 @@ namespace bases
 			} catch (exceptions::io::bad_variables &except) {
 				WARN (except.what ());
 			}
+			
 
 			if (mode != get_mode ()) {
-				FATAL ("Loading simulation in different mode.");
+				FATAL ("Loading simulation in different mode: " << mode << " instead of " << get_mode ());
 				throw 0;
 			}
 		}
@@ -268,7 +269,9 @@ namespace bases
 				output_stream->template append <datatype> (scalar_names [iter->first], ptr (iter->first));
 			}
 			output_stream->template append_scalar <datatype> ("t", &duration);
-			output_stream->template append_scalar <int> ("mode", &(get_mode ()));
+			
+			output_stream->template append_scalar <const int> ("mode", &(get_mode ()));
+			
 			/*
 				TODO Check the mode output
 			*/
@@ -277,6 +280,7 @@ namespace bases
 			} else if (flags & normal_output) {
 				normal_stream = output_stream;
 			}
+			DEBUG ("Output setup");
 		}
 		
 		/*!**********************************************************************
@@ -325,7 +329,7 @@ namespace bases
 		 * 
 		 * \return The datatype recommended timestep for the next timestep
 		 ************************************************************************/
-		virtual datatype calculate_min_timestep (int i_n = -1, datatype *i_position = NULL, datatype *i_velocity = NULL, int flags = 0x00) = 0;
+		virtual datatype calculate_min_timestep (io::virtual_dump *dump = NULL) = 0;
 		
 		/*
 			TODO Recast this to be more general, taking a map or dump instead of just vertical position and velocity

@@ -52,10 +52,8 @@ namespace utils
 			while (in [k] > x [i]) {
 				++i;
 			}
-			DEBUG ("Position " << in [k] << " is between " << x [i == 0 ? 0 : i - 1] << " and " << x [i]);
 			if (in [k] == x [i]) {
 				for (int j = 0; j < m; ++j) {
-					DEBUG ("From " << j * ldy + i << " " << y [j * ldy + i] << " to " << j * ldout + k)
 					out [j * ldout + k] = alpha * y [j * ldy + i] + beta * out [j * ldout + k];
 				}
 			} else {

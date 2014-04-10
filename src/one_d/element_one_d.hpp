@@ -120,19 +120,20 @@ namespace one_d
 			}
 		}
 		
-		virtual datatype calculate_timestep (int i, datatype *i_position = NULL, datatype *i_velocity = NULL, int flags = 0x00) = 0;
+		virtual datatype calculate_timestep (int i, io::virtual_dump *dump = NULL) = 0;
+		
+		/*
+			TODO Allow for external dump handling
+		*/
 
-		inline datatype calculate_min_timestep (int i_n = -1, datatype *i_position = NULL, datatype *i_velocity = NULL, int flags = 0x00) {
+		inline datatype calculate_min_timestep (io::virtual_dump *dump = NULL) {
 			datatype shared_min = max_timestep;
 			#pragma omp parallel 
 			{
 				datatype min = std::numeric_limits <datatype>::max ();
-				if (i_n == -1) {
-					i_n = n;
-				}
 				#pragma omp for nowait
-					for (int i = 1; i < i_n - 1; ++i) {
-						min = std::min (calculate_timestep (i, i_position, i_velocity, flags), min);
+					for (int i = 1; i < (dump ? dump->dims ["z"] [1] : n) - 1; ++i) {
+						min = std::min (calculate_timestep (i, dump), min);
 					}
 				#pragma omp critical 
 				{
@@ -183,7 +184,7 @@ namespace one_d
 			}
 			virtual ~element () {}
 			
-			int &get_mode () {
+			const int &get_mode () {
 				return mode;
 			}
 			
@@ -238,7 +239,7 @@ namespace one_d
 		
 			virtual ~nonlinear_diffusion_element () {}
 		
-			virtual datatype calculate_timestep (int i, datatype *i_position = NULL, datatype *i_velocity = NULL, int flags = 0x00);
+			virtual datatype calculate_timestep (int i, io::virtual_dump *dump);
 	
 		private:
 			using element <datatype>::initialize;
@@ -281,7 +282,7 @@ namespace one_d
 		
 			virtual ~advection_diffusion_element () {}
 		
-			virtual datatype calculate_timestep (int i, datatype *i_position = NULL, datatype *i_velocity = NULL, int flags = 0x00);
+			virtual datatype calculate_timestep (int i, io::virtual_dump *dump);
 	
 		private:
 			using element <datatype>::initialize;
@@ -325,7 +326,7 @@ namespace one_d
 			}
 			virtual ~element () {}
 			
-			int &get_mode () {
+			const int &get_mode () {
 				return mode;
 			}
 		
@@ -379,7 +380,7 @@ namespace one_d
 	
 			virtual ~advection_diffusion_element () {}
 	
-			virtual datatype calculate_timestep (int i, datatype *i_position = NULL, datatype *i_velocity = NULL, int flags = 0x00);
+			virtual datatype calculate_timestep (int i, io::virtual_dump *dump);
 
 		private:
 			using element <datatype>::initialize;

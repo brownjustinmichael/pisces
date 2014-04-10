@@ -21,10 +21,9 @@ namespace utils
 		if (output_dump != input_dump) {
 			*output_dump = *input_dump;
 		}
-		std::stringstream debug;
 		
-		for (typename std::map <std::string, std::vector <datatype>>::iterator iter = input_dump->begin <datatype> (); iter != input_dump->end <datatype> (); iter++) {
-			if (input_dump->dims [iter->first] [1] != 1) {
+		for (typename std::map <std::string, void *>::iterator iter = input_dump->begin (); iter != input_dump->end (); iter++) {
+			if (input_dump->dims [iter->first] [1] != 1 && input_dump->check_type <datatype> (iter->first)) {
 				TRACE ("Rezoning " << iter->first << "...");
 				int nn = input_grid->n;
 				std::vector <int> ns (inter_messenger->get_np (), nn);
@@ -45,7 +44,7 @@ namespace utils
 						nhere += ns [i];
 					}
 				}
-
+		
 				utils::matrix_switch (nn, input_dump->dims [iter->first] [0], &(input_dump->index <datatype> (iter->first)), &inter_buffer [nhere]);
 				inter_messenger->allgatherv <datatype> (nn * input_dump->dims [iter->first] [0], &inter_buffer [0], &ns [0]);
 				utils::matrix_switch (input_dump->dims [iter->first] [0], nsum, &inter_buffer [0], &value_buffer [0]);
@@ -53,6 +52,26 @@ namespace utils
 				utils::interpolate (output_grid->n, output_dump->dims [iter->first] [0], nsum, 1.0, 0.0, &position_buffer [0], &value_buffer [0], &((*output_grid) [0]), &(output_dump->index <datatype> (iter->first)));
 			}
 		}
+	}
+	
+	template <class datatype>
+	datatype minimum_timestep (int n, int m, bases::element <datatype> *element, bases::messenger *messenger, datatype *positions) {
+		io::virtual_dump dump, new_dump;
+		
+		std::shared_ptr <io::output> virtual_output (new io::output (new io::two_d::virtual_format (&dump, n, m)));
+		element->setup_output (virtual_output);
+		
+		virtual_output->to_file ();
+		
+		int id = messenger->get_id ();
+		int np = messenger->get_np ();
+		
+		bases::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == np - 1 ? 0 : 1);
+		std::shared_ptr <bases::grid <double>> vertical_grid = element->generate_grid (&vertical_axis);
+		
+		rezone <datatype> (messenger, &*(element->grids [1]), &*vertical_grid, &dump, &new_dump);
+		
+		return element->calculate_min_timestep (&new_dump);
 	}
 } /* utils */
 

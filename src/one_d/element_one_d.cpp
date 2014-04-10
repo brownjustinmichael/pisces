@@ -76,7 +76,7 @@ namespace one_d
 		}
 		
 		template <class datatype>
-		datatype advection_diffusion_element <datatype>::calculate_timestep (int i, datatype *i_position, datatype *i_velocity, int flags) {
+		datatype advection_diffusion_element <datatype>::calculate_timestep (int i, io::virtual_dump *dump) {
 			return (std::abs ((position_ptr [i - 1] - position_ptr [i + 1]) / velocity_ptr [i] / advection_coeff) * cfl);
 		}
 		
@@ -137,7 +137,7 @@ namespace one_d
 		}
 		
 		template <class datatype>
-		datatype advection_diffusion_element <datatype>::calculate_timestep (int i, datatype *i_position, datatype *i_velocity, int flags) {
+		datatype advection_diffusion_element <datatype>::calculate_timestep (int i, io::virtual_dump *dump) {
 			return (std::abs ((position_ptr [i - 1] - position_ptr [i + 1]) / velocity_ptr [i] / advection_coeff) * cfl);
 		}
 		
@@ -214,7 +214,7 @@ namespace one_d
 		}
 		
 		template <class datatype>
-		datatype nonlinear_diffusion_element <datatype>::calculate_timestep (int i, datatype *i_position, datatype *i_velocity, int flags) {
+		datatype nonlinear_diffusion_element <datatype>::calculate_timestep (int i, io::virtual_dump *dump) {
 			datatype t_timestep;
 			io::parameters& nparams = params;
 			datatype advection_coeff = nparams.get <datatype> ("velocity.advection");

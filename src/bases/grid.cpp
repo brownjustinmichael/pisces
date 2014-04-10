@@ -124,7 +124,6 @@ namespace bases
 				if (n > 1) {
 					for (int i = 0; i <= n; ++i) {
 						positions [i] = (i - excess_0) * (position_n - position_0) / (n - 1 - excess_n - excess_0) + position_0;
-						DEBUG ("POSITIONS " << positions [i]);
 					}
 				} else {
 					positions [0] = (position_0 + position_n) / 2.0;
