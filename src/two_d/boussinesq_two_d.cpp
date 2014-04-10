@@ -81,11 +81,25 @@ namespace two_d
 			}
 			
 			template <class datatype>
-			datatype boussinesq_element <datatype>::calculate_timestep (int i, int j, datatype *i_position, datatype *i_velocity, int flags) {
-				if (flags & profile_timestep) {
-					return std::abs ((i_position [j + 1] - i_position [j - 1]) / i_velocity [j] / advection_coeff) * cfl;
+			datatype boussinesq_element <datatype>::calculate_timestep (int i, int j, io::virtual_dump *dump) {
+				if (dump) {
+					if (j == 0 || j == dump->dims ["z"] [1] - 1) {
+						return 1.0 / 0.0;
+					}
+					if (i == 0 || i == dump->dims ["z"] [0] - 1) {
+						return std::abs ((dump->index <datatype> ("z", i, j + 1) - dump->index <datatype> ("z", i, j - 1)) / dump->index <datatype> ("w", i, j) / advection_coeff) * cfl;
+					} else {
+						return std::min (std::abs ((dump->index <datatype> ("x", i + 1, j) - dump->index <datatype> ("x", i - 1, j)) / dump->index <datatype> ("u", i, j) / advection_coeff), std::abs ((dump->index <datatype> ("z", i, j + 1) - dump->index <datatype> ("z", i, j - 1)) / dump->index <datatype> ("w", i, j) / advection_coeff)) * cfl;
+					}
 				} else {
-					return std::min (std::abs ((x_ptr [(i + 1) * m + j] - x_ptr [(i - 1) * m + j]) / x_vel_ptr [i * m + j] / advection_coeff), std::abs ((z_ptr [i * m + j + 1] - z_ptr [i * m + j - 1]) / z_vel_ptr [i * m + j] / advection_coeff)) * cfl;
+					if (j == 0 || j == m - 1) {
+						return 1.0 / 0.0;
+					}
+					if (i == 0 || i == n - 1) {
+						return std::abs ((z_ptr [i * m + j + 1] - z_ptr [i * m + j - 1]) / z_vel_ptr [i * m + j] / advection_coeff) * cfl;
+					} else {
+						return std::min (std::abs ((x_ptr [(i + 1) * m + j] - x_ptr [(i - 1) * m + j]) / x_vel_ptr [i * m + j] / advection_coeff), std::abs ((z_ptr [i * m + j + 1] - z_ptr [i * m + j - 1]) / z_vel_ptr [i * m + j] / advection_coeff)) * cfl;
+					}
 				}
 			}
 			

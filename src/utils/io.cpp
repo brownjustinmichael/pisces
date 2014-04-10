@@ -32,51 +32,6 @@ namespace io
 		return nodes [(int) nodes.size () - 1];
 	}
 	
-	template <>
-	std::map <std::string, std::vector <double>>::iterator virtual_dump::begin <double> () {
-		return double_map.begin ();
-	}
-	
-	template <>
-	std::map <std::string, std::vector <float>>::iterator virtual_dump::begin <float> () {
-		return float_map.begin ();
-	}
-	
-	template <>
-	std::map <std::string, std::vector <int>>::iterator virtual_dump::begin <int> () {
-		return int_map.begin ();
-	}
-	
-	template <>
-	std::map <std::string, std::vector <double>>::iterator virtual_dump::end <double> () {
-		return double_map.end ();
-	}
-	
-	template <>
-	std::map <std::string, std::vector <float>>::iterator virtual_dump::end <float> () {
-		return float_map.end ();
-	}
-	
-	template <>
-	std::map <std::string, std::vector <int>>::iterator virtual_dump::end <int> () {
-		return int_map.end ();
-	}
-	
-	template <>
-	double &virtual_dump::index <double> (std::string name, int i, int j) {
-		return double_map [name] [i * dims [name] [1] + j];
-	}
-	
-	template <>
-	float &virtual_dump::index <float> (std::string name, int i, int j) {
-		return float_map [name] [i * dims [name] [1] + j];
-	}
-	
-	template <>
-	int &virtual_dump::index <int> (std::string name, int i, int j) {
-		return int_map [name] [i * dims [name] [1] + j];
-	}
-	
 	namespace one_d
 	{
 		void ascii::to_file (const char *file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {

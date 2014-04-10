@@ -6,10 +6,14 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
+#ifndef IO_HPP_C1E9B6EF
+#define IO_HPP_C1E9B6EF
+
 #include <vector>
 #include <array>
 #include <map>
 #include <string>
+#include <cstring>
 #include <iostream>
 #include <memory>
 #include <typeinfo>
@@ -19,9 +23,6 @@
 #include <netcdfcpp.h>
 #include "utils.hpp"
 
-#ifndef IO_HPP_C1E9B6EF
-#define IO_HPP_C1E9B6EF
-
 namespace io
 {	
 	class virtual_dump
@@ -29,74 +30,101 @@ namespace io
 	public:
 		virtual_dump () {}
 		
-		virtual ~virtual_dump () {}
+		virtual ~virtual_dump () {
+			for (std::map <std::string, void *>::iterator iter = data_map.begin (); iter != data_map.end (); iter++) {
+				free (iter->second);
+			}
+		}
 		
-		template <class datatype>
-		typename std::map <std::string, std::vector <datatype>>::iterator begin ();
+		virtual_dump &operator= (virtual_dump &dump) {
+			if (&dump == this) {
+				return *this;
+			}
+			
+			for (std::map <std::string, void *>::iterator iter = dump.begin (); iter != dump.end (); ++iter) {
+				_add_var (iter->first, dump.types [iter->first], dump.sizes [iter->first], dump.dims [iter->first] [0], dump.dims [iter->first] [1]);
+				memcpy (data_map [iter->first], iter->second, dump.sizes [iter->first] * dump.dims [iter->first] [0] * dump.dims [iter->first] [1]);
+			}
+			
+			return *this;
+		}
 		
-		template <class datatype>
-		typename std::map <std::string, std::vector <datatype>>::iterator end ();
+		std::map <std::string, void *>::iterator begin () {
+			return data_map.begin ();
+		}
+		
+		std::map <std::string, void *>::iterator end () {
+			return data_map.end ();
+		}
 		
 		template <class datatype>
 		void add_var (std::string name, int n = 1, int m = 1) {
-			TRACE ("Adding variable...");
-			if (typeid (datatype) == typeid (double)) {
-				double_map [name].resize (n * m);
-			} else if (typeid (datatype) == typeid (float)) {
-				float_map [name].resize (n * m);
-			} else if (typeid (datatype) == typeid (int)) {
-				int_map [name].resize (n * m);
+			_add_var (name, &typeid (datatype), sizeof (datatype), n, m);
+		}
+		
+		template <class datatype>
+		bool check_type (std::string name) {
+			if (typeid (datatype) == *types [name]) {
+				return true;
 			} else {
-				ERROR ("Unknown type");
-				throw 0;
+				return false;
 			}
-			dims [name] [0] = n;
-			dims [name] [1] = m;
-			TRACE ("Done.");
 		}
 		
 		template <class datatype>
 		void put (std::string name, void *data, int n = 1, int m = 1, int ldm = -1) {
 			TRACE ("Putting " << name << "...");
-			ldm = ldm == -1 ? m : ldm;
-			if (typeid (datatype) == typeid (double)) {
-				utils::matrix_copy (m, n, (double *) data, &(double_map [name] [0]), ldm, dims [name] [1]);
-			} else if (typeid (datatype) == typeid (float)) {
-				utils::matrix_copy (m, n, (float *) data, &(float_map [name] [0]), ldm, dims [name] [1]);
-			} else if (typeid (datatype) == typeid (int)) {
-				utils::matrix_copy (m, n, (int *) data, &(int_map [name] [0]), ldm, dims [name] [1]);
+			if (check_type <datatype> (name)) {
+				ldm = ldm == -1 ? m : ldm;
+				memcpy (data_map [name], data, sizeof (datatype) * n * ldm);
+				TRACE ("Done.");
 			} else {
-				ERROR ("Unknown type");
+				ERROR ("Incorrect type");
 				throw 0;
 			}
-			TRACE ("Done.");
 		}
 		
 		template <class datatype>
 		void get (std::string name, void *data, int n = 1, int m = 1, int ldm = -1) {
 			TRACE ("Getting " << name << "...");
-			ldm = ldm == -1 ? m : ldm;
-			if (typeid (datatype) == typeid (double)) {
-				utils::matrix_copy (m, n, &(double_map [name] [0]), (double *) data, dims [name] [1], ldm);
-			} else if (typeid (datatype) == typeid (float)) {
-				utils::matrix_copy (m, n, &(float_map [name] [0]), (float *) data, dims [name] [1], ldm);
-			} else if (typeid (datatype) == typeid (int)) {
-				utils::matrix_copy (m, n, &(int_map [name] [0]), (int *) data, dims [name] [1], ldm);
+			if (check_type <datatype> (name)) {
+				ldm = ldm == -1 ? m : ldm;
+				memcpy (data, data_map [name], sizeof (datatype) * n * ldm);
+				TRACE ("Done.");
 			} else {
-				ERROR ("Unknown type");
+				ERROR ("Incorrect type");
 				throw 0;
 			}
-			TRACE ("Done.");
 		}
 		
 		template <class datatype>
-		datatype &index (std::string name, int i = 0, int j = 0);
+		datatype &index (std::string name, int i = 0, int j = 0) {
+			if (check_type <datatype> (name)) {
+				return ((datatype *) data_map [name]) [i * dims [name] [1] + j];
+			} else {
+				ERROR ("Incorrect type");
+				throw 0;
+			}
+		}
 			
 		std::map <std::string, std::array <int, 2>> dims;
 	private:
-		std::map <std::string, std::vector <int>> int_map;
-		std::map <std::string, std::vector <float>> float_map;
-		std::map <std::string, std::vector <double>> double_map;
+		void _add_var (std::string name, const std::type_info *type, size_t size, int n = 1, int m = 1) {
+			TRACE ("Adding variable " << name << "...");
+			if (data_map [name]) {
+				free (data_map [name]);
+			}
+			data_map [name] = malloc (size * n * m);
+			types [name] = type;
+			sizes [name] = size;
+			dims [name] [0] = n;
+			dims [name] [1] = m;
+			TRACE ("Done. " << data_map [name]);
+		}
+		
+		std::map <std::string, void *> data_map;
+		std::map <std::string, const std::type_info *> types;
+		std::map <std::string, size_t> sizes;
 	};
 	
 	class parameters : public YAML::Node
@@ -172,6 +200,7 @@ namespace io
 			names.push_back (name);
 			types.push_back (&typeid (datatype));
 			data_ptrs.push_back ((void *) data_ptr);
+			TRACE ("Appended.");
 		}
 		
 		template <class datatype>
@@ -182,12 +211,14 @@ namespace io
 					WARN ("Reuse of name " << name);
 					scalar_types [i] = &typeid (datatype);
 					scalar_ptrs [i] = (void *) data_ptr;
+					TRACE ("Scalar updated.");
 					return;
 				}
 			}
 			scalar_types.push_back (&typeid (datatype));
 			scalar_names.push_back (name);
 			scalar_ptrs.push_back ((void *) data_ptr);
+			TRACE ("Scalar appended.");
 		}
 		
 		/*!*******************************************************************

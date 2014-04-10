@@ -170,25 +170,17 @@ namespace two_d
 			TRACE ("Explicit reset end.");
 		}
 		
-		virtual datatype calculate_timestep (int i, int j, datatype *i_position = NULL, datatype *i_velocity = NULL, int flags = 0x00) = 0;
+		virtual datatype calculate_timestep (int i, int j, io::virtual_dump *dump = NULL) = 0;
 		
-		inline datatype calculate_min_timestep (int i_m = -1, datatype *i_position = NULL, datatype *i_velocity = NULL, int flags = 0x00) {
+		inline datatype calculate_min_timestep (io::virtual_dump *dump = NULL) {
 			double shared_min = max_timestep;
 			#pragma omp parallel 
 			{
 				double min = std::numeric_limits <double>::max ();
-				int nmin = 1, nmax = n - 1;
-				if (flags & profile_timestep) {
-					nmin = 0;
-					nmax = 1;
-				}
-				if (i_m == -1) {
-					i_m = m;
-				}
 				#pragma omp for nowait
-					for (int j = 1; j < i_m - 1; ++j) {
-						for (int i = nmin; i < nmax; ++i) {
-							min = std::min (calculate_timestep (i, j, i_position, i_velocity, flags), min);
+					for (int j = 1; j < (dump ? dump->dims ["z"] [1] : m) - 1; ++j) {
+						for (int i = 0; i < (dump ? dump->dims ["z"] [0] : n); ++i) {
+							min = std::min (calculate_timestep (i, j, dump), min);
 						}
 					}
 				#pragma omp critical 
@@ -254,7 +246,7 @@ namespace two_d
 				}
 				virtual ~element () {}
 				
-				int &get_mode () {
+				const int &get_mode () {
 					return mode;
 				}
 				
@@ -276,14 +268,6 @@ namespace two_d
 					*/
 					if ((name != x_position) && (name != z_position)) {
 						element <datatype>::add_transform (name, new master_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &element_flags [state], &element_flags [name], transform_threads));
-						// 					    if (i_element_flags & only_forward_horizontal) {
-						// 	element <datatype>::add_transform (name, new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, NULL, &element_flags [state], &element_flags [name], i_threads), forward_horizontal);
-						// } else if (!(i_element_flags & no_transform)) {
-						// 			   				element <datatype>::add_transform (name, new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, NULL, &element_flags [state], &element_flags [name], i_threads), forward_horizontal);
-						// 	element <datatype>::add_transform (name, new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, inverse, &element_flags [state], &element_flags [name], i_threads), inverse_horizontal);
-						// 	element <datatype>::add_transform (name, new vertical_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, NULL, &element_flags [state], &element_flags [name], i_threads), forward_vertical);
-						// 	element <datatype>::add_transform (name, new vertical_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, inverse, &element_flags [state], &element_flags [name], i_threads), inverse_vertical);
-						// }
 					}
 					TRACE ("Initialized.");
 					return this->ptr (name);
@@ -330,7 +314,7 @@ namespace two_d
 				
 				virtual ~element () {}
 				
-				int &get_mode () {
+				const int &get_mode () {
 					return mode;
 				}
 				

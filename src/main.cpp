@@ -170,6 +170,7 @@ int main (int argc, char *argv[])
 		begin = std::chrono::system_clock::now ();
 
 		while (n_steps > 0) {
+			DEBUG ("Running");
 			try {
 				element->run (n_steps);
 			} catch (exceptions::mesh_adapt &except) {
@@ -185,9 +186,9 @@ int main (int argc, char *argv[])
 				
 				std::shared_ptr <io::output> virtual_output (new io::output (new io::two_d::virtual_format (&dump, n, m)));
 				element->setup_output (virtual_output);
-						
+												
 				virtual_output->to_file ();
-				
+								
 				for (int i = 1; i < n_elements; i++) {
 					positions [i] += config.get <double> ("grid.z.width") / n_elements * 0.4;
 				}
@@ -200,7 +201,9 @@ int main (int argc, char *argv[])
 				io::input *virtual_input (new io::input (new io::two_d::virtual_format (&new_dump, n, m)));
 				
 				element.reset (new two_d::fourier::cosine::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, &process_messenger, 0x00));
+				
 				element->setup (&*virtual_input);
+				
 				if (normal_stream) {
 					element->setup_output (normal_stream, normal_output);
 				}
