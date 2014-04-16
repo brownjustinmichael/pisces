@@ -22,9 +22,20 @@
 #include "grid.hpp"
 #include "transform.hpp"
 #include "../config.hpp"
+#include <gsl/gsl_siman.h>
 
 namespace bases
 {
+	template <class datatype>
+	class element;
+	
+	template <class datatype>
+	union rezone_union {
+		bases::element <datatype> *element_ptr;
+		int np;
+		datatype position;
+	};
+	
 	/*!*******************************************************************
 	 * \brief This is the basic class of the code
 	 * 
@@ -205,20 +216,6 @@ namespace bases
 			if (!found) {
 				transforms.push_back (i_name);
 			}
-
-			// std::shared_ptr <plan <datatype>> plan_ptr = std::shared_ptr <plan <datatype>> (i_plan);
-			// if (i_flags & forward_horizontal) {
-			// 	forward_horizontal_transforms [i_name] = plan_ptr;
-			// }
-			// if (i_flags & forward_vertical) {
-			// 	forward_vertical_transforms [i_name] = plan_ptr;
-			// }
-			// if (i_flags & inverse_horizontal) {
-			// 	inverse_horizontal_transforms [i_name] = plan_ptr;
-			// }
-			// if (i_flags & inverse_vertical) {
-			// 	inverse_vertical_transforms [i_name] = plan_ptr;
-			// }
 			
 			master_transforms [i_name] = std::shared_ptr <master_transform <datatype>> (i_transform);
 		}
@@ -269,18 +266,17 @@ namespace bases
 				output_stream->template append <datatype> (scalar_names [iter->first], ptr (iter->first));
 			}
 			output_stream->template append_scalar <datatype> ("t", &duration);
-			
 			output_stream->template append_scalar <const int> ("mode", &(get_mode ()));
-			
-			/*
-				TODO Check the mode output
-			*/
+
 			if (flags & transform_output) {
 				transform_stream = output_stream;
 			} else if (flags & normal_output) {
 				normal_stream = output_stream;
 			}
-			DEBUG ("Output setup");
+		}
+		
+		virtual void setup_profile (std::shared_ptr <io::output> output_stream, int flags = 0x00) {
+			normal_profiles.push_back (output_stream);
 		}
 		
 		/*!**********************************************************************
@@ -331,9 +327,132 @@ namespace bases
 		 ************************************************************************/
 		virtual datatype calculate_min_timestep (io::virtual_dump *dump = NULL) = 0;
 		
+		virtual std::shared_ptr <io::virtual_dump> make_dump (int flags = 0x00) = 0;
+		
+		virtual std::shared_ptr <io::virtual_dump> make_rezoned_dump (datatype *positions, io::virtual_dump *dump, int flags = 0x00) = 0;
+		
+		virtual void get_zoning_positions (datatype *positions) = 0;
+		
+/* how many points do we try before stepping */
+#define N_TRIES 200             
+
+/* how many iterations for each T? */
+#define ITERS_FIXED_T 1000
+
+/* max step size in random walk */
+#define STEP_SIZE 1.0            
+
+/* Boltzmann constant */
+#define K 1.0                   
+
+/* initial temperature */
+#define T_INITIAL 0.008         
+
+/* damping factor for temperature */
+#define MU_T 1.003              
+#define T_MIN 2.0e-6
+		
 		/*
-			TODO Recast this to be more general, taking a map or dump instead of just vertical position and velocity
+			TODO Make these actual variables
 		*/
+		
+		virtual void rezone_minimize_ts () {
+			rezone_dump = make_dump ();
+			
+			rezone_union <datatype> rezone_data [(messenger_ptr->get_np () + 3)];
+			rezone_data [0].element_ptr = this;
+			rezone_data [1].np = messenger_ptr->get_np ();
+			
+			datatype positions [(messenger_ptr->get_np () + 1)];
+			
+			get_zoning_positions (positions);
+			
+			for (int i = 0; i < messenger_ptr->get_np () + 1; ++i) {
+				rezone_data [i + 2].position = positions [i];
+			}
+			
+			gsl_siman_params_t params = {N_TRIES, ITERS_FIXED_T, STEP_SIZE, K, T_INITIAL, MU_T, T_MIN};
+
+		    const gsl_rng_type * T;
+		    gsl_rng * r;
+
+		    gsl_rng_env_setup();
+
+		    T = gsl_rng_default;
+		    r = gsl_rng_alloc(T);
+
+		    gsl_siman_solve(r, rezone_data, element <datatype>::rezone_calculate_ts, element <datatype>::rezone_generate_step, element <datatype>::rezone_step_size, NULL, NULL, NULL, NULL, sizeof(rezone_union <datatype>) * (messenger_ptr->get_np () + 3), params);
+
+		    gsl_rng_free (r);
+			
+			DEBUG ("New positions: " << positions [messenger_ptr->get_id ()] << " " << positions [messenger_ptr->get_id () + 1]);
+			
+			/*
+				TODO return the final positions list
+			*/
+		}
+		
+		static double rezone_calculate_ts (void *i_rezone_data) {
+			bases::element <datatype> *element_ptr = ((rezone_union <datatype> *) i_rezone_data)->element_ptr;
+			datatype positions [((rezone_union <datatype> *) i_rezone_data) [1].np + 1];
+			for (int i = 0; i < ((rezone_union <datatype> *) i_rezone_data) [1].np + 1; ++i) {
+				positions [i] = ((rezone_union <datatype> *) i_rezone_data) [i + 2].position;
+			}
+			return element_ptr->calculate_min_timestep (&*(element_ptr->make_rezoned_dump (positions, &*(element_ptr->rezone_dump))));
+		}
+		
+		static double rezone_step_size (void *i_new_rezone_data, void *i_old_rezone_data) {
+			datatype total = 0;
+			bases::element <datatype> *element_ptr = ((rezone_union <datatype> *) i_new_rezone_data)->element_ptr;
+			datatype new_positions [((rezone_union <datatype> *) i_new_rezone_data) [1].np + 1];
+			for (int i = 0; i < ((rezone_union <datatype> *) i_new_rezone_data) [1].np + 1; ++i) {
+				new_positions [i] = ((rezone_union <datatype> *) i_new_rezone_data) [i + 2].position;
+			}
+			datatype old_positions [((rezone_union <datatype> *) i_old_rezone_data) [1].np + 1];
+			for (int i = 0; i < ((rezone_union <datatype> *) i_old_rezone_data) [1].np + 1; ++i) {
+				old_positions [i] = ((rezone_union <datatype> *) i_old_rezone_data) [i + 2].position;
+			}
+			bases::messenger *messenger_ptr = element_ptr->messenger_ptr;
+			for (int i = 1; i < messenger_ptr->get_np (); ++i) {
+				total += (new_positions [i] - old_positions [i]) * (new_positions [i] - old_positions [i]);
+			}
+			return sqrt (total);
+		}
+		
+		static void rezone_generate_step (const gsl_rng *r, void *i_rezone_data, double step_size) {
+			bases::element <datatype> *element_ptr = ((rezone_union <datatype> *) i_rezone_data)->element_ptr;
+			datatype positions [((rezone_union <datatype> *) i_rezone_data) [1].np + 1];
+			for (int i = 0; i < ((rezone_union <datatype> *) i_rezone_data) [1].np + 1; ++i) {
+				positions [i] = ((rezone_union <datatype> *) i_rezone_data) [i + 2].position;
+			}
+			bases::messenger *messenger_ptr = element_ptr->messenger_ptr;
+			if (messenger_ptr->get_id () == 0) {
+				datatype radius = gsl_rng_uniform (r) * step_size;
+				if (radius == 0.0) {
+					int flags = mpi_skip;
+					messenger_ptr->check_all (&flags);
+					return;
+				}
+				datatype xs [messenger_ptr->get_np () + 1];
+				datatype total = 0.0;
+				for (int i = 1; i < messenger_ptr->get_np (); ++i) {
+					xs [i] = gsl_rng_uniform (r) * 2.0 - 1.0;
+					total += xs [i] * xs [i];
+				}
+				if (total == 0.0) {
+					int flags = mpi_skip;
+					messenger_ptr->check_all (&flags);
+					return;
+				}
+				total /= radius;
+				for (int i = 1; i < messenger_ptr->get_np (); ++i) {
+					positions [i] = xs [i] / total + positions [i];
+				}
+				messenger_ptr->template bcast <datatype> (messenger_ptr->get_np () + 1, positions);
+			} else {
+				messenger_ptr->template bcast <datatype> (messenger_ptr->get_np () + 1, positions);
+			}
+		}
 		
 		/*!**********************************************************************
 		 * \brief The main function call of the class
@@ -357,10 +476,11 @@ namespace bases
 		
 		std::vector <bases::axis> axes;
 		std::vector <std::shared_ptr <grid <datatype>>> grids; //!< A vector of shared pointers to the collocation grids
+		std::shared_ptr <io::virtual_dump> rezone_dump;
+		messenger* messenger_ptr; //!< A pointer to the messenger object
 	protected:
 		int name, dimensions; //!< An integer representation of the element, to be used in file output
 		io::parameters& params; //!< The map that contains the input parameters
-		messenger* messenger_ptr; //!< A pointer to the messenger object
 		
 		datatype duration; //!< The datatype total simulated time
 		datatype timestep; //!< The datatype timestep length
@@ -372,6 +492,8 @@ namespace bases
 		std::shared_ptr <io::output> failsafe_dump; //!< An implementation to dump in case of failure
 		std::shared_ptr <io::output> normal_stream; //!< An implementation to output in normal space
 		std::shared_ptr <io::output> transform_stream; //!< An implementation to output in transform space
+		std::vector <std::shared_ptr <io::output>> normal_profiles; //!< An implementation to output in transform space
+		
 		
 		std::vector <int> solver_keys; //!< A vector of integer keys to the solvers map
 		std::map<int, std::shared_ptr<solver <datatype>>> solvers; //!< A vector of shared pointers to the matrix solvers

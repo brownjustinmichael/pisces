@@ -18,6 +18,7 @@
 #include "transform_one_d.hpp"
 #include "../bases/element.hpp"
 #include "../utils/utils.hpp"
+#include "../utils/rezone.hpp"
 #include "../bases/grid.hpp"
 #include "../config.hpp"
 	
@@ -121,10 +122,6 @@ namespace one_d
 		}
 		
 		virtual datatype calculate_timestep (int i, io::virtual_dump *dump = NULL) = 0;
-		
-		/*
-			TODO Allow for external dump handling
-		*/
 
 		inline datatype calculate_min_timestep (io::virtual_dump *dump = NULL) {
 			datatype shared_min = max_timestep;
@@ -144,6 +141,54 @@ namespace one_d
 				return shared_min * 0.8;
 			} else {
 				return timestep;
+			}
+		}
+		
+		virtual std::shared_ptr <io::virtual_dump> make_dump (int flags = 0x00) {
+			std::shared_ptr <io::virtual_dump> dump (new io::virtual_dump);
+			
+			std::shared_ptr <io::output> virtual_output (new io::output (new io::two_d::virtual_format (&*dump, n, 1)));
+			bases::element <datatype>::setup_output (virtual_output);
+			
+			virtual_output->to_file ();
+			return dump;
+		}
+		
+		virtual std::shared_ptr <bases::grid <datatype>> generate_grid (bases::axis *axis, int index = -1) = 0;
+		
+		virtual std::shared_ptr <io::virtual_dump> make_rezoned_dump (datatype *positions, io::virtual_dump *old_dump, int flags = 0x00) {
+			std::shared_ptr <io::virtual_dump> dump;
+			
+			bases::axis vertical_axis (n, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () ? 0 : 1);
+			std::shared_ptr <bases::grid <datatype>> vertical_grid = generate_grid (&vertical_axis);
+			
+			utils::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_dump, &*dump);
+			
+			DEBUG ("Old Bottom: " << old_dump->index <datatype> ("z", 0, 0) << " Old Top: " << old_dump->index <datatype> ("z", 0, n - 1));
+			DEBUG ("Bottom: " << dump->index <datatype> ("z", 0, 0) << " Top: " << dump->index <datatype> ("z", 0, n - 1));
+			
+			return dump;
+		}
+		
+		/*
+			TODO Combine these?
+		*/
+		
+		virtual void get_zoning_positions (datatype *positions) {
+			if (messenger_ptr->get_id () == 0) {
+				datatype temp [messenger_ptr->get_np () * 2 + 2];
+				temp [0] = axes [0].position_0;
+				temp [1] = axes [0].position_n;
+				messenger_ptr->template gather <datatype> (2, temp);
+				for (int i = 0; i < messenger_ptr->get_np (); ++i) {
+					positions [i] = temp [2 * i];
+				}
+				positions [messenger_ptr->get_np ()] = temp [messenger_ptr->get_np () * 2 + 1];
+				messenger_ptr->template bcast <datatype> (messenger_ptr->get_np () + 1, positions);
+			} else {
+				datatype temp [2] = {axes [0].position_0, axes [0].position_n};
+				messenger_ptr->template gather <datatype> (2, temp);
+				messenger_ptr->template bcast <datatype> (messenger_ptr->get_np () + 1, positions);
 			}
 		}
 		

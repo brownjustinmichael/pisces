@@ -120,6 +120,9 @@ namespace bases
 	
 	template <class datatype>
 	void messenger::recv (int n, datatype *data, int process, int tag) {
+		/*
+			TODO Make check_two
+		*/
 #ifdef _MPI
 		MPI::COMM_WORLD.Recv (data, n, mpi_type <datatype> (), process, tag);
 #else // _MPI
@@ -130,7 +133,7 @@ namespace bases
 
 	template <class datatype>
 	void messenger::data_check () {
-		int flags = 0;
+		int flags = mpi_all_clear;
 		check_all (&flags);
 		TRACE ("Running messenger check.");
 		while (data_queue [data_iter]) {
@@ -169,7 +172,7 @@ namespace bases
 	
 	template <class datatype>
 	void messenger::min (datatype* data) {
-		int flags = 0;
+		int flags = mpi_all_clear;
 		check_all (&flags);
 		if (np != 1) {
 			std::vector <datatype> buffer (np);
@@ -228,7 +231,7 @@ namespace bases
 	
 	template <class datatype>
 	void messenger::gather (int n, datatype* data_in, datatype* data_out) {
-		int flags = 0;
+		int flags = mpi_all_clear;
 		check_all (&flags);
 		if (!data_out) {
 			data_out = data_in;
@@ -245,9 +248,27 @@ namespace bases
 #endif // _MPI
 	}
 	
+#warning here
+	template <class datatype>
+	void messenger::bcast (int n, datatype* data_in) {
+		int flags = mpi_all_clear;
+		check_all (&flags);
+#ifdef _MPI
+		if (flags == mpi_all_clear) {
+			MPI::COMM_WORLD.Bcast (data_in, n, mpi_type <datatype> (), 0);
+		}
+		/*
+			TODO Use something like this instead of assuming check_all will always succeed or throw an exception?
+		*/
+#else // _MPI
+		FATAL ("Gather used without MPI environment. Exiting.");
+		// throw 0;
+#endif // _MPI
+	}
+	
 	template <class datatype>
 	void messenger::allgather (int n, datatype* data_in, datatype* data_out) {
-		int flags = 0;
+		int flags = mpi_all_clear;
 		check_all (&flags);
 		if (!data_out) {
 			data_out = data_in;
@@ -266,7 +287,7 @@ namespace bases
 	
 	template <class datatype>
 	void messenger::gatherv (int n, datatype* data_in, int *ns, datatype* data_out) {
-		int flags = 0;
+		int flags = mpi_all_clear;
 		check_all (&flags);
 		if (!data_out) {
 			data_out = data_in;
@@ -292,7 +313,7 @@ namespace bases
 	
 	template <class datatype>
 	void messenger::allgatherv (int n, datatype* data_in, int *ns, datatype* data_out) {
-		int flags = 0;
+		int flags = mpi_all_clear;
 		check_all (&flags);
 		if (!data_out) {
 			data_out = data_in;
@@ -316,7 +337,7 @@ namespace bases
 	
 	template <class datatype>
 	void messenger::scatter (int n, datatype* data_in, datatype* data_out) {
-		int flags = 0;
+		int flags = mpi_all_clear;
 		check_all (&flags);
 		if (!data_out) {
 			data_out = data_in;
@@ -335,7 +356,7 @@ namespace bases
 	
 	template <class datatype>
 	void messenger::scatterv (int n, datatype* data_in, int* ns, datatype* data_out) {
-		int flags = 0;
+		int flags = mpi_all_clear;
 		check_all (&flags);
 		if (!data_out) {
 			data_out = data_in;
@@ -360,7 +381,7 @@ namespace bases
 	}
 	
 	bool messenger::bool_and (bool boolean) {
-		int flags = 0;
+		int flags = mpi_all_clear;
 		check_all (&flags);
 		int temp;
 		if (boolean) {
@@ -428,6 +449,10 @@ namespace bases
 	template void messenger::gather <double> (int n, double* data_in, double* data_out);
 	template void messenger::gather <float> (int n, float* data_in, float* data_out);
 	template void messenger::gather <int> (int n, int* data_in, int* data_out);
+	
+	template void messenger::bcast <double> (int n, double* data_in);
+	template void messenger::bcast <float> (int n, float* data_in);
+	template void messenger::bcast <int> (int n, int* data_in);
 	
 	template void messenger::allgather <double> (int n, double* data_in, double* data_out);
 	template void messenger::allgather <float> (int n, float* data_in, float* data_out);

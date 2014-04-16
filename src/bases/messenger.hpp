@@ -27,7 +27,9 @@ enum modes {
 };
 
 enum mpi_flags {
-	mpi_fatal = 0x01
+	mpi_all_clear = 0x00,
+	mpi_fatal = 0x01,
+	mpi_skip = 0x02
 };
 
 namespace bases
@@ -173,6 +175,9 @@ namespace bases
 		
 		template <class datatype>
 		void gather (int n, datatype* data_in, datatype* data_out = NULL);
+		
+		template <class datatype>
+		void bcast (int n, datatype* data_in);
 		
 		template <class datatype>
 		void gatherv (int n, datatype* data_in, int* ns, datatype* data_out = NULL);

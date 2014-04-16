@@ -108,6 +108,9 @@ namespace bases
 						if (normal_stream) {
 							normal_stream->to_file ();
 						}
+						for (int i = 0; i < (int) normal_profiles.size (); ++i) {
+							normal_profiles [i]->to_file ();
+						}
 						, output_time, output_duration);
 					}
 				#pragma omp section

@@ -1,12 +1,17 @@
 Import ("env")
 Import ("objects")
 
+conf = Configure (env)
+for lib in ["gsl"]:
+    conf.CheckLib (lib)
+env = conf.Finish ()
+
 objects.append (env.Object ("plan.cpp"))
+
+objects.append (env.Object ("messenger.cpp"))
 
 objects.append (env.Object ("element.cpp"))
 
 objects.append (env.Object ("grid.cpp"))
-
-objects.append (env.Object ("messenger.cpp"))
 
 objects.append (env.Object ("solver.cpp"))

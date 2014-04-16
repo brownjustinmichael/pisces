@@ -15,6 +15,7 @@
 #include <sstream>
 #include "transform_two_d.hpp"
 #include "../utils/io.hpp"
+#include "../utils/rezone.hpp"
 #include "../config.hpp"
 
 namespace two_d
@@ -107,6 +108,18 @@ namespace two_d
 		inline datatype* ptr (int name, int i, int j) {
 			return bases::element <datatype>::ptr (name, i * m + j);
 		}
+		
+		virtual void setup_profile (std::shared_ptr <io::output> output_stream, int flags = 0x00) {
+			typedef typename std::map <int, std::vector <datatype> >::iterator iterator;
+			for (iterator iter = scalars.begin (); iter != scalars.end (); ++iter) {
+				output_stream->template append_functor <datatype> ("rms_" + scalar_names [iter->first], new io::root_mean_square_functor <datatype> (ptr (iter->first), n, m));
+				output_stream->template append_functor <datatype> ("avg_" + scalar_names [iter->first], new io::average_functor <datatype> (ptr (iter->first), n, m));
+			}
+			output_stream->template append_scalar <datatype> ("t", &duration);
+			output_stream->template append_scalar <const int> ("mode", &(get_mode ()));
+			
+			bases::element <datatype>::setup_profile (output_stream, flags);
+		}
 	
 		/*!*******************************************************************
 		 * \copydoc bases::element <datatype>::initialize ()
@@ -194,6 +207,54 @@ namespace two_d
 				return timestep;
 			}
 		}
+		
+		virtual std::shared_ptr <io::virtual_dump> make_dump (int flags = 0x00) {
+			std::shared_ptr <io::virtual_dump> dump (new io::virtual_dump);
+			
+			std::shared_ptr <io::output> virtual_output (new io::output (new io::two_d::virtual_format (&*dump, n, m)));
+			bases::element <datatype>::setup_output (virtual_output);
+			
+			virtual_output->to_file ();
+			return dump;
+		}
+		
+		virtual std::shared_ptr <bases::grid <datatype>> generate_grid (bases::axis *axis, int index = -1) = 0;
+		
+		virtual std::shared_ptr <io::virtual_dump> make_rezoned_dump (datatype *positions, io::virtual_dump *old_dump, int flags = 0x00) {
+			std::shared_ptr <io::virtual_dump> dump;
+			
+			bases::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () ? 0 : 1);
+			std::shared_ptr <bases::grid <datatype>> vertical_grid = generate_grid (&vertical_axis);
+			
+			utils::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_dump, &*dump);
+			
+			DEBUG ("Old Bottom: " << old_dump->index <datatype> ("z", 0, 0) << " Old Top: " << old_dump->index <datatype> ("z", 0, n - 1));
+			DEBUG ("Bottom: " << dump->index <datatype> ("z", 0, 0) << " Top: " << dump->index <datatype> ("z", 0, n - 1));
+			
+			return dump;
+		}
+		
+		/*
+			TODO Combine these?
+		*/
+		
+		virtual void get_zoning_positions (datatype *positions) {
+			if (messenger_ptr->get_id () == 0) {
+				datatype temp [messenger_ptr->get_np () * 2 + 2];
+				temp [0] = axes [1].position_0;
+				temp [1] = axes [1].position_n;
+				messenger_ptr->template gather <datatype> (2, temp);
+				for (int i = 0; i < messenger_ptr->get_np (); ++i) {
+					positions [i] = temp [2 * i];
+				}
+				positions [messenger_ptr->get_np ()] = temp [messenger_ptr->get_np () * 2 + 1];
+				messenger_ptr->template bcast <datatype> (messenger_ptr->get_np () + 1, positions);
+			} else {
+				datatype temp [2] = {axes [1].position_0, axes [1].position_n};
+				messenger_ptr->template gather <datatype> (2, temp);
+				messenger_ptr->template bcast <datatype> (messenger_ptr->get_np () + 1, positions);
+			}
+		}
 	
 	protected:
 		using bases::element <datatype>::scalars;
@@ -204,6 +265,9 @@ namespace two_d
 		using bases::element <datatype>::element_flags;
 		using bases::element <datatype>::timestep;
 		using bases::element <datatype>::axes;
+		using bases::element <datatype>::scalar_names;
+		using bases::element <datatype>::get_mode;
+		using bases::element <datatype>::duration;
 		
 		int n; //!< The number of elements in each 1D array
 		int m;
@@ -336,14 +400,6 @@ namespace two_d
 					*/
 					if ((name != x_position) && (name != z_position)) {
 						bases::element <datatype>::add_transform (name, new master_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal, &element_flags [state], &element_flags [name], transform_threads));
-						// 					    if (i_element_flags & only_forward_horizontal) {
-						// 	element <datatype>::add_transform (name, new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, NULL, &element_flags [state], &element_flags [name], transform_threads), forward_horizontal);
-						// } else if (!(i_element_flags & no_transform)) {
-						// 			   				element <datatype>::add_transform (name, new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, NULL, &element_flags [state], &element_flags [name], transform_threads), forward_horizontal);
-						// 	element <datatype>::add_transform (name, new horizontal_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, inverse, &element_flags [state], &element_flags [name], transform_threads), inverse_horizontal);
-						// 	element <datatype>::add_transform (name, new vertical_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, NULL, &element_flags [state], &element_flags [name], transform_threads), forward_vertical);
-						// 	element <datatype>::add_transform (name, new vertical_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, inverse, &element_flags [state], &element_flags [name], transform_threads), inverse_vertical);
-						// }
 					}
 					return this->ptr (name);
 				}

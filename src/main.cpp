@@ -182,21 +182,29 @@ int main (int argc, char *argv[])
 					TODO Remove these when updating to the more recent version
 				*/
 				
-				io::virtual_dump dump, new_dump;
+				io::virtual_dump dump, new_dump, profile_dump;
 				
 				std::shared_ptr <io::output> virtual_output (new io::output (new io::two_d::virtual_format (&dump, n, m)));
+				std::shared_ptr <io::output> profile_output (new io::output (new io::two_d::virtual_format (&profile_dump, 1, m)));
 				element->setup_output (virtual_output);
-												
+				element->setup_profile (profile_output);
+				
 				virtual_output->to_file ();
-								
+				profile_output->to_file ();
+				
 				for (int i = 1; i < n_elements; i++) {
-					positions [i] += config.get <double> ("grid.z.width") / n_elements * 0.4;
+					positions [i] += config.get <double> ("grid.z.width") / n_elements * 0.49;
 				}
-								
+				
 				bases::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
 				std::shared_ptr <bases::grid <double>> vertical_grid = element->generate_grid (&vertical_axis);
 				
 				utils::rezone (&process_messenger, &*(element->grids [1]), &*vertical_grid, &dump, &new_dump);
+				
+				DEBUG ("Old Bottom: " << dump.index <double> ("z", 0, 0) << " Old Top: " << dump.index <double> ("z", 0, m - 1));
+				DEBUG ("Bottom: " << new_dump.index <double> ("z", 0, 0) << " Top: " << new_dump.index <double> ("z", 0, m - 1));
+				
+				DEBUG ("New timestep: " << element->calculate_min_timestep (&new_dump));
 								
 				io::input *virtual_input (new io::input (new io::two_d::virtual_format (&new_dump, n, m)));
 				
