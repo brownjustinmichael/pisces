@@ -40,17 +40,10 @@ namespace two_d
 				advection_coeff = std::max (i_params.get <datatype> ("temperature.advection"), i_params.get <datatype> ("velocity.advection"));
 				cfl = i_params.get <datatype> ("time.cfl");
 
-				DEBUG ("Adding velocity solve.");
-
 				// Solve velocity
 				element <datatype>::add_solver (x_velocity, new divergence_solver <datatype> (*grids [0], *grids [1], ptr (x_velocity), ptr (z_velocity), &element_flags [state], &element_flags [x_velocity]));
-				
-				DEBUG ("Adding z velocity solve.");
-				
-				element <datatype>::add_solver (z_velocity, new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, ptr (z_velocity), &element_flags [state], &element_flags [z_velocity]));
-				
-				DEBUG ("Adding velocity plans.");
-				
+								
+				element <datatype>::add_solver (z_velocity, new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, ptr (z_velocity), &element_flags [state], &element_flags [z_velocity]));				
 				
 				solvers [z_velocity]->add_pre_plan (new vertical_diffusion <datatype> (*solvers [z_velocity], i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha")));
 				solvers [z_velocity]->add_mid_plan (new horizontal_diffusion <datatype> (*solvers [z_velocity], i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha")));
@@ -64,8 +57,6 @@ namespace two_d
 				solvers [z_velocity]->add_post_plan (new square_z_derivative_source <datatype> (*pressure_solver, -1.0, ptr (z_vel)));
 				solvers [z_velocity]->add_post_plan (new square_x_derivative_source <datatype> (*pressure_solver, -1.0, ptr (x_vel)));
 				solvers [z_velocity]->add_pre_solve_plan (new z_derivative_source <datatype> (*solvers [z_velocity], -1.0, ptr (pressure)));
-				
-				DEBUG ("Added velocity solve");
 				
 				// Solve temperature
 				element <datatype>::add_solver (temp, new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, ptr (temp), &element_flags [state], &element_flags [temp]));

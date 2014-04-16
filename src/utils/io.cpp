@@ -34,248 +34,299 @@ namespace io
 	
 	namespace one_d
 	{
-		void ascii::to_file (const char *file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
-			int i, j;
-			std::ofstream file_stream; // A file stream object to be used when writing to file 
-		
-			TRACE ("Beginning output...");	
-				
-			INFO ("Outputting to file " << file_name << "...");
-		
-			file_stream.open (file_name);
-		
-			if (! file_stream.is_open ()) {
-				exceptions::file_exception failure;
-				ERROR ("Failed to open file " << file_name);
-				throw failure;
+		void ascii::open_file (std::string file_name, int file_type) {
+			if (file_type == format::read_file) {
+				file_stream.open (file_name, std::ostream::in);
+			} else if (file_type == format::replace_file) {
+				file_stream.open (file_name, std::ostream::out | std::ostream::trunc);
+			} else {
+				throw 0;
 			}
-							
-			for (i = 0; i < n; ++i)
+			
+			double_data.resize (0);
+			int_data.resize (0);
+			float_data.resize (0);
+			types.resize (0);
+			names.resize (0);
+			
+			if (! file_stream.is_open ()) {
+				ERROR ("Failed to open file " << file_name);
+				throw exceptions::file_exception ();
+			}
+		}
+		
+		void ascii::close_file () {
+			TRACE ("Closing file.");
+			file_stream << comment;
+			for (int j = 0; j < (int) names.size (); ++j) {
+				file_stream << ' ' << names [j];
+			}
+			file_stream << '\n';
+			
+			for (int i = 0; i < n; ++i)
 			{
-				for (j = 0; j < n_data_ptrs; ++j)
+				for (int j = 0; j < (int) names.size (); ++j)
 				{
 					if (*types [j] == typeid (int)) {
-						file_stream << ((int *) (data_ptrs [j])) [i];
+						file_stream << int_data [j] [i];
 					} else if (*types [j] == typeid (double)) {
-						file_stream << ((double *) (data_ptrs [j])) [i];
+						file_stream << double_data [j] [i];
 					} else if (*types [j] == typeid (float)) {
-						file_stream << ((float *) (data_ptrs [j])) [i];
+						file_stream << float_data [j] [i];
 					}
 					file_stream << ' ';
 				}
 				file_stream << '\n';
 			}
-				
-			file_stream.close ();
-		
-			TRACE ("Output to file.");
-		}
-		
-		void ascii::from_file (const char *file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
-			// int i, j;
-			std::ofstream file_stream; // A file stream object to be used when writing to file 
-		
-			TRACE ("Beginning input...");	
-				
-			INFO ("Inputting from file " << file_name << "...");
-		
-			file_stream.open (file_name);
-		
-			if (! file_stream.is_open ()) {
-				exceptions::file_exception failure;
-				ERROR ("Failed to open file " << file_name);
-				throw failure;
-			}
-							
-			// for (i = 0; i < n; ++i)
-			// {
-			// 	for (j = 0; j < n_data_ptrs; ++j)
-			// 	{
-			// 		if (*types [j] == typeid (int)) {
-			// 			file_stream << ((int *) (data_ptrs [j])) [i];
-			// 		} else if (*types [j] == typeid (double)) {
-			// 			file_stream << ((double *) (data_ptrs [j])) [i];
-			// 		} else if (*types [j] == typeid (float)) {
-			// 			file_stream << ((float *) (data_ptrs [j])) [i];
-			// 		}
-			// 		file_stream << ' ';
-			// 	}
-			// 	file_stream << '\n';
-			// }
 			
-			/*
-				TODO Implement this
-			*/
-				
 			file_stream.close ();
-		
-			TRACE ("Output to file.");
 		}
 		
-		void netcdf::to_file (const char *file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
-			NcFile datafile (file_name, NcFile::Replace);
-	
-			INFO ("Outputting to file " << file_name << "...");
-	
-			if (!datafile.is_valid ()) {
+		void ascii::write (std::string name, double *data) {
+			TRACE ("Writing...");
+			names.push_back (name);
+			double_data.resize (double_data.size () + 1);
+			float_data.resize (float_data.size () + 1);
+			int_data.resize (int_data.size () + 1);
+			double_data [(int) double_data.size () - 1].resize (n);
+			double_data [(int) double_data.size () - 1].assign (data, data + n);
+			types.push_back (&typeid (double));
+		}
+		void ascii::write (std::string name, float *data) {
+			TRACE ("Writing...");
+			names.push_back (name);
+			double_data.resize (double_data.size () + 1);
+			float_data.resize (float_data.size () + 1);
+			int_data.resize (int_data.size () + 1);
+			float_data [(int) float_data.size () - 1].resize (n);
+			float_data [(int) float_data.size () - 1].assign (data, data + n);
+			types.push_back (&typeid (float));
+		}
+		void ascii::write (std::string name, int *data) {
+			TRACE ("Writing...");
+			names.push_back (name);
+			double_data.resize (double_data.size () + 1);
+			float_data.resize (float_data.size () + 1);
+			int_data.resize (int_data.size () + 1);
+			int_data [(int) int_data.size () - 1].resize (n);
+			int_data [(int) int_data.size () - 1].assign (data, data + n);
+			types.push_back (&typeid (int));
+		}
+		
+		void ascii::write_scalar (std::string name, double *data) {
+		}
+		void ascii::write_scalar (std::string name, float *data) {
+		}
+		void ascii::write_scalar (std::string name, int *data) {
+		}
+		
+		void ascii::read (std::string name, double *data) {
+			throw 0;
+		}
+		void ascii::read (std::string name, float *data) {
+			throw 0;
+		}
+		void ascii::read (std::string name, int *data) {
+			throw 0;
+		}
+		
+		void ascii::read_scalar (std::string name, double *data) {
+			throw 0;
+		}
+		void ascii::read_scalar (std::string name, float *data) {
+			throw 0;
+		}
+		void ascii::read_scalar (std::string name, int *data) {
+			throw 0;
+		}
+		
+		void netcdf::open_file (std::string filename, int file_type) {
+			if (file_type == format::read_file) {
+				datafile = new NcFile (filename.c_str (), NcFile::ReadOnly);
+			} else if (file_type & format::replace_file) {
+				datafile = new NcFile (filename.c_str (), NcFile::Replace);
+			} else {
+				throw 0;
+			}
+						
+			if (!(((NcFile *) datafile)->is_valid ())) {
 				FATAL ("Unable to output.");
 				throw 0;
 			}
-	
-			NcDim* zDim = datafile.add_dim ("z", n);
-		
-			for (int j = 0; j < n_data_ptrs; ++j) {
-				if (*types [j] == typeid (int)) {
-					NcVar *data = datafile.add_var (names [j].c_str (), ncInt, zDim);
-					data->put ((int *) (data_ptrs [j]), n);
-				} else if (*types [j] == typeid (double)) {
-					NcVar *data = datafile.add_var (names [j].c_str (), ncDouble, zDim);
-					data->put ((double *) (data_ptrs [j]), n);
-				} else if (*types [j] == typeid (float)) {
-					NcVar *data = datafile.add_var (names [j].c_str (), ncFloat, zDim);
-					data->put ((float *) (data_ptrs [j]), n);
-				}
-			}
 			
-			for (int j = 0; j < n_scalar_ptrs; ++j) {
-				if (*scalar_types [j] == typeid (int)) {
-					NcVar *data = datafile.add_var (scalar_names [j].c_str (), ncInt);
-					data->put ((int *) (scalar_ptrs [j]));
-				} else if (*scalar_types [j] == typeid (double)) {
-					NcVar *data = datafile.add_var (scalar_names [j].c_str (), ncDouble);
-					data->put ((double *) (scalar_ptrs [j]));
-				} else if (*scalar_types [j] == typeid (float)) {
-					NcVar *data = datafile.add_var (names [j].c_str (), ncFloat);
-					data->put ((float *) (scalar_ptrs [j]));
-				}
-			}
+			zDim = ((NcFile *) datafile)->add_dim ("z", n);
 		}
 		
-		void netcdf::from_file (const char *file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
-			NcFile datafile (file_name, NcFile::ReadOnly);
-	
-			INFO ("Inputting from file " << file_name << "...");
-	
-			if (!datafile.is_valid ()) {
-				FATAL ("Could not open " << file_name);
-				throw 0;
-			}
-	
-			for (int j = 0; j < n_data_ptrs; ++j) {
-				NcVar *data = datafile.get_var (names [j].c_str ());
-				if (*types [j] == typeid (int)) {
-					data->get ((int *) (data_ptrs [j]), n);
-				} else if (*types [j] == typeid (double)) {
-					data->get ((double *) (data_ptrs [j]), n);
-				} else if (*types [j] == typeid (float)) {
-					data->get ((float *) (data_ptrs [j]), n);
-				}
-			}
-			
-			for (int j = 0; j < n_scalar_ptrs; ++j) {
-				NcVar *data = datafile.get_var (scalar_names [j].c_str ());
-				if (*scalar_types [j] == typeid (int)) {
-					data->get ((int *) (scalar_ptrs [j]));
-				} else if (*scalar_types [j] == typeid (double)) {
-					data->get ((double *) (scalar_ptrs [j]));
-				} else if (*scalar_types [j] == typeid (float)) {
-					data->get ((float *) (scalar_ptrs [j]));
-				}
-			}
+		void netcdf::close_file () {
+			delete ((NcFile *) datafile);
+		}
+		
+		void netcdf::write (std::string name, int *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->add_var (name.c_str (), ncInt, (NcDim *) zDim);
+			ncdata->put ((int *) (data), n);
+		}
+		void netcdf::write (std::string name, double *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->add_var (name.c_str (), ncDouble, (NcDim *) zDim);
+			ncdata->put ((double *) (data), n);
+		}
+		void netcdf::write (std::string name, float *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->add_var (name.c_str (), ncFloat, (NcDim *) zDim);
+			ncdata->put ((float *) (data), n);
+		}
+		
+		void netcdf::write_scalar (std::string name, int *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->add_var (name.c_str (), ncInt);
+			ncdata->put ((int *) (data));
+		}
+		void netcdf::write_scalar (std::string name, double *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->add_var (name.c_str (), ncDouble);
+			ncdata->put ((double *) (data));
+		}
+		void netcdf::write_scalar (std::string name, float *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->add_var (name.c_str (), ncFloat);
+			ncdata->put ((float *) (data));
+		}
+		
+		void netcdf::read (std::string name, int *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->get_var (name.c_str ());
+			ncdata->get ((int *) (data), n);
+		}
+		void netcdf::read (std::string name, double *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->get_var (name.c_str ());
+			ncdata->get ((double *) (data), n);
+		}
+		void netcdf::read (std::string name, float *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->get_var (name.c_str ());
+			ncdata->get ((float *) (data), n);
+		}
+		
+		void netcdf::read_scalar (std::string name, int *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->get_var (name.c_str ());
+			ncdata->get ((int *) (data));
+		}
+		void netcdf::read_scalar (std::string name, double *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->get_var (name.c_str ());
+			ncdata->get ((double *) (data));
+		}
+		void netcdf::read_scalar (std::string name, float *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->get_var (name.c_str ());
+			ncdata->get ((float *) (data));
 		}
 	} /* one_d */
 	
 	namespace two_d
 	{
-		void netcdf::to_file (const char *file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
-			NcFile *datafile = new NcFile (file_name, NcFile::Replace);
-				
-			INFO ("Outputting to file " << file_name << "...");
-			
-			if (!datafile->is_valid ()) {
-				FATAL ("Unable to output.");
+		void netcdf::open_file (std::string filename, int file_type) {
+			if (file_type == format::read_file) {
+				datafile = new NcFile (filename.c_str (), NcFile::ReadOnly);
+			} else if (file_type & format::replace_file) {
+				datafile = new NcFile (filename.c_str (), NcFile::Replace);
+			} else {
 				throw 0;
 			}
-				
-			NcDim* xDim = datafile->add_dim ("x", n);
-			NcDim* zDim = datafile->add_dim ("z", m);
-					
-			for (int j = 0; j < n_data_ptrs; ++j) {
-				if (*types [j] == typeid (int)) {
-					NcVar *data = datafile->add_var (names [j].c_str (), ncInt, xDim, zDim);
-					data->put ((int *) (data_ptrs [j]), n, m);
-				} else if (*types [j] == typeid (double)) {
-					NcVar *data = datafile->add_var (names [j].c_str (), ncDouble, xDim, zDim);
-					data->put ((double *) (data_ptrs [j]), n, m);
-				} else if (*types [j] == typeid (float)) {
-					NcVar *data = datafile->add_var (names [j].c_str (), ncFloat, xDim, zDim);
-					data->put ((float *) (data_ptrs [j]), n, m);
-				}
+			
+			if (!(((NcFile *) datafile)->is_valid ())) {
+				FATAL ("Unable to load file.");
+				throw 0;
 			}
 			
-			for (int j = 0; j < n_scalar_ptrs; ++j) {
-				if (*scalar_types [j] == typeid (int)) {
-					NcVar *data = datafile->add_var (scalar_names [j].c_str (), ncInt);
-					data->put ((int *) (scalar_ptrs [j]));
-				} else if (*scalar_types [j] == typeid (double)) {
-					NcVar *data = datafile->add_var (scalar_names [j].c_str (), ncDouble);
-					data->put ((double *) (scalar_ptrs [j]));
-				} else if (*scalar_types [j] == typeid (float)) {
-					NcVar *data = datafile->add_var (names [j].c_str (), ncFloat);
-					data->put ((float *) (scalar_ptrs [j]));
-				}
-			}
+			xDim = ((NcFile *) datafile)->add_dim ("x", n);
+			zDim = ((NcFile *) datafile)->add_dim ("z", m);
 			
-			delete (datafile);
+			failures.resize (0);
 		}
 		
-		void netcdf::from_file (const char *file_name, int n_data_ptrs, std::string *names, const std::type_info **types, void **data_ptrs, int n_scalar_ptrs, std::string *scalar_names, const std::type_info **scalar_types, void **scalar_ptrs) {
-			failures.resize (0);
-			NcFile *datafile = new NcFile (file_name, NcFile::ReadOnly);
-				
-			INFO ("Inputting from file " << file_name << "...");
-
-			if (!datafile->is_valid ()) {
-				FATAL ("Could not open " << file_name);
-				throw 0;
-			}
-				
-			for (int j = 0; j < n_data_ptrs; ++j) {
-				NcVar *data = datafile->get_var (names [j].c_str ());
-				if (data && data->is_valid ()) {
-					if (*types [j] == typeid (int)) {
-						data->get ((int *) (data_ptrs [j]), n, m);
-					} else if (*types [j] == typeid (double)) {
-						data->get ((double *) (data_ptrs [j]), n, m);
-					} else if (*types [j] == typeid (float)) {
-						data->get ((float *) (data_ptrs [j]), n, m);
-					}
-				} else {
-					failures.push_back (names [j]);
-					WARN ("Variable " << names [j] << " not found in file " << file_name);
-				}
-			}
-			
-			for (int j = 0; j < n_scalar_ptrs; ++j) {
-				NcVar *data = datafile->get_var (scalar_names [j].c_str ());
-				if (data->is_valid ()) {
-					if (*scalar_types [j] == typeid (int)) {
-						data->get ((int *) (scalar_ptrs [j]));
-					} else if (*scalar_types [j] == typeid (double)) {
-						data->get ((double *) (scalar_ptrs [j]));
-					} else if (*scalar_types [j] == typeid (float)) {
-						data->get ((float *) (scalar_ptrs [j]));
-					}
-				} else {
-					failures.push_back (names [j]);
-					WARN ("Variable " << names [j] << " not found in file " << file_name);
-				}
-			}
-
-			delete (datafile);
+		void netcdf::close_file () {
+			delete ((NcFile *) datafile);
 			
 			if (failures.size () > 0) {
 				throw exceptions::io::bad_variables ((int) failures.size (), &failures [0]);
+			}
+			
+			/*
+				TODO Move exception to input class
+			*/
+		}
+		
+		void netcdf::write (std::string name, int *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->add_var (name.c_str (), ncInt, (NcDim *) xDim, (NcDim *) zDim);
+			ncdata->put ((int *) (data), n, m);
+		}
+		void netcdf::write (std::string name, double *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->add_var (name.c_str (), ncDouble, (NcDim *) xDim, (NcDim *) zDim);
+			ncdata->put ((double *) (data), n, m);
+		}
+		void netcdf::write (std::string name, float *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->add_var (name.c_str (), ncFloat, (NcDim *) xDim, (NcDim *) zDim);
+			ncdata->put ((float *) (data), n, m);
+		}
+		
+		void netcdf::write_scalar (std::string name, int *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->add_var (name.c_str (), ncInt);
+			ncdata->put ((int *) (data));
+		}
+		void netcdf::write_scalar (std::string name, double *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->add_var (name.c_str (), ncDouble);
+			ncdata->put ((double *) (data));
+		}
+		void netcdf::write_scalar (std::string name, float *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->add_var (name.c_str (), ncFloat);
+			ncdata->put ((float *) (data));
+		}
+		
+		void netcdf::read (std::string name, int *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->get_var (name.c_str ());
+			if (ncdata && ncdata->is_valid ()) {
+				ncdata->get ((int *) (data), n, m);
+			} else {
+				failures.push_back (name);
+				WARN ("Variable " << name << " not found in file");
+			}
+		}
+		void netcdf::read (std::string name, double *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->get_var (name.c_str ());
+			if (ncdata && ncdata->is_valid ()) {
+				ncdata->get ((double *) (data), n, m);
+			} else {
+				failures.push_back (name);
+				WARN ("Variable " << name << " not found in file");
+			}
+		}
+		void netcdf::read (std::string name, float *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->get_var (name.c_str ());
+			if (ncdata && ncdata->is_valid ()) {
+				ncdata->get ((float *) (data), n, m);
+			} else {
+				failures.push_back (name);
+				WARN ("Variable " << name << " not found in file");
+			}
+		}
+		
+		void netcdf::read_scalar (std::string name, int *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->get_var (name.c_str ());
+			if (ncdata && ncdata->is_valid ()) {
+				ncdata->get ((int *) (data));
+			} else {
+				failures.push_back (name);
+				WARN ("Variable " << name << " not found in file");
+			}
+		}
+		void netcdf::read_scalar (std::string name, double *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->get_var (name.c_str ());
+			if (ncdata && ncdata->is_valid ()) {
+				ncdata->get ((double *) (data));
+			} else {
+				failures.push_back (name);
+				WARN ("Variable " << name << " not found in file");
+			}
+		}
+		void netcdf::read_scalar (std::string name, float *data) {
+			NcVar *ncdata = ((NcFile *) datafile)->get_var (name.c_str ());
+			if (ncdata && ncdata->is_valid ()) {
+				ncdata->get ((float *) (data));
+			} else {
+				failures.push_back (name);
+				WARN ("Variable " << name << " not found in file");
 			}
 		}
 	} /* two_d */
