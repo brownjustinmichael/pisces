@@ -31,7 +31,7 @@
 namespace bases
 {
 	template <class datatype>
-	void element <datatype>::run (int &n_steps) {
+	void element <datatype>::run (int &n_steps, int max_steps) {
 		TRACE ("Running...");
 		datatype t_timestep;
 		clock_t cbegin, cend;
@@ -46,17 +46,12 @@ namespace bases
 		omp_set_nested (true);
 		int threads = params.get <int> ("parallel.maxthreads");
 		
-		while (n_steps > 0) {
-			if (n_steps == 5) {
-				--n_steps;
-				throw exceptions::mesh_adapt ();
-			}
+		while (n_steps > 0 && max_steps > 0) {
+			INFO ("Remaining steps: " << n_steps);
 			TIME (
 			read_transform_data ();
 			transform (inverse_vertical);
 			, transform_time, transform_duration);
-
-			INFO ("Remaining steps: " << n_steps);
 
 			TIME (
 			factorize ();
@@ -189,7 +184,9 @@ namespace bases
 			TRACE ("Update complete");
 			
 			--n_steps;
+			--max_steps;
 		}
+		read_transform_data ();
 		
 		INFO ("Profiling Factorize: CPU Time: " << factorize_time << " Wall Time: " << (double) factorize_duration.count () << " Efficiency: " << factorize_time / (double) factorize_duration.count () / omp_get_max_threads () * 100. << "%");
 		INFO ("Profiling Transform: CPU Time: " << transform_time << " Wall Time: " << (double) transform_duration.count () << " Efficiency: " << transform_time / (double) transform_duration.count () / omp_get_max_threads () * 100. << "%");

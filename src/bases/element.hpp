@@ -333,45 +333,36 @@ namespace bases
 		
 		virtual void get_zoning_positions (datatype *positions) = 0;
 		
-/* how many points do we try before stepping */
-#define N_TRIES 200             
+		/*!**********************************************************************
+		 * \param n_tries the number of attempts before stepping
+		 * \param iters_fixed_t the integer number of iterations at each temperature
+		 * \param step_size the real maximum step size
+		 * \param k a real boltzmann constant
+		 * \param t_initial the real initial temperature
+		 * \param mu_t the real damping factor for temperature
+		 * \param t_min the real damping factor parameter for temperature
+		 ************************************************************************/
+		virtual std::shared_ptr <io::virtual_dump> rezone_minimize_ts (datatype * positions, datatype min_size, datatype max_size, int n_tries = 20, int iters_fixed_t = 1000, datatype step_size = 1.0, datatype k = 1.0, datatype t_initial = 0.008, datatype mu_t = 1.003, datatype t_min = 2.0e-6) {
+			TRACE ("Rezoning...");
+			write_transform_data ();
+			transform (inverse_horizontal | inverse_vertical);
+			read_transform_data ();
 
-/* how many iterations for each T? */
-#define ITERS_FIXED_T 1000
-
-/* max step size in random walk */
-#define STEP_SIZE 1.0            
-
-/* Boltzmann constant */
-#define K 1.0                   
-
-/* initial temperature */
-#define T_INITIAL 0.008         
-
-/* damping factor for temperature */
-#define MU_T 1.003              
-#define T_MIN 2.0e-6
-		
-		/*
-			TODO Make these actual variables
-		*/
-		
-		virtual void rezone_minimize_ts () {
-			rezone_dump = make_dump ();
+			rezone_dump = make_dump (profile_only | timestep_only);
 			
-			rezone_union <datatype> rezone_data [(messenger_ptr->get_np () + 3)];
+			rezone_union <datatype> rezone_data [(messenger_ptr->get_np () + 5)];
 			rezone_data [0].element_ptr = this;
 			rezone_data [1].np = messenger_ptr->get_np ();
-			
-			datatype positions [(messenger_ptr->get_np () + 1)];
+			rezone_data [2].position = min_size;
+			rezone_data [3].position = max_size;
 			
 			get_zoning_positions (positions);
 			
 			for (int i = 0; i < messenger_ptr->get_np () + 1; ++i) {
-				rezone_data [i + 2].position = positions [i];
+				rezone_data [i + 4].position = positions [i];
 			}
 			
-			gsl_siman_params_t params = {N_TRIES, ITERS_FIXED_T, STEP_SIZE, K, T_INITIAL, MU_T, T_MIN};
+			gsl_siman_params_t params = {n_tries, iters_fixed_t, step_size, k, t_initial, mu_t, t_min};
 
 		    const gsl_rng_type * T;
 		    gsl_rng * r;
@@ -380,25 +371,39 @@ namespace bases
 
 		    T = gsl_rng_default;
 		    r = gsl_rng_alloc(T);
-
-		    gsl_siman_solve(r, rezone_data, element <datatype>::rezone_calculate_ts, element <datatype>::rezone_generate_step, element <datatype>::rezone_step_size, NULL, NULL, NULL, NULL, sizeof(rezone_union <datatype>) * (messenger_ptr->get_np () + 3), params);
+			
+		    gsl_siman_solve(r, rezone_data, element <datatype>::rezone_calculate_ts, element <datatype>::rezone_generate_step, element <datatype>::rezone_step_size, NULL, NULL, NULL, NULL, sizeof(rezone_union <datatype>) * (messenger_ptr->get_np () + 5), params);
 
 		    gsl_rng_free (r);
 			
+			DEBUG ("Old timestep: " << timestep << " New timestep: " << -rezone_calculate_ts (rezone_data));
+			if (rezone_calculate_ts (rezone_data) < -timestep) {
+				for (int i = 0; i < messenger_ptr->get_np () + 1; ++i) {
+					positions [i] = rezone_data [i + 4].position;
+				}
+			}
+			
 			DEBUG ("New positions: " << positions [messenger_ptr->get_id ()] << " " << positions [messenger_ptr->get_id () + 1]);
 			
-			/*
-				TODO return the final positions list
-			*/
+			return make_rezoned_dump (positions, &*(make_dump ()));
 		}
 		
 		static double rezone_calculate_ts (void *i_rezone_data) {
 			bases::element <datatype> *element_ptr = ((rezone_union <datatype> *) i_rezone_data)->element_ptr;
 			datatype positions [((rezone_union <datatype> *) i_rezone_data) [1].np + 1];
+			bases::messenger *messenger_ptr = element_ptr->messenger_ptr;
 			for (int i = 0; i < ((rezone_union <datatype> *) i_rezone_data) [1].np + 1; ++i) {
-				positions [i] = ((rezone_union <datatype> *) i_rezone_data) [i + 2].position;
+				positions [i] = ((rezone_union <datatype> *) i_rezone_data) [i + 4].position;
 			}
-			return element_ptr->calculate_min_timestep (&*(element_ptr->make_rezoned_dump (positions, &*(element_ptr->rezone_dump))));
+			double timestep = element_ptr->calculate_min_timestep (&*(element_ptr->make_rezoned_dump (positions, &*(element_ptr->rezone_dump), profile_only)));
+			messenger_ptr->min (&timestep);
+			return -timestep;
+		}
+		
+		static void print_rezone (void *i_rezone_data) {
+			for (int i = 0; i < ((rezone_union <datatype> *) i_rezone_data) [1].np + 1; ++i) {
+				printf (" %f ", ((rezone_union <datatype> *) i_rezone_data) [i + 4].position);
+			}
 		}
 		
 		static double rezone_step_size (void *i_new_rezone_data, void *i_old_rezone_data) {
@@ -406,11 +411,11 @@ namespace bases
 			bases::element <datatype> *element_ptr = ((rezone_union <datatype> *) i_new_rezone_data)->element_ptr;
 			datatype new_positions [((rezone_union <datatype> *) i_new_rezone_data) [1].np + 1];
 			for (int i = 0; i < ((rezone_union <datatype> *) i_new_rezone_data) [1].np + 1; ++i) {
-				new_positions [i] = ((rezone_union <datatype> *) i_new_rezone_data) [i + 2].position;
+				new_positions [i] = ((rezone_union <datatype> *) i_new_rezone_data) [i + 4].position;
 			}
 			datatype old_positions [((rezone_union <datatype> *) i_old_rezone_data) [1].np + 1];
 			for (int i = 0; i < ((rezone_union <datatype> *) i_old_rezone_data) [1].np + 1; ++i) {
-				old_positions [i] = ((rezone_union <datatype> *) i_old_rezone_data) [i + 2].position;
+				old_positions [i] = ((rezone_union <datatype> *) i_old_rezone_data) [i + 4].position;
 			}
 			bases::messenger *messenger_ptr = element_ptr->messenger_ptr;
 			for (int i = 1; i < messenger_ptr->get_np (); ++i) {
@@ -420,10 +425,11 @@ namespace bases
 		}
 		
 		static void rezone_generate_step (const gsl_rng *r, void *i_rezone_data, double step_size) {
-			bases::element <datatype> *element_ptr = ((rezone_union <datatype> *) i_rezone_data)->element_ptr;
-			datatype positions [((rezone_union <datatype> *) i_rezone_data) [1].np + 1];
-			for (int i = 0; i < ((rezone_union <datatype> *) i_rezone_data) [1].np + 1; ++i) {
-				positions [i] = ((rezone_union <datatype> *) i_rezone_data) [i + 2].position;
+			rezone_union <datatype> *rezone_data = (rezone_union <datatype> *) i_rezone_data;
+			bases::element <datatype> *element_ptr = rezone_data->element_ptr;
+			datatype positions [rezone_data [1].np + 1];
+			for (int i = 0; i < rezone_data [1].np + 1; ++i) {
+				positions [i] = rezone_data [i + 4].position;
 			}
 			bases::messenger *messenger_ptr = element_ptr->messenger_ptr;
 			if (messenger_ptr->get_id () == 0) {
@@ -444,6 +450,7 @@ namespace bases
 					messenger_ptr->check_all (&flags);
 					return;
 				}
+				total = sqrt (total);
 				total /= radius;
 				for (int i = 1; i < messenger_ptr->get_np (); ++i) {
 					positions [i] = xs [i] / total + positions [i];
@@ -452,7 +459,36 @@ namespace bases
 			} else {
 				messenger_ptr->template bcast <datatype> (messenger_ptr->get_np () + 1, positions);
 			}
+			for (int i = 1; i < rezone_data [1].np; ++i) {
+				if (positions [i] < positions [i - 1] + rezone_data [2].position) {
+					positions [i] = positions [i - 1] + rezone_data [2].position;
+				}
+				if (positions [i] > positions [i - 1] + rezone_data [3].position) {
+					positions [i] = positions [i - 1] + rezone_data [3].position;
+				}
+				rezone_data [i + 4].position = positions [i];
+			}
+			for (int i = rezone_data [1].np - 1; i >= 1; --i) {
+				if (rezone_data [i + 4].position > rezone_data [i + 5].position - rezone_data [2].position) {
+					rezone_data [i + 4].position = rezone_data [i + 5].position - rezone_data [2].position;
+				}
+				if (rezone_data [i + 4].position < rezone_data [i + 5].position - rezone_data [3].position) {
+					rezone_data [i + 4].position = rezone_data [i + 5].position - rezone_data [3].position;
+				}
+			}
+			if (rezone_data [4].position < rezone_data [5].position - rezone_data [3].position) {
+				FATAL ("Unrealistic size constraints in rezone: max_size too small");
+				throw 0;
+			}
+			if (rezone_data [4].position > rezone_data [5].position - rezone_data [2].position) {
+				FATAL ("Unrealistic size constraints in rezone: min_size too large");
+				throw 0;
+			}
 		}
+		
+		/*
+			TODO Allow for upside-down elements
+		*/
 		
 		/*!**********************************************************************
 		 * \brief The main function call of the class
@@ -462,7 +498,7 @@ namespace bases
 		 * updates the values as necessary. Output, if desired, is specified by 
 		 * the output streams.
 		 ************************************************************************/
-		virtual void run (int &n_steps);
+		virtual void run (int &n_steps, int max_steps);
 		
 		/*!*******************************************************************
 		 * \brief Output all information to a dump file in the current directory

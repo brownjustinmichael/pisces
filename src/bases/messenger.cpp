@@ -60,6 +60,7 @@ namespace bases
 	
 	messenger::~messenger () {
 		// printf ("Destroying bases messenger\n");
+		kill_all ();
 #ifdef _MPI
 		MPI::Finalize ();
 #endif // _MPI
@@ -248,7 +249,6 @@ namespace bases
 #endif // _MPI
 	}
 	
-#warning here
 	template <class datatype>
 	void messenger::bcast (int n, datatype* data_in) {
 		int flags = mpi_all_clear;
@@ -274,7 +274,7 @@ namespace bases
 			data_out = data_in;
 		}
 #ifdef _MPI
-		if (id == 0 && data_out == data_in) {
+		if (data_out == data_in) {
 			MPI::COMM_WORLD.Allgather (MPI_IN_PLACE, n, mpi_type <datatype> (), data_in, n, mpi_type <datatype> ());
 		} else {
 			MPI::COMM_WORLD.Allgather (data_in, n, mpi_type <datatype> (), data_out, n, mpi_type <datatype> ());

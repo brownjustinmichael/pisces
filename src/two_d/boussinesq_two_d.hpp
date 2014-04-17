@@ -27,6 +27,43 @@ namespace two_d
 			
 				datatype calculate_timestep (int i, int j, io::virtual_dump *dump = NULL);
 				
+				virtual std::shared_ptr <io::virtual_dump> make_dump (int flags = 0x00) {
+					std::shared_ptr <io::virtual_dump> dump (new io::virtual_dump);
+					std::shared_ptr <io::output> virtual_output;
+					if (flags & profile_only) {
+						virtual_output.reset (new io::output (new io::two_d::virtual_format (&*dump, 1, m)));
+						if (flags & timestep_only) {
+							virtual_output->append_functor <datatype> ("z", new io::average_functor <datatype> (ptr (z_position), n, m));
+							virtual_output->append_functor <datatype> ("w", new io::root_mean_square_functor <datatype> (ptr (z_velocity), n, m));
+						} else {
+							bases::element <datatype>::setup_profile (virtual_output);
+						}
+					} else {
+						virtual_output.reset (new io::output (new io::two_d::virtual_format (&*dump, n, m)));
+						if (flags & timestep_only) {
+							virtual_output->append <datatype> ("z", ptr (z_position));
+							virtual_output->append <datatype> ("x", ptr (x_position));
+							virtual_output->append <datatype> ("w", ptr (z_velocity));
+							virtual_output->append <datatype> ("u", ptr (x_velocity));
+						} else {
+							bases::element <datatype>::setup_output (virtual_output);
+						}
+					}
+					virtual_output->to_file ();
+					return dump;
+				}
+				
+				virtual std::shared_ptr <io::virtual_dump> make_rezoned_dump (datatype *positions, io::virtual_dump *old_dump, int flags = 0x00) {
+					std::shared_ptr <io::virtual_dump> dump (new io::virtual_dump);
+					
+					bases::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
+					std::shared_ptr <bases::grid <datatype>> vertical_grid = element <datatype>::generate_grid (&vertical_axis);
+			
+					utils::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_dump, &*dump);
+					
+					return dump;
+				}
+				
 				using element <datatype>::ptr;
 			private:
 				using element <datatype>::element_flags;

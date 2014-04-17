@@ -31,7 +31,7 @@ namespace utils
 				int nsum = 0;
 				int nhere = 0;
 				for (int i = 0; i < inter_messenger->get_np (); ++i) {
-					nsum += ns [0];
+					nsum += ns [i];
 				}
 				std::vector <datatype> position_buffer (nsum);
 				std::vector <datatype> value_buffer (nsum * input_dump->dims [iter->first] [0]);

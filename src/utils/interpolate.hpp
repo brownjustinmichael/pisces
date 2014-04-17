@@ -9,6 +9,8 @@
 #ifndef INTERPOLATE_HPP_IZNK7T4T
 #define INTERPOLATE_HPP_IZNK7T4T
 
+#define TINY 1.0e-6
+
 #include "../config.hpp"
 
 namespace utils
@@ -42,14 +44,14 @@ namespace utils
 			/*
 				TODO Allow for reverse dx as well
 			*/
-			if (in [k] < x [0] || in [k] > x [l - 1]) {
+			if (in [k] < x [0] || in [k] > x [l - 1] + TINY) {
 				FATAL ("Interpolation out of range: " << in [k] << " not between " << x [0] << " and " << x [l - 1]);
 				throw 0;
 				/*
 					TODO better exception?
 				*/
 			}
-			while (in [k] > x [i]) {
+			while (in [k] > x [i] && i < l) {
 				++i;
 			}
 			if (in [k] == x [i]) {
