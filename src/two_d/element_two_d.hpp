@@ -112,6 +112,7 @@ namespace two_d
 		virtual void setup_profile (std::shared_ptr <io::output> output_stream, int flags = 0x00) {
 			typedef typename std::map <int, std::vector <datatype> >::iterator iterator;
 			for (iterator iter = scalars.begin (); iter != scalars.end (); ++iter) {
+				output_stream->template append <datatype> (scalar_names [iter->first], ptr (iter->first));
 				output_stream->template append_functor <datatype> ("rms_" + scalar_names [iter->first], new io::root_mean_square_functor <datatype> (ptr (iter->first), n, m));
 				output_stream->template append_functor <datatype> ("avg_" + scalar_names [iter->first], new io::average_functor <datatype> (ptr (iter->first), n, m));
 			}
@@ -201,7 +202,7 @@ namespace two_d
 					shared_min = std::min (shared_min, min);
 				}
 			}
-			if (shared_min < timestep || shared_min > 2.0 * timestep) {
+			if ((shared_min < timestep || shared_min > 2.0 * timestep) || dump) {
 				return shared_min * timestep_safety;
 			} else {
 				return timestep;
@@ -221,15 +222,12 @@ namespace two_d
 		virtual std::shared_ptr <bases::grid <datatype>> generate_grid (bases::axis *axis, int index = -1) = 0;
 		
 		virtual std::shared_ptr <io::virtual_dump> make_rezoned_dump (datatype *positions, io::virtual_dump *old_dump, int flags = 0x00) {
-			std::shared_ptr <io::virtual_dump> dump;
+			std::shared_ptr <io::virtual_dump> dump (new io::virtual_dump);
 			
-			bases::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () ? 0 : 1);
+			bases::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
 			std::shared_ptr <bases::grid <datatype>> vertical_grid = generate_grid (&vertical_axis);
 			
 			utils::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_dump, &*dump);
-			
-			DEBUG ("Old Bottom: " << old_dump->index <datatype> ("z", 0, 0) << " Old Top: " << old_dump->index <datatype> ("z", 0, n - 1));
-			DEBUG ("Bottom: " << dump->index <datatype> ("z", 0, 0) << " Top: " << dump->index <datatype> ("z", 0, n - 1));
 			
 			return dump;
 		}
@@ -240,14 +238,14 @@ namespace two_d
 		
 		virtual void get_zoning_positions (datatype *positions) {
 			if (messenger_ptr->get_id () == 0) {
-				datatype temp [messenger_ptr->get_np () * 2 + 2];
+				datatype temp [messenger_ptr->get_np () * 2];
 				temp [0] = axes [1].position_0;
 				temp [1] = axes [1].position_n;
 				messenger_ptr->template gather <datatype> (2, temp);
 				for (int i = 0; i < messenger_ptr->get_np (); ++i) {
 					positions [i] = temp [2 * i];
 				}
-				positions [messenger_ptr->get_np ()] = temp [messenger_ptr->get_np () * 2 + 1];
+				positions [messenger_ptr->get_np ()] = temp [messenger_ptr->get_np () * 2 - 1];
 				messenger_ptr->template bcast <datatype> (messenger_ptr->get_np () + 1, positions);
 			} else {
 				datatype temp [2] = {axes [1].position_0, axes [1].position_n};

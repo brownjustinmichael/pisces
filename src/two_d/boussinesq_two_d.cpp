@@ -43,7 +43,7 @@ namespace two_d
 				// Solve velocity
 				element <datatype>::add_solver (x_velocity, new divergence_solver <datatype> (*grids [0], *grids [1], ptr (x_velocity), ptr (z_velocity), &element_flags [state], &element_flags [x_velocity]));
 								
-				element <datatype>::add_solver (z_velocity, new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, ptr (z_velocity), &element_flags [state], &element_flags [z_velocity]));				
+				element <datatype>::add_solver (z_velocity, new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, ptr (z_velocity), &element_flags [state], &element_flags [z_velocity]));
 				
 				solvers [z_velocity]->add_pre_plan (new vertical_diffusion <datatype> (*solvers [z_velocity], i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha")));
 				solvers [z_velocity]->add_mid_plan (new horizontal_diffusion <datatype> (*solvers [z_velocity], i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha")));
@@ -93,6 +93,8 @@ namespace two_d
 					}
 				}
 			}
+			
+			
 			
 			template class boussinesq_element <double>;
 		} /* cosine */

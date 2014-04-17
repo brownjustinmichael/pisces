@@ -51,7 +51,8 @@ enum plan_flags {
 	changed = 0x10000,
 	transform_output = 0x20000,
 	normal_output = 0x40000,
-	profile_timestep = 0x80000
+	profile_only = 0x80000,
+	timestep_only = 0x100000
 };
 
 namespace bases
