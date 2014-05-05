@@ -1,0 +1,174 @@
+\section{Model} % (fold)
+\label{sec:model}
+
+\subsection{Pseudo-Incompressible Equations} % (fold)
+\label{sub:pseudo}
+
+We start from the fully compressible equations of hydrodynamics in an irrotational system without magnetic fields (e.g. \citet{Braginsky2006}),
+\begin{subequations}
+	\begin{align}
+		\label{eq:velocity}
+		\rho\frac{D}{Dt}\vect{u}&=-\nabla p-\rho\nabla\Phi+\nabla\cdot\vect{\Pi},\\
+		\label{eq:density}
+		\frac{D}{Dt}\rho&=-\rho\nabla\cdot\vect{u},\\
+		\label{eq:entropy}
+		\rho T \frac{D}{Dt}s&=\nabla\vect{u}:\vect{\Pi}+\sum_{i}\mu_{i}\nabla\cdot\vect{C}_{i}-\nabla\cdot{\vect{H}},\\
+		\label{eq:composition}
+		\rho\frac{D}{Dt}\xi_{i}&=-\nabla\cdot\vect{C}_{i},
+	\end{align}
+\end{subequations}
+where $\rho$ is the mass density, $\vect{u}$ is the velocity, $\Phi$ is the gravitational potential energy, $s$ is the entropy, and $\xi_{i}$ is the fractional abundance of the $i$th compositional component of the fluid.
+
+Given an equation of state of the form $e(\rho,s,\xi_{1},\xi_{2},\dots)$, we can formally define 
+\begin{subequations}
+	\begin{align}
+		p\equiv\rho^{2}\frac{\partial e}{\partial \rho},\\
+		T\equiv\frac{\partial e}{\partial s},\\
+		\mu_{i}\equiv\frac{\partial e}{\partial \xi_{i}},
+	\end{align}
+\end{subequations}
+which are the pressure, temperature, and chemical potentials, respectively.
+The remaining quantities, $\vect{Pi}$, $\vect{H}$, and $\vect{C_{i}}$ are the stress tensor, heat flux vector, and compositional flux vectors, respectively.
+
+These equations as they are conserve momentum through Equation \ref{eq:velocity}, mass through Equation \ref{eq:density}, and energy as follows:
+\begin{equation}
+	\rho\frac{D}{Dt}\left(\vect{u}^{2}/2+e+\Phi\right)+\nabla\cdotp\vect{u}=\nabla\cdot\left(\Pi\cdot\vect{u}-\vect{H}\right),
+\end{equation}
+which can be derived trivially using Equations \ref{eq:velocity} through \ref{eq:composition} and the first law of thermodynamics:
+\begin{equation}
+	\label{eq:firstlaw}
+	de=Tds+\frac{p}{\rho^{2}}d\rho+\sum_{i}\mu_{i}d\xi_{i}.
+\end{equation}
+
+\citet{Vasil2013} show that in the absence of any nonconservative effects, such as diffusion, and under the approximation that the fluid is constrained to be in pressure balance, the pseduo-incompressible equations take the following form:
+\begin{subequations}
+	\begin{align}
+		\rho\frac{D}{Dt}\vect{u}&=-\nabla p_{0}-p_{0}^{\frac{c_{p}}{c_{V}}}\nabla\left(\frac{p_{1}}{p_{0}^{\frac{c_{p}}{c_{V}}}}\right)-\rho\nabla\Phi,\\
+		\frac{D}{Dt}\rho&=-\rho\nabla\cdot\vect{u},\\
+		\nabla\cdot p_{0}^{\frac{c_{p}}{c_{V}}}\vect{u}&=0,
+	\end{align}
+\end{subequations}
+where $p_{0}$ is a nonuniform but static reference pressure, $p_{1}$ is a small pressure perturbation, and $c_{V}$ and $c_{p}$ are the specific heat capacities at constant volume and pressure, respectively.
+As an additional assumption to arrive at this expression, it must be assumed that $\frac{c_{p}}{c_{V}}=\frac{\rho}{p}\left.\frac{\partial p}{\partial \rho}\right|_{s}$ is constant, which is the case for an ideal gas.
+It should be noted that these equations do not take the same form as those from the original ones in \citet{Durran1989}, rather they are derived to conserve mass and energy.
+
+Wood (private communication) has used these results to derive a set of equations with varying composition and allowing for diffusion while still conserving energy and mass:
+\begin{subequations}
+	\begin{align}
+		\label{eq:pieos}
+		p_{0}\left(\vect{x}\right)&=p\left(\rho,s,\xi_{1},\xi_{2},\dots\right),\\
+		\label{eq:pivelocity}
+		\rho\frac{D}{Dt}\vect{u}&=-\nabla\left(p_{0}+p_{1}\right)+\frac{p_{1}}{\rho}\left(\frac{\partial p}{\partial \rho}\right)^{-1}\nabla p_{0}-\rho\nabla\Phi+\nabla\cdot\vect{\Pi},\\
+		\label{eq:pidensity}
+		\frac{D}{Dt}\rho&=-\rho\nabla\cdot\vect{u},\\
+		\label{eq:pientropy}
+		\rho T \frac{D}{Dt}s&=\nabla\vect{u}:\vect{\Pi}+\sum_{i}\mu_{i}\nabla\cdot\vect{C}_{i}-\nabla\cdot{\vect{H}},\\
+		\label{eq:picomposition}
+		\rho\frac{D}{Dt}\xi_{i}&=-\nabla\cdot\vect{C}_{i},
+	\end{align}
+\end{subequations}
+where the quantities $T$ and $\mu_{i}$ are still the ``true'' values of temperature and chemical potential, but due to the approximation of the equation of state by fixing the pressure, these may no longer be the derivatives of $e$.
+He has shown that to conserve energy and mass,
+\begin{subequations}
+	\begin{align}
+		T&=\frac{\partial e}{\partial s}+p_{1}\frac{\partial \frac{\partial e}{\partial s}/\partial\rho}{\partial p/\partial\rho},\\
+		\mu_{i}&=\frac{\partial e}{\partial \xi_{i}}+p_{1}\frac{\partial \frac{\partial e}{\partial \xi_{i}}/\partial\rho}{\partial p/\partial\rho}.
+	\end{align}
+\end{subequations}
+This necessitates the use of an equation of state.
+% subsection pseudo (end)
+
+\subsection{Equation of State} % (fold)
+\label{sub:eos}
+
+The nature of the equations derived in \ref{sub:pseudo} requires an equation of state to determine the true temperature, $T$, and chemical potential, $\mu$.
+Unfortunately, unlike in the original \citet{Durran1989} formulation of the pseudo-incompressible equations, we cannot assume an ideal gas as our system has multiple chemical components.
+There does exist a formulation, known as an ideal mixture or solution XX REFERENCE XX, which describes a gas with multiple ideal components.
+In particular, this system has the properties that $n$, the total number density, is related to the component number densities, $n_{i}$, and fractional abundance, $\xi_{i}$ by
+\begin{equation}
+	n_{i}=\xi_{i}n,
+\end{equation}
+where we require the fractional abundances to sum to unity.
+From this, we can derive the relationship between the mass densities:
+\begin{equation}
+	\frac{\rho_{i}}{m_{i}}=\xi_{i}\frac{\rho}{\overline{m}},
+\end{equation}
+where $m_{i}$ is the mass of one particle in the corresponding component, and $\overline{m}$ is the mean particle weight in the system, weighted by the fractional abundances.
+
+Recall that the specific energy of an ideal gas can be expressed as
+\begin{equation}
+	e\left(\rho,s\right)=\frac{c_{V}}{m}\left(\frac{\rho}{m}\phi e^{\frac{ms}{k}}\right)^{\frac{k}{c_{V}}},
+\end{equation}
+where $k$ is the Boltzmann constant, $c_{V}$ is the specific heat capacity at constant volume ($3k/2$ for a perfect monatomic gas), $m$ is the particle mass, $s$ is the specific entropy, $\phi$ is a constant but can vary for different gases.
+In an ideal mixture, we can add the specific energies as follows:
+\begin{align}
+	\overline{m} e\left(\rho,s_{1},s_{2},\dots,\xi_{1},\xi_{2},\dots\right)&=\sum_{i} m_{i} \xi_{i} e_{i}\left(\rho,s_{i},\xi_{i}\right),\\
+	&=\sum_{i}c_{V}\left(\frac{\rho\xi_{i}}{m_{i}}\phi_{i} e^{\frac{m_{i}s_{i}}{k}}\right)^{\frac{k}{c_{V}}},
+\end{align}
+where subscripted quantities are specific to gas components.
+Given that we have evolution equations for the density, fractional abundances, and total entropy, we'd like to have our equation of state as a function of only those quantities.
+For an ideal mixture, we can relate the specific entropies as follows:
+\begin{equation}
+	\label{eq:totalentropy}
+	\overline{m} s=\sum_{i}m_{i}\xi_{i}s_{i}-k\sum_{i}\xi_{i}\ln{\xi_{i}}.
+\end{equation}
+The last summation is known as the entropy of mixing and comes from the increased number of possible states due to the introduction of non-identical particles.
+
+This unfortunately is insufficient to express the internal energy solely in terms of the global entropy; we must make an additional approximation.
+We choose to assume that the temperature of the individual components, $T_{i}\equiv\partial e_{i}/\partial s_{i}$, are the same.
+While this assumption does not usually hold in systems with few collisions (e.g. the interstellar medium), it is typically a good approximation in gases with frequent collisions.
+\begin{align}
+	T_{i}&=\frac{\partial e_{i}}{\partial s_{i}},\\
+	&=\left(\frac{\rho\xi_{i}\phi_{i}}{\overline{m}}e^{\frac{m_{i}s_{i}}{k}}\right)^{\frac{k}{c_{V}}},
+\end{align} 
+so for all the $T_{i}$ to be equal,
+\begin{equation}
+	\left(\xi_{i}\phi_{i}e^{\frac{m_{i}s_{i}}{k}}\right)=\left(\xi_{j}\phi_{j}e^{\frac{m_{j}s_{j}}{k}}\right).
+\end{equation}
+In a two-component gas, we can use this to relate the entropies by using Equation \ref{eq:totalentropy}:
+\begin{align}
+	e^{\frac{m_{1}s_{1}}{k}}&=\left(\frac{\xi_{2}\phi_{2}}{\xi_{1}\phi_{1}}\right)^{\xi_{2}}e^{\frac{\overline{m}s}{k}+\xi_{1}\ln{\xi_{1}}+\xi_{2}\ln{\xi_{2}}},\\
+	e^{\frac{m_{2}s_{2}}{k}}&=\left(\frac{\xi_{1}\phi_{1}}{\xi_{2}\phi_{2}}\right)^{\xi_{1}}e^{\frac{\overline{m}s}{k}+\xi_{1}\ln{\xi_{1}}+\xi_{2}\ln{\xi_{2}}}.
+\end{align}
+We can thus express the specific internal energies as
+\begin{align}
+	e_{1}\left(\rho,s,\xi_{1},\xi_{2}\right)&=c_{V}\left(\frac{\rho\xi_{1}\phi_{1}}{m_{1}}\left[\frac{\xi_{2}\phi_{2}}{\xi_{1}\phi{1}}\right]^{\xi_{2}} e^{\frac{\overline{m}s}{k}+\xi_{1}\ln{\xi_{1}}+\xi_{2}\ln{\xi_{2}}}\right)^{\frac{k}{c_{V}}},\\
+	e_{2}\left(\rho,s,\xi_{1},\xi_{2}\right)&=c_{V}\left(\frac{\rho\xi_{2}\phi_{2}}{m_{2}}\left[\frac{\xi_{1}\phi_{1}}{\xi_{2}\phi{2}}\right]^{\xi_{1}} e^{\frac{\overline{m}s}{k}+\xi_{1}\ln{\xi_{1}}+\xi_{2}\ln{\xi_{2}}}\right)^{\frac{k}{c_{V}}},\\
+	\overline{m} e\left(\rho,s,\xi_{1}\right)&=\sum_{i} m_{i} \xi_{i} e_{i}\left(\rho,s,\xi_{1},1-\xi_{1}\right).
+\end{align}
+It can be shown nontrivially that the derived pressure from this formulation, $p\equiv\rho^{2}\partial e /\partial \rho$, is
+\begin{equation}
+	p=\frac{k\rho T}{\overline{m}},
+\end{equation}
+where $T\equiv\partial e/\partial s$, which is what one would expect na\"ively of an ideal gas with multiple components.
+
+% subsection eos (end)
+
+\subsection{Perfect Gas} % (fold)
+\label{sub:perfect}
+
+Unfortunately, the form of Equation \ref{eq:pientropy} is exceedingly difficult to work with in a spectral sense.
+In the assumption of a perfect gas, i.e. $de=c_{V}dT$, we can produce a more desirable system from Equations \ref{eq:firstlaw}, \ref{eq:pientropy}, and \ref{eq:picomposition}:
+\begin{align}
+	\frac{D}{Dt}e&=\frac{\partial e}{\partial s}\frac{D}{Dt}s+\frac{p}{\rho^{2}}\frac{D}{Dt}\rho+\sum_{i}\frac{\partial e}{\partial \xi_{i}}\frac{D}{Dt}\xi_{i}=c_{V}\frac{D}{Dt}T,\\
+	c_{V}\rho\frac{D}{Dt}T&=\frac{1}{T}\frac{\partial e}{\partial s}\left(\nabla\vect{u}:\vect{\Pi}+\sum_{i}\mu_{i}\nabla\cdot\vect{C}_{i}-\nabla\cdot{\vect{H}}\right)+\nonumber\\
+	&-p\nabla\cdot\vect{u}-\sum_{i}\frac{\partial e}{\partial \xi_{i}}\nabla\cdot\vect{C}_{i}.
+\end{align}
+At first glance, it doesn't appear that we've made much progress; however, we note that we can expand $\frac{1}{T}\frac{\partial e}{\partial s}$ into
+\begin{equation}
+	\frac{1}{T}\frac{\partial e}{\partial s}=\frac{1}{1+\frac{p_{1}}{T}\frac{\partial \frac{\partial e}{\partial s}/\partial\rho}{\partial p/\partial\rho}}=1-\frac{p_{1}}{T}\frac{\partial \frac{\partial e}{\partial s}/\partial\rho}{\partial p/\partial\rho}+O\left(p_{1}^{2}\right),
+\end{equation}
+which is a fine approximation since $p_1$ must be a small quantity for the pseudo-incompressible approximation to work at all.
+A similar relation can be derived for $\mu_{i}$.
+Using this, we can look at the temperature evolution equation up to first order in $p_{1}$:
+\begin{align}
+	c_{V}\rho\frac{D}{Dt}T&=\nabla\vect{u}:\vect{\Pi}-\nabla\cdot{\vect{H}}-p\nabla\cdot\vect{u}\nonumber\\
+	&-\frac{p_{1}}{T}\frac{\partial \frac{\partial e}{\partial s}/\partial\rho}{\partial p/\partial\rho}\left(\nabla\vect{u}:\vect{\Pi}+\sum_{i}\frac{\partial e}{\partial \xi_{i}}\nabla\cdot\vect{C}_{i}-\nabla\cdot{\vect{H}}\right)+\nonumber\\
+	&+\sum_{i}\frac{p_{1}}{\mu_{i}}\frac{\partial \frac{\partial e}{\partial \xi_{i}}/\partial\rho}{\partial p/\partial\rho}\nabla\cdot\vect{C}_{i}+O\left(p_{1}^{2}\right).
+\end{align}
+In this formulation, the strongest diffusive term is now a simple second derivative, which is much more conducive to a spectral solution.
+All terms of order $p_{1}$ must be solved through nonlinear means.
+
+% subsection perfect (end)
+
+% section model (end)

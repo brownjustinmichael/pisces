@@ -1,0 +1,74 @@
+% PACKAGES TO USE
+%\usepackage{psfig}
+\usepackage{epsfig}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{appendix}
+\usepackage{natbib}
+\usepackage{color}
+\usepackage{ulem}
+\usepackage[breaklinks=true]{hyperref}
+
+% NEW COMMANDS
+\newcommand{\lSect}[1]{\label{sec:#1}}
+\newcommand{\lFig}[1]{\label{fig:#1}}
+\newcommand{\lEq}[1]{\label{eq:#1}}
+\newcommand{\lTab}[1]{\label{tab:#1}}
+\newcommand{\Msun}{\mbox{M$_\odot$}}
+\newcommand{\Lsun}{\mbox{L$_\odot$}}
+\newcommand{\vect}[1]{\mathbf{#1}}
+\newcommand{\unit}[1]{\vect{e}_#1}
+\newcommand{\pran}[0]{\textrm{Pr}}
+\newcommand{\abs}[1]{|#1|}
+\newcommand{\nut}{\textrm{Nu}_T}
+\newcommand{\num}{\textrm{Nu}_{\mu}}
+\newcommand{\add}[1]{#1}
+\newcommand{\del}[1]{}
+
+% Dans new commands
+\newcommand{\dmb}{\ensuremath{\Delta M_{15}(B)}}
+\newcommand{\Nifs}{\ensuremath{^{56}{\rm Ni}}}
+\newcommand{\kms}{\ensuremath{(\rm km~s)^{-1}}}
+
+% MACROS
+\def\gtaprx {\lower .1ex\hbox{\rlap{\raise .6ex\hbox{\hskip .3ex
+	{\ifmmode{\scriptscriptstyle >}\else
+		{$\scriptscriptstyle >$}\fi}}}
+	\kern -.4ex{\ifmmode{\scriptscriptstyle \sim}\else
+		{$\scriptscriptstyle\sim$}\fi}}}
+\def\ltaprx {\lower .1ex\hbox{\rlap{\raise .6ex\hbox{\hskip .3ex
+	{\ifmmode{\scriptscriptstyle <}\else
+		{$\scriptscriptstyle <$}\fi}}}
+	\kern -.4ex{\ifmmode{\scriptscriptstyle \sim}\else
+		{$\scriptscriptstyle\sim$}\fi}}}
+%\newcommand{\FIGFF}[2]{\ref{fig:#2}\PAN{#1}}
+\newcommand{\FIGFF}[2]{\ref{fig:#2}{#1}}
+\newcommand{\Figff}[1]{\FIGFF{}{#1}}
+\newcommand{\FIG}[2]{Fig.~\FIGFF{#1}{#2}}
+\newcommand{\Fig}[1]{\FIG{}{#1}}
+\newcommand{\FIGS}[2]{Figs.~\FIGFF{#1}{#2}}
+\newcommand{\Figs}[1]{\FIGS{}{#1}}
+\newcommand{\Figure}[1]{Figure~\FIGFF{}{#1}}
+\newcommand{\Figures}[1]{Figures~\FIGFF{}{#1}}
+\newcommand{\Sectff}[1]{\ref{sec:#1}}
+\newcommand{\Sect}[1]{\S~\Sectff{#1}}
+\newcommand{\Sects}[1]{\S\S~\Sectff{#1}}
+\newcommand{\Section}[1]{Section~\Sectff{#1}}
+\newcommand{\Sections}[1]{Sections~\Sectff{#1}}
+\newcommand{\App}[1]{Appendix~\Sectff{#1}}
+\newcommand{\Eqref}[1]{\ref{eq:#1}}
+\newcommand{\Eqff}[1]{(\Eqref{#1})}
+\newcommand{\eqff}[1]{\Eqref{#1}}
+\newcommand{\EQ}[1]{Equation~\Eqff{#1}}
+\newcommand{\Equation}[1]{Equation~\Eqff{#1}}
+\newcommand{\Equations}[1]{Equations~\Eqff{#1}}
+\newcommand{\Eq}[1]{eq.~\Eqff{#1}}
+\newcommand{\eq}[1]{equation~\eqff{#1}}
+\newcommand{\Eqs}[1]{eqs.~\Eqff{#1}}
+\newcommand{\Leg}[1]{\textit{#1}}
+\newcommand{\Tab}[1]{Table \ref{tab:#1}}
+
+\newcommand{\wid}{\columnwidth}
+\newcommand{\rot}{0}
+
