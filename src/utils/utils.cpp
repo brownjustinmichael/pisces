@@ -187,7 +187,6 @@ namespace utils
 	}
 	
 	void matrix_copy (int n, int m, int *x, int *y, int ldx, int ldy) {
-		int ione = 1;
 		if (ldx == -1) {
 			ldx = n;
 		}

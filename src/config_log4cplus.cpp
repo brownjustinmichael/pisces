@@ -42,7 +42,7 @@ log_config::log_config () {
     logger.setLogLevel (int_to_severity (severity));
 }
 
-void log_config::configure (int* argc, char*** argv, int id) {
+void log_config::configure (int* argc, char*** argv, int id, std::string log_file) {
 	for (int i = 0; i < *argc; ++i) {
 		if (((*argv) [i] [0] == '-') && ((*argv) [i] [1] == 'D')) {
 			severity = atoi (&((*argv) [i] [2]));
@@ -50,14 +50,29 @@ void log_config::configure (int* argc, char*** argv, int id) {
 			for (int j = i; j < *argc; ++j) {
 				(*argv) [j] = (*argv) [j + 1];
 			}
+			--i;
 		}
-	}	
+		if (((*argv) [i] [0] == '-') && ((*argv) [i] [1] == 'L')) {
+			log_file = (*argv) [i + 1];
+			*argc -= 2;
+			for (int j = i; j < *argc; ++j) {
+				(*argv) [j] = (*argv) [j + 2];
+				(*argv) [j + 1] = (*argv) [j + 3];
+			}
+			i -= 2;
+		}
+	}
 
 	std::ostringstream convert;
 	convert << id;
     logger.setLogLevel (int_to_severity (severity));
-
-	append = new log4cplus::FileAppender ("process_" + convert.str () + ".log");
+	if (log_file != "") {
+		char buffer [log_file.size () * 2];
+		snprintf (buffer, log_file.size () * 2, log_file.c_str (), id);
+		append = new log4cplus::FileAppender (buffer);
+		append->setLayout (std::auto_ptr<log4cplus::Layout> (new log4cplus::PatternLayout ("%d %-5p: (%M %L) - %m%n")));
+		logger.addAppender (append);
+	}
 	append->setLayout (std::auto_ptr<log4cplus::Layout> (new log4cplus::PatternLayout ("%d %-5p: (%M %L) - %m%n")));
 	logger.addAppender (append);
 }
