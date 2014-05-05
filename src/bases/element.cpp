@@ -56,10 +56,6 @@ namespace bases
 			factorize ();
 			, factorize_time, factorize_duration);
 			
-			TRACE ("Calculating...");
-	
-			explicit_reset ();
-			
 			TRACE ("Executing plans...");
 
 			TIME (

@@ -29,11 +29,14 @@ namespace bases
 	template <class datatype>
 	class element;
 	
+	/*!**********************************************************************
+	 * \brief This is a simple union for the zoning minimization
+	 ************************************************************************/
 	template <class datatype>
 	union rezone_union {
-		bases::element <datatype> *element_ptr;
-		int np;
-		datatype position;
+		bases::element <datatype> *element_ptr; //! A pointer to an element
+		int np; //! The integer number of elements
+		datatype position; //! A real zoning position
 	};
 	
 	/*!*******************************************************************
@@ -73,8 +76,8 @@ namespace bases
 		* \param i_name The string representation of the element
 		* \param i_dimensions The integer number of dimensions
 		* \param i_params The parameter object that contains the input parameters of the run
-		* \param i_messenger_ptr A pointer to a messenger object
-		* \param i_element_flags An integer set of execution element_flags
+		* \param i_messenger_ptr A pointer to a messenger object for inter-element communication
+		* \param i_element_flags An integer set of global flags for the element
 		*********************************************************************/
 		element (int i_name, int i_dimensions, io::parameters& i_params, messenger* i_messenger_ptr, int i_element_flags) : 
 		dimensions (i_dimensions),
@@ -95,9 +98,6 @@ namespace bases
 		 * 
 		 * \param name The integer name from the index enumeration
 		 * 
-		 * This must be implemented in a subclass and will depend on the 
-		 * storage system.
-		 * 
 		 * \return A datatype reference to the first element of the named scalar
 		 *********************************************************************/
 		inline datatype& operator[] (int name) {
@@ -114,19 +114,12 @@ namespace bases
 		 * \param name The integer name from the index enumeration
 		 * \param index The integer index of interest	
 		 * 
-		 * For simplicity, this could be overloaded in higher dimensions.
+		 * For simplicity, this could be overwritten in higher dimensions.
 		 * 
 		 * \return A datatype reference to the given index of the named scalar
 		 *********************************************************************/
 		virtual datatype& operator() (int name, int index = 0) {
 			return (&((*this) [name])) [index];
-		}
-		
-		/*!*******************************************************************
-		 * \brief Reset all contained solvers
-		 *********************************************************************/
-		virtual void explicit_reset () {
-			TRACE ("Resetting explicits...");
 		}
 		
 		virtual datatype *_initialize (int i_name, datatype *initial_conditions = NULL, int i_flags = 0x00) = 0;

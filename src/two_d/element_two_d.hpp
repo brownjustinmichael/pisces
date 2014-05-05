@@ -161,29 +161,6 @@ namespace two_d
 			return this->ptr (name);
 		}
 		
-		/*!*******************************************************************
-		 * \copydoc bases::element <datatype>::explicit_reset ()
-		 *********************************************************************/
-		inline void explicit_reset () {
-			bases::element <datatype>::explicit_reset ();
-			
-			TRACE ("Explicit reset start...");
-			
-			if (element_flags [state] & z_solve) {
-				element_flags [state] &= ~z_solve;
-				element_flags [state] |= x_solve;
-			} else {
-				element_flags [state] &= ~x_solve;
-				element_flags [state] |= z_solve;
-			}
-			
-			/*
-				TODO It'd be nice if this could be moved to a different method
-			*/
-			
-			TRACE ("Explicit reset end.");
-		}
-		
 		virtual datatype calculate_timestep (int i, int j, io::virtual_dump *dump = NULL) = 0;
 		
 		inline datatype calculate_min_timestep (io::virtual_dump *dump = NULL) {
