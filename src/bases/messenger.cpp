@@ -38,7 +38,7 @@ namespace bases
 	}
 #endif // _MPI
 	
-	messenger::messenger (int* argc, char*** argv, int n_boundaries) {
+	messenger::messenger (int* argc, char*** argv) {
 #ifdef _MPI
 		MPI::Init (*argc, *argv);
 		np = MPI::COMM_WORLD.Get_size ();
@@ -48,13 +48,6 @@ namespace bases
 		np = 1;
 		id = 0;
 #endif // _MPI
-		assert (n_boundaries % 2 == 0);
-		data_iter = 0;
-		int_iter = 0;
-		data_queue.resize (2 * n_boundaries);
-		int_data_queue.resize (2 * n_boundaries);
-		n_queue.resize (2 * n_boundaries);
-		process_queue.resize (2 * n_boundaries, -1);
 		stati.resize (np);
 	}
 	
@@ -64,30 +57,6 @@ namespace bases
 #ifdef _MPI
 		MPI::Finalize ();
 #endif // _MPI
-	}
-	
-	void messenger::add_boundary (int edge, int process) {
-		process_queue [edge_to_index (send_mode, edge)] = process;
-		process_queue [edge_to_index (recv_mode, edge)] = process;
-	}
-	
-	template <class datatype>
-	void messenger::send (int n, datatype* data, int edge) {
-		TRACE ("Adding message to queue.");
-		if (data_queue [edge_to_index (send_mode, edge)]) {
-			FATAL ("Message already in queue at this edge.");
-			throw 0;
-		}
-		if (!data) {
-			if (n == 0) {
-				data = (datatype*) 0x01;
-			} else {
-				WARN ("Nonzero null pointer specified for messenger operation");
-			}
-		}
-		data_queue [edge_to_index (send_mode, edge)] = data;
-		n_queue [edge_to_index (send_mode, edge)] = n;
-		data_check <datatype> ();
 	}
 	
 	template <class datatype>
@@ -101,25 +70,6 @@ namespace bases
 	}
 	
 	template <class datatype>
-	void messenger::recv (int n, datatype* data, int edge) {
-		TRACE ("Adding message to queue.");
-		if (data_queue [edge_to_index (recv_mode, edge)]) {
-			FATAL ("Message already in queue at this edge.");
-			throw 0;
-		}
-		if (!data) {
-			if (n == 0) {
-				data = (datatype*) 0x01;
-			} else {
-				WARN ("Nonzero null pointer specified for messenger operation");
-			}
-		}
-		data_queue [edge_to_index (recv_mode, edge)] = data;
-		n_queue [edge_to_index (recv_mode, edge)] = n;
-		data_check <datatype> ();
-	}
-	
-	template <class datatype>
 	void messenger::recv (int n, datatype *data, int process, int tag) {
 		/*
 			TODO Make check_two
@@ -130,45 +80,6 @@ namespace bases
 		FATAL ("Send used without MPI environment. Exiting.");
 		// throw 0;
 #endif // _MPI
-	}
-
-	template <class datatype>
-	void messenger::data_check () {
-		int flags = mpi_all_clear;
-		check_all (&flags);
-		TRACE ("Running messenger check.");
-		while (data_queue [data_iter]) {
-			if (process_queue [data_iter] == -1 || n_queue [data_iter] == 0) {
-				if (index_to_mode (data_iter) == recv_mode) {
-					utils::scale (n_queue [data_iter], (datatype) 0, (datatype*) data_queue [data_iter]);
-				}
-			} else {
-				if (index_to_mode (data_iter) == send_mode) {
-#ifdef _MPI
-					TRACE ("Performing send.");
-					MPI::COMM_WORLD.Send (data_queue [data_iter], n_queue [data_iter], mpi_type <datatype> (), process_queue [data_iter], data_iter);
-#else // _MPI
-					FATAL ("Send used without MPI environment. Exiting.");
-					// throw 0;
-#endif // _MPI
-				} else {
-#ifdef _MPI
-					TRACE ("Performing recv.");
-					MPI::COMM_WORLD.Recv (data_queue [data_iter], n_queue [data_iter], mpi_type <datatype> (), process_queue [data_iter], data_iter);
-#else // _MPI
-					FATAL ("Send used without MPI environment. Exiting.");
-					// throw 0;
-#endif // _MPI
-				}
-			}
-			data_queue [data_iter] = NULL;
-			if (data_iter + 1 >= (int) data_queue.size ()) {
-				data_iter = 0;
-			} else {
-				++data_iter;
-			}
-		}
-		TRACE ("Check complete.");
 	}
 	
 	template <class datatype>
@@ -422,10 +333,6 @@ namespace bases
 		}
 	}
 	
-	template void messenger::send <double> (int n, double* data, int edge);
-	template void messenger::send <float> (int n, float* data, int edge);
-	template void messenger::send <int> (int n, int* data, int edge);
-	
 	template void messenger::send <double> (int n, double* data, int process, int tag);
 	template void messenger::send <float> (int n, float* data, int process, int tag);
 	template void messenger::send <int> (int n, int* data, int process, int tag);
@@ -433,14 +340,6 @@ namespace bases
 	template void messenger::recv <double> (int n, double* data, int process, int tag);
 	template void messenger::recv <float> (int n, float* data, int process, int tag);
 	template void messenger::recv <int> (int n, int* data, int process, int tag);
-	
-	template void messenger::recv <double> (int n, double* data, int edge);
-	template void messenger::recv <float> (int n, float* data, int edge);
-	template void messenger::recv <int> (int n, int* data, int edge);
-	
-	template void messenger::data_check <double> ();
-	template void messenger::data_check <float> ();
-	template void messenger::data_check <int> ();
 	
 	template void messenger::min <double> (double* data);
 	template void messenger::min <float> (float* data);

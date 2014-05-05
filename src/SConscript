@@ -37,6 +37,7 @@ env.Append (LINKFLAGS = ["-fopenmp"])
 if include_cuda:
     env.Tool ('cuda')
     env.Append (NVCCFLAGS = ["-g", "-arch=sm_20"])
+    env.Append (CPPFLAGS = ["-D_CUDA"])
     
 if include_opencl:
     env.Append (CPPFLAGS = ["-framework", "OpenCL"])
@@ -45,7 +46,6 @@ env.Append (CPPFLAGS = ["-Wall", "-g", "-std=c++0x"])
 env.Append (LINKFLAGS = ["-Wall", "-g", "-std=c++0x"])
 
 objects = []
-cuda_objects = []
 
 if logger.lower () == "log4cxx":
     conf = Configure (env)
@@ -68,14 +68,15 @@ path = os.path.dirname (inspect.getfile (inspect.currentframe ()))
 
 for dirname, dirnames, filenames in os.walk (path):
     for subdirname in dirnames:
-        env.SConscript('%s/SConscript' % os.path.join (dirname, subdirname), variant_dir = os.path.join (".", directory (path, dirname) + subdirname), duplicate = 0, exports = {'env': env, "objects": objects, "cuda_objects" : cuda_objects, "include_cuda" : include_cuda, "include_mp": include_mp})
+        env.SConscript('%s/SConscript' % os.path.join (dirname, subdirname), variant_dir = os.path.join (".", directory (path, dirname) + subdirname), duplicate = 0, exports = {'env': env, "objects": objects, "include_cuda" : include_cuda, "include_mp": include_mp})
 
+none_config_object = env.Object ("config.cpp")
 if logger.lower () == "log4cxx":
-    objects.append (env.Object ("config_log4cxx.cpp"))
+    config_object = env.Object ("config_log4cxx.cpp")
 elif logger.lower () == "log4cplus":
-    objects.append (env.Object ("config_log4cplus.cpp"))
+    config_object = env.Object ("config_log4cplus.cpp")
 else:
-    objects.append (env.Object ("config.cpp"))
+    config_object = env.Object ("config.cpp")
     
 conf = Configure (env)
 conf.CheckLib ("gfortran")
@@ -84,8 +85,10 @@ env = conf.Finish ()
 if include_vt:
     env.Append (CPPFLAGS = env ["VTFLAGS"])
 
-env.Default (env.Program(target = "../run/main", source = (["main.cpp"] + objects)))
+env.Default (env.Program(target = "../run/main", source = (["main.cpp"] + objects + config_object)))
 
-env.Default (env.Program(target = "../run/init", source = (["init.cpp"] + objects)))
+env.Default (env.Program(target = "../run/init", source = (["init.cpp"] + objects + config_object)))
 
-env.Default (env.Program(target = "../run/block_test", source = (["block_test.cpp"] + objects)))
+env.Default (env.Program(target = "../run/block_test", source = (["block_test.cpp"] + objects + config_object)))
+
+env.SConscript('../test/SConscript', variant_dir = "./test", duplicate = 0, exports = {'env': env, "objects": objects, "include_cuda": include_cuda, "include_mp": include_mp, "none_config_object": none_config_object})

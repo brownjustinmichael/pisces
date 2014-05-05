@@ -9,6 +9,9 @@
 #ifndef FFTW_HPP_P3TP70YE
 #define FFTW_HPP_P3TP70YE
 
+#ifdef _CUDA
+#include "cuda/transform_one_d_cuda.hpp"
+#endif /* _CUDA */
 #include <fftw3.h>
 #include <memory>
 #include "../config.hpp"
@@ -73,15 +76,19 @@ namespace one_d
 			}
 		}
 		
-		void transform (int flags) {
+		void _transform (int flags) {
 			if (flags & forward_vertical) {
 				if (!(*component_flags & transformed_vertical) && forward_transform) {
 					forward_transform->execute ();
+				} else if (*component_flags & transformed_vertical) {
+					WARN ("Forward transform attempted on spectral data: ignoring.")
 				}
 			}
 			if (flags & inverse_vertical) {
 				if ((*component_flags & transformed_vertical) && inverse_transform) {
 					inverse_transform->execute ();
+				} else if (!(*component_flags & transformed_vertical)) {
+					WARN ("Inverse transform attempted on spectral data: ignoring.")
 				}
 			}
 		}

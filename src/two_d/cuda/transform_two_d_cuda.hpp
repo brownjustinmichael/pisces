@@ -1,33 +1,22 @@
 /*!**********************************************************************
- * \file transform_two_d.hpp
+ * \file transform_two_d_cuda.hpp
  * /Users/justinbrown/Dropbox/pisces/src
  * 
  * Created by Justin Brown on 2013-08-29.
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#ifndef TRANSFORM_TWO_D_HPP_RAXYBFTC
-#define TRANSFORM_TWO_D_HPP_RAXYBFTC
+#ifndef TRANSFORM_TWO_D_CUDA_HPP_RAXYBFTC
+#define TRANSFORM_TWO_D_CUDA_HPP_RAXYBFTC
 
 #include "../config.hpp"
 #include "plan_two_d.hpp"
 #include "../bases/transform.hpp"
-#include <fftw3.h>
+#include "../../utils/cuda/utils_cuda.hpp"
 #include "../utils/utils.hpp"
 
 namespace two_d
 {
-	// class fftw_configure
-	// {
-	// public:
-	// 	fftw_configure ();
-	// 	
-	// 	virtual ~fftw_configure ();
-	// 	
-	// private:
-	// 	bool threads;
-	// };
-	
 	namespace fourier
 	{
 		template <class datatype>
@@ -37,9 +26,9 @@ namespace two_d
 			/*!**********************************************************************
 			 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
 			 ************************************************************************/
-			horizontal_transform (int n, int m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0);
+			horizontal_transform (int n, int m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags = 0);
 
-			horizontal_transform (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0);
+			horizontal_transform (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags = 0);
 			
 			virtual ~horizontal_transform () {}
 			
@@ -48,16 +37,13 @@ namespace two_d
 		protected:
 			int n;
 			int m;
-			datatype *data_in;
-			datatype *data_out;
+			void *data_in;
+			void *data_out;
 			
 			int flags;
 			int threads;
 			datatype scalar;
-			std::vector <fftw_plan> plans;
-			std::vector <fftwf_plan> plans_float;
-			fftw_iodim major_iodim;
-			fftw_iodim iodim;
+			void *cu_plan;
 		};
 		
 		template <class datatype>
@@ -67,9 +53,9 @@ namespace two_d
 			/*!**********************************************************************
 			 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
 			 ************************************************************************/
-			vertical_transform (int n, int m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0);
+			vertical_transform (int n, int m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags = 0);
 
-			vertical_transform (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0);
+			vertical_transform (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags = 0);
 			
 			virtual ~vertical_transform () {}
 			
@@ -78,21 +64,21 @@ namespace two_d
 		protected:
 			int n;
 			int m;
-			datatype *data_in;
-			datatype *data_out;
+			void *data_in;
+			void *data_complex;
+			void *data_out;
 			
 			int flags;
 			int threads;
 			datatype scalar;
-			std::vector <fftw_plan> plans;
-			std::vector <fftwf_plan> plans_float;
+			void *cu_plan;
 		};
 		
 		template <class datatype>
 		class master_transform : public bases::master_transform <datatype>
 		{
 		public:
-			master_transform (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *element_flags, int *component_flags, int i_threads) : 
+			master_transform (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *element_flags, int *component_flags) : 
 			bases::master_transform <datatype> (element_flags, component_flags),
 			ldn (i_grid_n.ld),
 			ldm (i_grid_m.ld),
@@ -100,21 +86,28 @@ namespace two_d
 			data_out (i_data_out ? i_data_out : i_data_in) {
 				data.resize (ldn * ldm);
 				if (i_flags & forward_vertical) {
-					forward_vertical_transform = std::shared_ptr <bases::plan <datatype>> (new two_d::fourier::vertical_transform <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], 0x00, element_flags, component_flags, i_threads));
+					forward_vertical_transform = new two_d::fourier::vertical_transform <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], 0x00, element_flags, component_flags, i_threads);
 				}
 				if (i_flags & inverse_vertical) {
 					if (forward_vertical_transform) {
 						inverse_vertical_transform = forward_vertical_transform;
 					} else {
-						inverse_vertical_transform = std::shared_ptr <bases::plan <datatype>> (new two_d::fourier::vertical_transform <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], inverse, element_flags, component_flags, i_threads));
+						inverse_vertical_transform = new two_d::fourier::vertical_transform <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], inverse, element_flags, component_flags, i_threads);
 					}
 				}
 				if (i_flags & forward_horizontal) {
-					forward_horizontal_transform = std::shared_ptr <bases::plan <datatype>> (new two_d::fourier::horizontal_transform <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], 0x00, element_flags, component_flags, i_threads));
+					forward_horizontal_transform = new two_d::fourier::horizontal_transform <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], 0x00, element_flags, component_flags, i_threads);
 				}
 				if (i_flags & inverse_horizontal) {
-					inverse_horizontal_transform = std::shared_ptr <bases::plan <datatype>> (new two_d::fourier::horizontal_transform <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], inverse, element_flags, component_flags, i_threads));
+					inverse_horizontal_transform = new two_d::fourier::horizontal_transform <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], inverse, element_flags, component_flags, i_threads);
 				}
+			}
+			
+			virtual ~master_transform () {
+				delete (forward_horizontal_transform);
+				delete (forward_vertical_transform);
+				delete (inverse_horizontal_transform);
+				delete (inverse_vertical_transform);
 			}
 		
 			void _transform (int flags) {
@@ -151,16 +144,16 @@ namespace two_d
 		private:
 			int ldn, ldm;
 			datatype *data_in, *data_out;
-			std::vector <datatype> data;
+			utils::cuda::vector <datatype> data;
 			
-			std::shared_ptr <bases::plan <datatype>> forward_horizontal_transform;
-			std::shared_ptr <bases::plan <datatype>> forward_vertical_transform;
-			std::shared_ptr <bases::plan <datatype>> inverse_horizontal_transform;
-			std::shared_ptr <bases::plan <datatype>> inverse_vertical_transform;
+			bases::plan <datatype> *forward_horizontal_transform;
+			bases::plan <datatype> *forward_vertical_transform;
+			bases::plan <datatype> *inverse_horizontal_transform;
+			bases::plan <datatype> *inverse_vertical_transform;
 			
 			using bases::master_transform <datatype>::component_flags;
 		};
 	} /* fourier */
 } /* two_d */
 
-#endif /* end of include guard: TRANSFORM_TWO_D_HPP_RAXYBFTC */
+#endif /* end of include guard: TRANSFORM_TWO_D_CUDA_HPP_RAXYBFTC */

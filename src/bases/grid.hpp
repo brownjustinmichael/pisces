@@ -142,7 +142,7 @@ namespace bases
 		bool calculate_matrix;
 	
 	private:
-		std::vector<std::vector<datatype>> data; //!< A double vector containing the vectors of collocation data
+		std::vector<std::vector<datatype> > data; //!< A double vector containing the vectors of collocation data
 	};
 	
 	namespace chebyshev

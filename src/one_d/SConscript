@@ -1,6 +1,5 @@
 Import ("env")
 Import ("objects")
-Import ("cuda_objects")
 
 conf = Configure (env)
 for lib in ["fftw3", "fftw3f"]:
