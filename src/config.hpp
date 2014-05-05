@@ -12,6 +12,7 @@
 #include "config_log4cxx.hpp"
 #include "config_log4cplus.hpp"
 #include <iostream>
+#include <string>
 
 extern int severity;
 
@@ -69,7 +70,7 @@ public:
 		// printf ("Destroying log config\n");
 	}
 	
-	static void configure (int *argc, char ***argv, int id = 0);
+	static void configure (int *argc, char ***argv, int id = 0, std::string log_file = "");
 };
 
 #endif /* end of include guard: CONFIG_H_95CWOMPS */
