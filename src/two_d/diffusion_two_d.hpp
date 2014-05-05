@@ -53,7 +53,7 @@ namespace two_d
 				void execute () {	
 					TRACE ("Operating..." << element_flags);
 					std::stringstream debug;
-					if (*element_flags & x_solve) {
+					if (*component_flags & x_solve) {
 						if (1.0 - alpha != 0.0) {
 							#pragma omp parallel for
 							for (int i = 0; i < ldn; ++i) {
@@ -112,7 +112,7 @@ namespace two_d
 				void execute () {	
 					TRACE ("Operating..." << element_flags);
 					
-					if (*element_flags & z_solve) {
+					if (*component_flags & z_solve) {
 						if (1.0 - alpha != 0.0) {
 							utils::matrix_matrix_multiply (m, ldn, m, coeff * (1.0 - alpha), grid_m.get_data (2), data_in, 1.0, data_out, m);
 						}
@@ -159,7 +159,7 @@ namespace two_d
 				void execute () {	
 					TRACE ("Operating...");
 					
-					if (*element_flags & z_solve) {
+					if (*component_flags & z_solve) {
 						if (1.0 - alpha != 0.0) {
 							for (int i = 1; i < m - 1; ++i) {
 								datatype pos_m1 = grid_m [i - 1];

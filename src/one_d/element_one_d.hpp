@@ -109,18 +109,6 @@ namespace one_d
 			return this->ptr (name);
 		}
 		
-		/*!*******************************************************************
-		 * \copydoc bases::element <datatype>::explicit_reset ()
-		 *********************************************************************/
-		inline void explicit_reset () {
-			bases::element <datatype>::explicit_reset (); 
-			for (typename std::map <int, std::vector <datatype> >::iterator iter = scalars.begin (); iter != scalars.end (); ++iter) {
-				if (iter->first < 0) {
-					utils::scale (n, 0.0, &(iter->second [0]));
-				}
-			}
-		}
-		
 		virtual datatype calculate_timestep (int i, io::virtual_dump *dump = NULL) = 0;
 
 		inline datatype calculate_min_timestep (io::virtual_dump *dump = NULL) {

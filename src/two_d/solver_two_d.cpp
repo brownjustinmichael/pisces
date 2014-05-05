@@ -160,7 +160,7 @@ namespace two_d
 			utils::interpolate (ex_excess_0, ldn, m, 1.0, 1.0, positions, data, &positions_0 [0], &data_temp [1], m, lda);
 			utils::interpolate (ex_excess_n, ldn, m, 1.0, 1.0, positions, data, &positions_n [0], &data_temp [lda - 1 - ex_excess_n], m, lda);
 			
-			if (*element_flags & x_solve) {
+			if (*component_flags & x_solve) {
 				TRACE ("Solving in n direction...");
 				
 				std::vector <datatype> buffer_0 ((excess_0 > ex_excess_0 ? excess_0 + ntop : ex_excess_0 + ntop) * ldn);
@@ -208,7 +208,7 @@ namespace two_d
 				}
 				utils::matrix_copy (m, ldn, &data_temp [ntop + ex_excess_0], data, lda);
 
-			} else if (*element_flags & z_solve) {
+			} else if (*component_flags & z_solve) {
 				TRACE ("Solving in m direction...");
 
 				utils::p_block_matrix_solve (messenger_ptr->get_id (), messenger_ptr->get_np (), m - excess_0 - excess_n - ntop - nbot, excess_0 + ex_excess_0 + 2 * ntop, excess_n + ex_excess_n + 2 * nbot, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, ldn, lda, sqrt ((int) boundary_matrix.size ()), lda);
@@ -229,6 +229,13 @@ namespace two_d
 				*component_flags |= transformed_vertical;
 				
 				TRACE ("Solve complete.")
+			}
+			if (*component_flags & z_solve) {
+				*component_flags &= ~z_solve;
+				*component_flags |= x_solve;
+			} else {
+				*component_flags &= ~x_solve;
+				*component_flags |= z_solve;
 			}
 			TRACE ("Execution complete.");
 		}
