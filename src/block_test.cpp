@@ -19,7 +19,7 @@
 
 int main (int argc, char *argv[])
 {
-	bases::messenger mess (&argc, &argv, 2);
+	bases::messenger mess (&argc, &argv);
 	std::string config_filename;
 	
 	if (argc <= 1) {
@@ -28,6 +28,7 @@ int main (int argc, char *argv[])
 		config_filename = argv [1];
 	}
 	io::parameters config (config_filename);
+
 	// io::parameters <double> params ("../input/block_parameters.txt");
 	// omp_set_num_threads(params.nmp);
 

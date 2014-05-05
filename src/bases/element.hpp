@@ -311,9 +311,8 @@ namespace bases
 				solvers [*iter]->execute ();
 			}
 			// Make certain everything is fully transformed
-			write_transform_data ();
 			
-			transform (forward_vertical);
+			transform (forward_vertical | no_read);
 			TRACE ("Solve complete.");
 		}
 		

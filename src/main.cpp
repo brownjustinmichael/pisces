@@ -87,13 +87,13 @@ int main (int argc, char *argv[])
 	int id = 0, n_elements = 1;
 
 	// Initialize messenger
-	bases::messenger process_messenger (&argc, &argv, 2);
+	bases::messenger process_messenger (&argc, &argv);
 
 	try {
 		id = process_messenger.get_id ();
 		n_elements = process_messenger.get_np ();
-		
-		log_config::configure (&argc, &argv, id);
+
+		log_config::configure (&argc, &argv, id, "process_%d.log");
 		std::string config_filename;
 		
 		if (argc <= 1) {
@@ -102,6 +102,7 @@ int main (int argc, char *argv[])
 			config_filename = argv [1];
 		}
 		io::parameters config (config_filename);
+
 		if (!config ["time.steps"].IsDefined ()) config ["time.steps"] = 1;
 		if (!config ["grid.x.points"].IsDefined ()) config ["grid.x.points"] = 64;
 		if (!config ["grid.z.points"].IsDefined ()) config ["grid.z.points"] = 64;
@@ -186,6 +187,13 @@ int main (int argc, char *argv[])
 				element->setup_output (transform_stream, transform_output);
 			}
 			
+			// element.transform (forward_vertical | no_read);
+			// for (int i = 0; i < config.get <int> ("time.steps"); ++i) {
+			// 	element.transform (inverse_vertical | no_read | no_write);
+			// 	element.transform (forward_vertical | no_read | no_write);
+			// }
+			// element.transform (inverse_vertical | no_write);
+
 			element->run (n_steps, config.get <int> ("grid.rezone.check_every"));
 		}
 	

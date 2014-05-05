@@ -8,135 +8,88 @@
 
 #include "../../config.hpp"
 #include "utils_cublas.hpp"
-#include "utils_cuda.cuh"
+#include "utils_cuda.hpp"
 #include <vector>
 #include <cassert>
 #include <cublas.h>
 #include <stdio.h>
 
-namespace cuda
+namespace utils
 {
-	namespace utils
+	namespace cuda
 	{
-		template <class datatype>
-		vector <datatype>::vector (int i_n, datatype *x, int incx) {
-			inc_vect = 1;
-			n = i_n;
-			if (n != 0) {
-				HANDLE_ERROR (cudaMalloc ((void**) &vect, n * sizeof (datatype)));
-				if (x) {
-					copy_to_device (n, x, incx);
-				}
-			}
-		}
-		
-		template <class datatype>
-		vector <datatype>::~vector () {
-			if (n != 0) {
-				HANDLE_ERROR (cudaFree (vect));
-			}
-		}
-		
-		template <class datatype>
-		void vector <datatype>::resize (int i_n) {
-			if (n != 0) {
-				HANDLE_ERROR (cudaFree ((datatype*) vect));
-			}
-			if (i_n != 0) {
-				n = i_n;
-				HANDLE_ERROR (cudaMalloc ((void**) &vect, n * sizeof (datatype)));
-			}
-		}
-		
-		template <class datatype>
-		void vector <datatype>::copy_to_device (int i_n, datatype* x, int incx) {
-			if (i_n != 0 && n != 0) {
-				HANDLE_STATUS (cublasSetVector (i_n, sizeof (datatype), x, incx, vect, inc_vect));
-			} else if (n == 0) {
-				throw 0;
-			}
-		}
-	
-		template <class datatype>
-		void vector <datatype>::copy_to_host (int i_n, datatype* x, int incx) {
-			if (i_n != 0 && n != 0) {
-				HANDLE_STATUS (cublasGetVector (i_n, sizeof (datatype), vect, inc_vect, x, incx));
-			} else if (n == 0) {
-				throw 0;
-			}
-		}
-		
-		struct config
+		namespace cublas
 		{
-		public:
-			config () {
-				HANDLE_STATUS (cublasInit ());
-			}
-		
-			virtual ~config () {
-				HANDLE_STATUS (cublasShutdown ());
-			}
-		};
-		
-		void copy (int n, float* x, float* y, int incx, int incy) {
-			cublasScopy (n, x, incx, y, incy);
-		}
+			struct config
+			{
+			public:
+				config () {
+					CUBLAS_HANDLE_ERROR (cublasInit ());
+				}
 	
-		void copy (int n, double* x, double* y, int incx, int incy) {
-			cublasDcopy (n, x, incx, y, incy);
-		}
+				virtual ~config () {
+					CUBLAS_HANDLE_ERROR (cublasShutdown ());
+				}
+			};
 	
-		void scale (int n, float a, float* x, int incx) {
-			cublasSscal (n, a, x, incx);
-		}
-		
-		void scale (int n, double a, double* x, int incx) {
-			cublasDscal (n, a, x, incx);
-		}
+			void copy (int n, float* x, float* y, int incx, int incy) {
+				cublasScopy (n, x, incx, y, incy);
+			}
 
-		double dot (int n, float* x, float* y, int incx, int incy) {
-			return cublasSdot (n, x, incx, y, incy);
-		}
-	
-		double dot (int n, double* x, double* y, int incx, int incy) {
-			return cublasDdot (n, x, incx, y, incy);
-		}
+			void copy (int n, double* x, double* y, int incx, int incy) {
+				cublasDcopy (n, x, incx, y, incy);
+			}
 
-		void add_scaled (int n, float a, float* x, float* y, int incx, int incy) {
-			cublasSaxpy (n, a, x, incx, y, incy);
-		}
-	
-		void add_scaled (int n, double a, double* x, double* y, int incx, int incy) {
-			cublasDaxpy (n, a, x, incx, y, incy);
-		}
-	
-		void matrix_vector_multiply (int m, int n, float alpha, float* a, float* x, float beta, float* y, int lda, int incx, int incy) {
-			char charN = 'N';
-		
-			assert (x != y);
-		
-			if (lda == -1) {
-				lda = m;
+			void scale (int n, float a, float* x, int incx) {
+				cublasSscal (n, a, x, incx);
 			}
-			
-			cublasSgemv (charN, m, n, alpha, a, lda, x, incx, beta, y, incy);
-		}
-		
-		void matrix_vector_multiply (int m, int n, double alpha, double* a, double* x, double beta, double* y, int lda, int incx, int incy) {
-			char charN = 'N';
-		
-			assert (x != y);
-		
-			if (lda == -1) {
-				lda = m;
+	
+			void scale (int n, double a, double* x, int incx) {
+				cublasDscal (n, a, x, incx);
 			}
-			
-			cublasDgemv (charN, m, n, alpha, a, lda, x, incx, beta, y, incy);
-		}
+
+			double dot (int n, float* x, float* y, int incx, int incy) {
+				return cublasSdot (n, x, incx, y, incy);
+			}
+
+			double dot (int n, double* x, double* y, int incx, int incy) {
+				return cublasDdot (n, x, incx, y, incy);
+			}
+
+			void add_scaled (int n, float a, float* x, float* y, int incx, int incy) {
+				cublasSaxpy (n, a, x, incx, y, incy);
+			}
+
+			void add_scaled (int n, double a, double* x, double* y, int incx, int incy) {
+				cublasDaxpy (n, a, x, incx, y, incy);
+			}
+
+			void matrix_vector_multiply (int m, int n, float alpha, float* a, float* x, float beta, float* y, int lda, int incx, int incy) {
+				char charN = 'N';
+	
+				assert (x != y);
+	
+				if (lda == -1) {
+					lda = m;
+				}
 		
-		config config_instance;
+				cublasSgemv (charN, m, n, alpha, a, lda, x, incx, beta, y, incy);
+			}
+	
+			void matrix_vector_multiply (int m, int n, double alpha, double* a, double* x, double beta, double* y, int lda, int incx, int incy) {
+				char charN = 'N';
+	
+				assert (x != y);
+	
+				if (lda == -1) {
+					lda = m;
+				}
 		
-		template class vector <double>;
-		template class vector <float>;
-	} /* utils */
-} /* cuda */
+				cublasDgemv (charN, m, n, alpha, a, lda, x, incx, beta, y, incy);
+			}
+	
+			config config_instance;
+		} /* cublas */
+	} /* cuda */
+} /* utils */
+

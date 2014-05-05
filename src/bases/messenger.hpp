@@ -49,7 +49,7 @@ namespace bases
 		 * \param argv A pointer to an array of character arrays of command arguments
 		 * \param n_boundaries The integer number of boundaries per element (must be even)
 		 ************************************************************************/
-		messenger (int* argc, char*** argv, int n_boundaries);
+		messenger (int* argc, char*** argv);
 		
 		virtual ~messenger ();
 		
@@ -76,68 +76,6 @@ namespace bases
 		void kill_all ();
 		
 		/*!**********************************************************************
-		 * \brief Return whether the specified edge is linked
-		 * 
-		 * \return A bool of if the edge is linked to another process
-		 ************************************************************************/
-		bool linked (int edge) {
-			return process_queue [edge_to_index (send_mode, edge)] != -1;
-		}
-		
-		/*!**********************************************************************
-		 * \brief Given an edge and action mode, determine the correct index
-		 * 
-		 * Each action on each edge has a queue index, which this function reads
-		 * 
-		 * \param mode The integer representation of the action (0 for send, 1 for recv)
-		 * \param edge The integer representation of the edge
-		 ************************************************************************/
-		virtual inline int edge_to_index (int mode, int edge) {
-			if (id % 2 == 0) {
-				if (edge % 2 == 0) {
-					return 2 * edge + mode;
-				} else {
-					return 2 * edge + 1 - mode;
-				}
-			} else {
-				if (edge % 2 == 0) {
-					return 2 * (1 + edge) + mode;
-				} else {
-					return 2 * (edge - 1) + 1 - mode;
-				}
-			}
-		}
-	
-		/*!**********************************************************************
-		 * \brief Given an index, determine whether to send or recv
-		 * 
-		 * \param index The queue index of the action
-		 ************************************************************************/
-		virtual inline int index_to_mode (int index) {
-			if (id % 2 == 0) {
-				if (index % 4 == 0 || index % 4 == 3) {
-					return send_mode;
-				} else {
-					return recv_mode;
-				}
-			} else {
-				if (index % 4 == 1 || index % 4 == 2) {
-					return send_mode;
-				} else {
-					return recv_mode;
-				}
-			}
-		}
-
-		/*!**********************************************************************
-		 * \brief Link this element with another
-		 * 
-		 * \param edge The integer representation of the edge to link
-		 * \param process The integer id of the process to link to
-		 ************************************************************************/
-		virtual void add_boundary (int edge, int process);
-				
-		/*!**********************************************************************
 		 * \brief Add send action in the datatype queue
 		 * 
 		 * Warning. This does not send the data immediately. This could be 
@@ -149,9 +87,6 @@ namespace bases
 		 * \param data The datatype pointer to the data to send
 		 * \param edge The integer representation of the corresponding edge
 		 ************************************************************************/
-		template <class datatype>
-		void send (int n, datatype* data, int edge);
-		
 		template <class datatype>
 		void send (int n, datatype* data, int process, int tag);
 		
@@ -167,9 +102,6 @@ namespace bases
 		 * \param data The datatype pointer to the data to recv
 		 * \param edge The integer representation of the corresponding edge
 		 ************************************************************************/
-		template <class datatype>
-		void recv (int n, datatype* data, int edge);
-		
 		template <class datatype>
 		void recv (int n, datatype* data, int process, int tag);
 		
@@ -214,24 +146,11 @@ namespace bases
 		virtual bool bool_and (bool boolean);
 		
 	private:
-		/*!**********************************************************************
-		 * \brief Check to see if an action in the datatype queue is ready to be sent
-		 ************************************************************************/
-		template <class datatype>
-		void data_check ();
 		
 		std::vector <int> stati;
 		
 		int id; //!< The integer id of the current process
 		int np; //!< The integer number of total processes
-		int data_iter; //!< The integer current location in the datatype queue
-		int int_iter; //!< The integer current location in the integer queue
-		
-		std::vector <void*> data_queue; //!< A datatype pointer vector containing the elements to send/recv
-		std::vector <int*> int_data_queue; //!< An integer pointer vector containing the elements to send/recv
-		
-		std::vector <int> n_queue; //!< An integer vector containing the number of elements to send/recv
-		std::vector <int> process_queue; //!< An integer vector containing the processes for send/recv
 	};
 } /* bases */
 

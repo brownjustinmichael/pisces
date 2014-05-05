@@ -40,8 +40,7 @@ namespace bases
 		double transform_time = 0.0, execution_time = 0.0, solve_time = 0.0, factorize_time = 0.0, output_time = 0.0, timestep_time = 0.0;
 		std::chrono::duration <double> transform_duration, execution_duration, solve_duration, factorize_duration, output_duration, timestep_duration;
 	
-		write_transform_data ();
-		transform (forward_horizontal | forward_vertical);
+		transform (forward_horizontal | forward_vertical | no_read);
 		
 		omp_set_nested (true);
 		int threads = params.get <int> ("parallel.maxthreads");
@@ -50,7 +49,7 @@ namespace bases
 			INFO ("Remaining steps: " << n_steps);
 			TIME (
 			read_transform_data ();
-			transform (inverse_vertical);
+			transform (inverse_vertical | no_write | no_read);
 			, transform_time, transform_duration);
 
 			TIME (
@@ -71,7 +70,7 @@ namespace bases
 			
 			TIME (
 			read_transform_data ();
-			transform (inverse_horizontal);
+			transform (inverse_horizontal | no_write | no_read);
 			, transform_time, transform_duration);
 
 			TIME (
@@ -82,7 +81,7 @@ namespace bases
 	
 			TIME (
 			read_transform_data ();
-			transform (forward_horizontal);
+			transform (forward_horizontal | no_write | no_read);
 			, transform_time, transform_duration);
 
 			if (normal_stream) {

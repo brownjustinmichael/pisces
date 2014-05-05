@@ -18,6 +18,7 @@ namespace one_d
 	data_in (i_data_in),
 	data_out (i_data_out ? i_data_out : i_data_in) {
 		scalar = 1.0 / std::sqrt (2.0 * (n - 1));
+		DEBUG ("FFTW Pointer: "<< data_in << " " << data_out);
 		fourier_plan = fftw_plan_r2r_1d (n, data_in, data_out, FFTW_REDFT00, FFTW_ESTIMATE);
 	}
 
@@ -40,7 +41,7 @@ namespace one_d
 		for (int i = 0; i < n; ++i) {
 			data_out [i] *= scalar;
 		}
-	
+		
 		if (!(*component_flags & transformed_vertical)) {
 			*component_flags |= transformed_vertical;
 		} else {

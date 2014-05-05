@@ -203,6 +203,7 @@ namespace one_d
 		using bases::element <datatype>::timestep;
 		using bases::element <datatype>::axes;
 		
+		bases::axis *axis_n;
 		datatype alpha_0, alpha_n, max_timestep;
 		int &n;
 		std::vector<int> cell; //!< An integer array for tracking each cell number for output
@@ -237,8 +238,12 @@ namespace one_d
 				TRACE ("Initializing " << name << "...");
 				one_d::element <datatype>::_initialize (name, initial_conditions, flags);
 				if (!(flags & no_transform) && (name != position)) {
-					// element <datatype>::add_transform (name, new transform <datatype> (*grids [0], ptr (name), NULL, 0x00, &element_flags [state], &element_flags [name]), forward_vertical | inverse_vertical);
+#ifdef _CUDA
+					element <datatype>::add_transform (name, new cuda::master_transform <datatype> (*grids [0], ptr (name), NULL, forward_vertical | inverse_vertical, &element_flags [state], &element_flags [name]));
+#else
+					DEBUG("name: " << name << " pointer: " << ptr (name));
 					element <datatype>::add_transform (name, new master_transform <datatype> (*grids [0], ptr (name), NULL, forward_vertical | inverse_vertical, &element_flags [state], &element_flags [name]));
+#endif /* _CUDA */
 				}
 				return this->ptr (name);
 			}
@@ -251,7 +256,6 @@ namespace one_d
 				}
 			}
 			
-		protected:
 			using one_d::element <datatype>::initialize;
 			using one_d::element <datatype>::n;
 			using one_d::element <datatype>::grids;
@@ -286,7 +290,6 @@ namespace one_d
 		
 			virtual datatype calculate_timestep (int i, io::virtual_dump *dump);
 	
-		private:
 			using element <datatype>::initialize;
 			using element <datatype>::n;
 			using element <datatype>::element_flags;
@@ -303,6 +306,7 @@ namespace one_d
 			using element <datatype>::alpha_n;
 			using element <datatype>::solvers;
 			
+		private:
 			datatype advection_coeff, cfl;
 			datatype *position_ptr, *velocity_ptr;
 		};
@@ -329,7 +333,6 @@ namespace one_d
 		
 			virtual datatype calculate_timestep (int i, io::virtual_dump *dump);
 	
-		private:
 			using element <datatype>::initialize;
 			using element <datatype>::n;
 			using element <datatype>::element_flags;
@@ -346,6 +349,7 @@ namespace one_d
 			using element <datatype>::alpha_n;
 			using element <datatype>::solvers;
 		
+		private:
 			datatype advection_coeff, cfl;
 			datatype *position_ptr, *velocity_ptr;
 		};
@@ -379,7 +383,11 @@ namespace one_d
 				TRACE ("Initializing " << name << "...");
 				one_d::element <datatype>::_initialize (name, initial_conditions, flags);
 				if (!(flags & no_transform) && (name != position)) {
+#ifdef _CUDA
+					element <datatype>::add_transform (name, new cuda::master_transform <datatype> (*grids [0], ptr (name), NULL, forward_vertical | inverse_vertical, &element_flags [state], &element_flags [name]));
+#else
 					element <datatype>::add_transform (name, new master_transform <datatype> (*grids [0], ptr (name), NULL, forward_vertical | inverse_vertical, &element_flags [state], &element_flags [name]));
+#endif /* _CUDA */
 					
 				}
 				return this->ptr (name);
@@ -393,7 +401,6 @@ namespace one_d
 				}
 			}
 		
-		protected:
 			using one_d::element <datatype>::initialize;
 			using one_d::element <datatype>::element_flags;
 			using one_d::element <datatype>::n;
@@ -427,26 +434,29 @@ namespace one_d
 	
 			virtual datatype calculate_timestep (int i, io::virtual_dump *dump);
 
-		private:
 			using element <datatype>::initialize;
+			using element <datatype>::normal_stream;
+			using bases::element <datatype>::ptr;
+			using bases::element <datatype>::matrix_ptr;
+			
+		private:
 			using element <datatype>::n;
 			using element <datatype>::element_flags;
 			using element <datatype>::name;
-			using element <datatype>::normal_stream;
 			using element <datatype>::cell;
+			using element <datatype>::grids;
+			using element <datatype>::messenger_ptr;
 			using element <datatype>::timestep;
 			using bases::element <datatype>::params;
-			using element <datatype>::grids;
-			using bases::element <datatype>::ptr;
-			using bases::element <datatype>::matrix_ptr;
-			using element <datatype>::messenger_ptr;
 			using element <datatype>::alpha_0;
 			using element <datatype>::alpha_n;
 			using element <datatype>::solvers;
-			
 			datatype advection_coeff, cfl;
 			datatype *position_ptr, *velocity_ptr;
 		};
+		/*
+			TODO Fix member permissions
+		*/
 	} /* cosine */
 } /* one_d */
 
