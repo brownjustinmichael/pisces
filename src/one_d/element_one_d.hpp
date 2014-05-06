@@ -227,10 +227,10 @@ namespace one_d
 				one_d::element <datatype>::_initialize (name, initial_conditions, flags);
 				if (!(flags & no_transform) && (name != position)) {
 #ifdef _CUDA
-					element <datatype>::add_transform (name, new cuda::master_transform <datatype> (*grids [0], ptr (name), NULL, forward_vertical | inverse_vertical, &element_flags [state], &element_flags [name]));
+					element <datatype>::add_transform (name, std::shared_ptr <cuda::master_transform <datatype> > (new cuda::master_transform <datatype> (*grids [0], ptr (name), NULL, forward_vertical | inverse_vertical, &element_flags [state], &element_flags [name])));
 #else
 					DEBUG("name: " << name << " pointer: " << ptr (name));
-					element <datatype>::add_transform (name, new master_transform <datatype> (*grids [0], ptr (name), NULL, forward_vertical | inverse_vertical, &element_flags [state], &element_flags [name]));
+					element <datatype>::add_transform (name, std::shared_ptr <master_transform <datatype> > (new master_transform <datatype> (*grids [0], ptr (name), NULL, forward_vertical | inverse_vertical, &element_flags [state], &element_flags [name])));
 #endif /* _CUDA */
 				}
 				return this->ptr (name);
@@ -372,9 +372,9 @@ namespace one_d
 				one_d::element <datatype>::_initialize (name, initial_conditions, flags);
 				if (!(flags & no_transform) && (name != position)) {
 #ifdef _CUDA
-					element <datatype>::add_transform (name, new cuda::master_transform <datatype> (*grids [0], ptr (name), NULL, forward_vertical | inverse_vertical, &element_flags [state], &element_flags [name]));
+					element <datatype>::add_transform (name, std::shared_ptr <cuda::master_transform <datatype> > (new cuda::master_transform <datatype> (*grids [0], ptr (name), NULL, forward_vertical | inverse_vertical, &element_flags [state], &element_flags [name])));
 #else
-					element <datatype>::add_transform (name, new master_transform <datatype> (*grids [0], ptr (name), NULL, forward_vertical | inverse_vertical, &element_flags [state], &element_flags [name]));
+					element <datatype>::add_transform (name, std::shared_ptr <master_transform <datatype> > (new master_transform <datatype> (*grids [0], ptr (name), NULL, forward_vertical | inverse_vertical, &element_flags [state], &element_flags [name])));
 #endif /* _CUDA */
 					
 				}

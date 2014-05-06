@@ -48,8 +48,7 @@ namespace bases
 		while (n_steps > 0 && max_steps > 0) {
 			INFO ("Remaining steps: " << n_steps);
 			TIME (
-			read_transform_data ();
-			transform (inverse_vertical | no_write | no_read);
+			transform (inverse_vertical | no_write | no_read | read_before);
 			, transform_time, transform_duration);
 
 			TIME (
@@ -65,8 +64,7 @@ namespace bases
 			, execution_time, execution_duration);
 			
 			TIME (
-			read_transform_data ();
-			transform (inverse_horizontal | no_write | no_read);
+			transform (inverse_horizontal | no_write | no_read | read_before);
 			, transform_time, transform_duration);
 
 			TIME (
@@ -76,8 +74,7 @@ namespace bases
 			, execution_time, execution_duration);
 	
 			TIME (
-			read_transform_data ();
-			transform (forward_horizontal | no_write | no_read);
+			transform (forward_horizontal | no_write | no_read | read_before);
 			, transform_time, transform_duration);
 
 			if (normal_stream) {
@@ -142,7 +139,7 @@ namespace bases
 
 			// Transform forward in the horizontal direction
 			TIME (
-			read_transform_data ();
+			transform (do_not_transform | no_write);
 			, transform_time, transform_duration);
 	
 			// Calculate the pre solver plans
@@ -181,7 +178,7 @@ namespace bases
 			--n_steps;
 			--max_steps;
 		}
-		read_transform_data ();
+		transform (do_not_transform | no_write);
 		
 		INFO ("Profiling Factorize: CPU Time: " << factorize_time << " Wall Time: " << (double) factorize_duration.count () << " Efficiency: " << factorize_time / (double) factorize_duration.count () / omp_get_max_threads () * 100. << "%");
 		INFO ("Profiling Transform: CPU Time: " << transform_time << " Wall Time: " << (double) transform_duration.count () << " Efficiency: " << transform_time / (double) transform_duration.count () / omp_get_max_threads () * 100. << "%");
@@ -204,34 +201,6 @@ namespace bases
 		#pragma omp parallel for num_threads (threads)
 		for (int i = 0; i < (int) transforms.size (); ++i) {
 			master_transforms [transforms [i]]->transform (i_flags);
-		}
-	}
-	
-	template <class datatype>
-	void element <datatype>::write_transform_data () {
-		TRACE ("Writing to GPU...");
-		typedef typename std::vector <int>::iterator iterator;
-		omp_set_nested (true);
-		
-		int threads = params.get <int> ("parallel.transform.threads");
-		
-		#pragma omp parallel for num_threads (threads)
-		for (int i = 0; i < (int) transforms.size (); ++i) {
-			master_transforms [transforms [i]]->write ();
-		}
-	}
-	
-	template <class datatype>
-	void element <datatype>::read_transform_data () {
-		TRACE ("Reading from GPU...");
-		typedef typename std::vector <int>::iterator iterator;
-		omp_set_nested (true);
-		
-		int threads = params.get <int> ("parallel.transform.threads");
-		
-		#pragma omp parallel for num_threads (threads)
-		for (int i = 0; i < (int) transforms.size (); ++i) {
-			master_transforms [transforms [i]]->read ();
 		}
 	}
 	

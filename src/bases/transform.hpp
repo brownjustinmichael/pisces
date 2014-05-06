@@ -15,6 +15,7 @@
  * \brief A set of flags to be used with setting up transforms
  ************************************************************************/
 enum transform_flags {
+	do_not_transform = 0x00,
 	forward_horizontal = 0x01,
 	forward_vertical = 0x02,
 	inverse_horizontal = 0x04,
@@ -22,7 +23,8 @@ enum transform_flags {
 	ignore_m = 0x10,
 	inverse = 0x20,
 	no_write = 0x40,
-	no_read = 0x80
+	no_read = 0x80,
+	read_before = 0x100
 };
 
 namespace bases
@@ -41,7 +43,10 @@ namespace bases
 		/*!*******************************************************************
 		 * \brief Solve the matrix equation
 		 *********************************************************************/
-		virtual void transform (int flags) {
+		virtual void transform (int flags = 0x00) {
+			if (flags & read_before) {
+				read ();
+			}
 			if (!(flags & no_write)) {
 				write ();
 			}

@@ -122,27 +122,12 @@ namespace bases
 			return (&((*this) [name])) [index];
 		}
 		
-		virtual datatype *_initialize (int i_name, datatype *initial_conditions = NULL, int i_flags = 0x00) = 0;
-
-		/*!*******************************************************************
-		 * \brief Initialize the scalar name
+		/*!**********************************************************************
+		 * \brief Get the mode integer for the given element
 		 * 
-		 * \param name The integer name index to be initialized
-		 * \param initial_conditions The datatype array of initial conditions
-		 * \param element_flags A set of binary element_flags
-		 *********************************************************************/
-		virtual datatype *initialize (int i_name, std::string i_str, datatype* initial_conditions = NULL, int i_flags = 0x00) {
-			element_flags [i_name] = 0x00;
-			for (int i = 0; i < dimensions; ++i) {
-				if (!grids [i]) {
-					grids [i] = generate_grid (&axes [i], i);
-				}
-			}
-			scalar_names [i_name] = i_str;
-			return _initialize (i_name, initial_conditions, i_flags);
-		}
-		
-		virtual std::shared_ptr <grid <datatype>> generate_grid (bases::axis *axis, int index = -1) = 0;
+		 * This must be overwritten in elements. It is to make certain that loaded inputs have the same spatial geometry as the element that they are being loaded into.
+		 ************************************************************************/
+		virtual const int &get_mode () = 0;
 		
 		/*!**********************************************************************
 		 * \brief Get the pointer to a given named scalar index
@@ -156,7 +141,7 @@ namespace bases
 		 ************************************************************************/
 		virtual datatype* ptr (int name, int index = 0) {
 			/*
-				TODO It would be nice to check if name exists...
+				TODO It would be nice to check if name exists in debug mode...
 			*/
 			return &((*this) [name]) + index;
 		}
@@ -165,15 +150,15 @@ namespace bases
 		 * \brief Add a matrix solver.
 		 * 
 		 * \param i_name The integer solver name to add
-		 * \param i_solver A pointer to a solver object
+		 * \param i_solver_ptr A pointer to a solver object
 		 *********************************************************************/
-		inline void add_solver (int i_name, solver <datatype>* i_solver) {
+		inline void add_solver (int i_name, solver <datatype>* i_solver_ptr) {
 			TRACE ("Adding solver...");
-			solvers [i_name] = std::shared_ptr <solver <datatype>> (i_solver);
+			solvers [i_name] = std::shared_ptr <solver <datatype>> (i_solver_ptr);
 			solver_keys.push_back (i_name);
 			TRACE ("Solver added.");
 		}
-		
+	
 		/*!**********************************************************************
 		 * \brief Get the pointer to a matrix from a particular solver
 		 * 
@@ -184,21 +169,133 @@ namespace bases
 		 ************************************************************************/
 		inline datatype *matrix_ptr (int i_name, int index = 0) {
 			/*
-				TODO It would be nice to check if name exists...
+				TODO It would be nice to check if name exists in debug mode...
 			*/
 			return solvers [i_name]->matrix_ptr (index);
 		}
 		
 		/*!*******************************************************************
-		 * \brief Add a forward horizontal transform operation
+		 * \brief Initialize the scalar name and generate its transforms
+		 * 
+		 * \param name The integer index to be initialized from the index enumeration
+		 * \param i_str The string representation of the scalar field, for output
+		 * \param initial_conditions The datatype array of initial conditions
+		 * \param element_flags A set of binary element_flags for instantiation
+		 *********************************************************************/
+		virtual datatype *initialize (int i_name, std::string i_str, datatype* initial_conditions = NULL, int i_flags = 0x00) {
+			/*
+				TODO List possible flags in all documentation
+			*/
+			element_flags [i_name] = 0x00;
+			for (int i = 0; i < dimensions; ++i) {
+				if (!grids [i]) {
+					grids [i] = generate_grid (&axes [i], i);
+				}
+			}
+			scalar_names [i_name] = i_str;
+			return _initialize (i_name, initial_conditions, i_flags);
+		}
+		
+		/*!**********************************************************************
+		 * \brief Generate a shared_ptr to a grid for a specified dimension (use last dimension if unspecified)
+		 * 
+		 * \param axis_ptr A pointer to an axis object, which contains the extent of the grid and number of gridpoints
+		 * \param 
+		 ************************************************************************/
+		virtual std::shared_ptr <grid <datatype>> generate_grid (bases::axis *axis_ptr, int index = -1) = 0;
+		
+		/*!**********************************************************************
+		 * \brief Given an input stream, load all the relevant data into the element
+		 * 
+		 * \param input_stream_ptr A pointer to an input object
+		 ************************************************************************/
+		void setup (io::input *input_ptr) {
+			// Iterate through the scalar fields and append them to the variables for which the input will search
+			typedef typename std::map <int, std::vector <datatype> >::iterator iterator;
+			for (iterator iter = scalars.begin (); iter != scalars.end (); ++iter) {
+				input_ptr->template append <datatype> (scalar_names [iter->first], ptr (iter->first));
+			}
+			// Also look for the scalars for total simulated time and geometry mode
+			input_ptr->template append_scalar <datatype> ("t", &duration);
+			int mode;
+			input_ptr->template append_scalar <int> ("mode", &mode);
+
+			try {
+				// Read from the input into the element variables
+				input_ptr->from_file ();
+			} catch (exceptions::io::bad_variables &except) {
+				// Send a warning if there are missing variables in the input
+				WARN (except.what ());
+			}
+			
+			// Make sure that the mode matched the mode of the element
+			if (mode != get_mode ()) {
+				FATAL ("Loading simulation in different mode: " << mode << " instead of " << get_mode ());
+				throw 0;
+			}
+		}
+		
+		/*!**********************************************************************
+		 * \brief Given an output_stream, append all relevant outputs
+		 * 
+		 * \param output_ptr A shared_ptr to the output object
+		 * \param flags The integer flags to specify the type of output (transform stream, normal_stream)
+		 * 
+		 * Given an output object, prepare it to output all the scalar fields tracked directly by the element. Make it one of the output streams called during output. If flags is normal_stream, output the variables when in Cartesian space, else if flags is transform_stream, output with horizontal grid in Fourier space, but vertical grid in Cartesian space.
+		 ************************************************************************/
+		void setup_output (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
+			// Iterate through the scalar fields and append them to the variables which the output will write to file
+			typedef typename std::map <int, std::vector <datatype> >::iterator iterator;
+			for (iterator iter = scalars.begin (); iter != scalars.end (); ++iter) {
+				output_ptr->template append <datatype> (scalar_names [iter->first], ptr (iter->first));
+			}
+			// Also prepare to output the total simulated time and geometry mode
+			output_ptr->template append_scalar <datatype> ("t", &duration);
+			output_ptr->template append_scalar <const int> ("mode", &(get_mode ()));
+
+			// Check the desired output time and save the output object in the appropriate variable
+			if (flags & transform_output) {
+				transform_stream = output_ptr;
+			} else if (flags & normal_output) {
+				normal_stream = output_ptr;
+			}
+		}
+		
+		/*!**********************************************************************
+		 * \brief Given an output stream, append all relevant outputs for profiling
+		 * 
+		 * \param output_ptr A shared_ptr to the output object
+		 * \param flags The integer flags to specify the type of output profile
+		 * 
+		 * Given an output object, prepare it to output all the profiles of the scalar fields tracked directly by the element. Make it one of the output streams called during output. This method must be overwritten in subclasses and should be concluded by calling this method.
+		 ************************************************************************/
+		virtual void setup_profile (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
+			normal_profiles.push_back (output_ptr);
+		}
+		
+		/*
+			TODO These three methods are related in purpose but varied in design; they should be unified
+		*/
+		
+		/*!**********************************************************************
+		 * \brief Output to file
+		 ************************************************************************/
+		virtual void output () {
+			TRACE ("Writing to file...");
+			if (normal_stream) {
+				normal_stream->to_file ();
+			}
+		}
+		
+		/*!*******************************************************************
+		 * \brief Add a transform operation to a specific scalar fields
 		 * 
 		 * \param i_name The integer name of the scalar associated with the transform
-		 * \param i_plan A pointer to the transform plan
-		 * \param i_flags The integer transform flags indicating which transform to associate
+		 * \param i_transform_ptr A shared_ptr to the master_transform plan
 		 * 
-		 * The flags should come from the transform_flags enumeration.
+		 * The master_transform class contains both horizontal and vertical transforms in both directions. It can also send all the transformations to the GPU if desired.
 		 *********************************************************************/
-		inline void add_transform (int i_name, master_transform <datatype>* i_transform) {
+		inline void add_transform (int i_name, std::shared_ptr <master_transform <datatype>> i_transform_ptr) {
 			TRACE ("Adding transform...");
 			bool found = false;
 			for (int i = 0; i < (int) transforms.size (); ++i) {
@@ -210,7 +307,7 @@ namespace bases
 				transforms.push_back (i_name);
 			}
 			
-			master_transforms [i_name] = std::shared_ptr <master_transform <datatype>> (i_transform);
+			master_transforms [i_name] = i_transform_ptr;
 		}
 		
 		/*!**********************************************************************
@@ -222,66 +319,6 @@ namespace bases
 		 ************************************************************************/
 		virtual void transform (int i_flags);
 		
-		void write_transform_data ();
-		void read_transform_data ();
-		
-		virtual const int &get_mode () = 0;
-	
-		void setup (io::input *input_stream) {
-			// Set up input
-			typedef typename std::map <int, std::vector <datatype> >::iterator iterator;
-			for (iterator iter = scalars.begin (); iter != scalars.end (); ++iter) {
-				input_stream->template append <datatype> (scalar_names [iter->first], ptr (iter->first));
-			}
-			input_stream->template append_scalar <datatype> ("t", &duration);
-			int mode;
-			input_stream->template append_scalar <int> ("mode", &mode);
-
-			try {
-				input_stream->from_file ();
-			} catch (exceptions::io::bad_variables &except) {
-				WARN (except.what ());
-			}
-			
-
-			if (mode != get_mode ()) {
-				FATAL ("Loading simulation in different mode: " << mode << " instead of " << get_mode ());
-				throw 0;
-			}
-		}
-		
-		void setup_output (std::shared_ptr <io::output> output_stream, int flags = 0x00) {
-			/*
-				TODO This breaks if a pointer to an existing stream is passed, rather than a new instance
-			*/
-			typedef typename std::map <int, std::vector <datatype> >::iterator iterator;
-			for (iterator iter = scalars.begin (); iter != scalars.end (); ++iter) {
-				output_stream->template append <datatype> (scalar_names [iter->first], ptr (iter->first));
-			}
-			output_stream->template append_scalar <datatype> ("t", &duration);
-			output_stream->template append_scalar <const int> ("mode", &(get_mode ()));
-
-			if (flags & transform_output) {
-				transform_stream = output_stream;
-			} else if (flags & normal_output) {
-				normal_stream = output_stream;
-			}
-		}
-		
-		virtual void setup_profile (std::shared_ptr <io::output> output_stream, int flags = 0x00) {
-			normal_profiles.push_back (output_stream);
-		}
-		
-		/*!**********************************************************************
-		 * \brief Output to file
-		 ************************************************************************/
-		virtual void output () {
-			TRACE ("Writing to file...");
-			if (normal_stream) {
-				normal_stream->to_file ();
-			}
-		}
-
 		/*!**********************************************************************
 		 * \brief Factorize all solvers
 		 ************************************************************************/
@@ -336,9 +373,7 @@ namespace bases
 		 ************************************************************************/
 		virtual std::shared_ptr <io::virtual_dump> rezone_minimize_ts (datatype * positions, datatype min_size, datatype max_size, int n_tries = 20, int iters_fixed_t = 1000, datatype step_size = 1.0, datatype k = 1.0, datatype t_initial = 0.008, datatype mu_t = 1.003, datatype t_min = 2.0e-6) {
 			TRACE ("Rezoning...");
-			write_transform_data ();
 			transform (inverse_horizontal | inverse_vertical);
-			read_transform_data ();
 
 			rezone_dump = make_dump (profile_only | timestep_only);
 			
@@ -485,18 +520,14 @@ namespace bases
 		/*!**********************************************************************
 		 * \brief The main function call of the class
 		 * 
-		 * This method tells the element to begin the main run of the simulation.
-		 * It runs through all the specified plans in the appropriate order, and 
-		 * updates the values as necessary. Output, if desired, is specified by 
-		 * the output streams.
+		 * This method tells the element to begin the main run of the simulation. It runs through all the specified plans in the appropriate order, and updates the values as necessary. Output, if desired, is specified by the output streams.
 		 ************************************************************************/
 		virtual void run (int &n_steps, int max_steps);
 		
 		/*!*******************************************************************
 		 * \brief Output all information to a dump file in the current directory
 		 * 
-		 * This failsafe method is designed to create a snapshot immediately
-		 * before the simulation crashed.
+		 * This failsafe method is designed to create a snapshot immediately before the simulation crashed.
 		 *********************************************************************/
 		inline virtual void failsafe () {
 			failsafe_dump->to_file ();
@@ -507,6 +538,17 @@ namespace bases
 		std::shared_ptr <io::virtual_dump> rezone_dump;
 		messenger* messenger_ptr; //!< A pointer to the messenger object
 	protected:
+		/*!**********************************************************************
+		 * \brief Protected method to initialize a scalar field and generate its transforms
+		 * 
+		 * \param i_name The integer reference to the scalar field
+		 * \param initial_conditions Any initial conditions to instantiate with, NULL to use default
+		 * \param i_flags Integer flags describing the instantiation (e.g. whether the field doesn't require transforms)
+		 * 
+		 * This method is to be overwritten in subclasses to initialize a scalar field in accordance with the geometry of the element.
+		 ************************************************************************/
+		virtual datatype *_initialize (int i_name, datatype *initial_conditions = NULL, int i_flags = 0x00) = 0;
+		
 		int name, dimensions; //!< An integer representation of the element, to be used in file output
 		io::parameters& params; //!< The map that contains the input parameters
 		
