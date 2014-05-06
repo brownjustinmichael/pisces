@@ -306,7 +306,7 @@ namespace two_d
 						TODO Fix flaggin
 					*/
 					if ((name != x_position) && (name != z_position)) {
-						element <datatype>::add_transform (name, new master_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &element_flags [state], &element_flags [name], transform_threads));
+						element <datatype>::add_transform (name, std::shared_ptr <master_transform <datatype> > (new master_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &element_flags [state], &element_flags [name], transform_threads)));
 					}
 					TRACE ("Initialized.");
 					return this->ptr (name);
@@ -374,7 +374,7 @@ namespace two_d
 						TODO Fix flaggin
 					*/
 					if ((name != x_position) && (name != z_position)) {
-						bases::element <datatype>::add_transform (name, new master_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal, &element_flags [state], &element_flags [name], transform_threads));
+						bases::element <datatype>::add_transform (name, std::shared_ptr <master_transform <datatype> > (new master_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal, &element_flags [state], &element_flags [name], transform_threads)));
 					}
 					return this->ptr (name);
 				}
