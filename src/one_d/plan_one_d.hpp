@@ -40,8 +40,8 @@ namespace one_d
 	public:
 		explicit_plan (bases::grid <datatype> &i_grid, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : 
 		bases::plan <datatype> (i_element_flags, i_component_flags),
-		n (i_grid.n),
-		ld (i_grid.ld),
+		n (i_grid.get_n ()),
+		ld (i_grid.get_ld ()),
 		grid (i_grid),
 		data_in (i_data_in),
 		data_out (i_data_out ? i_data_out : i_data_in) {}
@@ -54,8 +54,8 @@ namespace one_d
 		 *********************************************************************/
 		explicit_plan (bases::solver <datatype> &i_solver) : 
 		bases::plan <datatype> (i_solver.element_flags, i_solver.component_flags),
-		n (i_solver.grid_ptr ()->n),
-		ld (i_solver.grid_ptr ()->ld),
+		n (i_solver.grid_ptr ()->get_n ()),
+		ld (i_solver.grid_ptr ()->get_ld ()),
 		grid (*(i_solver.grid_ptr ())),
 		data_in (i_solver.data_ptr ()),
 		data_out (i_solver.rhs_ptr (explicit_rhs)) {}
@@ -71,7 +71,7 @@ namespace one_d
 
 	protected:
 
-		int &n, &ld; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
+		int n, ld; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
 		bases::grid <datatype> &grid;
 		datatype* data_in; //!< A datatype pointer to the input data
 		datatype* data_out; //!< A datatype pointer to the output data

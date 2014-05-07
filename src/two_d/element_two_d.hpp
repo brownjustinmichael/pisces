@@ -43,7 +43,7 @@ namespace two_d
 	public:
 		element (bases::axis i_axis_n, bases::axis i_axis_m, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
 		bases::element <datatype> (i_name, 2, i_params, i_messenger_ptr, i_element_flags),
-		n (i_axis_n.n), m (i_axis_m.n) {
+		n (i_axis_n.get_n ()), m (i_axis_m.get_n ()) {
 			TRACE ("Instantiating...");
 			axes [0] = i_axis_n;
 			axes [1] = i_axis_m;
@@ -58,21 +58,6 @@ namespace two_d
 			} else {
 				alpha_n = 0.5;
 			}
-			
-			cell_n.resize (n * m);
-			cell_m.resize (n * m);
-			for (int i = 0; i < n; ++i) {
-				for (int j = 0; j < m; ++j) {
-					cell_n [i * m + j] = i;
-					cell_m [i * m + j] = j;
-				}
-			}
-			
-			std::ostringstream convert;
-			convert << name;
-			failsafe_dump.reset (new io::output (new io::two_d::netcdf (n, m), "dump.dat"));
-			failsafe_dump->template append <int> ("i", &cell_n [0]);
-			failsafe_dump->template append <int> ("j", &cell_m [0]);
 			
 			max_timestep = i_params.get <datatype> ("time.max");
 			timestep_safety = i_params.get <datatype> ("time.safety");
@@ -136,7 +121,7 @@ namespace two_d
 				i_flags |= uniform_n;
 			}
 			// Size allowing for real FFT buffer
-			scalars [name].resize (grids [0]->ld * m, 0.0);
+			scalars [name].resize (grids [0]->get_ld () * m, 0.0);
 			if (initial_conditions) {
 				if ((i_flags & uniform_m) && (i_flags & uniform_n)) {
 					for (int i = 0; i < n; ++i) {
@@ -216,8 +201,8 @@ namespace two_d
 		virtual void get_zoning_positions (datatype *positions) {
 			if (messenger_ptr->get_id () == 0) {
 				datatype temp [messenger_ptr->get_np () * 2];
-				temp [0] = axes [1].position_0;
-				temp [1] = axes [1].position_n;
+				temp [0] = axes [1].get_position_0 ();
+				temp [1] = axes [1].get_position_n ();
 				messenger_ptr->template gather <datatype> (2, temp);
 				for (int i = 0; i < messenger_ptr->get_np (); ++i) {
 					positions [i] = temp [2 * i];
@@ -225,7 +210,7 @@ namespace two_d
 				positions [messenger_ptr->get_np ()] = temp [messenger_ptr->get_np () * 2 - 1];
 				messenger_ptr->template bcast <datatype> (messenger_ptr->get_np () + 1, positions);
 			} else {
-				datatype temp [2] = {axes [1].position_0, axes [1].position_n};
+				datatype temp [2] = {axes [1].get_position_0 (), axes [1].get_position_n ()};
 				messenger_ptr->template gather <datatype> (2, temp);
 				messenger_ptr->template bcast <datatype> (messenger_ptr->get_np () + 1, positions);
 			}
@@ -235,7 +220,6 @@ namespace two_d
 		using bases::element <datatype>::scalars;
 		using bases::element <datatype>::grids;
 		using bases::element <datatype>::name;
-		using bases::element <datatype>::failsafe_dump;
 		using bases::element <datatype>::messenger_ptr;
 		using bases::element <datatype>::element_flags;
 		using bases::element <datatype>::timestep;

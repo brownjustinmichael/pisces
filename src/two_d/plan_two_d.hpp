@@ -56,9 +56,9 @@ namespace two_d
 	public:
 		explicit_plan (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) :
 		bases::plan <datatype> (i_element_flags, i_component_flags),
-		n (i_grid_n.n),
-		ldn (i_grid_n.ld),
-		m (i_grid_m.n),
+		n (i_grid_n.get_n ()),
+		ldn (i_grid_n.get_ld ()),
+		m (i_grid_m.get_n ()),
 		grid_n (i_grid_n),
 		grid_m (i_grid_m),
 		data_in (i_data_in),
@@ -72,9 +72,9 @@ namespace two_d
 		 *********************************************************************/
 		explicit_plan (bases::solver <datatype> &i_solver) :
 		bases::plan <datatype> (i_solver.element_flags, i_solver.component_flags),
-		n (i_solver.grid_ptr (0)->n),
-		ldn (i_solver.grid_ptr (0)->ld),
-		m (i_solver.grid_ptr (1)->n),
+		n (i_solver.grid_ptr (0)->get_n ()),
+		ldn (i_solver.grid_ptr (0)->get_ld ()),
+		m (i_solver.grid_ptr (1)->get_n ()),
 		grid_n (*(i_solver.grid_ptr (0))),
 		grid_m (*(i_solver.grid_ptr (1))),
 		data_in (i_solver.data_ptr ()),
@@ -106,9 +106,9 @@ namespace two_d
 	public:
 		real_plan (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) :
 		bases::plan <datatype> (i_element_flags, i_component_flags),
-		n (i_grid_n.n),
-		ldn (i_grid_n.ld),
-		m (i_grid_m.n),
+		n (i_grid_n.get_n ()),
+		ldn (i_grid_n.get_ld ()),
+		m (i_grid_m.get_n ()),
 		grid_n (i_grid_n),
 		grid_m (i_grid_m),
 		data_in (i_data_in),
@@ -122,9 +122,9 @@ namespace two_d
 		 *********************************************************************/
 		real_plan (bases::solver <datatype> &i_solver) :
 		bases::plan <datatype> (i_solver.element_flags, i_solver.component_flags),
-		n (i_solver.grid_ptr (0)->n),
-		ldn (i_solver.grid_ptr (0)->ld),
-		m (i_solver.grid_ptr (1)->n),
+		n (i_solver.grid_ptr (0)->get_n ()),
+		ldn (i_solver.grid_ptr (0)->get_ld ()),
+		m (i_solver.grid_ptr (1)->get_n ()),
 		grid_n (*(i_solver.grid_ptr (0))),
 		grid_m (*(i_solver.grid_ptr (1))),
 		data_in (i_solver.data_ptr ()),

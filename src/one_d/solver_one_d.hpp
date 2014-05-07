@@ -83,7 +83,7 @@ namespace one_d
    		void _factorize ();
    		void _solve ();
 	
-   		int &n, &ld;
+   		int n, ld;
    		bases::grid <datatype> &grid;
    		datatype *data;
 
