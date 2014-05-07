@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <memory>
+#include <cmath>
 #include "../config.hpp"
 
 namespace bases
@@ -20,6 +21,13 @@ namespace bases
 	 ************************************************************************/
 	class axis
 	{
+	private:
+		int n; //!< The integer number of meshpoints along the axis
+		int excess_0; //!< The integer number of excess meshpoints around index 0
+		int excess_n; //!< The integer number of excess meshpoints around index n - 1
+		double position_0; //!< The double position value at index excess_0
+		double position_n; //!< The double position value at index n - 1 - excess_n
+		
 	public:
 		/*!**********************************************************************
 		 * \param i_n The integer number of meshpoints along the axis
@@ -31,38 +39,78 @@ namespace bases
 		axis (int i_n = 0, double i_position_0 = 0.0, double i_position_n = 0.0, int i_excess_0 = 0, int i_excess_n = 0) :
 		n (i_n), excess_0 (i_excess_0), excess_n (i_excess_n), position_0 (i_position_0), position_n (i_position_n) {}
 		
-		int n; //!< The integer number of meshpoints along the axis
-		int excess_0; //!< The double position value at index excess_0
-		int excess_n; //!< The double position value at index n - 1 - i_excess_n
-		double position_0; //!< The integer number of excess meshpoints around index 0
-		double position_n; //!< The integer number of excess meshpoints around index n - 1
+		/*!**********************************************************************
+		 * \brief Get the total number of gridpoints along the axis
+		 ************************************************************************/
+		int get_n () {
+			return n;
+		}
+		
+		/*!**********************************************************************
+		 * \brief Get the number of overlapping points near index 0
+		 ************************************************************************/
+		int get_excess_0 () {
+			return excess_0;
+		}
+		
+		/*!**********************************************************************
+		 * \brief Get the number of overlapping points near index n - 1
+		 ************************************************************************/
+		int get_excess_n () {
+			return excess_n;
+		}
+		
+		/*!**********************************************************************
+		 * \brief Get the position at index excess_0
+		 ************************************************************************/
+		double get_position_0 () {
+			return position_0;
+		}
+		
+		/*!**********************************************************************
+		 * \brief Get the position at index n - 1 - excess_n
+		 ************************************************************************/
+		double get_position_n () {
+			return position_n;
+		}
 	};
 	
 	/*!*******************************************************************
 	 * \brief A class containing a collocation grid
 	 * 
-	 * This will need to be instantiated for a collocation method. 
-	 * Ideally, the structure contains a grid of polynomial values at a 
-	 * number of collocation points which can be called for little 
-	 * temporal expense.
+	 * This will need to be instantiated for a collocation method. Ideally, the structure contains a grid of polynomial values at a number of collocation points which can be called for little temporal expense. Unfortunately, creating such a grid is an expensive procedure, so the creation is delayed until the get_data method is called.
 	 *********************************************************************/
 	template <class datatype>
 	class grid
 	{
+	protected:
+		int n; //!< The number of meshpoints along the axis
+		int ld; //!< The number of meshpoints in the data along the axis (accounts for buffer points)
+		int excess_0; //!< The number of excess meshpoints near index 0
+		int excess_n; //!< The number of excess meshpoints near index n - 1
+		datatype position_0; //!< The position at index excess_0
+		datatype position_n; //!< The position at index n - 1 - excess_n
+		std::vector <datatype> positions; //!< A vector containing the positions along the axis
+		int derivs; //!< The integer number of derivatives deep the collocation grid runs
+		bool calculated_matrix; //!< A boolean describing whether the collocation matrix has been calculated
+	
+	private:
+		std::vector<std::vector<datatype> > data; //!< A double vector containing the vectors of collocation data
+
 	public:
 		/*!*******************************************************************
 		 * \param i_axis_ptr A pointer to an axis object
 		 * \param i_derivs The integer number of derivatives in the grid
+		 * \param i_ld
 		 *********************************************************************/
-		grid (axis *i_axis_ptr, int i_derivs, int i_ld = 0, bool i_calculate_matrix = true) :
-		n (i_axis_ptr->n),
+		grid (axis *i_axis_ptr, int i_derivs, int i_ld = 0) :
+		n (i_axis_ptr->get_n ()),
 		ld (i_ld),
-		excess_0 (i_axis_ptr->excess_0),
-		excess_n (i_axis_ptr->excess_n),
-		position_0 (i_axis_ptr->position_0),
-		position_n (i_axis_ptr->position_n),
-		derivs (i_derivs),
-		calculate_matrix (i_calculate_matrix) {
+		excess_0 (i_axis_ptr->get_excess_0 ()),
+		excess_n (i_axis_ptr->get_excess_n ()),
+		position_0 (i_axis_ptr->get_position_0 ()),
+		position_n (i_axis_ptr->get_position_n ()),
+		derivs (i_derivs) {
 			TRACE ("Instantiating...");
 			if (ld == 0) {
 				ld = n;
@@ -74,23 +122,10 @@ namespace bases
 			}
 			positions.resize (n + 1);
 
-			if (calculate_matrix) {
-				data.resize (derivs);
-				for (int i = 0; i < i_derivs; ++i) {
-					data [i].resize (ld * ld);
-				}
-			}
-
 			TRACE ("Instantiated...");
 		}
-		
-		/*
-			TODO If printing grids can be done logically, it would be nice to put cell in here, too.
-		*/
 	
-		virtual ~grid () {
-			// printf ("Destroying base grid\n");
-		}
+		virtual ~grid () {}
 		
 		/*!**********************************************************************
 		 * \brief Return a reference to the position along the grid
@@ -102,7 +137,58 @@ namespace bases
 		datatype& operator[] (int index) {
 			return positions [index];
 		}
+		/*
+			TODO Dangerous. A user could change one of the positions
+		*/
 		
+		/*!**********************************************************************
+		 * \brief Get the number of meshpoints along the axis
+		 ************************************************************************/
+		int get_n () {
+			return n;
+		}
+		
+		/*!**********************************************************************
+		 * \brief Get the total array length along the axis (allowing for buffer points)
+		 ************************************************************************/
+		int get_ld () {
+			return ld;
+		}
+		
+		/*!**********************************************************************
+		 * \brief Get the number of overlapping points by index 0
+		 ************************************************************************/
+		int get_excess_0 () {
+			return excess_0;
+		}
+		
+		/*!**********************************************************************
+		 * \brief Get the number of overlapping points by index n - 1
+		 ************************************************************************/
+		int get_excess_n () {
+			return excess_n;
+		}
+	
+		/*!*******************************************************************
+		 * \brief Get the data array for a given derivative level
+		 * 
+		 * \param deriv An integer derivative level (0 = value, 1 = first derivative, ...)
+		 * 
+		 * 
+		 * This method is intended for use when a subroutine requires the matrix containing the collocation elements. If the matrix has not yet been calculated, this method will do so.
+		 * 
+		 * \return A pointer to the first element of the double data array
+		 *********************************************************************/
+		inline datatype* get_data (int deriv) {
+			if (!calculated_matrix) {
+				DEBUG ("CALCULATING MATRIX...");
+				calculate_matrix ();
+				DEBUG ("MATRIX CALCULATED.");
+			}
+			return &(data [deriv] [0]);
+		}
+		
+	protected:
 		/*!*******************************************************************
 		 * \brief An indexing operation into the grid, for convenience
 		 * 
@@ -116,33 +202,27 @@ namespace bases
 			return data [deriv] [row * ld + col];
 		}
 	
-		/*!*******************************************************************
-		 * \brief Get the data array for a given derivative level
+		/*!**********************************************************************
+		 * \brief Calculate the collocation grid
 		 * 
-		 * This method is intended for use when a subroutine requires the 
-		 * matrix containing the collocation elements.
-		 * 
-		 * \param deriv An integer derivative level (0 = value, 1 = first derivative, ...)
-		 * 
-		 * \return A pointer to the first element of the double data array
-		 *********************************************************************/
-		inline datatype* get_data (int deriv) {
-			return &(data [deriv] [0]);
-		}
-
-		int n, ld; //!< The number of meshpoints along the axis
-		int excess_0; //!< The number of excess meshpoints near index 0
-		int excess_n; //!< The number of excess meshpoints near index n - 1
-		datatype position_0; //!< The position at index excess_0
-		datatype position_n; //!< The position at index n - 1 - excess_n
-	
-	protected:
-		std::vector <datatype> positions; //!< A vector containing the positions along the axis
-		int derivs; //!< The integer number of derivatives deep the collocation grid runs
-		bool calculate_matrix;
-	
+		 * This must be overwritten in subclasses that implement a grid.
+		 ************************************************************************/
+		virtual void _calculate_matrix () = 0;
+		
 	private:
-		std::vector<std::vector<datatype> > data; //!< A double vector containing the vectors of collocation data
+		/*!**********************************************************************
+		 * \brief Instantiate the collocation grid
+		 * 
+		 * Instantiate the collocation grid to be used by a collocation method. This method depends on the _calculate_matrix () operation.
+		 ************************************************************************/
+		virtual void calculate_matrix () {
+			data.resize (derivs);
+			for (int i = 0; i < derivs; ++i) {
+				data [i].resize (ld * ld);
+			}
+			_calculate_matrix ();
+			calculated_matrix = true;
+		}
 	};
 	
 	namespace chebyshev
@@ -150,20 +230,11 @@ namespace bases
 		/*!*******************************************************************
 		 * \brief A collocation grid for Chebyshev polynomials
 		 * 
-		 * This collocation grid stores the N collocation points for up to the
-		 * Mth order Chebyshev polynomial and its first and second derivatives
+		 * This collocation grid stores the N collocation points for up to the Mth order Chebyshev polynomial and its first and second derivatives
 		 *********************************************************************/
 		template <class datatype>
 		class grid : public bases::grid <datatype>
 		{
-		public:
-			/*!*******************************************************************
-			 * \param i_axis_ptr A pointer to an axis object
-			 *********************************************************************/
-			grid (axis *i_axis_ptr);
-	
-			virtual ~grid () {};
-			
 		private:
 			using bases::grid <datatype>::n;
 			using bases::grid <datatype>::ld;
@@ -173,15 +244,29 @@ namespace bases
 			using bases::grid <datatype>::position_n;
 			using bases::grid <datatype>::derivs;
 			using bases::grid <datatype>::positions;
-			using bases::grid <datatype>::calculate_matrix;
 	
 			datatype scale; //!< A datatype by which the collocation grid should be scaled
 			datatype width; //!< The datatype width of the collocation region
 			std::vector<bool> exists_array; //!< A bool vector containing whether the points exist
 			datatype pioN; //!< The datatype 3.14159.../N, for use in calculations
-	
+			
+		public:
 			/*!*******************************************************************
-			* \brief A check to see whether an element exists, for recursion
+			 * \param i_axis_ptr A pointer to an axis object
+			 *********************************************************************/
+			grid (axis *i_axis_ptr);
+	
+			virtual ~grid () {};
+			
+		protected:
+			/*!**********************************************************************
+			 * \copydoc bases::grid <datatype>::_calculate_matrix ()
+			 ************************************************************************/
+			void _calculate_matrix ();
+			
+		private:
+			/*!*******************************************************************
+			* \brief A check to see whether an index exists, for recursion
 			* 
 			* \param d The integer deriv to be indexed
 			* \param m The integer row to be indexed
@@ -196,13 +281,11 @@ namespace bases
 			/*!*******************************************************************
 			 * \brief A recursive method to calculate the full collocation grid
 			 * 
-			 * Uses known relationships of Chebyshev polynomials to calculate the 
-			 * value of the polynomial and its derivatives at an arbitrary 
-			 * collocation grid point.
-			 * 
 			 * \param d The integer deriv to be indexed
 			 * \param m The integer row to be indexed
 			 * \param k The integer column to be indexed
+			 * 
+			 * Uses known relationships of Chebyshev polynomials to calculate the value of the polynomial and its derivatives at an arbitrary collocation grid point.
 			 * 
 			 * \return The datatype value of the index
 			 *********************************************************************/
@@ -226,8 +309,11 @@ namespace bases
 			 * \param i_axis_ptr A pointer to an axis object
 			 *********************************************************************/
 			grid (axis *i_axis_ptr);
-	
+				
 			virtual ~grid () {};
+			
+		protected:
+			void _calculate_matrix ();
 			
 		private:
 			using bases::grid <datatype>::n;
@@ -238,7 +324,6 @@ namespace bases
 			using bases::grid <datatype>::position_n;
 			using bases::grid <datatype>::derivs;
 			using bases::grid <datatype>::positions;
-			using bases::grid <datatype>::calculate_matrix;
 	
 			datatype scale; //!< A datatype by which the collocation grid should be scaled
 			datatype width; //!< The datatype width of the collocation region
@@ -263,8 +348,11 @@ namespace bases
 			 * \param i_axis_ptr A pointer to an axis object
 			 *********************************************************************/
 			grid (axis *i_axis_ptr);
-	
+				
 			virtual ~grid () {};
+			
+		protected:
+			void _calculate_matrix ();
 			
 		private:
 			using bases::grid <datatype>::n;
@@ -275,7 +363,6 @@ namespace bases
 			using bases::grid <datatype>::position_n;
 			using bases::grid <datatype>::derivs;
 			using bases::grid <datatype>::positions;
-			using bases::grid <datatype>::calculate_matrix;
 	
 			datatype scale; //!< A datatype by which the collocation grid should be scaled
 			datatype width; //!< The datatype width of the collocation region

@@ -94,8 +94,8 @@ namespace two_d
 		public:
 			master_transform (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *element_flags, int *component_flags, int i_threads) : 
 			bases::master_transform <datatype> (element_flags, component_flags),
-			ldn (i_grid_n.ld),
-			ldm (i_grid_m.ld),
+			ldn (i_grid_n.get_ld ()),
+			ldm (i_grid_m.get_ld ()),
 			data_in (i_data_in),
 			data_out (i_data_out ? i_data_out : i_data_in) {
 				data.resize (ldn * ldm);

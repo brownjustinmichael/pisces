@@ -25,7 +25,7 @@ namespace utils
 		for (typename std::map <std::string, void *>::iterator iter = input_dump->begin (); iter != input_dump->end (); iter++) {
 			if (input_dump->dims [iter->first] [1] != 1 && input_dump->check_type <datatype> (iter->first)) {
 				TRACE ("Rezoning " << iter->first << "...");
-				int nn = input_grid->n;
+				int nn = input_grid->get_n ();
 				std::vector <int> ns (inter_messenger->get_np (), nn);
 				inter_messenger->allgather <int> (1, &ns [0]);
 				int nsum = 0;
@@ -48,8 +48,8 @@ namespace utils
 				utils::matrix_switch (nn, input_dump->dims [iter->first] [0], &(input_dump->index <datatype> (iter->first)), &inter_buffer [nhere]);
 				inter_messenger->allgatherv <datatype> (nn * input_dump->dims [iter->first] [0], &inter_buffer [0], &ns [0]);
 				utils::matrix_switch (input_dump->dims [iter->first] [0], nsum, &inter_buffer [0], &value_buffer [0]);
-				output_dump->add_var <datatype> (iter->first, input_dump->dims [iter->first] [0], input_grid->n);
-				utils::interpolate (output_grid->n, output_dump->dims [iter->first] [0], nsum, 1.0, 0.0, &position_buffer [0], &value_buffer [0], &((*output_grid) [0]), &(output_dump->index <datatype> (iter->first)));
+				output_dump->add_var <datatype> (iter->first, input_dump->dims [iter->first] [0], input_grid->get_n ());
+				utils::interpolate (output_grid->get_n (), output_dump->dims [iter->first] [0], nsum, 1.0, 0.0, &position_buffer [0], &value_buffer [0], &((*output_grid) [0]), &(output_dump->index <datatype> (iter->first)));
 			}
 		}
 	}

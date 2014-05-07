@@ -43,7 +43,7 @@ namespace one_d
 	 * \brief The 1D base element class
 	 * 
 	 * A 1D implementation of the element base class. This provides the
-	 * storage, indexing facilities, and failsafe_dump output. The plans should be added in a 
+	 * storage and indexing facilities. The plans should be added in a 
 	 * further subclass.
 	 *********************************************************************/
 	template <class datatype>
@@ -58,12 +58,8 @@ namespace one_d
 		 *********************************************************************/
 		element (bases::axis i_axis_n, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_flags) : 
 		bases::element <datatype> (i_name, 1, i_params, i_messenger_ptr, i_flags),
-		n (i_axis_n.n) {
+		n (i_axis_n.get_n ()) {
 			axes [0] = i_axis_n;
-			cell.resize (n);
-			for (int i = 0; i < n; ++i) {
-				cell [i] = i;
-			}
 			
 			if (i_messenger_ptr->get_id () == 0) {
 				alpha_0 = 0.0;
@@ -75,11 +71,6 @@ namespace one_d
 			} else {
 				alpha_n = 0.5;
 			}
-			
-			std::ostringstream convert;
-			convert << name;
-			failsafe_dump.reset (new io::output (new io::one_d::netcdf (n), "dump"));
-			failsafe_dump->append ("i", &cell [0]);
 			
 			max_timestep = i_params.get <datatype> ("time.max");
 		}
@@ -94,17 +85,14 @@ namespace one_d
 		virtual datatype *_initialize (int name, datatype* initial_conditions = NULL, int flags = 0x00) {
 			TRACE ("Initializing " << name << "...");
 			
-			scalars [name].resize ((*grids [0]).ld, 0.0);
+			scalars [name].resize ((*grids [0]).get_ld (), 0.0);
 			if (name == position) {
 				initial_conditions = &((*grids [0]) [0]);
 			}
 			if (initial_conditions) {
 				utils::copy (n, initial_conditions, this->ptr (name));
 			}
-			std::stringstream stream;
-			stream << name;
-			failsafe_dump->template append <datatype> (stream.str (), &(scalars [name]) [0]);
-
+			
 			TRACE ("Initialized " << name << ".");
 			return this->ptr (name);
 		}
@@ -165,8 +153,8 @@ namespace one_d
 		virtual void get_zoning_positions (datatype *positions) {
 			if (messenger_ptr->get_id () == 0) {
 				datatype temp [messenger_ptr->get_np () * 2];
-				temp [0] = axes [0].position_0;
-				temp [1] = axes [0].position_n;
+				temp [0] = axes [0].get_position_0 ();
+				temp [1] = axes [0].get_position_n ();
 				messenger_ptr->template gather <datatype> (2, temp);
 				for (int i = 0; i < messenger_ptr->get_np (); ++i) {
 					positions [i] = temp [2 * i];
@@ -174,7 +162,7 @@ namespace one_d
 				positions [messenger_ptr->get_np ()] = temp [messenger_ptr->get_np () * 2 - 1];
 				messenger_ptr->template bcast <datatype> (messenger_ptr->get_np () + 1, positions);
 			} else {
-				datatype temp [2] = {axes [0].position_0, axes [0].position_n};
+				datatype temp [2] = {axes [0].get_position_0 (), axes [0].get_position_n ()};
 				messenger_ptr->template gather <datatype> (2, temp);
 				messenger_ptr->template bcast <datatype> (messenger_ptr->get_np () + 1, positions);
 			}
@@ -185,7 +173,6 @@ namespace one_d
 		using bases::element <datatype>::params;
 		using bases::element <datatype>::grids;
 		using bases::element <datatype>::name;
-		using bases::element <datatype>::failsafe_dump;
 		using bases::element <datatype>::messenger_ptr;
 		using bases::element <datatype>::ptr;
 		using bases::element <datatype>::timestep;
@@ -193,7 +180,7 @@ namespace one_d
 		
 		bases::axis *axis_n;
 		datatype alpha_0, alpha_n, max_timestep;
-		int &n;
+		int n;
 		std::vector<int> cell; //!< An integer array for tracking each cell number for output
 	};
 
@@ -282,7 +269,6 @@ namespace one_d
 			using element <datatype>::n;
 			using element <datatype>::element_flags;
 			using element <datatype>::name;
-			using element <datatype>::normal_stream;
 			using element <datatype>::cell;
 			using element <datatype>::timestep;
 			using element <datatype>::params;
@@ -325,7 +311,6 @@ namespace one_d
 			using element <datatype>::n;
 			using element <datatype>::element_flags;
 			using element <datatype>::name;
-			using element <datatype>::normal_stream;
 			using element <datatype>::cell;
 			using element <datatype>::timestep;
 			using bases::element <datatype>::params;
@@ -423,7 +408,6 @@ namespace one_d
 			virtual datatype calculate_timestep (int i, io::virtual_dump *dump);
 
 			using element <datatype>::initialize;
-			using element <datatype>::normal_stream;
 			using bases::element <datatype>::ptr;
 			using bases::element <datatype>::matrix_ptr;
 			

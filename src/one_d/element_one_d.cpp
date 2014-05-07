@@ -55,15 +55,15 @@ namespace one_d
 			position_ptr = ptr (position);
 			velocity_ptr = initialize (velocity, "u", &init [0]);
 
-			// Set up output
-			std::string file_format = "../output/" + i_params.get <std::string> ("output.file");
-			char buffer [file_format.size () * 2];
-			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-
-			normal_stream.reset (new io::incremental (new io::one_d::netcdf (n), buffer, i_params.get <int> ("output.every")));
-			normal_stream->template append <int> ("i", &(cell [0]));
-			normal_stream->template append <datatype> ("x", ptr (position));
-			normal_stream->template append <datatype> ("u", ptr (velocity));
+			// // Set up output
+			// std::string file_format = "../output/" + i_params.get <std::string> ("output.file");
+			// char buffer [file_format.size () * 2];
+			// snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
+			// 
+			// normal_stream.reset (new io::incremental (new io::one_d::netcdf (n), buffer, i_params.get <int> ("output.every")));
+			// normal_stream->template append <int> ("i", &(cell [0]));
+			// normal_stream->template append <datatype> ("x", ptr (position));
+			// normal_stream->template append <datatype> ("u", ptr (velocity));
 			
 			// // Set up solver
 			element <datatype>::add_solver (velocity, new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, ptr (velocity), &element_flags [state], &element_flags [velocity]));
@@ -118,13 +118,13 @@ namespace one_d
 			position_ptr = ptr (position);
 			velocity_ptr = initialize (velocity, "u", &init [0]);
 			
-			// Set up output
-			std::ostringstream filestream;
-			filestream << "../output/" + nparams.get <std::string> ("output.file") << "_" << std::setfill ('0') << std::setw (2) << name << "_%04i";
-			normal_stream.reset (new io::incremental (new io::one_d::netcdf (n), filestream.str (), nparams.get <int> ("output.every")));
-			normal_stream->template append <int> ("i", &(cell [0]));
-			normal_stream->template append <datatype> ("x", ptr (position));
-			normal_stream->template append <datatype> ("u", ptr (velocity));
+			// // Set up output
+			// std::ostringstream filestream;
+			// filestream << "../output/" + nparams.get <std::string> ("output.file") << "_" << std::setfill ('0') << std::setw (2) << name << "_%04i";
+			// normal_stream.reset (new io::incremental (new io::one_d::netcdf (n), filestream.str (), nparams.get <int> ("output.every")));
+			// normal_stream->template append <int> ("i", &(cell [0]));
+			// normal_stream->template append <datatype> ("x", ptr (position));
+			// normal_stream->template append <datatype> ("u", ptr (velocity));
 			
 			// // Set up solver
 			element <datatype>::add_solver (velocity, new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, ptr (velocity), &element_flags [state], &element_flags [velocity]));
@@ -190,13 +190,13 @@ namespace one_d
 			position_ptr = ptr (position);
 			velocity_ptr = initialize (velocity, "u", &init [0]);
 			
-			// Set up output
-			std::ostringstream filestream;
-			filestream << "../output/" + nparams.get <std::string> ("output.file") + "_" << std::setfill ('0') << std::setw (2) << name << "_%04i";
-			normal_stream.reset (new io::incremental (new io::one_d::netcdf (n), filestream.str (), nparams.get <int> ("output.every")));
-			normal_stream->template append <int> ("i", &(cell [0]));
-			normal_stream->template append <datatype> ("x", ptr (position));
-			normal_stream->template append <datatype> ("u", ptr (velocity));			
+			// // Set up output
+			// std::ostringstream filestream;
+			// filestream << "../output/" + nparams.get <std::string> ("output.file") + "_" << std::setfill ('0') << std::setw (2) << name << "_%04i";
+			// normal_stream.reset (new io::incremental (new io::one_d::netcdf (n), filestream.str (), nparams.get <int> ("output.every")));
+			// normal_stream->template append <int> ("i", &(cell [0]));
+			// normal_stream->template append <datatype> ("x", ptr (position));
+			// normal_stream->template append <datatype> ("u", ptr (velocity));			
 
 			// Set up solver
 			element <datatype>::add_solver (velocity, new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, ptr (velocity), &element_flags [state], &element_flags [velocity]));
@@ -210,7 +210,7 @@ namespace one_d
 				solvers [velocity]->add_post_plan (new advection <datatype> (*solvers [velocity], advection_coeff));
 			}
 		
-			normal_stream->to_file ();
+			// normal_stream->to_file ();
 		
 			TRACE ("Initialized.");
 		}

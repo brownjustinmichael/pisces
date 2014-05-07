@@ -48,6 +48,33 @@ namespace bases
 	template <class datatype>
 	class element
 	{
+	protected:
+		std::vector <bases::axis> axes; //!< A vector of axis objects, containing the basic grid information
+		messenger* messenger_ptr; //!< A pointer to the messenger object
+		int name; //!< An integer representation of the element, to be used in file output
+		int dimensions; //!< The integer number of dimensions in the element
+		io::parameters& params; //!< The map that contains the input parameters
+		
+		datatype duration; //!< The datatype total simulated time
+		datatype timestep; //!< The datatype timestep length
+
+		std::vector <std::shared_ptr <grid <datatype>>> grids; //!< A vector of shared pointers to the collocation grids
+		std::map <int, std::vector <datatype> > scalars; //!< A map of scalar vectors
+		std::map <int, std::string> scalar_names; //!< A map of string representations of the scalars
+		std::map <int, int> element_flags; //!< A map of integer flags
+		
+		std::map<int, std::shared_ptr <solver <datatype>>> solvers; //!< A vector of shared pointers to the matrix solvers
+		
+	private:
+		std::shared_ptr <io::output> normal_stream; //!< An implementation to output in normal space
+		std::shared_ptr <io::output> transform_stream; //!< An implementation to output in transform space
+		std::vector <std::shared_ptr <io::output>> normal_profiles; //!< An implementation to output in transform space
+
+		std::vector <int> solver_keys; //!< A vector of integer keys to the solvers map
+		std::shared_ptr <io::virtual_dump> rezone_dump; //!< A shared_ptr to a virtual dump object, for rezoning
+		std::vector <int> transforms; //!< A vector of integer keys to the transform maps
+		std::map <int, std::shared_ptr <master_transform <datatype>>> master_transforms; //!< A map of shared_ptrs to the transform objects
+		
 	public:
 		/*!**********************************************************************
 		 * \brief Element iterator for iterating through the contained solvers
@@ -356,13 +383,12 @@ namespace bases
 		 ************************************************************************/
 		virtual datatype calculate_min_timestep (io::virtual_dump *dump = NULL) = 0;
 		
-		virtual std::shared_ptr <io::virtual_dump> make_dump (int flags = 0x00) = 0;
-		
-		virtual std::shared_ptr <io::virtual_dump> make_rezoned_dump (datatype *positions, io::virtual_dump *dump, int flags = 0x00) = 0;
-		
-		virtual void get_zoning_positions (datatype *positions) = 0;
-		
 		/*!**********************************************************************
+		 * \brief Caculate the zoning that minimizes the timestep according to size constraints
+		 * 
+		 * \param positions A datatype pointer to the zoning positions
+		 * \param min_size The datatype minimum distance between zoning positions
+		 * \param max_size The datatype maximum distance between zoning positions
 		 * \param n_tries the number of attempts before stepping
 		 * \param iters_fixed_t the integer number of iterations at each temperature
 		 * \param step_size the real maximum step size
@@ -370,6 +396,10 @@ namespace bases
 		 * \param t_initial the real initial temperature
 		 * \param mu_t the real damping factor for temperature
 		 * \param t_min the real damping factor parameter for temperature
+		 * 
+		 * Using a simulated annealing technique, rezone all the elements such that the timestep is minimized across them. This is an expensive operation and should be used sparingly.
+		 * 
+		 * \return A shared_ptr to a virtual_dump object containing the chosen rezoning
 		 ************************************************************************/
 		virtual std::shared_ptr <io::virtual_dump> rezone_minimize_ts (datatype * positions, datatype min_size, datatype max_size, int n_tries = 20, int iters_fixed_t = 1000, datatype step_size = 1.0, datatype k = 1.0, datatype t_initial = 0.008, datatype mu_t = 1.003, datatype t_min = 2.0e-6) {
 			TRACE ("Rezoning...");
@@ -415,6 +445,68 @@ namespace bases
 			return make_rezoned_dump (positions, &*(make_dump ()));
 		}
 		
+		/*!**********************************************************************
+		 * \brief The main function call of the class
+		 * 
+		 * This method tells the element to begin the main run of the simulation. It runs through all the specified plans in the appropriate order, and updates the values as necessary. Output, if desired, is specified by the output streams.
+		 ************************************************************************/
+		virtual void run (int &n_steps, int max_steps);
+		
+	protected:
+		/*!**********************************************************************
+		 * \brief Protected method to initialize a scalar field and generate its transforms
+		 * 
+		 * \param i_name The integer reference to the scalar field
+		 * \param initial_conditions Any initial conditions to instantiate with, NULL to use default
+		 * \param i_flags Integer flags describing the instantiation (e.g. whether the field doesn't require transforms)
+		 * 
+		 * This method is to be overwritten in subclasses to initialize a scalar field in accordance with the geometry of the element.
+		 * 
+		 * \return Returns a datatype pointer to the initialized scalar
+		 ************************************************************************/
+		virtual datatype *_initialize (int i_name, datatype *initial_conditions = NULL, int i_flags = 0x00) = 0;
+		
+		/*!**********************************************************************
+		 * \brief Protected method to make a virtual dump of the current state
+		 * 
+		 * \param flags The binary flags to pass to the method
+		 * 
+		 * This method needs to be overwritten in a subclass.
+		 * 
+		 * \return A shared_ptr to the dump of the current state
+		 ************************************************************************/
+		virtual std::shared_ptr <io::virtual_dump> make_dump (int flags = 0x00) = 0;
+		
+		/*!**********************************************************************
+		 * \brief Protected method to rezone the current state into a virtual dump
+		 * 
+		 * \param positions A datatype pointer to the zoning position array
+		 * \param dump_ptr A pointer to the dump to be rezoned (for speed)
+		 * \param flags The binary flags for method execution
+		 * 
+		 * The method needs to be overwritten in a subclass
+		 * 
+		 * \return A shared_ptr to the rezoned virtual dump
+		 ************************************************************************/
+		virtual std::shared_ptr <io::virtual_dump> make_rezoned_dump (datatype *positions, io::virtual_dump *dump_ptr, int flags = 0x00) = 0;
+		
+		/*!**********************************************************************
+		 * \brief Get the current zoning position array
+		 * 
+		 * \param positions A datatype pointer to the input and output position array
+		 * 
+		 * This method needs to be overwritten in a subclass
+		 ************************************************************************/
+		virtual void get_zoning_positions (datatype *positions) = 0;
+		
+	private:
+		/*!**********************************************************************
+		 * \brief Given a set of zoning data, calculate the timestep
+		 * 
+		 * \param i_rezone_data A pointer to an array of rezone_union objects
+		 * 
+		 * In order, the rezone_union objects must contain 1) a pointer to the element, 2) the total number of elements in the system, 3) min_size argument from rezone_minimize_ts, 4) max_size argument from rezone_minimize_ts, 5-n) positions of the zonal boundaries. This method is to be called by the GSL simulated annealing routine.
+		 ************************************************************************/
 		static double rezone_calculate_ts (void *i_rezone_data) {
 			bases::element <datatype> *element_ptr = ((rezone_union <datatype> *) i_rezone_data)->element_ptr;
 			datatype positions [((rezone_union <datatype> *) i_rezone_data) [1].np + 1];
@@ -426,13 +518,28 @@ namespace bases
 			messenger_ptr->min (&timestep);
 			return -timestep;
 		}
-		
+	
+		/*!**********************************************************************
+		 * \brief Given a set of zoning data, print the state, for debugging
+		 * 
+		 * \param i_rezone_data A pointer to an array of rezone_union objects
+		 * 
+		 * In order, the rezone_union objects must contain 1) a pointer to the element, 2) the total number of elements in the system, 3) min_size argument from rezone_minimize_ts, 4) max_size argument from rezone_minimize_ts, 5-n) positions of the zonal boundaries. This method is to be called by the GSL simulated annealing routine.
+		 ************************************************************************/
 		static void print_rezone (void *i_rezone_data) {
 			for (int i = 0; i < ((rezone_union <datatype> *) i_rezone_data) [1].np + 1; ++i) {
 				printf (" %f ", ((rezone_union <datatype> *) i_rezone_data) [i + 4].position);
 			}
 		}
-		
+	
+		/*!**********************************************************************
+		 * \brief Given two sets of zoning data, calculate the distance in parameter space
+		 * 
+		 * \param i_new_rezone_data A pointer to an array of new rezone_union objects
+		 * \param i_old_rezone_data A pointer to an array of old rezone_union objects
+		 * 
+		 * In order, the rezone_union objects must contain 1) a pointer to the element, 2) the total number of elements in the system, 3) min_size argument from rezone_minimize_ts, 4) max_size argument from rezone_minimize_ts, 5-n) positions of the zonal boundaries. This method is to be called by the GSL simulated annealing routine.
+		 ************************************************************************/
 		static double rezone_step_size (void *i_new_rezone_data, void *i_old_rezone_data) {
 			datatype total = 0;
 			bases::element <datatype> *element_ptr = ((rezone_union <datatype> *) i_new_rezone_data)->element_ptr;
@@ -450,8 +557,17 @@ namespace bases
 			}
 			return sqrt (total);
 		}
-		
-		static void rezone_generate_step (const gsl_rng *r, void *i_rezone_data, double step_size) {
+	
+		/*!**********************************************************************
+		 * \brief Generate a new set of parameters from the old ones with a random number generator
+		 * 
+		 * \param r A pointer to a gnu scientific library random number generator
+		 * \param i_rezone_data A pointer to an array of rezone_union objects
+		 * \param step_size The datatype step_size in parameter space
+		 * 
+		 * In order, the rezone_union objects must contain 1) a pointer to the element, 2) the total number of elements in the system, 3) min_size argument from rezone_minimize_ts, 4) max_size argument from rezone_minimize_ts, 5-n) positions of the zonal boundaries. This method is to be called by the GSL simulated annealing routine.
+		 ************************************************************************/
+		static void rezone_generate_step (const gsl_rng *r, void *i_rezone_data, datatype step_size) {
 			rezone_union <datatype> *rezone_data = (rezone_union <datatype> *) i_rezone_data;
 			bases::element <datatype> *element_ptr = rezone_data->element_ptr;
 			datatype positions [rezone_data [1].np + 1];
@@ -460,18 +576,21 @@ namespace bases
 			}
 			bases::messenger *messenger_ptr = element_ptr->messenger_ptr;
 			if (messenger_ptr->get_id () == 0) {
+				// Generate a random radius that is less than or equal to the step size
 				datatype radius = gsl_rng_uniform (r) * step_size;
 				if (radius == 0.0) {
 					int flags = mpi_skip;
 					messenger_ptr->check_all (&flags);
 					return;
 				}
+				// Generate a random step for every zonal position and sum the total step size
 				datatype xs [messenger_ptr->get_np () + 1];
 				datatype total = 0.0;
 				for (int i = 1; i < messenger_ptr->get_np (); ++i) {
 					xs [i] = gsl_rng_uniform (r) * 2.0 - 1.0;
 					total += xs [i] * xs [i];
 				}
+				// If possible, rescale the total step to be equal to the radius; otherwise, change nothing
 				if (total == 0.0) {
 					int flags = mpi_skip;
 					messenger_ptr->check_all (&flags);
@@ -482,27 +601,36 @@ namespace bases
 				for (int i = 1; i < messenger_ptr->get_np (); ++i) {
 					positions [i] = xs [i] / total + positions [i];
 				}
+				// Broadcast the new positions
 				messenger_ptr->template bcast <datatype> (messenger_ptr->get_np () + 1, positions);
 			} else {
+				// Receive the new positions
 				messenger_ptr->template bcast <datatype> (messenger_ptr->get_np () + 1, positions);
 			}
+			// Iterate forward through the data, checking that the mininum and maximum sizes are obeyed
 			for (int i = 1; i < rezone_data [1].np; ++i) {
+				// Check minimum size
 				if (positions [i] < positions [i - 1] + rezone_data [2].position) {
 					positions [i] = positions [i - 1] + rezone_data [2].position;
 				}
+				// Check maximum size
 				if (positions [i] > positions [i - 1] + rezone_data [3].position) {
 					positions [i] = positions [i - 1] + rezone_data [3].position;
 				}
 				rezone_data [i + 4].position = positions [i];
 			}
+			// Iterate backward through the positions, checking that the minimum and maximum sizes are obeyed
 			for (int i = rezone_data [1].np - 1; i >= 1; --i) {
+				// Check minimum size
 				if (rezone_data [i + 4].position > rezone_data [i + 5].position - rezone_data [2].position) {
 					rezone_data [i + 4].position = rezone_data [i + 5].position - rezone_data [2].position;
 				}
+				// Check maximum size
 				if (rezone_data [i + 4].position < rezone_data [i + 5].position - rezone_data [3].position) {
 					rezone_data [i + 4].position = rezone_data [i + 5].position - rezone_data [3].position;
 				}
 			}
+			// Make sure we didn't accidentally run off the end of the position array
 			if (rezone_data [4].position < rezone_data [5].position - rezone_data [3].position) {
 				FATAL ("Unrealistic size constraints in rezone: max_size too small");
 				throw 0;
@@ -512,65 +640,10 @@ namespace bases
 				throw 0;
 			}
 		}
-		
+	
 		/*
 			TODO Allow for upside-down elements
 		*/
-		
-		/*!**********************************************************************
-		 * \brief The main function call of the class
-		 * 
-		 * This method tells the element to begin the main run of the simulation. It runs through all the specified plans in the appropriate order, and updates the values as necessary. Output, if desired, is specified by the output streams.
-		 ************************************************************************/
-		virtual void run (int &n_steps, int max_steps);
-		
-		/*!*******************************************************************
-		 * \brief Output all information to a dump file in the current directory
-		 * 
-		 * This failsafe method is designed to create a snapshot immediately before the simulation crashed.
-		 *********************************************************************/
-		inline virtual void failsafe () {
-			failsafe_dump->to_file ();
-		}
-		
-		std::vector <bases::axis> axes;
-		std::vector <std::shared_ptr <grid <datatype>>> grids; //!< A vector of shared pointers to the collocation grids
-		std::shared_ptr <io::virtual_dump> rezone_dump;
-		messenger* messenger_ptr; //!< A pointer to the messenger object
-	protected:
-		/*!**********************************************************************
-		 * \brief Protected method to initialize a scalar field and generate its transforms
-		 * 
-		 * \param i_name The integer reference to the scalar field
-		 * \param initial_conditions Any initial conditions to instantiate with, NULL to use default
-		 * \param i_flags Integer flags describing the instantiation (e.g. whether the field doesn't require transforms)
-		 * 
-		 * This method is to be overwritten in subclasses to initialize a scalar field in accordance with the geometry of the element.
-		 ************************************************************************/
-		virtual datatype *_initialize (int i_name, datatype *initial_conditions = NULL, int i_flags = 0x00) = 0;
-		
-		int name, dimensions; //!< An integer representation of the element, to be used in file output
-		io::parameters& params; //!< The map that contains the input parameters
-		
-		datatype duration; //!< The datatype total simulated time
-		datatype timestep; //!< The datatype timestep length
-
-		std::map <int, std::vector <datatype> > scalars; //!< A map of scalar vectors
-		std::map <int, std::string> scalar_names;
-		std::map <int, int> element_flags; //!< A map of integer flags
-		
-		std::shared_ptr <io::output> failsafe_dump; //!< An implementation to dump in case of failure
-		std::shared_ptr <io::output> normal_stream; //!< An implementation to output in normal space
-		std::shared_ptr <io::output> transform_stream; //!< An implementation to output in transform space
-		std::vector <std::shared_ptr <io::output>> normal_profiles; //!< An implementation to output in transform space
-		
-		
-		std::vector <int> solver_keys; //!< A vector of integer keys to the solvers map
-		std::map<int, std::shared_ptr<solver <datatype>>> solvers; //!< A vector of shared pointers to the matrix solvers
-
-	private:
-		std::vector <int> transforms; //!< A vector of integer keys to the transform maps
-		std::map <int, std::shared_ptr <master_transform <datatype>>> master_transforms;
 	};
 } /* bases */
 

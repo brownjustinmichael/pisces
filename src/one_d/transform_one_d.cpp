@@ -14,7 +14,7 @@ namespace one_d
 	template <>
 	transform <double>::transform (bases::grid <double> &i_grid, double* i_data_in, double* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags) :
 	bases::plan <double> (i_element_flags, i_component_flags),
-	n (i_grid.n),
+	n (i_grid.get_n ()),
 	data_in (i_data_in),
 	data_out (i_data_out ? i_data_out : i_data_in) {
 		scalar = 1.0 / std::sqrt (2.0 * (n - 1));
@@ -25,7 +25,7 @@ namespace one_d
 	template <>
 	transform <float>::transform (bases::grid <float> &i_grid, float* i_data_in, float* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags) :
 	bases::plan <float> (i_element_flags, i_component_flags),
-	n (i_grid.n),
+	n (i_grid.get_n ()),
 	data_in (i_data_in),
 	data_out (i_data_out ? i_data_out : i_data_in) {
 		scalar = 1.0 / std::sqrt (2.0 * (n - 1));

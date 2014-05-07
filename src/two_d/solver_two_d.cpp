@@ -21,9 +21,9 @@ namespace two_d
 		template <class datatype>
 		solver <datatype>:: solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
 		bases::solver <datatype> (i_element_flags, i_component_flags),
-		n (i_grid_n.n), 
-		ldn (i_grid_n.ld), 
-		m (i_grid_m.n),
+		n (i_grid_n.get_n ()), 
+		ldn (i_grid_n.get_ld ()), 
+		m (i_grid_m.get_n ()),
 		data (i_data),
 		grid_n (i_grid_n),
 		grid_m (i_grid_m),
@@ -32,8 +32,8 @@ namespace two_d
 		alpha_0 (i_alpha_0), 
 		alpha_n (i_alpha_n), 
 		positions (&(grid_m [0])),
-		excess_0 (grid_m.excess_0), 
-		excess_n (grid_m.excess_n),
+		excess_0 (grid_m.get_excess_0 ()), 
+		excess_n (grid_m.get_excess_n ()),
 		default_matrix (grid_m.get_data (0)) {
 			TRACE ("Building solver...");
 			horizontal_matrix.resize (ldn);
@@ -245,16 +245,16 @@ namespace two_d
 		template <class datatype>
 		laplace_solver <datatype>::laplace_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, bases::messenger* i_messenger_ptr, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
 		bases::solver <datatype> (i_element_flags, i_component_flags),
-		n (i_grid_n.n), 
-		ldn (i_grid_n.ld), 
-		m (i_grid_m.n),
+		n (i_grid_n.get_n ()), 
+		ldn (i_grid_n.get_ld ()), 
+		m (i_grid_m.get_n ()),
 		data (i_data),
 		grid_n (i_grid_n),
 		grid_m (i_grid_m),
 		pos_n (&i_grid_n [0]),
 		pos_m (&i_grid_m [0]),
-		excess_0 (grid_m.excess_0), 
-		excess_n (grid_m.excess_n),
+		excess_0 (grid_m.get_excess_0 ()), 
+		excess_n (grid_m.get_excess_n ()),
 		messenger_ptr (i_messenger_ptr) {
 			sup.resize (m * ldn);
 			sub.resize (m * ldn);
@@ -391,9 +391,9 @@ namespace two_d
 		template <class datatype>
 		divergence_solver <datatype>::divergence_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_x, datatype *i_data_z, int *i_element_flags, int *i_component_flags) : 
 		bases::solver <datatype> (i_element_flags, i_component_flags),
-		n (i_grid_n.n), 
-		ldn (i_grid_n.ld), 
-		m (i_grid_m.n),
+		n (i_grid_n.get_n ()), 
+		ldn (i_grid_n.get_ld ()), 
+		m (i_grid_m.get_n ()),
 		data_x (i_data_x),
 		data_z (i_data_z),
 		pos_m (&(i_grid_m [0])),

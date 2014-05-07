@@ -60,7 +60,7 @@ namespace one_d
 	public:
 		master_transform (bases::grid <datatype> &i_grid, datatype* i_data_in, datatype* i_data_out, int i_flags, int *element_flags, int *component_flags):
 		bases::master_transform <datatype> (element_flags, component_flags),
-		ldn (i_grid.ld),
+		ldn (i_grid.get_ld ()),
 		data_in (i_data_in),
 		data_out (i_data_out ? i_data_out : i_data_in) {
 			data.resize (ldn);
@@ -101,7 +101,7 @@ namespace one_d
 			utils::copy (ldn, &data [0], data_out);
 		}
 	private:
-		int &ldn;
+		int ldn;
 		datatype *data_in, *data_out;
 		std::vector <datatype> data;
 		

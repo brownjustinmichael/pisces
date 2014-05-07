@@ -63,8 +63,8 @@ namespace two_d
 		template <>
 		horizontal_transform <float>::horizontal_transform (bases::grid <float> &i_grid_n, bases::grid <float> &i_grid_m, float* i_data_in, float* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads) :
 		bases::plan <float> (i_element_flags, i_component_flags),
-		n (i_grid_n.n), 
-		m (i_grid_m.n), 
+		n (i_grid_n.get_n ()), 
+		m (i_grid_m.get_n ()), 
 		data_in (i_data_in),
 		data_out (i_data_out ? i_data_out : i_data_in),
 		flags (i_flags),
@@ -156,8 +156,8 @@ namespace two_d
 		template <>
 		horizontal_transform <double>::horizontal_transform (bases::grid <double> &i_grid_n, bases::grid <double> &i_grid_m, double* i_data_in, double* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads) :
 		bases::plan <double> (i_element_flags, i_component_flags),
-		n (i_grid_n.n), 
-		m (i_grid_m.n), 
+		n (i_grid_n.get_n ()), 
+		m (i_grid_m.get_n ()), 
 		data_in (i_data_in),
 		data_out (i_data_out ? i_data_out : i_data_in),
 		flags (i_flags),
@@ -282,8 +282,8 @@ namespace two_d
 		template <>
 		vertical_transform <float>::vertical_transform (bases::grid <float> &i_grid_n, bases::grid <float> &i_grid_m, float* i_data_in, float* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads) :
 		bases::plan <float> (i_element_flags, i_component_flags),
-		n (i_grid_n.n), 
-		m (i_grid_m.n), 
+		n (i_grid_n.get_n ()), 
+		m (i_grid_m.get_n ()), 
 		data_in (i_data_in),
 		data_out (i_data_out ? i_data_out : i_data_in),
 		flags (i_flags),
@@ -349,8 +349,8 @@ namespace two_d
 		template <>
 		vertical_transform <double>::vertical_transform (bases::grid <double> &i_grid_n, bases::grid <double> &i_grid_m, double* i_data_in, double* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads) :
 		bases::plan <double> (i_element_flags, i_component_flags),
-		n (i_grid_n.n), 
-		m (i_grid_m.n), 
+		n (i_grid_n.get_n ()), 
+		m (i_grid_m.get_n ()), 
 		data_in (i_data_in),
 		data_out (i_data_out ? i_data_out : i_data_in),
 		flags (i_flags),

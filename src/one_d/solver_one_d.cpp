@@ -22,8 +22,8 @@ namespace one_d
 	template <class datatype>
 	solver <datatype>::solver (bases::grid <datatype> &i_grid, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_data, int *i_element_flags, int *i_component_flags) :
 	bases::solver <datatype> (i_element_flags, i_component_flags), 
-	n (i_grid.n),
-	ld (i_grid.ld),
+	n (i_grid.get_n ()),
+	ld (i_grid.get_ld ()),
 	grid (i_grid),
 	data (i_data),
 	messenger_ptr (i_messenger_ptr),
@@ -31,8 +31,8 @@ namespace one_d
 	alpha_0 (i_alpha_0), 
 	alpha_n (i_alpha_n), 
 	positions (&(grid [0])),
-	excess_0 (grid.excess_0), 
-	excess_n (grid.excess_n),
+	excess_0 (grid.get_excess_0 ()), 
+	excess_n (grid.get_excess_n ()),
 	default_matrix (i_grid.get_data (0)) {
 		matrix.resize (n * n);
 		values_0.resize (1);
