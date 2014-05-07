@@ -394,9 +394,9 @@ namespace two_d
 		n (i_grid_n.get_n ()), 
 		ldn (i_grid_n.get_ld ()), 
 		m (i_grid_m.get_n ()),
+		pos_m (&(i_grid_m [0])),
 		data_x (i_data_x),
 		data_z (i_data_z),
-		pos_m (&(i_grid_m [0])),
 		scalar (2.0 * acos (-1.0) / (i_grid_n [n - 1] - i_grid_n [0])),
 		grid_n (i_grid_n),
 		grid_m (i_grid_m) {}

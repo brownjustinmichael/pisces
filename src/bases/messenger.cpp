@@ -60,7 +60,7 @@ namespace bases
 	}
 	
 	template <class datatype>
-	void messenger::send (int n, datatype *data, int process, int tag) {
+	void messenger::send (int n, const datatype *data, int process, int tag) {
 #ifdef _MPI
 		MPI::COMM_WORLD.Send (data, n, mpi_type <datatype> (), process, tag);
 #else // _MPI
@@ -223,12 +223,9 @@ namespace bases
 	}
 	
 	template <class datatype>
-	void messenger::allgatherv (int n, datatype* data_in, int *ns, datatype* data_out) {
+	void messenger::allgatherv (int n, const datatype* data_in, int *ns, datatype* data_out) {
 		int flags = mpi_all_clear;
 		check_all (&flags);
-		if (!data_out) {
-			data_out = data_in;
-		}
 #ifdef _MPI
 		std::vector <int> displs;
 		displs.resize (np);
@@ -236,9 +233,9 @@ namespace bases
 			displs [i] = displs [i - 1] + ns [i - 1];
 		}
 		if (data_out == data_in) {
-			MPI::COMM_WORLD.Allgatherv (MPI_IN_PLACE, n, mpi_type <datatype> (), data_in, ns, &displs [0], mpi_type <datatype> ());
+			MPI::COMM_WORLD.Allgatherv (MPI_IN_PLACE, n, mpi_type <datatype> (), data_out, ns, &displs [0], mpi_type <datatype> ());
 		} else {
-			MPI::COMM_WORLD.Allgatherv ((void *) data_in, n, mpi_type <datatype> (), (void *) data_out, ns, &displs [0], mpi_type <datatype> ());
+			MPI::COMM_WORLD.Allgatherv ((const void *) data_in, n, mpi_type <datatype> (), (void *) data_out, ns, &displs [0], mpi_type <datatype> ());
 		}
 #else // _MPI
 		FATAL ("Gather used without MPI environment. Exiting.");
@@ -333,9 +330,9 @@ namespace bases
 		}
 	}
 	
-	template void messenger::send <double> (int n, double* data, int process, int tag);
-	template void messenger::send <float> (int n, float* data, int process, int tag);
-	template void messenger::send <int> (int n, int* data, int process, int tag);
+	template void messenger::send <double> (int n, const double* data, int process, int tag);
+	template void messenger::send <float> (int n, const float* data, int process, int tag);
+	template void messenger::send <int> (int n, const int* data, int process, int tag);
 	
 	template void messenger::recv <double> (int n, double* data, int process, int tag);
 	template void messenger::recv <float> (int n, float* data, int process, int tag);
@@ -361,9 +358,9 @@ namespace bases
 	template void messenger::gatherv <float> (int n, float* data_in, int *ns, float* data_out);
 	template void messenger::gatherv <int> (int n, int* data_in, int *ns, int* data_out);
 	
-	template void messenger::allgatherv <double> (int n, double* data_in, int *ns, double* data_out);
-	template void messenger::allgatherv <float> (int n, float* data_in, int *ns, float* data_out);
-	template void messenger::allgatherv <int> (int n, int* data_in, int *ns, int* data_out);
+	template void messenger::allgatherv <double> (int n, const double* data_in, int *ns, double* data_out);
+	template void messenger::allgatherv <float> (int n, const float* data_in, int *ns, float* data_out);
+	template void messenger::allgatherv <int> (int n, const int* data_in, int *ns, int* data_out);
 	
 	template void messenger::scatter <double> (int n, double* data_in, double* data_out);
 	template void messenger::scatter <float> (int n, float* data_in, float* data_out);

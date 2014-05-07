@@ -87,9 +87,8 @@ namespace one_d
 			
 			scalars [name].resize ((*grids [0]).get_ld (), 0.0);
 			if (name == position) {
-				initial_conditions = &((*grids [0]) [0]);
-			}
-			if (initial_conditions) {
+				utils::copy (n, &((*grids [0]) [0]), this->ptr (name));
+			} else if (initial_conditions) {
 				utils::copy (n, initial_conditions, this->ptr (name));
 			}
 			

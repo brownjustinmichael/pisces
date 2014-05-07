@@ -86,7 +86,7 @@ namespace two_d
 			datatype& alpha_n; //!< A datatype reference to the current edge_n weight
 			std::vector <datatype> values_0, values_n;
 
-			datatype* positions;
+			const datatype* positions;
 			int temp_n;
 			int excess_0; //!< The integer number of elements to recv from edge_0
 			int excess_n; //!< The integer number of elements to recv from edge_n
@@ -167,7 +167,8 @@ namespace two_d
 			int flags;
 			bases::grid <datatype> &grid_n;
 			bases::grid <datatype> &grid_m;
-			datatype *pos_n, *pos_m, *sub_ptr, *diag_ptr, *sup_ptr;
+			const datatype *pos_n, *pos_m;
+			datatype *sub_ptr, *diag_ptr, *sup_ptr;
 			int excess_0, excess_n, id, np;
 
 			bases::messenger* messenger_ptr;
@@ -220,7 +221,8 @@ namespace two_d
 			int n;
 			int ldn;
 			int m;
-			datatype *data_x, *data_z, *pos_m, scalar;
+			const datatype *pos_m;
+			datatype *data_x, *data_z, scalar;
 			int flags;
 			bases::grid <datatype> &grid_n;
 			bases::grid <datatype> &grid_m;

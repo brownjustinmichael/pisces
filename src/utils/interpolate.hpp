@@ -28,7 +28,7 @@ namespace utils
 	 * \param out The double array of output dependent variables
 	 ************************************************************************/
 	template <class datatype>
-	void interpolate (int n, int m, int l, datatype alpha, datatype beta, datatype *x, datatype *y, datatype *in, datatype *out, int ldy = -1, int ldout = -1) {
+	void interpolate (int n, int m, int l, datatype alpha, datatype beta, const datatype *x, const datatype *y, const datatype *in, datatype *out, int ldy = -1, int ldout = -1) {
 		TRACE ("Interpolating...");
 		if (ldy == -1) {
 			ldy = l;
@@ -65,8 +65,6 @@ namespace utils
 			}
 		}
 	}
-	
-	void interpolate (int n, int m, int l, float alpha, float* x, float* y, float* in, float* out, int ldy = -1, int ldout = -1);
 	
 	/*!**********************************************************************
 	 * \brief Interpolate a matrix multiplication at x_0

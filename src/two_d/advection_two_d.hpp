@@ -53,7 +53,7 @@ namespace two_d
 			private:
 				datatype coeff;
 				datatype *vel_n, *vel_m;
-				datatype *pos_n, *pos_m;
+				const datatype *pos_n, *pos_m;
 				using real_plan <datatype>::n;
 				using real_plan <datatype>::m;
 				using real_plan <datatype>::grid_n;
@@ -95,7 +95,7 @@ namespace two_d
 			private:
 				datatype coeff;
 				datatype *stream;
-				datatype *pos_n, *pos_m;
+				const datatype *pos_n, *pos_m;
 				using real_plan <datatype>::n;
 				using real_plan <datatype>::m;
 				using real_plan <datatype>::grid_n;

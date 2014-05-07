@@ -41,7 +41,7 @@ extern "C" double ddot_ (int *n, double *x, int *incx, double *y, int *incy);
  * \param y The array to which the data are copied
  * \param incy A pointer to an integer spacing of elements in y
  *********************************************************************/
-extern "C" void scopy_ (int *n, float *x, int *incx, float *y, int *incy);
+extern "C" void scopy_ (int *n, const float *x, int *incx, float *y, int *incy);
 
 /*!*******************************************************************
  * \brief Function from BLAS that copies a double array to another in place
@@ -52,7 +52,7 @@ extern "C" void scopy_ (int *n, float *x, int *incx, float *y, int *incy);
  * \param y The array to which the data are copied
  * \param incy A pointer to an integer spacing of elements in y
  *********************************************************************/
-extern "C" void dcopy_ (int *n, double *x, int *incx, double *y, int *incy);
+extern "C" void dcopy_ (int *n, const double *x, int *incx, double *y, int *incy);
 
 extern "C" void sswap_ (int *n, float *x, int *incx, float *y, int *incy);
 
@@ -140,14 +140,14 @@ extern "C" void dgemm_ (char *transa, char *transb, int *m, int *n, int *k, doub
 
 namespace utils
 {
-	void copy (int n, float* x, float* y, int incx, int incy) {
+	void copy (int n, const float* x, float* y, int incx, int incy) {
 		if (x == y && incx == incy) {
 			return;
 		}
 		scopy_ (&n, x, &incx, y, &incy);
 	}
 	
-	void copy (int n, double* x, double* y, int incx, int incy) {
+	void copy (int n, const double* x, double* y, int incx, int incy) {
 		if (x == y && incx == incy) {
 			return;
 		}
