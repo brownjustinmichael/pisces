@@ -38,7 +38,7 @@ namespace one_d
 		using explicit_plan <datatype>::grid;
 	
 		datatype coeff;
-		datatype *position_ptr;
+		const datatype *position_ptr;
 	};
 }
 

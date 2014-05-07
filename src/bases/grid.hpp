@@ -90,8 +90,9 @@ namespace bases
 		int excess_n; //!< The number of excess meshpoints near index n - 1
 		datatype position_0; //!< The position at index excess_0
 		datatype position_n; //!< The position at index n - 1 - excess_n
-		std::vector <datatype> positions; //!< A vector containing the positions along the axis
 		int derivs; //!< The integer number of derivatives deep the collocation grid runs
+		
+		std::vector <datatype> positions; //!< A vector containing the positions along the axis
 		bool calculated_matrix; //!< A boolean describing whether the collocation matrix has been calculated
 	
 	private:
@@ -134,12 +135,9 @@ namespace bases
 		 * 
 		 * \return A reference to a position along the grid
 		 ************************************************************************/
-		datatype& operator[] (int index) {
+		const datatype& operator[] (int index) {
 			return positions [index];
 		}
-		/*
-			TODO Dangerous. A user could change one of the positions
-		*/
 		
 		/*!**********************************************************************
 		 * \brief Get the number of meshpoints along the axis
@@ -230,7 +228,7 @@ namespace bases
 		/*!*******************************************************************
 		 * \brief A collocation grid for Chebyshev polynomials
 		 * 
-		 * This collocation grid stores the N collocation points for up to the Mth order Chebyshev polynomial and its first and second derivatives
+		 * This collocation grid stores the N collocation points for up to the Mth order Chebyshev polynomial and their first and second derivatives
 		 *********************************************************************/
 		template <class datatype>
 		class grid : public bases::grid <datatype>
@@ -298,23 +296,11 @@ namespace bases
 		/*!*******************************************************************
 		 * \brief A collocation grid for Chebyshev polynomials
 		 * 
-		 * This collocation grid stores the N collocation points for up to the
-		 * Mth order Chebyshev polynomial and its first and second derivatives
+		 * This collocation grid stores the N collocation points for up to the Mth order cosine modes and their first and second derivatives
 		 *********************************************************************/
 		template <class datatype>
 		class grid : public bases::grid <datatype>
 		{
-		public:
-			/*!*******************************************************************
-			 * \param i_axis_ptr A pointer to an axis object
-			 *********************************************************************/
-			grid (axis *i_axis_ptr);
-				
-			virtual ~grid () {};
-			
-		protected:
-			void _calculate_matrix ();
-			
 		private:
 			using bases::grid <datatype>::n;
 			using bases::grid <datatype>::ld;
@@ -327,8 +313,21 @@ namespace bases
 	
 			datatype scale; //!< A datatype by which the collocation grid should be scaled
 			datatype width; //!< The datatype width of the collocation region
-			std::vector<bool> exists_array; //!< A bool vector containing whether the points exist
 			datatype pioN; //!< The datatype 3.14159.../N, for use in calculations
+			
+		public:
+			/*!*******************************************************************
+			 * \param i_axis_ptr A pointer to an axis object
+			 *********************************************************************/
+			grid (axis *i_axis_ptr);
+				
+			virtual ~grid () {};
+			
+		protected:
+			/*!**********************************************************************
+			 * \copydoc bases::grid <datatype>::_calculate_matrix ()
+			 ************************************************************************/
+			void _calculate_matrix ();
 		};
 	} /* chebyshev */
 	
@@ -337,23 +336,11 @@ namespace bases
 		/*!*******************************************************************
 		 * \brief A collocation grid for Chebyshev polynomials
 		 * 
-		 * This collocation grid stores the N collocation points for up to the
-		 * Mth order Chebyshev polynomial and its first and second derivatives
+		 * This collocation grid stores the N collocation points for up to the Mth order fourier mode and their first and second derivatives
 		 *********************************************************************/
 		template <class datatype>
 		class grid : public bases::grid <datatype>
 		{
-		public:
-			/*!*******************************************************************
-			 * \param i_axis_ptr A pointer to an axis object
-			 *********************************************************************/
-			grid (axis *i_axis_ptr);
-				
-			virtual ~grid () {};
-			
-		protected:
-			void _calculate_matrix ();
-			
 		private:
 			using bases::grid <datatype>::n;
 			using bases::grid <datatype>::ld;
@@ -366,8 +353,21 @@ namespace bases
 	
 			datatype scale; //!< A datatype by which the collocation grid should be scaled
 			datatype width; //!< The datatype width of the collocation region
-			std::vector<bool> exists_array; //!< A bool vector containing whether the points exist
 			datatype pioN; //!< The datatype 3.14159.../N, for use in calculations
+			
+		public:
+			/*!*******************************************************************
+			 * \param i_axis_ptr A pointer to an axis object
+			 *********************************************************************/
+			grid (axis *i_axis_ptr);
+				
+			virtual ~grid () {};
+			
+		protected:
+			/*!**********************************************************************
+			 * \copydoc bases::grid <datatype>::_calculate_matrix ()
+			 ************************************************************************/
+			void _calculate_matrix ();
 		};
 	} /* fourier */
 } /* bases */

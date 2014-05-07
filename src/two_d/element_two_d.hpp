@@ -112,33 +112,35 @@ namespace two_d
 		 *********************************************************************/
 		virtual datatype *_initialize (int name, datatype* initial_conditions = NULL, int i_flags = 0x00) {
 			TRACE ("Initializing " << name << "...");
-
-			if (name == x_position) {
-				initial_conditions = &((*grids [0]) [0]);
-				i_flags |= uniform_m;
-			} else if (name == z_position) {
-				initial_conditions = &((*grids [1]) [0]);
-				i_flags |= uniform_n;
-			}
 			// Size allowing for real FFT buffer
 			scalars [name].resize (grids [0]->get_ld () * m, 0.0);
-			if (initial_conditions) {
-				if ((i_flags & uniform_m) && (i_flags & uniform_n)) {
-					for (int i = 0; i < n; ++i) {
-						for (int j = 0; j < m; ++j) {
-							(*this) (name, i, j) = *initial_conditions;
+			if (name == x_position) {
+				for (int j = 0; j < m; ++j) {
+					utils::copy (n, &((*grids [0]) [0]), ptr (name, 0, j), 1, m);
+				}
+			} else if (name == z_position) {
+				for (int i = 0; i < n; ++i) {
+					utils::copy (m, &((*grids [1]) [0]), ptr (name, i, 0));
+				}
+			} else {
+				if (initial_conditions) {
+					if ((i_flags & uniform_m) && (i_flags & uniform_n)) {
+						for (int i = 0; i < n; ++i) {
+							for (int j = 0; j < m; ++j) {
+								(*this) (name, i, j) = *initial_conditions;
+							}
 						}
+					} else if (i_flags & uniform_m) {
+						for (int j = 0; j < m; ++j) {
+							utils::copy (n, initial_conditions, ptr (name, 0, j), 1, m);
+						}
+					} else if (i_flags & uniform_n) {
+						for (int i = 0; i < n; ++i) {
+							utils::copy (m, initial_conditions, ptr (name, i, 0));
+						}
+					} else {
+						utils::copy (n * m, initial_conditions, ptr (name));
 					}
-				} else if (i_flags & uniform_m) {
-					for (int j = 0; j < m; ++j) {
-						utils::copy (n, initial_conditions, ptr (name, 0, j), 1, m);
-					}
-				} else if (i_flags & uniform_n) {
-					for (int i = 0; i < n; ++i) {
-						utils::copy (m, initial_conditions, ptr (name, i, 0));
-					}
-				} else {
-					utils::copy (n * m, initial_conditions, ptr (name));
 				}
 			}
 			

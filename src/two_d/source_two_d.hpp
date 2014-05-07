@@ -117,7 +117,8 @@ namespace two_d
 			using real_plan <datatype>::grid_m;
 			using real_plan <datatype>::data_out;
 			datatype coeff;
-			datatype *data_source, *pos_n;
+			datatype *data_source;
+			const datatype *pos_n;
 		};
 		
 		template <class datatype>
@@ -157,7 +158,8 @@ namespace two_d
 			using explicit_plan <datatype>::grid_m;
 			using explicit_plan <datatype>::data_out;
 			datatype coeff;
-			datatype *data_source, *pos_m;
+			datatype *data_source;
+			const datatype *pos_m;
 		};
 		
 		template <class datatype>
@@ -196,7 +198,8 @@ namespace two_d
 			using real_plan <datatype>::grid_m;
 			using real_plan <datatype>::data_out;
 			datatype coeff;
-			datatype *data_source, *pos_m;
+			datatype *data_source;
+			const datatype *pos_m;
 		};
 		
 		template <class datatype>
@@ -243,7 +246,8 @@ namespace two_d
 			using real_plan <datatype>::grid_m;
 			using real_plan <datatype>::data_out;
 			datatype coeff;
-			datatype *data_source_x, *data_source_z, *pos_n, *pos_m;
+			datatype *data_source_x, *data_source_z;
+			const datatype *pos_n, *pos_m;
 		};
 	} /* fourier */
 } /* two_d */

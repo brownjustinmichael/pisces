@@ -88,7 +88,7 @@ namespace bases
 		 * \param edge The integer representation of the corresponding edge
 		 ************************************************************************/
 		template <class datatype>
-		void send (int n, datatype* data, int process, int tag);
+		void send (int n, const datatype* data, int process, int tag);
 		
 		/*!**********************************************************************
 		 * \brief Add recv action in the datatype queue
@@ -124,7 +124,7 @@ namespace bases
 		void scatterv (int n, datatype* data_in, int* ns, datatype* data_out = NULL);
 		
 		template <class datatype>
-		void allgatherv (int n, datatype* data_in, int* ns, datatype* data_out = NULL);
+		void allgatherv (int n, const datatype* data_in, int* ns, datatype* data_out);
 		
 		/*!**********************************************************************
 		 * \brief Calculate a minimum across elements
