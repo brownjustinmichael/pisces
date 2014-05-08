@@ -205,7 +205,7 @@ namespace two_d
 				datatype temp [messenger_ptr->get_np () * 2];
 				temp [0] = axes [1].get_position_0 ();
 				temp [1] = axes [1].get_position_n ();
-				messenger_ptr->template gather <datatype> (2, temp);
+				messenger_ptr->template gather <datatype> (2, temp, temp);
 				for (int i = 0; i < messenger_ptr->get_np (); ++i) {
 					positions [i] = temp [2 * i];
 				}
@@ -213,7 +213,7 @@ namespace two_d
 				messenger_ptr->template bcast <datatype> (messenger_ptr->get_np () + 1, positions);
 			} else {
 				datatype temp [2] = {axes [1].get_position_0 (), axes [1].get_position_n ()};
-				messenger_ptr->template gather <datatype> (2, temp);
+				messenger_ptr->template gather <datatype> (2, temp, temp);
 				messenger_ptr->template bcast <datatype> (messenger_ptr->get_np () + 1, positions);
 			}
 		}

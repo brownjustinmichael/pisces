@@ -26,6 +26,9 @@ enum modes {
 	recv_mode = 1
 };
 
+/*!**********************************************************************
+ * An enum of MPI flags for checking the status of each process
+ ************************************************************************/
 enum mpi_flags {
 	mpi_all_clear = 0x00,
 	mpi_fatal = 0x01,
@@ -34,6 +37,20 @@ enum mpi_flags {
 
 namespace bases
 {	
+#ifdef _MPI
+	/*!**********************************************************************
+	 * \brief A helper function for MPI typing, for convenience
+	 * 
+	 * Given the appropriate template argument, this function returns the appropriate MPI type
+	 * 
+	 * \return The MPI type associated with the template argument
+	 ************************************************************************/
+	template <class datatype>
+	MPI_Datatype mpi_type ();
+	
+	template <> MPI_Datatype mpi_type <int> ();
+#endif // _MPI
+	
 	/*!***********************************************************************
 	 * \brief A class to manage boundary communication
 	 * 
@@ -43,15 +60,36 @@ namespace bases
 	 ************************************************************************/
 	class messenger
 	{
+	private:
+		int id; //!< The integer id of the current process
+		int np; //!< The integer number of total processes
+		
+		std::vector <int> stati; //!< A vector of the status of each processor
+		
 	public:
 		/*!**********************************************************************
 		 * \param argc An integer pointer to the number of command arguments
 		 * \param argv A pointer to an array of character arrays of command arguments
-		 * \param n_boundaries The integer number of boundaries per element (must be even)
 		 ************************************************************************/
-		messenger (int* argc, char*** argv);
+		messenger (int* argc, char*** argv) {
+#ifdef _MPI
+			MPI::Init (*argc, *argv);
+			np = MPI::COMM_WORLD.Get_size ();
+			id = MPI::COMM_WORLD.Get_rank ();
+			MPI::COMM_WORLD.Set_errhandler(MPI::ERRORS_THROW_EXCEPTIONS);
+#else
+			np = 1;
+			id = 0;
+#endif // _MPI
+			stati.resize (np);
+		}
 		
-		virtual ~messenger ();
+		virtual ~messenger () {
+			kill_all ();
+#ifdef _MPI
+			MPI::Finalize ();
+#endif // _MPI
+		}
 		
 		/*!**********************************************************************
 		 * \brief Return the id of the current process
@@ -71,86 +109,224 @@ namespace bases
 			return np;
 		}
 		
-		void check_all (int *flags);
-
-		void kill_all ();
+		/*!**********************************************************************
+		 * \brief Check that all processors are working
+		 * 
+		 * This method checks that all MPI processes are behaving normally. If there's a fatal issue with MPI, this method throws an error.
+		 * 
+		 * \return True if all clear, false if the next process should be skipped
+		 ************************************************************************/
+		bool check_all () {
+			TRACE ("Checking...");
+			int flags = mpi_all_clear;
+#ifdef _MPI
+			MPI::COMM_WORLD.Gather (&flags, 1, mpi_type <int> (), &stati [0], 1, mpi_type <int> (), 0);
+#endif // _MPI
+			if (id == 0) {
+				for (int i = 0; i < np; ++i) {
+					flags |= stati [i];
+				}
+			}
+#ifdef _MPI
+			MPI::COMM_WORLD.Bcast (&flags, 1, mpi_type <int> (), 0);
+#endif // _MPI
+			if (flags & mpi_fatal) {
+				throw 0;
+			}
+			TRACE ("Check complete.");
+			if (flags != mpi_all_clear) {
+				return false;
+			} else {
+				return true;
+			}
+		}
 		
 		/*!**********************************************************************
-		 * \brief Add send action in the datatype queue
-		 * 
-		 * Warning. This does not send the data immediately. This could be 
-		 * rewritten to save the information in a buffer, but it does not at 
-		 * present. It sends if it can, but the information is not guaranteed to
-		 * be sent until an entire set of send/recv commands are queued. 
+		 * \brief Force the computer to skip any active MPI commands
+		 ************************************************************************/
+		void skip_all () {
+			int flags = mpi_skip;
+#ifdef _MPI
+			MPI::COMM_WORLD.Bcast (&flags, 1, mpi_type <int> (), 0);
+#endif // _MPI
+		}
+		
+		/*!**********************************************************************
+		 * \brief Force the computer to kill all MPI processes
+		 ************************************************************************/
+		void kill_all () {
+			int flags = mpi_fatal;
+#ifdef _MPI
+			MPI::COMM_WORLD.Bcast (&flags, 1, mpi_type <int> (), 0);
+#endif // _MPI
+		}
+		
+		/*!**********************************************************************
+		 * \brief Send the data to a given process with a specific tag
 		 * 
 		 * \param n The integer number of elements to send
 		 * \param data The datatype pointer to the data to send
-		 * \param edge The integer representation of the corresponding edge
+		 * \param process The integer rank of the receiving processor
+		 * \param tag The identifying tag on the message
 		 ************************************************************************/
 		template <class datatype>
-		void send (int n, const datatype* data, int process, int tag);
+		void send (int n, const datatype* data, int process, int tag) {
+#ifdef _MPI
+			MPI::COMM_WORLD.Send (data, n, mpi_type <datatype> (), process, tag);
+#endif // _MPI
+		}
 		
 		/*!**********************************************************************
-		 * \brief Add recv action in the datatype queue
+		 * \brief Receive the data from a given process with a specific tag
 		 * 
-		 * Warning. This does not recv the data immediately. This could be 
-		 * rewritten to wait for the information, but it does not at 
-		 * present. It recvs if it can, but the information is not guaranteed to
-		 * arrive until an entire set of send/recv commands are queued. 
-		 * 
-		 * \param n The integer number of elements to recv
-		 * \param data The datatype pointer to the data to recv
-		 * \param edge The integer representation of the corresponding edge
+		 * \param n The integer number of elements to recieve
+		 * \param data The datatype pointer to the data to receive
+		 * \param process The integer rank of the sending processor
+		 * \param tag The identifying tag on the message
 		 ************************************************************************/
 		template <class datatype>
-		void recv (int n, datatype* data, int process, int tag);
+		void recv (int n, datatype* data, int process, int tag) {
+		/*
+			TODO Make check_two
+		*/
+#ifdef _MPI
+			MPI::COMM_WORLD.Recv (data, n, mpi_type <datatype> (), process, tag);
+#endif // _MPI
+		}
 		
+		/*!**********************************************************************
+		 * \brief Gather arrays from all processes onto process 0
+		 * 
+		 * \param n The number of elements to gather per process
+		 * \param data_in The array of data to be gathered
+		 * \param data_out The output array of all the data on process 0 (can be the same as data_in)
+		 ************************************************************************/
 		template <class datatype>
-		void gather (int n, datatype* data_in, datatype* data_out = NULL);
+		void gather (int n, const datatype* data_in, datatype* data_out) {
+			if (check_all ()) {
+#ifdef _MPI
+				if (id == 0 && data_out == data_in) {
+					MPI::COMM_WORLD.Gather (MPI_IN_PLACE, n, mpi_type <datatype> (), data_out, n, mpi_type <datatype> (), 0);
+				} else {
+					MPI::COMM_WORLD.Gather (data_in, n, mpi_type <datatype> (), data_out, n, mpi_type <datatype> (), 0);
+				}
+#endif // _MPI
+			}
+		}
 		
+		/*!**********************************************************************
+		 * \brief Gather arrays of varying length from all processes onto process 0
+		 * 
+		 * \param n The number of elements to send from an individual process
+		 * \param data_in The input array of data to be gathered
+		 * \param ns The array of the lengths of the arrays across all processes
+		 * \param data_out The output array of all the data on process 0 (can be the same as data_in)
+		 ************************************************************************/
 		template <class datatype>
-		void bcast (int n, datatype* data_in);
+		void gatherv (int n, const datatype* data_in, int* ns, datatype* data_out) {
+			if (check_all ()) {
+#ifdef _MPI
+				std::vector <int> displs;
+				if (id == 0) {
+					displs.resize (np);
+					for (int i = 1; i < np; ++i) {
+						displs [i] = displs [i - 1] + ns [i - 1];
+					}
+				}
+				if (id == 0 && data_out == data_in) {
+					MPI::COMM_WORLD.Gatherv (MPI_IN_PLACE, n, mpi_type <datatype> (), data_in, ns, &displs [0], mpi_type <datatype> (), 0);
+				} else {
+					MPI::COMM_WORLD.Gatherv (data_in, n, mpi_type <datatype> (), data_out, ns, &displs [0], mpi_type <datatype> (), 0);
+				}
+#endif // _MPI
+			}
+		}
 		
+		/*!**********************************************************************
+		 * \brief Gather arrays from all processes onto all processes
+		 * 
+		 * \param n The number of elements to gather per process
+		 * \param data_in The array of data to be gathered
+		 * \param data_out The output array of all the data (can be the same as data_in)
+		 ************************************************************************/
 		template <class datatype>
-		void gatherv (int n, datatype* data_in, int* ns, datatype* data_out = NULL);
+		void allgather (int n, const datatype *data_in, datatype *data_out) {
+			if (check_all ()) {
+#ifdef _MPI
+				if (data_out == data_in) {
+					MPI::COMM_WORLD.Allgather (MPI_IN_PLACE, n, mpi_type <datatype> (), data_out, n, mpi_type <datatype> ());
+				} else {
+					MPI::COMM_WORLD.Allgather (data_in, n, mpi_type <datatype> (), data_out, n, mpi_type <datatype> ());
+				}
+#endif // _MPI
+			}
+		}
 		
+		/*!**********************************************************************
+		 * \brief Gather arrays of variable length from all processes onto all processes
+		 * 
+		 * \param n The number of elements to gather for each process
+		 * \param data_in The array of data to be gathered
+		 * \param ns The integer array of the lengths of the data on each processor
+		 * \param data_out The output array of all the data (can be the same as data_in)
+		 ************************************************************************/
 		template <class datatype>
-		void allgather (int n, datatype *data_in, datatype *data_out = NULL);
+		void allgatherv (int n, const datatype* data_in, int* ns, datatype* data_out) {
+			if (check_all ()) {
+#ifdef _MPI
+				std::vector <int> displs;
+				displs.resize (np);
+				for (int i = 1; i < np; ++i) {
+					displs [i] = displs [i - 1] + ns [i - 1];
+				}
+				if (data_out == data_in) {
+					MPI::COMM_WORLD.Allgatherv (MPI_IN_PLACE, n, mpi_type <datatype> (), data_out, ns, &displs [0], mpi_type <datatype> ());
+				} else {
+					MPI::COMM_WORLD.Allgatherv ((const void *) data_in, n, mpi_type <datatype> (), (void *) data_out, ns, &displs [0], mpi_type <datatype> ());
+				}
+#endif // _MPI
+			}
+		}
 		
+		/*!**********************************************************************
+		 * \brief Broadcast array from process 0 to all processes
+		 * 
+		 * \param n The number of elements to broadcast
+		 * \param data The array of data to be broadcast on input and the final output array
+		 ************************************************************************/
 		template <class datatype>
-		void scatter (int n, datatype* data_in, datatype* data_out = NULL);
-		
-		template <class datatype>
-		void scatterv (int n, datatype* data_in, int* ns, datatype* data_out = NULL);
-		
-		template <class datatype>
-		void allgatherv (int n, const datatype* data_in, int* ns, datatype* data_out);
+		void bcast (int n, datatype* data) {
+			if (check_all ()) {
+#ifdef _MPI
+				MPI::COMM_WORLD.Bcast (data, n, mpi_type <datatype> (), 0);
+#endif // _MPI
+			}
+		}
 		
 		/*!**********************************************************************
 		 * \brief Calculate a minimum across elements
 		 * 
-		 * This uses the messenger buffer.
+		 * This uses a messenger buffer.
 		 * 
 		 * \param data The datatype pointer to the datatype to minimize
 		 ************************************************************************/	
 		template <class datatype>	
-		void min (datatype* data);
-		
-		/*!**********************************************************************
-		 * \brief Determine if all processes meet a condition
-		 * 
-		 * This uses the messenger integer buffer.
-		 * 
-		 * \param boolean The bool condition to check
-		 ************************************************************************/
-		virtual bool bool_and (bool boolean);
-		
-	private:
-		
-		std::vector <int> stati;
-		
-		int id; //!< The integer id of the current process
-		int np; //!< The integer number of total processes
+		void min (datatype* data) {
+			if (check_all ()) {
+				if (np != 1) {
+					std::vector <datatype> buffer (np);
+#ifdef _MPI
+					MPI::COMM_WORLD.Gather (data, 1, mpi_type <datatype> (), &buffer [0], 1, mpi_type <datatype> (), 0);
+#endif // _MPI
+					if (id == 0) {
+						*data = *std::min_element (buffer.begin (), buffer.end ());
+					}
+#ifdef _MPI
+					MPI::COMM_WORLD.Bcast (data, 1, mpi_type <datatype> (), 0);
+#endif // _MPI
+				}
+			}
+		}
 	};
 } /* bases */
 
