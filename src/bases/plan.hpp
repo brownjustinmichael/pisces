@@ -18,8 +18,7 @@
 /*!*******************************************************************
  * \brief A set of indices to be used with the element scalars for convenience
  * 
- * Indices less than zero are "resettable." The null index is 
- * equivalent to a NULL pointer.
+ * Indices less than zero are "resettable." The null index is equivalent to a NULL pointer.
  *********************************************************************/
 enum index {
 	null = 0x0,
@@ -60,24 +59,25 @@ namespace bases
 	/*!*******************************************************************
 	* \brief The basic functional unit, containing a recipe for execution
 	* 
-	* \param i_element_flags A pointer to the integer global flags
-	* \param i_component_flags A pointer to the integer local flags
-	* 
-	* An implemented plan class contains the operator and the addresses of 
-	* all the relevant data arrays to operate on. Each plan need be 
-	* constructed only once and can run any number of times each timestep.
+	* An implemented plan class contains the operator and the addresses of all the relevant data arrays to operate on. Each plan need be constructed only once and can run any number of times each timestep.
 	*********************************************************************/
 	template <class datatype>
 	class plan
 	{
+	protected:
+		int *element_flags; //!< A pointer to the integer global flags
+		int *component_flags; //!< A pointer to the integer local flags
+		
 	public:
+		/*!**********************************************************************
+		* \param i_element_flags A pointer to the integer global flags
+		* \param i_component_flags A pointer to the integer local flags
+		 ************************************************************************/
 		plan <datatype> (int *i_element_flags = NULL, int *i_component_flags = NULL) :
 		element_flags (i_element_flags),
 		component_flags (i_component_flags)  {}
 		
-		virtual ~plan () {
-			// printf ("Destroying bases plan\n");
-		}
+		virtual ~plan () {}
 		
 		/*!*******************************************************************
 		* \brief Operate the plan on the data arrays contained in the class
@@ -85,9 +85,6 @@ namespace bases
 		* The plan class serves as a wrapper for this function.
 		*********************************************************************/
 		virtual void execute () = 0;
-		
-		int *element_flags; //!< A pointer to the integer global flags
-		int *component_flags; //!< A pointer to the integer local flags
 	};
 } /* bases */
 #endif /* end of include guard: PLAN_HPP_S9YPWHOM */

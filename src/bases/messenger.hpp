@@ -19,14 +19,6 @@
 #include "../utils/utils.hpp"
 
 /*!**********************************************************************
- * An enum of various MPI actions that can be taken
- ************************************************************************/
-enum modes {
-	send_mode = 0,
-	recv_mode = 1
-};
-
-/*!**********************************************************************
  * An enum of MPI flags for checking the status of each process
  ************************************************************************/
 enum mpi_flags {
