@@ -27,7 +27,7 @@ namespace utils
 				TRACE ("Rezoning " << iter->first << "...");
 				int nn = input_grid->get_n ();
 				std::vector <int> ns (inter_messenger->get_np (), nn);
-				inter_messenger->allgather <int> (1, &ns [0]);
+				inter_messenger->allgather <int> (1, &ns [0], &ns [0]);
 				int nsum = 0;
 				int nhere = 0;
 				for (int i = 0; i < inter_messenger->get_np (); ++i) {

@@ -579,8 +579,7 @@ namespace bases
 				// Generate a random radius that is less than or equal to the step size
 				datatype radius = gsl_rng_uniform (r) * step_size;
 				if (radius == 0.0) {
-					int flags = mpi_skip;
-					messenger_ptr->check_all (&flags);
+					messenger_ptr->skip_all ();
 					return;
 				}
 				// Generate a random step for every zonal position and sum the total step size
@@ -592,8 +591,7 @@ namespace bases
 				}
 				// If possible, rescale the total step to be equal to the radius; otherwise, change nothing
 				if (total == 0.0) {
-					int flags = mpi_skip;
-					messenger_ptr->check_all (&flags);
+					messenger_ptr->skip_all ();
 					return;
 				}
 				total = sqrt (total);

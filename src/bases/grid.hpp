@@ -258,7 +258,7 @@ namespace bases
 			
 		protected:
 			/*!**********************************************************************
-			 * \copydoc bases::grid <datatype>::_calculate_matrix ()
+			 * \copydoc bases::grid::_calculate_matrix()
 			 ************************************************************************/
 			void _calculate_matrix ();
 			
@@ -325,7 +325,7 @@ namespace bases
 			
 		protected:
 			/*!**********************************************************************
-			 * \copydoc bases::grid <datatype>::_calculate_matrix ()
+			 * \copydoc bases::grid::_calculate_matrix()
 			 ************************************************************************/
 			void _calculate_matrix ();
 		};
@@ -365,7 +365,7 @@ namespace bases
 			
 		protected:
 			/*!**********************************************************************
-			 * \copydoc bases::grid <datatype>::_calculate_matrix ()
+			 * \copydoc bases::grid::_calculate_matrix()
 			 ************************************************************************/
 			void _calculate_matrix ();
 		};
