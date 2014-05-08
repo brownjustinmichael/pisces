@@ -69,9 +69,9 @@ namespace one_d
 			element <datatype>::add_solver (velocity, new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, ptr (velocity), &element_flags [state], &element_flags [velocity]));
 			// 
 			// // Set up plans in order
-			solvers [velocity]->add_pre_plan (new diffusion <datatype> (*solvers [velocity], nparams.get <datatype> ("velocity.diffusion"), nparams.get <datatype> ("time.alpha")));
+			solvers [velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new diffusion <datatype> (*solvers [velocity], nparams.get <datatype> ("velocity.diffusion"), nparams.get <datatype> ("time.alpha"))), pre_plan);
 			if (nparams.get <datatype> ("velocity.advection") != 0.0) {
-				solvers [velocity]->add_post_plan (new advection <datatype> (*solvers [velocity], nparams.get <datatype> ("velocity.advection")));
+				solvers [velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new advection <datatype> (*solvers [velocity], nparams.get <datatype> ("velocity.advection"))), post_plan);
 			}
 								
 			TRACE ("Initialized.");
@@ -130,9 +130,9 @@ namespace one_d
 			element <datatype>::add_solver (velocity, new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, ptr (velocity), &element_flags [state], &element_flags [velocity]));
 			// 
 			// // Set up plans in order
-			solvers [velocity]->add_pre_plan (new diffusion <datatype> (*solvers [velocity], nparams.get <datatype> ("velocity.diffusion"), nparams.get <datatype> ("time.alpha")));
+			solvers [velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new diffusion <datatype> (*solvers [velocity], nparams.get <datatype> ("velocity.diffusion"), nparams.get <datatype> ("time.alpha"))), pre_plan);
 			if (nparams.get <datatype> ("velocity.advection") != 0.0) {
-				solvers [velocity]->add_post_plan (new advection <datatype> (*solvers [velocity], nparams.get <datatype> ("velocity.advection")));
+				solvers [velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new advection <datatype> (*solvers [velocity], nparams.get <datatype> ("velocity.advection"))), post_plan);
 			}
 			
 			TRACE ("Initialized.");
@@ -202,12 +202,12 @@ namespace one_d
 			element <datatype>::add_solver (velocity, new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, ptr (velocity), &element_flags [state], &element_flags [velocity]));
 			
 			// Set up plans in order
-			solvers [velocity]->add_pre_plan (new diffusion <datatype> (*solvers [velocity], diffusion_coeff, alpha));
+			solvers [velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new diffusion <datatype> (*solvers [velocity], diffusion_coeff, alpha)), pre_plan);
 			if (nparams.get <datatype> ("velocity.nonlinear") != 0.0) {
-				solvers [velocity]->add_post_plan (new nonlinear_diffusion <datatype> (*solvers [velocity], nparams.get <datatype> ("velocity.nonlinear")));
+				solvers [velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new nonlinear_diffusion <datatype> (*solvers [velocity], nparams.get <datatype> ("velocity.nonlinear"))), post_plan);
 			}
 			if (advection_coeff != 0.0) {
-				solvers [velocity]->add_post_plan (new advection <datatype> (*solvers [velocity], advection_coeff));
+				solvers [velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new advection <datatype> (*solvers [velocity], advection_coeff)), post_plan);
 			}
 		
 			// normal_stream->to_file ();

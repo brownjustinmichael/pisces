@@ -59,7 +59,7 @@ namespace bases
 
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
-				solvers [*iter]->execute_pre_plans ();
+				solvers [*iter]->execute_plans (pre_plan);
 			}
 			, execution_time, execution_duration);
 			
@@ -69,7 +69,7 @@ namespace bases
 
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
-				solvers [*iter]->execute_mid_plans ();
+				solvers [*iter]->execute_plans (mid_plan);
 			}
 			, execution_time, execution_duration);
 	
@@ -105,7 +105,7 @@ namespace bases
 						omp_set_num_threads (threads);
 						TIME (
 						for (iterator iter = begin (); iter != end (); iter++) {
-							solvers [*iter]->execute_post_plans ();
+							solvers [*iter]->execute_plans (post_plan);
 						}
 						, execution_time, execution_duration);
 						
@@ -128,7 +128,7 @@ namespace bases
 						omp_set_num_threads (threads);
 						TIME (
 						for (iterator iter = begin (); iter != end (); iter++) {
-							solvers [*iter]->execute_post_plans ();
+							solvers [*iter]->execute_plans (post_plan);
 						}
 						, execution_time, execution_duration);
 					}
@@ -145,7 +145,7 @@ namespace bases
 			// Calculate the pre solver plans
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
-				solvers [*iter]->execute_pre_solve_plans ();
+				solvers [*iter]->execute_plans (pre_solve_plan);
 			}
 			, execution_time, execution_duration);
 			
