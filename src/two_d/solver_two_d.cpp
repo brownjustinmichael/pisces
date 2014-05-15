@@ -19,7 +19,7 @@ namespace two_d
 	namespace fourier
 	{
 		template <class datatype>
-		solver <datatype>:: solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
+		solver <datatype>:: solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
 		bases::solver <datatype> (i_element_flags, i_component_flags),
 		n (i_grid_n.get_n ()), 
 		ldn (i_grid_n.get_ld ()), 
@@ -130,7 +130,7 @@ namespace two_d
 			transform->execute ();
 
 			utils::scale ((ldn) * lda, 0.0, &data_temp [0]);
-					
+			
 			if (!(flags & first_run)) {
 				utils::copy (ldn, &data [0], &values_0 [0], m);
 				utils::copy (ldn, &data [m - 1], &values_n [0], m);
@@ -140,7 +140,20 @@ namespace two_d
 			utils::matrix_add_scaled (m - excess_0 - excess_n, ldn, timestep, &implicit_rhs_vec [excess_0], &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
 			utils::matrix_add_scaled (m - excess_0 - excess_n, ldn, timestep, &real_rhs_vec [excess_0], &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
 			utils::matrix_add_scaled (m - excess_0 - excess_n, ldn, timestep, &explicit_rhs_vec [excess_0], &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
-							
+			
+			for (int i = 0; i < ldn; ++i) {
+				for (int j = 0; j < m; ++j) {
+					if (std::isnan (data_temp [ex_excess_0 + ntop + i * m + j])) {
+						FATAL ("Found nan after scaling.");
+						for (int k = 0; k < m; ++k) {
+							printf ("%f ", data_temp [ex_excess_0 + ntop + k * m + j]);
+						}
+						printf ("\n");
+						throw exceptions::nan ();
+					}
+				}
+			}
+			
 			if (ntop != 0) {
 				utils::interpolate (ex_excess_0, ldn, m - excess_0 - excess_n, 1.0, 1.0, positions + excess_0, &data_temp [ex_excess_0 + ntop + excess_0], &positions_0 [0], &data_temp [ntop], lda, lda);
 				utils::scale (ldn, alpha_0, &data_temp [0] + ntop + ex_excess_0 + excess_0, lda);
@@ -156,9 +169,40 @@ namespace two_d
 				utils::copy (ldn, &values_n [0], &data_temp [m - 1 + ntop + ex_excess_0], 1, lda);
 			}
 			
+			for (int i = 0; i < ldn; ++i) {
+				for (int j = 0; j < m; ++j) {
+					if (std::isnan (data_temp [ex_excess_0 + ntop + i * m + j])) {
+						FATAL ("Found nan after edges.");
+						for (int k = 0; k < m; ++k) {
+							debug << data_temp [ex_excess_0 + ntop + k * m + j] << " ";
+						}
+						DEBUG (debug.str ());
+						throw exceptions::nan ();
+					}
+				}
+			}
+			
 			utils::matrix_add_scaled (m - 2 + ntop + nbot - excess_0 - excess_n, ldn, 1.0, data + 1 - ntop + excess_0, &data_temp [ex_excess_0 + 1 + excess_0], m, lda);
+			for (int i = 0; i < ldn; ++i) {
+				for (int j = 0; j < m; ++j) {
+					if (std::isnan (data_temp [ex_excess_0 + ntop + i * m + j])) {
+						FATAL ("Found nan.");
+						throw exceptions::nan ();
+					}
+				}
+			}
+			
 			utils::interpolate (ex_excess_0, ldn, m, 1.0, 1.0, positions, data, &positions_0 [0], &data_temp [1], m, lda);
 			utils::interpolate (ex_excess_n, ldn, m, 1.0, 1.0, positions, data, &positions_n [0], &data_temp [lda - 1 - ex_excess_n], m, lda);
+			
+			for (int i = 0; i < ldn; ++i) {
+				for (int j = 0; j < m; ++j) {
+					if (std::isnan (data_temp [ex_excess_0 + ntop + i * m + j])) {
+						FATAL ("Found nan.");
+						throw exceptions::nan ();
+					}
+				}
+			}
 			
 			if (*component_flags & x_solve) {
 				TRACE ("Solving in n direction...");
@@ -211,13 +255,31 @@ namespace two_d
 			} else if (*component_flags & z_solve) {
 				TRACE ("Solving in m direction...");
 
+				for (int i = 0; i < ldn; ++i) {
+					for (int j = 0; j < m; ++j) {
+						if (std::isnan (data_temp [ex_excess_0 + ntop + i * m + j])) {
+							FATAL ("Found nan.");
+							for (int k = 0; k < m; ++k) {
+								printf ("%f ", data_temp [ex_excess_0 + ntop + k * m + j]);
+							}
+							printf ("\n");
+							throw exceptions::nan ();
+						}
+					}
+				}
+
 				utils::p_block_matrix_solve (messenger_ptr->get_id (), messenger_ptr->get_np (), m - excess_0 - excess_n - ntop - nbot, excess_0 + ex_excess_0 + 2 * ntop, excess_n + ex_excess_n + 2 * nbot, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, ldn, lda, sqrt ((int) boundary_matrix.size ()), lda);
 				
 				TRACE ("Matrix solve complete.");
 				
 				for (int i = 0; i < ldn; ++i) {
 					for (int j = 0; j < m; ++j) {
-						if (std::isnan (data_temp [i * m + j])) {
+						if (std::isnan (data_temp [ex_excess_0 + ntop + i * m + j])) {
+							FATAL ("Found nan.");
+							for (int k = 0; k < m; ++k) {
+								printf ("%f ", data_temp [ex_excess_0 + ntop + k * m + j]);
+							}
+							printf ("\n");
 							throw exceptions::nan ();
 						}
 					}
@@ -243,7 +305,7 @@ namespace two_d
 		template class solver <double>;
 		
 		template <class datatype>
-		laplace_solver <datatype>::laplace_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, bases::messenger* i_messenger_ptr, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
+		laplace_solver <datatype>::laplace_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
 		bases::solver <datatype> (i_element_flags, i_component_flags),
 		n (i_grid_n.get_n ()), 
 		ldn (i_grid_n.get_ld ()), 

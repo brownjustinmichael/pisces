@@ -17,7 +17,7 @@ namespace cuda
 	namespace one_d
 	{
 		template <class datatype>
-		solver <datatype>::solver (bases::messenger* i_messenger_ptr, int i_n, int i_excess_0, int i_excess_n, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_positions, datatype *i_default_matrix, datatype *i_matrix, datatype* i_data_in, datatype* i_rhs, datatype* i_data_out, int i_flags) :
+		solver <datatype>::solver (utils::messenger* i_messenger_ptr, int i_n, int i_excess_0, int i_excess_n, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_positions, datatype *i_default_matrix, datatype *i_matrix, datatype* i_data_in, datatype* i_rhs, datatype* i_data_out, int i_flags) :
 		::one_d::solver <datatype> (i_messenger_ptr, i_n, i_excess_0, i_excess_n, i_timestep, i_alpha_0, i_alpha_n, i_positions, i_default_matrix, i_matrix, i_data_in, i_rhs, i_data_out, i_flags) {
 			HANDLE_ERROR (cudaMalloc ((void**) &factorized_matrix_dev, n * n * sizeof (datatype)));
 			HANDLE_ERROR (cudaMalloc ((void**) &ipiv_dev, n * sizeof (int)));

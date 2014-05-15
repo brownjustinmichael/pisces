@@ -9,7 +9,7 @@
 #ifndef SOLVER_TWO_D_HPP_JW4BV4PS
 #define SOLVER_TWO_D_HPP_JW4BV4PS
 
-#include "../bases/messenger.hpp"
+#include "../utils/messenger.hpp"
 #include "../bases/solver.hpp"
 #include "element_two_d.hpp"
 #include "plan_two_d.hpp"
@@ -22,7 +22,7 @@ namespace two_d
 		class solver : public bases::solver <datatype>
 		{
 		public:
-			solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_aplha_n, datatype* i_data, int *i_element_flags, int *i_component_flags);
+			solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_aplha_n, datatype* i_data, int *i_element_flags, int *i_component_flags);
 			
 			virtual ~solver () {}
 			
@@ -79,7 +79,7 @@ namespace two_d
 			bases::grid <datatype> &grid_n;
 			bases::grid <datatype> &grid_m;
 
-			bases::messenger* messenger_ptr;
+			utils::messenger* messenger_ptr;
 	
 			datatype& timestep; //!< A datatype reference to the current timestep
 			datatype& alpha_0; //!< A datatype reference to the current edge_0 weight
@@ -119,7 +119,7 @@ namespace two_d
 		class laplace_solver : public bases::solver <datatype>
 		{
 		public:
-			laplace_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, bases::messenger* i_messenger_ptr, datatype* i_data, int *i_element_flags, int *i_component_flags);
+			laplace_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype* i_data, int *i_element_flags, int *i_component_flags);
 			
 			virtual ~laplace_solver () {}
 			
@@ -171,7 +171,7 @@ namespace two_d
 			datatype *sub_ptr, *diag_ptr, *sup_ptr;
 			int excess_0, excess_n, id, np;
 
-			bases::messenger* messenger_ptr;
+			utils::messenger* messenger_ptr;
 			
 			std::vector <datatype> x;
 			std::vector <datatype> explicit_rhs_vec;

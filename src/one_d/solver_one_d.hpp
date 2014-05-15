@@ -9,7 +9,7 @@
 #ifndef SOLVER_HPP_N0BUAX6H
 #define SOLVER_HPP_N0BUAX6H
 
-#include "../bases/messenger.hpp"
+#include "../utils/messenger.hpp"
 #include <vector>
 #include <memory>
 #include "plan_one_d.hpp"
@@ -40,7 +40,7 @@ namespace one_d
 		 * \param i_name_rhs The integer representation of the matrix right-hand-side
 		 * \copydoc bases::solver <datatype>::solver ()
 		 *********************************************************************/
-		solver (bases::grid <datatype> &i_grid, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_aplha_n, datatype* i_data, int *element_flags, int *component_flags);
+		solver (bases::grid <datatype> &i_grid, utils::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_aplha_n, datatype* i_data, int *element_flags, int *component_flags);
 	
 		virtual ~solver () {
 			// printf ("Destroying one_d solver\n");
@@ -87,7 +87,7 @@ namespace one_d
 		bases::grid <datatype> &grid;
 		datatype *data;
 		
-		bases::messenger* messenger_ptr;
+		utils::messenger* messenger_ptr;
 		
 		datatype& timestep; //!< A datatype reference to the current timestep
 		datatype& alpha_0; //!< A datatype reference to the current edge_0 weight

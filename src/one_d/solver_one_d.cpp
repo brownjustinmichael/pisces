@@ -8,7 +8,7 @@
 
 #include "solver_one_d.hpp"
 
-#include "../bases/messenger.hpp"
+#include "../utils/messenger.hpp"
 #include <cmath>
 #include "../config.hpp"
 #include "../utils/utils.hpp"
@@ -20,7 +20,7 @@
 namespace one_d
 {
 	template <class datatype>
-	solver <datatype>::solver (bases::grid <datatype> &i_grid, bases::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_data, int *i_element_flags, int *i_component_flags) :
+	solver <datatype>::solver (bases::grid <datatype> &i_grid, utils::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_data, int *i_element_flags, int *i_component_flags) :
 	bases::solver <datatype> (i_element_flags, i_component_flags), 
 	n (i_grid.get_n ()),
 	ld (i_grid.get_ld ()),

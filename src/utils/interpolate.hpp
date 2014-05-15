@@ -12,15 +12,16 @@
 #define TINY 1.0e-6
 
 #include "../config.hpp"
+#include <cmath>
 
 namespace utils
 {
 	/*!**********************************************************************
 	 * \brief Interpolate over the array dy at points in
 	 * 
-	 * \param n The integer number of elements in the interpolation direction in dy
-	 * \param m The integer number of elements perpendicular to the interpolation direction in dy
-	 * \param l The integer number of elements in the interpolation direction in dx
+	 * \param n The integer number of elements in the interpolation direction in in, out
+	 * \param m The integer number of elements perpendicular to the interpolation direction in in, out, x, y
+	 * \param l The integer number of elements in the interpolation direction in x, y
 	 * \param alpha The real multiplier on the resulting array
 	 * \param x The double array of independent variables to interpolate over
 	 * \param y The double array of dependent variables to interpolate over
@@ -51,16 +52,41 @@ namespace utils
 					TODO better exception?
 				*/
 			}
-			while (in [k] > x [i] && i < l) {
+			while (in [k] > x [i] + TINY && i < l) {
 				++i;
 			}
 			if (in [k] == x [i]) {
 				for (int j = 0; j < m; ++j) {
+					if (std::isnan (y [j * ldy + i])) {
+						FATAL ("Nan in y " << i);
+						throw 0;
+					}
+					if (std::isnan (out [j * ldout + k])) {
+						FATAL ("Nan in out");
+						throw 0;
+					}
 					out [j * ldout + k] = alpha * y [j * ldy + i] + beta * out [j * ldout + k];
+					if (std::isnan (out [j * ldout + k])) {
+						FATAL ("Nan in output");
+						throw 0;
+					}
 				}
 			} else {
 				for (int j = 0; j < m; ++j) {
+					if (std::isnan (y [j * ldy + i]) || std::isnan (y [j * ldy + i] - 1)) {
+						FATAL ("Nan in y " << i);
+						FATAL ("Interpolating at " << in [k] << " using " << x [i] << " and " << x [i - 1]);
+						throw 0;
+					}
+					if (std::isnan (out [j * ldout + k])) {
+						FATAL ("Nan in out");
+						throw 0;
+					}
 					out [j * ldout + k] = alpha * ((y [j * ldy + i] - y [j * ldy + i - 1]) / (x [i] - x [i - 1]) * (in [k] - x [i]) + y [j * ldy + i]) + beta * out [j * ldout + k];
+					if (std::isnan (out [j * ldout + k])) {
+						FATAL ("Nan in output");
+						throw 0;
+					}
 				}
 			}
 		}

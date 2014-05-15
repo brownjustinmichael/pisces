@@ -19,7 +19,7 @@ namespace cuda
 		class solver : public ::one_d::solver <datatype>
 		{
 		public:
-			solver (bases::messenger* i_messenger_ptr, int i_n, int i_excess_0, int i_excess_n, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_positions, datatype *i_default_matrix, datatype *i_matrix, datatype* i_data_in, datatype* i_rhs, datatype* i_data_out = NULL, int i_flags = 0x00);
+			solver (utils::messenger* i_messenger_ptr, int i_n, int i_excess_0, int i_excess_n, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_positions, datatype *i_default_matrix, datatype *i_matrix, datatype* i_data_in, datatype* i_rhs, datatype* i_data_out = NULL, int i_flags = 0x00);
 			
 			virtual ~solver ();
 			

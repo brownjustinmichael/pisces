@@ -179,9 +179,7 @@ namespace bases
 		 *********************************************************************/
 		inline datatype* get_data (int deriv) {
 			if (!calculated_matrix) {
-				DEBUG ("CALCULATING MATRIX...");
 				calculate_matrix ();
-				DEBUG ("MATRIX CALCULATED.");
 			}
 			return &(data [deriv] [0]);
 		}

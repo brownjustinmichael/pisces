@@ -12,7 +12,7 @@
 #ifndef ELEMENT_HPP_IUTSU4TQ
 #define ELEMENT_HPP_IUTSU4TQ
 
-#include "messenger.hpp"
+#include "../utils/messenger.hpp"
 #include <string>
 #include <cassert>
 #include <memory>
@@ -50,7 +50,7 @@ namespace bases
 	{
 	protected:
 		std::vector <bases::axis> axes; //!< A vector of axis objects, containing the basic grid information
-		messenger* messenger_ptr; //!< A pointer to the messenger object
+		utils::messenger* messenger_ptr; //!< A pointer to the messenger object
 		int name; //!< An integer representation of the element, to be used in file output
 		int dimensions; //!< The integer number of dimensions in the element
 		io::parameters& params; //!< The map that contains the input parameters
@@ -106,7 +106,7 @@ namespace bases
 		* \param i_messenger_ptr A pointer to a messenger object for inter-element communication
 		* \param i_element_flags An integer set of global flags for the element
 		*********************************************************************/
-		element (int i_name, int i_dimensions, io::parameters& i_params, messenger* i_messenger_ptr, int i_element_flags) : 
+		element (int i_name, int i_dimensions, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_element_flags) : 
 		dimensions (i_dimensions),
 		params (i_params) {
 			element_flags [state] = i_element_flags;
@@ -246,7 +246,7 @@ namespace bases
 			input_ptr->template append_scalar <datatype> ("t", &duration);
 			int mode;
 			input_ptr->template append_scalar <int> ("mode", &mode);
-
+			
 			try {
 				// Read from the input into the element variables
 				input_ptr->from_file ();
@@ -433,14 +433,11 @@ namespace bases
 
 		    gsl_rng_free (r);
 			
-			DEBUG ("Old timestep: " << timestep << " New timestep: " << -rezone_calculate_ts (rezone_data));
 			if (rezone_calculate_ts (rezone_data) < -timestep) {
 				for (int i = 0; i < messenger_ptr->get_np () + 1; ++i) {
 					positions [i] = rezone_data [i + 4].position;
 				}
 			}
-			
-			DEBUG ("New positions: " << positions [messenger_ptr->get_id ()] << " " << positions [messenger_ptr->get_id () + 1]);
 			
 			return make_rezoned_dump (positions, &*(make_dump ()));
 		}
@@ -510,7 +507,7 @@ namespace bases
 		static double rezone_calculate_ts (void *i_rezone_data) {
 			bases::element <datatype> *element_ptr = ((rezone_union <datatype> *) i_rezone_data)->element_ptr;
 			datatype positions [((rezone_union <datatype> *) i_rezone_data) [1].np + 1];
-			bases::messenger *messenger_ptr = element_ptr->messenger_ptr;
+			utils::messenger *messenger_ptr = element_ptr->messenger_ptr;
 			for (int i = 0; i < ((rezone_union <datatype> *) i_rezone_data) [1].np + 1; ++i) {
 				positions [i] = ((rezone_union <datatype> *) i_rezone_data) [i + 4].position;
 			}
@@ -551,7 +548,7 @@ namespace bases
 			for (int i = 0; i < ((rezone_union <datatype> *) i_old_rezone_data) [1].np + 1; ++i) {
 				old_positions [i] = ((rezone_union <datatype> *) i_old_rezone_data) [i + 4].position;
 			}
-			bases::messenger *messenger_ptr = element_ptr->messenger_ptr;
+			utils::messenger *messenger_ptr = element_ptr->messenger_ptr;
 			for (int i = 1; i < messenger_ptr->get_np (); ++i) {
 				total += (new_positions [i] - old_positions [i]) * (new_positions [i] - old_positions [i]);
 			}
@@ -574,7 +571,7 @@ namespace bases
 			for (int i = 0; i < rezone_data [1].np + 1; ++i) {
 				positions [i] = rezone_data [i + 4].position;
 			}
-			bases::messenger *messenger_ptr = element_ptr->messenger_ptr;
+			utils::messenger *messenger_ptr = element_ptr->messenger_ptr;
 			if (messenger_ptr->get_id () == 0) {
 				// Generate a random radius that is less than or equal to the step size
 				datatype radius = gsl_rng_uniform (r) * step_size;

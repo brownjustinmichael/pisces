@@ -9,7 +9,7 @@
 #ifndef ELEMENT_HPP_3SURDTOH
 #define ELEMENT_HPP_3SURDTOH
 
-#include "../bases/messenger.hpp"
+#include "../utils/messenger.hpp"
 #include <string>
 #include <sstream>
 #include <vector>
@@ -56,7 +56,7 @@ namespace one_d
 		 * \param i_position_n The datatype position of index n - 1 - excess_n
 		 * \copydoc bases::element <datatype>::element ()
 		 *********************************************************************/
-		element (bases::axis i_axis_n, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_flags) : 
+		element (bases::axis i_axis_n, int i_name, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_flags) : 
 		bases::element <datatype> (i_name, 1, i_params, i_messenger_ptr, i_flags),
 		n (i_axis_n.get_n ()) {
 			axes [0] = i_axis_n;
@@ -139,9 +139,6 @@ namespace one_d
 			
 			utils::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_dump, &*dump);
 			
-			DEBUG ("Old Bottom: " << old_dump->index <datatype> ("z", 0, 0) << " Old Top: " << old_dump->index <datatype> ("z", 0, n - 1));
-			DEBUG ("Bottom: " << dump->index <datatype> ("z", 0, 0) << " Top: " << dump->index <datatype> ("z", 0, n - 1));
-			
 			return dump;
 		}
 		
@@ -195,7 +192,7 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc one_d::element::element ()
 			 *********************************************************************/
-			element (bases::axis i_axis_n, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_flags) : 
+			element (bases::axis i_axis_n, int i_name, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_flags) : 
 			one_d::element <datatype> (i_axis_n, i_name, i_params, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
 				// one_d::element <datatype>::set_grid (new bases::chebyshev::grid <datatype> (axis_n));
@@ -215,7 +212,6 @@ namespace one_d
 #ifdef _CUDA
 					element <datatype>::add_transform (name, std::shared_ptr <cuda::master_transform <datatype> > (new cuda::master_transform <datatype> (*grids [0], ptr (name), NULL, forward_vertical | inverse_vertical, &element_flags [state], &element_flags [name])));
 #else
-					DEBUG("name: " << name << " pointer: " << ptr (name));
 					element <datatype>::add_transform (name, std::shared_ptr <master_transform <datatype> > (new master_transform <datatype> (*grids [0], ptr (name), NULL, forward_vertical | inverse_vertical, &element_flags [state], &element_flags [name])));
 #endif /* _CUDA */
 				}
@@ -258,7 +254,7 @@ namespace one_d
 			 * \param i_excess_n The integer number of points evaluated in the adjacent element
 			 * \copydoc element::element ()
 			 *********************************************************************/
-			nonlinear_diffusion_element (bases::axis i_axis_n, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_flags);
+			nonlinear_diffusion_element (bases::axis i_axis_n, int i_name, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_flags);
 		
 			virtual ~nonlinear_diffusion_element () {}
 		
@@ -300,7 +296,7 @@ namespace one_d
 			 * \param i_excess_n The integer number of points evaluated in the adjacent element
 			 * \copydoc element::element ()
 			 *********************************************************************/
-			advection_diffusion_element (bases::axis i_axis_n, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_flags);
+			advection_diffusion_element (bases::axis i_axis_n, int i_name, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_flags);
 		
 			virtual ~advection_diffusion_element () {}
 		
@@ -339,7 +335,7 @@ namespace one_d
 			/*!*******************************************************************
 			 * \copydoc one_d::element::element ()
 			 *********************************************************************/
-			element (bases::axis i_axis_n, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_flags) : 
+			element (bases::axis i_axis_n, int i_name, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_flags) : 
 			one_d::element <datatype> (i_axis_n, i_name, i_params, i_messenger_ptr, i_flags) {
 				TRACE ("Instantiating...");
 				initialize (position, "x");
@@ -400,7 +396,7 @@ namespace one_d
 			 * \param i_excess_n The integer number of points evaluated in the adjacent element
 			 * \copydoc element::element ()
 			 *********************************************************************/
-			advection_diffusion_element (bases::axis i_axis_n, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_flags);
+			advection_diffusion_element (bases::axis i_axis_n, int i_name, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_flags);
 	
 			virtual ~advection_diffusion_element () {}
 	

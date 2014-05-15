@@ -23,7 +23,7 @@ namespace two_d
 		namespace cosine
 		{
 			template <class datatype>
-			boussinesq_element <datatype>::boussinesq_element (bases::axis i_axis_n, bases::axis i_axis_m, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
+			boussinesq_element <datatype>::boussinesq_element (bases::axis i_axis_n, bases::axis i_axis_m, int i_name, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_element_flags) : 
 			element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_messenger_ptr, i_element_flags) {
 		
 				assert (n > 0);
@@ -39,7 +39,7 @@ namespace two_d
 				
 				advection_coeff = std::max (i_params.get <datatype> ("temperature.advection"), i_params.get <datatype> ("velocity.advection"));
 				cfl = i_params.get <datatype> ("time.cfl");
-
+				
 				// Solve velocity
 				element <datatype>::add_solver (x_velocity, new divergence_solver <datatype> (*grids [0], *grids [1], ptr (x_velocity), ptr (z_velocity), &element_flags [state], &element_flags [x_velocity]));
 								
