@@ -26,6 +26,9 @@
 #include <vt_user.h>
 #endif
 
+/*!**********************************************************************
+ * \brief Time a function call
+ ************************************************************************/
 #define TIME(call,cputime,duration) cbegin=clock(); tbegin=std::chrono::system_clock::now(); call; cend=clock(); tend=std::chrono::system_clock::now(); cputime+=((double) (cend - cbegin))/CLOCKS_PER_SEC; duration+=tend-tbegin;
 
 namespace bases
@@ -34,28 +37,37 @@ namespace bases
 	void element <datatype>::run (int &n_steps, int max_steps) {
 		TRACE ("Running...");
 		datatype t_timestep;
+		
+		// Define the variables to use in timing the execution of the run
 		clock_t cbegin, cend;
 		std::chrono::time_point <std::chrono::system_clock> tbegin, tend;
 		
 		double transform_time = 0.0, execution_time = 0.0, solve_time = 0.0, factorize_time = 0.0, output_time = 0.0, timestep_time = 0.0;
 		std::chrono::duration <double> transform_duration, execution_duration, solve_duration, factorize_duration, output_duration, timestep_duration;
-	
+		
+		// If the element is in Cartesian space, transform to modal space and copy from the transform buffer
 		transform (forward_horizontal | forward_vertical | no_read);
 		
+		// Set up openmp to run multiple plans simultaneously
 		omp_set_nested (true);
 		int threads = params.get <int> ("parallel.maxthreads");
 		
+		// Iterate through the total number of timesteps
 		while (n_steps > 0 && max_steps > 0) {
 			INFO ("Remaining steps: " << n_steps);
+			
+			// Transform the vertical grid to Cartesian space in the background
 			TIME (
 			transform (inverse_vertical | no_write | no_read | read_before);
 			, transform_time, transform_duration);
-
+			
+			// Factorize the matrices
 			TIME (
 			factorize ();
 			, factorize_time, factorize_duration);
 			
 			TRACE ("Executing plans...");
+			
 
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
@@ -76,42 +88,18 @@ namespace bases
 			TIME (
 			transform (forward_horizontal | no_write | no_read | read_before);
 			, transform_time, transform_duration);
-
+			
 			if (normal_stream) {
-			#pragma omp parallel sections num_threads(3)
-				{
-				#pragma omp section
-					{
-			// Calculate the minimum timestep among all elements
-						omp_set_num_threads (threads);
-						TIME (
-						t_timestep = calculate_min_timestep ();
-						messenger_ptr->min (&t_timestep);
-						, timestep_time, timestep_duration);
-					}
-				#pragma omp section
-					{
-						TIME (
-						if (normal_stream) {
-							normal_stream->to_file ();
-						}
-						for (int i = 0; i < (int) normal_profiles.size (); ++i) {
-							normal_profiles [i]->to_file ();
-						}
-						, output_time, output_duration);
-					}
-				#pragma omp section
-					{
-						omp_set_num_threads (threads);
-						TIME (
-						for (iterator iter = begin (); iter != end (); iter++) {
-							solvers [*iter]->execute_plans (post_plan);
-						}
-						, execution_time, execution_duration);
-						
-					}
+				TIME (
+				if (normal_stream) {
+					normal_stream->to_file ();
 				}
-			} else {
+				for (int i = 0; i < (int) normal_profiles.size (); ++i) {
+					normal_profiles [i]->to_file ();
+				}
+				, output_time, output_duration);
+			}
+			
 			#pragma omp parallel sections num_threads(2)
 				{
 				#pragma omp section
@@ -133,10 +121,8 @@ namespace bases
 						, execution_time, execution_duration);
 					}
 				}
-			}
-
 			TRACE ("Updating...");
-
+			
 			// Transform forward in the horizontal direction
 			TIME (
 			transform (do_not_transform | no_write);

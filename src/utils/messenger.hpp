@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file bases/messenger.hpp
+ * \file utils/messenger.hpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-19.
@@ -15,6 +15,7 @@
 #include <cassert>
 #include <algorithm>
 #include <vector>
+#include <typeinfo>
 #include "../config.hpp"
 #include "../utils/utils.hpp"
 
@@ -27,20 +28,29 @@ enum mpi_flags {
 	mpi_skip = 0x02
 };
 
-namespace bases
+namespace utils
 {	
 #ifdef _MPI
 	/*!**********************************************************************
 	 * \brief A helper function for MPI typing, for convenience
 	 * 
-	 * Given the appropriate template argument, this function returns the appropriate MPI type
+	 * \param type The type_info object describing the desired MPI type
 	 * 
-	 * \return The MPI type associated with the template argument
+	 * \return The MPI type associated with the argument
 	 ************************************************************************/
-	template <class datatype>
-	MPI_Datatype mpi_type ();
+	inline MPI_Datatype mpi_type (const std::type_info* type) {
+		if (type == &typeid (double)) {
+			return MPI::DOUBLE;
+		} else if (type == &typeid (int)) {
+			return MPI::INT;
+		} else if (type == &typeid (float)) {
+			return MPI::REAL;
+		} else {
+			FATAL ("Unrecognized MPI type");
+			throw 0;
+		}
+	}
 	
-	template <> MPI_Datatype mpi_type <int> ();
 #endif // _MPI
 	
 	/*!***********************************************************************
@@ -112,7 +122,7 @@ namespace bases
 			TRACE ("Checking...");
 			int flags = mpi_all_clear;
 #ifdef _MPI
-			MPI::COMM_WORLD.Gather (&flags, 1, mpi_type <int> (), &stati [0], 1, mpi_type <int> (), 0);
+			MPI::COMM_WORLD.Gather (&flags, 1, mpi_type (&typeid (int)), &stati [0], 1, mpi_type (&typeid (int)), 0);
 #endif // _MPI
 			if (id == 0) {
 				for (int i = 0; i < np; ++i) {
@@ -120,7 +130,7 @@ namespace bases
 				}
 			}
 #ifdef _MPI
-			MPI::COMM_WORLD.Bcast (&flags, 1, mpi_type <int> (), 0);
+			MPI::COMM_WORLD.Bcast (&flags, 1, mpi_type (&typeid (int)), 0);
 #endif // _MPI
 			if (flags & mpi_fatal) {
 				throw 0;
@@ -139,7 +149,7 @@ namespace bases
 		void skip_all () {
 			int flags = mpi_skip;
 #ifdef _MPI
-			MPI::COMM_WORLD.Bcast (&flags, 1, mpi_type <int> (), 0);
+			MPI::COMM_WORLD.Bcast (&flags, 1, mpi_type (&typeid (int)), 0);
 #endif // _MPI
 		}
 		
@@ -149,7 +159,7 @@ namespace bases
 		void kill_all () {
 			int flags = mpi_fatal;
 #ifdef _MPI
-			MPI::COMM_WORLD.Bcast (&flags, 1, mpi_type <int> (), 0);
+			MPI::COMM_WORLD.Bcast (&flags, 1, mpi_type (&typeid (int)), 0);
 #endif // _MPI
 		}
 		
@@ -164,7 +174,7 @@ namespace bases
 		template <class datatype>
 		void send (int n, const datatype* data, int process, int tag) {
 #ifdef _MPI
-			MPI::COMM_WORLD.Send (data, n, mpi_type <datatype> (), process, tag);
+			MPI::COMM_WORLD.Send (data, n, mpi_type (&typeid (datatype)), process, tag);
 #endif // _MPI
 		}
 		
@@ -182,7 +192,7 @@ namespace bases
 			TODO Make check_two
 		*/
 #ifdef _MPI
-			MPI::COMM_WORLD.Recv (data, n, mpi_type <datatype> (), process, tag);
+			MPI::COMM_WORLD.Recv (data, n, mpi_type (&typeid (datatype)), process, tag);
 #endif // _MPI
 		}
 		
@@ -198,9 +208,9 @@ namespace bases
 			if (check_all ()) {
 #ifdef _MPI
 				if (id == 0 && data_out == data_in) {
-					MPI::COMM_WORLD.Gather (MPI_IN_PLACE, n, mpi_type <datatype> (), data_out, n, mpi_type <datatype> (), 0);
+					MPI::COMM_WORLD.Gather (MPI_IN_PLACE, n, mpi_type (&typeid (datatype)), data_out, n, mpi_type (&typeid (datatype)), 0);
 				} else {
-					MPI::COMM_WORLD.Gather (data_in, n, mpi_type <datatype> (), data_out, n, mpi_type <datatype> (), 0);
+					MPI::COMM_WORLD.Gather (data_in, n, mpi_type (&typeid (datatype)), data_out, n, mpi_type (&typeid (datatype)), 0);
 				}
 #endif // _MPI
 			}
@@ -226,9 +236,9 @@ namespace bases
 					}
 				}
 				if (id == 0 && data_out == data_in) {
-					MPI::COMM_WORLD.Gatherv (MPI_IN_PLACE, n, mpi_type <datatype> (), data_in, ns, &displs [0], mpi_type <datatype> (), 0);
+					MPI::COMM_WORLD.Gatherv (MPI_IN_PLACE, n, mpi_type (&typeid (datatype)), data_in, ns, &displs [0], mpi_type (&typeid (datatype)), 0);
 				} else {
-					MPI::COMM_WORLD.Gatherv (data_in, n, mpi_type <datatype> (), data_out, ns, &displs [0], mpi_type <datatype> (), 0);
+					MPI::COMM_WORLD.Gatherv (data_in, n, mpi_type (&typeid (datatype)), data_out, ns, &displs [0], mpi_type (&typeid (datatype)), 0);
 				}
 #endif // _MPI
 			}
@@ -246,9 +256,9 @@ namespace bases
 			if (check_all ()) {
 #ifdef _MPI
 				if (data_out == data_in) {
-					MPI::COMM_WORLD.Allgather (MPI_IN_PLACE, n, mpi_type <datatype> (), data_out, n, mpi_type <datatype> ());
+					MPI::COMM_WORLD.Allgather (MPI_IN_PLACE, n, mpi_type (&typeid (datatype)), data_out, n, mpi_type (&typeid (datatype)));
 				} else {
-					MPI::COMM_WORLD.Allgather (data_in, n, mpi_type <datatype> (), data_out, n, mpi_type <datatype> ());
+					MPI::COMM_WORLD.Allgather (data_in, n, mpi_type (&typeid (datatype)), data_out, n, mpi_type (&typeid (datatype)));
 				}
 #endif // _MPI
 			}
@@ -272,9 +282,9 @@ namespace bases
 					displs [i] = displs [i - 1] + ns [i - 1];
 				}
 				if (data_out == data_in) {
-					MPI::COMM_WORLD.Allgatherv (MPI_IN_PLACE, n, mpi_type <datatype> (), data_out, ns, &displs [0], mpi_type <datatype> ());
+					MPI::COMM_WORLD.Allgatherv (MPI_IN_PLACE, n, mpi_type (&typeid (datatype)), data_out, ns, &displs [0], mpi_type (&typeid (datatype)));
 				} else {
-					MPI::COMM_WORLD.Allgatherv ((const void *) data_in, n, mpi_type <datatype> (), (void *) data_out, ns, &displs [0], mpi_type <datatype> ());
+					MPI::COMM_WORLD.Allgatherv ((const void *) data_in, n, mpi_type (&typeid (datatype)), (void *) data_out, ns, &displs [0], mpi_type (&typeid (datatype)));
 				}
 #endif // _MPI
 			}
@@ -290,7 +300,7 @@ namespace bases
 		void bcast (int n, datatype* data) {
 			if (check_all ()) {
 #ifdef _MPI
-				MPI::COMM_WORLD.Bcast (data, n, mpi_type <datatype> (), 0);
+				MPI::COMM_WORLD.Bcast (data, n, mpi_type (&typeid (datatype)), 0);
 #endif // _MPI
 			}
 		}
@@ -308,13 +318,13 @@ namespace bases
 				if (np != 1) {
 					std::vector <datatype> buffer (np);
 #ifdef _MPI
-					MPI::COMM_WORLD.Gather (data, 1, mpi_type <datatype> (), &buffer [0], 1, mpi_type <datatype> (), 0);
+					MPI::COMM_WORLD.Gather (data, 1, mpi_type (&typeid (datatype)), &buffer [0], 1, mpi_type (&typeid (datatype)), 0);
 #endif // _MPI
 					if (id == 0) {
 						*data = *std::min_element (buffer.begin (), buffer.end ());
 					}
 #ifdef _MPI
-					MPI::COMM_WORLD.Bcast (data, 1, mpi_type <datatype> (), 0);
+					MPI::COMM_WORLD.Bcast (data, 1, mpi_type (&typeid (datatype)), 0);
 #endif // _MPI
 				}
 			}

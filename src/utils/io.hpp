@@ -61,6 +61,11 @@ namespace io
 		template <class datatype>
 		void add_var (std::string name, int n = 1, int m = 1) {
 			_add_var (name, &typeid (datatype), sizeof (datatype), n, m);
+			for (int i = 0; i < n; ++i) {
+				for (int j = 0; j < m; ++j) {
+					((datatype *) (data_map [name])) [i * m + j] = 0.0;
+				}
+			}
 		}
 		
 		template <class datatype>
@@ -339,7 +344,6 @@ namespace io
 			
 			INFO ("Outputting to file " << file_name << "...");
 			
-			// DEBUG ("Scalars");
 			format_ptr->open_file (file_name.c_str (), format::replace_file);
 			for (int i = 0; i < (int) scalar_names.size (); ++i) {
 				if (scalar_types [i] == &typeid (double)) {
@@ -351,7 +355,6 @@ namespace io
 				}
 			}
 
-			// DEBUG ("Data");
 			for (int i = 0; i < (int) names.size (); ++i) {
 				if (types [i] == &typeid (double)) {
 					format_ptr->write (names [i], (double *) data_ptrs [i]);
@@ -362,7 +365,6 @@ namespace io
 				}
 			}
 			
-			// DEBUG ("Functions");
 			for (int i = 0; i < (int) functor_names.size (); ++i) {
 				if (functor_types [i] == &typeid (double)) {
 					format_ptr->write (functor_names [i], ((format_functor <double> *) functor_ptrs [i])->calculate ());

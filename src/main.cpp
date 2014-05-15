@@ -1,12 +1,12 @@
 /*!***********************************************************************
  * \file main.cpp
- * Spectral Element
+ * PISCES
  * 
  * Created by Justin Brown on 2013-04-08.
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include "bases/messenger.hpp"
+#include "utils/messenger.hpp"
 #include "bases/plan.hpp"
 #include "one_d/element_one_d.hpp"
 #include "two_d/boussinesq_two_d.hpp"
@@ -33,7 +33,7 @@
  * The goal of this project is to set up a code designed to do 2D 
  * Anelastic simulations using a spectral element scheme.
  * 
- * WARNING: This code uses the C++ shared_ptr object. If you are unfamiliar with this object, this can lead to some problems. Always generate a shared_ptr either with the make_shared C++ standard library function or by setting the shared pointer to the result of the "new" operator. This will avoid many future headaches on your part. Never set a shared_ptr to a pointer to a previously existing object as the computer will attempt to call the destructor to the object twice. (This often appears as a segmentation fault after the code has finished while the computer cleans up.)
+ * WARNING: This code uses the C++ shared_ptr object. If you are unfamiliar with this object, this can lead to some problems. Always generate a shared_ptr either with the make_shared C++ standard library function or by setting the shared pointer to the result of the "new" operator. This will avoid many future headaches on your part. Never set a shared_ptr to a pointer of a previously existing object as the computer will attempt to call the destructor to the object twice. (This often appears as a segmentation fault after the code has finished while the computer cleans up.)
  *
  * Possible further reaching goals: 3D, pseudo-incompressible
  *********************************************************************/
@@ -87,7 +87,7 @@ int main (int argc, char *argv[])
 	int id = 0, n_elements = 1;
 
 	// Initialize messenger
-	bases::messenger process_messenger (&argc, &argv);
+	utils::messenger process_messenger (&argc, &argv);
 
 	try {
 		id = process_messenger.get_id ();

@@ -6,7 +6,7 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include "bases/messenger.hpp"
+#include "utils/messenger.hpp"
 #include "config.hpp"
 #include "two_d/plan_two_d.hpp"
 #include "bases/grid.hpp"
@@ -22,7 +22,7 @@ int main (int argc, char *argv[])
 		int id = 0, n_elements = 1;
 
 		// Initialize messenger
-		bases::messenger process_messenger (&argc, &argv);
+		utils::messenger process_messenger (&argc, &argv);
 
 		id = process_messenger.get_id ();
 		n_elements = process_messenger.get_np ();

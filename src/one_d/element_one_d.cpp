@@ -28,7 +28,7 @@ namespace one_d
 		int element <datatype>::mode = mode_flag;
 		
 		template <class datatype>
-		advection_diffusion_element <datatype>::advection_diffusion_element (bases::axis i_axis_n, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
+		advection_diffusion_element <datatype>::advection_diffusion_element (bases::axis i_axis_n, int i_name, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_element_flags) : 
 		element <datatype> (i_axis_n, i_name, i_params, i_messenger_ptr, i_element_flags) {
 		
 			assert (n > 0);
@@ -91,7 +91,7 @@ namespace one_d
 		int element <datatype>::mode = mode_flag;
 		
 		template <class datatype>
-		advection_diffusion_element <datatype>::advection_diffusion_element (bases::axis i_axis_n, int i_name, io::parameters& i_params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
+		advection_diffusion_element <datatype>::advection_diffusion_element (bases::axis i_axis_n, int i_name, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_element_flags) : 
 		element <datatype> (i_axis_n, i_name, i_params, i_messenger_ptr, i_element_flags) {
 		
 			assert (n > 0);
@@ -146,7 +146,7 @@ namespace one_d
 		template class advection_diffusion_element <double>;
 		
 		template <class datatype>
-		nonlinear_diffusion_element <datatype>::nonlinear_diffusion_element (bases::axis i_axis_n, int i_name, io::parameters& params, bases::messenger* i_messenger_ptr, int i_element_flags) : 
+		nonlinear_diffusion_element <datatype>::nonlinear_diffusion_element (bases::axis i_axis_n, int i_name, io::parameters& params, utils::messenger* i_messenger_ptr, int i_element_flags) : 
 		element <datatype> (i_axis_n, i_name, params, i_messenger_ptr, i_element_flags) {
 			io::parameters& nparams = params;
 			advection_coeff = nparams.get <datatype> ("velocity.advection");

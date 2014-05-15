@@ -6,7 +6,7 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include "bases/messenger.hpp"
+#include "utils/messenger.hpp"
 #include "utils/io.hpp"
 #include <vector>
 #include <stdio.h>
@@ -19,7 +19,7 @@
 
 int main (int argc, char *argv[])
 {
-	bases::messenger mess (&argc, &argv);
+	utils::messenger mess (&argc, &argv);
 	std::string config_filename;
 	
 	if (argc <= 1) {

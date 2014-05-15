@@ -287,6 +287,14 @@ namespace io
 			NcVar *ncdata = ((NcFile *) datafile)->get_var (name.c_str ());
 			if (ncdata && ncdata->is_valid ()) {
 				ncdata->get ((double *) (data), n, m);
+				for (int i = 0; i < n; ++i) {
+					for (int j = 0; j < m; ++j) {
+						if (std::isnan (data [i * m + j])) {
+							WARN ("Reading in Nan.");
+							throw 0;
+						}
+					}
+				}
 			} else {
 				failures.push_back (name);
 				WARN ("Variable " << name << " not found in file");

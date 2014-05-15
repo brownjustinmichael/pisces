@@ -19,7 +19,7 @@ namespace cuda
 		namespace chebyshev
 		{
 			template <class datatype>
-			fft_element <datatype>::fft_element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameters& params, bases::messenger* i_messenger_ptr, int i_flags) : 
+			fft_element <datatype>::fft_element (int i_n, int i_excess_0, datatype i_position_0, int i_excess_n, datatype i_position_n, int i_name, io::parameters& params, utils::messenger* i_messenger_ptr, int i_flags) : 
 			::one_d::chebyshev::element <datatype> (i_n, i_excess_0, i_position_0, i_excess_n, i_position_n, i_name, params, i_messenger_ptr, i_flags),
 			excess_0 (i_excess_0),
 			excess_n (i_excess_n) {
