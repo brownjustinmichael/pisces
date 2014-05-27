@@ -225,16 +225,7 @@ namespace two_d
 		
 		template <>
 		void horizontal_transform <double>::execute () {
-			std::stringstream debug;
 			TRACE ("Executing...");
-			for (int j = 0; j < m; ++j) {
-				for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
-					debug << data_in [i * m + j] << " ";
-				}
-				DEBUG ("In: " << debug.str ());
-				debug.str ("");
-			}
-			
 #pragma omp parallel for num_threads (threads)
 			for (int i = 0; i < threads; ++i) {
 				fftw_execute (plans [i]);
@@ -248,14 +239,6 @@ namespace two_d
 		
 			for (int i = 0; i < 2 * (n / 2 + 1) * m; ++i) {
 				data_out [i] *= scalar;
-			}
-			
-			for (int j = 0; j < m; ++j) {
-				for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
-					debug << data_out [i * m + j] << " ";
-				}
-				DEBUG ("Out: " << debug.str ());
-				debug.str ("");
 			}
 			TRACE ("Execution Complete.");
 		}

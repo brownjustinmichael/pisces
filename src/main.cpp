@@ -8,7 +8,7 @@
 
 #include "utils/messenger.hpp"
 #include "bases/plan.hpp"
-#include "one_d/element_one_d.hpp"
+// #include "one_d/element_one_d.hpp"
 #include "two_d/boussinesq_two_d.hpp"
 #include "config.hpp"
 #include "two_d/transform_two_d.hpp"
@@ -134,12 +134,7 @@ int main (int argc, char *argv[])
 			std::string file_format = "../input/" + config.get <std::string> ("input.file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-			int m_max = m, m_offset = 0;
-			if (config.get <bool> ("input.full")) {
-				m_max = n_elements * m;
-				m_offset = id * m;
-			}
-			io::formatted_input <io::two_d::netcdf> input_stream (buffer, n, m, 1, n, m_max, 1, 0, m_offset);
+			io::formatted_input <io::two_d::netcdf> input_stream (buffer, n, m);
 		
 			element->setup (&input_stream);
 		}
@@ -151,12 +146,7 @@ int main (int argc, char *argv[])
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 		
-			int m_max = m, m_offset = 0;
-			if (config.get <bool> ("output.full")) {
-				m_max = n_elements * m;
-				m_offset = id * m;
-			}
-			normal_stream.reset (new io::incremental <io::two_d::netcdf> (buffer, config.get <int> ("output.every"), n, m, 1, n, m_max, 1, 0, m_offset));
+			normal_stream.reset (new io::incremental <io::two_d::netcdf> (buffer, config.get <int> ("output.every"), n, m));
 		}
 		
 		std::shared_ptr <io::output> transform_stream;
@@ -164,13 +154,8 @@ int main (int argc, char *argv[])
 			std::string file_format = "../output/" + config.get <std::string> ("output.transform_file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-			
-			int m_max = m, m_offset = 0;
-			if (config.get <bool> ("output.full")) {
-				m_max = n_elements * m;
-				m_offset = id * m;
-			}
-			transform_stream.reset (new io::incremental <io::two_d::netcdf> (buffer, config.get <int> ("output.every"), n, m, 1, n, m_max, 1, 0, m_offset));
+		
+			transform_stream.reset (new io::incremental <io::two_d::netcdf> (buffer, config.get <int> ("output.every"), n, m));
 		}
 		
 		/*
@@ -184,17 +169,19 @@ int main (int argc, char *argv[])
 		begin = std::chrono::system_clock::now ();
 
 		while (n_steps > 0) {
-			// io::virtual_dumps ["start"] = *(element->rezone_minimize_ts (&positions [0], config.get <double> ("grid.rezone.min_size"), config.get <double> ("grid.rezone.max_size"), config.get <int> ("grid.rezone.n_tries"), config.get <int> ("grid.rezone.iters_fixed_t"), config.get <double> ("grid.rezone.step_size"), config.get <double> ("grid.rezone.k"), config.get <double> ("grid.rezone.t_initial"), config.get <double> ("grid.rezone.mu_t"), config.get <double> ("grid.rezone.t_min")));
+			std::shared_ptr <io::virtual_dump> new_dump = element->rezone_minimize_ts (&positions [0], config.get <double> ("grid.rezone.min_size"), config.get <double> ("grid.rezone.max_size"), config.get <int> ("grid.rezone.n_tries"), config.get <int> ("grid.rezone.iters_fixed_t"), config.get <double> ("grid.rezone.step_size"), config.get <double> ("grid.rezone.k"), config.get <double> ("grid.rezone.t_initial"), config.get <double> ("grid.rezone.mu_t"), config.get <double> ("grid.rezone.t_min"));
 			
-			// bases::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
-			// element.reset (new two_d::fourier::cosine::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, &process_messenger, 0x00));
+			bases::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
+			element.reset (new two_d::fourier::cosine::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, &process_messenger, 0x00));
 			
 			/*
 				TODO It would be nice to combine the above construction of element with this one
 			*/
 			
-			// io::input *virtual_input (new io::formatted_input <io::two_d::virtual_format> ("start", n, m));
-			// element->setup (&*virtual_input);
+			io::virtual_dumps ["main/new_dump"] = *new_dump;
+			
+			io::input *virtual_input (new io::formatted_input <io::two_d::virtual_format> ("main/new_dump", n, m));
+			element->setup (&*virtual_input);
 			if (normal_stream) {
 				element->setup_output (normal_stream, normal_output);
 			}

@@ -82,13 +82,8 @@ int main (int argc, char *argv[])
 		std::string file_format = "../input/" + config.get <std::string> ("input.file");
 		char buffer [file_format.size () * 2];
 		snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
-		
-		int m_max = m, m_offset = 0;
-		if (config.get <bool> ("input.full")) {
-			m_max = n_elements * m;
-			m_offset = id * m;
-		}
-		io::formatted_output <io::two_d::netcdf> output_stream (buffer, n, m, 1, n, m_max, 1, 0, m_offset);
+
+		io::formatted_output <io::two_d::netcdf> output_stream (buffer, n, m);
 
 		double duration = 0.0;
 		int mode = mode_flag;
