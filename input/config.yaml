@@ -23,8 +23,8 @@ grid:
         mu_t: 1.003
         t_min: 2e-1
 time:
-    steps: 2000
-    max: 1.e0
+    steps: 10
+    max: 0.e0
     safety: 0.8
     cfl: 0.1
     alpha: 1.0
@@ -37,13 +37,15 @@ velocity:
     advection: 10.0
 input:
     file: input_%02i
+    full: true
 output:
     file: output_%02i_%%04i
     transform_file: output_t_%02i_%%04i
-    every: 20
+    every: 1
     merge_file: merge_%04i
+    full: true
 parallel:
     maxthreads: 4
     transform:
-        threads: 4
+        threads: 1
         subthreads: 4
