@@ -71,9 +71,7 @@ where the quantities $T$ and $\mu_{i}$ are still the ``true'' values of temperat
 He has shown that to conserve energy and mass,
 \begin{subequations}
 	\begin{align}
-		\label{eq:realT}
 		T&=\frac{\partial e}{\partial s}+p_{1}\frac{\partial \frac{\partial e}{\partial s}/\partial\rho}{\partial p/\partial\rho},\\
-		\label{eq:realmu}
 		\mu_{i}&=\frac{\partial e}{\partial \xi_{i}}+p_{1}\frac{\partial \frac{\partial e}{\partial \xi_{i}}/\partial\rho}{\partial p/\partial\rho}.
 	\end{align}
 \end{subequations}
@@ -144,14 +142,6 @@ It can be shown nontrivially that the derived pressure from this formulation, $p
 \end{equation}
 where $T\equiv\partial e/\partial s$, which is what one would expect na\"ively of an ideal gas with multiple components.
 
-With some calculus, we can derive useful expressions for Equations \ref{eq:realT} and \ref{eq:realmu}:
-\begin{subequations}
-	\begin{align}
-		T&=\frac{\partial e}{\partial s}+p_{1}\frac{\overline{m}}{\left(c_{V}+k\right)\rho},\\
-		\mu_{i}&=\frac{\partial e}{\partial \xi_{i}}+p_{1}\frac{\left(m_{1}-m_{2}\right)\left(s-\frac{c_{V}+k}{\overline{m}}\right)+k\ln{\frac{\phi_{2}}{\phi_{2}}}}{\left(c_{V}+k\right)\rho}.
-	\end{align}
-\end{subequations}
-
 % subsection eos (end)
 
 \subsection{Perfect Gas} % (fold)
@@ -176,7 +166,7 @@ Using this, we can look at the temperature evolution equation up to first order 
 	&-\frac{p_{1}}{T}\frac{\partial \frac{\partial e}{\partial s}/\partial\rho}{\partial p/\partial\rho}\left(\nabla\vect{u}:\vect{\Pi}+\sum_{i}\frac{\partial e}{\partial \xi_{i}}\nabla\cdot\vect{C}_{i}-\nabla\cdot{\vect{H}}\right)+\nonumber\\
 	&+\sum_{i}\frac{p_{1}}{\mu_{i}}\frac{\partial \frac{\partial e}{\partial \xi_{i}}/\partial\rho}{\partial p/\partial\rho}\nabla\cdot\vect{C}_{i}+O\left(p_{1}^{2}\right).
 \end{align}
-In this formulation, the strongest diffusive term is now a simple second derivative (buried in the divergence of the heat flux), which is much more conducive to a spectral solution.
+In this formulation, the strongest diffusive term is now a simple second derivative, which is much more conducive to a spectral solution.
 All terms of order $p_{1}$ must be solved through nonlinear means.
 
 % subsection perfect (end)

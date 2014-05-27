@@ -84,7 +84,7 @@ namespace two_d
 			ipiv.resize (m); // TODO Should be n - ntop - nbot - excess_0 - excess_n
 			data_temp.resize ((m + ex_excess_0 + ex_excess_n + nbot + ntop) * (ldn));
 			
-			transform = std::shared_ptr <bases::plan <datatype> > (new horizontal_transform <datatype> (n, m, rhs_ptr (real_rhs), NULL, NULL, element_flags, &flags));
+			transform = std::shared_ptr <bases::plan <datatype> > (new horizontal_transform <datatype> (n, m, rhs_ptr (real_rhs), NULL, 0x00, element_flags, component_flags));
 			TRACE ("Solver built.");
 		}
 		
@@ -352,7 +352,7 @@ namespace two_d
 				messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
 			}
 			
-			transform = std::shared_ptr <bases::plan <datatype> > (new horizontal_transform <datatype> (n, m, rhs_ptr (real_rhs), NULL, NULL, i_element_flags, &flags));
+			transform = std::shared_ptr <bases::plan <datatype> > (new horizontal_transform <datatype> (n, m, rhs_ptr (real_rhs), NULL, 0x00, i_element_flags, i_component_flags));
 		}
 		
 		template <class datatype>

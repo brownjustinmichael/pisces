@@ -21,11 +21,34 @@
 #include "exceptions.hpp"
 #include "../config.hpp"
 #include <yaml-cpp/yaml.h>
-#include <netcdfcpp.h>
+#include <netcdf>
 #include "utils.hpp"
 
 namespace io
 {	
+	enum io_flags {
+		read_file = 0,
+		replace_file = 1,
+		append_file = 2
+	};
+
+	class virtual_dump;
+	
+	extern std::map <std::string, virtual_dump> virtual_dumps;
+	
+	inline netCDF::NcType netcdf_type (const std::type_info* type) {
+		if (type == &typeid (double)) {
+			return netCDF::ncDouble;
+		} else if (type == &typeid (int)) {
+			return netCDF::ncInt;
+		} else if (type == &typeid (float)) {
+			return netCDF::ncFloat;
+		} else {
+			FATAL ("Unrecognized MPI type");
+			throw 0;
+		}
+	}
+	
 	class virtual_dump
 	{
 	public:
@@ -35,6 +58,16 @@ namespace io
 			for (std::map <std::string, void *>::iterator iter = data_map.begin (); iter != data_map.end (); iter++) {
 				free (iter->second);
 			}
+		}
+		
+		virtual void reset () {
+			for (std::map <std::string, void *>::iterator iter = data_map.begin (); iter != data_map.end (); iter++) {
+				free (iter->second);
+			}
+			data_map.clear ();
+			types.clear ();
+			sizes.clear ();
+			dims.clear ();
 		}
 		
 		virtual_dump &operator= (virtual_dump &dump) {
@@ -112,7 +145,7 @@ namespace io
 				throw 0;
 			}
 		}
-			
+					
 		std::map <std::string, std::array <int, 2>> dims;
 	private:
 		void _add_var (std::string name, const std::type_info *type, size_t size, int n = 1, int m = 1) {
@@ -224,38 +257,6 @@ namespace io
 		std::vector <datatype> inner_data;
 	};
 	
-	class format
-	{
-	public:
-		virtual ~format () {}
-		
-		virtual std::string extension () = 0;
-		
-		virtual void open_file (std::string file_name, int file_type) = 0;
-		
-		virtual void close_file () = 0;
-		
-		virtual void write (std::string name, double *) = 0;
-		virtual void write (std::string name, float *) = 0;
-		virtual void write (std::string name, int *) = 0;
-		
-		virtual void write_scalar (std::string name, double *) = 0;
-		virtual void write_scalar (std::string name, float *) = 0;
-		virtual void write_scalar (std::string name, int *) = 0;
-		
-		virtual void read (std::string name, double *) = 0;
-		virtual void read (std::string name, float *) = 0;
-		virtual void read (std::string name, int *) = 0;
-		
-		virtual void read_scalar (std::string name, double *) = 0;
-		virtual void read_scalar (std::string name, float *) = 0;
-		virtual void read_scalar (std::string name, int *) = 0;
-		
-		const static int read_file = 0;
-		const static int replace_file = 1;
-		const static int append_file = 2;
-	};
-	
 	/*!*******************************************************************
 	 * \brief An abstract output stream base class that generates output files
 	 *********************************************************************/
@@ -266,13 +267,11 @@ namespace io
 		 * \param i_header_ptr A pointer to the header object
 		 * \param i_n The integer number of points in the data
 		 *********************************************************************/
-		output (format* i_format_ptr, std::string i_file_name = "out") :
-		format_ptr (i_format_ptr),
-		file_name (i_file_name + format_ptr->extension ()) {};
+		output (std::string i_file_name = "out", int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 1, int i_m_max = 1, int i_l_max = 1, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) :
+		file_name (i_file_name),
+		n (i_n), m (i_m), l (i_l), n_max (i_n_max), m_max (i_m_max), l_max (i_l_max), n_offset (i_n_offset), m_offset (i_m_offset), l_offset (i_l_offset) {}
 		
-		virtual ~output () {
-			// printf ("Destroying output\n");
-		}
+		virtual ~output () {}
 		
 		/*!*******************************************************************
 		 * \brief Append a datatype array to the list to be output
@@ -329,7 +328,7 @@ namespace io
 			functor_types.push_back (&typeid (datatype));
 			functor_names.push_back (name);
 			functor_ptrs.push_back ((void *) functor_ptr);
-			TRACE ("Scalar appended.");
+			TRACE ("Functor appended.");
 		}
 		
 		/*!*******************************************************************
@@ -339,47 +338,13 @@ namespace io
 		 * contain a call to this function, which will output with default 
 		 * datatype representation in C++.
 		 *********************************************************************/
-		virtual void to_file () {
-			TRACE ("Sending to file...");
-			
-			INFO ("Outputting to file " << file_name << "...");
-			
-			format_ptr->open_file (file_name.c_str (), format::replace_file);
-			for (int i = 0; i < (int) scalar_names.size (); ++i) {
-				if (scalar_types [i] == &typeid (double)) {
-					format_ptr->write_scalar (scalar_names [i], (double *) scalar_ptrs [i]);
-				} else if (scalar_types [i] == &typeid (float)) {
-					format_ptr->write_scalar (scalar_names [i], (float *) scalar_ptrs [i]);
-				} else if (scalar_types [i] == &typeid (int)) {
-					format_ptr->write_scalar (scalar_names [i], (int *) scalar_ptrs [i]);
-				}
-			}
-
-			for (int i = 0; i < (int) names.size (); ++i) {
-				if (types [i] == &typeid (double)) {
-					format_ptr->write (names [i], (double *) data_ptrs [i]);
-				} else if (types [i] == &typeid (float)) {
-					format_ptr->write (names [i], (float *) data_ptrs [i]);
-				} else if (types [i] == &typeid (int)) {
-					format_ptr->write (names [i], (int *) data_ptrs [i]);
-				}
-			}
-			
-			for (int i = 0; i < (int) functor_names.size (); ++i) {
-				if (functor_types [i] == &typeid (double)) {
-					format_ptr->write (functor_names [i], ((format_functor <double> *) functor_ptrs [i])->calculate ());
-				} else if (functor_types [i] == &typeid (float)) {
-					format_ptr->write (functor_names [i], ((format_functor <float> *) functor_ptrs [i])->calculate ());
-				} else if (functor_types [i] == &typeid (int)) {
-					format_ptr->write (functor_names [i], ((format_functor <int> *) functor_ptrs [i])->calculate ());
-				}
-			}
-			format_ptr->close_file ();
-		}
+		virtual void to_file () = 0;
 		
 	protected:
-		std::shared_ptr <format> format_ptr;
 		std::string file_name;
+		int n, m, l;
+		int n_max, m_max, l_max;
+		int n_offset, m_offset, l_offset;
 		std::vector <std::string> names;
 		std::vector <std::string> scalar_names;
 		std::vector <std::string> functor_names;
@@ -391,12 +356,68 @@ namespace io
 		std::vector <void *> functor_ptrs;
 	};
 	
-	class incremental : public output
+	template <class format>
+	class formatted_output : public output
 	{
 	public:
-		incremental (format* i_format_ptr, std::string i_file_format, int i_output_every = 1) :
-		output (i_format_ptr),
-		file_format (i_file_format + format_ptr->extension ()),
+		formatted_output (std::string i_file_name = "out", int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 1, int i_m_max = 1, int i_l_max = 1, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) :
+		output (i_file_name + format::extension (), i_n, i_m, i_l, i_n_max, i_m_max, i_l_max, i_n_offset, i_m_offset, i_l_offset) {}		
+		
+		virtual ~formatted_output () {}
+		
+		virtual void to_file () {
+			TRACE ("Sending to file...");
+			
+			INFO ("Outputting to file " << file_name << "...");
+			
+			format::open_file (file_name.c_str (), replace_file, n_max, m_max, l_max);
+			
+			for (int i = 0; i < (int) scalar_names.size (); ++i) {
+				if (scalar_types [i] == &typeid (double)) {
+					format::template write_scalar <double> (file_name, scalar_names [i], (double *) scalar_ptrs [i]);
+				} else if (scalar_types [i] == &typeid (float)) {
+					format::template write_scalar <float> (file_name, scalar_names [i], (float *) scalar_ptrs [i]);
+				} else if (scalar_types [i] == &typeid (int)) {
+					format::template write_scalar <int> (file_name, scalar_names [i], (int *) scalar_ptrs [i]);
+				} else {
+					throw 0;
+				}
+			}
+
+			for (int i = 0; i < (int) names.size (); ++i) {
+				if (types [i] == &typeid (double)) {
+					format::template write <double> (file_name, names [i], (double *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset);
+				} else if (types [i] == &typeid (float)) {
+					format::template write <float> (file_name, names [i], (float *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset);
+				} else if (types [i] == &typeid (int)) {
+					format::template write <int> (file_name, names [i], (int *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset);
+				} else {
+					throw 0;
+				}
+			}
+			
+			for (int i = 0; i < (int) functor_names.size (); ++i) {
+				if (functor_types [i] == &typeid (double)) {
+					format::template write <double> (file_name, functor_names [i], ((format_functor <double> *) functor_ptrs [i])->calculate (), n, m, l, n_offset, m_offset, l_offset);
+				} else if (functor_types [i] == &typeid (float)) {
+					format::template write <float> (file_name, functor_names [i], ((format_functor <float> *) functor_ptrs [i])->calculate (), n, m, l, n_offset, m_offset, l_offset);
+				} else if (functor_types [i] == &typeid (int)) {
+					format::template write <int> (file_name, functor_names [i], ((format_functor <int> *) functor_ptrs [i])->calculate (), n, m, l, n_offset, m_offset, l_offset);
+				} else {
+					throw 0;
+				}
+			}
+			format::close_file (file_name.c_str ());
+		}
+	};
+	
+	template <class format>
+	class incremental : public formatted_output <format>
+	{
+	public:
+		incremental (std::string i_file_format, int i_output_every = 1, int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 1, int i_m_max = 1, int i_l_max = 1, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) :
+		formatted_output <format> ("", i_n, i_m, i_l, i_n_max, i_m_max, i_l_max, i_n_offset, i_m_offset, i_l_offset),
+		file_format (i_file_format + format::extension ()),
 		output_every (i_output_every > 0 ? i_output_every : 1),
 		count (0) {}
 		
@@ -407,8 +428,8 @@ namespace io
 			if (count % output_every == 0) {
 				char buffer [file_format.size () * 2];
 				snprintf (buffer, file_format.size () * 2, file_format.c_str (), count / output_every);
-				file_name = buffer;
-				output::to_file ();
+				formatted_output <format>::file_name = buffer;
+				formatted_output <format>::to_file ();
 			}
 			++count;
 		}
@@ -422,9 +443,9 @@ namespace io
 	class input
 	{
 	public:
-		input (format* i_format_ptr, std::string i_file_name = "in") :
-		format_ptr (i_format_ptr),
-		file_name (i_file_name + format_ptr->extension ()) {};
+		input (std::string i_file_name = "in", int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 1, int i_m_max = 1, int i_l_max = 1, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) :
+		file_name (i_file_name),
+		n (i_n), m (i_m), l (i_l), n_max (i_n_max), m_max (i_m_max), l_max (i_l_max), n_offset (i_n_offset), m_offset (i_m_offset), l_offset (i_l_offset) {}
 		
 		virtual ~input () {
 			// printf ("Destroying input\n");
@@ -458,35 +479,13 @@ namespace io
 		 * contain a call to this function, which will output with default 
 		 * datatype representation in C++.
 		 *********************************************************************/
-		virtual void from_file () {
-			INFO ("Inputting from file " << file_name << "...");
-
-			format_ptr->open_file (file_name.c_str (), format::read_file);
-			for (int i = 0; i < (int) names.size (); ++i) {
-				if (types [i] == &typeid (double)) {
-					format_ptr->read (names [i], (double *) data_ptrs [i]);
-				} else if (types [i] == &typeid (float)) {
-					format_ptr->read (names [i], (float *) data_ptrs [i]);
-				} else if (types [i] == &typeid (int)) {
-					format_ptr->read (names [i], (int *) data_ptrs [i]);
-				}
-			}
-			
-			for (int i = 0; i < (int) scalar_names.size (); ++i) {
-				if (scalar_types [i] == &typeid (double)) {
-					format_ptr->read_scalar (scalar_names [i], (double *) scalar_ptrs [i]);
-				} else if (scalar_types [i] == &typeid (float)) {
-					format_ptr->read_scalar (scalar_names [i], (float *) scalar_ptrs [i]);
-				} else if (scalar_types [i] == &typeid (int)) {
-					format_ptr->read_scalar (scalar_names [i], (int *) scalar_ptrs [i]);
-				}
-			}
-			format_ptr->close_file ();
-		}
+		virtual void from_file () = 0;
 		
 	protected:
-		format *format_ptr;
 		std::string file_name;
+		int n, m, l;
+		int n_max, m_max, l_max;
+		int n_offset, m_offset, l_offset;
 		std::vector <std::string> names;
 		std::vector <const std::type_info*> types;
 		std::vector <void *> data_ptrs; //!< A vector of integer pointers to the arrays of data
@@ -495,304 +494,296 @@ namespace io
 		std::vector <void *> scalar_ptrs; //!< A vector of integer pointers to the arrays of data
 	};
 	
+	template <class format>
+	class formatted_input : public input
+	{
+	public:
+		formatted_input (std::string i_file_name = "in", int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 1, int i_m_max = 1, int i_l_max = 1, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) :
+		input (i_file_name + format::extension (), i_n, i_m, i_l, i_n_max, i_m_max, i_l_max, i_n_offset, i_m_offset, i_l_offset) {}
+		
+		virtual ~formatted_input () {}
+		
+		virtual void from_file () {
+			INFO ("Inputting from file " << file_name << "...");
+
+			format::open_file (file_name.c_str (), read_file, n_max, m_max, l_max);
+			
+			for (int i = 0; i < (int) names.size (); ++i) {
+				if (types [i] == &typeid (double)) {
+					format::template read <double> (file_name, names [i], (double *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset);
+				} else if (types [i] == &typeid (float)) {
+					format::template read <float> (file_name, names [i], (float *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset);
+				} else if (types [i] == &typeid (int)) {
+					format::template read <int> (file_name, names [i], (int *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset);
+				} else {
+					throw 0;
+				}
+			}
+			
+			for (int i = 0; i < (int) scalar_names.size (); ++i) {
+				DEBUG ("THING " << scalar_names [i]);
+				if (scalar_types [i] == &typeid (double)) {
+					format::template read_scalar <double> (file_name, scalar_names [i], (double *) scalar_ptrs [i]);
+				} else if (scalar_types [i] == &typeid (float)) {
+					format::template read_scalar <float> (file_name, scalar_names [i], (float *) scalar_ptrs [i]);
+				} else if (scalar_types [i] == &typeid (int)) {
+					format::template read_scalar <int> (file_name, scalar_names [i], (int *) scalar_ptrs [i]);
+					DEBUG ("After " << scalar_names [i] << " " << *((int *) scalar_ptrs [i]));
+				} else {
+					throw 0;
+				}
+				DEBUG ("Done");
+			}
+			
+			format::close_file (file_name.c_str ());
+		}
+	};
+	
 	namespace one_d
 	{
-		/*!*******************************************************************
-		 * \brief A simple implementation of the output class
-		 * 
-		 * This class is a simple implementation of the output class.
-		 *********************************************************************/
-		class ascii : public format
-		{
-		public:
-			/*!*******************************************************************
-			 * \param i_file_name The string name of file for output
-			 * \param i_n The integer number of points in the data
-			 * \param i_output_every An integer number of steps between outputs
-			 *********************************************************************/
-			ascii (int i_n, std::string i_comment = "#") : 
-			n (i_n),
-			comment (i_comment) {}
-		
-			~ascii () {}
-			
-			std::string extension () {return ".dat";}
-			
-			virtual void open_file (std::string file_name, int file_type);
-		
-			virtual void close_file ();
-		
-			virtual void write (std::string name, double *);
-			virtual void write (std::string name, float *);
-			virtual void write (std::string name, int *);
-			
-			virtual void write_scalar (std::string name, double *);
-			virtual void write_scalar (std::string name, float *);
-			virtual void write_scalar (std::string name, int *);
-			
-			virtual void read (std::string name, double *);
-			virtual void read (std::string name, float *);
-			virtual void read (std::string name, int *);
-			
-			virtual void read_scalar (std::string name, double *);
-			virtual void read_scalar (std::string name, float *);
-			virtual void read_scalar (std::string name, int *);
-			
-			/*
-				TODO Write these methods
-			*/
-				
-		protected:
-			std::ofstream file_stream;
-			int n;
-			std::vector <const std::type_info *> types;
-			std::vector <std::vector <double>> double_data;
-			std::vector <std::vector <float>> float_data;
-			std::vector <std::vector <int>> int_data;
-			std::vector <std::string> names;
-			std::string comment;
-		};
+		// /*!*******************************************************************
+		//  * \brief A simple implementation of the output class
+		//  * 
+		//  * This class is a simple implementation of the output class.
+		//  *********************************************************************/
+		// class ascii : public format <ascii>
+		// {
+		// public:
+		// 	/*!*******************************************************************
+		// 	 * \param i_file_name The string name of file for output
+		// 	 * \param i_n The integer number of points in the data
+		// 	 * \param i_output_every An integer number of steps between outputs
+		// 	 *********************************************************************/
+		// 	ascii (int i_n, std::string i_comment = "#") : 
+		// 	n (i_n),
+		// 	comment (i_comment) {}
+		// 
+		// 	~ascii () {}
+		// 	
+		// 	std::string extension () {return ".dat";}
+		// 	
+		// 	virtual void open_file (std::string file_name, int file_type);
+		// 
+		// 	virtual void close_file ();
+		// 
+		// 	template <class datatype>
+		// 	virtual void _write (std::string name, void *data) {
+		// 		TRACE ("Writing...");
+		// 		names.push_back (name);
+		// 		double_data.resize (double_data.size () + 1);
+		// 		float_data.resize (float_data.size () + 1);
+		// 		int_data.resize (int_data.size () + 1);
+		// 		if (type == &typeid (double)) {
+		// 			double_data [(int) double_data.size () - 1].resize (n);
+		// 			double_data [(int) double_data.size () - 1].assign ((double *) data, ((double *) data) + n);
+		// 			types.push_back (&typeid (double));
+		// 		} else if (type == &typeid (float)) {
+		// 			float_data [(int) float_data.size () - 1].resize (n);
+		// 			float_data [(int) float_data.size () - 1].assign ((float *) data, ((float *) data) + n);
+		// 			types.push_back (&typeid (float));
+		// 		} else if (type == &typeid (int)) {
+		// 			int_data [(int) int_data.size () - 1].resize (n);
+		// 			int_data [(int) int_data.size () - 1].assign ((int *) data, ((int *) data) + n);
+		// 			types.push_back (&typeid (int));
+		// 		}
+		// 	}
+		// 	virtual void write_scalar (std::string name, std::type_info *, void *) {
+		// 		
+		// 	}
+		// 	virtual void read (std::string name, std::type_info *, void *) {
+		// 		throw 0;
+		// 	}
+		// 	virtual void read_scalar (std::string name, std::type_info *, void *) {
+		// 		throw 0;
+		// 	}
+		// 	
+		// 	/*
+		// 		TODO Write these methods
+		// 	*/
+		// 		
+		// protected:
+		// 	std::ofstream file_stream;
+		// 	int n;
+		// 	std::vector <const std::type_info *> types;
+		// 	std::vector <std::vector <double>> double_data;
+		// 	std::vector <std::vector <float>> float_data;
+		// 	std::vector <std::vector <int>> int_data;
+		// 	std::vector <std::string> names;
+		// 	std::string comment;
+		// };
 		
 		/*
 			TODO Make legible headers
 		*/
 		
-		class netcdf : public format
-		{
-		public:
-			netcdf (int i_n) :
-			n (i_n) {}
-		
-			virtual ~netcdf () {}
-			
-			std::string extension () {return ".cdf";}
-			
-			virtual void open_file (std::string file_name, int file_type);
-		
-			virtual void close_file ();
-		
-			virtual void write (std::string name, double *);
-			virtual void write (std::string name, float *);
-			virtual void write (std::string name, int *);
-			
-			virtual void write_scalar (std::string name, double *);
-			virtual void write_scalar (std::string name, float *);
-			virtual void write_scalar (std::string name, int *);
-			
-			virtual void read (std::string name, double *);
-			virtual void read (std::string name, float *);
-			virtual void read (std::string name, int *);
-			
-			virtual void read_scalar (std::string name, double *);
-			virtual void read_scalar (std::string name, float *);
-			virtual void read_scalar (std::string name, int *);
-		
-		protected:
-			int n;
-			void * datafile, *zDim;
-		};
+		// class netcdf : public format
+		// {
+		// public:
+		// 	netcdf (int i_n, int i_n_offset = 0) :
+		// 	n (i_n), n_offset (i_n_offset) {}
+		// 
+		// 	virtual ~netcdf () {}
+		// 	
+		// 	std::string extension () {return ".cdf";}
+		// 	
+		// 	virtual void open_file (std::string file_name, int file_type);
+		// 
+		// 	virtual void close_file ();
+		// 
+		// 	virtual void write (std::string name, double *);
+		// 	virtual void write (std::string name, float *);
+		// 	virtual void write (std::string name, int *);
+		// 	
+		// 	virtual void write_scalar (std::string name, double *);
+		// 	virtual void write_scalar (std::string name, float *);
+		// 	virtual void write_scalar (std::string name, int *);
+		// 	
+		// 	virtual void read (std::string name, double *);
+		// 	virtual void read (std::string name, float *);
+		// 	virtual void read (std::string name, int *);
+		// 	
+		// 	virtual void read_scalar (std::string name, double *);
+		// 	virtual void read_scalar (std::string name, float *);
+		// 	virtual void read_scalar (std::string name, int *);
+		// 
+		// protected:
+		// 	int n;
+		// 	int n_offset;
+		// 	void * datafile;
+		// 	netCDF::NcDim zDim;
+		// };
 	} /* one_d */
 	
 	namespace two_d
 	{
-		class average_profile : public format
+		class virtual_format
 		{
 		public:
-			average_profile (format *i_format, int i_n, int i_m) :
-			base_format (i_format),
-			n (i_n),
-			m (i_m) {
-				double_buffer.resize (m);
-				int_buffer.resize (m);
-				float_buffer.resize (m);
-			}
-			
-			virtual ~average_profile () {}
-			
-			std::string extension () {return base_format->extension ();}
-			
-			void open_file (std::string file_name, int file_type) {
-				TRACE ("Opening file...");
-				base_format->open_file (file_name, file_type);
-			}
-			
-			void close_file () {
-				base_format->close_file ();
-			}
-			
-			void write (std::string name, double *data) {
-				TRACE ("Making average...");
-				for (int j = 0; j < m; ++j) {
-					double_buffer [j] = 0.0;
-					for (int i = 0; i < n; ++i) {
-						double_buffer [j] += data [i * m + j];
-					}
-					double_buffer [j] /= n;
-				}
-				base_format->write (name, &double_buffer [0]);
-			}
-			void write (std::string name, float *data) {
-				TRACE ("Making average...");
-				for (int j = 0; j < m; ++j) {
-					float_buffer [j] = 0.0;
-					for (int i = 0; i < n; ++i) {
-						float_buffer [j] += data [i * m + j];
-					}
-					float_buffer [j] /= n;
-				}
-				base_format->write (name, &float_buffer [0]);
-			}
-			void write (std::string name, int *data) {
-				TRACE ("Making average...");
-				for (int j = 0; j < m; ++j) {
-					int_buffer [j] = 0;
-					for (int i = 0; i < n; ++i) {
-						int_buffer [j] += data [i * m + j];
-					}
-					int_buffer [j] /= n;
-				}
-				base_format->write (name, &int_buffer [0]);
-			}
-			
-			void write_scalar (std::string name, double *data) {
-				base_format->write_scalar (name, data);
-			}
-			void write_scalar (std::string name, float *data) {
-				base_format->write_scalar (name, data);
-			}
-			void write_scalar (std::string name, int *data) {
-				base_format->write_scalar (name, data);
-			}
-			
-			void read (std::string name, double *data) {
-				throw 0;
-			}
-			void read (std::string name, float *data) {
-				throw 0;
-			}
-			void read (std::string name, int *data) {
-				throw 0;
-			}
-			
-			void read_scalar (std::string name, double *data) {
-				throw 0;
-			}
-			void read_scalar (std::string name, float *data) {
-				throw 0;
-			}
-			void read_scalar (std::string name, int *data) {
-				throw 0;
-			}
-			
-		private:
-			format *base_format;
-			int n, m;
-			std::vector <int> int_buffer;
-			std::vector <double> double_buffer;
-			std::vector <float> float_buffer;
-		};
-		
-		class virtual_format : public format
-		{
-		public:
-			virtual_format (virtual_dump *i_dump, int i_n, int i_m) :
-			dump (i_dump), n (i_n), m (i_m) {}
+			virtual_format () {}
 		
 			~virtual_format () {}
 		
-			std::string extension () {return "";}
+			static std::string extension () {return "";}
 			
-			void open_file (std::string name, int file_type) {}
-			void close_file () {}
-			
-			void write (std::string name, double *data) {
-				dump->add_var <double> (name, n, m);
-				dump->put <double> (name, (double *) data, n, m);
-			}
-			void write (std::string name, float *data) {
-				dump->add_var <float> (name, n, m);
-				dump->put <float> (name, (float *) data, n, m);
-			}
-			void write (std::string name, int *data) {
-				dump->add_var <int> (name, n, m);
-				dump->put <int> (name, (int *) data, n, m);
+			static void open_file (std::string file_name, int file_type, int n_max, int m_max, int l_max) {
+				virtual_dumps [file_name];
 			}
 			
-			void write_scalar (std::string name, double *data) {
-				dump->add_var <double> (name);
-				dump->put <double> (name, (double *) data);
-			}
-			void write_scalar (std::string name, float *data) {
-				dump->add_var <float> (name);
-				dump->put <float> (name, (float *) data);
-			}
-			void write_scalar (std::string name, int *data) {
-				dump->add_var <int> (name);
-				dump->put <int> (name, (int *) data);
-			}
+			static void close_file (std::string file_name) {}
 			
-			void read (std::string name, double *data) {
-				dump->get <double> (name, (double *) data, n, m);
-			}
-			void read (std::string name, float *data) {
-				dump->get <float> (name, (float *) data, n, m);
-			}
-			void read (std::string name, int *data) {
-				dump->get <int> (name, (int *) data, n, m);
-			}
-			
-			void read_scalar (std::string name, double *data) {
-				dump->get <double> (name, (double *) data);
-			}
-			void read_scalar (std::string name, float *data) {
-				dump->get <float> (name, (float *) data);
-			}
-			void read_scalar (std::string name, int *data) {
-				dump->get <int> (name, (int *) data);
+			template <class datatype>
+			static void write (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0) {
+				virtual_dumps [file_name].add_var <datatype> (name, n, m);
+				virtual_dumps [file_name].put <datatype> (name, (datatype *) data, n, m);
 			}
 		
-		private:
-			virtual_dump *dump;
-			int n, m;
+			template <class datatype>
+			static void write_scalar (std::string file_name, std::string name, datatype *data) {
+				virtual_dumps [file_name].add_var <datatype> (name);
+				virtual_dumps [file_name].put <datatype> (name, (datatype *) data);
+			}
+		
+			template <class datatype>
+			static void read (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0) {
+				virtual_dumps [file_name].get <datatype> (name, (datatype *) data, n, m);
+				for (int i = 0; i < n; ++i) {
+					for (int j = 0; j < m; ++j) {
+						if (*(data + i * m + j) != *(data + i * m + j)) {
+							FATAL ("NaN read in.");
+							throw 0;
+						}
+					}
+				}
+			}
+		
+			template <class datatype>
+			static void read_scalar (std::string file_name, std::string name, datatype *data) {
+				virtual_dumps [file_name].get <datatype> (name, (datatype *) data);
+			}
 		};
 			
 		
-		class netcdf : public format
+		class netcdf
 		{
 		public:
-			netcdf (int i_n = 0, int i_m = 0) :
-			n (i_n), m (i_m) {
-				// if (n == 0)
-			}
+			netcdf () {}
 		
 			virtual ~netcdf () {}
 		
-			std::string extension () {return ".cdf";}
+			static std::string extension () {return ".cdf";}
 			
-			virtual void open_file (std::string file_name, int file_type);
+			static void open_file (std::string file_name, int file_type, int n_max, int m_max, int l_max);
 		
-			virtual void close_file ();
+			static void close_file (std::string file_name);
 			
-			void write (std::string name, double *data);
-			void write (std::string name, float *data);
-			void write (std::string name, int *data);
-			
-			void write_scalar (std::string name, double *data);
-			void write_scalar (std::string name, float *data);
-			void write_scalar (std::string name, int *data);
-			
-			void read (std::string name, double *data);
-			void read (std::string name, float *data);
-			void read (std::string name, int *data);
-			
-			void read_scalar (std::string name, double *data);
-			void read_scalar (std::string name, float *data);
-			void read_scalar (std::string name, int *data);
+			template <class datatype>
+			static void write (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0) {
+				std::vector <size_t> offsets = {(size_t) n_offset, (size_t) m_offset};
+				std::vector <size_t> sizes = {(size_t) n, (size_t) m};
+				netCDF::NcVar ncdata = files [file_name]->addVar (name.c_str (), netcdf_type (&typeid (datatype)), dims [file_name]);
+				ncdata.setFill (true, NULL);
+				ncdata.putVar (offsets, sizes, data);
+			}
+		
+			template <class datatype>
+			static void write_scalar (std::string file_name, std::string name, datatype *data) {
+				std::vector <netCDF::NcDim> scalar_dims;
+				std::vector <size_t> scalar_offset;
+				netCDF::NcVar ncdata = files [file_name]->addVar (name.c_str (), netcdf_type (&typeid (datatype)), scalar_dims);
+				ncdata.putVar (scalar_offset, data);
+			}
+		
+			template <class datatype>
+			static void read (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0) {
+				try {
+					std::vector <size_t> offsets = {(size_t) n_offset, (size_t) m_offset};
+					std::vector <size_t> sizes = {(size_t) n, (size_t) m};
+					netCDF::NcVar ncdata = files [file_name]->getVar (name.c_str ());
+					if (ncdata.isNull ()) {
+						throw 0;
+					}
+					ncdata.getVar (offsets, sizes, data);
+					for (int i = 0; i < n; ++i) {
+						for (int j = 0; j < m; ++j) {
+							if (*(data + i * m + j) != *(data + i * m + j)) {
+								FATAL ("NaN read in.");
+								throw 0;
+							}
+						}
+					}
+				} catch (netCDF::exceptions::NcBadName &e) {
+					failures [file_name].push_back (name);
+					WARN ("Variable " << name << " not found in file");
+				} catch (int &e) {
+					failures [file_name].push_back (name);
+					WARN ("Variable " << name << " not found in file");
+				}
+			}
+		
+			template <class datatype>
+			static void read_scalar (std::string file_name, std::string name, datatype *data) {
+				try {
+					DEBUG ("Reading scalar..." << name << " " << data);
+					std::vector <size_t> scalar_offset;
+					netCDF::NcVar ncdata = files [file_name]->getVar (name.c_str ());
+					if (ncdata.isNull ()) {
+						throw 0;
+					}
+					ncdata.getVar (scalar_offset, data);
+					DEBUG ("Read " << *data);
+				} catch (netCDF::exceptions::NcBadName &e) {
+					failures [file_name].push_back (name);
+					WARN ("Variable " << name << " not found in file");
+				} catch (int &e) {
+					failures [file_name].push_back (name);
+					WARN ("Variable " << name << " not found in file");
+				}
+			}
 			
 		protected:
-			int n, m;
-			std::vector <std::string> failures;
-			void *datafile, *zDim, *xDim;
+			static std::map <std::string, netCDF::NcFile *> files;
+			static std::map <std::string, std::vector <netCDF::NcDim>> dims;
+			static std::map <std::string, std::vector <std::string>> failures;
 		};
 		
 		/*
