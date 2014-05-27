@@ -56,13 +56,6 @@ namespace bases
 		while (n_steps > 0 && max_steps > 0) {
 			INFO ("Remaining steps: " << n_steps);
 			
-			TIME (
-			if (transform_stream) {
-				TRACE ("Writing to file...");
-				transform_stream->to_file ();
-			}
-			, output_time, output_duration);
-			
 			// Transform the vertical grid to Cartesian space in the background
 			TIME (
 			transform (inverse_vertical | no_write | no_read | read_before);
@@ -75,25 +68,12 @@ namespace bases
 			
 			TRACE ("Executing plans...");
 			
-			TIME (
-			if (transform_stream) {
-				TRACE ("Writing to file...");
-				transform_stream->to_file ();
-			}
-			, output_time, output_duration);
-			
+
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
 				solvers [*iter]->execute_plans (pre_plan);
 			}
 			, execution_time, execution_duration);
-			
-			TIME (
-			if (transform_stream) {
-				TRACE ("Writing to file...");
-				transform_stream->to_file ();
-			}
-			, output_time, output_duration);
 			
 			TIME (
 			transform (inverse_horizontal | no_write | no_read | read_before);
@@ -104,24 +84,10 @@ namespace bases
 				solvers [*iter]->execute_plans (mid_plan);
 			}
 			, execution_time, execution_duration);
-			
-			TIME (
-			if (transform_stream) {
-				TRACE ("Writing to file...");
-				transform_stream->to_file ();
-			}
-			, output_time, output_duration);
 	
 			TIME (
 			transform (forward_horizontal | no_write | no_read | read_before);
 			, transform_time, transform_duration);
-			
-			TIME (
-			if (transform_stream) {
-				TRACE ("Writing to file...");
-				transform_stream->to_file ();
-			}
-			, output_time, output_duration);
 			
 			if (normal_stream) {
 				TIME (
@@ -157,25 +123,11 @@ namespace bases
 				}
 			TRACE ("Updating...");
 			
-			TIME (
-			if (transform_stream) {
-				TRACE ("Writing to file...");
-				transform_stream->to_file ();
-			}
-			, output_time, output_duration);
-
 			// Transform forward in the horizontal direction
 			TIME (
 			transform (do_not_transform | no_write);
 			, transform_time, transform_duration);
 	
-			TIME (
-			if (transform_stream) {
-				TRACE ("Writing to file...");
-				transform_stream->to_file ();
-			}
-			, output_time, output_duration);
-
 			// Calculate the pre solver plans
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
@@ -195,12 +147,6 @@ namespace bases
 			solve ();
 			, solve_time, solve_duration);
 			
-			TIME (
-			if (transform_stream) {
-				TRACE ("Writing to file...");
-				transform_stream->to_file ();
-			}
-			, output_time, output_duration);
 			// Check whether the timestep has changed. If it has, mark all solvers to be refactorized.
 			
 			duration += timestep;
@@ -233,13 +179,13 @@ namespace bases
 	template <class datatype>
 	void element <datatype>::transform (int i_flags) {
 		TRACE ("Transforming...");
+		typedef typename std::vector <int>::iterator iterator;
 		omp_set_nested (true);
 		
 		int threads = params.get <int> ("parallel.transform.threads");
 		
 		#pragma omp parallel for num_threads (threads)
 		for (int i = 0; i < (int) transforms.size (); ++i) {
-			DEBUG ("Transforming " << transforms [i])
 			master_transforms [transforms [i]]->transform (i_flags);
 		}
 	}

@@ -223,7 +223,7 @@ namespace one_d
 			datatype cfl = nparams.get <datatype> ("time.cfl");
 			datatype nonlinear = nparams.get <datatype> ("velocity.nonlinear");
 			t_timestep = nparams.get <datatype> ("time.max");
-			return std::min (std::min (t_timestep, std::abs ((position_ptr [i - 1] - position_ptr [i + 1]) / velocity_ptr [i] / advection_coeff) * cfl), std::abs ((*this) (position, i + 1) - (*this) (position, i - 1)) * ((*this) (position, i + 1) - (*this) (position, i - 1)) / 2.0 / nonlinear / (*this) (velocity, i) * cfl);
+			return std::min (std::abs ((position_ptr [i - 1] - position_ptr [i + 1]) / velocity_ptr [i] / advection_coeff) * cfl, std::abs ((*this) (position, i + 1) - (*this) (position, i - 1)) * ((*this) (position, i + 1) - (*this) (position, i - 1)) / 2.0 / nonlinear / (*this) (velocity, i) * cfl);
 		}
 		
 		template class nonlinear_diffusion_element <double>;

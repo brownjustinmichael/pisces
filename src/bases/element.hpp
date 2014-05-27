@@ -71,6 +71,7 @@ namespace bases
 		std::vector <std::shared_ptr <io::output>> normal_profiles; //!< An implementation to output in transform space
 
 		std::vector <int> solver_keys; //!< A vector of integer keys to the solvers map
+		io::virtual_dump *rezone_dump; //!< A shared_ptr to a virtual dump object, for rezoning
 		std::vector <int> transforms; //!< A vector of integer keys to the transform maps
 		std::map <int, std::shared_ptr <master_transform <datatype>>> master_transforms; //!< A map of shared_ptrs to the transform objects
 		
@@ -245,16 +246,13 @@ namespace bases
 			input_ptr->template append_scalar <datatype> ("t", &duration);
 			int mode;
 			input_ptr->template append_scalar <int> ("mode", &mode);
-			DEBUG ("Mode is " << mode << " " << &mode);
 			
 			try {
 				// Read from the input into the element variables
 				input_ptr->from_file ();
-				DEBUG ("2Mode is " << mode << " " << &mode);
 			} catch (exceptions::io::bad_variables &except) {
 				// Send a warning if there are missing variables in the input
 				WARN (except.what ());
-				DEBUG ("3Mode is " << mode << " " << &mode);
 			}
 			
 			// Make sure that the mode matched the mode of the element
@@ -403,11 +401,11 @@ namespace bases
 		 * 
 		 * \return A shared_ptr to a virtual_dump object containing the chosen rezoning
 		 ************************************************************************/
-		virtual io::virtual_dump *rezone_minimize_ts (datatype * positions, datatype min_size, datatype max_size, int n_tries = 20, int iters_fixed_t = 1000, datatype step_size = 1.0, datatype k = 1.0, datatype t_initial = 0.008, datatype mu_t = 1.003, datatype t_min = 2.0e-6) {
+		virtual std::shared_ptr <io::virtual_dump> rezone_minimize_ts (datatype * positions, datatype min_size, datatype max_size, int n_tries = 20, int iters_fixed_t = 1000, datatype step_size = 1.0, datatype k = 1.0, datatype t_initial = 0.008, datatype mu_t = 1.003, datatype t_min = 2.0e-6) {
 			TRACE ("Rezoning...");
 			transform (inverse_horizontal | inverse_vertical);
 
-			io::virtual_dumps ["base_element"] = *make_dump (profile_only | timestep_only);
+			rezone_dump = make_dump (profile_only | timestep_only);
 			
 			rezone_union <datatype> rezone_data [(messenger_ptr->get_np () + 5)];
 			rezone_data [0].element_ptr = this;
@@ -441,7 +439,7 @@ namespace bases
 				}
 			}
 			
-			return make_rezoned_dump (positions, make_dump ());
+			return make_rezoned_dump (positions, &*(make_dump ()));
 		}
 		
 		/*!**********************************************************************
@@ -487,7 +485,7 @@ namespace bases
 		 * 
 		 * \return A shared_ptr to the rezoned virtual dump
 		 ************************************************************************/
-		virtual io::virtual_dump *make_rezoned_dump (datatype *positions, io::virtual_dump *dump_ptr, int flags = 0x00) = 0;
+		virtual std::shared_ptr <io::virtual_dump> make_rezoned_dump (datatype *positions, io::virtual_dump *dump_ptr, int flags = 0x00) = 0;
 		
 		/*!**********************************************************************
 		 * \brief Get the current zoning position array
@@ -513,7 +511,7 @@ namespace bases
 			for (int i = 0; i < ((rezone_union <datatype> *) i_rezone_data) [1].np + 1; ++i) {
 				positions [i] = ((rezone_union <datatype> *) i_rezone_data) [i + 4].position;
 			}
-			double timestep = element_ptr->calculate_min_timestep (&*(element_ptr->make_rezoned_dump (positions, &io::virtual_dumps ["base_element"], profile_only)));
+			double timestep = element_ptr->calculate_min_timestep (&*(element_ptr->make_rezoned_dump (positions, &*(element_ptr->rezone_dump), profile_only)));
 			messenger_ptr->min (&timestep);
 			return -timestep;
 		}

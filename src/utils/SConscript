@@ -15,7 +15,7 @@ if not conf.CheckLib ("ptf77blas"):
 if not conf.CheckLib ("ptcblas"):
     conf.CheckLib ("cblas")
 
-for lib in ["atlas", "libnetcdf_c++4.dylib", "irc", "imf", "yaml-cpp"]:
+for lib in ["atlas", "netcdf_c++4", "irc", "imf", "yaml-cpp"]:
     conf.CheckLib (lib)
 
 env = conf.Finish ()

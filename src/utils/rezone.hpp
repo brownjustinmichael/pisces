@@ -67,7 +67,7 @@ namespace utils
 	datatype minimum_timestep (int n, int m, bases::element <datatype> *element, utils::messenger *messenger, datatype *positions) {
 		io::virtual_dump dump, new_dump;
 		
-		std::shared_ptr <io::output> virtual_output (new io::formatted_output <io::two_d::virtual_format> ("rezone_in", n, m));
+		std::shared_ptr <io::output> virtual_output (new io::formatted_output <io::two_d::virtual_format> ("rezone/dump", n, m));
 		element->setup_output (virtual_output);
 		
 		virtual_output->to_file ();
@@ -78,9 +78,9 @@ namespace utils
 		bases::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == np - 1 ? 0 : 1);
 		std::shared_ptr <bases::grid <double>> vertical_grid = element->generate_grid (&vertical_axis);
 		
-		rezone <datatype> (messenger, &*(element->grids [1]), &*vertical_grid, &io::virtual_dumps ["rezone_in"], &io::virtual_dumps ["rezone_out"]);
+		rezone <datatype> (messenger, &*(element->grids [1]), &*vertical_grid, &io::virtual_dumps ["rezone/dump"], &new_dump);
 		
-		return element->calculate_min_timestep (&io::virtual_dumps ["rezone_out"]);
+		return element->calculate_min_timestep (&new_dump);
 	}
 	
 	

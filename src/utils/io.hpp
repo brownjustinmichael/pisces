@@ -267,9 +267,9 @@ namespace io
 		 * \param i_header_ptr A pointer to the header object
 		 * \param i_n The integer number of points in the data
 		 *********************************************************************/
-		output (std::string i_file_name = "out", int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 1, int i_m_max = 1, int i_l_max = 1, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) :
+		output (std::string i_file_name = "out", int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 0, int i_m_max = 0, int i_l_max = 0, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) :
 		file_name (i_file_name),
-		n (i_n), m (i_m), l (i_l), n_max (i_n_max), m_max (i_m_max), l_max (i_l_max), n_offset (i_n_offset), m_offset (i_m_offset), l_offset (i_l_offset) {}
+		n (i_n), m (i_m), l (i_l), n_max (i_n_max ? i_n_max : n), m_max (i_m_max ? i_m_max : m), l_max (i_l_max ? i_l_max : l), n_offset (i_n_offset), m_offset (i_m_offset), l_offset (i_l_offset) {}
 		
 		virtual ~output () {}
 		
@@ -360,7 +360,7 @@ namespace io
 	class formatted_output : public output
 	{
 	public:
-		formatted_output (std::string i_file_name = "out", int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 1, int i_m_max = 1, int i_l_max = 1, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) :
+		formatted_output (std::string i_file_name = "out", int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 0, int i_m_max = 0, int i_l_max = 0, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) :
 		output (i_file_name + format::extension (), i_n, i_m, i_l, i_n_max, i_m_max, i_l_max, i_n_offset, i_m_offset, i_l_offset) {}		
 		
 		virtual ~formatted_output () {}
@@ -415,7 +415,7 @@ namespace io
 	class incremental : public formatted_output <format>
 	{
 	public:
-		incremental (std::string i_file_format, int i_output_every = 1, int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 1, int i_m_max = 1, int i_l_max = 1, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) :
+		incremental (std::string i_file_format, int i_output_every = 1, int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 0, int i_m_max = 0, int i_l_max = 0, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) :
 		formatted_output <format> ("", i_n, i_m, i_l, i_n_max, i_m_max, i_l_max, i_n_offset, i_m_offset, i_l_offset),
 		file_format (i_file_format + format::extension ()),
 		output_every (i_output_every > 0 ? i_output_every : 1),
