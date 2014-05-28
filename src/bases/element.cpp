@@ -179,7 +179,6 @@ namespace bases
 	template <class datatype>
 	void element <datatype>::transform (int i_flags) {
 		TRACE ("Transforming...");
-		typedef typename std::vector <int>::iterator iterator;
 		omp_set_nested (true);
 		
 		int threads = params.get <int> ("parallel.transform.threads");

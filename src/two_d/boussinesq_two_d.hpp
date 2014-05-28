@@ -28,7 +28,6 @@ namespace two_d
 				datatype calculate_timestep (int i, int j, io::virtual_dump *dump = NULL);
 				
 				virtual io::virtual_dump *make_dump (int flags = 0x00) {
-					std::shared_ptr <io::virtual_dump> dump (new io::virtual_dump);
 					std::shared_ptr <io::output> virtual_output;
 					if (flags & profile_only) {
 						virtual_output.reset (new io::formatted_output <io::two_d::virtual_format> ("two_d/boussinesq/dump", 1, m));
@@ -53,15 +52,13 @@ namespace two_d
 					return &io::virtual_dumps ["two_d/boussinesq/dump"];
 				}
 				
-				virtual std::shared_ptr <io::virtual_dump> make_rezoned_dump (datatype *positions, io::virtual_dump *old_dump, int flags = 0x00) {
-					std::shared_ptr <io::virtual_dump> dump (new io::virtual_dump);
-					
+				virtual io::virtual_dump *make_rezoned_dump (datatype *positions, io::virtual_dump *old_dump, int flags = 0x00) {
 					bases::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
 					std::shared_ptr <bases::grid <datatype>> vertical_grid = element <datatype>::generate_grid (&vertical_axis);
 			
-					utils::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_dump, &*dump);
+					utils::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_dump, &io::virtual_dumps ["two_d/boussinesq/new_dump"]);
 					
-					return dump;
+					return &io::virtual_dumps ["two_d/boussinesq/new_dump"];
 				}
 				
 				using element <datatype>::ptr;
