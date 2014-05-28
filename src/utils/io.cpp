@@ -17,7 +17,6 @@
 
 namespace io
 {	
-	// netCDF::NcError error_instance (netCDF::NcError::verbose_nonfatal);
 	std::map <std::string, virtual_dump> virtual_dumps;
 	
 	YAML::Node parameters::operator [] (std::string key) {
