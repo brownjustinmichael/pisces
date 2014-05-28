@@ -217,13 +217,12 @@ namespace one_d
 		
 		template <class datatype>
 		datatype nonlinear_diffusion_element <datatype>::calculate_timestep (int i, io::virtual_dump *dump) {
-			datatype t_timestep;
 			io::parameters& nparams = params;
 			datatype advection_coeff = nparams.get <datatype> ("velocity.advection");
 			datatype cfl = nparams.get <datatype> ("time.cfl");
 			datatype nonlinear = nparams.get <datatype> ("velocity.nonlinear");
-			t_timestep = nparams.get <datatype> ("time.max");
-			return std::min (std::abs ((position_ptr [i - 1] - position_ptr [i + 1]) / velocity_ptr [i] / advection_coeff) * cfl, std::abs ((*this) (position, i + 1) - (*this) (position, i - 1)) * ((*this) (position, i + 1) - (*this) (position, i - 1)) / 2.0 / nonlinear / (*this) (velocity, i) * cfl);
+			datatype t_timestep = std::min (nparams.get <datatype> ("time.max"), std::abs ((position_ptr [i - 1] - position_ptr [i + 1]) / velocity_ptr [i] / advection_coeff) * cfl);
+			return std::min (t_timestep, std::abs ((*this) (position, i + 1) - (*this) (position, i - 1)) * ((*this) (position, i + 1) - (*this) (position, i - 1)) / 2.0 / nonlinear / (*this) (velocity, i) * cfl);
 		}
 		
 		template class nonlinear_diffusion_element <double>;

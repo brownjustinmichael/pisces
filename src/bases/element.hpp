@@ -401,7 +401,7 @@ namespace bases
 		 * 
 		 * \return A shared_ptr to a virtual_dump object containing the chosen rezoning
 		 ************************************************************************/
-		virtual std::shared_ptr <io::virtual_dump> rezone_minimize_ts (datatype * positions, datatype min_size, datatype max_size, int n_tries = 20, int iters_fixed_t = 1000, datatype step_size = 1.0, datatype k = 1.0, datatype t_initial = 0.008, datatype mu_t = 1.003, datatype t_min = 2.0e-6) {
+		virtual io::virtual_dump *rezone_minimize_ts (datatype * positions, datatype min_size, datatype max_size, int n_tries = 20, int iters_fixed_t = 1000, datatype step_size = 1.0, datatype k = 1.0, datatype t_initial = 0.008, datatype mu_t = 1.003, datatype t_min = 2.0e-6) {
 			TRACE ("Rezoning...");
 			transform (inverse_horizontal | inverse_vertical);
 
@@ -439,7 +439,7 @@ namespace bases
 				}
 			}
 			
-			return make_rezoned_dump (positions, &*(make_dump ()));
+			return make_rezoned_dump (positions, make_dump ());
 		}
 		
 		/*!**********************************************************************
@@ -485,7 +485,7 @@ namespace bases
 		 * 
 		 * \return A shared_ptr to the rezoned virtual dump
 		 ************************************************************************/
-		virtual std::shared_ptr <io::virtual_dump> make_rezoned_dump (datatype *positions, io::virtual_dump *dump_ptr, int flags = 0x00) = 0;
+		virtual io::virtual_dump *make_rezoned_dump (datatype *positions, io::virtual_dump *dump_ptr, int flags = 0x00) = 0;
 		
 		/*!**********************************************************************
 		 * \brief Get the current zoning position array
@@ -511,7 +511,7 @@ namespace bases
 			for (int i = 0; i < ((rezone_union <datatype> *) i_rezone_data) [1].np + 1; ++i) {
 				positions [i] = ((rezone_union <datatype> *) i_rezone_data) [i + 4].position;
 			}
-			double timestep = element_ptr->calculate_min_timestep (&*(element_ptr->make_rezoned_dump (positions, &*(element_ptr->rezone_dump), profile_only)));
+			double timestep = element_ptr->calculate_min_timestep (element_ptr->make_rezoned_dump (positions, &*(element_ptr->rezone_dump), profile_only));
 			messenger_ptr->min (&timestep);
 			return -timestep;
 		}

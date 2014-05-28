@@ -52,7 +52,9 @@ namespace io
 	class virtual_dump
 	{
 	public:
-		virtual_dump () {}
+		virtual_dump () {
+			DEBUG ("Generating new virtual dump");
+		}
 		
 		virtual ~virtual_dump () {
 			for (std::map <std::string, void *>::iterator iter = data_map.begin (); iter != data_map.end (); iter++) {
@@ -443,7 +445,7 @@ namespace io
 	class input
 	{
 	public:
-		input (std::string i_file_name = "in", int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 1, int i_m_max = 1, int i_l_max = 1, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) :
+		input (std::string i_file_name = "in", int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 0, int i_m_max = 0, int i_l_max = 0, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) :
 		file_name (i_file_name),
 		n (i_n), m (i_m), l (i_l), n_max (i_n_max), m_max (i_m_max), l_max (i_l_max), n_offset (i_n_offset), m_offset (i_m_offset), l_offset (i_l_offset) {}
 		
@@ -498,7 +500,7 @@ namespace io
 	class formatted_input : public input
 	{
 	public:
-		formatted_input (std::string i_file_name = "in", int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 1, int i_m_max = 1, int i_l_max = 1, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) :
+		formatted_input (std::string i_file_name = "in", int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 0, int i_m_max = 0, int i_l_max = 0, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) :
 		input (i_file_name + format::extension (), i_n, i_m, i_l, i_n_max, i_m_max, i_l_max, i_n_offset, i_m_offset, i_l_offset) {}
 		
 		virtual ~formatted_input () {}
@@ -666,13 +668,17 @@ namespace io
 			static std::string extension () {return "";}
 			
 			static void open_file (std::string file_name, int file_type, int n_max, int m_max, int l_max) {
+				DEBUG ("Opening virtual file.");
 				virtual_dumps [file_name];
 			}
 			
-			static void close_file (std::string file_name) {}
+			static void close_file (std::string file_name) {
+				DEBUG ("Closing virtual file.");
+			}
 			
 			template <class datatype>
 			static void write (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0) {
+				DEBUG ("Writing to virtual file");
 				virtual_dumps [file_name].add_var <datatype> (name, n, m);
 				virtual_dumps [file_name].put <datatype> (name, (datatype *) data, n, m);
 			}
@@ -685,6 +691,7 @@ namespace io
 		
 			template <class datatype>
 			static void read (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0) {
+				DEBUG ("Reading from virtual file");
 				virtual_dumps [file_name].get <datatype> (name, (datatype *) data, n, m);
 				for (int i = 0; i < n; ++i) {
 					for (int j = 0; j < m; ++j) {

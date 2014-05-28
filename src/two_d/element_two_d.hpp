@@ -185,15 +185,13 @@ namespace two_d
 		
 		virtual std::shared_ptr <bases::grid <datatype>> generate_grid (bases::axis *axis, int index = -1) = 0;
 		
-		virtual std::shared_ptr <io::virtual_dump> make_rezoned_dump (datatype *positions, io::virtual_dump *old_dump, int flags = 0x00) {
-			std::shared_ptr <io::virtual_dump> dump (new io::virtual_dump);
-			
+		virtual io::virtual_dump *make_rezoned_dump (datatype *positions, io::virtual_dump *old_dump, int flags = 0x00) {
 			bases::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
 			std::shared_ptr <bases::grid <datatype>> vertical_grid = generate_grid (&vertical_axis);
 			
-			utils::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_dump, &*dump);
+			utils::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_dump, &io::virtual_dumps ["two_d/element/new_dump"]);
 			
-			return dump;
+			return &io::virtual_dumps ["two_d/element/new_dump"];
 		}
 		
 		/*
