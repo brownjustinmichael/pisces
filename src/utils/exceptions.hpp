@@ -26,6 +26,18 @@ namespace exceptions
 		inline const char *what () const throw () {return "File couldn't be opened";}
 	};
 	
+	/*!**********************************************************************
+	 * \brief This exception occurs when a function is called that can't handle the given type
+	 ************************************************************************/
+	class bad_type : public std::exception
+	{
+	public:
+		/*!**********************************************************************
+		 * \brief Describe the nature of the exception
+		 ************************************************************************/
+		inline const char *what () const throw () {return "Bad type passed";}
+	};
+	
 	class key_does_not_exist : public std::exception
 	{
 	public:
