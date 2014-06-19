@@ -6,7 +6,7 @@
  * Copyright 2014 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include "../../src/bases/messenger.hpp"
+#include "../../src/utils/messenger.hpp"
 #include "../../src/utils/io.hpp"
 #include "../../src/one_d/element_one_d.hpp"
 #include "../../src/config.hpp"
@@ -72,7 +72,7 @@ int main (int argc, char *argv[])
 	// }
 	fftw_plan fourier_plan = fftw_plan_r2r_1d (n, &fftw_copy [0], &fftw_copy [0], FFTW_REDFT00, FFTW_ESTIMATE);
 	
-	bases::messenger process_messenger (&argc, &argv);
+	utils::messenger process_messenger (&argc, &argv);
 	io::parameters config;
 	
 	config ["time.max"] = 0.0;

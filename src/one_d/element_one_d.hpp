@@ -120,7 +120,7 @@ namespace one_d
 		}
 		
 		virtual io::virtual_dump *make_dump (int flags = 0x00) {
-			std::shared_ptr <io::output> virtual_output (new io::formatted_output <io::two_d::virtual_format> ("one_d/dump", n));
+			std::shared_ptr <io::output> virtual_output (new io::formatted_output <io::formats::two_d::virtual_format> ("one_d/dump", n));
 			bases::element <datatype>::setup_output (virtual_output);
 			
 			virtual_output->to_file ();

@@ -348,10 +348,7 @@ namespace io
 		 * \param i_n The integer horizontal extent of the data
 		 * \param i_m The integer vertical extent of the data
 		 ************************************************************************/
-		average_functor (datatype *i_data, int i_n, int i_m) :
-		data (i_data),
-		n (i_n),
-		m (i_m) {
+		average_functor (datatype *i_data, int i_n, int i_m) : data (i_data), n (i_n), m (i_m) {
 			inner_data.resize (m);
 		}
 		
@@ -390,10 +387,7 @@ namespace io
 		 * \param i_n The integer horizontal extent of the data
 		 * \param i_m The integer vertical extent of the data
 		 ************************************************************************/
-		root_mean_square_functor (datatype *i_data, int i_n, int i_m) :
-		data (i_data),
-		n (i_n),
-		m (i_m) {
+		root_mean_square_functor (datatype *i_data, int i_n, int i_m) : data (i_data), n (i_n), m (i_m) {
 			inner_data.resize (m);
 		}
 		
@@ -423,6 +417,7 @@ namespace io
 	{
 	protected:
 		std::string file_name; //!< The string file name
+		int file_format;
 		int n; //!< The integer number of points in the first dimension of the data
 		int m; //!< The integer number of points in the second dimension of the data
 		int l; //!< The integer number of points in the third dimension of the data
@@ -457,9 +452,7 @@ namespace io
 		 * 
 		 * This seems an extremely tedious way to do this. It might be superior to accept arrays or brace initialized lists
 		 *********************************************************************/
-		output (std::string i_file_name = "out", int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 0, int i_m_max = 0, int i_l_max = 0, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) :
-		file_name (i_file_name),
-		n (i_n), m (i_m), l (i_l), n_max (i_n_max ? i_n_max : n), m_max (i_m_max ? i_m_max : m), l_max (i_l_max ? i_l_max : l), n_offset (i_n_offset), m_offset (i_m_offset), l_offset (i_l_offset) {}
+		output (std::string i_file_name = "out", int i_file_format = replace_file, int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 0, int i_m_max = 0, int i_l_max = 0, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) : file_name (i_file_name), file_format (i_file_format), n (i_n), m (i_m), l (i_l), n_max (i_n_max ? i_n_max : n), m_max (i_m_max ? i_m_max : m), l_max (i_l_max ? i_l_max : l), n_offset (i_n_offset), m_offset (i_m_offset), l_offset (i_l_offset) {}
 		
 		virtual ~output () {}
 		
@@ -543,7 +536,7 @@ namespace io
 		 * 
 		 * This function should be overwritten by subclasses.
 		 *********************************************************************/
-		virtual void to_file () = 0;
+		virtual void to_file (int record = -1) = 0;
 	};
 	
 	/*!**********************************************************************
@@ -558,29 +551,30 @@ namespace io
 		/*!**********************************************************************
 		 * \copydoc output::output
 		 ************************************************************************/
-		formatted_output (std::string i_file_name = "out", int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 0, int i_m_max = 0, int i_l_max = 0, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) :
-		output (i_file_name + format::extension (), i_n, i_m, i_l, i_n_max, i_m_max, i_l_max, i_n_offset, i_m_offset, i_l_offset) {}		
+		formatted_output (std::string i_file_name = "out", int i_file_format = replace_file, int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 0, int i_m_max = 0, int i_l_max = 0, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) : output (i_file_name + format::extension (), i_file_format, i_n, i_m, i_l, i_n_max, i_m_max, i_l_max, i_n_offset, i_m_offset, i_l_offset) {}		
 		
-		virtual ~formatted_output () {}
+		virtual ~formatted_output () {
+			format::close_file (file_name.c_str (), output::file_format);
+		}
 		
 		/*!**********************************************************************
 		 * \copybrief output::to_file
 		 ************************************************************************/
-		virtual void to_file () {
+		virtual void to_file (int record = -1) {
 			TRACE ("Sending to file...");
 			
 			INFO ("Outputting to file " << file_name << "...");
 			
-			format::open_file (file_name.c_str (), replace_file, n_max, m_max, l_max);
+			format::open_file (file_name.c_str (), output::file_format, n_max, m_max, l_max);
 			
 			// Output the scalars
 			for (int i = 0; i < (int) scalar_names.size (); ++i) {
 				if (scalar_types [i] == &typeid (double)) {
-					format::template write_scalar <double> (file_name, scalar_names [i], (double *) scalar_ptrs [i]);
+					format::template write_scalar <double> (file_name, scalar_names [i], (double *) scalar_ptrs [i], record);
 				} else if (scalar_types [i] == &typeid (float)) {
-					format::template write_scalar <float> (file_name, scalar_names [i], (float *) scalar_ptrs [i]);
+					format::template write_scalar <float> (file_name, scalar_names [i], (float *) scalar_ptrs [i], record);
 				} else if (scalar_types [i] == &typeid (int)) {
-					format::template write_scalar <int> (file_name, scalar_names [i], (int *) scalar_ptrs [i]);
+					format::template write_scalar <int> (file_name, scalar_names [i], (int *) scalar_ptrs [i], record);
 				} else {
 					throw 0;
 				}
@@ -589,11 +583,11 @@ namespace io
 			// OUtput the array data
 			for (int i = 0; i < (int) names.size (); ++i) {
 				if (types [i] == &typeid (double)) {
-					format::template write <double> (file_name, names [i], (double *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset);
+					format::template write <double> (file_name, names [i], (double *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset, record);
 				} else if (types [i] == &typeid (float)) {
-					format::template write <float> (file_name, names [i], (float *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset);
+					format::template write <float> (file_name, names [i], (float *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset, record);
 				} else if (types [i] == &typeid (int)) {
-					format::template write <int> (file_name, names [i], (int *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset);
+					format::template write <int> (file_name, names [i], (int *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset, record);
 				} else {
 					throw 0;
 				}
@@ -602,16 +596,18 @@ namespace io
 			// Output the results from the functors
 			for (int i = 0; i < (int) functor_names.size (); ++i) {
 				if (functor_types [i] == &typeid (double)) {
-					format::template write <double> (file_name, functor_names [i], ((format_functor <double> *) functor_ptrs [i])->calculate (), n, m, l, n_offset, m_offset, l_offset);
+					format::template write <double> (file_name, functor_names [i], ((format_functor <double> *) functor_ptrs [i])->calculate (), n, m, l, n_offset, m_offset, l_offset, record);
 				} else if (functor_types [i] == &typeid (float)) {
-					format::template write <float> (file_name, functor_names [i], ((format_functor <float> *) functor_ptrs [i])->calculate (), n, m, l, n_offset, m_offset, l_offset);
+					format::template write <float> (file_name, functor_names [i], ((format_functor <float> *) functor_ptrs [i])->calculate (), n, m, l, n_offset, m_offset, l_offset, record);
 				} else if (functor_types [i] == &typeid (int)) {
-					format::template write <int> (file_name, functor_names [i], ((format_functor <int> *) functor_ptrs [i])->calculate (), n, m, l, n_offset, m_offset, l_offset);
+					format::template write <int> (file_name, functor_names [i], ((format_functor <int> *) functor_ptrs [i])->calculate (), n, m, l, n_offset, m_offset, l_offset, record);
 				} else {
 					throw 0;
 				}
 			}
-			format::close_file (file_name.c_str ());
+			if (output::file_format != append_file) {
+				format::close_file (file_name.c_str (), output::file_format);
+			}
 		}
 	};
 	
@@ -633,7 +629,7 @@ namespace io
 		 * \copydoc formatted_output::formatted_output
 		 ************************************************************************/
 		incremental (std::string i_file_format, int i_output_every = 1, int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 0, int i_m_max = 0, int i_l_max = 0, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) :
-		formatted_output <format> ("", i_n, i_m, i_l, i_n_max, i_m_max, i_l_max, i_n_offset, i_m_offset, i_l_offset),
+		formatted_output <format> ("", replace_file, i_n, i_m, i_l, i_n_max, i_m_max, i_l_max, i_n_offset, i_m_offset, i_l_offset),
 		file_format (i_file_format + format::extension ()),
 		output_every (i_output_every > 0 ? i_output_every : 1),
 		count (0) {}
@@ -643,13 +639,44 @@ namespace io
 		/*!**********************************************************************
 		 * \copybrief formatted_output::to_file
 		 ************************************************************************/
-		void to_file () {
+		void to_file (int record = -1) {
 			TRACE ("Sending to file...");
 			if (count % output_every == 0) {
 				char buffer [file_format.size () * 2];
 				snprintf (buffer, file_format.size () * 2, file_format.c_str (), count / output_every);
 				formatted_output <format>::file_name = buffer;
-				formatted_output <format>::to_file ();
+				formatted_output <format>::to_file (record);
+			}
+			++count;
+		}
+	};
+	
+	/*!**********************************************************************
+	 * \brief An output class that appends each output to the same file
+	 ************************************************************************/
+	template <class format>
+	class appender_output : public formatted_output <format>
+	{
+	private:
+		int output_every; //!< The integer frequency of outputs
+		int count; //!< The current integer count of total outputs
+	
+	public:
+		/*!**********************************************************************
+		 * \param i_output_every The integer frequency of outputs
+		 * \copydoc formatted_output::formatted_output
+		 ************************************************************************/
+		appender_output (std::string i_file_name, int i_output_every = 1, int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 0, int i_m_max = 0, int i_l_max = 0, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) : formatted_output <format> (i_file_name, append_file, i_n, i_m, i_l, i_n_max, i_m_max, i_l_max, i_n_offset, i_m_offset, i_l_offset), output_every (i_output_every > 0 ? i_output_every : 1), count (0) {}
+	
+		virtual ~appender_output () {}
+	
+		/*!**********************************************************************
+		 * \copybrief formatted_output::to_file
+		 ************************************************************************/
+		void to_file (int record = -1) {
+			TRACE ("Sending to file...");
+			if (count % output_every == 0) {
+				formatted_output <format>::to_file (record ? record : count);
 			}
 			++count;
 		}
@@ -684,9 +711,7 @@ namespace io
 		/*!**********************************************************************
 		 * /copydoc output::output
 		 ************************************************************************/
-		input (std::string i_file_name = "in", int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 0, int i_m_max = 0, int i_l_max = 0, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) :
-		file_name (i_file_name),
-		n (i_n), m (i_m), l (i_l), n_max (i_n_max), m_max (i_m_max), l_max (i_l_max), n_offset (i_n_offset), m_offset (i_m_offset), l_offset (i_l_offset) {}
+		input (std::string i_file_name = "in", int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 0, int i_m_max = 0, int i_l_max = 0, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) : file_name (i_file_name), n (i_n), m (i_m), l (i_l), n_max (i_n_max), m_max (i_m_max), l_max (i_l_max), n_offset (i_n_offset), m_offset (i_m_offset), l_offset (i_l_offset) {}
 		
 		virtual ~input () {}
 		
@@ -699,6 +724,14 @@ namespace io
 		template <class datatype>
 		void append (std::string name, datatype *data_ptr) {
 			TRACE ("Appending " << name << " to input...");
+			for (int i = 0; i < (int) names.size (); ++i) {
+				if (names [i] == name) {
+					WARN ("Reuse of name " << name);
+					types [i] = &typeid (datatype);
+					data_ptrs [i] = (void *) data_ptr;
+					return;
+				}
+			}
 			types.push_back (&typeid (datatype));
 			names.push_back (name);
 			data_ptrs.push_back ((void *) data_ptr);
@@ -713,6 +746,15 @@ namespace io
 		template <class datatype>
 		void append_scalar (std::string name, datatype *data_ptr) {
 			TRACE ("Appending " << name << " to input...");
+			for (int i = 0; i < (int) scalar_names.size (); ++i) {
+				if (scalar_names [i] == name) {
+					WARN ("Reuse of name " << name);
+					scalar_types [i] = &typeid (datatype);
+					scalar_ptrs [i] = (void *) data_ptr;
+					TRACE ("Scalar updated.");
+					return;
+				}
+			}
 			scalar_types.push_back (&typeid (datatype));
 			scalar_names.push_back (name);
 			scalar_ptrs.push_back ((void *) data_ptr);
@@ -723,7 +765,7 @@ namespace io
 		 * 
 		 * This function should be overwritten by subclasses.
 		 *********************************************************************/
-		virtual void from_file () = 0;
+		virtual void from_file (int record = -1) = 0;
 	};
 	
 	/*!**********************************************************************
@@ -746,7 +788,7 @@ namespace io
 		/*!**********************************************************************
 		 * \copybrief input::from_file
 		 ************************************************************************/
-		virtual void from_file () {
+		virtual void from_file (int record = -1) {
 			INFO ("Inputting from file " << file_name << "...");
 			
 			format::open_file (file_name.c_str (), read_file, n_max, m_max, l_max);
@@ -754,11 +796,11 @@ namespace io
 			// Input the scalars from file
 			for (int i = 0; i < (int) scalar_names.size (); ++i) {
 				if (scalar_types [i] == &typeid (double)) {
-					format::template read_scalar <double> (file_name, scalar_names [i], (double *) scalar_ptrs [i]);
+					format::template read_scalar <double> (file_name, scalar_names [i], (double *) scalar_ptrs [i], record);
 				} else if (scalar_types [i] == &typeid (float)) {
-					format::template read_scalar <float> (file_name, scalar_names [i], (float *) scalar_ptrs [i]);
+					format::template read_scalar <float> (file_name, scalar_names [i], (float *) scalar_ptrs [i], record);
 				} else if (scalar_types [i] == &typeid (int)) {
-					format::template read_scalar <int> (file_name, scalar_names [i], (int *) scalar_ptrs [i]);
+					format::template read_scalar <int> (file_name, scalar_names [i], (int *) scalar_ptrs [i], record);
 				} else {
 					throw 0;
 				}
@@ -768,276 +810,19 @@ namespace io
 			// Input the arrays from file
 			for (int i = 0; i < (int) names.size (); ++i) {
 				if (types [i] == &typeid (double)) {
-					format::template read <double> (file_name, names [i], (double *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset);
+					format::template read <double> (file_name, names [i], (double *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset, record);
 				} else if (types [i] == &typeid (float)) {
-					format::template read <float> (file_name, names [i], (float *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset);
+					format::template read <float> (file_name, names [i], (float *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset, record);
 				} else if (types [i] == &typeid (int)) {
-					format::template read <int> (file_name, names [i], (int *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset);
+					format::template read <int> (file_name, names [i], (int *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset, record);
 				} else {
 					throw 0;
 				}
 			}
 			
-			format::close_file (file_name.c_str ());
+			format::close_file (file_name.c_str (), read_file);
 		}
 	};
-	
-	namespace one_d
-	{
-		// /*!*******************************************************************
-		//  * \brief A simple implementation of the output class
-		//  * 
-		//  * This class is a simple implementation of the output class.
-		//  *********************************************************************/
-		// class ascii : public format <ascii>
-		// {
-		// public:
-		// 	/*!*******************************************************************
-		// 	 * \param i_file_name The string name of file for output
-		// 	 * \param i_n The integer number of points in the data
-		// 	 * \param i_output_every An integer number of steps between outputs
-		// 	 *********************************************************************/
-		// 	ascii (int i_n, std::string i_comment = "#") : 
-		// 	n (i_n),
-		// 	comment (i_comment) {}
-		// 
-		// 	~ascii () {}
-		// 	
-		// 	std::string extension () {return ".dat";}
-		// 	
-		// 	virtual void open_file (std::string file_name, int file_type);
-		// 
-		// 	virtual void close_file ();
-		// 
-		// 	template <class datatype>
-		// 	virtual void _write (std::string name, void *data) {
-		// 		TRACE ("Writing...");
-		// 		names.push_back (name);
-		// 		double_data.resize (double_data.size () + 1);
-		// 		float_data.resize (float_data.size () + 1);
-		// 		int_data.resize (int_data.size () + 1);
-		// 		if (type == &typeid (double)) {
-		// 			double_data [(int) double_data.size () - 1].resize (n);
-		// 			double_data [(int) double_data.size () - 1].assign ((double *) data, ((double *) data) + n);
-		// 			types.push_back (&typeid (double));
-		// 		} else if (type == &typeid (float)) {
-		// 			float_data [(int) float_data.size () - 1].resize (n);
-		// 			float_data [(int) float_data.size () - 1].assign ((float *) data, ((float *) data) + n);
-		// 			types.push_back (&typeid (float));
-		// 		} else if (type == &typeid (int)) {
-		// 			int_data [(int) int_data.size () - 1].resize (n);
-		// 			int_data [(int) int_data.size () - 1].assign ((int *) data, ((int *) data) + n);
-		// 			types.push_back (&typeid (int));
-		// 		}
-		// 	}
-		// 	virtual void write_scalar (std::string name, std::type_info *, void *) {
-		// 		
-		// 	}
-		// 	virtual void read (std::string name, std::type_info *, void *) {
-		// 		throw 0;
-		// 	}
-		// 	virtual void read_scalar (std::string name, std::type_info *, void *) {
-		// 		throw 0;
-		// 	}
-		// 	
-		// 	/*
-		// 		TODO Write these methods
-		// 	*/
-		// 		
-		// protected:
-		// 	std::ofstream file_stream;
-		// 	int n;
-		// 	std::vector <const std::type_info *> types;
-		// 	std::vector <std::vector <double>> double_data;
-		// 	std::vector <std::vector <float>> float_data;
-		// 	std::vector <std::vector <int>> int_data;
-		// 	std::vector <std::string> names;
-		// 	std::string comment;
-		// };
-		
-		/*
-			TODO Make legible headers
-		*/
-		
-		// class netcdf : public format
-		// {
-		// public:
-		// 	netcdf (int i_n, int i_n_offset = 0) :
-		// 	n (i_n), n_offset (i_n_offset) {}
-		// 
-		// 	virtual ~netcdf () {}
-		// 	
-		// 	std::string extension () {return ".cdf";}
-		// 	
-		// 	virtual void open_file (std::string file_name, int file_type);
-		// 
-		// 	virtual void close_file ();
-		// 
-		// 	virtual void write (std::string name, double *);
-		// 	virtual void write (std::string name, float *);
-		// 	virtual void write (std::string name, int *);
-		// 	
-		// 	virtual void write_scalar (std::string name, double *);
-		// 	virtual void write_scalar (std::string name, float *);
-		// 	virtual void write_scalar (std::string name, int *);
-		// 	
-		// 	virtual void read (std::string name, double *);
-		// 	virtual void read (std::string name, float *);
-		// 	virtual void read (std::string name, int *);
-		// 	
-		// 	virtual void read_scalar (std::string name, double *);
-		// 	virtual void read_scalar (std::string name, float *);
-		// 	virtual void read_scalar (std::string name, int *);
-		// 
-		// protected:
-		// 	int n;
-		// 	int n_offset;
-		// 	void * datafile;
-		// 	netCDF::NcDim zDim;
-		// };
-	} /* one_d */
-	
-	namespace two_d
-	{
-		class virtual_format
-		{
-		public:
-			virtual_format () {}
-		
-			~virtual_format () {}
-		
-			static std::string extension () {return "";}
-			
-			static void open_file (std::string file_name, int file_type, int n_max, int m_max, int l_max) {
-				DEBUG ("Opening virtual file.");
-				virtual_dumps [file_name];
-			}
-			
-			static void close_file (std::string file_name) {
-				DEBUG ("Closing virtual file.");
-			}
-			
-			template <class datatype>
-			static void write (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0) {
-				DEBUG ("Writing to virtual file");
-				virtual_dumps [file_name].add_var <datatype> (name, n, m);
-				virtual_dumps [file_name].put <datatype> (name, (datatype *) data, n, m);
-			}
-		
-			template <class datatype>
-			static void write_scalar (std::string file_name, std::string name, datatype *data) {
-				virtual_dumps [file_name].add_var <datatype> (name);
-				virtual_dumps [file_name].put <datatype> (name, (datatype *) data);
-			}
-		
-			template <class datatype>
-			static void read (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0) {
-				DEBUG ("Reading from virtual file");
-				virtual_dumps [file_name].get <datatype> (name, (datatype *) data, n, m);
-				for (int i = 0; i < n; ++i) {
-					for (int j = 0; j < m; ++j) {
-						if (*(data + i * m + j) != *(data + i * m + j)) {
-							FATAL ("NaN read in.");
-							throw 0;
-						}
-					}
-				}
-			}
-		
-			template <class datatype>
-			static void read_scalar (std::string file_name, std::string name, datatype *data) {
-				virtual_dumps [file_name].get <datatype> (name, (datatype *) data);
-			}
-		};
-			
-		
-		class netcdf
-		{
-		public:
-			netcdf () {}
-		
-			virtual ~netcdf () {}
-		
-			static std::string extension () {return ".cdf";}
-			
-			static void open_file (std::string file_name, int file_type, int n_max, int m_max, int l_max);
-		
-			static void close_file (std::string file_name);
-			
-			template <class datatype>
-			static void write (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0) {
-				std::vector <size_t> offsets = {(size_t) n_offset, (size_t) m_offset};
-				std::vector <size_t> sizes = {(size_t) n, (size_t) m};
-				netCDF::NcVar ncdata = files [file_name]->addVar (name.c_str (), netcdf_type (&typeid (datatype)), dims [file_name]);
-				ncdata.setFill (true, NULL);
-				ncdata.putVar (offsets, sizes, data);
-			}
-		
-			template <class datatype>
-			static void write_scalar (std::string file_name, std::string name, datatype *data) {
-				std::vector <netCDF::NcDim> scalar_dims;
-				std::vector <size_t> scalar_offset;
-				netCDF::NcVar ncdata = files [file_name]->addVar (name.c_str (), netcdf_type (&typeid (datatype)), scalar_dims);
-				ncdata.putVar (scalar_offset, data);
-			}
-		
-			template <class datatype>
-			static void read (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0) {
-				try {
-					std::vector <size_t> offsets = {(size_t) n_offset, (size_t) m_offset};
-					std::vector <size_t> sizes = {(size_t) n, (size_t) m};
-					netCDF::NcVar ncdata = files [file_name]->getVar (name.c_str ());
-					if (ncdata.isNull ()) {
-						throw 0;
-					}
-					ncdata.getVar (offsets, sizes, data);
-					for (int i = 0; i < n; ++i) {
-						for (int j = 0; j < m; ++j) {
-							if (*(data + i * m + j) != *(data + i * m + j)) {
-								FATAL ("NaN read in.");
-								throw 0;
-							}
-						}
-					}
-				} catch (netCDF::exceptions::NcBadName &e) {
-					failures [file_name].push_back (name);
-					WARN ("Variable " << name << " not found in file");
-				} catch (int &e) {
-					failures [file_name].push_back (name);
-					WARN ("Variable " << name << " not found in file");
-				}
-			}
-		
-			template <class datatype>
-			static void read_scalar (std::string file_name, std::string name, datatype *data) {
-				try {
-					DEBUG ("Reading scalar..." << name << " " << data);
-					std::vector <size_t> scalar_offset;
-					netCDF::NcVar ncdata = files [file_name]->getVar (name.c_str ());
-					if (ncdata.isNull ()) {
-						throw 0;
-					}
-					ncdata.getVar (scalar_offset, data);
-					DEBUG ("Read " << *data);
-				} catch (netCDF::exceptions::NcBadName &e) {
-					failures [file_name].push_back (name);
-					WARN ("Variable " << name << " not found in file");
-				} catch (int &e) {
-					failures [file_name].push_back (name);
-					WARN ("Variable " << name << " not found in file");
-				}
-			}
-			
-		protected:
-			static std::map <std::string, netCDF::NcFile *> files;
-			static std::map <std::string, std::vector <netCDF::NcDim>> dims;
-			static std::map <std::string, std::vector <std::string>> failures;
-		};
-		
-		/*
-			TODO Accept 1D outputs
-		*/
-	} /* two_d */
 } /* io */
 
 #endif /* end of include guard: IO_HPP_C1E9B6EF */

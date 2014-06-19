@@ -5,15 +5,3 @@ conf = Configure (env)
 for lib in ["fftw3", "fftw3f"]:
     conf.CheckLib (lib)
 env = conf.Finish ()
-
-objects.append (env.Object ("element_one_d.cpp"))
-
-objects.append (env.Object ("diffusion_one_d.cpp"))
-
-objects.append (env.Object ("advection_one_d.cpp"))
-
-objects.append (env.Object ("transform_one_d.cpp"))
-
-objects.append (env.Object ("solver_one_d.cpp"))
-
-objects.append (env.Object ("plan_one_d.cpp"))

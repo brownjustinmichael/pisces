@@ -11,6 +11,7 @@
 #include "two_d/plan_two_d.hpp"
 #include "bases/grid.hpp"
 #include "utils/io.hpp"
+#include "utils/formats.hpp"
 #include <sstream>
 #include <iomanip>
 
@@ -83,7 +84,7 @@ int main (int argc, char *argv[])
 		char buffer [file_format.size () * 2];
 		snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
 
-		io::formatted_output <io::two_d::netcdf> output_stream (buffer, n, m, 1, 0, config.get <bool> ("input.full") ? n_elements * m : 0, 0, 0, config.get <bool> ("input.full") ? id * m : 0);
+		io::formatted_output <io::formats::two_d::netcdf> output_stream (buffer, io::replace_file, n, m, 1, 0, config.get <bool> ("input.full") ? n_elements * m : 0, 0, 0, config.get <bool> ("input.full") ? id * m : 0);
 
 		double duration = 0.0;
 		int mode = mode_flag;

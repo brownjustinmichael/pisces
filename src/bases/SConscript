@@ -5,7 +5,3 @@ conf = Configure (env)
 for lib in ["gsl"]:
     conf.CheckLib (lib)
 env = conf.Finish ()
-
-objects.append (env.Object ("element.cpp"))
-
-objects.append (env.Object ("grid.cpp"))
