@@ -190,6 +190,8 @@ namespace two_d
 			bases::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
 			std::shared_ptr <bases::grid <datatype>> vertical_grid = generate_grid (&vertical_axis);
 			
+			DEBUG ("Old dimensions " << old_dump->dims ["T"] [0] << " " << old_dump->dims ["T"] [1]);
+			
 			utils::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_dump, &io::virtual_dumps ["two_d/element/new_dump"]);
 			
 			return &io::virtual_dumps ["two_d/element/new_dump"];

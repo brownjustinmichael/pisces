@@ -23,7 +23,6 @@ namespace utils
 			*output_dump = *input_dump;
 		}
 		
-		DEBUG ("Rezoning...");
 		for (typename std::map <std::string, void *>::iterator iter = input_dump->begin (); iter != input_dump->end (); iter++) {
 			if (input_dump->dims [iter->first] [1] != 1 && input_dump->check_type <datatype> (iter->first)) {
 				TRACE ("Rezoning " << iter->first << "...");
