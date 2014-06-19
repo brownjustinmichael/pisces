@@ -97,28 +97,7 @@ namespace exceptions
 		class bad_variables : public std::exception
 		{
 		public:
-			bad_variables (int i_n = 0, std::string *i_names = NULL) : n (i_n) {
-				names.resize (n);
-				for (int i = 0; i < n; ++i) {
-					names [i] = i_names [i];
-				}
-			}
-
-			~bad_variables () throw () {}
-
-			inline const char *what () const throw () {
-				std::stringstream message;
-				message << "Bad variable(s) ";
-				for (int i = 0; i < n - 1; ++i) {
-					message << names [i] << ", ";
-				}
-				message << names [n - 1];
-				return message.str ().c_str ();
-			}
-		
-		private:
-			int n;
-			std::vector <std::string> names;
+			inline const char *what () const throw () {return "Bad variable(s)";}
 		};
 	} /* io */
 } /* exceptions */

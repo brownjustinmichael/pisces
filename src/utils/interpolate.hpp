@@ -40,6 +40,14 @@ namespace utils
 		if (alpha == 0.0) {
 			return;
 		}
+		for (int i = 0; i < n; ++i) {
+			for (int j = 0; j < m; ++j) {
+				if (std::isnan (y [i * m + j])) {
+					FATAL ("Nan before interpolate");
+					throw 0;
+				}
+			}
+		}
 		for (int k = 0; k < n; ++k) {
 			int i = 0;
 			/*
