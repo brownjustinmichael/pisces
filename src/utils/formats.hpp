@@ -145,6 +145,13 @@ namespace io
 			
 				static void open_file (std::string file_name, int file_type, int n_max, int m_max, int l_max) {
 					DEBUG ("Opening virtual file.");
+					// if (file_type == read_file && (!virtual_dumps [file_name])) {
+						// ERROR ("Virtual file doesn't exist.");
+						// throw 0;
+					// } 
+					/*
+						TODO Check for virtual file existence
+					*/
 					virtual_dumps [file_name];
 				}
 			
@@ -228,7 +235,7 @@ namespace io
 				template <class datatype>
 				static void read (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0, int record = -1) {
 					try {
-						std::vector <size_t> offsets = {(size_t) (record == -1 ? records [file_name] : record), (size_t) n_offset, (size_t) m_offset};
+						std::vector <size_t> offsets = {(size_t) (record < 0 ? records [file_name] : record), (size_t) n_offset, (size_t) m_offset};
 						std::vector <size_t> sizes = {(size_t) 1, (size_t) n, (size_t) m};
 						netCDF::NcVar ncdata = files [file_name]->getVar (name.c_str ());
 						if (ncdata.isNull ()) {
@@ -236,6 +243,7 @@ namespace io
 						}
 						ncdata.getVar (offsets, sizes, data);
 						for (int i = 0; i < n; ++i) {
+							DEBUG ("Read from data " << data [i * m + m / 2]);
 							for (int j = 0; j < m; ++j) {
 								if (*(data + i * m + j) != *(data + i * m + j)) {
 									FATAL ("NaN read in. ");

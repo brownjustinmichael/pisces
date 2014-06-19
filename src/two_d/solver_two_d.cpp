@@ -182,6 +182,15 @@ namespace two_d
 				}
 			}
 			
+			for (int i = 0; i < ldn; ++i) {
+				for (int j = 0; j < ldn; ++j) {
+					if (std::isnan (data [i * m + j])) {
+						FATAL ("Found nan in data.");
+						throw exceptions::nan ();
+					}
+				}
+			}
+			
 			utils::matrix_add_scaled (m - 2 + ntop + nbot - excess_0 - excess_n, ldn, 1.0, data + 1 - ntop + excess_0, &data_temp [ex_excess_0 + 1 + excess_0], m, lda);
 			for (int i = 0; i < ldn; ++i) {
 				for (int j = 0; j < m; ++j) {

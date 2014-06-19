@@ -146,7 +146,7 @@ int main (int argc, char *argv[])
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 		
-			normal_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (buffer, config.get <int> ("output.every"), n, m, 1, 0, config.get <bool> ("output.full") ? n_elements * m : 0, 0, 0, config.get <bool> ("output.full") ? id * m : 0));
+			normal_stream.reset (new io::incremental <io::formats::two_d::netcdf> (buffer, config.get <int> ("output.every"), n, m, 1, 0, config.get <bool> ("output.full") ? n_elements * m : 0, 0, 0, config.get <bool> ("output.full") ? id * m : 0));
 		}
 		
 		std::shared_ptr <io::output> transform_stream;
@@ -155,7 +155,7 @@ int main (int argc, char *argv[])
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 		
-			transform_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (buffer, config.get <int> ("output.every"), n, m, 1, 0, config.get <bool> ("output.full") ? n_elements * m : 0, 0, 0, config.get <bool> ("output.full") ? id * m : 0));
+			transform_stream.reset (new io::incremental <io::formats::two_d::netcdf> (buffer, config.get <int> ("output.every"), n, m, 1, 0, config.get <bool> ("output.full") ? n_elements * m : 0, 0, 0, config.get <bool> ("output.full") ? id * m : 0));
 		}
 		
 		/*

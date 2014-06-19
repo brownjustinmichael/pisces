@@ -164,7 +164,13 @@ namespace io
 						throw 0;
 					}
 					files [file_name] = new netCDF::NcFile (file_name.c_str (), netCDF::NcFile::read);
-					records [file_name] = files [file_name]->getDim ("record").getSize () - 1;
+					if (files [file_name]->isNull () or files [file_name]->getDim ("record").isNull ()) {
+						DEBUG ("No previous record");
+						records [file_name] = 0;
+					} else {
+						DEBUG ("Yes previous record");
+						records [file_name] = files [file_name]->getDim ("record").getSize () - 1;
+					}
 				} else if (file_type == replace_file) {
 					if (files [file_name]) {
 						FATAL ("File already open");
@@ -207,7 +213,7 @@ namespace io
 			
 			
 				if (failures [file_name].size () > 0) {
-					throw exceptions::io::bad_variables ((int) failures [file_name].size (), &failures [file_name] [0]);
+					// throw exceptions::io::bad_variables ();
 				}
 			
 				/*
