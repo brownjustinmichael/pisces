@@ -99,7 +99,7 @@ namespace two_d
 			
 			utils::matrix_scale (lda, lda, 0.0, &factorized_matrix [0], lda);
 			utils::matrix_copy (m, m, default_matrix, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1)], m, lda);
-
+			
 			utils::matrix_add_scaled (m - excess_n - excess_0 - 2, m, timestep, &matrix [0] + excess_0 + 1, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + 1 + excess_0], m, lda);
 			if (ntop != 0) {
 				utils::matrix_add_scaled (ntop, m, alpha_0 * timestep, &matrix [0] + excess_0, &factorized_matrix [(ntop + ex_excess_0) * lda], m, m + ex_excess_0 + ex_excess_n + ntop + nbot);
@@ -128,7 +128,7 @@ namespace two_d
 			*/
 			
 			transform->execute ();
-
+			
 			utils::scale ((ldn) * lda, 0.0, &data_temp [0]);
 			
 			if (!(flags & first_run)) {
@@ -136,7 +136,7 @@ namespace two_d
 				utils::copy (ldn, &data [m - 1], &values_n [0], m);
 				flags |= first_run;
 			}
-
+			
 			utils::matrix_add_scaled (m - excess_0 - excess_n, ldn, timestep, &implicit_rhs_vec [excess_0], &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
 			utils::matrix_add_scaled (m - excess_0 - excess_n, ldn, timestep, &real_rhs_vec [excess_0], &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
 			utils::matrix_add_scaled (m - excess_0 - excess_n, ldn, timestep, &explicit_rhs_vec [excess_0], &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
@@ -249,21 +249,21 @@ namespace two_d
 				if (messenger_ptr->get_id () - 1 >= 0) {
 					messenger_ptr->recv ((excess_0 + ntop) * ldn, &buffer_0 [0], messenger_ptr->get_id () - 1, 1);
 				}
-
+				
 				for (int i = 0; i < ldn; ++i) {
 					for (int j = 0; j < ex_excess_0 + ntop; ++j) {
 						data_temp [i * lda + ntop + ex_excess_0 + j] += buffer_0 [j * ldn + i];
 					}
 				}
-
+				
 				for (int j = 0; j < m; ++j) {
 					utils::diagonal_solve (ldn, &factorized_horizontal_matrix [0], &data_temp [ntop + ex_excess_0 + j], 1, lda);
 				}
 				utils::matrix_copy (m, ldn, &data_temp [ntop + ex_excess_0], data, lda);
-
+				
 			} else if (*component_flags & z_solve) {
 				TRACE ("Solving in m direction...");
-
+				
 				for (int i = 0; i < ldn; ++i) {
 					for (int j = 0; j < m; ++j) {
 						if (std::isnan (data_temp [ex_excess_0 + ntop + i * m + j])) {
@@ -276,7 +276,7 @@ namespace two_d
 						}
 					}
 				}
-
+				
 				utils::p_block_matrix_solve (messenger_ptr->get_id (), messenger_ptr->get_np (), m - excess_0 - excess_n - ntop - nbot, excess_0 + ex_excess_0 + 2 * ntop, excess_n + ex_excess_n + 2 * nbot, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, ldn, lda, sqrt ((int) boundary_matrix.size ()), lda);
 				
 				TRACE ("Matrix solve complete.");
@@ -479,7 +479,7 @@ namespace two_d
 		void divergence_solver <datatype>::_solve () {
 			TRACE ("Solving...");
 			utils::scale (m * ldn, 0.0, data_x);
-
+			
 			for (int j = 0; j < m; ++j) {
 				data_z [j] = 0.0;
 				data_z [m + j] = 0.0;

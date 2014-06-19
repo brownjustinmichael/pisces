@@ -162,8 +162,17 @@ namespace io
 				template <class datatype>
 				static void write (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0, int record = -1) {
 					DEBUG ("Writing to virtual file");
+					std::stringstream debug;
 					virtual_dumps [file_name].add_var <datatype> (name, n, m);
 					virtual_dumps [file_name].put <datatype> (name, (datatype *) data, n, m);
+					DEBUG ("Dimensions " << n << ", " << m << ", " << l);
+					for (int i = 0; i < n; ++i) {
+						for (int j = 0; j < m; ++j) {
+							debug << data [i * m + j] << ":" << virtual_dumps [file_name].index <datatype> (name, i, j) << " ";
+						}
+						if (file_name == "main/dump") DEBUG (debug.str ());
+						debug.str ("");
+					}
 				}
 		
 				template <class datatype>
@@ -176,14 +185,14 @@ namespace io
 				static void read (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0, int record = -1) {
 					DEBUG ("Reading from virtual file");
 					virtual_dumps [file_name].get <datatype> (name, (datatype *) data, n, m);
-					// for (int i = 0; i < n; ++i) {
-					// 	for (int j = 0; j < m; ++j) {
-					// 		if (*(data + i * m + j) != *(data + i * m + j)) {
-					// 			FATAL ("NaN read in." << i << " " << j << " " << *(data + i * m + j));
-					// 			throw 0;
-					// 		}
-					// 	}
-					// }
+					for (int i = 0; i < n; ++i) {
+						for (int j = 0; j < m; ++j) {
+							if (*(data + i * m + j) != *(data + i * m + j)) {
+								FATAL ("NaN read in." << i << " " << j << " " << *(data + i * m + j));
+								throw 0;
+							}
+						}
+					}
 				}
 		
 				template <class datatype>
@@ -243,7 +252,6 @@ namespace io
 						}
 						ncdata.getVar (offsets, sizes, data);
 						for (int i = 0; i < n; ++i) {
-							DEBUG ("Read from data " << data [i * m + m / 2]);
 							for (int j = 0; j < m; ++j) {
 								if (*(data + i * m + j) != *(data + i * m + j)) {
 									FATAL ("NaN read in. ");
