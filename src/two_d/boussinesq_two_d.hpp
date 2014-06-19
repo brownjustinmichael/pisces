@@ -30,7 +30,7 @@ namespace two_d
 				virtual io::virtual_dump *make_dump (int flags = 0x00) {
 					std::shared_ptr <io::output> virtual_output;
 					if (flags & profile_only) {
-						virtual_output.reset (new io::formatted_output <io::two_d::virtual_format> ("two_d/boussinesq/dump", 1, m));
+						virtual_output.reset (new io::formatted_output <io::formats::two_d::virtual_format> ("two_d/boussinesq/dump", 1, m));
 						if (flags & timestep_only) {
 							virtual_output->append_functor <datatype> ("z", new io::average_functor <datatype> (ptr (z_position), n, m));
 							virtual_output->append_functor <datatype> ("w", new io::root_mean_square_functor <datatype> (ptr (z_velocity), n, m));
@@ -38,7 +38,7 @@ namespace two_d
 							bases::element <datatype>::setup_profile (virtual_output);
 						}
 					} else {
-						virtual_output.reset (new io::formatted_output <io::two_d::virtual_format> ("two_d/boussinesq/dump", n, m));
+						virtual_output.reset (new io::formatted_output <io::formats::two_d::virtual_format> ("two_d/boussinesq/dump", n, m));
 						if (flags & timestep_only) {
 							virtual_output->append <datatype> ("z", ptr (z_position));
 							virtual_output->append <datatype> ("x", ptr (x_position));

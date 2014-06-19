@@ -3,7 +3,6 @@ Import ("env")
 Import ("include_cuda")
 Import ("include_mp")
 Import ("objects")
-Import ("none_config_object")
 
 def directory (path, dirname):
     if dirname [len (path) + 1:] == "":
@@ -14,5 +13,9 @@ def directory (path, dirname):
 path = os.path.dirname (inspect.getfile (inspect.currentframe ()))
 
 for dirname, dirnames, filenames in os.walk (path):
-    for subdirname in dirnames:
-        env.SConscript('%s/SConscript' % os.path.join (dirname, subdirname), variant_dir = os.path.join (".", directory (path, dirname) + subdirname), duplicate = 0, exports = {'env': env, "objects": objects, "include_cuda" : include_cuda, "include_mp": include_mp, "none_config_object": none_config_object})
+    if dirname != path:
+        for filename in filenames:
+            if filename == "SConscript":
+                env.SConscript(dirname + '/' + filename, variant_dir = os.path.join (".", directory (path, dirname)), duplicate = 0, exports = {'env': env, "objects": objects, "include_cuda" : include_cuda, "include_mp": include_mp})
+            if filename.split ('.') [-1] == 'hpp':
+                env.CxxTest('tests_' + filename, source = [os.path.relpath (dirname, path) + '/' + filename] + objects) 

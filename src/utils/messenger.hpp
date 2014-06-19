@@ -73,7 +73,7 @@ namespace utils
 		 * \param argc An integer pointer to the number of command arguments
 		 * \param argv A pointer to an array of character arrays of command arguments
 		 ************************************************************************/
-		messenger (int* argc, char*** argv) {
+		messenger (int* argc = NULL, char*** argv = NULL) {
 #ifdef _MPI
 			MPI::Init (*argc, *argv);
 			np = MPI::COMM_WORLD.Get_size ();

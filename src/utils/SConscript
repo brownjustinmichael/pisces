@@ -3,6 +3,8 @@ Import ("objects")
 Import ("include_cuda")
 Import ("include_mp")
 
+import os, inspect
+
 conf = Configure (env)
 
 if include_cuda:
@@ -19,12 +21,3 @@ for lib in ["atlas", "netcdf_c++4", "irc", "imf", "yaml-cpp"]:
     conf.CheckLib (lib)
 
 env = conf.Finish ()
-
-objects.append (env.Object ("utils.cpp"))
-objects.append (env.Object ("solver_utils.cpp"))
-
-objects.append (env.Object ("interpolate.cpp"))
-
-objects.append (env.Object ("block_solver.cpp"))
-
-objects.append (env.Object ("io.cpp"))

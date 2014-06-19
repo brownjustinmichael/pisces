@@ -8,14 +8,3 @@ conf.CheckLib ("fftw3")
 conf.CheckLib ("fftw3f")
     
 env = conf.Finish ()
-
-objects.append (env.Object ("element_two_d.cpp"))
-
-objects.append (env.Object ("plan_two_d.cpp"))
-
-objects.append (env.Object ("transform_two_d.cpp"))
-
-objects.append (env.Object ("solver_two_d.cpp"))
-
-objects.append (env.Object ("boussinesq_two_d.cpp"))
-

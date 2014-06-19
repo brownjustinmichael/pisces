@@ -8,6 +8,6 @@ include_mp = True
 include_opencl = False
 logger = "log4cplus"
 
-env = Environment (ENV = os.environ)
+env = Environment (ENV = os.environ, tools = ["default", "cxxtest"])
 
 env.SConscript ("../src/SConscript", variant_dir = ".", duplicate = 0, exports = {"env": env, "include_cuda": include_cuda, "include_mp": include_mp, "include_vt":include_vt, "include_opencl":include_opencl, "include_mpi":include_mpi, "logger": logger})
