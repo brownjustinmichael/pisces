@@ -137,6 +137,45 @@ namespace two_d
 				flags |= first_run;
 			}
 			
+			for (int i = 0; i < ldn; ++i) {
+				for (int j = 0; j < m; ++j) {
+					if (std::isnan (implicit_rhs_vec [i * m + j])) {
+						FATAL ("Found nan before scaling in implicit.");
+						for (int k = 0; k < m; ++k) {
+							printf ("%f ", implicit_rhs_vec [k * m + j]);
+						}
+						printf ("\n");
+						throw exceptions::nan ();
+					}
+				}
+			}
+			
+			for (int i = 0; i < ldn; ++i) {
+				for (int j = 0; j < m; ++j) {
+					if (std::isnan (explicit_rhs_vec [i * m + j])) {
+						FATAL ("Found nan before scaling in explicit.");
+						for (int k = 0; k < m; ++k) {
+							printf ("%f ", explicit_rhs_vec [k * m + j]);
+						}
+						printf ("\n");
+						throw exceptions::nan ();
+					}
+				}
+			}
+			
+			for (int i = 0; i < ldn; ++i) {
+				for (int j = 0; j < m; ++j) {
+					if (std::isnan (real_rhs_vec [i * m + j])) {
+						FATAL ("Found nan before scaling in real.");
+						for (int k = 0; k < m; ++k) {
+							printf ("%f ", real_rhs_vec [k * m + j]);
+						}
+						printf ("\n");
+						throw exceptions::nan ();
+					}
+				}
+			}
+			
 			utils::matrix_add_scaled (m - excess_0 - excess_n, ldn, timestep, &implicit_rhs_vec [excess_0], &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
 			utils::matrix_add_scaled (m - excess_0 - excess_n, ldn, timestep, &real_rhs_vec [excess_0], &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
 			utils::matrix_add_scaled (m - excess_0 - excess_n, ldn, timestep, &explicit_rhs_vec [excess_0], &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
@@ -430,9 +469,50 @@ namespace two_d
 			if (id != np - 1) {
 				mm -= excess_n + 1;
 			}
+			
+			// std::stringstream debug;
+			// for (int j = 0; j < m; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << real_rhs_vec [i * m + j] << " ";
+			// 		if (std::isnan (real_rhs_vec [i * m + j])) {
+			// 			FATAL ("Nan in real rhs laplace solver.");
+			// 			throw exceptions::nan ();
+			// 		}
+			// 	}
+			// 	DEBUG (debug.str ());
+			// 	debug.str ("");
+			// }
+			
 			transform->execute ();
+			// for (int j = 0; j < m; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << real_rhs_vec [i * m + j] << " ";
+			// 		if (std::isnan (real_rhs_vec [i * m + j])) {
+			// 			FATAL ("Nan in real rhs laplace solver.");
+			// 			throw exceptions::nan ();
+			// 		}
+			// 	}
+			// 	DEBUG (debug.str ());
+			// 	debug.str ("");
+			// }
 			utils::matrix_copy (mm, ldn, &explicit_rhs_vec [nbegin], data + nbegin);
+			for (int j = 0; j < m; ++j) {
+				for (int i = 0; i < ldn; ++i) {
+					if (std::isnan (data [i * m + j])) {
+						FATAL ("Nan after copy from explicit.");
+						throw exceptions::nan ();
+					}
+				}
+			}
 			utils::matrix_add_scaled (mm, ldn, 1.0, &real_rhs_vec [nbegin], data + nbegin);
+			for (int j = 0; j < m; ++j) {
+				for (int i = 0; i < ldn; ++i) {
+					if (std::isnan (data [i * m + j])) {
+						FATAL ("Nan after adding from real.");
+						throw exceptions::nan ();
+					}
+				}
+			}
 			if (id == 0) {
 				utils::scale (ldn, 0.0, data + nbegin, m);
 			}
@@ -443,6 +523,15 @@ namespace two_d
 			
 			int info;
 			
+			for (int j = 0; j < m; ++j) {
+				for (int i = 0; i < ldn; ++i) {
+					if (std::isnan (data [i * m + j])) {
+						FATAL ("Nan before laplace solver.");
+						throw exceptions::nan ();
+					}
+				}
+			}
+			
 			utils::p_block_tridiag_solve (id, np, mm, &sub [nbegin], &diag [nbegin], &sup [nbegin], &supsup [nbegin], &ipiv [nbegin], data + nbegin, &x [0], &xipiv [0], &info, ldn, m, m);
 			
 			for (int i = 0; i < ldn; ++i) {
@@ -451,6 +540,15 @@ namespace two_d
 				}
 				for (int j = m - excess_n; j < m; ++j) {
 					data [i * m + j] = (data [i * m + j - 2] - data [i * m + j - 1]) / (pos_m [j - 2] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]) + data [i * m + j - 1];
+				}
+			}
+			
+			for (int j = 0; j < m; ++j) {
+				for (int i = 0; i < ldn; ++i) {
+					if (std::isnan (data [i * m + j])) {
+						FATAL ("Nan in laplace solver.");
+						throw exceptions::nan ();
+					}
 				}
 			}
 			

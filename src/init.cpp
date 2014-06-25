@@ -76,7 +76,7 @@ int main (int argc, char *argv[])
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
 				temp [i * m + j] = scale * (std::exp (- (horizontal_grid [i] - mean) * (horizontal_grid [i] - mean) / 2.0 / sigma / sigma) - height) * (std::exp (- (vertical_grid [j] - mean) * (vertical_grid [j] - mean) / 2.0 / sigma / sigma) - height) * sin (vertical_grid [j] / 3.14159 * 2 / width);
-				// temp [i * m + j] = (double) (rand () % 1000 - 500) / 100000.0 * (-vertical_grid [j] * vertical_grid [j] + config ["grid.z.width") * config ["grid.z.width") / 4.0);
+				// temp [i * m + j] = (double) (rand () % 1000 - 500) / 100000000000.0 * (-vertical_grid [j] * vertical_grid [j] + config.get <double> ("grid.z.width") * config.get <double> ("grid.z.width") / 4.0);
 			}
 		}
 

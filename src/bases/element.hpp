@@ -365,7 +365,13 @@ namespace bases
 			TRACE ("Beginning solve...");
 			// Execute the solvers
 			for (iterator iter = begin (); iter != end (); iter++) {
-				solvers [*iter]->execute ();
+				TRACE ("Solving " << *iter);
+				try {
+					solvers [*iter]->execute ();
+				} catch (std::exception &except) {
+					FATAL ("Failure in solver " << *iter);
+					throw except;
+				}
 			}
 			// Make certain everything is fully transformed
 			
@@ -447,7 +453,7 @@ namespace bases
 		 * 
 		 * This method tells the element to begin the main run of the simulation. It runs through all the specified plans in the appropriate order, and updates the values as necessary. Output, if desired, is specified by the output streams.
 		 ************************************************************************/
-		virtual void run (int &n_steps, int max_steps);
+		virtual void run (int &n_steps, int max_steps, int check_every = -1);
 		
 	protected:
 		/*!**********************************************************************

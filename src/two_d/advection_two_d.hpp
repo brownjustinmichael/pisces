@@ -27,7 +27,9 @@ namespace two_d
 				vel_n (i_vel_n),
 				vel_m (i_vel_m),
 				pos_n (&(grid_n [0])),
-				pos_m (&(grid_m [0])) {}
+				pos_m (&(grid_m [0])) {
+					TRACE ("Adding advection...");
+				}
 				
 				advection (bases::solver <datatype> &i_solver, datatype i_coeff, datatype* i_vel_n, datatype *i_vel_m) :
 				real_plan <datatype> (i_solver),
@@ -35,7 +37,9 @@ namespace two_d
 				vel_n (i_vel_n),
 				vel_m (i_vel_m),
 				pos_n (&(grid_n [0])),
-				pos_m (&(grid_m [0])) {}
+				pos_m (&(grid_m [0])) {
+					TRACE ("Adding advection...");
+				}
 				
 				virtual ~advection () {}
 				
