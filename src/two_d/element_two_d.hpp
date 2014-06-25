@@ -177,7 +177,7 @@ namespace two_d
 		virtual io::virtual_dump *make_dump (int flags = 0x00) {
 			std::shared_ptr <io::virtual_dump> dump (new io::virtual_dump);
 			
-			std::shared_ptr <io::output> virtual_output (new io::formatted_output <io::formats::two_d::virtual_format> ("two_d/element/dump", n, m));
+			std::shared_ptr <io::output> virtual_output (new io::formatted_output <io::formats::two_d::virtual_format> ("two_d/element/dump", io::replace_file, n, m));
 			bases::element <datatype>::setup_output (virtual_output);
 			
 			virtual_output->to_file ();

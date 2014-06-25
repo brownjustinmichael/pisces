@@ -34,7 +34,7 @@
 namespace bases
 {
 	template <class datatype>
-	void element <datatype>::run (int &n_steps, int max_steps) {
+	void element <datatype>::run (int &n_steps, int max_steps, int check_every) {
 		TRACE ("Running...");
 		datatype t_timestep;
 		
@@ -53,8 +53,8 @@ namespace bases
 		int threads = params.get <int> ("parallel.maxthreads");
 		
 		// Iterate through the total number of timesteps
-		while (n_steps > 0 && max_steps > 0) {
-			INFO ("Remaining steps: " << n_steps);
+		while (n_steps < max_steps && check_every != 0) {
+			INFO ("Timestep: " << n_steps);
 			
 			// Transform the vertical grid to Cartesian space in the background
 			TIME (
@@ -161,8 +161,8 @@ namespace bases
 		
 			TRACE ("Update complete");
 			
-			--n_steps;
-			--max_steps;
+			++n_steps;
+			--check_every;
 		}
 		transform (do_not_transform | no_write);
 		

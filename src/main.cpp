@@ -92,7 +92,7 @@ int main (int argc, char *argv[])
 	try {
 		id = process_messenger.get_id ();
 		n_elements = process_messenger.get_np ();
-
+		
 		log_config::configure (&argc, &argv, id, "process_%d.log");
 		std::string config_filename;
 		
@@ -120,7 +120,7 @@ int main (int argc, char *argv[])
 		
 		int n = config.get <int> ("grid.x.points");
 		
-		int n_steps = config.get <int> ("time.steps");
+		int n_steps = 0;
 		
 		bases::axis horizontal_axis (n, -config.get <double> ("grid.x.width") / 2.0, config.get <double> ("grid.x.width") / 2.0);
 		bases::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
@@ -146,7 +146,8 @@ int main (int argc, char *argv[])
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 		
-			normal_stream.reset (new io::incremental <io::formats::two_d::netcdf> (buffer, config.get <int> ("output.every"), n, m, 1, 0, config.get <bool> ("output.full") ? n_elements * m : 0, 0, 0, config.get <bool> ("output.full") ? id * m : 0));
+			normal_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (buffer, config.get <int> ("output.every"), n, m, 1, 0, config.get <bool> ("output.full") ? n_elements * m : 0, 0, 0, config.get <bool> ("output.full") ? id * m : 0));
+			element->setup_output (normal_stream, normal_output);
 		}
 		
 		std::shared_ptr <io::output> transform_stream;
@@ -155,7 +156,8 @@ int main (int argc, char *argv[])
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 		
-			transform_stream.reset (new io::incremental <io::formats::two_d::netcdf> (buffer, config.get <int> ("output.every"), n, m, 1, 0, config.get <bool> ("output.full") ? n_elements * m : 0, 0, 0, config.get <bool> ("output.full") ? id * m : 0));
+			transform_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (buffer, config.get <int> ("output.every"), n, m, 1, 0, config.get <bool> ("output.full") ? n_elements * m : 0, 0, 0, config.get <bool> ("output.full") ? id * m : 0));
+			element->setup_output (transform_stream, transform_output);
 		}
 		
 		/*
@@ -168,33 +170,27 @@ int main (int argc, char *argv[])
 		cbegin = clock ();
 		begin = std::chrono::system_clock::now ();
 
-		while (n_steps > 0) {
-			io::virtual_dumps ["main/dump"] = *(element->rezone_minimize_ts (&positions [0], config.get <double> ("grid.rezone.min_size"), config.get <double> ("grid.rezone.max_size"), config.get <int> ("grid.rezone.n_tries"), config.get <int> ("grid.rezone.iters_fixed_t"), config.get <double> ("grid.rezone.step_size"), config.get <double> ("grid.rezone.k"), config.get <double> ("grid.rezone.t_initial"), config.get <double> ("grid.rezone.mu_t"), config.get <double> ("grid.rezone.t_min")));
+		while (n_steps < config.get <int> ("time.steps")) {
+			if (config.get <int> ("grid.rezone.check_every") > 0) {
+				io::virtual_dumps ["main/dump"] = *(element->rezone_minimize_ts (&positions [0], config.get <double> ("grid.rezone.min_size"), config.get <double> ("grid.rezone.max_size"), config.get <int> ("grid.rezone.n_tries"), config.get <int> ("grid.rezone.iters_fixed_t"), config.get <double> ("grid.rezone.step_size"), config.get <double> ("grid.rezone.k"), config.get <double> ("grid.rezone.t_initial"), config.get <double> ("grid.rezone.mu_t"), config.get <double> ("grid.rezone.t_min")));
 			
-			bases::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
-			element.reset (new two_d::fourier::cosine::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, &process_messenger, 0x00));
+				bases::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
+				element.reset (new two_d::fourier::cosine::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, &process_messenger, 0x00));
 			
-			/*
-				TODO It would be nice to combine the above construction of element with this one
-			*/
+				/*
+					TODO It would be nice to combine the above construction of element with this one
+				*/
 			
-			io::input *virtual_input (new io::formatted_input <io::formats::two_d::virtual_format> ("main/dump", n, m));
-			element->setup (&*virtual_input);
-			if (normal_stream) {
-				element->setup_output (normal_stream, normal_output);
+				io::input *virtual_input (new io::formatted_input <io::formats::two_d::virtual_format> ("main/dump", n, m));
+				element->setup (&*virtual_input);
+				if (normal_stream) {
+					element->setup_output (normal_stream, normal_output);
+				}
+				if (transform_stream) {
+					element->setup_output (transform_stream, transform_output);
+				}
 			}
-			if (transform_stream) {
-				element->setup_output (transform_stream, transform_output);
-			}
-			
-			// element.transform (forward_vertical | no_read);
-			// for (int i = 0; i < config.get <int> ("time.steps"); ++i) {
-			// 	element.transform (inverse_vertical | no_read | no_write);
-			// 	element.transform (forward_vertical | no_read | no_write);
-			// }
-			// element.transform (inverse_vertical | no_write);
-
-			element->run (n_steps, config.get <int> ("grid.rezone.check_every"));
+			element->run (n_steps, config.get <int> ("time.steps"), config.get <int> ("grid.rezone.check_every"));
 		}
 	
 		cend = clock ();

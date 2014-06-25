@@ -15,6 +15,8 @@
 #include "../config.hpp"
 #include <map>
 
+#define NANTRACK
+
 /*!*******************************************************************
  * \brief A set of indices to be used with the element scalars for convenience
  * 

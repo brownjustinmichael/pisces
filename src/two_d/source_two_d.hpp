@@ -23,7 +23,9 @@ namespace two_d
 			source (bases::solver <datatype> &i_solver, datatype i_coeff, datatype* i_data_source) :
 			explicit_plan <datatype> (i_solver),
 			coeff (i_coeff),
-			data_source (i_data_source) {}
+			data_source (i_data_source) {
+				TRACE ("Adding source...");
+			}
 			
 			virtual ~source () {}
 			
@@ -108,6 +110,17 @@ namespace two_d
 					data_out [(n - 1) * m + j] += coeff * (data_source [j] - data_source [(n - 2) * m + j]) * (data_source [j] - data_source [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]) / (pos_n [n - 1] - pos_n [n - 2]) / 4.0;
 				}
 				TRACE ("Execution complete.");
+				
+#ifdef NANTRACK
+				for (int j = 0; j < m; ++j) {
+					for (int i = 0; i < n; ++i) {
+						if (std::isnan (data_out [i * m + j])) {
+							FATAL ("Nan in square x derivative source.");
+							throw exceptions::nan ();
+						}
+					}
+				}
+#endif
 			}
 		
 		private:
@@ -149,6 +162,17 @@ namespace two_d
 					}
 					data_out [(i + 1) * m - 1] += coeff * (data_source [(i + 1) * m - 1] - data_source [(i + 1) * m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
 				}
+				
+#ifdef NANTRACK
+				for (int j = 0; j < m; ++j) {
+					for (int i = 0; i < n; ++i) {
+						if (std::isnan (data_out [i * m + j])) {
+							FATAL ("Nan in z derivative source.");
+							throw exceptions::nan ();
+						}
+					}
+				}
+#endif
 			}
 		
 		private:
@@ -170,13 +194,17 @@ namespace two_d
 			real_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out),
 			coeff (i_coeff),
 			data_source (i_data_source),
-			pos_m (&(grid_m [0])) {}
+			pos_m (&(grid_m [0])) {
+				TRACE ("Adding square z derivative source...");
+			}
 
 			square_z_derivative_source (bases::solver <datatype> &i_solver, datatype i_coeff, datatype* i_data_source) :
 			real_plan <datatype> (i_solver),
 			coeff (i_coeff),
 			data_source (i_data_source),
-			pos_m (&(grid_m [0])) {}
+			pos_m (&(grid_m [0])) {
+				TRACE ("Adding square z derivative source...");
+			}
 			
 			virtual ~square_z_derivative_source () {}
 			
@@ -190,6 +218,17 @@ namespace two_d
 					}
 					data_out [(i + 1) * m - 1] += coeff * (data_source [(i + 1) * m - 1] - data_source [(i + 1) * m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) * (data_source [(i + 1) * m - 1] - data_source [(i + 1) * m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
 				}
+				
+#ifdef NANTRACK
+				for (int j = 0; j < m; ++j) {
+					for (int i = 0; i < n; ++i) {
+						if (std::isnan (data_out [i * m + j])) {
+							FATAL ("Nan in square z derivative source.");
+							throw exceptions::nan ();
+						}
+					}
+				}
+#endif
 			}
 		
 		private:
@@ -212,7 +251,9 @@ namespace two_d
 			data_source_x (i_data_source_x),
 			data_source_z (i_data_source_z),
 			pos_n (&(grid_n [0])),
-			pos_m (&(grid_m [0])) {}
+			pos_m (&(grid_m [0])) {
+				TRACE ("Adding mixed derivative source...");
+			}
 			
 			virtual ~mixed_derivative_source () {}
 			
@@ -237,6 +278,17 @@ namespace two_d
 					data_out [(n - 1) * m + j] += coeff * (data_source_z [(n - 1) * m + j + 1] - data_source_z [(n - 1) * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]) * (data_source_x [j] - data_source_x [(n - 1) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]) / 2.0;
 				}
 				data_out [n * m - 1] += coeff * (data_source_z [n * m - 1] - data_source_z [n * m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) * (data_source_x [m - 1] - data_source_x [(n - 1) * m - 1]) / (pos_n [n - 1] - pos_n [n - 2]) / 2.0;
+				
+#ifdef NANTRACK
+				for (int j = 0; j < m; ++j) {
+					for (int i = 0; i < n; ++i) {
+						if (std::isnan (data_out [i * m + j])) {
+							FATAL ("Nan in mixed derivative source.");
+							throw exceptions::nan ();
+						}
+					}
+				}
+#endif
 			}
 		
 		private:
