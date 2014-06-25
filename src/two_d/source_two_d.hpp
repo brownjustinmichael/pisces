@@ -32,7 +32,7 @@ namespace two_d
 			virtual void execute () {
 				TRACE ("Executing source...");
 				for (int j = 0; j < m; ++j) {
-					utils::add_scaled (ldn, 1.0, data_source + j, data_out + j, m, m);
+					utils::add_scaled (ldn, coeff, data_source + j, data_out + j, m, m);
 				}
 			}
 		
