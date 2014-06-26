@@ -14,27 +14,27 @@
 #include "solver_two_d.hpp"
 #include <sstream>
 
+/*
+	TODO boundary class:
+	* Hold edge values
+	* Communicating boundary can handle overlapping positions
+	* - Handle interpolating overlapping zones
+	* - Update ntop, nbot
+	* Edge boundaries can specify physics of boundary
+*/
+
+/*
+	TODO Split z, x solvers into separate methods
+	* Update base element class
+*/
+
 namespace two_d
 {
 	namespace fourier
 	{
 		template <class datatype>
 		solver <datatype>:: solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
-		bases::solver <datatype> (i_element_flags, i_component_flags),
-		n (i_grid_n.get_n ()), 
-		ldn (i_grid_n.get_ld ()), 
-		m (i_grid_m.get_n ()),
-		data (i_data),
-		grid_n (i_grid_n),
-		grid_m (i_grid_m),
-		messenger_ptr (i_messenger_ptr), 
-		timestep (i_timestep), 
-		alpha_0 (i_alpha_0), 
-		alpha_n (i_alpha_n), 
-		positions (&(grid_m [0])),
-		excess_0 (grid_m.get_excess_0 ()), 
-		excess_n (grid_m.get_excess_n ()),
-		default_matrix (grid_m.get_data (0)) {
+		bases::solver <datatype> (i_element_flags, i_component_flags), n (i_grid_n.get_n ()),  ldn (i_grid_n.get_ld ()),  m (i_grid_m.get_n ()), data (i_data), grid_n (i_grid_n), grid_m (i_grid_m), messenger_ptr (i_messenger_ptr),  timestep (i_timestep),  alpha_0 (i_alpha_0),  alpha_n (i_alpha_n),  positions (&(grid_m [0])), excess_0 (grid_m.get_excess_0 ()),  excess_n (grid_m.get_excess_n ()), default_matrix (grid_m.get_data (0)) {
 			TRACE ("Building solver...");
 			horizontal_matrix.resize (ldn);
 			factorized_horizontal_matrix.resize (ldn);
@@ -44,6 +44,7 @@ namespace two_d
 			implicit_rhs_vec.resize (ldn * m);
 			explicit_rhs_vec.resize (ldn * m);
 			real_rhs_vec.resize (ldn * m);
+			
 			if (messenger_ptr->get_id () - 1 >= 0) {
 				messenger_ptr->template send <int> (1, &excess_0, messenger_ptr->get_id () - 1, 0);
 				messenger_ptr->template recv <int> (1, &ex_excess_0, messenger_ptr->get_id () - 1, 0);

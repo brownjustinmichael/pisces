@@ -56,12 +56,12 @@ namespace two_d
 				
 				std::shared_ptr <bases::solver <datatype>> pressure_solver = std::shared_ptr <bases::solver <datatype>> (new laplace_solver <datatype> (*grids [0], *grids [1], messenger_ptr, ptr (pressure), &element_flags [state], &element_flags [pressure]));
 				solvers [z_velocity]->add_plan (pressure_solver, pre_solve_plan);
-				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new z_derivative_source <datatype> (*pressure_solver, 1.0, ptr (temp))), mid_plan);
-				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new mixed_derivative_source <datatype> (*pressure_solver, -2.0, ptr (z_vel), ptr (x_vel))), post_plan);
-				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new square_z_derivative_source <datatype> (*pressure_solver, -1.0, ptr (z_vel))), post_plan);
-				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new square_x_derivative_source <datatype> (*pressure_solver, -1.0, ptr (x_vel))), post_plan);
-				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype> > (new z_derivative_source <datatype> (*solvers [z_velocity], -1.0, ptr (pressure))), pre_solve_plan);
-				
+				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new z_derivative_source <datatype> (*pressure_solver, i_params.get <datatype> ("velocity.diffusion"), ptr (temp))), mid_plan);
+				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new mixed_derivative_source <datatype> (*pressure_solver, -2.0 * i_params.get <datatype> ("velocity.advection"), ptr (z_vel), ptr (x_vel))), post_plan);
+				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new square_z_derivative_source <datatype> (*pressure_solver, -1.0 * i_params.get <datatype> ("velocity.advection"), ptr (z_vel))), post_plan);
+				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new square_x_derivative_source <datatype> (*pressure_solver, -1.0 * i_params.get <datatype> ("velocity.advection"), ptr (x_vel))), post_plan);
+				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new z_derivative_source <datatype> (*solvers [z_velocity], -1.0, ptr (pressure))), pre_solve_plan);
+			
 				// Solve temperature
 				element <datatype>::add_solver (temp, new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, ptr (temp), &element_flags [state], &element_flags [temp]));
 						
