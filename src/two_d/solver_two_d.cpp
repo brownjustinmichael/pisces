@@ -408,13 +408,6 @@ namespace two_d
 				
 				TRACE ("Solve complete.")
 			}
-			if (*component_flags & z_solve) {
-				*component_flags &= ~z_solve;
-				*component_flags |= x_solve;
-			} else {
-				*component_flags &= ~x_solve;
-				*component_flags |= z_solve;
-			}
 			TRACE ("Execution complete.");
 		}
 		
