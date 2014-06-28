@@ -31,16 +31,16 @@ namespace one_d
 		std::vector <datatype> implicit_rhs_vec;
 		std::vector <datatype> real_rhs_vec;
 		
+		datatype *explicit_rhs_ptr = NULL;
+		datatype *implicit_rhs_ptr = NULL;
+		datatype *real_rhs_ptr = NULL;
+		
 		using bases::master_solver <datatype>::data;
 		using bases::master_solver <datatype>::element_flags;
 		using bases::master_solver <datatype>::component_flags;
 		
 	public:
-		master_solver (bases::grid <datatype> &i_grid, datatype *i_data, int *i_element_flags, int *i_component_flags) : bases::master_solver <datatype> (i_data, element_flags, component_flags), n (i_grid.get_n ()), grid (i_grid) {
-			implicit_rhs_vec.resize (n);
-			explicit_rhs_vec.resize (n);
-			real_rhs_vec.resize (n);
-		}
+		master_solver (bases::grid <datatype> &i_grid, datatype *i_data, int *i_element_flags, int *i_component_flags) : bases::master_solver <datatype> (i_data, element_flags, component_flags), n (i_grid.get_n ()), grid (i_grid) {}
 		
 		virtual ~master_solver () {}
 		
@@ -50,11 +50,23 @@ namespace one_d
 		
 		datatype *rhs_ptr (int index = implicit_rhs) {
 			if (index == implicit_rhs) {
-				return &implicit_rhs_vec [0];
+				if (!implicit_rhs_ptr) {
+					implicit_rhs_vec.resize (n);
+					implicit_rhs_ptr = &implicit_rhs_vec [0];
+				}
+				return implicit_rhs_ptr;
 			} else if (index == explicit_rhs) {
-				return &explicit_rhs_vec [0];
+				if (!explicit_rhs_ptr) {
+					explicit_rhs_vec.resize (n);
+					explicit_rhs_ptr = &implicit_rhs_vec [0];
+				}
+				return explicit_rhs_ptr;
 			} else if (index == real_rhs) {
-				return &real_rhs_vec [0];
+				if (!real_rhs_ptr) {
+					real_rhs_vec.resize (n);
+					real_rhs_ptr = &implicit_rhs_vec [0];
+				}
+				return real_rhs_ptr;
 			} else {
 				return NULL;
 			}
@@ -65,9 +77,15 @@ namespace one_d
 		}
 		
 		virtual void reset () {
-			utils::scale (n, 0.0, rhs_ptr (implicit_rhs));
-			utils::scale (n, 0.0, rhs_ptr (explicit_rhs));
-			utils::scale (n, 0.0, rhs_ptr (real_rhs));
+			if (implicit_rhs_ptr) {
+				utils::scale (n, 0.0, implicit_rhs_ptr);
+			}
+			if (explicit_rhs_ptr) {
+				utils::scale (n, 0.0, explicit_rhs_ptr);
+			}
+			if (real_rhs_ptr) {
+				utils::scale (n, 0.0, real_rhs_ptr);
+			}
 		}
 		
 		virtual void add_solver (std::shared_ptr <bases::solver <datatype> > i_solver, int flags = 0x00) {
@@ -116,16 +134,6 @@ namespace one_d
 
 		datatype *matrix_ptr (int index = 0) {
 			return &matrix [0];
-		}
-		
-		datatype *rhs_ptr (int index = implicit_rhs) {
-			if (index == implicit_rhs) {
-				return &implicit_rhs_vec [0];
-			} else if (index == explicit_rhs) {
-				return &explicit_rhs_vec [0];
-			} else {
-				return NULL;
-			}
 		}
 		
 		void factorize ();
