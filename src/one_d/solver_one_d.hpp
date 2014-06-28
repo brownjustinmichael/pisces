@@ -18,6 +18,72 @@
 
 namespace one_d
 {
+	template <class datatype>
+	class master_solver : public bases::master_solver <datatype>
+	{
+	private:
+		int n;
+		bases::grid <datatype> &grid;
+		
+		std::shared_ptr <bases::solver <datatype> > z_solver;
+		
+		std::vector <datatype> explicit_rhs_vec;
+		std::vector <datatype> implicit_rhs_vec;
+		std::vector <datatype> real_rhs_vec;
+		
+		using bases::master_solver <datatype>::data;
+		using bases::master_solver <datatype>::element_flags;
+		using bases::master_solver <datatype>::component_flags;
+		
+	public:
+		master_solver (bases::grid <datatype> &i_grid, datatype *i_data, int *i_element_flags, int *i_component_flags) : bases::master_solver <datatype> (i_data, element_flags, component_flags), n (i_grid.get_n ()), grid (i_grid) {
+			implicit_rhs_vec.resize (n);
+			explicit_rhs_vec.resize (n);
+			real_rhs_vec.resize (n);
+		}
+		
+		virtual ~master_solver () {}
+		
+		bases::grid <datatype> *grid_ptr (int index = 0) {
+			return &grid;
+		}
+		
+		datatype *rhs_ptr (int index = implicit_rhs) {
+			if (index == implicit_rhs) {
+				return &implicit_rhs_vec [0];
+			} else if (index == explicit_rhs) {
+				return &explicit_rhs_vec [0];
+			} else if (index == real_rhs) {
+				return &real_rhs_vec [0];
+			} else {
+				return NULL;
+			}
+		}
+		
+		datatype *matrix_ptr (int index = 0) {
+			return z_solver->matrix_ptr ();
+		}
+		
+		virtual void reset () {
+			utils::scale (n, 0.0, rhs_ptr (implicit_rhs));
+			utils::scale (n, 0.0, rhs_ptr (explicit_rhs));
+			utils::scale (n, 0.0, rhs_ptr (real_rhs));
+		}
+		
+		virtual void add_solver (std::shared_ptr <bases::solver <datatype> > i_solver, int flags = 0x00) {
+			z_solver = i_solver;
+		}
+		
+	protected:
+		virtual void _factorize () {
+			z_solver->factorize ();
+		}
+		
+		virtual void _solve () {
+			z_solver->execute ();
+		}
+	};
+	
 	/*!*******************************************************************
 	 * \brief A 1D implementation of a matrix solver
 	 * 
@@ -40,7 +106,9 @@ namespace one_d
 		 * \param i_name_rhs The integer representation of the matrix right-hand-side
 		 * \copydoc bases::solver <datatype>::solver ()
 		 *********************************************************************/
-		solver (bases::grid <datatype> &i_grid, utils::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_aplha_n, datatype* i_data, int *element_flags, int *component_flags);
+		solver (bases::grid <datatype> &i_grid, utils::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_aplha_n, datatype *i_explicit_rhs, datatype* i_implicit_rhs, datatype *i_real_rhs, datatype* i_data, int *element_flags, int *component_flags);
+		
+		solver (bases::master_solver <datatype> &i_solver, utils::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_aplha_n);
 	
 		virtual ~solver () {
 			// printf ("Destroying one_d solver\n");
@@ -48,10 +116,6 @@ namespace one_d
 
 		datatype *matrix_ptr (int index = 0) {
 			return &matrix [0];
-		}
-		
-		datatype *data_ptr () {
-			return data;
 		}
 		
 		datatype *rhs_ptr (int index = implicit_rhs) {
@@ -64,25 +128,14 @@ namespace one_d
 			}
 		}
 		
-		bases::grid <datatype> *grid_ptr (int index = 0) {
-			return &grid;
-		}
+		void factorize ();
 		
-		virtual void reset () {
-			utils::scale (n, 0.0, rhs_ptr (implicit_rhs));
-			utils::scale (n, 0.0, rhs_ptr (explicit_rhs));
-		}
+		void execute ();
 		
 		using bases::solver <datatype>::element_flags;
 		using bases::solver <datatype>::component_flags;
 			
 	protected:
-		/*!*******************************************************************
-		 * \copydoc bases::solver <datatype>::factorize ()
-		 *********************************************************************/
-		void _factorize ();
-		void _solve ();
-		
 		int n, ld;
 		bases::grid <datatype> &grid;
 		datatype *data;
@@ -102,10 +155,8 @@ namespace one_d
 		int ex_excess_0; //!< The integer number of elements to send to edge_0
 		int ex_excess_n; //!< The integer number of elements to send to edge_n
 		int ntop, nbot;
+		datatype *implicit_rhs_vec, *explicit_rhs_vec, *real_rhs_vec;
 		
-		std::vector <datatype> explicit_rhs_vec; //!< The datatype array of the right-hand-side of the matrix equation
-		std::vector <datatype> implicit_rhs_vec; //!< The datatype array of the right-hand-side of the matrix equation
-		std::vector <datatype> real_rhs_vec; //!< The datatype array of the right-hand-side of the matrix equation
 		datatype* default_matrix; //!< The datatype array of the non-timestep dependent matrix component
 		
 		std::vector <datatype> values_0, values_n;

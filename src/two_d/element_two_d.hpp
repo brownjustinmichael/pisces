@@ -14,6 +14,7 @@
 #include <cmath>
 #include <sstream>
 #include "transform_two_d.hpp"
+#include "solver_two_d.hpp"
 #include "../utils/io.hpp"
 #include "../utils/formats.hpp"
 #include "../utils/rezone.hpp"
@@ -26,11 +27,6 @@ namespace two_d
 		edge_nn = 1, // Start at n, 0, increment by n
 		edge_m0 = 2, // Start at 0, 0, increment by 1
 		edge_mm = 3 // Start at 0, m, increment by 1
-	};
-	
-	enum solve_element_flags {
-		x_solve = 0x20,
-		z_solve = 0x80
 	};
 	
 	enum initialize_element_flags {
@@ -295,6 +291,9 @@ namespace two_d
 					if ((name != x_position) && (name != z_position)) {
 						element <datatype>::add_transform (name, std::shared_ptr <master_transform <datatype> > (new master_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &element_flags [state], &element_flags [name], transform_threads)));
 					}
+					if ((name != x_position) && (name != z_position)) {
+						element <datatype>::add_solver (name, std::shared_ptr <master_solver <datatype> > (new master_solver <datatype> (*grids [0], *grids [1], ptr (name), &element_flags [state], &element_flags [name])));
+					}
 					TRACE ("Initialized.");
 					return this->ptr (name);
 				}
@@ -362,6 +361,9 @@ namespace two_d
 					*/
 					if ((name != x_position) && (name != z_position)) {
 						bases::element <datatype>::add_transform (name, std::shared_ptr <master_transform <datatype> > (new master_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal, &element_flags [state], &element_flags [name], transform_threads)));
+					}
+					if ((name != x_position) && (name != z_position)) {
+						element <datatype>::add_solver (name, std::shared_ptr <master_solver <datatype> > (new master_solver <datatype> (*grids [0], *grids [1], ptr (name), &element_flags [state], &element_flags [name])));
 					}
 					return this->ptr (name);
 				}

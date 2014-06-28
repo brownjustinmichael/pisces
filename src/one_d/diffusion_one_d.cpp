@@ -28,7 +28,7 @@ namespace one_d
 	}
 
 	template <class datatype>
-	diffusion <datatype>::diffusion (bases::solver <datatype> &i_solver, datatype i_coeff, datatype i_alpha) :
+	diffusion <datatype>::diffusion (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype i_alpha) :
 	implicit_plan <datatype> (i_solver),
 	coeff (i_coeff), 
 	alpha (i_alpha) {
@@ -52,7 +52,7 @@ namespace one_d
 	template class diffusion <float>;
 	
 	template <class datatype>
-	nonlinear_diffusion <datatype>::nonlinear_diffusion (bases::solver <datatype> &i_solver, datatype i_coeff) :
+	nonlinear_diffusion <datatype>::nonlinear_diffusion (bases::master_solver <datatype> &i_solver, datatype i_coeff) :
 	explicit_plan <datatype> (i_solver),
 	coeff (i_coeff) {
 		TRACE ("Initialized.");

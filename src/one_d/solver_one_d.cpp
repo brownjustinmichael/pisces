@@ -20,7 +20,7 @@
 namespace one_d
 {
 	template <class datatype>
-	solver <datatype>::solver (bases::grid <datatype> &i_grid, utils::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_data, int *i_element_flags, int *i_component_flags) :
+	solver <datatype>::solver (bases::grid <datatype> &i_grid, utils::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype *i_explicit_rhs, datatype* i_implicit_rhs, datatype *i_real_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) :
 	bases::solver <datatype> (i_element_flags, i_component_flags), 
 	n (i_grid.get_n ()),
 	ld (i_grid.get_ld ()),
@@ -33,13 +33,75 @@ namespace one_d
 	positions (&(grid [0])),
 	excess_0 (grid.get_excess_0 ()), 
 	excess_n (grid.get_excess_n ()),
+	implicit_rhs_vec (i_implicit_rhs),
+	explicit_rhs_vec (i_explicit_rhs),
+	real_rhs_vec (i_real_rhs),
 	default_matrix (i_grid.get_data (0)) {
 		matrix.resize (n * n);
 		values_0.resize (1);
 		values_n.resize (1);
-		implicit_rhs_vec.resize (1 * n);
-		explicit_rhs_vec.resize (1 * n);
-		real_rhs_vec.resize (1 * n);
+		if (messenger_ptr->get_id () - 1 >= 0) {
+			messenger_ptr->template send <int> (1, &excess_0, messenger_ptr->get_id () - 1, 0);
+			messenger_ptr->template recv <int> (1, &ex_excess_0, messenger_ptr->get_id () - 1, 0);
+			positions_0.resize (ex_excess_0);
+			messenger_ptr->template send <datatype> (excess_0, positions, messenger_ptr->get_id () - 1, 0);
+			messenger_ptr->template recv <datatype> (ex_excess_0, &positions_0 [0], messenger_ptr->get_id () - 1, 0);
+			ntop = 1;
+		} else {
+			ex_excess_0 = 0;
+			ntop = 0;
+		}
+		if (messenger_ptr->get_id () + 1 < messenger_ptr->get_np ()) {
+			messenger_ptr->template send <int> (1, &excess_n, messenger_ptr->get_id () + 1, 0);
+			messenger_ptr->template recv <int> (1, &ex_excess_n, messenger_ptr->get_id () + 1, 0);
+			positions_n.resize (ex_excess_n);
+			messenger_ptr->template send <datatype> (excess_n, &(positions [n - excess_n]), messenger_ptr->get_id () + 1, 0);
+			messenger_ptr->template recv <datatype> (ex_excess_n, &positions_n [0], messenger_ptr->get_id () + 1, 0);
+			nbot = 1;
+		} else {
+			ex_excess_n = 0;
+			nbot = 0;
+		}
+		int ns0 = excess_0 + ex_excess_0 + ntop * 2;
+		if (messenger_ptr->get_id () == 0) {
+			ns.resize (messenger_ptr->get_np ());
+			messenger_ptr->template gather <int> (1, &ns0, &ns [0]);
+			int ntot = 0;
+			for (int i = 0; i < messenger_ptr->get_np (); ++i) {
+				ntot += ns [i];
+			}
+			boundary_matrix.resize (ntot * ntot);
+			bipiv.resize (ntot);
+		} else {
+			messenger_ptr->template gather <int> (1, &ns0, NULL);
+			boundary_matrix.resize ((excess_0 + ex_excess_0 + excess_n + ex_excess_n + 2 * (nbot + ntop)) * (excess_0 + ex_excess_0 + excess_n + ex_excess_n + 2 * (nbot + ntop)));
+		}
+		factorized_matrix.resize ((n + ex_excess_0 + ex_excess_n + nbot + ntop) * (n + ex_excess_0 + ex_excess_n + nbot + ntop), 0.0);
+		ipiv.resize (n); // TODO Should be n - ntop - nbot - excess_0 - excess_n
+		data_temp.resize ((n + ex_excess_0 + ex_excess_n + nbot + ntop) * (1));
+	}
+	
+	template <class datatype>
+	solver <datatype>::solver (bases::master_solver <datatype> &i_solver, utils::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n) :
+	bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags), 
+	n (i_solver.grid_ptr ()->get_n ()),
+	ld (i_solver.grid_ptr ()->get_ld ()),
+	grid (*(i_solver.grid_ptr ())),
+	data (i_solver.data_ptr ()),
+	messenger_ptr (i_messenger_ptr),
+	timestep (i_timestep), 
+	alpha_0 (i_alpha_0), 
+	alpha_n (i_alpha_n), 
+	positions (&(grid [0])),
+	excess_0 (grid.get_excess_0 ()), 
+	excess_n (grid.get_excess_n ()),
+	implicit_rhs_vec (i_solver.rhs_ptr (implicit_rhs)),
+	explicit_rhs_vec (i_solver.rhs_ptr (explicit_rhs)),
+	real_rhs_vec (i_solver.rhs_ptr (real_rhs)),
+	default_matrix (grid.get_data (0)) {
+		matrix.resize (n * n);
+		values_0.resize (1);
+		values_n.resize (1);
 		if (messenger_ptr->get_id () - 1 >= 0) {
 			messenger_ptr->template send <int> (1, &excess_0, messenger_ptr->get_id () - 1, 0);
 			messenger_ptr->template recv <int> (1, &ex_excess_0, messenger_ptr->get_id () - 1, 0);
@@ -82,7 +144,7 @@ namespace one_d
 	}
 
 	template <class datatype>
-	void solver <datatype>::_factorize () {
+	void solver <datatype>::factorize () {
 		int info, lda = n + ex_excess_0 + ex_excess_n + nbot + ntop;
 		TRACE ("Factorizing..." << messenger_ptr->get_id ());
 
@@ -107,7 +169,7 @@ namespace one_d
 	}
 
 	template <class datatype>
-	void solver <datatype>::_solve () {
+	void solver <datatype>::execute () {
 		int info, lda = n + ex_excess_0 + ex_excess_n + nbot + ntop;
 		TRACE ("Executing solve...");
 		utils::scale (lda, 0.0, &data_temp [0]);

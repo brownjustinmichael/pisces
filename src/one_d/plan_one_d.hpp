@@ -52,7 +52,7 @@ namespace one_d
 		 * \param i_data_out The integer scalar index of the output
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		explicit_plan (bases::solver <datatype> &i_solver) : 
+		explicit_plan (bases::master_solver <datatype> &i_solver) : 
 		bases::plan <datatype> (i_solver.element_flags, i_solver.component_flags),
 		n (i_solver.grid_ptr ()->get_n ()),
 		ld (i_solver.grid_ptr ()->get_ld ()),
@@ -96,7 +96,7 @@ namespace one_d
 		 * \param i_matrix The datatype matrix to be updated
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		implicit_plan (bases::solver <datatype> &i_solver) :
+		implicit_plan (bases::master_solver <datatype> &i_solver) :
 		explicit_plan <datatype> (i_solver),  
 		matrix (i_solver.matrix_ptr ()) {
 			data_out = i_solver.rhs_ptr (0);

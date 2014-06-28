@@ -20,7 +20,7 @@ namespace two_d
 		class source : public explicit_plan <datatype>
 		{
 		public:
-			source (bases::solver <datatype> &i_solver, datatype i_coeff, datatype* i_data_source) :
+			source (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype* i_data_source) :
 			explicit_plan <datatype> (i_solver),
 			coeff (i_coeff),
 			data_source (i_data_source) {
@@ -54,7 +54,7 @@ namespace two_d
 			coeff (i_coeff),
 			data_source (i_data_source) {}
 			
-			x_derivative_source (bases::solver <datatype> &i_solver, datatype i_coeff, datatype* i_data_source) :
+			x_derivative_source (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype* i_data_source) :
 			explicit_plan <datatype> (i_solver),
 			coeff (i_coeff),
 			data_source (i_data_source) {}
@@ -91,7 +91,7 @@ namespace two_d
 			data_source (i_data_source),
 			pos_n (&(grid_n [0])) {}
 			
-			square_x_derivative_source (bases::solver <datatype> &i_solver, datatype i_coeff, datatype* i_data_source) :
+			square_x_derivative_source (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype* i_data_source) :
 			real_plan <datatype> (i_solver),
 			coeff (i_coeff),
 			data_source (i_data_source),
@@ -144,7 +144,7 @@ namespace two_d
 			data_source (i_data_source),
 			pos_m (&(grid_m [0])) {}
 
-			z_derivative_source (bases::solver <datatype> &i_solver, datatype i_coeff, datatype* i_data_source) :
+			z_derivative_source (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype* i_data_source) :
 			explicit_plan <datatype> (i_solver),
 			coeff (i_coeff),
 			data_source (i_data_source),
@@ -198,7 +198,7 @@ namespace two_d
 				TRACE ("Adding square z derivative source...");
 			}
 
-			square_z_derivative_source (bases::solver <datatype> &i_solver, datatype i_coeff, datatype* i_data_source) :
+			square_z_derivative_source (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype* i_data_source) :
 			real_plan <datatype> (i_solver),
 			coeff (i_coeff),
 			data_source (i_data_source),
@@ -245,7 +245,7 @@ namespace two_d
 		class mixed_derivative_source : public real_plan <datatype>
 		{
 		public:
-			mixed_derivative_source (bases::solver <datatype> &i_solver, datatype i_coeff, datatype* i_data_source_x, datatype* i_data_source_z) :
+			mixed_derivative_source (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype* i_data_source_x, datatype* i_data_source_z) :
 			real_plan <datatype> (i_solver),
 			coeff (i_coeff),
 			data_source_x (i_data_source_x),

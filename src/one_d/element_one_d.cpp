@@ -66,7 +66,7 @@ namespace one_d
 			// normal_stream->template append <datatype> ("u", ptr (velocity));
 			
 			// // Set up solver
-			element <datatype>::add_solver (velocity, new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, ptr (velocity), &element_flags [state], &element_flags [velocity]));
+			solvers [velocity]->add_solver (std::shared_ptr <solver <datatype>> (new solver <datatype> (*solvers [velocity], messenger_ptr, timestep, alpha_0, alpha_n)));
 			// 
 			// // Set up plans in order
 			solvers [velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new diffusion <datatype> (*solvers [velocity], nparams.get <datatype> ("velocity.diffusion"), nparams.get <datatype> ("time.alpha"))), pre_plan);
@@ -127,7 +127,7 @@ namespace one_d
 			// normal_stream->template append <datatype> ("u", ptr (velocity));
 			
 			// // Set up solver
-			element <datatype>::add_solver (velocity, new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, ptr (velocity), &element_flags [state], &element_flags [velocity]));
+			solvers [velocity]->add_solver (std::shared_ptr <solver <datatype>> (new solver <datatype> (*solvers [velocity], messenger_ptr, timestep, alpha_0, alpha_n)));
 			// 
 			// // Set up plans in order
 			solvers [velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new diffusion <datatype> (*solvers [velocity], nparams.get <datatype> ("velocity.diffusion"), nparams.get <datatype> ("time.alpha"))), pre_plan);
@@ -199,7 +199,7 @@ namespace one_d
 			// normal_stream->template append <datatype> ("u", ptr (velocity));			
 
 			// Set up solver
-			element <datatype>::add_solver (velocity, new solver <datatype> (*grids [0], messenger_ptr, timestep, alpha_0, alpha_n, ptr (velocity), &element_flags [state], &element_flags [velocity]));
+			solvers [velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new solver <datatype> (*solvers [velocity], messenger_ptr, timestep, alpha_0, alpha_n)));
 			
 			// Set up plans in order
 			solvers [velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new diffusion <datatype> (*solvers [velocity], diffusion_coeff, alpha)), pre_plan);

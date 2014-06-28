@@ -24,7 +24,7 @@ namespace one_d
 	public:
 		advection (bases::grid <datatype> &i_grid, datatype i_coeff, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL);	//constuctor initializes private members to point to input and output vectors
 
-		advection (bases::solver <datatype> &i_solver, datatype i_coeff);	//constuctor initializes private members to point to input and output vectors
+		advection (bases::master_solver <datatype> &i_solver, datatype i_coeff);	//constuctor initializes private members to point to input and output vectors
 		
 		virtual ~advection () {
 			// printf ("Destroying one_d advection\n");

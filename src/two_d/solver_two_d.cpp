@@ -12,6 +12,8 @@
 #include "../utils/interpolate.hpp"
 #include "../utils/block_solver.hpp"
 #include "solver_two_d.hpp"
+#include "transform_two_d.hpp"
+#include "../utils/exceptions.hpp"
 #include <sstream>
 
 /*
@@ -33,7 +35,7 @@ namespace two_d
 	namespace fourier
 	{
 		template <class datatype>
-		solver <datatype>:: solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
+		collocation_solver <datatype>::collocation_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_implicit_rhs, datatype *i_explicit_rhs, datatype *i_real_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
 		bases::solver <datatype> (i_element_flags, i_component_flags), n (i_grid_n.get_n ()),  ldn (i_grid_n.get_ld ()),  m (i_grid_m.get_n ()), data (i_data), grid_n (i_grid_n), grid_m (i_grid_m), messenger_ptr (i_messenger_ptr),  timestep (i_timestep),  alpha_0 (i_alpha_0),  alpha_n (i_alpha_n),  positions (&(grid_m [0])), excess_0 (grid_m.get_excess_0 ()),  excess_n (grid_m.get_excess_n ()), default_matrix (grid_m.get_data (0)) {
 			TRACE ("Building solver...");
 			horizontal_matrix.resize (ldn);
@@ -41,9 +43,9 @@ namespace two_d
 			matrix.resize (m * m);
 			values_0.resize (ldn);
 			values_n.resize (ldn);
-			implicit_rhs_vec.resize (ldn * m);
-			explicit_rhs_vec.resize (ldn * m);
-			real_rhs_vec.resize (ldn * m);
+			implicit_rhs_vec = i_implicit_rhs;
+			explicit_rhs_vec = i_explicit_rhs;
+			real_rhs_vec = i_real_rhs;
 			
 			if (messenger_ptr->get_id () - 1 >= 0) {
 				messenger_ptr->template send <int> (1, &excess_0, messenger_ptr->get_id () - 1, 0);
@@ -85,14 +87,78 @@ namespace two_d
 			ipiv.resize (m); // TODO Should be n - ntop - nbot - excess_0 - excess_n
 			data_temp.resize ((m + ex_excess_0 + ex_excess_n + nbot + ntop) * (ldn));
 			
-			transform = std::shared_ptr <bases::plan <datatype> > (new horizontal_transform <datatype> (n, m, rhs_ptr (real_rhs), NULL, 0x00, element_flags, &flags));
+			transform = std::shared_ptr <bases::plan <datatype> > (new horizontal_transform <datatype> (n, m, real_rhs_vec, NULL, 0x00, element_flags, &flags));
+			/*
+				TODO Move this plan to master_solver?
+			*/
 			TRACE ("Solver built.");
 		}
 		
 		template <class datatype>
-		void solver <datatype>::_factorize () {
+		collocation_solver <datatype>::collocation_solver (bases::master_solver <datatype> &i_solver, utils::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n) : 
+		bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags), n (i_solver.grid_ptr (0)->get_n ()),  ldn (i_solver.grid_ptr (0)->get_ld ()),  m (i_solver.grid_ptr (1)->get_n ()), data (i_solver.data_ptr ()), grid_n (*(i_solver.grid_ptr (0))), grid_m (*(i_solver.grid_ptr (1))), messenger_ptr (i_messenger_ptr),  timestep (i_timestep),  alpha_0 (i_alpha_0),  alpha_n (i_alpha_n),  positions (&(grid_m [0])), excess_0 (grid_m.get_excess_0 ()),  excess_n (grid_m.get_excess_n ()), default_matrix (grid_m.get_data (0)) {
+			TRACE ("Building solver...");
+			horizontal_matrix.resize (ldn);
+			factorized_horizontal_matrix.resize (ldn);
+			matrix.resize (m * m);
+			values_0.resize (ldn);
+			values_n.resize (ldn);
+			implicit_rhs_vec = i_solver.rhs_ptr (implicit_rhs);
+			explicit_rhs_vec = i_solver.rhs_ptr (explicit_rhs);
+			real_rhs_vec = i_solver.rhs_ptr (real_rhs);
+			
+			if (messenger_ptr->get_id () - 1 >= 0) {
+				messenger_ptr->template send <int> (1, &excess_0, messenger_ptr->get_id () - 1, 0);
+				messenger_ptr->template recv <int> (1, &ex_excess_0, messenger_ptr->get_id () - 1, 0);
+				positions_0.resize (ex_excess_0);
+				messenger_ptr->template send <datatype> (excess_0, positions, messenger_ptr->get_id () - 1, 0);
+				messenger_ptr->template recv <datatype> (ex_excess_0, &positions_0 [0], messenger_ptr->get_id () - 1, 0);
+				ntop = 1;
+			} else {
+				ex_excess_0 = 0;
+				ntop = 0;
+			}
+			if (messenger_ptr->get_id () + 1 < messenger_ptr->get_np ()) {
+				messenger_ptr->template send <int> (1, &excess_n, messenger_ptr->get_id () + 1, 0);
+				messenger_ptr->template recv <int> (1, &ex_excess_n, messenger_ptr->get_id () + 1, 0);
+				positions_n.resize (ex_excess_n);
+				messenger_ptr->template send <datatype> (excess_n, &(positions [m - excess_n]), messenger_ptr->get_id () + 1, 0);
+				messenger_ptr->template recv <datatype> (ex_excess_n, &positions_n [0], messenger_ptr->get_id () + 1, 0);
+				nbot = 1;
+			} else {
+				ex_excess_n = 0;
+				nbot = 0;
+			}
+			int ns0 = excess_0 + ex_excess_0 + ntop * 2;
+			if (messenger_ptr->get_id () == 0) {
+				ns.resize (messenger_ptr->get_np ());
+				messenger_ptr->template gather <int> (1, &ns0, &ns [0]);
+				int ntot = 0;
+				for (int i = 0; i < messenger_ptr->get_np (); ++i) {
+					ntot += ns [i];
+				}
+				boundary_matrix.resize (ntot * ntot);
+				bipiv.resize (ntot);
+			} else {
+				messenger_ptr->template gather <int> (1, &ns0, NULL);
+				boundary_matrix.resize ((excess_0 + ex_excess_0 + excess_n + ex_excess_n + 2 * (nbot + ntop)) * (excess_0 + ex_excess_0 + excess_n + ex_excess_n + 2 * (nbot + ntop)));
+			}
+			factorized_matrix.resize ((m + ex_excess_0 + ex_excess_n + nbot + ntop) * (m + ex_excess_0 + ex_excess_n + nbot + ntop), 0.0);
+			ipiv.resize (m); // TODO Should be n - ntop - nbot - excess_0 - excess_n
+			data_temp.resize ((m + ex_excess_0 + ex_excess_n + nbot + ntop) * (ldn));
+			
+			transform = std::shared_ptr <bases::plan <datatype> > (new horizontal_transform <datatype> (n, m, real_rhs_vec, NULL, 0x00, element_flags, &flags));
+			/*
+				TODO Move this plan to master_solver
+			*/
+			TRACE ("Solver built.");
+		}
+		
+		template <class datatype>
+		void collocation_solver <datatype>::factorize () {
 			int info, lda = m + ex_excess_0 + ex_excess_n + nbot + ntop;
 			TRACE ("Factorizing...");
+			DEBUG ("Factorizing...");
 			
 			for (int i = 0; i < ldn; ++i) {
 				factorized_horizontal_matrix [i] = 1.0 + timestep * horizontal_matrix [i];
@@ -119,10 +185,11 @@ namespace two_d
 		}
 		
 		template <class datatype>
-		void solver <datatype>::_solve () {
+		void collocation_solver <datatype>::execute () {
 			int info, lda = m + ex_excess_0 + ex_excess_n + nbot + ntop;
 			std::stringstream debug;
 			TRACE ("Executing solve...");
+			DEBUG ("Executing solve...");
 			
 			/*
 				TODO Add timestep check here?
@@ -351,10 +418,10 @@ namespace two_d
 			TRACE ("Execution complete.");
 		}
 		
-		template class solver <double>;
+		template class collocation_solver <double>;
 		
 		template <class datatype>
-		laplace_solver <datatype>::laplace_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
+		laplace_solver <datatype>::laplace_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype* i_implicit_rhs, datatype *i_explicit_rhs, datatype *i_real_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
 		bases::solver <datatype> (i_element_flags, i_component_flags),
 		n (i_grid_n.get_n ()), 
 		ldn (i_grid_n.get_ld ()), 
@@ -370,8 +437,9 @@ namespace two_d
 			sup.resize (m * ldn);
 			sub.resize (m * ldn);
 			diag.resize (m * ldn);
-			explicit_rhs_vec.resize (ldn * m);
-			real_rhs_vec.resize (ldn * m);
+			implicit_rhs_vec = i_implicit_rhs;
+			explicit_rhs_vec = i_explicit_rhs;
+			real_rhs_vec = i_real_rhs;
 			
 			sup_ptr = &sup [0];
 			sub_ptr = &sub [0];
@@ -401,11 +469,63 @@ namespace two_d
 				messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
 			}
 			
-			transform = std::shared_ptr <bases::plan <datatype> > (new horizontal_transform <datatype> (n, m, rhs_ptr (real_rhs), NULL, 0x00, i_element_flags, &flags));
+			transform = std::shared_ptr <bases::plan <datatype> > (new horizontal_transform <datatype> (n, m, real_rhs_vec, NULL, 0x00, i_element_flags, &flags));
 		}
 		
 		template <class datatype>
-		void laplace_solver <datatype>::_factorize () {
+		laplace_solver <datatype>::laplace_solver (bases::master_solver <datatype> &i_solver, utils::messenger* i_messenger_ptr) : 
+		bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags),
+		n (i_solver.grid_ptr (0)->get_n ()), 
+		ldn (i_solver.grid_ptr (0)->get_ld ()), 
+		m (i_solver.grid_ptr (1)->get_n ()),
+		data (i_solver.data_ptr ()),
+		grid_n (*(i_solver.grid_ptr (0))),
+		grid_m (*(i_solver.grid_ptr (1))),
+		pos_n (&grid_n [0]),
+		pos_m (&grid_m [0]),
+		excess_0 (grid_m.get_excess_0 ()), 
+		excess_n (grid_m.get_excess_n ()),
+		messenger_ptr (i_messenger_ptr) {
+			sup.resize (m * ldn);
+			sub.resize (m * ldn);
+			diag.resize (m * ldn);
+			implicit_rhs_vec = i_solver.rhs_ptr (implicit_rhs);
+			explicit_rhs_vec = i_solver.rhs_ptr (explicit_rhs);
+			real_rhs_vec = i_solver.rhs_ptr (real_rhs);
+			
+			sup_ptr = &sup [0];
+			sub_ptr = &sub [0];
+			diag_ptr = &diag [0];
+			
+			supsup.resize (ldn * m);
+			ipiv.resize (ldn * m);
+			
+			if (messenger_ptr->get_id () == 0) {
+				x.resize ((m + 4 * messenger_ptr->get_np ()) * 2 * ldn);
+				xipiv.resize (2 * messenger_ptr->get_np () * ldn);
+			} else {
+				x.resize ((m + 4) * 2 * ldn);
+			}
+			
+			id = messenger_ptr->get_id ();
+			np = messenger_ptr->get_np ();
+			
+			if (id != 0) {
+				messenger_ptr->send (1, &pos_m [excess_0 + 1], id - 1, 0);
+			}
+			if (id != np - 1) {
+				messenger_ptr->recv (1, &ex_pos_m, id + 1, 0);
+				messenger_ptr->send (1, &pos_m [m - 1 - excess_n], id + 1, 1);
+			}
+			if (id != 0) {
+				messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
+			}
+			
+			transform = std::shared_ptr <bases::plan <datatype> > (new horizontal_transform <datatype> (n, m, real_rhs_vec, NULL, 0x00, i_solver.element_flags, &flags));
+		}
+		
+		template <class datatype>
+		void laplace_solver <datatype>::factorize () {
 			TRACE ("Factorizing laplace solver...");
 			
 			double scalar = 4.0 * std::acos (-1.0) / (pos_n [n - 1] - pos_n [0]);
@@ -459,7 +579,7 @@ namespace two_d
 		}
 		
 		template <class datatype>
-		void laplace_solver <datatype>::_solve () {
+		void laplace_solver <datatype>::execute () {
 			TRACE ("Solving...");
 			int mm = m;
 			int nbegin = excess_0;
@@ -572,10 +692,23 @@ namespace two_d
 		grid_m (i_grid_m) {}
 		
 		template <class datatype>
-		void divergence_solver <datatype>::_factorize () {}
+		divergence_solver <datatype>::divergence_solver (bases::master_solver <datatype> &i_solver, datatype *i_data_z) : 
+		bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags),
+		n (i_solver.grid_ptr (0)->get_n ()), 
+		ldn (i_solver.grid_ptr (0)->get_ld ()), 
+		m (i_solver.grid_ptr (1)->get_n ()),
+		pos_m (&((*(i_solver.grid_ptr (1))) [0])),
+		data_x (i_solver.data_ptr ()),
+		data_z (i_data_z),
+		scalar (2.0 * acos (-1.0) / ((*(i_solver.grid_ptr (0))) [n - 1] - (*(i_solver.grid_ptr (0))) [0])),
+		grid_n (*(i_solver.grid_ptr (0))),
+		grid_m (*(i_solver.grid_ptr (1))) {}
 		
 		template <class datatype>
-		void divergence_solver <datatype>::_solve () {
+		void divergence_solver <datatype>::factorize () {}
+		
+		template <class datatype>
+		void divergence_solver <datatype>::execute () {
 			TRACE ("Solving...");
 			utils::scale (m * ldn, 0.0, data_x);
 			

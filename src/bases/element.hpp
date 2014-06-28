@@ -63,7 +63,7 @@ namespace bases
 		std::map <int, std::string> scalar_names; //!< A map of string representations of the scalars
 		std::map <int, int> element_flags; //!< A map of integer flags
 		
-		std::map<int, std::shared_ptr <solver <datatype>>> solvers; //!< A vector of shared pointers to the matrix solvers
+		std::map<int, std::shared_ptr <master_solver <datatype>>> solvers; //!< A vector of shared pointers to the matrix solvers
 		
 	private:
 		std::shared_ptr <io::output> normal_stream; //!< An implementation to output in normal space
@@ -179,9 +179,9 @@ namespace bases
 		 * \param i_name The integer solver name to add
 		 * \param i_solver_ptr A pointer to a solver object
 		 *********************************************************************/
-		inline void add_solver (int i_name, solver <datatype>* i_solver_ptr) {
+		inline void add_solver (int i_name, std::shared_ptr <master_solver <datatype> > i_solver_ptr) {
 			TRACE ("Adding solver...");
-			solvers [i_name] = std::shared_ptr <solver <datatype>> (i_solver_ptr);
+			solvers [i_name] = i_solver_ptr;
 			solver_keys.push_back (i_name);
 			TRACE ("Solver added.");
 		}
@@ -367,7 +367,7 @@ namespace bases
 			for (iterator iter = begin (); iter != end (); iter++) {
 				TRACE ("Solving " << *iter);
 				try {
-					solvers [*iter]->execute ();
+					solvers [*iter]->solve ();
 				} catch (std::exception &except) {
 					FATAL ("Failure in solver " << *iter);
 					throw except;
