@@ -78,7 +78,13 @@ namespace two_d
 			utils::scale (ldn * m, 0.0, rhs_ptr (implicit_rhs));
 			utils::scale (ldn * m, 0.0, rhs_ptr (explicit_rhs));
 			utils::scale (ldn * m, 0.0, rhs_ptr (real_rhs));
-			
+			if (*component_flags & z_solve) {
+				*component_flags &= ~z_solve;
+				*component_flags |= x_solve;
+			} else {
+				*component_flags &= ~x_solve;
+				*component_flags |= z_solve;
+			}
 		}
 		
 		virtual void add_solver (std::shared_ptr <bases::solver <datatype>> i_solver, int flags = 0x00) {
