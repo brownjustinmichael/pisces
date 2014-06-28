@@ -32,15 +32,16 @@ namespace two_d
 		std::vector <datatype> implicit_rhs_vec;
 		std::vector <datatype> real_rhs_vec;
 		
+		datatype *explicit_rhs_ptr = NULL;
+		datatype *implicit_rhs_ptr = NULL;
+		datatype *real_rhs_ptr = NULL;
+		
 		using bases::master_solver <datatype>::data;
 		using bases::master_solver <datatype>::element_flags;
 		using bases::master_solver <datatype>::component_flags;
 		
 	public:
 		master_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype *i_data, int *i_element_flags, int *i_component_flags) : bases::master_solver <datatype> (i_data, i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), grid_n (i_grid_n), grid_m (i_grid_m) {
-			implicit_rhs_vec.resize (ldn * m);
-			explicit_rhs_vec.resize (ldn * m);
-			real_rhs_vec.resize (ldn * m);
 			*component_flags |= z_solve;
 		}
 		
@@ -56,11 +57,23 @@ namespace two_d
 		
 		datatype *rhs_ptr (int index = implicit_rhs) {
 			if (index == implicit_rhs) {
-				return &implicit_rhs_vec [0];
+				if (!implicit_rhs_ptr) {
+					implicit_rhs_vec.resize (ldn * m);
+					implicit_rhs_ptr = &implicit_rhs_vec [0];
+				}
+				return implicit_rhs_ptr;
 			} else if (index == explicit_rhs) {
-				return &explicit_rhs_vec [0];
+				if (!explicit_rhs_ptr) {
+					explicit_rhs_vec.resize (ldn * m);
+					explicit_rhs_ptr = &explicit_rhs_vec [0];
+				}
+				return explicit_rhs_ptr;
 			} else if (index == real_rhs) {
-				return &real_rhs_vec [0];
+				if (!real_rhs_ptr) {
+					real_rhs_vec.resize (ldn * m);
+					real_rhs_ptr = &real_rhs_vec [0];
+				}
+				return real_rhs_ptr;
 			} else {
 				return NULL;
 			}
@@ -75,9 +88,16 @@ namespace two_d
 		}
 		
 		virtual void reset () {
-			utils::scale (ldn * m, 0.0, rhs_ptr (implicit_rhs));
-			utils::scale (ldn * m, 0.0, rhs_ptr (explicit_rhs));
-			utils::scale (ldn * m, 0.0, rhs_ptr (real_rhs));
+			if (implicit_rhs_ptr) {
+				utils::scale (ldn * m, 0.0, implicit_rhs_ptr);
+			}
+			if (explicit_rhs_ptr) {
+				utils::scale (ldn * m, 0.0, explicit_rhs_ptr);
+			}
+			if (real_rhs_ptr) {
+				utils::scale (ldn * m, 0.0, real_rhs_ptr);
+			}
+			
 			if (*component_flags & z_solve) {
 				*component_flags &= ~z_solve;
 				*component_flags |= x_solve;
