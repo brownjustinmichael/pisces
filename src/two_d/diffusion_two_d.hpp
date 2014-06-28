@@ -37,7 +37,7 @@ namespace two_d
 					}
 				}
 				
-				horizontal_diffusion (bases::solver <datatype> &i_solver, datatype i_coeff, datatype i_alpha) :
+				horizontal_diffusion (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype i_alpha) :
 				implicit_plan <datatype> (i_solver),
 				coeff (i_coeff),
 				alpha (i_alpha) {
@@ -98,7 +98,7 @@ namespace two_d
 					}
 				}
 				
-				vertical_diffusion (bases::solver <datatype> &i_solver, datatype i_coeff, datatype i_alpha) :
+				vertical_diffusion (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype i_alpha) :
 				implicit_plan <datatype> (i_solver),
 				coeff (i_coeff),
 				alpha (i_alpha) {
@@ -144,7 +144,7 @@ namespace two_d
 			class finite_vertical_diffusion : public implicit_plan <datatype>
 			{
 			public:
-				finite_vertical_diffusion (bases::solver <datatype> &i_solver, datatype i_coeff, datatype i_alpha) :
+				finite_vertical_diffusion (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype i_alpha) :
 				implicit_plan <datatype> (i_solver),
 				coeff (i_coeff),
 				alpha (i_alpha) {

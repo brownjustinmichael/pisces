@@ -22,7 +22,7 @@ namespace one_d
 	position_ptr (&i_grid [0]) {}
 	
 	template <class datatype>
-	advection <datatype>::advection (bases::solver <datatype> &i_solver, datatype i_coeff) : 
+	advection <datatype>::advection (bases::master_solver <datatype> &i_solver, datatype i_coeff) : 
 	explicit_plan <datatype> (i_solver),
 	coeff (-i_coeff),
 	position_ptr (&grid [0]) {}

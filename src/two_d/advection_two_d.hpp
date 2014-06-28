@@ -31,7 +31,7 @@ namespace two_d
 					TRACE ("Adding advection...");
 				}
 				
-				advection (bases::solver <datatype> &i_solver, datatype i_coeff, datatype* i_vel_n, datatype *i_vel_m) :
+				advection (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype* i_vel_n, datatype *i_vel_m) :
 				real_plan <datatype> (i_solver),
 				coeff (-i_coeff),
 				vel_n (i_vel_n),
@@ -77,7 +77,7 @@ namespace two_d
 				pos_n (&(grid_n [0])),
 				pos_m (&(grid_m [0])) {}
 				
-				stream_advection (bases::solver <datatype> &i_solver, datatype i_coeff, datatype *i_stream) :
+				stream_advection (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype *i_stream) :
 				real_plan <datatype> (i_solver),
 				coeff (-i_coeff),
 				stream (i_stream),
