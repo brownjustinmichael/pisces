@@ -134,13 +134,55 @@ namespace two_d
 		}
 	};
 	
+	template <class datatype>
+	class boundary
+	{
+	public:
+		boundary () {}
+		
+		virtual ~boundary () {}
+		
+		virtual void calculate_rhs () = 0;
+	};
+	
+	template <class datatype>
+	class communicating_boundary : public boundary <datatype>
+	{
+	private:
+		datatype alpha;
+		utils::messenger *messenger_ptr;
+		// std::vector <datatype> boundary_positions;
+		int n_boundary_in;
+		int n_boundary_out;
+		int out_id;
+		
+	public:
+		communicating_boundary (utils::messenger *i_messenger_ptr, int n, int &i_n_boundary_in, int &i_n_boundary_out, const datatype *i_positions, std::vector <datatype> &boundary_positions, bool top, int &bound) : messenger_ptr (i_messenger_ptr) {
+			n_boundary_in = i_n_boundary_in;
+			out_id = messenger_ptr->get_id () + (top ? 1 : -1);
+			messenger_ptr->template send <int> (1, &i_n_boundary_in, out_id, 0);
+			messenger_ptr->template recv <int> (1, &i_n_boundary_out, out_id, 0);
+			n_boundary_out = i_n_boundary_out;
+			boundary_positions.resize (i_n_boundary_out);
+			messenger_ptr->template send <datatype> (i_n_boundary_in, i_positions, out_id, 0);
+			messenger_ptr->template recv <datatype> (i_n_boundary_out, &boundary_positions [0], out_id, 0);
+			bound = 1;
+		}
+		
+		virtual ~communicating_boundary () {}
+		
+		virtual void calculate_rhs () {
+			
+		}
+	};
+	
 	namespace fourier
 	{
 		template <class datatype>
 		class collocation_solver : public bases::solver <datatype>
 		{
 		public:
-			collocation_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_aplha_n, datatype *i_implicit_rhs, datatype *i_explicit_rhs, datatype *i_real_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
+			collocation_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype *i_implicit_rhs, datatype *i_explicit_rhs, datatype *i_real_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
 			collocation_solver (bases::master_solver <datatype> &i_solver, utils::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_aplha_n);
 			
 			virtual ~collocation_solver () {}

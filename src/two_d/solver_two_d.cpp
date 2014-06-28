@@ -47,6 +47,9 @@ namespace two_d
 			explicit_rhs_vec = i_explicit_rhs;
 			real_rhs_vec = i_real_rhs;
 			
+			// ex_excess_0 = 0;
+			// ntop = 0;
+			// communicating_boundary <datatype> (messenger_ptr, n, excess_0, ex_excess_0, &positions [0], positions_0, false, ntop);
 			if (messenger_ptr->get_id () - 1 >= 0) {
 				messenger_ptr->template send <int> (1, &excess_0, messenger_ptr->get_id () - 1, 0);
 				messenger_ptr->template recv <int> (1, &ex_excess_0, messenger_ptr->get_id () - 1, 0);
