@@ -161,7 +161,6 @@ namespace two_d
 		void collocation_solver <datatype>::factorize () {
 			int info, lda = m + ex_excess_0 + ex_excess_n + nbot + ntop;
 			TRACE ("Factorizing...");
-			DEBUG ("Factorizing...");
 			
 			for (int i = 0; i < ldn; ++i) {
 				factorized_horizontal_matrix [i] = 1.0 + timestep * horizontal_matrix [i];
@@ -192,7 +191,6 @@ namespace two_d
 			int info, lda = m + ex_excess_0 + ex_excess_n + nbot + ntop;
 			std::stringstream debug;
 			TRACE ("Executing solve...");
-			DEBUG ("Executing solve...");
 			
 			/*
 				TODO Add timestep check here?
@@ -523,6 +521,7 @@ namespace two_d
 		template <class datatype>
 		void laplace_solver <datatype>::factorize () {
 			TRACE ("Factorizing laplace solver...");
+			DEBUG ("Factorizing...");
 			
 			double scalar = 4.0 * std::acos (-1.0) / (pos_n [n - 1] - pos_n [0]);
 			int mm = m;
@@ -577,6 +576,7 @@ namespace two_d
 		template <class datatype>
 		void laplace_solver <datatype>::execute () {
 			TRACE ("Solving...");
+			DEBUG ("Solving...");
 			int mm = m;
 			int nbegin = excess_0;
 			if (id != 0) {
