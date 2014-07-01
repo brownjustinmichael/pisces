@@ -23,7 +23,7 @@ grid:
         mu_t: 1.003
         t_min: 2e-1
 time:
-    steps: 1000
+    steps: 10
     max: 1.e0
     safety: 0.8
     cfl: 0.1
@@ -49,7 +49,7 @@ input:
 output:
     file: output_%02i
     transform_file: output_t_%02i
-    every: 10
+    every: 1
     merge_file: merge_%04i
     full: true
 parallel:
