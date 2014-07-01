@@ -30,7 +30,7 @@ time:
     alpha: 1.0
     allow: 1000.0
 temperature:
-    diffusion: 0.01
+    diffusion: 1.0
     advection: 1.0
     stratification: -0.0
 composition:

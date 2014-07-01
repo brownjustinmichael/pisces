@@ -81,9 +81,11 @@ namespace two_d
 		
 		datatype *matrix_ptr (int index = 0) {
 			if (index == 0) {
-				return x_solver->matrix_ptr ();
+				DEBUG ("X POINTER IS " << x_solver->matrix_ptr (index));
+				return x_solver->matrix_ptr (index);
 			} else {
-				return z_solver->matrix_ptr ();
+				DEBUG ("Z POINTER IS " << z_solver->matrix_ptr (index));
+				return z_solver->matrix_ptr (index);
 			}
 		}
 		
@@ -203,7 +205,11 @@ namespace two_d
 			virtual ~collocation_solver () {}
 			
 			datatype *matrix_ptr (int index = 0) {
-				return &matrix [0];
+				if (index == 0) {
+					return &matrix [0];
+				} else {
+					return &horizontal_matrix [0];
+				}
 			}
 	
 			void factorize ();
