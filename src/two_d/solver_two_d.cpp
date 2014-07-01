@@ -91,10 +91,19 @@ namespace two_d
 		template <class datatype>
 		void solver <datatype>::_factorize () {
 			int info, lda = m + ex_excess_0 + ex_excess_n + nbot + ntop;
+			std::stringstream debug;
 			TRACE ("Factorizing...");
 			
 			for (int i = 0; i < ldn; ++i) {
 				factorized_horizontal_matrix [i] = 1.0 + timestep * horizontal_matrix [i];
+			}
+			
+			for (int j = 0; j < m; ++j) {
+				for (int i = 0; i < m; ++i) {
+					debug << matrix [i * m + j] << " ";
+				}
+				DEBUG ("MATRIX: " << debug.str ());
+				debug.str ("");
 			}
 			
 			utils::matrix_scale (lda, lda, 0.0, &factorized_matrix [0], lda);
