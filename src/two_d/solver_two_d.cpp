@@ -112,8 +112,24 @@ namespace two_d
 				utils::matrix_add_scaled (nbot, m, alpha_n * timestep, &matrix [0] + m - nbot - excess_n, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + m + ex_excess_n], m, lda);
 			}
 			
+			for (int j = 0; j < lda; ++j) {
+				for (int i = 0; i < lda; ++i) {
+					debug << factorized_matrix [i * lda + j] << " ";
+				}
+				DEBUG ("BEFORE FACTOR: " << debug.str ());
+				debug.str ("");
+			}
+			
 			utils::p_block_matrix_factorize (messenger_ptr->get_id (), messenger_ptr->get_np (), m - excess_0 - excess_n - ntop - nbot, excess_0 + ex_excess_0 + 2 * ntop, excess_n + ex_excess_n + 2 * nbot, &factorized_matrix [0], &ipiv [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, lda, sqrt ((int) boundary_matrix.size ()));
 			
+			for (int j = 0; j < lda; ++j) {
+				for (int i = 0; i < lda; ++i) {
+					debug << factorized_matrix [i * lda + j] << " ";
+				}
+				DEBUG ("AFTER FACTOR: " << debug.str ());
+				debug.str ("");
+			}
+						
 			TRACE ("Done.");
 		}
 		
