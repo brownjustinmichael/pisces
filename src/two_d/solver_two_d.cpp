@@ -170,6 +170,7 @@ namespace two_d
 			utils::matrix_scale (lda, lda, 0.0, &factorized_matrix [0], lda);
 			utils::matrix_copy (m, m, default_matrix, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1)], m, lda);
 			
+			DEBUG ("MATRIX POINTER "<< &matrix [0]);
 			for (int j = 0; j < m; ++j) {
 				for (int i = 0; i < m; ++i) {
 					debug << matrix [i * m + j] << " ";
