@@ -42,7 +42,7 @@ namespace two_d
 		
 	public:
 		master_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype *i_data, int *i_element_flags, int *i_component_flags) : bases::master_solver <datatype> (i_data, i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), grid_n (i_grid_n), grid_m (i_grid_m) {
-			*component_flags |= z_solve;
+			// *component_flags |= z_solve;
 		}
 		
 		virtual ~master_solver () {}
@@ -131,7 +131,7 @@ namespace two_d
 			if (x_solver) {
 				x_solver->factorize ();
 			}
-			if (z_solver) {
+			if (z_solver && (x_solver != z_solver)) {
 				z_solver->factorize ();
 			}
 		}
