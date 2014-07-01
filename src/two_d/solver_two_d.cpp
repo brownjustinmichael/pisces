@@ -364,6 +364,15 @@ namespace two_d
 					}
 				}
 				
+				for (int i = 0; i < ldn; ++i) {
+					debug << factorized_horizontal_matrix [i] << " = ";
+					for (int j = 0; j < m; ++j) {
+						debug << data_temp [i * m + j] << " ";
+					}
+					DEBUG ("X_SOLVE: " << debug.str ());
+					debug.str ("");
+				}
+				
 				for (int j = 0; j < m; ++j) {
 					utils::diagonal_solve (ldn, &factorized_horizontal_matrix [0], &data_temp [ntop + ex_excess_0 + j], 1, lda);
 				}
@@ -383,6 +392,18 @@ namespace two_d
 							throw exceptions::nan ();
 						}
 					}
+				}
+				
+				for (int j = 0; j < lda; ++j) {
+					for (int i = 0; i < lda; ++i) {
+						debug << factorized_matrix [i * lda + j] << " ";
+					}
+					debug << " = ";
+					for (int i = 0; i < ldn; ++i) {
+						debug << data_temp [i * m + j] << " ";
+					}
+					DEBUG ("Z_SOLVE: " << debug.str ());
+					debug.str ("");
 				}
 				
 				utils::p_block_matrix_solve (messenger_ptr->get_id (), messenger_ptr->get_np (), m - excess_0 - excess_n - ntop - nbot, excess_0 + ex_excess_0 + 2 * ntop, excess_n + ex_excess_n + 2 * nbot, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, ldn, lda, sqrt ((int) boundary_matrix.size ()), lda);
