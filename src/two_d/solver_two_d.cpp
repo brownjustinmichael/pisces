@@ -40,7 +40,7 @@ namespace two_d
 			TRACE ("Building solver...");
 			horizontal_matrix.resize (ldn);
 			factorized_horizontal_matrix.resize (ldn);
-			matrix.resize (m * m);
+			matrix.resize (m * m, 0.0);
 			values_0.resize (ldn);
 			values_n.resize (ldn);
 			implicit_rhs_vec = i_implicit_rhs;
@@ -160,6 +160,7 @@ namespace two_d
 		template <class datatype>
 		void collocation_solver <datatype>::factorize () {
 			int info, lda = m + ex_excess_0 + ex_excess_n + nbot + ntop;
+			std::stringstream debug;
 			TRACE ("Factorizing...");
 			
 			for (int i = 0; i < ldn; ++i) {
@@ -168,6 +169,14 @@ namespace two_d
 			
 			utils::matrix_scale (lda, lda, 0.0, &factorized_matrix [0], lda);
 			utils::matrix_copy (m, m, default_matrix, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1)], m, lda);
+			
+			for (int j = 0; j < m; ++j) {
+				for (int i = 0; i < m; ++i) {
+					debug << matrix [i * m + j] << " ";
+				}
+				DEBUG ("MATRIX: " << debug.str ());
+				debug.str ("");
+			}
 			
 			utils::matrix_add_scaled (m - excess_n - excess_0 - 2, m, timestep, &matrix [0] + excess_0 + 1, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + 1 + excess_0], m, lda);
 			if (ntop != 0) {
@@ -181,7 +190,23 @@ namespace two_d
 				utils::matrix_add_scaled (nbot, m, alpha_n * timestep, &matrix [0] + m - nbot - excess_n, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + m + ex_excess_n], m, lda);
 			}
 			
+			for (int j = 0; j < lda; ++j) {
+				for (int i = 0; i < lda; ++i) {
+					debug << factorized_matrix [i * lda + j] << " ";
+				}
+				DEBUG ("BEFORE FACTOR: " << debug.str ());
+				debug.str ("");
+			}
+			
 			utils::p_block_matrix_factorize (messenger_ptr->get_id (), messenger_ptr->get_np (), m - excess_0 - excess_n - ntop - nbot, excess_0 + ex_excess_0 + 2 * ntop, excess_n + ex_excess_n + 2 * nbot, &factorized_matrix [0], &ipiv [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, lda, sqrt ((int) boundary_matrix.size ()));
+			
+			for (int j = 0; j < lda; ++j) {
+				for (int i = 0; i < lda; ++i) {
+					debug << factorized_matrix [i * lda + j] << " ";
+				}
+				DEBUG ("AFTER FACTOR: " << debug.str ());
+				debug.str ("");
+			}
 			
 			TRACE ("Done.");
 		}
