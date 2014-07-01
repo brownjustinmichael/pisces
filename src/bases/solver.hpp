@@ -20,9 +20,9 @@ enum solver_flags {
 	not_x_solver = 0x01,
 	not_y_solver = 0x02,
 	not_z_solver = 0x04,
-	x_solver = ~(not_y_solver & not_z_solver),
-	y_solver = ~(not_x_solver & not_z_solver),
-	z_solver = ~(not_x_solver & not_y_solver),
+	x_solver = ~(not_y_solver | not_z_solver),
+	y_solver = ~(not_x_solver | not_z_solver),
+	z_solver = ~(not_x_solver | not_y_solver),
 	implicit_rhs = 0x00,
 	explicit_rhs = 0x01,
 	real_rhs = 0x02,
@@ -195,6 +195,8 @@ namespace bases
 		}
 		
 		virtual void add_solver (std::shared_ptr <solver <datatype> > i_solver, int flags = 0x00) = 0;
+		
+		virtual std::shared_ptr <bases::solver <datatype>> get_solver (int flags = 0x00) = 0;
 		
 		/*!*******************************************************************
 		 * \brief Adds a plan to be executed

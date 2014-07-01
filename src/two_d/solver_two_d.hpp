@@ -116,20 +116,35 @@ namespace two_d
 			}
 		}
 		
+		virtual std::shared_ptr <bases::solver <datatype>> get_solver (int flags = 0x00) {
+			if (!(flags & not_x_solver)) {
+				return x_solver;
+			}
+			if (!(flags & not_z_solver)) {
+				return z_solver;
+			}
+			throw 0;
+		}
+		
 	protected:
 		virtual void _factorize () {
-			x_solver->factorize ();
-			z_solver->factorize ();
+			if (x_solver) {
+				x_solver->factorize ();
+			}
+			if (z_solver) {
+				z_solver->factorize ();
+			}
 		}
 		
 		virtual void _solve () {
-			DEBUG ("_SOLVING...");
 			if (*component_flags & x_solve) {
-				DEBUG ("X SOLVE");
-				x_solver->execute ();
+				if (x_solver) {
+					x_solver->execute ();
+				}
 			} else if (*component_flags & z_solve) {
-				DEBUG ("Z SOLVE");
-				z_solver->execute ();
+				if (z_solver) {
+					z_solver->execute ();
+				}
 			}
 		}
 	};

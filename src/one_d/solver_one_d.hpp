@@ -92,6 +92,10 @@ namespace one_d
 			z_solver = i_solver;
 		}
 		
+		virtual std::shared_ptr <bases::solver <datatype>> get_solver (int flags = 0x00) {
+			return z_solver;
+		}
+		
 	protected:
 		virtual void _factorize () {
 			z_solver->factorize ();
