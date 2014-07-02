@@ -165,10 +165,8 @@ namespace io
 					}
 					files [file_name] = new netCDF::NcFile (file_name.c_str (), netCDF::NcFile::read);
 					if (files [file_name]->isNull () or files [file_name]->getDim ("record").isNull ()) {
-						DEBUG ("No previous record");
 						records [file_name] = 0;
 					} else {
-						DEBUG ("Yes previous record");
 						records [file_name] = files [file_name]->getDim ("record").getSize () - 1;
 					}
 				} else if (file_type == replace_file) {

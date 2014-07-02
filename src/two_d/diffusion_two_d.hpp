@@ -102,23 +102,8 @@ namespace two_d
 				implicit_plan <datatype> (i_solver),
 				coeff (i_coeff),
 				alpha (i_alpha) {
-					std::stringstream debug;
-					for (int j = 0; j < m; ++j) {
-						for (int i = 0; i < m; ++i) {
-							debug << matrix_m [i * m + j] << " ";
-						}
-						DEBUG ("BEFORE DIFFUSION: " << debug.str ());
-						debug.str ("");
-					}
 					for (int j = 0; j < m; ++j) {
 						utils::add_scaled (m, -coeff * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
-					}
-					for (int j = 0; j < m; ++j) {
-						for (int i = 0; i < m; ++i) {
-							debug << matrix_m [i * m + j] << " ";
-						}
-						DEBUG ("AFTER DIFFUSION: " << debug.str ());
-						debug.str ("");
 					}
 				}
 				

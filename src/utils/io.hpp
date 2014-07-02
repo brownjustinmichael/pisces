@@ -804,7 +804,6 @@ namespace io
 				} else {
 					throw 0;
 				}
-				DEBUG ("Done");
 			}
 
 			// Input the arrays from file
