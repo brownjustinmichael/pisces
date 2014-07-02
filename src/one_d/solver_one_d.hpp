@@ -31,16 +31,20 @@ namespace one_d
 		std::vector <datatype> implicit_rhs_vec;
 		std::vector <datatype> real_rhs_vec;
 		
-		datatype *explicit_rhs_ptr = NULL;
-		datatype *implicit_rhs_ptr = NULL;
-		datatype *real_rhs_ptr = NULL;
+		datatype *explicit_rhs_ptr;
+		datatype *implicit_rhs_ptr;
+		datatype *real_rhs_ptr;
 		
 		using bases::master_solver <datatype>::data;
 		using bases::master_solver <datatype>::element_flags;
 		using bases::master_solver <datatype>::component_flags;
 		
 	public:
-		master_solver (bases::grid <datatype> &i_grid, datatype *i_data, int *i_element_flags, int *i_component_flags) : bases::master_solver <datatype> (i_data, element_flags, component_flags), n (i_grid.get_n ()), grid (i_grid) {}
+		master_solver (bases::grid <datatype> &i_grid, datatype *i_data, int *i_element_flags, int *i_component_flags) : bases::master_solver <datatype> (i_data, element_flags, component_flags), n (i_grid.get_n ()), grid (i_grid) {
+			explicit_rhs_ptr = NULL;
+			implicit_rhs_ptr = NULL;
+			real_rhs_ptr = NULL;
+		}
 		
 		virtual ~master_solver () {}
 		

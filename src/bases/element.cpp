@@ -127,7 +127,7 @@ namespace bases
 			TIME (
 			transform (do_not_transform | no_write);
 			, transform_time, transform_duration);
-	
+						
 			// Calculate the pre solver plans
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {

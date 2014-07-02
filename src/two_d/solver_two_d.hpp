@@ -32,9 +32,9 @@ namespace two_d
 		std::vector <datatype> implicit_rhs_vec;
 		std::vector <datatype> real_rhs_vec;
 		
-		datatype *explicit_rhs_ptr = NULL;
-		datatype *implicit_rhs_ptr = NULL;
-		datatype *real_rhs_ptr = NULL;
+		datatype *explicit_rhs_ptr;
+		datatype *implicit_rhs_ptr;
+		datatype *real_rhs_ptr;
 		
 		using bases::master_solver <datatype>::data;
 		using bases::master_solver <datatype>::element_flags;
@@ -42,7 +42,9 @@ namespace two_d
 		
 	public:
 		master_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype *i_data, int *i_element_flags, int *i_component_flags) : bases::master_solver <datatype> (i_data, i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), grid_n (i_grid_n), grid_m (i_grid_m) {
-			// *component_flags |= z_solve;
+			explicit_rhs_ptr = NULL;
+			implicit_rhs_ptr = NULL;
+			real_rhs_ptr = NULL;
 		}
 		
 		virtual ~master_solver () {}
@@ -81,10 +83,8 @@ namespace two_d
 		
 		datatype *matrix_ptr (int index = 0) {
 			if (index == 0) {
-				DEBUG ("X POINTER IS " << x_solver->matrix_ptr (index));
 				return x_solver->matrix_ptr (index);
 			} else {
-				DEBUG ("Z POINTER IS " << z_solver->matrix_ptr (index));
 				return z_solver->matrix_ptr (index);
 			}
 		}
@@ -110,6 +110,7 @@ namespace two_d
 		}
 		
 		virtual void add_solver (std::shared_ptr <bases::solver <datatype>> i_solver, int flags = 0x00) {
+			TRACE ("Adding solver...");
 			if (!(flags & not_x_solver)) {
 				x_solver = i_solver;
 			}
@@ -206,9 +207,9 @@ namespace two_d
 			
 			datatype *matrix_ptr (int index = 0) {
 				if (index == 0) {
-					return &matrix [0];
-				} else {
 					return &horizontal_matrix [0];
+				} else {
+					return &matrix [0];
 				}
 			}
 	

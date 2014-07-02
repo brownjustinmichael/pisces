@@ -144,7 +144,6 @@ namespace io
 				static std::string extension () {return "";}
 			
 				static void open_file (std::string file_name, int file_type, int n_max, int m_max, int l_max) {
-					DEBUG ("Opening virtual file.");
 					// if (file_type == read_file && (!virtual_dumps [file_name])) {
 						// ERROR ("Virtual file doesn't exist.");
 						// throw 0;
@@ -156,16 +155,13 @@ namespace io
 				}
 			
 				static void close_file (std::string file_name, int file_type) {
-					DEBUG ("Closing virtual file.");
 				}
 			
 				template <class datatype>
 				static void write (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0, int record = -1) {
-					DEBUG ("Writing to virtual file");
 					std::stringstream debug;
 					virtual_dumps [file_name].add_var <datatype> (name, n, m);
 					virtual_dumps [file_name].put <datatype> (name, (datatype *) data, n, m);
-					DEBUG ("Dimensions " << n << ", " << m << ", " << l);
 					for (int i = 0; i < n; ++i) {
 						for (int j = 0; j < m; ++j) {
 							debug << data [i * m + j] << ":" << virtual_dumps [file_name].index <datatype> (name, i, j) << " ";
@@ -183,7 +179,6 @@ namespace io
 		
 				template <class datatype>
 				static void read (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0, int record = -1) {
-					DEBUG ("Reading from virtual file");
 					virtual_dumps [file_name].get <datatype> (name, (datatype *) data, n, m);
 					for (int i = 0; i < n; ++i) {
 						for (int j = 0; j < m; ++j) {
@@ -278,7 +273,6 @@ namespace io
 							throw 0;
 						}
 						ncdata.getVar (scalar_offset, sizes, data);
-						DEBUG ("Read " << *data);
 					} catch (netCDF::exceptions::NcBadName &e) {
 						failures [file_name].push_back (name);
 						WARN ("Variable " << name << " not found in file");
