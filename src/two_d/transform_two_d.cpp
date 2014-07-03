@@ -207,7 +207,7 @@ namespace two_d
 		void horizontal_transform <float>::execute () {
 			TRACE ("Executing...");
 			
-			#pragma omp parallel for num_threads (threads)
+			// #pragma omp parallel for num_threads (threads)
 			for (int i = 0; i < threads; ++i) {
 				fftwf_execute (plans_float [i]);
 			}				
@@ -226,7 +226,7 @@ namespace two_d
 		template <>
 		void horizontal_transform <double>::execute () {
 			TRACE ("Executing...");
-#pragma omp parallel for num_threads (threads)
+// #pragma omp parallel for num_threads (threads)
 			for (int i = 0; i < threads; ++i) {
 				fftw_execute (plans [i]);
 			}		
@@ -386,7 +386,7 @@ namespace two_d
 			TRACE ("Executing...");
 	
 			if (m > 1 && !(flags & ignore_m)) {
-				#pragma omp parallel for num_threads (threads)
+				// #pragma omp parallel for num_threads (threads)
 				for (int i = 0; i < threads; ++i) {
 					fftwf_execute (plans_float [i]);
 				}
@@ -407,7 +407,7 @@ namespace two_d
 		void vertical_transform <double>::execute () {
 			TRACE ("Executing...");
 			if (m > 1 && !(flags & ignore_m)) {
-				#pragma omp parallel for num_threads (threads)
+				// #pragma omp parallel for num_threads (threads)
 				for (int i = 0; i < threads; ++i) {
 					fftw_execute (plans [i]);
 				}

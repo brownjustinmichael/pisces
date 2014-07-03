@@ -100,27 +100,27 @@ namespace bases
 				, output_time, output_duration);
 			}
 			
-			#pragma omp parallel sections num_threads(2)
-				{
-				#pragma omp section
-					{
+			// #pragma omp parallel sections num_threads(2)
+				// {
+				// #pragma omp section
+					// {
 			// Calculate the minimum timestep among all elements
-						omp_set_num_threads (threads);
+						// omp_set_num_threads (threads);
 						TIME (
 						t_timestep = calculate_min_timestep ();
 						messenger_ptr->min (&t_timestep);
 						, timestep_time, timestep_duration);
-					}
-				#pragma omp section
-					{
-						omp_set_num_threads (threads);
+					// }
+				// #pragma omp section
+					// {
+						// omp_set_num_threads (threads);
 						TIME (
 						for (iterator iter = begin (); iter != end (); iter++) {
 							solvers [*iter]->execute_plans (post_plan);
 						}
 						, execution_time, execution_duration);
-					}
-				}
+					// }
+				// }
 			TRACE ("Updating...");
 			
 			// Transform forward in the horizontal direction
@@ -179,7 +179,7 @@ namespace bases
 	template <class datatype>
 	void element <datatype>::transform (int i_flags) {
 		TRACE ("Transforming...");
-		omp_set_nested (true);
+		// omp_set_nested (true);
 		
 		int threads = params.get <int> ("parallel.transform.threads");
 		
