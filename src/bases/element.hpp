@@ -72,10 +72,10 @@ namespace bases
 
 		std::vector <int> solver_keys; //!< A vector of integer keys to the solvers map
 		io::virtual_dump *rezone_dump; //!< A shared_ptr to a virtual dump object, for rezoning
-		std::vector <int> transforms; //!< A vector of integer keys to the transform maps
-		std::map <int, std::shared_ptr <master_transform <datatype>>> master_transforms; //!< A map of shared_ptrs to the transform objects
 		
 	public:
+		std::vector <int> transforms; //!< A vector of integer keys to the transform maps
+		std::map <int, std::shared_ptr <master_transform <datatype>>> master_transforms; //!< A map of shared_ptrs to the transform objects
 		/*!**********************************************************************
 		 * \brief Element iterator for iterating through the contained solvers
 		 ************************************************************************/
