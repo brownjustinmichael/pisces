@@ -169,9 +169,8 @@ int main (int argc, char *argv[])
 		begin = std::chrono::system_clock::now ();
 		
 		int n_steps = 0;
-		int threads = config.get <int> ("parallel.transform.threads");
-		omp_set_nested (true);
-#pragma omp parallel num_threads (threads)
+// int threads = config.get <int> ("parallel.transform.threads");
+// #pragma omp parallel num_threads (threads)
 		{
 			while (n_steps < config.get <int> ("time.steps")) {
 				// if (config.get <int> ("grid.rezone.check_every") > 0) {
