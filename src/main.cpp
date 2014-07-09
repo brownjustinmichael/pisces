@@ -168,51 +168,32 @@ int main (int argc, char *argv[])
 		cbegin = clock ();
 		begin = std::chrono::system_clock::now ();
 		INFO ("Here");
+		
+		int n_steps = 0;
+		while (n_steps < config.get <int> ("time.steps")) {
+			if (config.get <int> ("grid.rezone.check_every") > 0) {
+				io::virtual_dumps ["main/dump"] = *(element->rezone_minimize_ts (&positions [0], config.get <double> ("grid.rezone.min_size"), config.get <double> ("grid.rezone.max_size"), config.get <int> ("grid.rezone.n_tries"), config.get <int> ("grid.rezone.iters_fixed_t"), config.get <double> ("grid.rezone.step_size"), config.get <double> ("grid.rezone.k"), config.get <double> ("grid.rezone.t_initial"), config.get <double> ("grid.rezone.mu_t"), config.get <double> ("grid.rezone.t_min")));
 
-		std::vector <bases::master_transform <double> *> transforms (element->transforms.size ());
-		for (int i = 0; i < element->transforms.size (); ++i) {
-			transforms [i] = &*(element->master_transforms [element->transforms [i]]);
+				bases::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
+				element.reset (new two_d::fourier::cosine::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, &process_messenger, 0x00));
+
+				/*
+					TODO It would be nice to combine the above construction of element with this one
+				*/
+
+				io::input *virtual_input (new io::formatted_input <io::formats::two_d::virtual_format> ("main/dump", n, m));
+				element->setup (&*virtual_input);
+				if (normal_stream) {
+					element->setup_output (normal_stream, normal_output);
+				}
+				if (transform_stream) {
+					element->setup_output (transform_stream, transform_output);
+				}
+			}
+			element->run (n_steps, config.get <int> ("time.steps"), config.get <int> ("grid.rezone.check_every"));
 		}
 		
-		int threads = config.get <int> ("parallel.transform.threads");
-		#pragma omp parallel for num_threads (threads)
-		for (int i = 0; i < (int) element->transforms.size (); i++) {
-			int n_steps = 0;
-			while (n_steps < config.get <int> ("time.steps")) {
-				if (config.get <int> ("grid.rezone.check_every") > 0) {
-					io::virtual_dumps ["main/dump"] = *(element->rezone_minimize_ts (&positions [0], config.get <double> ("grid.rezone.min_size"), config.get <double> ("grid.rezone.max_size"), config.get <int> ("grid.rezone.n_tries"), config.get <int> ("grid.rezone.iters_fixed_t"), config.get <double> ("grid.rezone.step_size"), config.get <double> ("grid.rezone.k"), config.get <double> ("grid.rezone.t_initial"), config.get <double> ("grid.rezone.mu_t"), config.get <double> ("grid.rezone.t_min")));
-
-					bases::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
-					element.reset (new two_d::fourier::cosine::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, &process_messenger, 0x00));
-
-					/*
-						TODO It would be nice to combine the above construction of element with this one
-					*/
-
-					io::input *virtual_input (new io::formatted_input <io::formats::two_d::virtual_format> ("main/dump", n, m));
-					element->setup (&*virtual_input);
-					if (normal_stream) {
-						element->setup_output (normal_stream, normal_output);
-					}
-					if (transform_stream) {
-						element->setup_output (transform_stream, transform_output);
-					}
-				}
-				// element->run (n_steps, config.get <int> ("time.steps"), config.get <int> ("grid.rezone.check_every"));
-				std::cout << "Running " << n_steps << " with " << omp_get_thread_num () << " on " << threads << "\n";
-				int q;
-				// for (int k = 0; k < 10000000; ++k) {
-				// 	q += k;
-				// }
-				// transforms [i]->transform (forward_horizontal);
-				transforms [i]->transform (forward_vertical);
-				// transforms [i]->transform (inverse_horizontal);
-				transforms [i]->transform (inverse_vertical);
-				n_steps++;
-			}
-		}
-
-	
+		
 		cend = clock ();
 		end = std::chrono::system_clock::now ();
 			
