@@ -173,7 +173,6 @@ namespace bases
 		INFO ("Profiling Solve: CPU Time: " << solve_time << " Wall Time: " << (double) solve_duration.count () << " Efficiency: " << solve_time / (double) solve_duration.count () / omp_get_max_threads () * 100. << "%");
 		INFO ("Profiling Output: CPU Time: " << output_time << " Wall Time: " << (double) output_duration.count () << " Efficiency: " << output_time / (double) output_duration.count () / omp_get_max_threads () * 100. << "%");
 		INFO ("Max Threads = " << threads << " of " << omp_get_max_threads ());
-		
 	}
 	
 	template <class datatype>
@@ -181,9 +180,9 @@ namespace bases
 		TRACE ("Transforming...");
 		// omp_set_nested (true);
 		
-		int threads = params.get <int> ("parallel.transform.threads");
+		// int threads = params.get <int> ("parallel.transform.threads");
 		
-		#pragma omp parallel for num_threads (threads)
+		#pragma omp for
 		for (int i = 0; i < (int) transforms.size (); ++i) {
 			master_transforms [transforms [i]]->transform (i_flags);
 		}
