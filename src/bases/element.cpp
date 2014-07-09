@@ -178,13 +178,14 @@ namespace bases
 	template <class datatype>
 	void element <datatype>::transform (int i_flags) {
 		TRACE ("Transforming...");
-		// omp_set_nested (true);
 		
-		// int threads = params.get <int> ("parallel.transform.threads");
-		
-		#pragma omp for
-		for (int i = 0; i < (int) transforms.size (); ++i) {
-			master_transforms [transforms [i]]->transform (i_flags);
+		int threads = params.get <int> ("parallel.transform.threads");
+#pragma omp parallel num_threads (threads)
+		{
+#pragma omp for
+			for (int i = 0; i < (int) transforms.size (); ++i) {
+				master_transforms [transforms [i]]->transform (i_flags);
+			}
 		}
 	}
 	
