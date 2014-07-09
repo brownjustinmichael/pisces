@@ -2,6 +2,7 @@ Import ("env")
 Import ("objects")
 
 conf = Configure (env)
-for lib in ["gsl"]:
-    conf.CheckLib (lib)
+if not conf.CheckLib ("gsl"):
+    conf.CheckLib ("gslcblas")
+    conf.CheckLib ("gsl")
 env = conf.Finish ()
