@@ -169,6 +169,7 @@ int main (int argc, char *argv[])
 		begin = std::chrono::system_clock::now ();
 		
 		int n_steps = 0;
+		int threads = config.get <int> ("parallel.transform.threads");
 		while (n_steps < config.get <int> ("time.steps")) {
 			if (config.get <int> ("grid.rezone.check_every") > 0) {
 				io::virtual_dumps ["main/dump"] = *(element->rezone_minimize_ts (&positions [0], config.get <double> ("grid.rezone.min_size"), config.get <double> ("grid.rezone.max_size"), config.get <int> ("grid.rezone.n_tries"), config.get <int> ("grid.rezone.iters_fixed_t"), config.get <double> ("grid.rezone.step_size"), config.get <double> ("grid.rezone.k"), config.get <double> ("grid.rezone.t_initial"), config.get <double> ("grid.rezone.mu_t"), config.get <double> ("grid.rezone.t_min")));
@@ -190,9 +191,12 @@ int main (int argc, char *argv[])
 				}
 			}
 			// element->run (n_steps, config.get <int> ("time.steps"), config.get <int> ("grid.rezone.check_every"));
-			element->transform (forward_vertical);
-			element->transform (inverse_vertical);
-			n_steps++;
+#pragma omp parallel num_threads (threads)
+			{
+				element->transform (forward_vertical);
+				element->transform (inverse_vertical);
+				n_steps++;
+			}
 		}
 		
 		
