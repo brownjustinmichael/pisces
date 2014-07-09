@@ -167,7 +167,6 @@ int main (int argc, char *argv[])
 		
 		cbegin = clock ();
 		begin = std::chrono::system_clock::now ();
-		INFO ("Here");
 		
 		int n_steps = 0;
 		while (n_steps < config.get <int> ("time.steps")) {
@@ -190,7 +189,10 @@ int main (int argc, char *argv[])
 					element->setup_output (transform_stream, transform_output);
 				}
 			}
-			element->run (n_steps, config.get <int> ("time.steps"), config.get <int> ("grid.rezone.check_every"));
+			// element->run (n_steps, config.get <int> ("time.steps"), config.get <int> ("grid.rezone.check_every"));
+			element->transform (forward_vertical);
+			element->transform (inverse_vertical);
+			n_steps++;
 		}
 		
 		
