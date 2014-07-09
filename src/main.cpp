@@ -170,6 +170,7 @@ int main (int argc, char *argv[])
 		
 		int n_steps = 0;
 		int threads = config.get <int> ("parallel.transform.threads");
+		omp_set_nested (true);
 #pragma omp parallel num_threads (threads)
 		{
 			while (n_steps < config.get <int> ("time.steps")) {
