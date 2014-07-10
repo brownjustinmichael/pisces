@@ -41,7 +41,7 @@ velocity:
     diffusion: 0.01
     advection: 1.0
     buoyancy:
-        temperature: 0.0
+        temperature: 1.0
         composition: -0.0
 input:
     file: input_%02i
@@ -49,7 +49,7 @@ input:
 output:
     file: output_%02i
     transform_file: output_t_%02i
-    every: 200
+    every: 10
     merge_file: merge_%04i
     full: true
 parallel:
