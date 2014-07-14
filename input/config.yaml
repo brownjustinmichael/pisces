@@ -23,7 +23,7 @@ grid:
         mu_t: 1.003
         t_min: 2e-1
 time:
-    steps: 100
+    steps: 2000
     max: 1.e0
     safety: 0.8
     cfl: 0.1
@@ -38,7 +38,7 @@ composition:
     advection: 0.0
     stratification: 0.0
 velocity:
-    diffusion: 0.01
+    diffusion: 0.001
     advection: 1.0
     buoyancy:
         temperature: 1.0
@@ -49,11 +49,11 @@ input:
 output:
     file: output_%02i
     transform_file: output_t_%02i
-    every: 10
+    every: 100
     merge_file: merge_%04i
     full: true
 parallel:
-    maxthreads: 1
+    maxthreads: 4
     transform:
         threads: 4
         subthreads: 1

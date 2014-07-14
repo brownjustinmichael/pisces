@@ -11,7 +11,9 @@
 
 #include "../utils/messenger.hpp"
 #include "../bases/solver.hpp"
+#include "../utils/interpolate.hpp"
 #include "plan_two_d.hpp"
+#include "boundary_two_d.hpp"
 
 namespace two_d
 {
@@ -152,56 +154,27 @@ namespace two_d
 		}
 	};
 	
-	template <class datatype>
-	class boundary
-	{
-	public:
-		boundary () {}
-		
-		virtual ~boundary () {}
-		
-		virtual void calculate_rhs () = 0;
-	};
-	
-	template <class datatype>
-	class communicating_boundary : public boundary <datatype>
-	{
-	private:
-		datatype alpha;
-		utils::messenger *messenger_ptr;
-		// std::vector <datatype> boundary_positions;
-		int n_boundary_in;
-		int n_boundary_out;
-		int out_id;
-		
-	public:
-		communicating_boundary (utils::messenger *i_messenger_ptr, int n, int &i_n_boundary_in, int &i_n_boundary_out, const datatype *i_positions, std::vector <datatype> &boundary_positions, bool top, int &bound) : messenger_ptr (i_messenger_ptr) {
-			n_boundary_in = i_n_boundary_in;
-			out_id = messenger_ptr->get_id () + (top ? 1 : -1);
-			messenger_ptr->template send <int> (1, &i_n_boundary_in, out_id, 0);
-			messenger_ptr->template recv <int> (1, &i_n_boundary_out, out_id, 0);
-			n_boundary_out = i_n_boundary_out;
-			boundary_positions.resize (i_n_boundary_out);
-			messenger_ptr->template send <datatype> (i_n_boundary_in, i_positions, out_id, 0);
-			messenger_ptr->template recv <datatype> (i_n_boundary_out, &boundary_positions [0], out_id, 0);
-			bound = 1;
-		}
-		
-		virtual ~communicating_boundary () {}
-		
-		virtual void calculate_rhs () {
-			
-		}
-	};
-	
 	namespace fourier
 	{
 		template <class datatype>
 		class collocation_solver : public bases::solver <datatype>
 		{
 		public:
-			collocation_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype *i_implicit_rhs, datatype *i_explicit_rhs, datatype *i_real_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
-			collocation_solver (bases::master_solver <datatype> &i_solver, utils::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_aplha_n);
+			/*!**********************************************************************
+			 * The collocation matrix is set up as 
+			 * 
+			 * 0 0 boundary row for above element       0 0
+			 * 0 0 interpolating row for above element  0 0
+			 * 0 0 [interpolating row for this element] 0 0
+			 * 0 0 [boundary row for this element     ] 0 0
+			 * 0 0 [matrix                            ] 0 0
+			 * 0 0 [boundary row for this element     ] 0 0
+			 * 0 0 [interpolating row for this element] 0 0
+			 * 0 0 interpolating row for below element  0 0
+			 * 0 0 boundary row for below element       0 0
+			 ************************************************************************/
+			collocation_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype *i_implicit_rhs, datatype *i_explicit_rhs, datatype *i_real_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
+			collocation_solver (bases::master_solver <datatype> &i_solver, utils::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n);
 			
 			virtual ~collocation_solver () {}
 			
@@ -231,24 +204,15 @@ namespace two_d
 			utils::messenger* messenger_ptr;
 	
 			datatype& timestep; //!< A datatype reference to the current timestep
-			datatype& alpha_0; //!< A datatype reference to the current edge_0 weight
-			datatype& alpha_n; //!< A datatype reference to the current edge_n weight
-			std::vector <datatype> values_0, values_n;
 			datatype *implicit_rhs_vec, *explicit_rhs_vec, *real_rhs_vec;
 
 			const datatype* positions;
-			int temp_n;
 			int excess_0; //!< The integer number of elements to recv from edge_0
 			int excess_n; //!< The integer number of elements to recv from edge_n
-			int ex_excess_0; //!< The integer number of elements to send to edge_0
-			int ex_excess_n; //!< The integer number of elements to send to edge_n
-			int ntop, nbot;
 
 			datatype* default_matrix; //!< The datatype array of the non-timestep dependent matrix component
 
 			std::vector <datatype> data_temp; //!< A datatype vector to be used in lieu of data_out for non-updating steps
-			std::vector <datatype> positions_0; //!< A datatype vector of excess positions from edge_0
-			std::vector <datatype> positions_n; //!< A datatype vector of excess positions from edge_n
 			std::vector <datatype> factorized_matrix; //!< A datatype vector containing the factorized sum of default matrix and timestep * matrix
 			std::vector <datatype> boundary_matrix; //!< A datatype vector containing the factorized sum of default matrix and timestep * matrix
 			std::vector <datatype> previous_rhs;
@@ -260,6 +224,14 @@ namespace two_d
 			std::vector <datatype> factorized_horizontal_matrix;
 			
 			std::shared_ptr <bases::plan <datatype> > transform;
+			std::shared_ptr <bases::boundary <datatype>> boundary_0, boundary_n;
+			
+			int inner_m;
+			int ex_overlap_0;
+			int overlap_0;
+			int ex_overlap_n;
+			int overlap_n;
+			int lda;
 		};
 		
 		template <class datatype>
