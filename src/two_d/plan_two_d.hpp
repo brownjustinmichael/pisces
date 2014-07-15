@@ -78,7 +78,7 @@ namespace two_d
 		grid_n (*(i_solver.grid_ptr (0))),
 		grid_m (*(i_solver.grid_ptr (1))),
 		data_in (i_solver.data_ptr ()),
-		data_out (i_solver.rhs_ptr (explicit_rhs)) {}
+		data_out (i_solver.rhs_ptr (spectral_rhs)) {}
 
 		virtual ~explicit_plan () {}
 
@@ -169,7 +169,7 @@ namespace two_d
 		explicit_plan <datatype> (i_solver), 
 		matrix_n (i_solver.matrix_ptr (0)),
 		matrix_m (i_solver.matrix_ptr (1)) {
-			data_out = i_solver.rhs_ptr (implicit_rhs);
+			data_out = i_solver.rhs_ptr (spectral_rhs);
 		}
 		
 		virtual ~implicit_plan () {}
