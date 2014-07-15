@@ -35,20 +35,16 @@ namespace two_d
 	namespace fourier
 	{
 		template <class datatype>
-		collocation_solver <datatype>::collocation_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype* i_implicit_rhs, datatype *i_explicit_rhs, datatype *i_real_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
+		collocation_solver <datatype>::collocation_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
 		bases::solver <datatype> (i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), data (i_data), grid_n (i_grid_n), grid_m (i_grid_m), messenger_ptr (i_messenger_ptr), timestep (i_timestep), positions (&(grid_m [0])), excess_0 (grid_m.get_excess_0 ()), excess_n (grid_m.get_excess_n ()), default_matrix (grid_m.get_data (0)) {
 			TRACE ("Building solver...");
 			horizontal_matrix.resize (ldn);
 			factorized_horizontal_matrix.resize (ldn);
 			matrix.resize (m * m, 0.0);
-			implicit_rhs_vec = i_implicit_rhs;
-			explicit_rhs_vec = i_explicit_rhs;
-			real_rhs_vec = i_real_rhs;
+			rhs_ptr = i_rhs;
 			
-			boundary_0_ptr = i_boundary_0;
-			boundary_0 = &*boundary_0_ptr;
-			boundary_n_ptr = i_boundary_n;
-			boundary_n = &*boundary_n_ptr;
+			boundary_0 = i_boundary_0;
+			boundary_n = i_boundary_n;
 			
 			ex_overlap_0 = boundary_0->get_ex_overlap ();
 			overlap_0 = boundary_0->get_overlap ();
@@ -75,11 +71,6 @@ namespace two_d
 			factorized_matrix.resize (lda * lda, 0.0);
 			ipiv.resize (m); // TODO Should be n - ntop - nbot - excess_0 - excess_n
 			data_temp.resize (lda * ldn);
-			
-			transform = std::shared_ptr <bases::plan <datatype> > (new horizontal_transform <datatype> (n, m, real_rhs_vec, NULL, 0x00, element_flags, &flags));
-			/*
-				TODO Move this plan to master_solver?
-			*/
 			TRACE ("Solver built.");
 		}
 		
@@ -90,9 +81,7 @@ namespace two_d
 			horizontal_matrix.resize (ldn);
 			factorized_horizontal_matrix.resize (ldn);
 			matrix.resize (m * m);
-			implicit_rhs_vec = i_solver.rhs_ptr (implicit_rhs);
-			explicit_rhs_vec = i_solver.rhs_ptr (explicit_rhs);
-			real_rhs_vec = i_solver.rhs_ptr (real_rhs);
+			rhs_ptr = i_solver.rhs_ptr (spectral_rhs);
 			
 			boundary_0 = i_boundary_0;
 			boundary_n = i_boundary_n;
@@ -124,7 +113,6 @@ namespace two_d
 			ipiv.resize (m); // TODO Should be n - ntop - nbot - excess_0 - excess_n
 			data_temp.resize (lda * ldn);
 			
-			transform = std::shared_ptr <bases::plan <datatype> > (new horizontal_transform <datatype> (n, m, real_rhs_vec, NULL, 0x00, element_flags, &flags));
 			/*
 				TODO Move this plan to master_solver
 			*/
@@ -168,17 +156,11 @@ namespace two_d
 				TODO Add timestep check here?
 			*/
 			
-			transform->execute ();
-			
 			utils::scale ((ldn) * lda, 0.0, &data_temp [0]);
 			
-			utils::matrix_add_scaled (m, ldn, timestep, &implicit_rhs_vec [0], &data_temp [ex_overlap_0], m, lda);
-			utils::matrix_add_scaled (m, ldn, timestep, &real_rhs_vec [0], &data_temp [ex_overlap_0], m, lda);
-			utils::matrix_add_scaled (m, ldn, timestep, &explicit_rhs_vec [0], &data_temp [ex_overlap_0], m, lda);
-			
-			/*
-				TODO Once the transform is moved to master_solver, there's no need for these to be separate
-			*/
+			if (rhs_ptr) {
+				utils::matrix_add_scaled (m, ldn, timestep, rhs_ptr, &data_temp [ex_overlap_0], m, lda);
+			}
 			
 			if (boundary_0) {
 				boundary_0->calculate_rhs (data, &data_temp [0], &data_temp [0], lda);
@@ -241,7 +223,7 @@ namespace two_d
 		template class collocation_solver <double>;
 		
 		template <class datatype>
-		laplace_solver <datatype>::laplace_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype* i_implicit_rhs, datatype *i_explicit_rhs, datatype *i_real_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
+		laplace_solver <datatype>::laplace_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
 		bases::solver <datatype> (i_element_flags, i_component_flags),
 		n (i_grid_n.get_n ()), 
 		ldn (i_grid_n.get_ld ()), 
@@ -258,9 +240,7 @@ namespace two_d
 			sup.resize (m * ldn);
 			sub.resize (m * ldn);
 			diag.resize (m * ldn);
-			implicit_rhs_vec = i_implicit_rhs;
-			explicit_rhs_vec = i_explicit_rhs;
-			real_rhs_vec = i_real_rhs;
+			rhs_ptr = i_rhs;
 			
 			sup_ptr = &sup [0];
 			sub_ptr = &sub [0];
@@ -289,8 +269,6 @@ namespace two_d
 			if (id != 0) {
 				messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
 			}
-			
-			transform = std::shared_ptr <bases::plan <datatype> > (new horizontal_transform <datatype> (n, m, real_rhs_vec, NULL, 0x00, i_element_flags, &flags));
 		}
 		
 		template <class datatype>
@@ -310,9 +288,7 @@ namespace two_d
 			sup.resize (m * ldn);
 			sub.resize (m * ldn);
 			diag.resize (m * ldn);
-			implicit_rhs_vec = i_solver.rhs_ptr (implicit_rhs);
-			explicit_rhs_vec = i_solver.rhs_ptr (explicit_rhs);
-			real_rhs_vec = i_solver.rhs_ptr (real_rhs);
+			rhs_ptr = i_solver.rhs_ptr (spectral_rhs);
 
 			sup_ptr = &sup [0];
 			sub_ptr = &sub [0];
@@ -341,8 +317,6 @@ namespace two_d
 			if (id != 0) {
 				messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
 			}
-
-			transform = std::shared_ptr <bases::plan <datatype> > (new horizontal_transform <datatype> (n, m, real_rhs_vec, NULL, 0x00, i_solver.element_flags, &flags));
 		}
 		
 		template <class datatype>
@@ -411,13 +385,11 @@ namespace two_d
 			if (id != np - 1) {
 				mm -= excess_n + 1;
 			}
-
-			transform->execute ();
-
-			utils::matrix_copy (mm, ldn, &explicit_rhs_vec [nbegin], data + nbegin);
 			
-			utils::matrix_add_scaled (mm, ldn, 1.0, &real_rhs_vec [nbegin], data + nbegin);
-
+			if (rhs_ptr) {
+				utils::matrix_copy (mm, ldn, rhs_ptr, data + nbegin);
+			}
+			
 			if (id == 0) {
 				utils::scale (ldn, 0.0, data + nbegin, m);
 			}
@@ -425,7 +397,7 @@ namespace two_d
 				utils::scale (ldn, 0.0, data + m - 1 - excess_n, m);
 			}
 			utils::scale (2 * m, 0.0, data);
-
+			
 			int info;
 			
 			utils::p_block_tridiag_solve (id, np, mm, &sub [nbegin], &diag [nbegin], &sup [nbegin], &supsup [nbegin], &ipiv [nbegin], data + nbegin, &x [0], &xipiv [0], &info, ldn, m, m);

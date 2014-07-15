@@ -24,6 +24,7 @@ enum solver_flags {
 	y_solver = ~(not_x_solver | not_z_solver),
 	z_solver = ~(not_x_solver | not_y_solver),
 	implicit_rhs = 0x00,
+	spectral_rhs = 0x00,
 	explicit_rhs = 0x01,
 	real_rhs = 0x02,
 	factorized = 0x08,
