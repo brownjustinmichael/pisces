@@ -19,23 +19,27 @@ namespace two_d
 	private:
 		datatype value;
 		bool top;
-		int ldn;
+		int ldn, m;
 		
 	public:
-		fixed_boundary (int i_ldn, datatype i_value, bool i_top) : value (i_value), top (i_top) {
+		fixed_boundary (int n, int i_ldn, int i_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (n)), top (i_top) {
 			ldn = i_ldn;
+			m = i_m;
 		}
 		
 		virtual ~fixed_boundary () {}
 		
 		virtual void calculate_rhs (datatype *data, datatype *interpolate_original, datatype *interpolate_data, datatype *data_temp, int lda) {
 			data_temp [0] = value;
-			for (int i = 0; i < ldn; ++i) {
+			DEBUG ("Setting " << value);
+			for (int i = 1; i < ldn; ++i) {
 				data_temp [i * lda] = 0.0;
 			}
 		}
 		
-		virtual void calculate_matrix (datatype *matrix_in, datatype *interpolate_matrix, datatype *matrix_out, int lda) {}
+		virtual void calculate_matrix (datatype *matrix_in, datatype *interpolate_matrix, datatype *matrix_out, int lda) {
+			utils::scale (m, 0.0, matrix_out, lda);
+		}
 	};
 	
 	template <class datatype>

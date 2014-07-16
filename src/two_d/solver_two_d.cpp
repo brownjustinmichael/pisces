@@ -122,6 +122,11 @@ namespace two_d
 			TRACE ("Factorizing...");
 			
 			utils::matrix_copy (m, m, &matrix [0], &factorized_matrix [(ex_overlap_0) * (lda + 1)], m, lda);
+			
+			/*
+				TODO Should we do the matrix copy before the edges?
+			*/
+			
 			if (boundary_0) {
 				boundary_0->calculate_matrix (&matrix [excess_0], &matrix [0], &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0], lda);
 			}
@@ -157,6 +162,8 @@ namespace two_d
 			if (boundary_0) {
 				boundary_0->calculate_rhs (data + excess_0, data, &data_temp [0], &data_temp [ex_overlap_0 + excess_0], lda);
 			}
+			DEBUG (data_temp [ex_overlap_0 + excess_0]);
+			DEBUG (data_temp [ex_overlap_0 + excess_0 + lda]);
 			if (boundary_n) {
 				boundary_n->calculate_rhs (data + m - 1 - excess_n, data, &data_temp [0], &data_temp [lda - 1 - excess_n - ex_overlap_n], lda);
 			}

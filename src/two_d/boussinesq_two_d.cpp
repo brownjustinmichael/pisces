@@ -47,12 +47,12 @@ namespace two_d
 				if (messenger_ptr->get_id () > 0) {
 					boundary_0 = std::shared_ptr <bases::boundary <datatype>> (new communicating_boundary <datatype> (messenger_ptr, grids [0]->get_ld (), m, grids [1]->get_excess_0 (), &((*grids [1]) [0]), 0, false));
 				} else {
-					boundary_0 = std::shared_ptr <bases::boundary <datatype>> (new fixed_boundary <datatype> (0.0, grids [0]->get_ld (), false));
+					boundary_0 = std::shared_ptr <bases::boundary <datatype>> (new fixed_boundary <datatype> (grids [0]->get_n (), grids [0]->get_ld (), grids [1]->get_n (), 0.0, false));
 				}
 				if (messenger_ptr->get_id () + 1 < messenger_ptr->get_np ()) {
 					boundary_n = std::shared_ptr <bases::boundary <datatype>> (new communicating_boundary <datatype> (messenger_ptr, grids [0]->get_ld (), m, grids [1]->get_excess_n (), &((*grids [1]) [0]), m - grids [1]->get_excess_n (), true));
 				} else {
-					boundary_n = std::shared_ptr <bases::boundary <datatype>> (new fixed_boundary <datatype> (0.0, grids [0]->get_ld (), true));
+					boundary_n = std::shared_ptr <bases::boundary <datatype>> (new fixed_boundary <datatype> (grids [0]->get_n (), grids [0]->get_ld (), grids [1]->get_n (), 0.0, true));
 				}
 				
 				/*
