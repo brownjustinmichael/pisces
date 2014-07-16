@@ -366,17 +366,23 @@ namespace bases
 			// Execute the solvers
 			for (iterator iter = begin (); iter != end (); iter++) {
 				TRACE ("Solving " << *iter);
-				try {
-					solvers [*iter]->solve ();
-				} catch (std::exception &except) {
-					FATAL ("Failure in solver " << *iter);
-					throw except;
-				}
+				solvers [*iter]->solve ();
+				// solve_recursive (*iter);
 			}
 			// Make certain everything is fully transformed
 			
 			transform (forward_vertical | no_read);
 			TRACE ("Solve complete.");
+		}
+		
+		virtual void solve_recursive (int name) {
+			if (!(element_flags [name] & solved)) {
+				int n_deps = solvers [name]->n_dependencies ();
+				for (int i = 0; i < n_deps; ++i) {
+					solve_recursive (solvers [name]->get_dependency (i));
+				}
+				solver [name]->solve ();
+			}
 		}
 		
 		/*!**********************************************************************
