@@ -28,9 +28,10 @@ namespace two_d
 		
 		virtual ~fixed_boundary () {}
 		
-		virtual void calculate_rhs (datatype *data, datatype *interpolate_data, datatype *data_temp, int lda) {
+		virtual void calculate_rhs (datatype *data, datatype *interpolate_original, datatype *interpolate_data, datatype *data_temp, int lda) {
+			data_temp [0] = value;
 			for (int i = 0; i < ldn; ++i) {
-				data_temp [i * lda] = value;
+				data_temp [i * lda] = 0.0;
 			}
 		}
 		
@@ -110,23 +111,29 @@ namespace two_d
 			}
 		}
 		
-		virtual void calculate_rhs (datatype *data, datatype *interpolate_data, datatype *data_temp, int lda) {
-			utils::matrix_scale (1 + n_boundary_out + n_boundary_in, ldn, 0.0, data_temp + (top ? 1 : 0), lda);
-			utils::interpolate (n_boundary_out, ldn, m, 1.0, 1.0, positions, interpolate_data, boundary_positions, data_temp + (top ? 1 + n_boundary_in : 1), lda, lda);
-			utils::scale (ldn, alpha, data_temp + (top ? 0 : 1 + n_boundary_out + n_boundary_in), lda);
-			utils::copy (ldn, data_temp + (top ? 0 : 1 + n_boundary_out + n_boundary_in), data_temp + (top ? 1 + n_boundary_out + n_boundary_in : 0), lda, lda);
-			utils::interpolate (n_boundary_out, ldn, m, 1.0, 1.0, positions, data, boundary_positions, &data_temp [(top ? 1 + n_boundary_in : 1)], m, lda);
-			utils::matrix_add_scaled (1, ldn, 1.0, data + (top ? m - 1 - n_boundary_out : n_boundary_in), data_temp + (top ? 0 : 1 + n_boundary_out + n_boundary_in), m, lda);
+		virtual void calculate_rhs (datatype *data, datatype *interpolate_original, datatype *interpolate_data, datatype *data_temp, int lda) {
+			utils::matrix_scale (1 + n_boundary_out + n_boundary_in, ldn, 0.0, data_temp + (top ? 1 : -1 - n_boundary_out - n_boundary_in), lda);
+			// Setting the external overlapping boundary
+			utils::interpolate (n_boundary_out, ldn, m, 1.0, 1.0, positions, interpolate_data, boundary_positions, data_temp + (top ? 1 + n_boundary_in : -n_boundary_in - n_boundary_out), lda, lda);
+			// Scale the internal boundary row
+			utils::scale (ldn, alpha, data_temp, lda);
+			// Copy the internal boundary row to the external boundary row
+			utils::copy (ldn, data_temp, data_temp + (top ? 1 : -1) * (1 + n_boundary_out + n_boundary_in), lda, lda);
+			// Add the original data to the overlapping boundary
+			utils::interpolate (n_boundary_out, ldn, m, 1.0, 1.0, positions, interpolate_original, boundary_positions, data_temp + (top ? 1 + n_boundary_in : -n_boundary_in - n_boundary_out), m, lda);
+			// Add the original data to the internal boundary row
+			utils::add_scaled (ldn, 1.0, data, data_temp, m, lda);
 		}
 		
 		virtual void calculate_matrix (datatype *matrix_in, datatype *interpolate_matrix, datatype *matrix_out, int lda) {
-			utils::matrix_scale (1 + n_boundary_out, m, 0.0, matrix_out + (top ? n_boundary_in + 1 : 0), lda);
+			// Zero everything but the internal boundary row
+			utils::matrix_scale (1 + n_boundary_out, m, 0.0, matrix_out + (top ? 1 : -1 - n_boundary_out - n_boundary_in), lda);
 			// Setting the external boundary matrix row
-			utils::matrix_add_scaled (1, m, alpha, matrix_in, matrix_out, m, lda);
+			utils::matrix_add_scaled (1, m, alpha, matrix_in, matrix_out + (top ? 1 : -1) * (1 + n_boundary_out + n_boundary_in), m, lda);
 			// Setting the external overlapping boundary matrix row
-			utils::interpolate (n_boundary_out, m, m, 1.0, 1.0, positions, interpolate_matrix, boundary_positions, matrix_out + 1, m, lda);
+			utils::interpolate (n_boundary_out, m, m, 1.0, 1.0, positions, interpolate_matrix, boundary_positions, matrix_out + (top ? 1 + n_boundary_in : -n_boundary_in - n_boundary_out), m, lda);
 			// Setting the internal boundary matrix row
-			utils::matrix_add_scaled (1, m, alpha, matrix_in, matrix_out + 1 + n_boundary_out + n_boundary_in, m, lda);
+			utils::matrix_add_scaled (1, m, alpha, matrix_in, matrix_out, m, lda);
 		}
 	};
 } /* two_d */

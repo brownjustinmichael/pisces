@@ -20,9 +20,9 @@ enum solver_flags {
 	not_x_solver = 0x01,
 	not_y_solver = 0x02,
 	not_z_solver = 0x04,
-	x_solver = ~(not_y_solver | not_z_solver),
-	y_solver = ~(not_x_solver | not_z_solver),
-	z_solver = ~(not_x_solver | not_y_solver),
+	x_solver = not_y_solver | not_z_solver,
+	y_solver = not_x_solver | not_z_solver,
+	z_solver = not_x_solver | not_y_solver,
 	implicit_rhs = 0x00,
 	spectral_rhs = 0x00,
 	explicit_rhs = 0x01,
@@ -76,7 +76,7 @@ namespace bases
 		 * 
 		 * Note: these matrices are implementation dependent, so the implicit plans must be associated with particular matrix types.
 		 ************************************************************************/
-		virtual datatype *matrix_ptr (int index = 0) = 0;
+		virtual datatype *matrix_ptr () = 0;
 		/*
 			TODO Restrict implicit plans to only be associated with one type of matrix solver
 		*/
@@ -125,6 +125,12 @@ namespace bases
 			TODO Have this take an array of grid pointers?
 		*/	
 		virtual ~master_solver () {}
+		
+		// virtual int n_dependencies () = 0;
+		//
+		// virtual int get_dependency () = 0;
+		//
+		// virtual int add_dependency (int flags) = 0;
 		
 		/*!**********************************************************************
 		 * \brief Return a pointer to the data associated with the solver

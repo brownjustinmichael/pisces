@@ -140,7 +140,7 @@ namespace one_d
 			// printf ("Destroying one_d solver\n");
 		}
 
-		datatype *matrix_ptr (int index = 0) {
+		datatype *matrix_ptr () {
 			return &matrix [0];
 		}
 		

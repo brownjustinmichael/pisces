@@ -81,11 +81,10 @@ namespace two_d
 		}
 		
 		datatype *matrix_ptr (int index = 0) {
-			
 			if (index == 0) {
-				return x_solver->matrix_ptr (index);
+				return x_solver->matrix_ptr ();
 			} else {
-				return z_solver->matrix_ptr (index);
+				return z_solver->matrix_ptr ();
 			}
 		}
 		
@@ -109,9 +108,11 @@ namespace two_d
 		virtual void add_solver (std::shared_ptr <bases::solver <datatype>> i_solver, int flags = 0x00) {
 			TRACE ("Adding solver...");
 			if (!(flags & not_x_solver)) {
+				DEBUG ("Adding x solver...");
 				x_solver = i_solver;
 			}
 			if (!(flags & not_z_solver)) {
+				DEBUG ("Adding z solver...");
 				z_solver = i_solver;
 			}
 		}
@@ -145,10 +146,12 @@ namespace two_d
 			
 			if (*component_flags & x_solve) {
 				if (x_solver) {
+					DEBUG ("Solving in x direction...");
 					x_solver->execute ();
 				}
 			} else if (*component_flags & z_solve) {
 				if (z_solver) {
+					DEBUG ("Solving in z direction...");
 					z_solver->execute ();
 				}
 			}
@@ -160,47 +163,12 @@ namespace two_d
 		template <class datatype>
 		class collocation_solver : public bases::solver <datatype>
 		{
-		public:
-			/*!**********************************************************************
-			 * The collocation matrix is set up as 
-			 * 
-			 * 0 0 boundary row for above element       0 0
-			 * 0 0 interpolating row for above element  0 0
-			 * 0 0 [interpolating row for this element] 0 0
-			 * 0 0 [boundary row for this element     ] 0 0
-			 * 0 0 [matrix                            ] 0 0
-			 * 0 0 [boundary row for this element     ] 0 0
-			 * 0 0 [interpolating row for this element] 0 0
-			 * 0 0 interpolating row for below element  0 0
-			 * 0 0 boundary row for below element       0 0
-			 ************************************************************************/
-			collocation_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
-			collocation_solver (bases::master_solver <datatype> &i_solver, utils::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n);
-			
-			virtual ~collocation_solver () {}
-			
-			datatype *matrix_ptr (int index = 0) {
-				if (index == 0) {
-					return &horizontal_matrix [0];
-				} else {
-					return &matrix [0];
-				}
-			}
-	
-			void factorize ();
-			void execute ();
-			
-			using bases::solver <datatype>::element_flags;
-			using bases::solver <datatype>::component_flags;
-		
 		private:
 			int n;
 			int ldn;
 			int m;
 			datatype *data;
 			int flags;
-			bases::grid <datatype> &grid_n;
-			bases::grid <datatype> &grid_m;
 
 			utils::messenger* messenger_ptr;
 	
@@ -221,6 +189,64 @@ namespace two_d
 			std::vector <int> ipiv; //!< A vector of integers needed to calculate the factorization
 			std::vector <int> bipiv; //!< A vector of integers needed to calculate the factorization
 			std::vector <datatype> matrix;
+			
+			std::shared_ptr <bases::boundary <datatype>> boundary_0, boundary_n;
+			
+			int inner_m;
+			int ex_overlap_0;
+			int overlap_0;
+			int ex_overlap_n;
+			int overlap_n;
+			int lda;
+			
+			using bases::solver <datatype>::element_flags;
+			using bases::solver <datatype>::component_flags;
+			
+		public:
+			/*!**********************************************************************
+			 * The collocation matrix is set up as 
+			 * 
+			 * 0 0 boundary row for above element       0 0
+			 * 0 0 interpolating row for above element  0 0
+			 * 0 0 [interpolating row for this element] 0 0
+			 * 0 0 [boundary row for this element     ] 0 0
+			 * 0 0 [matrix                            ] 0 0
+			 * 0 0 [boundary row for this element     ] 0 0
+			 * 0 0 [interpolating row for this element] 0 0
+			 * 0 0 interpolating row for below element  0 0
+			 * 0 0 boundary row for below element       0 0
+			 ************************************************************************/
+			collocation_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
+			collocation_solver (bases::master_solver <datatype> &i_solver, utils::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n);
+			
+			virtual ~collocation_solver () {}
+			
+			datatype *matrix_ptr () {
+				return &matrix [0];
+			}
+	
+			void factorize ();
+			void execute ();
+		};
+		
+		template <class datatype>
+		class fourier_solver : public bases::solver <datatype>
+		{
+		private:
+			int n;
+			int ldn;
+			int m;
+			datatype *data;
+			int flags;
+			
+			datatype& timestep; //!< A datatype reference to the current timestep
+			datatype *rhs_ptr;
+
+			int excess_0; //!< The integer number of elements to recv from edge_0
+			int excess_n; //!< The integer number of elements to recv from edge_n
+			
+			std::vector <datatype> data_temp; //!< A datatype vector to be used in lieu of data_out for non-updating steps
+			std::vector <datatype> previous_rhs;
 			std::vector <datatype> horizontal_matrix;
 			std::vector <datatype> factorized_horizontal_matrix;
 			
@@ -232,6 +258,35 @@ namespace two_d
 			int ex_overlap_n;
 			int overlap_n;
 			int lda;
+			
+			using bases::solver <datatype>::element_flags;
+			using bases::solver <datatype>::component_flags;
+			
+		public:
+			/*!**********************************************************************
+			 * The fourier matrix is set up as 
+			 * 
+			 * 0 0 boundary row for above element       0 0
+			 * 0 0 interpolating row for above element  0 0
+			 * 0 0 [interpolating row for this element] 0 0
+			 * 0 0 [boundary row for this element     ] 0 0
+			 * 0 0 [matrix                            ] 0 0
+			 * 0 0 [boundary row for this element     ] 0 0
+			 * 0 0 [interpolating row for this element] 0 0
+			 * 0 0 interpolating row for below element  0 0
+			 * 0 0 boundary row for below element       0 0
+			 ************************************************************************/
+			fourier_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
+			fourier_solver (bases::master_solver <datatype> &i_solver, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n);
+			
+			virtual ~fourier_solver () {}
+			
+			datatype *matrix_ptr () {
+				return &horizontal_matrix [0];
+			}
+	
+			void factorize ();
+			void execute ();
 		};
 		
 		template <class datatype>
@@ -243,7 +298,7 @@ namespace two_d
 			
 			virtual ~laplace_solver () {}
 			
-			datatype *matrix_ptr (int index = 0) {
+			datatype *matrix_ptr () {
 				return NULL;
 			}
 	
@@ -280,7 +335,7 @@ namespace two_d
 			
 			virtual ~divergence_solver () {}
 			
-			datatype *matrix_ptr (int index = 0) {
+			datatype *matrix_ptr () {
 				return NULL;
 			}
 			

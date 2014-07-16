@@ -36,10 +36,8 @@ namespace two_d
 	{
 		template <class datatype>
 		collocation_solver <datatype>::collocation_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
-		bases::solver <datatype> (i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), data (i_data), grid_n (i_grid_n), grid_m (i_grid_m), messenger_ptr (i_messenger_ptr), timestep (i_timestep), positions (&(grid_m [0])), excess_0 (grid_m.get_excess_0 ()), excess_n (grid_m.get_excess_n ()), default_matrix (grid_m.get_data (0)) {
+		bases::solver <datatype> (i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), data (i_data), messenger_ptr (i_messenger_ptr), timestep (i_timestep), positions (&(i_grid_m [0])), excess_0 (i_grid_m.get_excess_0 ()), excess_n (i_grid_m.get_excess_n ()), default_matrix (i_grid_m.get_data (0)) {
 			TRACE ("Building solver...");
-			horizontal_matrix.resize (ldn);
-			factorized_horizontal_matrix.resize (ldn);
 			matrix.resize (m * m, 0.0);
 			rhs_ptr = i_rhs;
 			
@@ -76,10 +74,8 @@ namespace two_d
 		
 		template <class datatype>
 		collocation_solver <datatype>::collocation_solver (bases::master_solver <datatype> &i_solver, utils::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n) : 
-		bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags), n (i_solver.grid_ptr (0)->get_n ()),  ldn (i_solver.grid_ptr (0)->get_ld ()),  m (i_solver.grid_ptr (1)->get_n ()), data (i_solver.data_ptr ()), grid_n (*(i_solver.grid_ptr (0))), grid_m (*(i_solver.grid_ptr (1))), messenger_ptr (i_messenger_ptr),  timestep (i_timestep),  positions (&(grid_m [0])), excess_0 (grid_m.get_excess_0 ()),  excess_n (grid_m.get_excess_n ()), default_matrix (grid_m.get_data (0)) {
+		bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags), n (i_solver.grid_ptr (0)->get_n ()),  ldn (i_solver.grid_ptr (0)->get_ld ()),  m (i_solver.grid_ptr (1)->get_n ()), data (i_solver.data_ptr ()), messenger_ptr (i_messenger_ptr),  timestep (i_timestep),  positions (&((*(i_solver.grid_ptr (1))) [0])), excess_0 (i_solver.grid_ptr (1)->get_excess_0 ()),  excess_n (i_solver.grid_ptr (1)->get_excess_n ()), default_matrix (i_solver.grid_ptr (1)->get_data (0)) {
 			TRACE ("Building solver...");
-			horizontal_matrix.resize (ldn);
-			factorized_horizontal_matrix.resize (ldn);
 			matrix.resize (m * m);
 			rhs_ptr = i_solver.rhs_ptr (spectral_rhs);
 			
@@ -122,20 +118,15 @@ namespace two_d
 		template <class datatype>
 		void collocation_solver <datatype>::factorize () {
 			int info;
-			std::stringstream debug;
 			
 			TRACE ("Factorizing...");
 			
-			for (int i = 0; i < ldn; ++i) {
-				factorized_horizontal_matrix [i] = 1.0 + timestep * horizontal_matrix [i];
-			}
-			
 			utils::matrix_copy (m, m, &matrix [0], &factorized_matrix [(ex_overlap_0) * (lda + 1)], m, lda);
 			if (boundary_0) {
-				boundary_0->calculate_matrix (&matrix [excess_0], &matrix [0], &factorized_matrix [(ex_overlap_0) * lda], lda);
+				boundary_0->calculate_matrix (&matrix [excess_0], &matrix [0], &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0], lda);
 			}
 			if (boundary_n) {
-				boundary_n->calculate_matrix (&matrix [m - ex_overlap_n], &matrix [0], &factorized_matrix [(ex_overlap_0) * (lda + 1) + m - ex_overlap_n], lda);
+				boundary_n->calculate_matrix (&matrix [m - 1 - excess_n], &matrix [0], &factorized_matrix [(ex_overlap_0) * (lda + 1) + m - 1 - excess_n], lda);
 			}
 			
 			utils::matrix_scale (lda, lda, timestep, &factorized_matrix [0], lda);
@@ -151,6 +142,7 @@ namespace two_d
 		void collocation_solver <datatype>::execute () {
 			int info;
 			TRACE ("Executing solve...");
+			DEBUG ("Collocation Solve...");
 			
 			/*
 				TODO Add timestep check here?
@@ -163,64 +155,144 @@ namespace two_d
 			}
 			
 			if (boundary_0) {
-				boundary_0->calculate_rhs (data, &data_temp [0], &data_temp [0], lda);
+				boundary_0->calculate_rhs (data + excess_0, data, &data_temp [0], &data_temp [ex_overlap_0 + excess_0], lda);
 			}
 			if (boundary_n) {
-				boundary_n->calculate_rhs (data, &data_temp [0], &data_temp [lda - 1 - excess_n - ex_overlap_n], lda);
+				boundary_n->calculate_rhs (data + m - 1 - excess_n, data, &data_temp [0], &data_temp [lda - 1 - excess_n - ex_overlap_n], lda);
 			}
 			
 			utils::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
 			
-			if (*component_flags & x_solve) {
-				TRACE ("Solving in n direction...");
-				
-				if (boundary_0) {
-					boundary_0->send (&data_temp [0], lda);
-				}
-				if (boundary_n) {
-					boundary_n->receive (&data_temp [lda - overlap_n], lda);
-					boundary_n->send (&data_temp [lda - ex_overlap_n], lda);
-				}
-				if (boundary_0) {
-					boundary_0->receive (&data_temp [ex_overlap_0], lda);
-				}
-				
+			TRACE ("Solving in m direction...");
+			
+			utils::p_block_matrix_solve (messenger_ptr->get_id (), messenger_ptr->get_np (), inner_m, overlap_0, overlap_n, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, ldn, lda, sqrt ((int) boundary_matrix.size ()), lda);
+			
+			TRACE ("Matrix solve complete.");
+			
+			for (int i = 0; i < ldn; ++i) {
 				for (int j = 0; j < m; ++j) {
-					utils::diagonal_solve (ldn, &factorized_horizontal_matrix [0], &data_temp [ex_overlap_0 + j], 1, lda);
-				}
-				utils::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data, lda);
-				
-			} else if (*component_flags & z_solve) {
-				TRACE ("Solving in m direction...");
-				
-				utils::p_block_matrix_solve (messenger_ptr->get_id (), messenger_ptr->get_np (), inner_m, overlap_0, overlap_n, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, ldn, lda, sqrt ((int) boundary_matrix.size ()), lda);
-				
-				TRACE ("Matrix solve complete.");
-				
-				for (int i = 0; i < ldn; ++i) {
-					for (int j = 0; j < m; ++j) {
-						if (std::isnan (data_temp [ex_overlap_0 + i * m + j])) {
-							FATAL ("Found nan.");
-							for (int k = 0; k < m; ++k) {
-								printf ("%f ", data_temp [ex_overlap_0 + k * m + j]);
-							}
-							printf ("\n");
-							throw exceptions::nan ();
+					if (std::isnan (data_temp [ex_overlap_0 + i * m + j])) {
+						FATAL ("Found nan.");
+						for (int k = 0; k < m; ++k) {
+							printf ("%f ", data_temp [ex_overlap_0 + k * m + j]);
 						}
+						printf ("\n");
+						throw exceptions::nan ();
 					}
 				}
-						
-				TRACE ("Updating...");
-				utils::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data, lda, m);
-				
-				*component_flags |= transformed_vertical;
-				
-				TRACE ("Solve complete.")
 			}
+					
+			TRACE ("Updating...");
+			utils::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data, lda, m);
+			
+			*component_flags |= transformed_vertical;
+			
+			TRACE ("Solve complete.")
 			TRACE ("Execution complete.");
 		}
 		
 		template class collocation_solver <double>;
+		
+		template <class datatype>
+		fourier_solver <datatype>::fourier_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
+		bases::solver <datatype> (i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), data (i_data), timestep (i_timestep), excess_0 (i_grid_m.get_excess_0 ()), excess_n (i_grid_m.get_excess_n ()) {
+			TRACE ("Building solver...");
+			horizontal_matrix.resize (ldn);
+			factorized_horizontal_matrix.resize (ldn);
+			rhs_ptr = i_rhs;
+			
+			boundary_0 = i_boundary_0;
+			boundary_n = i_boundary_n;
+			
+			ex_overlap_0 = boundary_0->get_ex_overlap ();
+			overlap_0 = boundary_0->get_overlap ();
+			ex_overlap_n = boundary_n->get_ex_overlap ();
+			overlap_n = boundary_n->get_overlap ();
+			lda = m + ex_overlap_n + ex_overlap_0;
+			inner_m = lda - overlap_0 - overlap_n;
+			
+			data_temp.resize (lda * ldn);
+			TRACE ("Solver built.");
+		}
+		
+		template <class datatype>
+		fourier_solver <datatype>::fourier_solver (bases::master_solver <datatype> &i_solver, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n) : 
+		bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags), n (i_solver.grid_ptr (0)->get_n ()),  ldn (i_solver.grid_ptr (0)->get_ld ()),  m (i_solver.grid_ptr (1)->get_n ()), data (i_solver.data_ptr ()), timestep (i_timestep), excess_0 (i_solver.grid_ptr (1)->get_excess_0 ()),  excess_n (i_solver.grid_ptr (1)->get_excess_n ()) {
+			TRACE ("Building solver...");
+			horizontal_matrix.resize (ldn);
+			factorized_horizontal_matrix.resize (ldn);
+			rhs_ptr = i_solver.rhs_ptr (spectral_rhs);
+			
+			boundary_0 = i_boundary_0;
+			boundary_n = i_boundary_n;
+			
+			ex_overlap_0 = boundary_0->get_ex_overlap ();
+			overlap_0 = boundary_0->get_overlap ();
+			ex_overlap_n = boundary_n->get_ex_overlap ();
+			overlap_n = boundary_n->get_overlap ();
+			lda = m + ex_overlap_n + ex_overlap_0;
+			inner_m = lda - overlap_0 - overlap_n;
+			
+			data_temp.resize (lda * ldn);
+			
+			TRACE ("Solver built.");
+		}
+		
+		template <class datatype>
+		void fourier_solver <datatype>::factorize () {
+			
+			TRACE ("Factorizing...");
+			
+			for (int i = 0; i < ldn; ++i) {
+				factorized_horizontal_matrix [i] = 1.0 + timestep * horizontal_matrix [i];
+			}
+			
+			TRACE ("Done.");
+		}
+		
+		template <class datatype>
+		void fourier_solver <datatype>::execute () {
+			TRACE ("Executing solve...");
+			
+			/*
+				TODO Add timestep check here?
+			*/
+			
+			utils::scale ((ldn) * lda, 0.0, &data_temp [0]);
+			
+			if (rhs_ptr) {
+				utils::matrix_add_scaled (m, ldn, timestep, rhs_ptr, &data_temp [ex_overlap_0], m, lda);
+			}
+			
+			if (boundary_0) {
+				boundary_0->calculate_rhs (data + excess_0, data, &data_temp [0], &data_temp [ex_overlap_0 + excess_0], lda);
+			}
+			if (boundary_n) {
+				boundary_n->calculate_rhs (data + m - 1 - excess_n, data, &data_temp [0], &data_temp [lda - 1 - excess_n - ex_overlap_n], lda);
+			}
+			
+			utils::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
+			
+			if (boundary_0) {
+				boundary_0->send (&data_temp [0], lda);
+			}
+			if (boundary_n) {
+				boundary_n->receive (&data_temp [lda - overlap_n], lda);
+				boundary_n->send (&data_temp [lda - ex_overlap_n], lda);
+			}
+			if (boundary_0) {
+				boundary_0->receive (&data_temp [ex_overlap_0], lda);
+			}
+			
+			for (int j = 0; j < m; ++j) {
+				utils::diagonal_solve (ldn, &factorized_horizontal_matrix [0], &data_temp [ex_overlap_0 + j], 1, lda);
+			}
+			utils::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data, lda);
+			
+			TRACE ("Execution complete.");
+		}
+		
+		template class fourier_solver <double>;
 		
 		template <class datatype>
 		laplace_solver <datatype>::laplace_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
