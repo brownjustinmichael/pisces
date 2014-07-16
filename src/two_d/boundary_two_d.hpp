@@ -31,7 +31,6 @@ namespace two_d
 		
 		virtual void calculate_rhs (datatype *data, datatype *interpolate_original, datatype *interpolate_data, datatype *data_temp, int lda) {
 			data_temp [0] = value;
-			DEBUG ("Setting " << value);
 			for (int i = 1; i < ldn; ++i) {
 				data_temp [i * lda] = 0.0;
 			}

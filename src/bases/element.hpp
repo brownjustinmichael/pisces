@@ -365,11 +365,17 @@ namespace bases
 			TRACE ("Beginning solve...");
 			// Execute the solvers
 			for (iterator iter = begin (); iter != end (); iter++) {
-				TRACE ("Solving " << *iter);
-				solvers [*iter]->solve ();
-				// solve_recursive (*iter);
+				// TRACE ("Solving " << *iter);
+				// solvers [*iter]->solve ();
+				solve_recursive (*iter);
 			}
+			
+			for (iterator iter = begin (); iter != end (); iter++) {
+				element_flags [*iter] &= ~solved;
+			}
+			
 			// Make certain everything is fully transformed
+			
 			
 			transform (forward_vertical | no_read);
 			TRACE ("Solve complete.");
