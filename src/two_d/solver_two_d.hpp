@@ -52,6 +52,46 @@ namespace two_d
 		
 		virtual ~master_solver () {}
 		
+		virtual int n_dependencies () {
+			if (*component_flags & x_solve) {
+				if (x_solver) {
+					return x_solver->n_dependencies ();
+				} else {
+					return 0;
+				}
+			} else if (*component_flags & z_solve) {
+				if (z_solver) {
+					return z_solver->n_dependencies ();
+				} else {
+					return 0;
+				}
+			} else {
+				return 0;
+			}
+		}
+
+		virtual int& get_dependency (int i) {
+			if (*component_flags & x_solve) {
+				return x_solver->get_dependency (i);
+			} else if (*component_flags & z_solve) {
+				return z_solver->get_dependency (i);
+			} else {
+				throw 0;
+			}
+		}
+
+		virtual void add_dependency (int name, int flags = 0x00) {
+			if (!(flags & not_x_solver)) {
+				if (x_solver) {
+					x_solver->add_dependency (name);
+				}
+			} else if (!(flags & not_z_solver)) {
+				if (z_solver) {
+					z_solver->add_dependency (name);
+				}
+			}
+		}
+		
 		bases::grid <datatype> *grid_ptr (int index = 0) {
 			if (index == 0) {
 				return &grid_n;

@@ -48,6 +48,24 @@ namespace one_d
 		
 		virtual ~master_solver () {}
 		
+		virtual int n_dependencies () {
+			if (z_solver) {
+				return z_solver->n_dependencies ();
+			} else {
+				return 0;
+			}
+		}
+
+		virtual int& get_dependency (int i) {
+			return z_solver->get_dependency (i);
+		}
+
+		virtual void add_dependency (int name, int flags = 0x00) {
+			if (z_solver) {
+				z_solver->add_dependency (name);
+			}
+		}
+		
 		bases::grid <datatype> *grid_ptr (int index = 0) {
 			return &grid;
 		}

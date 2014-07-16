@@ -55,6 +55,8 @@ namespace bases
 		using bases::plan <datatype>::element_flags;
 		using bases::plan <datatype>::component_flags;
 	private:
+		std::vector <int> deps;
+		
 		std::vector <std::shared_ptr <plan <datatype> > > pre_transform_plans; //!< A vector of shared pointers of plans to be executed before the transforms
 		std::vector <std::shared_ptr <plan <datatype> > > mid_transform_plans; //!< A vector of shared pointers of plans to be executed after the vertical transform
 		std::vector <std::shared_ptr <plan <datatype> > > post_transform_plans; //!< A vector of shared pointers of plans to be executed after both transforms
@@ -68,6 +70,18 @@ namespace bases
 		plan <datatype> (i_element_flags, i_component_flags) {}
 		
 		virtual ~solver () {}
+		
+		virtual int n_dependencies () {
+			return (int) deps.size ();
+		}
+
+		virtual int& get_dependency (int i) {
+			return deps [i];
+		}
+
+		virtual void add_dependency (int name) {
+			deps.push_back (name);
+		}
 		
 		/*!**********************************************************************
 		 * \brief Return a pointer to the solver's matrix for the index dimension
@@ -126,11 +140,11 @@ namespace bases
 		*/	
 		virtual ~master_solver () {}
 		
-		// virtual int n_dependencies () = 0;
-		//
-		// virtual int get_dependency () = 0;
-		//
-		// virtual int add_dependency (int flags) = 0;
+		virtual int n_dependencies () = 0;
+
+		virtual int& get_dependency (int i) = 0;
+
+		virtual void add_dependency (int name, int flags = 0x00) = 0;
 		
 		/*!**********************************************************************
 		 * \brief Return a pointer to the data associated with the solver
