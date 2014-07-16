@@ -64,6 +64,7 @@ namespace two_d
 
 				solvers [x_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new collocation_solver <datatype> (*solvers [x_velocity], messenger_ptr, timestep, boundary_0, boundary_n)), z_solver);
 				solvers [x_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new fourier_solver <datatype> (*solvers [x_velocity], timestep, boundary_0, boundary_n)), x_solver);
+				solvers [x_velocity]->get_solver (x_solver)->add_dependency (z_velocity);
 
 				solvers [x_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new vertical_diffusion <datatype> (*solvers [x_velocity], i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha"))), pre_plan);
 				solvers [x_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new horizontal_diffusion <datatype> (*solvers [x_velocity], i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha"))), mid_plan);
@@ -71,6 +72,7 @@ namespace two_d
 
 				solvers [z_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new collocation_solver <datatype> (*solvers [z_velocity], messenger_ptr, timestep, boundary_0, boundary_n)),z_solver);
 				solvers [z_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new fourier_solver <datatype> (*solvers [z_velocity], timestep, boundary_0, boundary_n)), x_solver);
+				solvers [z_velocity]->get_solver (z_solver)->add_dependency (x_velocity);
 
 				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new vertical_diffusion <datatype> (*solvers [z_velocity], i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha"))), pre_plan);
 				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new horizontal_diffusion <datatype> (*solvers [z_velocity], i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha"))), mid_plan);

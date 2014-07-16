@@ -148,11 +148,9 @@ namespace two_d
 		virtual void add_solver (std::shared_ptr <bases::solver <datatype>> i_solver, int flags = 0x00) {
 			TRACE ("Adding solver...");
 			if (!(flags & not_x_solver)) {
-				DEBUG ("Adding x solver...");
 				x_solver = i_solver;
 			}
 			if (!(flags & not_z_solver)) {
-				DEBUG ("Adding z solver...");
 				z_solver = i_solver;
 			}
 		}
@@ -186,12 +184,10 @@ namespace two_d
 			
 			if (*component_flags & x_solve) {
 				if (x_solver) {
-					DEBUG ("Solving in x direction...");
 					x_solver->execute ();
 				}
 			} else if (*component_flags & z_solve) {
 				if (z_solver) {
-					DEBUG ("Solving in z direction...");
 					z_solver->execute ();
 				}
 			}

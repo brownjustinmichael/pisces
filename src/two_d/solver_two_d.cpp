@@ -147,7 +147,6 @@ namespace two_d
 		void collocation_solver <datatype>::execute () {
 			int info;
 			TRACE ("Executing solve...");
-			DEBUG ("Collocation Solve...");
 			
 			/*
 				TODO Add timestep check here?
@@ -162,8 +161,6 @@ namespace two_d
 			if (boundary_0) {
 				boundary_0->calculate_rhs (data + excess_0, data, &data_temp [0], &data_temp [ex_overlap_0 + excess_0], lda);
 			}
-			DEBUG (data_temp [ex_overlap_0 + excess_0]);
-			DEBUG (data_temp [ex_overlap_0 + excess_0 + lda]);
 			if (boundary_n) {
 				boundary_n->calculate_rhs (data + m - 1 - excess_n, data, &data_temp [0], &data_temp [lda - 1 - excess_n - ex_overlap_n], lda);
 			}

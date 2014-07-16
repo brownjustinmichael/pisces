@@ -55,7 +55,7 @@ enum plan_flags {
 	profile_only = 0x80000,
 	timestep_only = 0x100000,
 	no_solve = 0x200000,
-	solved = 0x400000
+	solved = 0x4000000
 };
 
 enum solve_element_flags {
