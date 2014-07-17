@@ -75,6 +75,9 @@ namespace utils
 	void tridiagonal_factorize (int n, double *dl, double *d, double *du, double *du2, int *ipiv, int *info = NULL);
 	
 	void tridiagonal_solve (int n, float *dl, float *d, float *du, float *du2, int *ipiv, float *b, int *info = NULL, int nrhs = 1, int ldb = -1);
+
+	void tridiagonal_direct_solve (int n, float *dl, float *d, float *du, float *b, int *info = NULL, int nrhs = 1, int ldb = -1);
+	void tridiagonal_direct_solve (int n, double *dl, double *d, double *du, double *b, int *info = NULL, int nrhs = 1, int ldb = -1);
 	
 	void tridiagonal_factorize (int n, float *dl, float *d, float *du, float *du2, int *ipiv, int *info = NULL);
 	

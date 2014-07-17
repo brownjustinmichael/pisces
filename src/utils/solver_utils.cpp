@@ -190,6 +190,7 @@ namespace utils
 		dgttrf_ (&n, dl, d, du, du2, ipiv, info);
 		
 		if (*info != 0) {
+			FATAL ("Info is " << *info);
 			throw exceptions::cannot_factor ();
 		}
 	}
@@ -284,8 +285,60 @@ namespace utils
 			throw exceptions::cannot_solve ();
 		}
 	}
+	
+	void tridiagonal_direct_solve (int n, double *dl, double *d, double *du, double* du2, double *b, int nrhs, int ldb) {
+		if (n == 0) {
+			return;
+		}
+		
+		if (ldb == -1) {
+			ldb = n;
+		}
+		
+		copy (n, du, du2);
+		
+		du2 [0] /= d [0];
+		for (int i = 0; i < nrhs; ++i) {
+			b [i * ldb] /= d_copy [0]
+		}
+		for (int j = 1; j < n; ++j) {
+			du2 [j] /= d [j] - dl [j] * du2 [j - 1];
+			for (int i = 0; i < nrhs; ++i) {
+				b [i * ldb + j] = (b [i * ldb + j] - dl [j] * b [i * ldb + j - 1]) / (d [j] - dl [j] * du2 [j - 1]);
+			}
+		}
+		
+		for (int j = n - 2; j >= 0; ++j) {
+			b [i * ldb + j] -= du2 [j] * b [i * ldb + j + 1]
+		}
+	}
 
-
+	void tridiagonal_direct_solve (int n, float *dl, float *d, float *du, float* du2, float *b, int nrhs, int ldb) {
+		if (n == 0) {
+			return;
+		}
+		
+		if (ldb == -1) {
+			ldb = n;
+		}
+		
+		copy (n, du, du2);
+		
+		du2 [0] /= d [0];
+		for (int i = 0; i < nrhs; ++i) {
+			b [i * ldb] /= d_copy [0]
+		}
+		for (int j = 1; j < n; ++j) {
+			du2 [j] /= d [j] - dl [j] * du2 [j - 1];
+			for (int i = 0; i < nrhs; ++i) {
+				b [i * ldb + j] = (b [i * ldb + j] - dl [j] * b [i * ldb + j - 1]) / (d [j] - dl [j] * du2 [j - 1]);
+			}
+		}
+		
+		for (int j = n - 2; j >= 0; ++j) {
+			b [i * ldb + j] -= du2 [j] * b [i * ldb + j + 1]
+		}
+	}
 
 	void diagonal_solve (int n, float *a, float *b, int inca, int incb) {
 		for (int i = 0; i < n; ++i) {

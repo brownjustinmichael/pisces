@@ -363,13 +363,13 @@ namespace two_d
 		};
 		
 		template <class datatype>
-		class divergence_solver : public bases::solver <datatype>
+		class horizontal_divergence_solver : public bases::solver <datatype>
 		{
 		public:
-			divergence_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_x, datatype *i_data_z, int *i_element_flags, int *i_component_flags);
-			divergence_solver (bases::master_solver <datatype> &i_solver, datatype *i_data_z);
+			horizontal_divergence_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_x, datatype *i_data_z, int *i_element_flags, int *i_component_flags);
+			horizontal_divergence_solver (bases::master_solver <datatype> &i_solver, datatype *i_data_z);
 			
-			virtual ~divergence_solver () {}
+			virtual ~horizontal_divergence_solver () {}
 			
 			datatype *matrix_ptr () {
 				return NULL;
@@ -387,6 +387,44 @@ namespace two_d
 			int flags;
 			bases::grid <datatype> &grid_n;
 			bases::grid <datatype> &grid_m;
+		};
+		
+		template <class datatype>
+		class vertical_divergence_solver : public bases::solver <datatype>
+		{
+		public:
+			vertical_divergence_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger *i_messenger_ptr, datatype* i_data_x, datatype *i_data_z, int *i_element_flags, int *i_component_flags);
+			vertical_divergence_solver (bases::master_solver <datatype> &i_solver, utils::messenger* i_messenger_ptr, datatype *i_data_x);
+			
+			virtual ~vertical_divergence_solver () {}
+			
+			datatype *matrix_ptr () {
+				return NULL;
+			}
+	
+			void factorize ();
+			void execute ();
+		
+		private:
+			int n;
+			int ldn;
+			int m;
+			datatype ex_pos_0, ex_pos_m;
+			int flags;
+			const datatype *pos_n, *pos_m;
+			datatype *data_x;
+			datatype *data_z;
+			bases::grid <datatype> &grid_n;
+			bases::grid <datatype> &grid_m;
+			datatype *sub_ptr, *diag_ptr, *sup_ptr;
+			int excess_0, excess_n, id, np;
+
+
+			utils::messenger* messenger_ptr;
+			
+			std::vector <datatype> x;
+			std::vector <datatype> sup, sub, diag, supsup; //!< A datatype vector to be used in lieu of data_out for non-updating steps
+			std::vector <int> ipiv, xipiv;
 		};
 	} /* fourier */
 } /* two_d */
