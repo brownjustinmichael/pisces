@@ -294,12 +294,14 @@ namespace utils
 		if (ldb == -1) {
 			ldb = n;
 		}
+
+		dl -= 1;
 		
 		copy (n, du, du2);
 		
 		du2 [0] /= d [0];
 		for (int i = 0; i < nrhs; ++i) {
-			b [i * ldb] /= d_copy [0]
+			b [i * ldb] /= d [0];
 		}
 		for (int j = 1; j < n; ++j) {
 			du2 [j] /= d [j] - dl [j] * du2 [j - 1];
@@ -308,8 +310,10 @@ namespace utils
 			}
 		}
 		
-		for (int j = n - 2; j >= 0; ++j) {
-			b [i * ldb + j] -= du2 [j] * b [i * ldb + j + 1]
+		for (int j = n - 2; j >= 0; --j) {
+			for (int i = 0; i < nrhs; ++i) {
+				b [i * ldb + j] -= du2 [j] * b [i * ldb + j + 1];
+			}
 		}
 	}
 
@@ -322,11 +326,12 @@ namespace utils
 			ldb = n;
 		}
 		
+		dl -= 1;
 		copy (n, du, du2);
 		
 		du2 [0] /= d [0];
 		for (int i = 0; i < nrhs; ++i) {
-			b [i * ldb] /= d_copy [0]
+			b [i * ldb] /= d [0];
 		}
 		for (int j = 1; j < n; ++j) {
 			du2 [j] /= d [j] - dl [j] * du2 [j - 1];
@@ -336,7 +341,9 @@ namespace utils
 		}
 		
 		for (int j = n - 2; j >= 0; ++j) {
-			b [i * ldb + j] -= du2 [j] * b [i * ldb + j + 1]
+			for (int i = 0; i < nrhs; ++i) {
+				b [i * ldb + j] -= du2 [j] * b [i * ldb + j + 1];
+			}
 		}
 	}
 
