@@ -32,8 +32,12 @@ namespace two_d
 				alpha (i_alpha) {
 					TRACE ("Instantiating...");
 					pioL2 = 4.0 * (std::acos (-1.0) * std::acos (-1.0) / (grid_n [n - 1] - grid_n [0]) / (grid_n [n - 1] - grid_n [0]));
-					for (int i = 0; i < ldn; ++i) {
-						matrix_n [i] = coeff * alpha * pioL2 * (datatype) ((i / 2) * (i / 2));
+					if (matrix_n) {
+						for (int i = 0; i < ldn; ++i) {
+							matrix_n [i] = coeff * alpha * pioL2 * (datatype) ((i / 2) * (i / 2));
+						}
+					} else {
+						WARN ("No matrix");
 					}
 				}
 				
@@ -43,8 +47,12 @@ namespace two_d
 				alpha (i_alpha) {
 					TRACE ("Instantiating...");
 					pioL2 = 4.0 * (std::acos (-1.0) * std::acos (-1.0) / (grid_n [n - 1] - grid_n [0]) / (grid_n [n - 1] - grid_n [0]));
-					for (int i = 0; i < ldn; ++i) {
-						matrix_n [i] = coeff * alpha * pioL2 * (datatype) ((i / 2) * (i / 2));
+					if (matrix_n) {
+						for (int i = 0; i < ldn; ++i) {
+							matrix_n [i] = coeff * alpha * pioL2 * (datatype) ((i / 2) * (i / 2));
+						}
+					} else {
+						WARN ("No matrix");
 					}
 				}
 				
@@ -93,8 +101,12 @@ namespace two_d
 				implicit_plan <datatype> (i_grid_n, i_grid_m, i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_element_flags, i_component_flags),
 				coeff (i_coeff),
 				alpha (i_alpha) {
-					for (int j = 0; j < m; ++j) {
-						utils::add_scaled (m, -coeff * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
+					if (matrix_m) {
+						for (int j = 0; j < m; ++j) {
+							utils::add_scaled (m, -coeff * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
+						}
+					} else {
+						WARN ("No matrix");
 					}
 				}
 				
@@ -102,8 +114,12 @@ namespace two_d
 				implicit_plan <datatype> (i_solver),
 				coeff (i_coeff),
 				alpha (i_alpha) {
-					for (int j = 0; j < m; ++j) {
-						utils::add_scaled (m, -coeff * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
+					if (matrix_m) {
+						for (int j = 0; j < m; ++j) {
+							utils::add_scaled (m, -coeff * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
+						}
+					} else {
+						WARN ("No matrix");
 					}
 				}
 				

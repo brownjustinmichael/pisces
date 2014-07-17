@@ -502,7 +502,7 @@ namespace two_d
 		template class laplace_solver <double>;
 	
 		template <class datatype>
-		divergence_solver <datatype>::divergence_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_x, datatype *i_data_z, int *i_element_flags, int *i_component_flags) : 
+		horizontal_divergence_solver <datatype>::horizontal_divergence_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_x, datatype *i_data_z, int *i_element_flags, int *i_component_flags) : 
 		bases::solver <datatype> (i_element_flags, i_component_flags),
 		n (i_grid_n.get_n ()), 
 		ldn (i_grid_n.get_ld ()), 
@@ -515,7 +515,7 @@ namespace two_d
 		grid_m (i_grid_m) {}
 		
 		template <class datatype>
-		divergence_solver <datatype>::divergence_solver (bases::master_solver <datatype> &i_solver, datatype *i_data_z) : 
+		horizontal_divergence_solver <datatype>::horizontal_divergence_solver (bases::master_solver <datatype> &i_solver, datatype *i_data_z) : 
 		bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags),
 		n (i_solver.grid_ptr (0)->get_n ()), 
 		ldn (i_solver.grid_ptr (0)->get_ld ()), 
@@ -528,10 +528,10 @@ namespace two_d
 		grid_m (*(i_solver.grid_ptr (1))) {}
 		
 		template <class datatype>
-		void divergence_solver <datatype>::factorize () {}
+		void horizontal_divergence_solver <datatype>::factorize () {}
 		
 		template <class datatype>
-		void divergence_solver <datatype>::execute () {
+		void horizontal_divergence_solver <datatype>::execute () {
 			TRACE ("Solving...");
 			utils::scale (m * ldn, 0.0, data_x);
 			
@@ -553,6 +553,206 @@ namespace two_d
 			}
 		}
 		
-		template class divergence_solver <double>;
+		template class horizontal_divergence_solver <double>;
+		
+		template <class datatype>
+		vertical_divergence_solver <datatype>::vertical_divergence_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger *i_messenger_ptr, datatype* i_data_x, datatype *i_data_z, int *i_element_flags, int *i_component_flags) : 
+		bases::solver <datatype> (i_element_flags, i_component_flags),
+		n (i_grid_n.get_n ()), 
+		ldn (i_grid_n.get_ld ()), 
+		m (i_grid_m.get_n ()),
+		pos_n (&i_grid_n [0]),
+		pos_m (&i_grid_m [0]),
+		data_z (i_data_z),
+		grid_n (i_grid_n),
+		grid_m (i_grid_m),
+		excess_0 (grid_m.get_excess_0 ()), 
+		excess_n (grid_m.get_excess_n ()),
+		messenger_ptr (i_messenger_ptr) {
+			TRACE ("Building vertical divergence solver...");
+			sup.resize (m);
+			sub.resize (m);
+			diag.resize (m);
+			data_x = i_data_x;
+			
+			sup_ptr = &sup [0];
+			sub_ptr = &sub [0];
+			diag_ptr = &diag [0];
+			
+			supsup.resize (ldn * m);
+			ipiv.resize (ldn * m);
+			
+			if (messenger_ptr->get_id () == 0) {
+				x.resize ((m + 4 * messenger_ptr->get_np ()) * 2 * ldn);
+				xipiv.resize (2 * messenger_ptr->get_np () * ldn);
+			} else {
+				x.resize ((m + 4) * 2 * ldn);
+			}
+			
+			id = messenger_ptr->get_id ();
+			np = messenger_ptr->get_np ();
+			
+			if (id != 0) {
+				messenger_ptr->send (1, &pos_m [excess_0 + 1], id - 1, 0);
+			}
+			if (id != np - 1) {
+				messenger_ptr->recv (1, &ex_pos_m, id + 1, 0);
+				messenger_ptr->send (1, &pos_m [m - 1 - excess_n], id + 1, 1);
+			}
+			if (id != 0) {
+				messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
+			}
+		}
+		
+		template <class datatype>
+		vertical_divergence_solver <datatype>::vertical_divergence_solver (bases::master_solver <datatype> &i_solver, utils::messenger *i_messenger_ptr, datatype *i_data_x) : 
+		bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags),
+		n (i_solver.grid_ptr (0)->get_n ()), 
+		ldn (i_solver.grid_ptr (0)->get_ld ()), 
+		m (i_solver.grid_ptr (1)->get_n ()),
+		pos_m (&((*(i_solver.grid_ptr (1))) [0])),
+		data_x (i_data_x),
+		data_z (i_solver.data_ptr ()),
+		grid_n (*(i_solver.grid_ptr (0))),
+		grid_m (*(i_solver.grid_ptr (1))),
+		excess_0 (grid_m.get_excess_0 ()), 
+		excess_n (grid_m.get_excess_n ()) {
+			TRACE ("Building vertical divergence solver...");
+			sup.resize (m);
+			sub.resize (m);
+			diag.resize (m);
+			data_x = i_data_x;
+			messenger_ptr = i_messenger_ptr;
+			
+			sup_ptr = &sup [0];
+			sub_ptr = &sub [0];
+			diag_ptr = &diag [0];
+			
+			supsup.resize (ldn * m);
+			ipiv.resize (ldn * m);
+			
+			DEBUG ("Messenger " << messenger_ptr);
+			
+			if (messenger_ptr->get_id () == 0) {
+				x.resize ((m + 4 * messenger_ptr->get_np ()) * 2 * ldn);
+				xipiv.resize (2 * messenger_ptr->get_np () * ldn);
+			} else {
+				x.resize ((m + 4) * 2 * ldn);
+			}
+			
+			DEBUG ("Messaging...");
+			id = messenger_ptr->get_id ();
+			np = messenger_ptr->get_np ();
+			
+			if (id != 0) {
+				DEBUG ("Sending...");
+				messenger_ptr->send (1, &pos_m [excess_0 + 1], id - 1, 0);
+			}
+			if (id != np - 1) {
+				DEBUG ("Recving...");
+				messenger_ptr->recv (1, &ex_pos_m, id + 1, 0);
+				DEBUG ("Sending...");
+				messenger_ptr->send (1, &pos_m [m - 1 - excess_n], id + 1, 1);
+			}
+			if (id != 0) {
+				DEBUG ("Recving...");
+				messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
+			}
+			TRACE ("Done.");
+		}
+		
+		template <class datatype>
+		void vertical_divergence_solver <datatype>::factorize () {
+			TRACE ("Factorizing divergence solver...");
+
+			int mm = m;
+			int nbegin = excess_0;
+			if (id != 0) {
+				mm -= excess_0 + 2;
+				nbegin += 1;
+			}
+			if (id != np - 1) {
+				mm -= excess_n + 1;
+			}
+			if (id != 0) {
+				sub_ptr [nbegin] = 1.0 / (pos_m [nbegin + 1] - ex_pos_0);
+				sup_ptr [nbegin] = -1.0 / (pos_m [nbegin + 1] - ex_pos_0);
+				diag_ptr [nbegin] = 1.0e-8;
+			} else {
+				sup_ptr [nbegin] = 0.0;
+				diag_ptr [nbegin] = 1.0;
+				sub_ptr [nbegin] = 0.0;
+			}
+			for (int j = nbegin + 1; j < m - 1 - excess_n; ++j) {
+				sub_ptr [j] = 1.0 / (pos_m [j + 1] - pos_m [j - 1]);
+				sup_ptr [j] = -1.0 / (pos_m [j + 1] - pos_m [j - 1]);
+				diag_ptr [j] = 1.0e-8;
+			}
+			if (id != np - 1) {
+				sub_ptr [m - 1 - excess_n] = 1.0 / (ex_pos_m - pos_m [m - 2 - excess_n]);
+				sup_ptr [m - 1 - excess_n] = -1.0 / (ex_pos_m - pos_m [m - 2 - excess_n]);
+				diag_ptr [m - 1 - excess_n] = 1.0e-8;
+			} else {
+				sup_ptr [m - 1 - excess_n] = 0.0;
+				diag_ptr [m - 1 - excess_n] = 1.0;
+				sub_ptr [m - 1 - excess_n] = 0.0;
+			}
+
+			int info;
+			
+			utils::p_block_tridiag_factorize (id, np, mm, &sub [nbegin], &diag [nbegin], &sup [nbegin], &supsup [nbegin], &ipiv [nbegin], &x [0], &xipiv [0], &info, 1, m);
+		}
+		
+		template <class datatype>
+		void vertical_divergence_solver <datatype>::execute () {
+			TRACE ("Solving...");
+			int mm = m;
+			int nbegin = excess_0;
+			if (id != 0) {
+				mm -= excess_0 + 2;
+				nbegin += 1;
+			}
+			if (id != np - 1) {
+				mm -= excess_n + 1;
+			}
+			
+			if (data_x) {
+				utils::matrix_copy (mm, ldn, data_x, data_z + nbegin);
+			}
+			
+			if (id == 0) {
+				utils::scale (ldn, 0.0, data_z + nbegin, m);
+			}
+			if (id == np - 1) {
+				utils::scale (ldn, 0.0, data_z + m - 1 - excess_n, m);
+			}
+			utils::scale (2 * m, 0.0, data_z);
+			
+			int info;
+			
+			utils::p_block_tridiag_solve (id, np, mm, &sub [nbegin], &diag [nbegin], &sup [nbegin], &supsup [nbegin], &ipiv [nbegin], data_z + nbegin, &x [0], &xipiv [0], &info, 1, m, m, ldn);
+			
+			for (int i = 0; i < ldn; ++i) {
+				for (int j = nbegin - 1; j >= 0; --j) {
+					data_z [i * m + j] = (data_z [i * m + j + 2] - data_z [i * m + j + 1]) / (pos_m [j + 2] - pos_m [j + 1]) * (pos_m [j] - pos_m [j + 1]) + data_z [i * m + j + 1];
+				}
+				for (int j = m - excess_n; j < m; ++j) {
+					data_z [i * m + j] = (data_z [i * m + j - 2] - data_z [i * m + j - 1]) / (pos_m [j - 2] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]) + data_z [i * m + j - 1];
+				}
+			}
+
+			for (int j = 0; j < m; ++j) {
+				for (int i = 0; i < ldn; ++i) {
+					if (std::isnan (data_z [i * m + j])) {
+						FATAL ("Nan in laplace solver.");
+						throw exceptions::nan ();
+					}
+				}
+			}
+
+			TRACE ("Solved.");
+		}
+		
+		template class vertical_divergence_solver <double>;
 	} /* fourier */
 } /* two_d */

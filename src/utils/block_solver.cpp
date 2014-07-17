@@ -200,7 +200,7 @@ namespace utils
 // #endif
 // 	}
 	
-	void p_block_tridiag_factorize (int id, int np, int n, double* sub, double *diag, double *sup, double *supsup, int* ipiv, double *x, int *xipiv, int *info, int nrhs, int lda) {
+	void p_block_tridiag_factorize (int id, int np, int n, double* sub, double *diag, double *sup, double *supsup, int* ipiv, double *x, int *xipiv, int *info, int nrhs, int lda, int inrhs) {
 		int ntop, nbot;
 		int ldx = 2;
 		if (id == 0) {
@@ -310,9 +310,9 @@ namespace utils
 #endif
 	}
 	
-	void p_block_tridiag_solve (int id, int np, int n, double* sub, double *diag, double *sup, double *supsup, int* ipiv, double* b, double *x, int *xipiv, int *info, int nrhs, int lda, int ldb) {
+	void p_block_tridiag_solve (int id, int np, int n, double* sub, double *diag, double *sup, double *supsup, int* ipiv, double* b, double *x, int *xipiv, int *info, int nrhs, int lda, int ldb, int inrhs) {
 		int ntop, nbot;
-		std::vector <double> y (2 * np * nrhs, 0.0);
+		std::vector <double> y (2 * np * nrhs * inrhs, 0.0);
 		if (id == 0) {
 			ntop = 0;
 		} else {
@@ -338,75 +338,90 @@ namespace utils
 		}
 		double *bufferl = x, *bufferr = bufferl + n * nrhs, *xsub = bufferr + n * nrhs, *xdiag = xsub + ldxx, *xsup = xdiag + ldxx, *xsupsup = xsup + ldxx;
 		
-		add_scaled (ntop * nrhs, 1.0, b, &y [0], ldb, ldy);
-		add_scaled (nbot * nrhs, 1.0, b + ntop + n, &y [1], ldb, ldy);
+		for (int j = 0; j < inrhs; ++j) {
+			add_scaled (ntop * nrhs, 1.0, b + j * nrhs * ldb, &y [j * nrhs * ldy], ldb, ldy);
+			add_scaled (nbot * nrhs, 1.0, b + ntop + n + j * nrhs * ldb, &y [1 + j * nrhs * ldy], ldb, ldy);
+		}
 		
 		for (int i = 0; i < nrhs; ++i) {
-			tridiagonal_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, b + ntop + i * ldb, info);
+			tridiagonal_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, b + ntop + i * ldb, info, inrhs, ldb * nrhs);
 		}
 		
 #ifdef _MPI
 		if (id != 0) {
-			for (int i = 0; i < nrhs; ++i) {
-				y [i * ldy] -= sup [i * lda] * b [1 + i * ldb];
+			for (int j = 0; j < inrhs; ++j) {
+				for (int i = 0; i < nrhs; ++i) {
+					y [i * ldy + j * nrhs * ldy] -= sup [i * lda] * b [1 + i * ldb + j * nrhs * ldb];
+				}
 			}
 		}
 		if (id != np - 1) {
-			for (int i = 0; i < nrhs; ++i) {
-				y [1 + i * ldy] -= sub [n + ntop + nbot - 1 + i * lda] * b [n + ntop + nbot - 2 + i * ldb];
+			for (int j = 0; j < inrhs; ++j) {
+				for (int i = 0; i < nrhs; ++i) {
+					y [1 + i * ldy + j * nrhs * ldy] -= sub [n + ntop + nbot - 1 + i * lda] * b [n + ntop + nbot - 2 + i * ldb + j * nrhs * ldb];
+				}
 			}
 		}
 		
 		if (id == 0) {
-			MPI::COMM_WORLD.Gather (&y [0], 2 * nrhs, MPI::DOUBLE, &y [0], 2 * nrhs, MPI::DOUBLE, 0);
+			MPI::COMM_WORLD.Gather (&y [0], 2 * nrhs * inrhs, MPI::DOUBLE, &y [0], 2 * nrhs * inrhs, MPI::DOUBLE, 0);
 			int ldx = 2 * np;
 			ldy = 2 * nrhs;
 			int ldbuff = 2 * np;
 			
-			std::vector <double> buffer (2 * np * nrhs);
+			std::vector <double> buffer (2 * np * nrhs * inrhs);
 			
-			for (int i = 0; i < nrhs; ++i) {
-				for (int j = 0; j < np; ++j) {
-					buffer [2 * j + i * ldbuff] = y [2 * i + j * ldy];
-					buffer [2 * j + 1 + i * ldbuff] = y [2 * i + 1 + j * ldy];
+			for (int k = 0; k < inrhs; ++k) {
+				for (int i = 0; i < nrhs; ++i) {
+					for (int j = 0; j < np; ++j) {
+						buffer [2 * j + i * ldbuff + k * nrhs * ldbuff] = y [2 * i + j * ldy + k * nrhs * ldy];
+						buffer [2 * j + 1 + i * ldbuff + k * nrhs * ldbuff] = y [2 * i + 1 + j * ldy + k * nrhs * ldy];
+					}
 				}
 			}
 
-			copy (2 * nrhs * np, &buffer [0], &y [0]);
+			copy (2 * nrhs * np * inrhs, &buffer [0], &y [0]);
 			
 			for (int i = 0; i < nrhs; ++i) {
-				tridiagonal_solve (2 * np - 2, xsub + 2 + i * ldx, xdiag + 1 + i * ldx, xsup + 1 + i * ldx, xsupsup + 1 + i * ldx, xipiv + i * ldx, &y [1 + i * ldbuff], info);
+				tridiagonal_solve (2 * np - 2, xsub + 2 + i * ldx, xdiag + 1 + i * ldx, xsup + 1 + i * ldx, xsupsup + 1 + i * ldx, xipiv + i * ldx, &y [1 + i * ldbuff], info, inrhs, nrhs * ldbuff);
 			}
 			
-			for (int i = 0; i < nrhs; ++i) {
-				for (int j = 0; j < np; ++j) {
-					buffer [2 * i + j * ldy] = y [2 * j + i * ldbuff];
-					buffer [2 * i + 1 + j * ldy] = y [2 * j + 1 + i * ldbuff];
+			for (int k = 0; k < inrhs; ++k) {
+				for (int i = 0; i < nrhs; ++i) {
+					for (int j = 0; j < np; ++j) {
+						buffer [2 * i + j * ldy + k * nrhs * ldy] = y [2 * j + i * ldbuff + k * nrhs * ldbuff];
+						buffer [2 * i + 1 + j * ldy + k * nrhs * ldy] = y [2 * j + 1 + i * ldbuff + k * nrhs * ldbuff];
+					}
 				}
 			}
 
-			copy (2 * nrhs * np, &buffer [0], &y [0]);
+
+			copy (2 * nrhs * np * inrhs, &buffer [0], &y [0]);
 			
-			MPI::COMM_WORLD.Scatter (&y [0], 2 * nrhs, MPI::DOUBLE, &y [0], 2 * nrhs, MPI::DOUBLE, 0);
+			MPI::COMM_WORLD.Scatter (&y [0], 2 * nrhs * inrhs, MPI::DOUBLE, &y [0], 2 * nrhs * inrhs, MPI::DOUBLE, 0);
 		} else {
-			MPI::COMM_WORLD.Gather (&y [0], 2 * nrhs, MPI::DOUBLE, NULL, 2 * nrhs, MPI::DOUBLE, 0);
-			MPI::COMM_WORLD.Scatter (NULL, 2 * nrhs, MPI::DOUBLE, &y [0], 2 * nrhs, MPI::DOUBLE, 0);
+			MPI::COMM_WORLD.Gather (&y [0], 2 * nrhs * inrhs, MPI::DOUBLE, NULL, 2 * nrhs * inrhs, MPI::DOUBLE, 0);
+			MPI::COMM_WORLD.Scatter (NULL, 2 * nrhs * inrhs, MPI::DOUBLE, &y [0], 2 * nrhs * inrhs, MPI::DOUBLE, 0);
 		}
 		ldy = 2;
 				
 		if (id != 0) {
-			copy (nrhs, &y [0], b, ldy, ldb);
-			for (int i = 0; i < n; ++i) {
-				for (int j = 0; j < nrhs; ++j) {
-					b [ntop + i + j * ldb] -= bufferl [i + j * n] * y [j * ldy]; 
+			copy (nrhs * inrhs, &y [0], b, ldy, ldb);
+			for (int k = 0; k < inrhs; ++k) {
+				for (int i = 0; i < n; ++i) {
+					for (int j = 0; j < nrhs; ++j) {
+						b [ntop + i + j * ldb + k * nrhs * ldb] -= bufferl [i + j * n] * y [j * ldy + k * nrhs * ldy]; 
+					}
 				}
 			}
 		}
 		if (id != np - 1) {
-			copy (nrhs, &y [1], b + n + ntop + nbot - 1, ldy, ldb);
-			for (int i = 0; i < n; ++i) {
-				for (int j = 0; j < nrhs; ++j) {
-					b [ntop + i + j * ldb] -= bufferr [i + j * n] * y [1 + j * ldy];
+			copy (nrhs * inrhs, &y [1], b + n + ntop + nbot - 1, ldy, ldb);
+			for (int k = 0; k < inrhs; ++k) {
+				for (int i = 0; i < n; ++i) {
+					for (int j = 0; j < nrhs; ++j) {
+						b [ntop + i + j * ldb + k * nrhs * ldb] -= bufferr [i + j * n] * y [1 + j * ldy + k * nrhs * ldy];
+					}
 				}
 			}
 		}
