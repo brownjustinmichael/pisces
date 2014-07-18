@@ -82,6 +82,12 @@ int main (int argc, char *argv[])
 			bcopy [i + j * n] = b [i];
 		}
 	}
+	
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < nrhs; ++j) {
+			DEBUG ("[" << id << "] " << subcopy [i] << " " << diagcopy [i] << " " << supcopy [i] << " = " << bcopy [i]);
+		}
+	}
 
 	try {
 		// utils::p_block_tridiag_factorize (id, np, n - ntop - nbot, &sub [0], &diag [0], &sup [0], &supsup [0], &ipiv [0], &x [0], &xipiv [0], &info, nrhs);
