@@ -234,23 +234,23 @@ namespace utils
 		}
 		
 		for (int i = 0; i < nrhs; ++i) {
-			tridiagonal_factorize (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, info);
+			// tridiagonal_factorize (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, info);
 		}
 		
 #ifdef _MPI
 		if (id != 0) {
 			copy (nrhs, sub + 1, bufferl, lda, n);
 			for (int i = 0; i < nrhs; ++i) {
-				tridiagonal_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, &bufferl [i * n], info);
-				// tridiagonal_direct_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, &bufferl [i * n]);
+				// tridiagonal_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, &bufferl [i * n], info);
+				tridiagonal_direct_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, &bufferl [i * n]);
 			}
 		}
 		
 		if (id != np - 1) {
 			copy (nrhs, sup + n + ntop + nbot - 2, bufferr + n - 1, lda, n);
 			for (int i = 0; i < nrhs; ++i) {
-				tridiagonal_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, &bufferr [i * n], info);
-				// tridiagonal_direct_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, &bufferr [i * n]);
+				// tridiagonal_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, &bufferr [i * n], info);
+				tridiagonal_direct_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, &bufferr [i * n]);
 			}
 		}
 		if (id != 0) {
@@ -303,7 +303,7 @@ namespace utils
 			
 		
 			for (int i = 0; i < nrhs; ++i) {
-				tridiagonal_factorize (2 * np - 2, xsub + 2 + i * ldbuff, xdiag + 1 + i * ldbuff, xsup + 1 + i * ldbuff, xsupsup + 1 + i * ldbuff, xipiv + i * ldbuff, info);
+				// tridiagonal_factorize (2 * np - 2, xsub + 2 + i * ldbuff, xdiag + 1 + i * ldbuff, xsup + 1 + i * ldbuff, xsupsup + 1 + i * ldbuff, xipiv + i * ldbuff, info);
 			}
 			
 		} else {
@@ -346,8 +346,8 @@ namespace utils
 		}
 		
 		for (int i = 0; i < nrhs; ++i) {
-			tridiagonal_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, b + ntop + i * ldb, info, inrhs, ldb * nrhs);
-			// tridiagonal_direct_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, b + ntop + i * ldb, inrhs, ldb * nrhs);
+			// tridiagonal_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, b + ntop + i * ldb, info, inrhs, ldb * nrhs);
+			tridiagonal_direct_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, b + ntop + i * ldb, inrhs, ldb * nrhs);
 		}
 		
 #ifdef _MPI
@@ -377,24 +377,24 @@ namespace utils
 			for (int k = 0; k < inrhs; ++k) {
 				for (int i = 0; i < nrhs; ++i) {
 					for (int j = 0; j < np; ++j) {
-						buffer [2 * j + i * ldbuff + k * nrhs * ldbuff] = y [2 * i + j * ldy + k * nrhs * ldy];
-						buffer [2 * j + 1 + i * ldbuff + k * nrhs * ldbuff] = y [2 * i + 1 + j * ldy + k * nrhs * ldy];
+						buffer [2 * j + i * ldbuff + k * nrhs * ldbuff] = y [2 * i + j * inrhs * ldy + k * ldy];
+						buffer [2 * j + 1 + i * ldbuff + k * nrhs * ldbuff] = y [2 * i + 1 + j * ldy * inrhs + k * ldy];
 					}
 				}
 			}
 
 			copy (2 * nrhs * np * inrhs, &buffer [0], &y [0]);
-			
+
 			for (int i = 0; i < nrhs; ++i) {
-				tridiagonal_solve (2 * np - 2, xsub + 2 + i * ldx, xdiag + 1 + i * ldx, xsup + 1 + i * ldx, xsupsup + 1 + i * ldx, xipiv + i * ldx, &y [1 + i * ldbuff], info, inrhs, nrhs * ldbuff);
-				// tridiagonal_direct_solve (2 * np - 2, xsub + 2 + i * ldx, xdiag + 1 + i * ldx, xsup + 1 + i * ldx, xsupsup + 1 + i * ldx, &y [1 + i * ldbuff], inrhs, nrhs * ldbuff);
+				// tridiagonal_solve (2 * np - 2, xsub + 2 + i * ldx, xdiag + 1 + i * ldx, xsup + 1 + i * ldx, xsupsup + 1 + i * ldx, xipiv + i * ldx, &y [1 + i * ldbuff], info, inrhs, nrhs * ldbuff);
+				tridiagonal_direct_solve (2 * np - 2, xsub + 2 + i * ldx, xdiag + 1 + i * ldx, xsup + 1 + i * ldx, xsupsup + 1 + i * ldx, &y [1 + i * ldbuff], inrhs, nrhs * ldbuff);
 			}
 			
 			for (int k = 0; k < inrhs; ++k) {
 				for (int i = 0; i < nrhs; ++i) {
 					for (int j = 0; j < np; ++j) {
-						buffer [2 * i + j * ldy + k * nrhs * ldy] = y [2 * j + i * ldbuff + k * nrhs * ldbuff];
-						buffer [2 * i + 1 + j * ldy + k * nrhs * ldy] = y [2 * j + 1 + i * ldbuff + k * nrhs * ldbuff];
+						buffer [2 * i + j * ldy * inrhs + k * ldy] = y [2 * j + i * ldbuff + k * nrhs * ldbuff];
+						buffer [2 * i + 1 + j * inrhs * ldy + k * ldy] = y [2 * j + 1 + i * ldbuff + k * nrhs * ldbuff];
 					}
 				}
 			}
