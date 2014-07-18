@@ -477,12 +477,14 @@ namespace two_d
 			int info;
 			
 			utils::p_block_tridiag_solve (id, np, mm, &sub [nbegin], &diag [nbegin], &sup [nbegin], &supsup [nbegin], &ipiv [nbegin], data + nbegin, &x [0], &xipiv [0], &info, ldn, m, m);
-			
+
 			for (int i = 0; i < ldn; ++i) {
 				for (int j = nbegin - 1; j >= 0; --j) {
+					DEBUG ((data [i * m + j + 2] - data [i * m + j + 1]) / (pos_m [j + 2] - pos_m [j + 1]) * (pos_m [j] - pos_m [j + 1]) + data [i * m + j + 1]);
 					data [i * m + j] = (data [i * m + j + 2] - data [i * m + j + 1]) / (pos_m [j + 2] - pos_m [j + 1]) * (pos_m [j] - pos_m [j + 1]) + data [i * m + j + 1];
 				}
 				for (int j = m - excess_n; j < m; ++j) {
+					DEBUG ((data [i * m + j - 2] - data [i * m + j - 1]) / (pos_m [j - 2] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]) + data [i * m + j - 1]);
 					data [i * m + j] = (data [i * m + j - 2] - data [i * m + j - 1]) / (pos_m [j - 2] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]) + data [i * m + j - 1];
 				}
 			}
@@ -610,6 +612,7 @@ namespace two_d
 		n (i_solver.grid_ptr (0)->get_n ()), 
 		ldn (i_solver.grid_ptr (0)->get_ld ()), 
 		m (i_solver.grid_ptr (1)->get_n ()),
+		pos_n (&((*(i_solver.grid_ptr (0))) [0])),
 		pos_m (&((*(i_solver.grid_ptr (1))) [0])),
 		data_x (i_data_x),
 		data_z (i_solver.data_ptr ()),
@@ -677,7 +680,7 @@ namespace two_d
 			if (id != 0) {
 				sub_ptr [nbegin] = 1.0 / (pos_m [nbegin + 1] - ex_pos_0);
 				sup_ptr [nbegin] = -1.0 / (pos_m [nbegin + 1] - ex_pos_0);
-				diag_ptr [nbegin] = 1.0e-8;
+				diag_ptr [nbegin] = 0.0;
 			} else {
 				sup_ptr [nbegin] = 0.0;
 				diag_ptr [nbegin] = 1.0;
@@ -686,12 +689,12 @@ namespace two_d
 			for (int j = nbegin + 1; j < m - 1 - excess_n; ++j) {
 				sub_ptr [j] = 1.0 / (pos_m [j + 1] - pos_m [j - 1]);
 				sup_ptr [j] = -1.0 / (pos_m [j + 1] - pos_m [j - 1]);
-				diag_ptr [j] = 1.0e-8;
+				diag_ptr [j] = 0.0;
 			}
 			if (id != np - 1) {
 				sub_ptr [m - 1 - excess_n] = 1.0 / (ex_pos_m - pos_m [m - 2 - excess_n]);
 				sup_ptr [m - 1 - excess_n] = -1.0 / (ex_pos_m - pos_m [m - 2 - excess_n]);
-				diag_ptr [m - 1 - excess_n] = 1.0e-8;
+				diag_ptr [m - 1 - excess_n] = 0.0;
 			} else {
 				sup_ptr [m - 1 - excess_n] = 0.0;
 				diag_ptr [m - 1 - excess_n] = 1.0;
@@ -715,9 +718,17 @@ namespace two_d
 			if (id != np - 1) {
 				mm -= excess_n + 1;
 			}
+			datatype scalar = 2.0 * acos (-1.0) / (pos_n [n - 1] - pos_n [0]);
+			
 			
 			if (data_x) {
 				utils::matrix_copy (mm, ldn, data_x, data_z + nbegin);
+				for (int i = 2; i < ldn; i += 2) {
+					for (int j = 0; j < m; ++j) {
+						data_z [(i + 1) * m + j] = data_x [i * m + j] * scalar * (i / 2);
+						data_z [i * m + j] = -data_x [(i + 1) * m + j] * scalar * (i / 2);
+					}
+				}
 			}
 			
 			if (id == 0) {
@@ -730,8 +741,26 @@ namespace two_d
 			
 			int info;
 			
+			for (int j = 0; j < m; ++j) {
+				for (int i = 0; i < ldn; ++i) {
+					if (std::isnan (data_z [i * m + j])) {
+						FATAL ("Nan pre vertical divergence solver." << i << " " << j);
+						throw exceptions::nan ();
+					}
+				}
+			}
+			
+			DEBUG ("Solving" << &sub [nbegin] << &diag [nbegin] << &sup [nbegin] << &supsup [nbegin] << &ipiv [nbegin]);
 			utils::p_block_tridiag_solve (id, np, mm, &sub [nbegin], &diag [nbegin], &sup [nbegin], &supsup [nbegin], &ipiv [nbegin], data_z + nbegin, &x [0], &xipiv [0], &info, 1, m, m, ldn);
 			
+			for (int j = 0; j < m; ++j) {
+				for (int i = 0; i < ldn; ++i) {
+					if (std::isnan (data_z [i * m + j])) {
+						FATAL ("Nan post vertical divergence solver.");
+						throw exceptions::nan ();
+					}
+				}
+			}
 			for (int i = 0; i < ldn; ++i) {
 				for (int j = nbegin - 1; j >= 0; --j) {
 					data_z [i * m + j] = (data_z [i * m + j + 2] - data_z [i * m + j + 1]) / (pos_m [j + 2] - pos_m [j + 1]) * (pos_m [j] - pos_m [j + 1]) + data_z [i * m + j + 1];
@@ -744,7 +773,7 @@ namespace two_d
 			for (int j = 0; j < m; ++j) {
 				for (int i = 0; i < ldn; ++i) {
 					if (std::isnan (data_z [i * m + j])) {
-						FATAL ("Nan in laplace solver.");
+						FATAL ("Nan in vertical divergence solver.");
 						throw exceptions::nan ();
 					}
 				}

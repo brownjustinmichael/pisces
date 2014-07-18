@@ -208,6 +208,8 @@ namespace utils
 	void p_block_tridiag_factorize (int id, int np, int n, double* sub, double *diag, double *sup, double *supsup, int* ipiv, double *x, int *xipiv, int *info, int nrhs = 1, int lda = -1, int inrhs = 1);
 	
 	void p_block_tridiag_solve (int id, int np, int n, double* sub, double *diag, double *sup, double *supsup, int* ipiv, double* b, double *x, int *xipiv, int *info, int nrhs = 1, int lda = -1, int ldb = -1, int inrhs = 1);
+
+	void p_block_direct_tridiag_solve (int id, int np, int n, double* sub, double *diag, double *sup, double *supsup, double* b, int nrhs = 1, int ldb = -1);
 } /* utils */
 
 #endif /* end of include guard: BLOCK_SOLVER_HPP_8C3ZNSDI */

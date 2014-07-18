@@ -315,6 +315,17 @@ namespace utils
 	void p_block_tridiag_solve (int id, int np, int n, double* sub, double *diag, double *sup, double *supsup, int* ipiv, double* b, double *x, int *xipiv, int *info, int nrhs, int lda, int ldb, int inrhs) {
 		int ntop, nbot;
 		std::vector <double> y (2 * np * nrhs * inrhs, 0.0);
+		
+		for (int i = 0; i < inrhs; ++i) {
+			for (int j = 0; j < nrhs; ++j) {
+				for (int k = 0; k < n; ++k) {
+					if (b [k + j * ldb + k * nrhs * ldb] != b [k + j * ldb + k * nrhs * ldb]) {
+						DEBUG ("Found nan at beginning");
+						throw 0;
+					}
+				}
+			}
+		}
 		if (id == 0) {
 			ntop = 0;
 		} else {
@@ -345,9 +356,31 @@ namespace utils
 			add_scaled (nbot * nrhs, 1.0, b + ntop + n + j * nrhs * ldb, &y [1 + j * nrhs * ldy], ldb, ldy);
 		}
 		
+		for (int i = 0; i < inrhs; ++i) {
+			for (int j = 0; j < nrhs; ++j) {
+				for (int k = 0; k < n; ++k) {
+					if (b [k + j * ldb + k * nrhs * ldb] != b [k + j * ldb + k * nrhs * ldb]) {
+						DEBUG ("Found nan after scale");
+						throw 0;
+					}
+				}
+			}
+		}
+		
 		for (int i = 0; i < nrhs; ++i) {
 			// tridiagonal_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, b + ntop + i * ldb, info, inrhs, ldb * nrhs);
 			tridiagonal_direct_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, b + ntop + i * ldb, inrhs, ldb * nrhs);
+		}
+		
+		for (int i = 0; i < inrhs; ++i) {
+			for (int j = 0; j < nrhs; ++j) {
+				for (int k = 0; k < n; ++k) {
+					if (b [k + j * ldb + k * nrhs * ldb] != b [k + j * ldb + k * nrhs * ldb]) {
+						DEBUG ("Found nan after first solve");
+						throw 0;
+					}
+				}
+			}
 		}
 		
 #ifdef _MPI
@@ -362,6 +395,17 @@ namespace utils
 			for (int j = 0; j < inrhs; ++j) {
 				for (int i = 0; i < nrhs; ++i) {
 					y [1 + i * ldy + j * nrhs * ldy] -= sub [n + ntop + nbot - 1 + i * lda] * b [n + ntop + nbot - 2 + i * ldb + j * nrhs * ldb];
+				}
+			}
+		}
+		
+		for (int i = 0; i < inrhs; ++i) {
+			for (int j = 0; j < nrhs; ++j) {
+				for (int k = 0; k < n; ++k) {
+					if (b [k + j * ldb + k * nrhs * ldb] != b [k + j * ldb + k * nrhs * ldb]) {
+						DEBUG ("Found nan before gather");
+						throw 0;
+					}
 				}
 			}
 		}
@@ -408,7 +452,18 @@ namespace utils
 			MPI::COMM_WORLD.Scatter (NULL, 2 * nrhs * inrhs, MPI::DOUBLE, &y [0], 2 * nrhs * inrhs, MPI::DOUBLE, 0);
 		}
 		ldy = 2;
-				
+		
+		for (int i = 0; i < inrhs; ++i) {
+			for (int j = 0; j < nrhs; ++j) {
+				for (int k = 0; k < n; ++k) {
+					if (b [k + j * ldb + k * nrhs * ldb] != b [k + j * ldb + k * nrhs * ldb]) {
+						DEBUG ("Found nan after scatter");
+						throw 0;
+					}
+				}
+			}
+		}
+		
 		if (id != 0) {
 			copy (nrhs * inrhs, &y [0], b, ldy, ldb);
 			for (int k = 0; k < inrhs; ++k) {
@@ -429,6 +484,91 @@ namespace utils
 				}
 			}
 		}
+		
+		for (int i = 0; i < inrhs; ++i) {
+			for (int j = 0; j < nrhs; ++j) {
+				for (int k = 0; k < n; ++k) {
+					if (b [k + j * ldb + k * nrhs * ldb] != b [k + j * ldb + k * nrhs * ldb]) {
+						DEBUG ("Found nan at end");
+						throw 0;
+					}
+				}
+			}
+		}
 #endif
+	}
+	
+	void p_block_direct_tridiag_solve (int id, int np, int n, double* sub, double *diag, double *sup, double *supsup, double* b, int nrhs, int ldb) {
+		std::vector <double> y (nrhs + 1, 0.0);
+		
+		int ntop = 0, nbot = 0;
+		if (id != 0) {
+			ntop += 1;
+		}
+		if (id != np - 1) {
+			nbot += 1;
+		}
+		
+		if (ldb == -1) {
+			ldb = n + ntop + nbot;
+		}
+		
+		copy (n + ntop + nbot, sup, supsup);
+		if (id > 0) {
+			MPI::COMM_WORLD.Recv (&y [0], nrhs + 1, MPI::DOUBLE, id - 1, 0);
+			DEBUG ("Recved " << y [0]);
+			supsup [0] /= diag [0] - sub [0] * y [nrhs];
+			for (int i = 0; i < nrhs; ++i) {
+				b [i * ldb] = (b [i * ldb] - sub [0] * y [i]) / (diag [0] - sub [0] * y [nrhs]);
+			}
+		} else {
+			if (diag [0] == 0.0) {
+				FATAL ("Algorithm can't handle 0 in first diagonal element.");
+				throw 0;
+			}
+			supsup [0] /= diag [0];
+			for (int i = 0; i < nrhs; ++i) {
+				b [i * ldb] /= diag [0];
+			}
+		}
+		
+		for (int j = 1; j < n + ntop + nbot; ++j) {
+			supsup [j] /= diag [j] - sub [j] * supsup [j - 1];
+			for (int i = 0; i < nrhs; ++i) {
+				b [i * ldb + j] = (b [i * ldb + j] - sub [j] * b [i * ldb + j - 1]) / (diag [j] - sub [j] * supsup [j - 1]);
+			}
+			DEBUG ("VALUE " << b [j]);
+		}
+		
+		if (id < np - 1) {
+			for (int i = 0; i < nrhs; ++i) {
+				y [i] = b [i * ldb + n + ntop + nbot - 1];
+			}
+			y [nrhs] = supsup [n + ntop + nbot - 1];
+			
+			MPI::COMM_WORLD.Send (&y [0], nrhs + 1, MPI::DOUBLE, id + 1, 0);
+			
+			MPI::COMM_WORLD.Recv (&y [0], nrhs, MPI::DOUBLE, id + 1, 1);
+			
+			DEBUG ("RECV " << y [0]);
+			for (int i = 0; i < nrhs; ++i) {
+				b [i * ldb + n + ntop + nbot - 1] -= supsup [n + ntop + nbot - 1] * y [i];
+			}
+		}
+		
+		for (int j = n + ntop + nbot - 2; j >= 0; --j) {
+			for (int i = 0; i < nrhs; ++i) {
+				b [i * ldb + j] -= supsup [j] * b [i * ldb + j + 1];
+			}
+			DEBUG ("VALUE " << b [j]);
+		}
+		
+		if (id > 0) {
+			for (int i = 0; i < nrhs; ++i) {
+				y [i] = b [i * ldb];
+			}
+			
+			MPI::COMM_WORLD.Send (&y [0], nrhs, MPI::DOUBLE, id - 1, 1);
+		}
 	}
 } /* utils */
