@@ -299,6 +299,11 @@ namespace utils
 		
 		copy (n, du, du2);
 		
+		if (d [0] == 0.0) {
+			FATAL ("Algorithm can't handle 0 in first element of diagonal.");
+			throw 0;
+		}
+		
 		du2 [0] /= d [0];
 		for (int i = 0; i < nrhs; ++i) {
 			b [i * ldb] /= d [0];
@@ -307,6 +312,10 @@ namespace utils
 			du2 [j] /= d [j] - dl [j] * du2 [j - 1];
 			for (int i = 0; i < nrhs; ++i) {
 				b [i * ldb + j] = (b [i * ldb + j] - dl [j] * b [i * ldb + j - 1]) / (d [j] - dl [j] * du2 [j - 1]);
+				if (b [i * ldb + j] != b [i * ldb + j]) {
+					DEBUG ("FOUND NAN " << b [i * ldb + j] << " " << dl [j] << " " << b [i * ldb + j - 1] << " " << d [j] << " " << du2 [j - 1]);
+					throw 0;
+				}
 			}
 		}
 		
@@ -329,6 +338,10 @@ namespace utils
 		dl -= 1;
 		copy (n, du, du2);
 		
+		if (d [0] == 0.0) {
+			FATAL ("Algorithm can't handle 0 in first element of diagonal.");
+			throw 0;
+		}
 		du2 [0] /= d [0];
 		for (int i = 0; i < nrhs; ++i) {
 			b [i * ldb] /= d [0];
@@ -343,6 +356,10 @@ namespace utils
 		for (int j = n - 2; j >= 0; ++j) {
 			for (int i = 0; i < nrhs; ++i) {
 				b [i * ldb + j] -= du2 [j] * b [i * ldb + j + 1];
+				if (b [i * ldb + j] != b [i * ldb + j]) {
+					FATAL ("FOUND NAN IN TRIDIAG DIRECT SOLVE");
+					throw 0;
+				}
 			}
 		}
 	}
