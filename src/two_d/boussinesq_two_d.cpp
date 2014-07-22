@@ -46,13 +46,15 @@ namespace two_d
 				std::shared_ptr <bases::boundary <datatype>> boundary_0, boundary_n;
 				if (messenger_ptr->get_id () > 0) {
 					boundary_0 = std::shared_ptr <bases::boundary <datatype>> (new communicating_boundary <datatype> (messenger_ptr, grids [0]->get_ld (), m, grids [1]->get_excess_0 (), &((*grids [1]) [0]), 0, false));
+					// boundary_0 = std::shared_ptr <bases::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], 0.0, false));
 				} else {
-					boundary_0 = std::shared_ptr <bases::boundary <datatype>> (new fixed_boundary <datatype> (grids [0]->get_n (), grids [0]->get_ld (), grids [1]->get_n (), 0.0, false));
+					boundary_0 = std::shared_ptr <bases::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], 0.0, false));
 				}
 				if (messenger_ptr->get_id () + 1 < messenger_ptr->get_np ()) {
 					boundary_n = std::shared_ptr <bases::boundary <datatype>> (new communicating_boundary <datatype> (messenger_ptr, grids [0]->get_ld (), m, grids [1]->get_excess_n (), &((*grids [1]) [0]), m - grids [1]->get_excess_n (), true));
+					// boundary_n = std::shared_ptr <bases::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], 0.0, true));
 				} else {
-					boundary_n = std::shared_ptr <bases::boundary <datatype>> (new fixed_boundary <datatype> (grids [0]->get_n (), grids [0]->get_ld (), grids [1]->get_n (), 0.0, true));
+					boundary_n = std::shared_ptr <bases::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], 0.0, true));
 				}
 				
 				/*
@@ -63,17 +65,17 @@ namespace two_d
 				// solvers [x_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new divergence_solver <datatype> (*solvers [x_velocity], ptr (z_velocity))));
 
 				solvers [x_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new collocation_solver <datatype> (*solvers [x_velocity], messenger_ptr, timestep, boundary_0, boundary_n)), z_solver);
-				// solvers [x_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new fourier_solver <datatype> (*solvers [x_velocity], timestep, boundary_0, boundary_n)), x_solver);
-				solvers [x_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new horizontal_divergence_solver <datatype> (*solvers [x_velocity], ptr (z_velocity))), x_solver);
+				solvers [x_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new fourier_solver <datatype> (*solvers [x_velocity], timestep, boundary_0, boundary_n)), x_solver);
+				// solvers [x_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new horizontal_divergence_solver <datatype> (*solvers [x_velocity], ptr (z_velocity))), x_solver);
 				solvers [x_velocity]->get_solver (x_solver)->add_dependency (z_velocity);
-
+			
 				solvers [x_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new vertical_diffusion <datatype> (*solvers [x_velocity], i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha"))), pre_plan);
 				solvers [x_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new horizontal_diffusion <datatype> (*solvers [x_velocity], i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha"))), mid_plan);
 				solvers [x_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new advection <datatype> (*solvers [x_velocity], i_params.get <datatype> ("velocity.advection"), ptr (x_velocity), ptr (z_velocity))), post_plan);
 
-				// solvers [z_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new collocation_solver <datatype> (*solvers [z_velocity], messenger_ptr, timestep, boundary_0, boundary_n)),z_solver);
+				solvers [z_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new collocation_solver <datatype> (*solvers [z_velocity], messenger_ptr, timestep, boundary_0, boundary_n)),z_solver);
 				solvers [z_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new fourier_solver <datatype> (*solvers [z_velocity], timestep, boundary_0, boundary_n)), x_solver);
-				solvers [z_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new vertical_divergence_solver <datatype> (*solvers [z_velocity], messenger_ptr, ptr (x_velocity))), z_solver);
+				// solvers [z_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new vertical_divergence_solver <datatype> (*solvers [z_velocity], messenger_ptr, ptr (x_velocity))), z_solver);
 				solvers [z_velocity]->get_solver (z_solver)->add_dependency (x_velocity);
 
 				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new vertical_diffusion <datatype> (*solvers [z_velocity], i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha"))), pre_plan);

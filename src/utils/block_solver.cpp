@@ -516,7 +516,6 @@ namespace utils
 		copy (n + ntop + nbot, sup, supsup);
 		if (id > 0) {
 			MPI::COMM_WORLD.Recv (&y [0], nrhs + 1, MPI::DOUBLE, id - 1, 0);
-			DEBUG ("Recved " << y [0]);
 			supsup [0] /= diag [0] - sub [0] * y [nrhs];
 			for (int i = 0; i < nrhs; ++i) {
 				b [i * ldb] = (b [i * ldb] - sub [0] * y [i]) / (diag [0] - sub [0] * y [nrhs]);
@@ -536,8 +535,11 @@ namespace utils
 			supsup [j] /= diag [j] - sub [j] * supsup [j - 1];
 			for (int i = 0; i < nrhs; ++i) {
 				b [i * ldb + j] = (b [i * ldb + j] - sub [j] * b [i * ldb + j - 1]) / (diag [j] - sub [j] * supsup [j - 1]);
+				if (b [i * ldb + j] != b [i * ldb + j]) {
+					DEBUG ("Nan at " << i << " " << j << " " << sub [j] << " " << b [i * ldb + j - 1] << " " << diag [j] << " " << supsup [j - 1]);
+					throw 0;
+				}
 			}
-			DEBUG ("VALUE " << b [j]);
 		}
 		
 		if (id < np - 1) {
@@ -550,7 +552,6 @@ namespace utils
 			
 			MPI::COMM_WORLD.Recv (&y [0], nrhs, MPI::DOUBLE, id + 1, 1);
 			
-			DEBUG ("RECV " << y [0]);
 			for (int i = 0; i < nrhs; ++i) {
 				b [i * ldb + n + ntop + nbot - 1] -= supsup [n + ntop + nbot - 1] * y [i];
 			}
@@ -560,7 +561,6 @@ namespace utils
 			for (int i = 0; i < nrhs; ++i) {
 				b [i * ldb + j] -= supsup [j] * b [i * ldb + j + 1];
 			}
-			DEBUG ("VALUE " << b [j]);
 		}
 		
 		if (id > 0) {

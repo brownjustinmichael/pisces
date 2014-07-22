@@ -22,9 +22,10 @@ namespace two_d
 		int ldn, m;
 		
 	public:
-		fixed_boundary (int n, int i_ldn, int i_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (n)), top (i_top) {
-			ldn = i_ldn;
-			m = i_m;
+		fixed_boundary (bases::grid <datatype> *i_grid_n, bases::grid <datatype> *i_grid_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n->get_n ())), top (i_top) {
+			DEBUG ("Fixed boundary initialized");
+			ldn = i_grid_n->get_ld ();
+			m = i_grid_m->get_n ();
 		}
 		
 		virtual ~fixed_boundary () {}
@@ -36,8 +37,9 @@ namespace two_d
 			}
 		}
 		
-		virtual void calculate_matrix (datatype *matrix_in, datatype *interpolate_matrix, datatype *matrix_out, int lda) {
+		virtual void calculate_matrix (datatype timestep, datatype *default_matrix, datatype *matrix_in, datatype *interpolate_matrix, datatype *matrix_out, int lda) {
 			utils::scale (m, 0.0, matrix_out, lda);
+			utils::add_scaled (m, 1.0, default_matrix, matrix_out, m, lda);
 		}
 	};
 	
@@ -62,7 +64,7 @@ namespace two_d
 			/*
 				TODO Take grid as input
 			*/
-			
+			DEBUG ("Boundary Initialized");
 			alpha = 0.5;
 			positions = i_positions;
 			n_boundary_in = i_n_boundary_in;
@@ -123,12 +125,16 @@ namespace two_d
 			// Copy the internal boundary row to the external boundary row
 			utils::copy (ldn, data_temp, data_temp + (top ? 1 : -1) * (1 + n_boundary_out + n_boundary_in), lda, lda);
 			// Add the original data to the overlapping boundary
-			utils::interpolate (n_boundary_out, ldn, m, 1.0, 1.0, positions, interpolate_original, boundary_positions, data_temp + (top ? 1 + n_boundary_in : -n_boundary_in - n_boundary_out), m, lda);
+			if (interpolate_original) {
+				utils::interpolate (n_boundary_out, ldn, m, 1.0, 1.0, positions, interpolate_original, boundary_positions, data_temp + (top ? 1 + n_boundary_in : -n_boundary_in - n_boundary_out), m, lda);
+			}
 			// Add the original data to the internal boundary row
-			utils::add_scaled (ldn, 1.0, data, data_temp, m, lda);
+			if (data) {
+				utils::add_scaled (ldn, 1.0, data, data_temp, m, lda);
+			}
 		}
 		
-		virtual void calculate_matrix (datatype *matrix_in, datatype *interpolate_matrix, datatype *matrix_out, int lda) {
+		virtual void calculate_matrix (datatype timestep, datatype *default_matrix, datatype *matrix_in, datatype *interpolate_matrix, datatype *matrix_out, int lda) {
 			// Zero everything but the internal boundary row
 			utils::matrix_scale (1 + n_boundary_out, m, 0.0, matrix_out + (top ? 1 : -1 - n_boundary_out - n_boundary_in), lda);
 			// Setting the external boundary matrix row
@@ -137,6 +143,10 @@ namespace two_d
 			utils::interpolate (n_boundary_out, m, m, 1.0, 1.0, positions, interpolate_matrix, boundary_positions, matrix_out + (top ? 1 + n_boundary_in : -n_boundary_in - n_boundary_out), m, lda);
 			// Setting the internal boundary matrix row
 			utils::matrix_add_scaled (1, m, alpha, matrix_in, matrix_out, m, lda);
+			DEBUG ("FIRST POINT " << matrix_out + (top ? 0 : -2 - n_boundary_out - n_boundary_in));
+			utils::matrix_scale (1 + n_boundary_out + n_boundary_in + 1, m, timestep, matrix_out + (top ? 0 : -2 - n_boundary_out - n_boundary_in), lda);
+			utils::matrix_add_scaled (1 + n_boundary_in, m, 1.0, default_matrix + (top ? 0 : -n_boundary_in), matrix_out + (top ? 0 : -n_boundary_in), m, lda);
+			DEBUG ("Calculated.");
 		}
 	};
 } /* two_d */

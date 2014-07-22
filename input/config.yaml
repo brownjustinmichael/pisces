@@ -6,10 +6,10 @@ grid:
     nrhs: 4096
     nb: 1
     x:
-        points: 16
+        points: 256
         width: 100.0
     z:
-        points: 16
+        points: 256
         width: 100.0
     rezone:
         check_every: -1
@@ -49,11 +49,11 @@ input:
 output:
     file: output_%02i
     transform_file: output_t_%02i
-    every: 1
+    every: 10
     merge_file: merge_%04i
     full: true
 parallel:
     maxthreads: 4
     transform:
-        threads: 4
+        threads: 1
         subthreads: 1
