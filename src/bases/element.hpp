@@ -367,6 +367,7 @@ namespace bases
 			for (iterator iter = begin (); iter != end (); iter++) {
 				// TRACE ("Solving " << *iter);
 				// solvers [*iter]->solve ();
+				
 				solve_recursive (*iter);
 			}
 			
