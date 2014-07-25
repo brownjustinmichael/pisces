@@ -150,6 +150,7 @@ namespace two_d
 		template <class datatype>
 		void collocation_solver <datatype>::execute () {
 			int info;
+			std::stringstream debug;
 			TRACE ("Executing solve...");
 
 			/*
@@ -171,7 +172,15 @@ namespace two_d
 
 			utils::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
 
-			TRACE ("Solving in m direction..." << &factorized_matrix [0] << " " << &data_temp [0] << " " << &boundary_matrix [0]);
+			DEBUG ("Solving in m direction..." << &factorized_matrix [0] << " " << &data_temp [0] << " " << &boundary_matrix [0]);
+
+			for (int j = 0; j < lda; ++j) {
+				for (int i = 0; i < ldn; ++i) {
+					debug << data_temp [i * lda + j] << " ";
+				}
+				DEBUG ("RHS " << debug.str ());
+				debug.str ("");
+			}
 
 			utils::p_block_matrix_solve (messenger_ptr->get_id (), messenger_ptr->get_np (), inner_m, overlap_0, overlap_n, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, ldn, lda, sqrt ((int) boundary_matrix.size ()), lda);
 
@@ -265,6 +274,8 @@ namespace two_d
 			/*
 				TODO Add timestep check here?
 			*/
+			
+			DEBUG ("Solving in n direction");
 			
 			utils::scale ((ldn) * lda, 0.0, &data_temp [0]);
 			
@@ -769,164 +780,190 @@ namespace two_d
 		//
 		// template class vertical_divergence_solver <double>;
 		
-		// template <class datatype>
-		// vertical_divergence_solver <datatype>::vertical_divergence_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) :
-		// bases::solver <datatype> (i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), data (i_data), messenger_ptr (i_messenger_ptr), timestep (i_timestep), positions (&(i_grid_m [0])), excess_0 (i_grid_m.get_excess_0 ()), excess_n (i_grid_m.get_excess_n ()), default_matrix (i_grid_m.get_data (0)) {
-		// 	TRACE ("Building solver...");
-		// 	matrix.resize (m * m, 0.0);
-		// 	rhs_ptr = i_rhs;
-		//
-		// 	boundary_0 = i_boundary_0;
-		// 	boundary_n = i_boundary_n;
-		//
-		// 	ex_overlap_0 = boundary_0->get_ex_overlap ();
-		// 	overlap_0 = boundary_0->get_overlap ();
-		// 	ex_overlap_n = boundary_n->get_ex_overlap ();
-		// 	overlap_n = boundary_n->get_overlap ();
-		// 	lda = m + ex_overlap_n + ex_overlap_0;
-		// 	inner_m = lda - overlap_0 - overlap_n;
-		// 	int ns0 = overlap_0;
-		//
-		// 	if (messenger_ptr->get_id () == 0) {
-		// 		ns.resize (messenger_ptr->get_np ());
-		// 		messenger_ptr->template gather <int> (1, &ns0, &ns [0]);
-		// 		int ntot = 0;
-		// 		for (int i = 0; i < messenger_ptr->get_np (); ++i) {
-		// 			ntot += ns [i];
-		// 		}
-		// 		boundary_matrix.resize (ntot * ntot);
-		// 		bipiv.resize (ntot);
-		// 	} else {
-		// 		messenger_ptr->template gather <int> (1, &ns0, NULL);
-		// 		boundary_matrix.resize ((overlap_0 + overlap_n) * (overlap_0 + overlap_n));
-		// 	}
-		//
-		// 	factorized_matrix.resize (lda * lda, 0.0);
-		// 	ipiv.resize (m); // TODO Should be n - ntop - nbot - excess_0 - excess_n
-		// 	data_temp.resize (lda * ldn);
-		//
-		// 	transform = std::shared_ptr <bases::plan <datatype> > (new fourier::vertical_transform <datatype> (n, m, rhs_ptr, &data_temp [ex_overlap_0], inverse, i_element_flags, &flags));
-		// 	TRACE ("Solver built.");
-		// }
-		//
-		// template <class datatype>
-		// vertical_divergence_solver <datatype>::vertical_divergence_solver (bases::master_solver <datatype> &i_solver, utils::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n) :
-		// bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags), n (i_solver.grid_ptr (0)->get_n ()),  ldn (i_solver.grid_ptr (0)->get_ld ()),  m (i_solver.grid_ptr (1)->get_n ()), data (i_solver.data_ptr ()), messenger_ptr (i_messenger_ptr),  timestep (i_timestep),  positions (&((*(i_solver.grid_ptr (1))) [0])), excess_0 (i_solver.grid_ptr (1)->get_excess_0 ()),  excess_n (i_solver.grid_ptr (1)->get_excess_n ()), default_matrix (i_solver.grid_ptr (1)->get_data (1)) {
-		// 	TRACE ("Building solver...");
-		// 	matrix.resize (m * m);
-		// 	rhs_ptr = i_solver.rhs_ptr (spectral_rhs);
-		//
-		// 	boundary_0 = i_boundary_0;
-		// 	boundary_n = i_boundary_n;
-		//
-		// 	ex_overlap_0 = boundary_0->get_ex_overlap ();
-		// 	overlap_0 = boundary_0->get_overlap ();
-		// 	ex_overlap_n = boundary_n->get_ex_overlap ();
-		// 	overlap_n = boundary_n->get_overlap ();
-		// 	lda = m + ex_overlap_n + ex_overlap_0;
-		// 	inner_m = lda - overlap_0 - overlap_n;
-		//
-		// 	int ns0 = overlap_0;
-		//
-		// 	if (messenger_ptr->get_id () == 0) {
-		// 		ns.resize (messenger_ptr->get_np ());
-		// 		messenger_ptr->template gather <int> (1, &ns0, &ns [0]);
-		// 		int ntot = 0;
-		// 		for (int i = 0; i < messenger_ptr->get_np (); ++i) {
-		// 			ntot += ns [i];
-		// 		}
-		// 		boundary_matrix.resize (ntot * ntot);
-		// 		bipiv.resize (ntot);
-		// 	} else {
-		// 		messenger_ptr->template gather <int> (1, &ns0, NULL);
-		// 		boundary_matrix.resize ((overlap_0 + overlap_n) * (overlap_0 + overlap_n));
-		// 	}
-		//
-		// 	factorized_matrix.resize (lda * lda, 0.0);
-		// 	ipiv.resize (m); // TODO Should be n - ntop - nbot - excess_0 - excess_n
-		// 	data_temp.resize (lda * ldn);
-		//
-		// 	transform = std::shared_ptr <bases::plan <datatype> > (new fourier::vertical_transform <datatype> (n, m, rhs_ptr, &data_temp [ex_overlap_0], inverse, i_solver.element_flags, &flags));
-		//
-		// 	TRACE ("Solver built.");
-		// }
-		//
-		// template <class datatype>
-		// void vertical_divergence_solver <datatype>::factorize () {
-		// 	int info;
-		//
-		// 	TRACE ("Factorizing...");
-		//
-		// 	utils::matrix_copy (m, m, &matrix [0], &factorized_matrix [(ex_overlap_0) * (lda + 1)], m, lda);
-		//
-		// 	/*
-		// 		TODO Should we do the matrix copy before the edges?
-		// 	*/
-		//
-		// 	if (boundary_0) {
-		// 		boundary_0->calculate_matrix (timestep, default_matrix + excess_0, &matrix [excess_0], &matrix [0], &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0], lda);
-		// 	}
-		// 	if (boundary_n) {
-		// 		boundary_n->calculate_matrix (timestep, default_matrix + m - 1 - excess_n, &matrix [m - 1 - excess_n], &matrix [0], &factorized_matrix [(ex_overlap_0) * (lda + 1) + m - 1 - excess_n], lda);
-		// 	}
-		//
-		// 	utils::matrix_scale (lda - 2 - excess_0 - ex_overlap_0 - excess_n - ex_overlap_n, lda, timestep, &factorized_matrix [(ex_overlap_0) * (lda + 1) + 1 + excess_0], lda);
-		//
-		// 	utils::matrix_add_scaled (m - 2 - excess_0 - excess_n, m, 1.0, default_matrix + excess_0 + 1, &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0 + 1], m, lda);
-		//
-		// 	utils::p_block_matrix_factorize (messenger_ptr->get_id (), messenger_ptr->get_np (), inner_m, overlap_0, overlap_n, &factorized_matrix [0], &ipiv [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, lda, sqrt ((int) boundary_matrix.size ()));
-		//
-		// 	TRACE ("Done.");
-		// }
-		//
-		// template <class datatype>
-		// void vertical_divergence_solver <datatype>::execute () {
-		// 	int info;
-		// 	TRACE ("Executing solve...");
-		//
-		// 	/*
-		// 		TODO Add timestep check here?
-		// 	*/
-		//
-		// 	utils::scale ((ldn) * lda, 0.0, &data_temp [0]);
-		//
-		// 	transform->execute ();
-		//
-		// 	if (boundary_0) {
-		// 		boundary_0->calculate_rhs (NULL, NULL, &data_temp [0], &data_temp [ex_overlap_0 + excess_0], lda);
-		// 	}
-		// 	if (boundary_n) {
-		// 		boundary_n->calculate_rhs (NULL, NULL, &data_temp [0], &data_temp [lda - 1 - excess_n - ex_overlap_n], lda);
-		// 	}
-		//
-		// 	TRACE ("Solving in m direction...");
-		//
-		// 	utils::p_block_matrix_solve (messenger_ptr->get_id (), messenger_ptr->get_np (), inner_m, overlap_0, overlap_n, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, ldn, lda, sqrt ((int) boundary_matrix.size ()), lda);
-		//
-		// 	TRACE ("Matrix solve complete.");
-		//
-		// 	for (int i = 0; i < ldn; ++i) {
-		// 		for (int j = 0; j < m; ++j) {
-		// 			if (std::isnan (data_temp [ex_overlap_0 + i * m + j])) {
-		// 				FATAL ("Found nan.");
-		// 				for (int k = 0; k < m; ++k) {
-		// 					printf ("%f ", data_temp [ex_overlap_0 + k * m + j]);
-		// 				}
-		// 				printf ("\n");
-		// 				throw exceptions::nan ();
-		// 			}
-		// 		}
-		// 	}
-		//
-		// 	TRACE ("Updating...");
-		// 	utils::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data, lda, m);
-		//
-		// 	*component_flags |= transformed_vertical;
-		//
-		// 	TRACE ("Solve complete.")
-		// 	TRACE ("Execution complete.");
-		// }
-		//
-		// template class vertical_divergence_solver <double>;
+		template <class datatype>
+		vertical_divergence_solver <datatype>::vertical_divergence_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) :
+		bases::solver <datatype> (i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), data (i_data), messenger_ptr (i_messenger_ptr), positions (&(i_grid_m [0])), excess_0 (i_grid_m.get_excess_0 ()), excess_n (i_grid_m.get_excess_n ()), default_matrix (i_grid_m.get_data (0)) {
+			TRACE ("Building solver...");
+			matrix.resize (m * m, 0.0);
+			rhs_ptr = i_rhs;
+
+			boundary_0 = i_boundary_0;
+			boundary_n = i_boundary_n;
+
+			ex_overlap_0 = boundary_0->get_ex_overlap ();
+			overlap_0 = boundary_0->get_overlap ();
+			ex_overlap_n = boundary_n->get_ex_overlap ();
+			overlap_n = boundary_n->get_overlap ();
+			lda = m + ex_overlap_n + ex_overlap_0;
+			inner_m = lda - overlap_0 - overlap_n;
+			int ns0 = overlap_0;
+
+			if (messenger_ptr->get_id () == 0) {
+				ns.resize (messenger_ptr->get_np ());
+				messenger_ptr->template gather <int> (1, &ns0, &ns [0]);
+				int ntot = 0;
+				for (int i = 0; i < messenger_ptr->get_np (); ++i) {
+					ntot += ns [i];
+				}
+				boundary_matrix.resize (ntot * ntot);
+				bipiv.resize (ntot);
+			} else {
+				messenger_ptr->template gather <int> (1, &ns0, NULL);
+				boundary_matrix.resize ((overlap_0 + overlap_n) * (overlap_0 + overlap_n));
+			}
+
+			factorized_matrix.resize (lda * lda, 0.0);
+			ipiv.resize (m); // TODO Should be n - ntop - nbot - excess_0 - excess_n
+			data_temp.resize (lda * ldn);
+
+			transform = std::shared_ptr <bases::plan <datatype> > (new fourier::vertical_transform <datatype> (n, m, rhs_ptr, &data_temp [ex_overlap_0], inverse, i_element_flags, &flags));
+			TRACE ("Solver built.");
+		}
+
+		template <class datatype>
+		vertical_divergence_solver <datatype>::vertical_divergence_solver (bases::master_solver <datatype> &i_solver, utils::messenger* i_messenger_ptr, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype * i_rhs) :
+		bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags), n (i_solver.grid_ptr (0)->get_n ()),  ldn (i_solver.grid_ptr (0)->get_ld ()),  m (i_solver.grid_ptr (1)->get_n ()), data (i_solver.data_ptr ()), messenger_ptr (i_messenger_ptr), positions (&((*(i_solver.grid_ptr (1))) [0])), excess_0 (i_solver.grid_ptr (1)->get_excess_0 ()),  excess_n (i_solver.grid_ptr (1)->get_excess_n ()), default_matrix (i_solver.grid_ptr (1)->get_data (0)), deriv_matrix (i_solver.grid_ptr (1)->get_data (1)) {
+			TRACE ("Building solver...");
+			matrix.resize (m * m);
+			rhs_ptr = i_rhs;
+
+			boundary_0 = i_boundary_0;
+			boundary_n = i_boundary_n;
+
+			ex_overlap_0 = boundary_0->get_ex_overlap ();
+			overlap_0 = boundary_0->get_overlap ();
+			ex_overlap_n = boundary_n->get_ex_overlap ();
+			overlap_n = boundary_n->get_overlap ();
+			lda = m + ex_overlap_n + ex_overlap_0;
+			inner_m = lda - overlap_0 - overlap_n;
+
+			int ns0 = overlap_0;
+
+			if (messenger_ptr->get_id () == 0) {
+				ns.resize (messenger_ptr->get_np ());
+				messenger_ptr->template gather <int> (1, &ns0, &ns [0]);
+				int ntot = 0;
+				for (int i = 0; i < messenger_ptr->get_np (); ++i) {
+					ntot += ns [i];
+				}
+				boundary_matrix.resize (ntot * ntot);
+				bipiv.resize (ntot);
+			} else {
+				messenger_ptr->template gather <int> (1, &ns0, NULL);
+				boundary_matrix.resize ((overlap_0 + overlap_n) * (overlap_0 + overlap_n));
+			}
+
+			factorized_matrix.resize (lda * lda, 0.0);
+			ipiv.resize (m); // TODO Should be n - ntop - nbot - excess_0 - excess_n
+			data_temp.resize (lda * ldn);
+
+			transform = std::shared_ptr <bases::plan <datatype> > (new fourier::vertical_transform <datatype> (n, m, rhs_ptr, &data_temp [ex_overlap_0], inverse, i_solver.element_flags, &flags));
+
+			TRACE ("Solver built.");
+		}
+
+		template <class datatype>
+		void vertical_divergence_solver <datatype>::factorize () {
+			int info;
+
+			TRACE ("Factorizing...");
+
+			utils::matrix_scale (m, lda, 0.0, &factorized_matrix [(ex_overlap_0)], lda);
+
+			/*
+				TODO Should we do the matrix copy before the edges?
+			*/
+			std::stringstream debug;
+			for (int j = 0; j < m; ++j) {
+				for (int i = 0; i < m; ++i) {
+					debug << factorized_matrix [i * lda + j] << " ";
+				}
+				DEBUG ("ZERO " << debug.str ());
+				debug.str ("");
+			}
+
+			DEBUG ("ZERO POINT " << &factorized_matrix [0] << " " << (ex_overlap_0) * (lda + 1) + excess_0);
+
+			if (boundary_0) {
+				boundary_0->calculate_matrix (1.0, default_matrix + excess_0, deriv_matrix + excess_0, deriv_matrix, &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0], lda, true);
+			}
+			if (boundary_n) {
+				boundary_n->calculate_matrix (1.0, default_matrix + m - 1 - excess_n, deriv_matrix + m - 1 - excess_n, deriv_matrix, &factorized_matrix [(ex_overlap_0) * (lda + 1) + m - 1 - excess_n], lda, true);
+			}
+
+			// utils::matrix_scale (lda - 2 - excess_0 - ex_overlap_0 - excess_n - ex_overlap_n, lda, timestep, &factorized_matrix [ex_overlap_0 + 1 + excess_0], lda);
+
+			utils::matrix_add_scaled (m - 2 - excess_0 - excess_n, m, 1.0, deriv_matrix + excess_0 + 1, &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0 + 1], m, lda);
+			
+			for (int j = 0; j < m; ++j) {
+				for (int i = 0; i < m; ++i) {
+					debug << deriv_matrix [i * m + j] << " ";
+				}
+				DEBUG ("DERIV " << debug.str ());
+				debug.str ("");
+			}
+			for (int j = 0; j < lda; ++j) {
+				for (int i = 0; i < lda; ++i) {
+					debug << factorized_matrix [i * lda + j] << " ";
+				}
+				DEBUG (debug.str ());
+				debug.str ("");
+			}
+
+			utils::p_block_matrix_factorize (messenger_ptr->get_id (), messenger_ptr->get_np (), inner_m, overlap_0, overlap_n, &factorized_matrix [0], &ipiv [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, lda, sqrt ((int) boundary_matrix.size ()));
+
+			TRACE ("Done.");
+		}
+
+		template <class datatype>
+		void vertical_divergence_solver <datatype>::execute () {
+			int info;
+			std::stringstream debug;
+			TRACE ("Executing solve...");
+
+			/*
+				TODO Add timestep check here?
+			*/
+
+			utils::scale ((ldn) * lda, 0.0, &data_temp [0]);
+
+			transform->execute ();
+
+			if (boundary_0) {
+				boundary_0->calculate_rhs (NULL, NULL, &data_temp [0], &data_temp [ex_overlap_0 + excess_0], lda);
+			}
+			if (boundary_n) {
+				boundary_n->calculate_rhs (NULL, NULL, &data_temp [0], &data_temp [lda - 1 - excess_n - ex_overlap_n], lda);
+			}
+
+			TRACE ("Solving in m direction...");
+
+			utils::p_block_matrix_solve (messenger_ptr->get_id (), messenger_ptr->get_np (), inner_m, overlap_0, overlap_n, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, ldn, lda, sqrt ((int) boundary_matrix.size ()), lda);
+
+			TRACE ("Matrix solve complete.");
+
+			for (int i = 0; i < ldn; ++i) {
+				for (int j = 0; j < m; ++j) {
+					if (std::isnan (data_temp [ex_overlap_0 + i * m + j])) {
+						FATAL ("Found nan.");
+						for (int k = 0; k < m; ++k) {
+							printf ("%f ", data_temp [ex_overlap_0 + k * m + j]);
+						}
+						printf ("\n");
+						throw exceptions::nan ();
+					}
+				}
+			}
+
+			TRACE ("Updating...");
+			utils::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data, lda, m);
+
+			*component_flags |= transformed_vertical;
+
+			TRACE ("Solve complete.")
+			TRACE ("Execution complete.");
+		}
+
+		template class vertical_divergence_solver <double>;
 	} /* fourier */
 } /* two_d */

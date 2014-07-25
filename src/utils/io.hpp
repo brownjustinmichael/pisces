@@ -365,7 +365,6 @@ namespace io
 				}
 				inner_data [j] /= (datatype) n;
 			}
-			DEBUG ("Functor data " << &inner_data [0]);
 			return &inner_data [0];
 		}
 	};
@@ -405,7 +404,6 @@ namespace io
 				}
 				inner_data [j] = sqrt(inner_data [j] / (datatype) n);
 			}
-			DEBUG ("Functor data " << &inner_data [0]);
 			return &inner_data [0];
 		}
 	};
@@ -571,9 +569,6 @@ namespace io
 			
 			// Output the scalars
 			for (int i = 0; i < (int) scalar_names.size (); ++i) {
-				DEBUG ("Outputting " << scalar_ptrs [i]);
-				DEBUG ("OUTPUTTING " << &*scalar_types.front () + i);
-				DEBUG ("OUTPUTTING " << scalar_types [i]);
 				if (scalar_types [i] == &typeid (double)) {
 					format::template write_scalar <double> (file_name, scalar_names [i], (double *) scalar_ptrs [i], record);
 				} else if (scalar_types [i] == &typeid (float)) {
@@ -587,9 +582,6 @@ namespace io
 			
 			// Output the array data
 			for (int i = 0; i < (int) names.size (); ++i) {
-				DEBUG ("Outputting " << data_ptrs [i]);
-				DEBUG ("Outputting " << names [i]);
-				DEBUG ("OUTPUTTING " << types [i]);
 				if (types [i] == &typeid (double)) {
 					format::template write <double> (file_name, names [i], (double *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset, record);
 				} else if (types [i] == &typeid (float)) {
@@ -616,7 +608,6 @@ namespace io
 			if (output::file_format != append_file) {
 				format::close_file (file_name.c_str (), output::file_format);
 			}
-			DEBUG ("FILE CLOSED");
 		}
 	};
 	

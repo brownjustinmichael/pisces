@@ -388,6 +388,7 @@ namespace bases
 				for (int i = 0; i < n_deps; ++i) {
 					solve_recursive (solvers [name]->get_dependency (i));
 				}
+				DEBUG ("Solving " << name);
 				solvers [name]->solve ();
 				element_flags [name] |= solved;
 			}

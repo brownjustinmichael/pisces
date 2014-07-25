@@ -37,7 +37,7 @@ namespace two_d
 			}
 		}
 		
-		virtual void calculate_matrix (datatype timestep, datatype *default_matrix, datatype *matrix_in, datatype *interpolate_matrix, datatype *matrix_out, int lda) {
+		virtual void calculate_matrix (datatype timestep, datatype *default_matrix, datatype *matrix_in, datatype *interpolate_matrix, datatype *matrix_out, int lda, bool diverging = false) {
 			utils::scale (m, 0.0, matrix_out, lda);
 			utils::add_scaled (m, 1.0, default_matrix, matrix_out, m, lda);
 		}
@@ -134,7 +134,7 @@ namespace two_d
 			}
 		}
 		
-		virtual void calculate_matrix (datatype timestep, datatype *default_matrix, datatype *matrix_in, datatype *interpolate_matrix, datatype *matrix_out, int lda) {
+		virtual void calculate_matrix (datatype timestep, datatype *default_matrix, datatype *matrix_in, datatype *interpolate_matrix, datatype *matrix_out, int lda, bool diverging = false) {
 			// Zero everything but the internal boundary row
 			utils::matrix_scale (1 + n_boundary_out, m, 0.0, matrix_out + (top ? 1 : -1 - n_boundary_out - n_boundary_in), lda);
 			// Setting the external boundary matrix row
@@ -145,7 +145,12 @@ namespace two_d
 			utils::matrix_add_scaled (1, m, alpha, matrix_in, matrix_out, m, lda);
 			DEBUG ("FIRST POINT " << matrix_out + (top ? 0 : -2 - n_boundary_out - n_boundary_in));
 			utils::matrix_scale (1 + n_boundary_out + n_boundary_in + 1, m, timestep, matrix_out + (top ? 0 : -2 - n_boundary_out - n_boundary_in), lda);
-			utils::matrix_add_scaled (1 + n_boundary_in, m, 1.0, default_matrix + (top ? 0 : -n_boundary_in), matrix_out + (top ? 0 : -n_boundary_in), m, lda);
+			if (diverging) {
+				utils::matrix_add_scaled (1, m, 1.0, default_matrix, matrix_out, m, lda);
+				utils::matrix_add_scaled (1, m, -1.0, default_matrix, matrix_out + (top ? 1 + n_boundary_in + n_boundary_out : -n_boundary_in - n_boundary_out - 1), m, lda);
+			} else {
+				utils::matrix_add_scaled (1 + n_boundary_in, m, 1.0, default_matrix + (top ? 0 : -n_boundary_in), matrix_out + (top ? 0 : -n_boundary_in), m, lda);
+			}
 			DEBUG ("Calculated.");
 		}
 	};
