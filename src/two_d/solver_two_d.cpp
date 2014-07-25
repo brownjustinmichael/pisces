@@ -118,6 +118,7 @@ namespace two_d
 		template <class datatype>
 		void collocation_solver <datatype>::factorize () {
 			int info;
+			std::stringstream debug;
 
 			TRACE ("Factorizing...");
 
@@ -130,10 +131,10 @@ namespace two_d
 			DEBUG ("ZERO POINT " << &factorized_matrix [0]);
 
 			if (boundary_0) {
-				boundary_0->calculate_matrix (timestep, default_matrix + excess_0, &matrix [excess_0], &matrix [0], &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0], lda);
+				boundary_0->calculate_matrix (timestep, default_matrix + excess_0, &matrix [excess_0], default_matrix, &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0], lda);
 			}
 			if (boundary_n) {
-				boundary_n->calculate_matrix (timestep, default_matrix + m - 1 - excess_n, &matrix [m - 1 - excess_n], &matrix [0], &factorized_matrix [(ex_overlap_0) * (lda + 1) + m - 1 - excess_n], lda);
+				boundary_n->calculate_matrix (timestep, default_matrix + m - 1 - excess_n, &matrix [m - 1 - excess_n], default_matrix, &factorized_matrix [(ex_overlap_0) * (lda + 1) + m - 1 - excess_n], lda);
 			}
 
 			utils::matrix_scale (lda - 2 - excess_0 - ex_overlap_0 - excess_n - ex_overlap_n, lda, timestep, &factorized_matrix [ex_overlap_0 + 1 + excess_0], lda);
@@ -141,6 +142,14 @@ namespace two_d
 
 			utils::matrix_add_scaled (m - 2 - excess_0 - excess_n, m, 1.0, default_matrix + excess_0 + 1, &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0 + 1], m, lda);
 			// utils::matrix_add_scaled (m, m, 1.0, default_matrix, &factorized_matrix [(ex_overlap_0) * (lda + 1)], m, lda);
+
+			for (int j = 0; j < lda; ++j) {
+				for (int i = 0; i < lda; ++i) {
+					debug << factorized_matrix [i * lda + j] << " ";
+				}
+				DEBUG (debug.str ());
+				debug.str ("");
+			}
 
 			utils::p_block_matrix_factorize (messenger_ptr->get_id (), messenger_ptr->get_np (), inner_m, overlap_0, overlap_n, &factorized_matrix [0], &ipiv [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, lda, sqrt ((int) boundary_matrix.size ()));
 
@@ -212,7 +221,7 @@ namespace two_d
 		
 		template <class datatype>
 		fourier_solver <datatype>::fourier_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
-		bases::solver <datatype> (i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), data (i_data), timestep (i_timestep), excess_0 (i_grid_m.get_excess_0 ()), excess_n (i_grid_m.get_excess_n ()) {
+		bases::solver <datatype> (i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), data (i_data), timestep (i_timestep), excess_0 (i_grid_m.get_excess_0 ()), excess_n (i_grid_m.get_excess_n ()), pos_m (&i_grid_m [0]) {
 			TRACE ("Building solver...");
 			horizontal_matrix.resize (ldn);
 			factorized_horizontal_matrix.resize (ldn);
@@ -234,7 +243,7 @@ namespace two_d
 		
 		template <class datatype>
 		fourier_solver <datatype>::fourier_solver (bases::master_solver <datatype> &i_solver, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n) : 
-		bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags), n (i_solver.grid_ptr (0)->get_n ()),  ldn (i_solver.grid_ptr (0)->get_ld ()),  m (i_solver.grid_ptr (1)->get_n ()), data (i_solver.data_ptr ()), timestep (i_timestep), excess_0 (i_solver.grid_ptr (1)->get_excess_0 ()),  excess_n (i_solver.grid_ptr (1)->get_excess_n ()) {
+		bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags), n (i_solver.grid_ptr (0)->get_n ()),  ldn (i_solver.grid_ptr (0)->get_ld ()),  m (i_solver.grid_ptr (1)->get_n ()), data (i_solver.data_ptr ()), timestep (i_timestep), excess_0 (i_solver.grid_ptr (1)->get_excess_0 ()),  excess_n (i_solver.grid_ptr (1)->get_excess_n ()), pos_m (&((*(i_solver.grid_ptr (1))) [0])) {
 			TRACE ("Building solver...");
 			horizontal_matrix.resize (ldn);
 			factorized_horizontal_matrix.resize (ldn);
@@ -303,10 +312,19 @@ namespace two_d
 				boundary_0->receive (&data_temp [ex_overlap_0], lda);
 			}
 			
-			for (int j = 0; j < m; ++j) {
+			for (int j = excess_0; j < m - excess_n; ++j) {
 				utils::diagonal_solve (ldn, &factorized_horizontal_matrix [0], &data_temp [ex_overlap_0 + j], 1, lda);
 			}
 			utils::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data, lda);
+			
+			for (int i = 0; i < ldn; ++i) {
+				for (int j = excess_0 - 1; j >= 0; --j) {
+					data [i * m + j] = (data [i * m + j + 2] - data [i * m + j + 1]) / (pos_m [j + 2] - pos_m [j + 1]) * (pos_m [j] - pos_m [j + 1]) + data [i * m + j + 1];
+				}
+				for (int j = m - excess_n; j < m; ++j) {
+					data [i * m + j] = (data [i * m + j - 2] - data [i * m + j - 1]) / (pos_m [j - 2] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]) + data [i * m + j - 1];
+				}
+			}
 			
 			TRACE ("Execution complete.");
 		}
@@ -885,10 +903,10 @@ namespace two_d
 			DEBUG ("ZERO POINT " << &factorized_matrix [0] << " " << (ex_overlap_0) * (lda + 1) + excess_0);
 
 			if (boundary_0) {
-				boundary_0->calculate_matrix (1.0, default_matrix + excess_0, deriv_matrix + excess_0, deriv_matrix, &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0], lda, true);
+				boundary_0->calculate_matrix (1.0, default_matrix + excess_0, deriv_matrix + excess_0, default_matrix, &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0], lda, true);
 			}
 			if (boundary_n) {
-				boundary_n->calculate_matrix (1.0, default_matrix + m - 1 - excess_n, deriv_matrix + m - 1 - excess_n, deriv_matrix, &factorized_matrix [(ex_overlap_0) * (lda + 1) + m - 1 - excess_n], lda, true);
+				boundary_n->calculate_matrix (1.0, default_matrix + m - 1 - excess_n, deriv_matrix + m - 1 - excess_n, default_matrix, &factorized_matrix [(ex_overlap_0) * (lda + 1) + m - 1 - excess_n], lda, true);
 			}
 
 			// utils::matrix_scale (lda - 2 - excess_0 - ex_overlap_0 - excess_n - ex_overlap_n, lda, timestep, &factorized_matrix [ex_overlap_0 + 1 + excess_0], lda);

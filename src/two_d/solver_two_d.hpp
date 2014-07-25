@@ -294,6 +294,7 @@ namespace two_d
 			int ex_overlap_n;
 			int overlap_n;
 			int lda;
+			const datatype *pos_m;
 			
 			using bases::solver <datatype>::element_flags;
 			using bases::solver <datatype>::component_flags;
