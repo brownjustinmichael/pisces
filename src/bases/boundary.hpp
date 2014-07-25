@@ -41,7 +41,7 @@ namespace bases
 		
 		virtual void calculate_rhs (datatype *data_in, datatype *interpolate_original, datatype *interpolate_data, datatype *data_out, int lda) = 0;
 		
-		virtual void calculate_matrix (datatype timestep, datatype *default_matrix, datatype *matrix_in, datatype *interpolate_matrix, datatype *matrix_out, int lda) = 0;
+		virtual void calculate_matrix (datatype timestep, datatype *default_matrix, datatype *matrix_in, datatype *interpolate_matrix, datatype *matrix_out, int lda, bool diverging = false) = 0;
 	};
 } /* bases */
 
