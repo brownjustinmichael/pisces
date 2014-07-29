@@ -280,9 +280,10 @@ namespace two_d
 					}
 				}
 				
-				virtual datatype *_initialize (int name, int i_threads = 0, datatype* initial_conditions = NULL, int i_element_flags = 0x00) {
+				virtual datatype *_initialize (int name, datatype* initial_conditions = NULL, int i_element_flags = 0x00) {
 					TRACE ("Initializing...");
 					two_d::element <datatype>::_initialize (name, initial_conditions, i_element_flags);
+					DEBUG ("Trying...");
 					/*
 						TODO Fix flaggin
 					*/
@@ -291,6 +292,8 @@ namespace two_d
 					}
 					if ((name != x_position) && (name != z_position)) {
 						element <datatype>::add_solver (name, std::shared_ptr <master_solver <datatype> > (new master_solver <datatype> (*grids [0], *grids [1], ptr (name), &element_flags [state], &element_flags [name])));
+						DEBUG ("Adding " << name << " solver");
+						
 					}
 					TRACE ("Initialized.");
 					return this->ptr (name);

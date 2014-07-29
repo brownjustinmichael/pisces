@@ -15,7 +15,7 @@ namespace two_d
 {
 	namespace fourier
 	{
-		namespace cosine
+		namespace chebyshev
 		{	
 			template <class datatype>
 			class boussinesq_element : public element <datatype>

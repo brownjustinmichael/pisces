@@ -128,7 +128,7 @@ namespace two_d
 				TODO Should we do the matrix copy before the edges?
 			*/
 
-			DEBUG ("ZERO POINT " << &factorized_matrix [0]);
+			// DEBUG ("ZERO POINT " << &factorized_matrix [0]);
 
 			if (boundary_0) {
 				boundary_0->calculate_matrix (timestep, default_matrix + excess_0, &matrix [excess_0], default_matrix, &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0], lda);
@@ -181,17 +181,25 @@ namespace two_d
 
 			utils::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
 
-			DEBUG ("Solving in m direction..." << &factorized_matrix [0] << " " << &data_temp [0] << " " << &boundary_matrix [0]);
+			// DEBUG ("Solving in m direction..." << &factorized_matrix [0] << " " << &data_temp [0] << " " << &boundary_matrix [0]);
 
-			for (int j = 0; j < lda; ++j) {
-				for (int i = 0; i < ldn; ++i) {
-					debug << data_temp [i * lda + j] << " ";
-				}
-				DEBUG ("RHS " << debug.str ());
-				debug.str ("");
-			}
+			// for (int j = 0; j < lda; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << data_temp [i * lda + j] << " ";
+			// 	}
+			// 	DEBUG ("RHS " << debug.str ());
+			// 	debug.str ("");
+			// }
 
 			utils::p_block_matrix_solve (messenger_ptr->get_id (), messenger_ptr->get_np (), inner_m, overlap_0, overlap_n, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, ldn, lda, sqrt ((int) boundary_matrix.size ()), lda);
+
+			// for (int j = 0; j < lda; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << data_temp [i * lda + j] << " ";
+			// 	}
+			// 	DEBUG ("DONE " << debug.str ());
+			// 	debug.str ("");
+			// }
 
 			TRACE ("Matrix solve complete.");
 
@@ -284,7 +292,7 @@ namespace two_d
 				TODO Add timestep check here?
 			*/
 			
-			DEBUG ("Solving in n direction");
+			// DEBUG ("Solving in n direction");
 			
 			utils::scale ((ldn) * lda, 0.0, &data_temp [0]);
 			
@@ -566,6 +574,7 @@ namespace two_d
 		template <class datatype>
 		void horizontal_divergence_solver <datatype>::execute () {
 			TRACE ("Solving...");
+			// DEBUG ("HORIZONTAL DIV " << data_x);
 			utils::scale (m * ldn, 0.0, data_x);
 			
 			for (int j = 0; j < m; ++j) {
@@ -573,17 +582,24 @@ namespace two_d
 				data_z [m + j] = 0.0;
 			}
 			
-			#pragma omp parallel for
+			// #pragma omp parallel for
 			for (int i = 2; i < ldn; i += 2) {
-				data_x [i * m] = -(data_z [(i + 1) * m + 1] - data_z [(i + 1) * m]) / (pos_m [1] - pos_m [0]) / scalar / (i / 2);
-				data_x [(i + 1) * m] = (data_z [i * m + 1] - data_z [i * m]) / (pos_m [1] - pos_m [0]) / scalar / (i / 2);
 				for (int j = 1; j < m - 1; ++j) {
 					data_x [i * m + j] = -(data_z [(i + 1) * m + j + 1] - data_z [(i + 1) * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]) / scalar / (i / 2);
 					data_x [(i + 1) * m + j] = (data_z [i * m + j + 1] - data_z [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]) / scalar / (i / 2);
 				}
+				data_x [i * m] = -(data_z [(i + 1) * m + 1] - data_z [(i + 1) * m]) / (pos_m [1] - pos_m [0]) / scalar / (i / 2);
+				data_x [(i + 1) * m] = (data_z [i * m + 1] - data_z [i * m]) / (pos_m [1] - pos_m [0]) / scalar / (i / 2);
+				data_x [i * m] = data_x [i * m + 1];
+				data_x [(i + 1) * m] = data_x [(i + 1) * m + 1];
+				
 				data_x [(i + 1) * m - 1] = -(data_z [(i + 2) * m - 1] - data_z [(i + 2) * m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / scalar / (i / 2);
 				data_x [(i + 2) * m - 1] = (data_z [(i + 1) * m - 1] - data_z [(i + 1) * m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / scalar / (i / 2);
+				data_x [(i + 1) * m - 1] = data_x [(i + 1) * m - 2];
+				data_x [(i + 2) * m - 1] = data_x [(i + 2) * m - 2];
 			}
+			
+
 		}
 		
 		template class horizontal_divergence_solver <double>;
@@ -800,7 +816,7 @@ namespace two_d
 		
 		template <class datatype>
 		vertical_divergence_solver <datatype>::vertical_divergence_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) :
-		bases::solver <datatype> (i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), data (i_data), messenger_ptr (i_messenger_ptr), positions (&(i_grid_m [0])), excess_0 (i_grid_m.get_excess_0 ()), excess_n (i_grid_m.get_excess_n ()), default_matrix (i_grid_m.get_data (0)) {
+		bases::solver <datatype> (i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), data (i_data), messenger_ptr (i_messenger_ptr), pos_n (&(i_grid_n [0])), positions (&(i_grid_m [0])), excess_0 (i_grid_m.get_excess_0 ()), excess_n (i_grid_m.get_excess_n ()), default_matrix (i_grid_m.get_data (0)) {
 			TRACE ("Building solver...");
 			matrix.resize (m * m, 0.0);
 			rhs_ptr = i_rhs;
@@ -840,7 +856,7 @@ namespace two_d
 
 		template <class datatype>
 		vertical_divergence_solver <datatype>::vertical_divergence_solver (bases::master_solver <datatype> &i_solver, utils::messenger* i_messenger_ptr, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype * i_rhs) :
-		bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags), n (i_solver.grid_ptr (0)->get_n ()),  ldn (i_solver.grid_ptr (0)->get_ld ()),  m (i_solver.grid_ptr (1)->get_n ()), data (i_solver.data_ptr ()), messenger_ptr (i_messenger_ptr), positions (&((*(i_solver.grid_ptr (1))) [0])), excess_0 (i_solver.grid_ptr (1)->get_excess_0 ()),  excess_n (i_solver.grid_ptr (1)->get_excess_n ()), default_matrix (i_solver.grid_ptr (1)->get_data (0)), deriv_matrix (i_solver.grid_ptr (1)->get_data (1)) {
+		bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags), n (i_solver.grid_ptr (0)->get_n ()),  ldn (i_solver.grid_ptr (0)->get_ld ()),  m (i_solver.grid_ptr (1)->get_n ()), data (i_solver.data_ptr ()), messenger_ptr (i_messenger_ptr), pos_n (&((*(i_solver.grid_ptr (0))) [0])), positions (&((*(i_solver.grid_ptr (1))) [0])), excess_0 (i_solver.grid_ptr (1)->get_excess_0 ()),  excess_n (i_solver.grid_ptr (1)->get_excess_n ()), default_matrix (i_solver.grid_ptr (1)->get_data (0)), deriv_matrix (i_solver.grid_ptr (1)->get_data (1)) {
 			TRACE ("Building solver...");
 			matrix.resize (m * m);
 			rhs_ptr = i_rhs;
@@ -892,15 +908,15 @@ namespace two_d
 				TODO Should we do the matrix copy before the edges?
 			*/
 			std::stringstream debug;
-			for (int j = 0; j < m; ++j) {
-				for (int i = 0; i < m; ++i) {
-					debug << factorized_matrix [i * lda + j] << " ";
-				}
-				DEBUG ("ZERO " << debug.str ());
-				debug.str ("");
-			}
+			// for (int j = 0; j < m; ++j) {
+			// 	for (int i = 0; i < m; ++i) {
+			// 		debug << factorized_matrix [i * lda + j] << " ";
+			// 	}
+			// 	DEBUG ("ZERO " << debug.str ());
+			// 	debug.str ("");
+			// }
 
-			DEBUG ("ZERO POINT " << &factorized_matrix [0] << " " << (ex_overlap_0) * (lda + 1) + excess_0);
+			// DEBUG ("ZERO POINT " << &factorized_matrix [0] << " " << (ex_overlap_0) * (lda + 1) + excess_0);
 
 			if (boundary_0) {
 				boundary_0->calculate_matrix (1.0, default_matrix + excess_0, deriv_matrix + excess_0, default_matrix, &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0], lda, true);
@@ -913,12 +929,15 @@ namespace two_d
 
 			utils::matrix_add_scaled (m - 2 - excess_0 - excess_n, m, 1.0, deriv_matrix + excess_0 + 1, &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0 + 1], m, lda);
 			
-			for (int j = 0; j < m; ++j) {
-				for (int i = 0; i < m; ++i) {
-					debug << deriv_matrix [i * m + j] << " ";
-				}
-				DEBUG ("DERIV " << debug.str ());
-				debug.str ("");
+			// for (int j = 0; j < m; ++j) {
+			// 	for (int i = 0; i < m; ++i) {
+			// 		debug << deriv_matrix [i * m + j] << " ";
+			// 	}
+			// 	DEBUG ("DERIV " << debug.str ());
+			// 	debug.str ("");
+			// }
+			for (int j = 1; j < lda - 1; ++j) {
+				factorized_matrix [(lda - 1) * lda + j] = 0.0;
 			}
 			for (int j = 0; j < lda; ++j) {
 				for (int i = 0; i < lda; ++i) {
@@ -938,6 +957,7 @@ namespace two_d
 			int info;
 			std::stringstream debug;
 			TRACE ("Executing solve...");
+			// DEBUG ("VERTICAL DIV");
 
 			/*
 				TODO Add timestep check here?
@@ -947,6 +967,24 @@ namespace two_d
 
 			transform->execute ();
 
+			// for (int j = 0; j < lda; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << data_temp [i * lda + j] << " ";
+			// 	}
+			// 	DEBUG ("AFTER TRANSFORM RHS " << debug.str ());
+			// 	debug.str ("");
+			// }
+			
+			datatype scalar = 2.0 * acos (-1.0) / (pos_n [n - 1] - pos_n [0]);
+			datatype temp;
+			for (int i = 2; i < ldn; i += 2) {
+				for (int j = 0; j < m; ++j) {
+					temp = data_temp [i * m + j];
+					data_temp [i * m + j] = -data_temp [(i + 1) * m + j] * scalar * (i / 2);
+					data_temp [(i + 1) * m + j] = temp * scalar * (i / 2);
+				}
+			}
+			
 			if (boundary_0) {
 				boundary_0->calculate_rhs (NULL, NULL, &data_temp [0], &data_temp [ex_overlap_0 + excess_0], lda);
 			}
@@ -955,8 +993,24 @@ namespace two_d
 			}
 
 			TRACE ("Solving in m direction...");
+			
+			// for (int j = 0; j < lda; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << data_temp [i * lda + j] << " ";
+			// 	}
+			// 	DEBUG ("DIV RHS " << debug.str ());
+			// 	debug.str ("");
+			// }
 
 			utils::p_block_matrix_solve (messenger_ptr->get_id (), messenger_ptr->get_np (), inner_m, overlap_0, overlap_n, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, ldn, lda, sqrt ((int) boundary_matrix.size ()), lda);
+			
+			// for (int j = 0; j < lda; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << data_temp [i * lda + j] << " ";
+			// 	}
+			// 	DEBUG ("DIV END " << debug.str ());
+			// 	debug.str ("");
+			// }
 
 			TRACE ("Matrix solve complete.");
 
@@ -974,7 +1028,16 @@ namespace two_d
 			}
 
 			TRACE ("Updating...");
-			utils::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data, lda, m);
+			utils::matrix_scale (1, ldn, 0.0, &data_temp [lda - 1], lda);
+			utils::matrix_copy (m, ldn, &data_temp [(ex_overlap_0) * (lda + 1)], data, lda, m);
+			
+			// for (int j = 0; j < m; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << data [i * m + j] << " ";
+			// 	}
+			// 	DEBUG ("DIV FIN " << debug.str ());
+			// 	debug.str ("");
+			// }
 
 			*component_flags |= transformed_vertical;
 

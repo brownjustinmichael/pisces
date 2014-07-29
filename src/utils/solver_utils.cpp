@@ -97,6 +97,7 @@ namespace utils
 		dgetrf_ (&m, &n, a, &lda, ipiv, info);
 		
 		if (*info != 0) {
+			FATAL ("ERROR " << *info);
 			throw exceptions::cannot_factor ();
 		}
 	}
@@ -145,6 +146,7 @@ namespace utils
 		sgetrf_ (&m, &n, a, &lda, ipiv, info);
 		
 		if (*info != 0) {
+			FATAL ("ERROR " << *info);
 			throw exceptions::cannot_factor ();
 		}
 	}
