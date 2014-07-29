@@ -44,6 +44,39 @@ namespace two_d
 	};
 	
 	template <class datatype>
+	class fixed_deriv_boundary : public bases::boundary <datatype>
+	{
+	private:
+		datatype value;
+		bool top;
+		int ldn, m;
+		datatype *deriv_matrix;
+		
+	public:
+		fixed_deriv_boundary (bases::grid <datatype> *i_grid_n, bases::grid <datatype> *i_grid_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n->get_n ())), top (i_top) {
+			DEBUG ("Fixed boundary initialized");
+			ldn = i_grid_n->get_ld ();
+			m = i_grid_m->get_n ();
+			deriv_matrix = i_grid_m->get_data (1) + (top ? m - 1 : 0);
+			DEBUG ("Done");
+		}
+		
+		virtual ~fixed_deriv_boundary () {}
+		
+		virtual void calculate_rhs (datatype *data, datatype *interpolate_original, datatype *interpolate_data, datatype *data_temp, int lda) {
+			data_temp [0] = value;
+			for (int i = 1; i < ldn; ++i) {
+				data_temp [i * lda] = 0.0;
+			}
+		}
+		
+		virtual void calculate_matrix (datatype timestep, datatype *default_matrix, datatype *matrix_in, datatype *interpolate_matrix, datatype *matrix_out, int lda, bool diverging = false) {
+			utils::scale (m, 0.0, matrix_out, lda);
+			utils::add_scaled (m, 1.0, deriv_matrix, matrix_out, m, lda);
+		}
+	};
+	
+	template <class datatype>
 	class communicating_boundary : public bases::boundary <datatype>
 	{
 	private:
@@ -144,11 +177,9 @@ namespace two_d
 			// Setting the internal boundary matrix row
 			utils::matrix_add_scaled (1, m, alpha, matrix_in, matrix_out, m, lda);
 			utils::matrix_scale (1 + n_boundary_out + n_boundary_in + 1, m, timestep, matrix_out + (top ? 0 : -2 - n_boundary_out - n_boundary_in), lda);
+			utils::matrix_add_scaled (1 + n_boundary_in, m, 1.0, default_matrix + (top ? 0 : -n_boundary_in), matrix_out + (top ? 0 : -n_boundary_in), m, lda);
 			if (diverging) {
-				utils::matrix_add_scaled (1, m, 1.0, default_matrix, matrix_out, m, lda);
 				utils::matrix_add_scaled (1, m, -1.0, default_matrix, matrix_out + (top ? 1 + n_boundary_in + n_boundary_out : -n_boundary_in - n_boundary_out - 1), m, lda);
-			} else {
-				utils::matrix_add_scaled (1 + n_boundary_in, m, 1.0, default_matrix + (top ? 0 : -n_boundary_in), matrix_out + (top ? 0 : -n_boundary_in), m, lda);
 			}
 			utils::interpolate (n_boundary_out, m, m, -1.0, 0.0, positions, interpolate_matrix, boundary_positions, matrix_out + (top ? 1 + n_boundary_in : -n_boundary_in - n_boundary_out), m, lda);
 			

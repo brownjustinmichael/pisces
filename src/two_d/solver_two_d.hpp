@@ -443,7 +443,7 @@ namespace two_d
 
 			datatype *rhs_ptr;
 
-			const datatype* positions;
+			const datatype* pos_n, *positions;
 			int excess_0; //!< The integer number of elements to recv from edge_0
 			int excess_n; //!< The integer number of elements to recv from edge_n
 
