@@ -61,6 +61,25 @@ namespace two_d
 				void execute () {	
 					TRACE ("Operating..." << element_flags);
 					std::stringstream debug;
+					datatype max = 0.0;
+					int index = 0;
+					for (int j = 0; j < m; ++j) {
+						for (int i = 0; i < ldn; ++i) {
+							if (data_out [i * m + j] < 0.0) {
+								if (data_out [i * m + j] < -max) {
+									max = -data_out [i * m + j];
+									index = i * m + j;
+								}
+							} else {
+								if (data_out [i * m + j] > max) {
+									max = data_out [i * m + j];
+									index = i * m + j;
+								}
+							}
+						}
+					}
+					DEBUG ("MAX BEFORE HDIFF " << (index / m) << " " << (index % m) << " " << data_out [index] << " " << data_in [index]);
+					DEBUG ("CHOICE FROM HDIFF " << data_out [12 * m + 24] << " " << data_in [12 * m + 24]);
 					if (*component_flags & x_solve) {
 						if (1.0 - alpha != 0.0) {
 							#pragma omp parallel for
@@ -75,6 +94,26 @@ namespace two_d
 						}
 					}
 					TRACE ("Operation complete.");
+					
+					max = 0.0;
+					index = 0;
+					for (int j = 0; j < m; ++j) {
+						for (int i = 0; i < ldn; ++i) {
+							if (data_out [i * m + j] < 0.0) {
+								if (data_out [i * m + j] < -max) {
+									max = -data_out [i * m + j];
+									index = i * m + j;
+								}
+							} else {
+								if (data_out [i * m + j] > max) {
+									max = data_out [i * m + j];
+									index = i * m + j;
+								}
+							}
+						}
+					}
+					DEBUG ("MAX FROM HDIFF " << (index / m) << " " << (index % m) << " " << data_out [index] << " " << data_in [index]);
+					DEBUG ("CHOICE FROM HDIFF " << data_out [12 * m + 24] << " " << data_in [12 * m + 24]);
 				}
 				
 				using implicit_plan <datatype>::element_flags;
@@ -128,6 +167,25 @@ namespace two_d
 				void execute () {	
 					TRACE ("Operating..." << element_flags);
 					
+					datatype max = 0.0;
+					int index = 0;
+					for (int j = 0; j < m; ++j) {
+						for (int i = 0; i < ldn; ++i) {
+							if (data_out [i * m + j] < 0.0) {
+								if (data_out [i * m + j] < -max) {
+									max = -data_out [i * m + j];
+									index = i * m + j;
+								}
+							} else {
+								if (data_out [i * m + j] > max) {
+									max = data_out [i * m + j];
+									index = i * m + j;
+								}
+							}
+						}
+					}
+					DEBUG ("MAX BEFORE VDIFF " << (index / m) << " " << (index % m) << " " << data_out [index] << " " << data_in [index]);
+					DEBUG ("CHOICE BEFORE VDIFF " << data_out [12 * m + 24] << " " << data_in [12 * m + 24]);
 					if (*component_flags & z_solve) {
 						if (1.0 - alpha != 0.0) {
 							utils::matrix_matrix_multiply (m, ldn, m, coeff * (1.0 - alpha), grid_m.get_data (2), data_in, 1.0, data_out, m);
@@ -135,6 +193,26 @@ namespace two_d
 					} else {
 						utils::matrix_matrix_multiply (m, ldn, m, coeff, grid_m.get_data (2), data_in, 1.0, data_out, m);
 					}
+					
+					max = 0.0;
+					index = 0;
+					for (int j = 0; j < m; ++j) {
+						for (int i = 0; i < ldn; ++i) {
+							if (data_out [i * m + j] < 0.0) {
+								if (data_out [i * m + j] < -max) {
+									max = -data_out [i * m + j];
+									index = i * m + j;
+								}
+							} else {
+								if (data_out [i * m + j] > max) {
+									max = data_out [i * m + j];
+									index = i * m + j;
+								}
+							}
+						}
+					}
+					DEBUG ("MAX FROM VDIFF " << (index / m) << " " << (index % m) << " " << data_out [index] << " " << data_in [index]);
+					DEBUG ("CHOICE FROM VDIFF " << data_out [12 * m + 24] << " " << data_in [12 * m + 24]);
 					
 					TRACE ("Operation complete.");
 				}

@@ -200,7 +200,7 @@ namespace utils
 // #endif
 // 	}
 	
-	void p_block_tridiag_factorize (int id, int np, int n, double* sub, double *diag, double *sup, double *supsup, int* ipiv, double *x, int *xipiv, int *info, int nrhs, int lda, int inrhs) {
+	void p_block_tridiag_factorize (int id, int np, int n, double* sub, double *diag, double *sup, double *supsup, int* ipiv, double *x, int *xipiv, int *info, int nrhs, int lda) {
 		int ntop, nbot;
 		int ldx = 2;
 		if (id == 0) {
@@ -234,23 +234,21 @@ namespace utils
 		}
 		
 		for (int i = 0; i < nrhs; ++i) {
-			// tridiagonal_factorize (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, info);
+			tridiagonal_factorize (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, info);
 		}
 		
 #ifdef _MPI
 		if (id != 0) {
 			copy (nrhs, sub + 1, bufferl, lda, n);
 			for (int i = 0; i < nrhs; ++i) {
-				// tridiagonal_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, &bufferl [i * n], info);
-				tridiagonal_direct_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, &bufferl [i * n]);
+				tridiagonal_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, &bufferl [i * n], info);
 			}
 		}
 		
 		if (id != np - 1) {
 			copy (nrhs, sup + n + ntop + nbot - 2, bufferr + n - 1, lda, n);
 			for (int i = 0; i < nrhs; ++i) {
-				// tridiagonal_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, &bufferr [i * n], info);
-				tridiagonal_direct_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, &bufferr [i * n]);
+				tridiagonal_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, &bufferr [i * n], info);
 			}
 		}
 		if (id != 0) {
@@ -303,7 +301,7 @@ namespace utils
 			
 		
 			for (int i = 0; i < nrhs; ++i) {
-				// tridiagonal_factorize (2 * np - 2, xsub + 2 + i * ldbuff, xdiag + 1 + i * ldbuff, xsup + 1 + i * ldbuff, xsupsup + 1 + i * ldbuff, xipiv + i * ldbuff, info);
+				tridiagonal_factorize (2 * np - 2, xsub + 2 + i * ldbuff, xdiag + 1 + i * ldbuff, xsup + 1 + i * ldbuff, xsupsup + 1 + i * ldbuff, xipiv + i * ldbuff, info);
 			}
 			
 		} else {
@@ -312,20 +310,9 @@ namespace utils
 #endif
 	}
 	
-	void p_block_tridiag_solve (int id, int np, int n, double* sub, double *diag, double *sup, double *supsup, int* ipiv, double* b, double *x, int *xipiv, int *info, int nrhs, int lda, int ldb, int inrhs) {
+	void p_block_tridiag_solve (int id, int np, int n, double* sub, double *diag, double *sup, double *supsup, int* ipiv, double* b, double *x, int *xipiv, int *info, int nrhs, int lda, int ldb) {
 		int ntop, nbot;
-		std::vector <double> y (2 * np * nrhs * inrhs, 0.0);
-		
-		for (int i = 0; i < inrhs; ++i) {
-			for (int j = 0; j < nrhs; ++j) {
-				for (int k = 0; k < n; ++k) {
-					if (b [k + j * ldb + k * nrhs * ldb] != b [k + j * ldb + k * nrhs * ldb]) {
-						DEBUG ("Found nan at beginning");
-						throw 0;
-					}
-				}
-			}
-		}
+		std::vector <double> y (2 * np * nrhs, 0.0);
 		if (id == 0) {
 			ntop = 0;
 		} else {
@@ -351,224 +338,78 @@ namespace utils
 		}
 		double *bufferl = x, *bufferr = bufferl + n * nrhs, *xsub = bufferr + n * nrhs, *xdiag = xsub + ldxx, *xsup = xdiag + ldxx, *xsupsup = xsup + ldxx;
 		
-		for (int j = 0; j < inrhs; ++j) {
-			add_scaled (ntop * nrhs, 1.0, b + j * nrhs * ldb, &y [j * nrhs * ldy], ldb, ldy);
-			add_scaled (nbot * nrhs, 1.0, b + ntop + n + j * nrhs * ldb, &y [1 + j * nrhs * ldy], ldb, ldy);
-		}
-		
-		for (int i = 0; i < inrhs; ++i) {
-			for (int j = 0; j < nrhs; ++j) {
-				for (int k = 0; k < n; ++k) {
-					if (b [k + j * ldb + k * nrhs * ldb] != b [k + j * ldb + k * nrhs * ldb]) {
-						DEBUG ("Found nan after scale");
-						throw 0;
-					}
-				}
-			}
-		}
+		add_scaled (ntop * nrhs, 1.0, b, &y [0], ldb, ldy);
+		add_scaled (nbot * nrhs, 1.0, b + ntop + n, &y [1], ldb, ldy);
 		
 		for (int i = 0; i < nrhs; ++i) {
-			// tridiagonal_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, b + ntop + i * ldb, info, inrhs, ldb * nrhs);
-			tridiagonal_direct_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, b + ntop + i * ldb, inrhs, ldb * nrhs);
-		}
-		
-		for (int i = 0; i < inrhs; ++i) {
-			for (int j = 0; j < nrhs; ++j) {
-				for (int k = 0; k < n; ++k) {
-					if (b [k + j * ldb + k * nrhs * ldb] != b [k + j * ldb + k * nrhs * ldb]) {
-						DEBUG ("Found nan after first solve");
-						throw 0;
-					}
-				}
-			}
+			tridiagonal_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, b + ntop + i * ldb, info);
 		}
 		
 #ifdef _MPI
 		if (id != 0) {
-			for (int j = 0; j < inrhs; ++j) {
-				for (int i = 0; i < nrhs; ++i) {
-					y [i * ldy + j * nrhs * ldy] -= sup [i * lda] * b [1 + i * ldb + j * nrhs * ldb];
-				}
+			for (int i = 0; i < nrhs; ++i) {
+				y [i * ldy] -= sup [i * lda] * b [1 + i * ldb];
 			}
 		}
 		if (id != np - 1) {
-			for (int j = 0; j < inrhs; ++j) {
-				for (int i = 0; i < nrhs; ++i) {
-					y [1 + i * ldy + j * nrhs * ldy] -= sub [n + ntop + nbot - 1 + i * lda] * b [n + ntop + nbot - 2 + i * ldb + j * nrhs * ldb];
-				}
-			}
-		}
-		
-		for (int i = 0; i < inrhs; ++i) {
-			for (int j = 0; j < nrhs; ++j) {
-				for (int k = 0; k < n; ++k) {
-					if (b [k + j * ldb + k * nrhs * ldb] != b [k + j * ldb + k * nrhs * ldb]) {
-						DEBUG ("Found nan before gather");
-						throw 0;
-					}
-				}
+			for (int i = 0; i < nrhs; ++i) {
+				y [1 + i * ldy] -= sub [n + ntop + nbot - 1 + i * lda] * b [n + ntop + nbot - 2 + i * ldb];
 			}
 		}
 		
 		if (id == 0) {
-			MPI::COMM_WORLD.Gather (&y [0], 2 * nrhs * inrhs, MPI::DOUBLE, &y [0], 2 * nrhs * inrhs, MPI::DOUBLE, 0);
+			MPI::COMM_WORLD.Gather (&y [0], 2 * nrhs, MPI::DOUBLE, &y [0], 2 * nrhs, MPI::DOUBLE, 0);
 			int ldx = 2 * np;
 			ldy = 2 * nrhs;
 			int ldbuff = 2 * np;
 			
-			std::vector <double> buffer (2 * np * nrhs * inrhs);
+			std::vector <double> buffer (2 * np * nrhs);
 			
-			for (int k = 0; k < inrhs; ++k) {
-				for (int i = 0; i < nrhs; ++i) {
-					for (int j = 0; j < np; ++j) {
-						buffer [2 * j + i * ldbuff + k * nrhs * ldbuff] = y [2 * i + j * inrhs * ldy + k * ldy];
-						buffer [2 * j + 1 + i * ldbuff + k * nrhs * ldbuff] = y [2 * i + 1 + j * ldy * inrhs + k * ldy];
-					}
-				}
-			}
-
-			copy (2 * nrhs * np * inrhs, &buffer [0], &y [0]);
-
 			for (int i = 0; i < nrhs; ++i) {
-				// tridiagonal_solve (2 * np - 2, xsub + 2 + i * ldx, xdiag + 1 + i * ldx, xsup + 1 + i * ldx, xsupsup + 1 + i * ldx, xipiv + i * ldx, &y [1 + i * ldbuff], info, inrhs, nrhs * ldbuff);
-				tridiagonal_direct_solve (2 * np - 2, xsub + 2 + i * ldx, xdiag + 1 + i * ldx, xsup + 1 + i * ldx, xsupsup + 1 + i * ldx, &y [1 + i * ldbuff], inrhs, nrhs * ldbuff);
-			}
-			
-			for (int k = 0; k < inrhs; ++k) {
-				for (int i = 0; i < nrhs; ++i) {
-					for (int j = 0; j < np; ++j) {
-						buffer [2 * i + j * ldy * inrhs + k * ldy] = y [2 * j + i * ldbuff + k * nrhs * ldbuff];
-						buffer [2 * i + 1 + j * inrhs * ldy + k * ldy] = y [2 * j + 1 + i * ldbuff + k * nrhs * ldbuff];
-					}
+				for (int j = 0; j < np; ++j) {
+					buffer [2 * j + i * ldbuff] = y [2 * i + j * ldy];
+					buffer [2 * j + 1 + i * ldbuff] = y [2 * i + 1 + j * ldy];
 				}
 			}
 
-
-			copy (2 * nrhs * np * inrhs, &buffer [0], &y [0]);
+			copy (2 * nrhs * np, &buffer [0], &y [0]);
 			
-			MPI::COMM_WORLD.Scatter (&y [0], 2 * nrhs * inrhs, MPI::DOUBLE, &y [0], 2 * nrhs * inrhs, MPI::DOUBLE, 0);
+			for (int i = 0; i < nrhs; ++i) {
+				tridiagonal_solve (2 * np - 2, xsub + 2 + i * ldx, xdiag + 1 + i * ldx, xsup + 1 + i * ldx, xsupsup + 1 + i * ldx, xipiv + i * ldx, &y [1 + i * ldbuff], info);
+			}
+			
+			for (int i = 0; i < nrhs; ++i) {
+				for (int j = 0; j < np; ++j) {
+					buffer [2 * i + j * ldy] = y [2 * j + i * ldbuff];
+					buffer [2 * i + 1 + j * ldy] = y [2 * j + 1 + i * ldbuff];
+				}
+			}
+
+			copy (2 * nrhs * np, &buffer [0], &y [0]);
+			
+			MPI::COMM_WORLD.Scatter (&y [0], 2 * nrhs, MPI::DOUBLE, &y [0], 2 * nrhs, MPI::DOUBLE, 0);
 		} else {
-			MPI::COMM_WORLD.Gather (&y [0], 2 * nrhs * inrhs, MPI::DOUBLE, NULL, 2 * nrhs * inrhs, MPI::DOUBLE, 0);
-			MPI::COMM_WORLD.Scatter (NULL, 2 * nrhs * inrhs, MPI::DOUBLE, &y [0], 2 * nrhs * inrhs, MPI::DOUBLE, 0);
+			MPI::COMM_WORLD.Gather (&y [0], 2 * nrhs, MPI::DOUBLE, NULL, 2 * nrhs, MPI::DOUBLE, 0);
+			MPI::COMM_WORLD.Scatter (NULL, 2 * nrhs, MPI::DOUBLE, &y [0], 2 * nrhs, MPI::DOUBLE, 0);
 		}
 		ldy = 2;
-		
-		for (int i = 0; i < inrhs; ++i) {
-			for (int j = 0; j < nrhs; ++j) {
-				for (int k = 0; k < n; ++k) {
-					if (b [k + j * ldb + k * nrhs * ldb] != b [k + j * ldb + k * nrhs * ldb]) {
-						DEBUG ("Found nan after scatter");
-						throw 0;
-					}
-				}
-			}
-		}
-		
+				
 		if (id != 0) {
-			copy (nrhs * inrhs, &y [0], b, ldy, ldb);
-			for (int k = 0; k < inrhs; ++k) {
-				for (int i = 0; i < n; ++i) {
-					for (int j = 0; j < nrhs; ++j) {
-						b [ntop + i + j * ldb + k * nrhs * ldb] -= bufferl [i + j * n] * y [j * ldy + k * nrhs * ldy]; 
-					}
+			copy (nrhs, &y [0], b, ldy, ldb);
+			for (int i = 0; i < n; ++i) {
+				for (int j = 0; j < nrhs; ++j) {
+					b [ntop + i + j * ldb] -= bufferl [i + j * n] * y [j * ldy]; 
 				}
 			}
 		}
 		if (id != np - 1) {
-			copy (nrhs * inrhs, &y [1], b + n + ntop + nbot - 1, ldy, ldb);
-			for (int k = 0; k < inrhs; ++k) {
-				for (int i = 0; i < n; ++i) {
-					for (int j = 0; j < nrhs; ++j) {
-						b [ntop + i + j * ldb + k * nrhs * ldb] -= bufferr [i + j * n] * y [1 + j * ldy + k * nrhs * ldy];
-					}
-				}
-			}
-		}
-		
-		for (int i = 0; i < inrhs; ++i) {
-			for (int j = 0; j < nrhs; ++j) {
-				for (int k = 0; k < n; ++k) {
-					if (b [k + j * ldb + k * nrhs * ldb] != b [k + j * ldb + k * nrhs * ldb]) {
-						DEBUG ("Found nan at end");
-						throw 0;
-					}
+			copy (nrhs, &y [1], b + n + ntop + nbot - 1, ldy, ldb);
+			for (int i = 0; i < n; ++i) {
+				for (int j = 0; j < nrhs; ++j) {
+					b [ntop + i + j * ldb] -= bufferr [i + j * n] * y [1 + j * ldy];
 				}
 			}
 		}
 #endif
-	}
-	
-	void p_block_direct_tridiag_solve (int id, int np, int n, double* sub, double *diag, double *sup, double *supsup, double* b, int nrhs, int ldb) {
-		std::vector <double> y (nrhs + 1, 0.0);
-		
-		int ntop = 0, nbot = 0;
-		if (id != 0) {
-			ntop += 1;
-		}
-		if (id != np - 1) {
-			nbot += 1;
-		}
-		
-		if (ldb == -1) {
-			ldb = n + ntop + nbot;
-		}
-		
-		copy (n + ntop + nbot, sup, supsup);
-		if (id > 0) {
-			MPI::COMM_WORLD.Recv (&y [0], nrhs + 1, MPI::DOUBLE, id - 1, 0);
-			supsup [0] /= diag [0] - sub [0] * y [nrhs];
-			for (int i = 0; i < nrhs; ++i) {
-				b [i * ldb] = (b [i * ldb] - sub [0] * y [i]) / (diag [0] - sub [0] * y [nrhs]);
-			}
-		} else {
-			if (diag [0] == 0.0) {
-				FATAL ("Algorithm can't handle 0 in first diagonal element.");
-				throw 0;
-			}
-			supsup [0] /= diag [0];
-			for (int i = 0; i < nrhs; ++i) {
-				b [i * ldb] /= diag [0];
-			}
-		}
-		
-		for (int j = 1; j < n + ntop + nbot; ++j) {
-			supsup [j] /= diag [j] - sub [j] * supsup [j - 1];
-			for (int i = 0; i < nrhs; ++i) {
-				b [i * ldb + j] = (b [i * ldb + j] - sub [j] * b [i * ldb + j - 1]) / (diag [j] - sub [j] * supsup [j - 1]);
-				if (b [i * ldb + j] != b [i * ldb + j]) {
-					DEBUG ("Nan at " << i << " " << j << " " << sub [j] << " " << b [i * ldb + j - 1] << " " << diag [j] << " " << supsup [j - 1]);
-					throw 0;
-				}
-			}
-		}
-		
-		if (id < np - 1) {
-			for (int i = 0; i < nrhs; ++i) {
-				y [i] = b [i * ldb + n + ntop + nbot - 1];
-			}
-			y [nrhs] = supsup [n + ntop + nbot - 1];
-			
-			MPI::COMM_WORLD.Send (&y [0], nrhs + 1, MPI::DOUBLE, id + 1, 0);
-			
-			MPI::COMM_WORLD.Recv (&y [0], nrhs, MPI::DOUBLE, id + 1, 1);
-			
-			for (int i = 0; i < nrhs; ++i) {
-				b [i * ldb + n + ntop + nbot - 1] -= supsup [n + ntop + nbot - 1] * y [i];
-			}
-		}
-		
-		for (int j = n + ntop + nbot - 2; j >= 0; --j) {
-			for (int i = 0; i < nrhs; ++i) {
-				b [i * ldb + j] -= supsup [j] * b [i * ldb + j + 1];
-			}
-		}
-		
-		if (id > 0) {
-			for (int i = 0; i < nrhs; ++i) {
-				y [i] = b [i * ldb];
-			}
-			
-			MPI::COMM_WORLD.Send (&y [0], nrhs, MPI::DOUBLE, id - 1, 1);
-		}
 	}
 } /* utils */

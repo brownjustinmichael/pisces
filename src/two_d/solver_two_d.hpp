@@ -178,6 +178,14 @@ namespace two_d
 		virtual void _solve () {
 			TRACE ("Solving...");
 			if (transform) transform->execute ();
+			if (spectral_rhs_ptr) {
+				DEBUG ("BEFORE ADD SPEC " << spectral_rhs_ptr [12 * m + 24]);
+			}
+			if (real_rhs_ptr) {
+				DEBUG ("BEFORE ADD REAL " << real_rhs_ptr [12 * m + 24]);
+				
+			}
+			
 			if (spectral_rhs_ptr && real_rhs_ptr) {
 				utils::matrix_add_scaled (m, ldn, 1.0, real_rhs_ptr, spectral_rhs_ptr);
 			}

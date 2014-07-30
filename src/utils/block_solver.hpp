@@ -31,8 +31,6 @@ namespace utils
 			lda = n + ntop + nbot;
 		}
 		
-		DEBUG ("Starting.")
-		
 		std::vector <int> ns2;
 		if (id == 0) {
 			ns2.resize (np);
@@ -56,7 +54,6 @@ namespace utils
 			}
 		}
 		if (ldx < ntop + nbot) {
-			FATAL ("X matrix too small");
 			throw 0;
 		}
 				
@@ -65,9 +62,7 @@ namespace utils
 		matrix_copy (ntop, nbot, a + (ntop + n) * lda, x + ntop * ldb, lda, ldb);
 		matrix_copy (nbot, nbot, a + (ntop + n) * (lda + 1), x + ntop * (ldb + 1), lda, ldb);
 		
-		DEBUG ("Factorizing now " << am [0] << " " << n);
 		matrix_factorize (n, n, am, ipiv, info, lda);
-		DEBUG ("Done.");
 		
 		matrix_solve (n, am, ipiv, al, info, ntop, lda, lda);
 		matrix_solve (n, am, ipiv, ar, info, nbot, lda, lda);
@@ -210,11 +205,9 @@ namespace utils
 #endif
 	}
 	
-	void p_block_tridiag_factorize (int id, int np, int n, double* sub, double *diag, double *sup, double *supsup, int* ipiv, double *x, int *xipiv, int *info, int nrhs = 1, int lda = -1, int inrhs = 1);
+	void p_block_tridiag_factorize (int id, int np, int n, double* sub, double *diag, double *sup, double *supsup, int* ipiv, double *x, int *xipiv, int *info, int nrhs = 1, int lda = -1);
 	
-	void p_block_tridiag_solve (int id, int np, int n, double* sub, double *diag, double *sup, double *supsup, int* ipiv, double* b, double *x, int *xipiv, int *info, int nrhs = 1, int lda = -1, int ldb = -1, int inrhs = 1);
-
-	void p_block_direct_tridiag_solve (int id, int np, int n, double* sub, double *diag, double *sup, double *supsup, double* b, int nrhs = 1, int ldb = -1);
+	void p_block_tridiag_solve (int id, int np, int n, double* sub, double *diag, double *sup, double *supsup, int* ipiv, double* b, double *x, int *xipiv, int *info, int nrhs = 1, int lda = -1, int ldb = -1);
 } /* utils */
 
 #endif /* end of include guard: BLOCK_SOLVER_HPP_8C3ZNSDI */

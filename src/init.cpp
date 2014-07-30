@@ -41,7 +41,8 @@ int main (int argc, char *argv[])
 		if (!config ["grid.x.points"].IsDefined ()) config ["grid.x.points"] = 64;
 		if (!config ["grid.z.points"].IsDefined ()) config ["grid.z.points"] = 64;
 
-		int m = config.get <int> ("grid.z.points") / n_elements + 1;
+		int m = config.get <int> ("grid.z.points") / n_elements;
+		m += m % 2;
 		int n = config.get <int> ("grid.x.points");
 		double position_m0 = -config.get <double> ("grid.z.width") / 2.0 + config.get <double> ("grid.z.width") / n_elements * id;
 		double position_mm = -config.get <double> ("grid.z.width") / 2.0 + config.get <double> ("grid.z.width") / n_elements * (id + 1);
@@ -75,8 +76,8 @@ int main (int argc, char *argv[])
 		height = std::max (scale * std::exp (- (-width / 2.0 - mean) * (-width / 2.0 - mean) / 2.0 / sigma / sigma), scale * std::exp (- (width / 2.0 - mean) * (width / 2.0 - mean) / 2.0 / sigma / sigma));
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
-				// temp [i * m + j] = scale * (std::exp (- (horizontal_grid [i] - mean) * (horizontal_grid [i] - mean) / 2.0 / sigma / sigma) - height) * (std::exp (- (vertical_grid [j] - mean) * (vertical_grid [j] - mean) / 2.0 / sigma / sigma) - height) * sin (vertical_grid [j] / 3.14159 * 2 / width);
-				temp [i * m + j] = (double) (rand () % 1000 - 500) / 100000000000.0 * (-vertical_grid [j] * vertical_grid [j] + config.get <double> ("grid.z.width") * config.get <double> ("grid.z.width") / 4.0);
+				temp [i * m + j] = -scale * (std::exp (- (horizontal_grid [i] - mean) * (horizontal_grid [i] - mean) / 2.0 / sigma / sigma) - height) * (std::exp (- (vertical_grid [j] - mean) * (vertical_grid [j] - mean) / 2.0 / sigma / sigma) - height) * sin (vertical_grid [j] / 3.14159 * 2 / width);
+				// temp [i * m + j] = (double) (rand () % 1000 - 500) / 100000000000.0 * (-vertical_grid [j] * vertical_grid [j] + config.get <double> ("grid.z.width") * config.get <double> ("grid.z.width") / 4.0);
 			}
 		}
 
@@ -89,7 +90,8 @@ int main (int argc, char *argv[])
 		double duration = 0.0;
 		int mode = mode_flag;
 		output_stream.append <double> ("T", &temp [0]);
-		output_stream.append <double> ("w", &temp [0]);
+		// output_stream.append <double> ("w", &temp [0]);
+		// output_stream.append <double> ("u", &temp [0]);
 		output_stream.append_scalar <double> ("t", &duration);
 		output_stream.append_scalar <int> ("mode", &mode);
 

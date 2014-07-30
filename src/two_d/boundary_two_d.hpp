@@ -169,7 +169,7 @@ namespace two_d
 		
 		virtual void calculate_matrix (datatype timestep, datatype *default_matrix, datatype *matrix_in, datatype *interpolate_matrix, datatype *matrix_out, int lda, bool diverging = false) {
 			// Zero everything but the internal boundary row
-			utils::matrix_scale (1 + n_boundary_out, m, 0.0, matrix_out + (top ? 1 : -1 - n_boundary_out - n_boundary_in), lda);
+			utils::matrix_scale (1 + n_boundary_out + n_boundary_in, m, 0.0, matrix_out + (top ? 1 : -1 - n_boundary_out - n_boundary_in), lda);
 			// Setting the external boundary matrix row
 			utils::matrix_add_scaled (1, m, alpha, matrix_in, matrix_out + (top ? 1 : -1) * (1 + n_boundary_out + n_boundary_in), m, lda);
 			// Setting the external overlapping boundary matrix row

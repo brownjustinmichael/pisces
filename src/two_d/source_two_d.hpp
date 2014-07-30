@@ -31,9 +31,48 @@ namespace two_d
 			
 			virtual void execute () {
 				TRACE ("Executing source...");
+				datatype max = 0.0;
+				int index = 0;
+				for (int j = 0; j < m; ++j) {
+					for (int i = 0; i < ldn; ++i) {
+						if (data_out [i * m + j] < 0.0) {
+							if (data_out [i * m + j] < -max) {
+								max = -data_out [i * m + j];
+								index = i * m + j;
+							}
+						} else {
+							if (data_out [i * m + j] > max) {
+								max = data_out [i * m + j];
+								index = i * m + j;
+							}
+						}
+					}
+				}
+				DEBUG ("MAX BEFORE SOURCE " << (index / m) << " " << (index % m) << " " << data_out [index]);
+				DEBUG ("CHOICE BEFORE SOURCE " << data_out [12 * m + 24]);
 				for (int j = 0; j < m; ++j) {
 					utils::add_scaled (ldn, coeff, data_source + j, data_out + j, m, m);
 				}
+				max = 0.0;
+				index = 0;
+				for (int j = 0; j < m; ++j) {
+					for (int i = 0; i < ldn; ++i) {
+						if (data_out [i * m + j] < 0.0) {
+							if (data_out [i * m + j] < -max) {
+								max = -data_out [i * m + j];
+								index = i * m + j;
+							}
+						} else {
+							if (data_out [i * m + j] > max) {
+								max = data_out [i * m + j];
+								index = i * m + j;
+							}
+						}
+					}
+				}
+				DEBUG ("MAX FROM SOURCE " << (index / m) << " " << (index % m) << " " << data_out [index]);
+				DEBUG ("CHOICE FROM SOURCE " << data_out [12 * m + 24]);
+			
 			}
 		
 		private:
