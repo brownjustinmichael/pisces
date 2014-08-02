@@ -635,21 +635,32 @@ namespace two_d
 				data_z [m + j] = 0.0;
 			}
 			
+			double denom, A, B;
+			
 			// #pragma omp parallel for
 			for (int i = 2; i < ldn; i += 2) {
 				for (int j = 1; j < m - 1; ++j) {
-					data_x [i * m + j] = -(data_z [(i + 1) * m + j + 1] - data_z [(i + 1) * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]) / scalar / (i / 2);
-					data_x [(i + 1) * m + j] = (data_z [i * m + j + 1] - data_z [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]) / scalar / (i / 2);
+					denom = (pos_m [j + 1] - pos_m [j]) * (pos_m [j + 1] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]);
+					A = (pos_m [j - 1] * (data_z [i * m + j] - data_z [i * m + j + 1]) + pos_m [j] * (data_z [i * m + j + 1] - data_z [i * m + j - 1]) + pos_m [j + 1] * (data_z [i * m + j - 1] - data_z [i * m + j])) / denom;
+					B = (pos_m [j - 1] * pos_m [j - 1] * (data_z [i * m + j + 1] - data_z [i * m + j]) + pos_m [j] * pos_m [j] * (data_z [i * m + j - 1] - data_z [i * m + j + 1]) + pos_m [j + 1] * pos_m [j + 1] * (data_z [i * m + j] - data_z [i * m + j - 1])) / denom;
+					
+					data_x [(i + 1) * m + j] = (2.0 * A * pos_m [j] + B) / scalar / (i / 2);
+					
+					A = (pos_m [j - 1] * (data_z [(i + 1) * m + j] - data_z [(i + 1) * m + j + 1]) + pos_m [j] * (data_z [(i + 1) * m + j + 1] - data_z [(i + 1) * m + j - 1]) + pos_m [j + 1] * (data_z [(i + 1) * m + j - 1] - data_z [(i + 1) * m + j])) / denom;
+					B = (pos_m [j - 1] * pos_m [j - 1] * (data_z [(i + 1) * m + j + 1] - data_z [(i + 1) * m + j]) + pos_m [j] * pos_m [j] * (data_z [(i + 1) * m + j - 1] - data_z [(i + 1) * m + j + 1]) + pos_m [j + 1] * pos_m [j + 1] * (data_z [(i + 1) * m + j] - data_z [(i + 1) * m + j - 1])) / denom;
+					
+					data_x [i * m + j] = -(2.0 * A * pos_m [j] + B) / scalar / (i / 2);
 				}
 				data_x [i * m] = -(data_z [(i + 1) * m + 1] - data_z [(i + 1) * m]) / (pos_m [1] - pos_m [0]) / scalar / (i / 2);
+				DEBUG ("STUFF " << data_z [(i + 1) * m + 1] << " " << data_z [(i + 1) * m] << " " << (pos_m [1] - pos_m [0]) << " " << scalar << " " << data_x [i * m]);
 				data_x [(i + 1) * m] = (data_z [i * m + 1] - data_z [i * m]) / (pos_m [1] - pos_m [0]) / scalar / (i / 2);
-				data_x [i * m] = data_x [i * m + 1];
-				data_x [(i + 1) * m] = data_x [(i + 1) * m + 1];
+				data_x [i * m] = 0.0;
+				data_x [(i + 1) * m] = 0.0;
 				
 				data_x [(i + 1) * m - 1] = -(data_z [(i + 2) * m - 1] - data_z [(i + 2) * m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / scalar / (i / 2);
 				data_x [(i + 2) * m - 1] = (data_z [(i + 1) * m - 1] - data_z [(i + 1) * m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / scalar / (i / 2);
-				data_x [(i + 1) * m - 1] = data_x [(i + 1) * m - 2];
-				data_x [(i + 2) * m - 1] = data_x [(i + 2) * m - 2];
+				data_x [(i + 1) * m - 1] = 0.0;
+				data_x [(i + 2) * m - 1] = 0.0;
 			}
 		}
 		
@@ -769,6 +780,8 @@ namespace two_d
 			// utils::matrix_scale (lda - 2 - excess_0 - ex_overlap_0 - excess_n - ex_overlap_n, lda, timestep, &factorized_matrix [ex_overlap_0 + 1 + excess_0], lda);
 
 			utils::matrix_add_scaled (m - 2 - excess_0 - excess_n, m, 1.0, deriv_matrix + excess_0 + 1, &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0 + 1], m, lda);
+
+			// utils::matrix_add_scaled (m - 2 - excess_0 - excess_n, m, 1.0, default_matrix + excess_0 + 1, &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0 + 1], m, lda);
 			
 			// for (int j = 0; j < m; ++j) {
 			// 	for (int i = 0; i < m; ++i) {
@@ -856,11 +869,11 @@ namespace two_d
 				}
 			}
 			
-			for (int j = 0; j < lda; ++j) {
+			for (int j = 0; j < m; ++j) {
 				for (int i = 0; i < ldn; ++i) {
-					debug << data_temp [i * lda + j] << " ";
+					debug << data [i * m + j] << " ";
 				}
-				DEBUG ("DIV RHS PRIOR " << debug.str ());
+				DEBUG ("DIV PRIOR " << debug.str ());
 				debug.str ("");
 			}
 			
@@ -870,7 +883,13 @@ namespace two_d
 			if (boundary_n) {
 				boundary_n->calculate_rhs (NULL, NULL, &data_temp [0], &data_temp [lda - 1 - excess_n - ex_overlap_n], lda);
 			}
-
+			
+			// for (int i = 0; i < ldn; ++i) {
+			// 	for (int j = excess_0 + 1; j < m - excess_n - 2; ++j) {
+			// 		data_temp [i * lda + j] += data [i * m + j];
+			// 	}
+			// }
+			
 			TRACE ("Solving in m direction...");
 			
 			for (int j = 0; j < lda; ++j) {
@@ -882,15 +901,7 @@ namespace two_d
 			}
 
 			utils::p_block_matrix_solve (messenger_ptr->get_id (), messenger_ptr->get_np (), inner_m, overlap_0, overlap_n, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, ldn, lda, sqrt ((int) boundary_matrix.size ()), lda);
-			
-			for (int j = 0; j < lda; ++j) {
-				for (int i = 0; i < ldn; ++i) {
-					debug << data_temp [i * lda + j] << " ";
-				}
-				DEBUG ("DIV END " << debug.str ());
-				debug.str ("");
-			}
-
+		
 			TRACE ("Matrix solve complete.");
 
 			for (int i = 0; i < ldn; ++i) {
