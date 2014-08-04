@@ -151,6 +151,8 @@ namespace bases
 			exists_array.resize (n * n * 3, false);	
 		
 			width = positions [n - 1] - positions [0];
+			
+			width *= -1;
 
 			for (int d = 0; d < 3; ++d) {
 				for (int k = 0; k < n; ++k) {
