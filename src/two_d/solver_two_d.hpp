@@ -372,140 +372,43 @@ namespace two_d
 		};
 		
 		template <class datatype>
-		class horizontal_divergence_solver : public bases::solver <datatype>
+		class incompressible_corrector : public bases::solver <datatype>
 		{
 		public:
-			horizontal_divergence_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_x, datatype *i_data_z, int *i_element_flags, int *i_component_flags);
-			horizontal_divergence_solver (bases::master_solver <datatype> &i_solver, datatype *i_data_z);
+			incompressible_corrector (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype *i_rhs, datatype* i_data, datatype *i_data_x, datatype *i_data_z, int *i_element_flags, int *i_component_flags, int *i_component_x, int *i_component_z);
+			incompressible_corrector (bases::master_solver <datatype> &i_solver, bases::master_solver <datatype> &i_solver_x, bases::master_solver <datatype> &i_solver_z, utils::messenger* i_messenger_ptr);
 			
-			virtual ~horizontal_divergence_solver () {}
+			virtual ~incompressible_corrector () {}
 			
 			datatype *matrix_ptr () {
 				return NULL;
 			}
-			
+	
 			void factorize ();
 			void execute ();
-			
+		
 		private:
 			int n;
 			int ldn;
 			int m;
-			const datatype *pos_m;
-			datatype *data_x, *data_z, scalar;
+			datatype *data, *data_x, *data_z;
+			datatype ex_pos_0, ex_pos_m;
 			int flags;
+			int *component_flags_x, *component_flags_z;
 			bases::grid <datatype> &grid_n;
 			bases::grid <datatype> &grid_m;
-		};
-		
-		// template <class datatype>
-		// class vertical_divergence_solver : public bases::solver <datatype>
-		// {
-		// public:
-		// 	vertical_divergence_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger *i_messenger_ptr, datatype* i_data_x, datatype *i_data_z, int *i_element_flags, int *i_component_flags);
-		// 	vertical_divergence_solver (bases::master_solver <datatype> &i_solver, utils::messenger* i_messenger_ptr, datatype *i_data_x);
-		//
-		// 	virtual ~vertical_divergence_solver () {}
-		//
-		// 	datatype *matrix_ptr () {
-		// 		return NULL;
-		// 	}
-		//
-		// 	void factorize ();
-		// 	void execute ();
-		//
-		// private:
-		// 	int n;
-		// 	int ldn;
-		// 	int m;
-		// 	datatype ex_pos_0, ex_pos_m;
-		// 	int flags;
-		// 	const datatype *pos_n, *pos_m;
-		// 	datatype *data_x;
-		// 	datatype *data_z;
-		// 	bases::grid <datatype> &grid_n;
-		// 	bases::grid <datatype> &grid_m;
-		// 	datatype *sub_ptr, *diag_ptr, *sup_ptr;
-		// 	int excess_0, excess_n, id, np;
-		// 	std::shared_ptr <bases::plan <datatype> > transform;
-		//
-		//
-		// 	utils::messenger* messenger_ptr;
-		//
-		// 	std::vector <datatype> x;
-		// 	std::vector <datatype> sup, sub, diag, supsup; //!< A datatype vector to be used in lieu of data_out for non-updating steps
-		// 	std::vector <int> ipiv, xipiv;
-		// };
-		
-		template <class datatype>
-		class vertical_divergence_solver : public bases::solver <datatype>
-		{
-		private:
-			int n;
-			int ldn;
-			int m;
-			datatype *data;
-			int flags;
+			const datatype *pos_n, *pos_m;
+			datatype *sub_ptr, *diag_ptr, *sup_ptr;
+			int excess_0, excess_n, id, np;
+			datatype *rhs_ptr;
+			std::shared_ptr <bases::plan <datatype> > transform, x_deriv, z_deriv;
 
 			utils::messenger* messenger_ptr;
-
-			datatype *rhs_ptr;
-
-			const datatype* pos_n, *positions;
-			int excess_0; //!< The integer number of elements to recv from edge_0
-			int excess_n; //!< The integer number of elements to recv from edge_n
-
-			datatype* default_matrix; //!< The datatype array of the non-timestep dependent matrix component
-			datatype* deriv_matrix; //!< The datatype array of the non-timestep dependent matrix component
-
-			std::vector <datatype> data_temp; //!< A datatype vector to be used in lieu of data_out for non-updating steps
-			std::vector <datatype> factorized_matrix; //!< A datatype vector containing the factorized sum of default matrix and timestep * matrix
-			std::vector <datatype> boundary_matrix; //!< A datatype vector containing the factorized sum of default matrix and timestep * matrix
-			std::vector <datatype> previous_rhs;
-			std::vector <int> ns;
-			std::vector <int> ipiv; //!< A vector of integers needed to calculate the factorization
-			std::vector <int> bipiv; //!< A vector of integers needed to calculate the factorization
-			std::vector <datatype> matrix;
-
-			std::shared_ptr <bases::boundary <datatype>> boundary_0, boundary_n;
-			std::shared_ptr <bases::plan <datatype> > transform;
-
-
-			int inner_m;
-			int ex_overlap_0;
-			int overlap_0;
-			int ex_overlap_n;
-			int overlap_n;
-			int lda;
-
-			using bases::solver <datatype>::element_flags;
-			using bases::solver <datatype>::component_flags;
-
-		public:
-			/*!**********************************************************************
-			 * The vertical_divergence matrix is set up as
-			 *
-			 * 0 0 boundary row for above element       0 0
-			 * 0 0 interpolating row for above element  0 0
-			 * 0 0 [interpolating row for this element] 0 0
-			 * 0 0 [boundary row for this element     ] 0 0
-			 * 0 0 [matrix                            ] 0 0
-			 * 0 0 [boundary row for this element     ] 0 0
-			 * 0 0 [interpolating row for this element] 0 0
-			 * 0 0 interpolating row for below element  0 0
-			 * 0 0 boundary row for below element       0 0
-			 ************************************************************************/
-			vertical_divergence_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
-			vertical_divergence_solver (bases::master_solver <datatype> &i_solver, utils::messenger* i_messenger_ptr, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype *i_rhs);
-
-			virtual ~vertical_divergence_solver () {}
-
-			datatype *matrix_ptr () {
-				return &matrix [0];
-			}
-
-			void factorize ();
-			void execute ();
+			
+			std::vector <datatype> x;
+			std::vector <datatype> data_temp;
+			std::vector <datatype> sup, sub, diag, supsup; //!< A datatype vector to be used in lieu of data_out for non-updating steps
+			std::vector <int> ipiv, xipiv;
 		};
 	} /* fourier */
 } /* two_d */
