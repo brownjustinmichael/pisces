@@ -651,7 +651,7 @@ namespace two_d
 			flags = 0x00;
 			transform = std::shared_ptr <bases::plan <datatype> > (new fourier::vertical_transform <datatype> (n, m, &data_temp [0], NULL, inverse, i_element_flags, &flags));
 			z_deriv = std::shared_ptr <bases::plan <datatype >> (new fourier::z_derivative_source <datatype> (grid_n, grid_m, data, data, 1.0, data_z, i_element_flags, i_component_flags_z));
-			// x_deriv = std::shared_ptr <bases::plan <datatype >> (new fourier::x_derivative_source <datatype> (grid_n, grid_m, data, data, 1.0, data_x, i_element_flags, i_component_flags_z));
+			// x_deriv = std::shared_ptr <bases::plan <datatype >> (new fourier::x_derivative_source <datatype> (grid_n, grid_m, data, data, 1.0, data_x));
 		}
 		
 		template <class datatype>
@@ -737,22 +737,30 @@ namespace two_d
 			}
 			
 			if (x_deriv) {
-				// x_deriv->execute ();
+				x_deriv->execute ();
 			}
 			
-			
-			// if (id == 0) {
-			// 	utils::scale (ldn, 0.0, data + nbegin, m);
-			// }
-			// if (id == np - 1) {
-			// 	utils::scale (ldn, 0.0, data + m - 1 - excess_n, m);
-			// }
-			// utils::scale (2 * m, 0.0, data);
+			if (id == 0) {
+				utils::scale (ldn, 0.0, data + nbegin, m);
+			}
+			if (id == np - 1) {
+				utils::scale (ldn, 0.0, data + m - 1 - excess_n, m);
+			}
+			utils::scale (2 * m, 0.0, data);
 			
 			int info;
 			
+			DEBUG (&sub [nbegin]);
+			DEBUG (&diag [nbegin]);
+			DEBUG (&sup [nbegin]);
+			DEBUG (&supsup [nbegin]);
+			DEBUG (&ipiv [nbegin]);
+			DEBUG (&x [0]);
+			DEBUG (&xipiv [0]);
+			DEBUG (" " << id << " " << np << " " << mm << " " << nbegin);
 			utils::p_block_tridiag_solve (id, np, mm, &sub [nbegin], &diag [nbegin], &sup [nbegin], &supsup [nbegin], &ipiv [nbegin], data + nbegin, &x [0], &xipiv [0], &info, ldn, m, m);
 
+			DEBUG ("DONE");
 			for (int i = 0; i < ldn; ++i) {
 				for (int j = nbegin - 1; j >= 0; --j) {
 					data [i * m + j] = (data [i * m + j + 2] - data [i * m + j + 1]) / (pos_m [j + 2] - pos_m [j + 1]) * (pos_m [j] - pos_m [j + 1]) + data [i * m + j + 1];
@@ -761,31 +769,7 @@ namespace two_d
 					data [i * m + j] = (data [i * m + j - 2] - data [i * m + j - 1]) / (pos_m [j - 2] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]) + data [i * m + j - 1];
 				}
 			}
-			
-			// for (int i = 2; i < ldn; i += 2) {
-			// 	utils::add_scaled (m, 2.0 * acos (-1.0) / (grid_n [n - 1] - grid_n [0]) * (i / 2), data + i * m, &data_temp [0] + (i + 1) * m);
-			// 	utils::add_scaled (m, -2.0 * acos (-1.0) / (grid_n [n - 1] - grid_n [0]) * (i / 2), data + (i + 1) * m, &data_temp [0] + i * m);
-			// }
-			//
-			// transform->execute ();
-			//
-			// utils::matrix_add_scaled (m, ldn, -1.0, &data_temp [0], data_x);
-			//
-			// const datatype *pos_m = &grid_m [0];
-			// datatype *new_data = &data_temp [0];
-			//
-			// for (int i = 0; i < ldn; ++i) {
-			// 	new_data [i * m] += (data [i * m + 1] - data [i * m]) / (pos_m [1] - pos_m [0]);
-			// 	for (int j = 1; j < m - 1; ++j) {
-			// 		new_data [i * m + j] += (data [i * m + j + 1] - data [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
-			// 	}
-			// 	new_data [(i + 1) * m - 1] += (data [(i + 1) * m - 1] - data [(i + 1) * m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
-			// }
-			//
-			// transform->execute ();
-			//
-			// utils::matrix_add_scaled (m, ldn, -1.0, &data_temp [0], data_z);
-			
+
 			for (int j = 0; j < m; ++j) {
 				for (int i = 0; i < ldn; ++i) {
 					if (std::isnan (data [i * m + j])) {

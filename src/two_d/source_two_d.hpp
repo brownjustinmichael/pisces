@@ -51,39 +51,23 @@ namespace two_d
 		class x_derivative_source : public explicit_plan <datatype>
 		{
 		public:
-			x_derivative_source (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype *i_data_in, datatype *i_data_out, datatype i_coeff, datatype* i_data_source, int *i_element_flags, int *i_component_flags) :
-			explicit_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out, i_element_flags, i_component_flags),
+			x_derivative_source (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype *i_data_in, datatype *i_data_out, datatype i_coeff, datatype* i_data_source) :
+			explicit_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out),
 			coeff (i_coeff),
-			data_source (i_data_source) {
-				data_temp.resize (m * ldn, 0.0);
-				flags = 0x00;
-				transform = std::shared_ptr <bases::plan <datatype> > (new fourier::vertical_transform <datatype> (n, m, data_source, &data_temp [0], inverse, element_flags, &flags));
-			}
+			data_source (i_data_source) {}
 			
 			x_derivative_source (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype* i_data_source) :
 			explicit_plan <datatype> (i_solver),
 			coeff (i_coeff),
-			data_source (i_data_source) {
-				data_temp.resize (m * ldn, 0.0);
-				flags = 0x00;
-				transform = std::shared_ptr <bases::plan <datatype> > (new fourier::vertical_transform <datatype> (n, m, &data_temp [0], NULL, inverse, element_flags, &flags));
-			}
+			data_source (i_data_source) {}
 			
 			virtual ~x_derivative_source () {}
 			
 			virtual void execute () {
 				TRACE ("Executing source...");
-				if (*component_flags & transformed_vertical) {
-					transform->execute ();
-					for (int i = 2; i < ldn; i += 2) {
-						utils::add_scaled (m, coeff * 2.0 * acos (-1.0) / (grid_n [n - 1] - grid_n [0]) * (i / 2), &data_temp [0] + i * m, data_out + (i + 1) * m);
-						utils::add_scaled (m, coeff * -2.0 * acos (-1.0) / (grid_n [n - 1] - grid_n [0]) * (i / 2), &data_temp [0] + (i + 1) * m, data_out + i * m);
-					}
-				} else {
-					for (int i = 2; i < ldn; i += 2) {
-						utils::add_scaled (m, coeff * 2.0 * acos (-1.0) / (grid_n [n - 1] - grid_n [0]) * (i / 2), data_source + i * m, data_out + (i + 1) * m);
-						utils::add_scaled (m, coeff * -2.0 * acos (-1.0) / (grid_n [n - 1] - grid_n [0]) * (i / 2), data_source + (i + 1) * m, data_out + i * m);
-					}
+				for (int i = 2; i < ldn; i += 2) {
+					utils::add_scaled (m, coeff * 2.0 * acos (-1.0) / (grid_n [n - 1] - grid_n [0]) * (i / 2), data_source + i * m, data_out + (i + 1) * m);
+					utils::add_scaled (m, coeff * -2.0 * acos (-1.0) / (grid_n [n - 1] - grid_n [0]) * (i / 2), data_source + (i + 1) * m, data_out + i * m);
 				}
 			}
 		
@@ -94,13 +78,7 @@ namespace two_d
 			using explicit_plan <datatype>::grid_n;
 			using explicit_plan <datatype>::grid_m;
 			using explicit_plan <datatype>::data_out;
-			using explicit_plan <datatype>::component_flags;
-			using explicit_plan <datatype>::element_flags;
 			datatype coeff;
-			std::vector <datatype> data_temp;
-			int flags;
-			std::shared_ptr <bases::plan <datatype> > transform;
-			
 			datatype *data_source;
 		};
 		
@@ -178,10 +156,10 @@ namespace two_d
 			virtual void execute () {
 				TRACE ("Executing source...");
 				DEBUG ("COMPONENT FLAGS ?");
-				// if (*component_flags & transformed_vertical) {
+				if (*component_flags & transformed_vertical) {
 					DEBUG ("Multiplying...");
-					// utils::matrix_matrix_multiply (m, ldn, m, coeff, grid_m.get_data (1), data_source, 1.0, data_out, m);
-				// } else {
+					utils::matrix_matrix_multiply (m, ldn, m, coeff, grid_m.get_data (1), data_source, 1.0, data_out, m);
+				} else {
 					DEBUG ("NORMAL EXECUTION");
 					#pragma omp parallel for
 					for (int i = 0; i < ldn; ++i) {
@@ -191,7 +169,7 @@ namespace two_d
 						}
 						data_out [(i + 1) * m - 1] += coeff * (data_source [(i + 1) * m - 1] - data_source [(i + 1) * m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
 					}
-				// }
+				}
 				
 #ifdef NANTRACK
 				for (int j = 0; j < m; ++j) {
