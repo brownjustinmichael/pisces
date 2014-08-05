@@ -650,6 +650,7 @@ namespace two_d
 			data_temp.resize (m * ldn);
 			flags = 0x00;
 			transform = std::shared_ptr <bases::plan <datatype> > (new fourier::vertical_transform <datatype> (n, m, &data_temp [0], NULL, inverse, i_element_flags, &flags));
+			transform_h = std::shared_ptr <bases::plan <datatype> > (new fourier::horizontal_transform <datatype> (n, m, &data_temp [0], NULL, inverse, i_element_flags, &flags));
 			z_deriv = std::shared_ptr <bases::plan <datatype >> (new fourier::z_derivative_source <datatype> (grid_n, grid_m, data, data, 1.0, data_z, i_element_flags, i_component_flags_z));
 			x_deriv = std::shared_ptr <bases::plan <datatype >> (new fourier::x_derivative_source <datatype> (grid_n, grid_m, data, data, 1.0, data_x, i_element_flags, i_component_flags_z));
 		}
@@ -661,7 +662,7 @@ namespace two_d
 		void incompressible_corrector <datatype>::factorize () {
 			TRACE ("Factorizing laplace solver...");
 
-			double scalar = 4.0 * std::acos (-1.0) / (pos_n [n - 1] - pos_n [0]);
+			double scalar = 4.0 * std::acos (-1.0) * std::acos (-1.0) / (pos_n [n - 1] - pos_n [0]) / (pos_n [n - 1] - pos_n [0]);
 			int mm = m;
 			int nbegin = excess_0;
 			if (id != 0) {
