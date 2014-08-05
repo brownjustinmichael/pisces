@@ -12,61 +12,47 @@
 #include "../utils/interpolate.hpp"
 #include "../utils/block_solver.hpp"
 #include "solver_two_d.hpp"
+#include "source_two_d.hpp"
+#include "transform_two_d.hpp"
+#include "../utils/exceptions.hpp"
 #include <sstream>
+
+/*
+	TODO boundary class:
+	* Hold edge values
+	* Communicating boundary can handle overlapping positions
+	* - Handle interpolating overlapping zones
+	* - Update ntop, nbot
+	* Edge boundaries can specify physics of boundary
+*/
+
+/*
+	TODO Split z, x solvers into separate methods
+	* Update base element class
+*/
 
 namespace two_d
 {
 	namespace fourier
 	{
 		template <class datatype>
-		solver <datatype>:: solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype& i_timestep, datatype& i_alpha_0, datatype& i_alpha_n, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
-		bases::solver <datatype> (i_element_flags, i_component_flags),
-		n (i_grid_n.get_n ()), 
-		ldn (i_grid_n.get_ld ()), 
-		m (i_grid_m.get_n ()),
-		data (i_data),
-		grid_n (i_grid_n),
-		grid_m (i_grid_m),
-		messenger_ptr (i_messenger_ptr), 
-		timestep (i_timestep), 
-		alpha_0 (i_alpha_0), 
-		alpha_n (i_alpha_n), 
-		positions (&(grid_m [0])),
-		excess_0 (grid_m.get_excess_0 ()), 
-		excess_n (grid_m.get_excess_n ()),
-		default_matrix (grid_m.get_data (0)) {
+		collocation_solver <datatype>::collocation_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
+		bases::solver <datatype> (i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), data (i_data), messenger_ptr (i_messenger_ptr), timestep (i_timestep), positions (&(i_grid_m [0])), excess_0 (i_grid_m.get_excess_0 ()), excess_n (i_grid_m.get_excess_n ()), default_matrix (i_grid_m.get_data (0)) {
 			TRACE ("Building solver...");
-			horizontal_matrix.resize (ldn);
-			factorized_horizontal_matrix.resize (ldn);
-			matrix.resize (m * m);
-			values_0.resize (ldn);
-			values_n.resize (ldn);
-			implicit_rhs_vec.resize (ldn * m);
-			explicit_rhs_vec.resize (ldn * m);
-			real_rhs_vec.resize (ldn * m);
-			if (messenger_ptr->get_id () - 1 >= 0) {
-				messenger_ptr->template send <int> (1, &excess_0, messenger_ptr->get_id () - 1, 0);
-				messenger_ptr->template recv <int> (1, &ex_excess_0, messenger_ptr->get_id () - 1, 0);
-				positions_0.resize (ex_excess_0);
-				messenger_ptr->template send <datatype> (excess_0, positions, messenger_ptr->get_id () - 1, 0);
-				messenger_ptr->template recv <datatype> (ex_excess_0, &positions_0 [0], messenger_ptr->get_id () - 1, 0);
-				ntop = 1;
-			} else {
-				ex_excess_0 = 0;
-				ntop = 0;
-			}
-			if (messenger_ptr->get_id () + 1 < messenger_ptr->get_np ()) {
-				messenger_ptr->template send <int> (1, &excess_n, messenger_ptr->get_id () + 1, 0);
-				messenger_ptr->template recv <int> (1, &ex_excess_n, messenger_ptr->get_id () + 1, 0);
-				positions_n.resize (ex_excess_n);
-				messenger_ptr->template send <datatype> (excess_n, &(positions [m - excess_n]), messenger_ptr->get_id () + 1, 0);
-				messenger_ptr->template recv <datatype> (ex_excess_n, &positions_n [0], messenger_ptr->get_id () + 1, 0);
-				nbot = 1;
-			} else {
-				ex_excess_n = 0;
-				nbot = 0;
-			}
-			int ns0 = excess_0 + ex_excess_0 + ntop * 2;
+			matrix.resize (m * m, 0.0);
+			rhs_ptr = i_rhs;
+			
+			boundary_0 = i_boundary_0;
+			boundary_n = i_boundary_n;
+			
+			ex_overlap_0 = boundary_0 ? boundary_0->get_ex_overlap () : 0;
+			overlap_0 = boundary_0 ? boundary_0->get_overlap () : 0;
+			ex_overlap_n = boundary_n ? boundary_n->get_ex_overlap () : 0;
+			overlap_n = boundary_n ? boundary_n->get_overlap () : 0;
+			lda = m + ex_overlap_n + ex_overlap_0;
+			inner_m = lda - overlap_0 - overlap_n;
+			int ns0 = overlap_0;
+			
 			if (messenger_ptr->get_id () == 0) {
 				ns.resize (messenger_ptr->get_np ());
 				messenger_ptr->template gather <int> (1, &ns0, &ns [0]);
@@ -78,73 +64,229 @@ namespace two_d
 				bipiv.resize (ntot);
 			} else {
 				messenger_ptr->template gather <int> (1, &ns0, NULL);
-				boundary_matrix.resize ((excess_0 + ex_excess_0 + excess_n + ex_excess_n + 2 * (nbot + ntop)) * (excess_0 + ex_excess_0 + excess_n + ex_excess_n + 2 * (nbot + ntop)));
+				boundary_matrix.resize ((overlap_0 + overlap_n) * (overlap_0 + overlap_n));
 			}
-			factorized_matrix.resize ((m + ex_excess_0 + ex_excess_n + nbot + ntop) * (m + ex_excess_0 + ex_excess_n + nbot + ntop), 0.0);
-			ipiv.resize (m); // TODO Should be n - ntop - nbot - excess_0 - excess_n
-			data_temp.resize ((m + ex_excess_0 + ex_excess_n + nbot + ntop) * (ldn));
 			
-			transform = std::shared_ptr <bases::plan <datatype> > (new horizontal_transform <datatype> (n, m, rhs_ptr (real_rhs), NULL, 0x00, element_flags, &flags));
+			factorized_matrix.resize (lda * lda, 0.0);
+			ipiv.resize (m); // TODO Should be n - ntop - nbot - excess_0 - excess_n
+			data_temp.resize (lda * ldn);
 			TRACE ("Solver built.");
 		}
 		
 		template <class datatype>
-		void solver <datatype>::_factorize () {
-			int info, lda = m + ex_excess_0 + ex_excess_n + nbot + ntop;
+		collocation_solver <datatype>::collocation_solver (bases::master_solver <datatype> &i_solver, utils::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n) : 
+		bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags), n (i_solver.grid_ptr (0)->get_n ()),  ldn (i_solver.grid_ptr (0)->get_ld ()),  m (i_solver.grid_ptr (1)->get_n ()), data (i_solver.data_ptr ()), messenger_ptr (i_messenger_ptr),  timestep (i_timestep),  positions (&((*(i_solver.grid_ptr (1))) [0])), excess_0 (i_solver.grid_ptr (1)->get_excess_0 ()),  excess_n (i_solver.grid_ptr (1)->get_excess_n ()), default_matrix (i_solver.grid_ptr (1)->get_data (0)) {
+			TRACE ("Building solver...");
+			matrix.resize (m * m);
+			rhs_ptr = i_solver.rhs_ptr (spectral_rhs);
+			
+			boundary_0 = i_boundary_0;
+			boundary_n = i_boundary_n;
+			
+			ex_overlap_0 = boundary_0 ? boundary_0->get_ex_overlap () : 0;
+			overlap_0 = boundary_0 ? boundary_0->get_overlap () : 0;
+			ex_overlap_n = boundary_n ? boundary_n->get_ex_overlap () : 0;
+			overlap_n = boundary_n ? boundary_n->get_overlap () : 0;
+			lda = m + ex_overlap_n + ex_overlap_0;
+			inner_m = lda - overlap_0 - overlap_n;
+			
+			int ns0 = overlap_0;
+			
+			if (messenger_ptr->get_id () == 0) {
+				ns.resize (messenger_ptr->get_np ());
+				messenger_ptr->template gather <int> (1, &ns0, &ns [0]);
+				int ntot = 0;
+				for (int i = 0; i < messenger_ptr->get_np (); ++i) {
+					ntot += ns [i];
+				}
+				boundary_matrix.resize (ntot * ntot);
+				bipiv.resize (ntot);
+			} else {
+				messenger_ptr->template gather <int> (1, &ns0, NULL);
+				boundary_matrix.resize ((overlap_0 + overlap_n) * (overlap_0 + overlap_n));
+			}
+			
+			factorized_matrix.resize (lda * lda, 0.0);
+			ipiv.resize (m); // TODO Should be n - ntop - nbot - excess_0 - excess_n
+			data_temp.resize (lda * ldn);
+			
+			/*
+				TODO Move this plan to master_solver
+			*/
+			TRACE ("Solver built.");
+		}
+		
+		template <class datatype>
+		void collocation_solver <datatype>::factorize () {
+			int info;
 			std::stringstream debug;
+
+			TRACE ("Factorizing...");
+
+			utils::matrix_copy (m, m, &matrix [0], &factorized_matrix [(ex_overlap_0) * (lda + 1)], m, lda);
+
+			/*
+				TODO Should we do the matrix copy before the edges?
+			*/
+
+			// DEBUG ("ZERO POINT " << &factorized_matrix [0]);
+
+			if (boundary_0) {
+				boundary_0->calculate_matrix (timestep, default_matrix + excess_0, &matrix [excess_0], default_matrix, &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0], lda);
+			}
+			if (boundary_n) {
+				boundary_n->calculate_matrix (timestep, default_matrix + m - 1 - excess_n, &matrix [m - 1 - excess_n], default_matrix, &factorized_matrix [(ex_overlap_0) * (lda + 1) + m - 1 - excess_n], lda);
+			}
+
+			utils::matrix_scale (lda - 2 - excess_0 - ex_overlap_0 - excess_n - ex_overlap_n, lda, timestep, &factorized_matrix [ex_overlap_0 + 1 + excess_0], lda);
+			// utils::matrix_scale (lda, lda, timestep, &factorized_matrix [(ex_overlap_0) * (lda + 1)], lda);
+
+			utils::matrix_add_scaled (m - 2 - excess_0 - excess_n, m, 1.0, default_matrix + excess_0 + 1, &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0 + 1], m, lda);
+			// utils::matrix_add_scaled (m, m, 1.0, default_matrix, &factorized_matrix [(ex_overlap_0) * (lda + 1)], m, lda);
+
+			// for (int j = 0; j < lda; ++j) {
+			// 	for (int i = 0; i < lda; ++i) {
+			// 		debug << factorized_matrix [i * lda + j] << " ";
+			// 	}
+			// 	DEBUG (debug.str ());
+			// 	debug.str ("");
+			// }
+
+			utils::p_block_matrix_factorize (messenger_ptr->get_id (), messenger_ptr->get_np (), inner_m, overlap_0, overlap_n, &factorized_matrix [0], &ipiv [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, lda, sqrt ((int) boundary_matrix.size ()));
+
+			TRACE ("Done.");
+		}
+		
+		template <class datatype>
+		void collocation_solver <datatype>::execute () {
+			int info;
+			std::stringstream debug;
+			TRACE ("Executing solve...");
+
+			/*
+				TODO Add timestep check here?
+			*/
+
+			utils::scale ((ldn) * lda, 0.0, &data_temp [0]);
+
+			if (rhs_ptr) {
+				utils::matrix_add_scaled (m, ldn, timestep, rhs_ptr, &data_temp [ex_overlap_0], m, lda);
+			}
+
+			if (boundary_0) {
+				boundary_0->calculate_rhs (data + excess_0, data, &data_temp [0], &data_temp [ex_overlap_0 + excess_0], lda);
+			}
+			if (boundary_n) {
+				boundary_n->calculate_rhs (data + m - 1 - excess_n, data, &data_temp [0], &data_temp [lda - 1 - excess_n - ex_overlap_n], lda);
+			}
+			
+			utils::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
+
+			// DEBUG ("Solving in m direction..." << &factorized_matrix [0] << " " << &data_temp [0] << " " << &boundary_matrix [0]);
+
+			// for (int j = 0; j < lda; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << data_temp [i * lda + j] << " ";
+			// 	}
+			// 	DEBUG ("RHS " << debug.str ());
+			// 	debug.str ("");
+			// }
+
+			utils::p_block_matrix_solve (messenger_ptr->get_id (), messenger_ptr->get_np (), inner_m, overlap_0, overlap_n, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, ldn, lda, sqrt ((int) boundary_matrix.size ()), lda);
+
+			// for (int j = 0; j < lda; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << data_temp [i * lda + j] << " ";
+			// 	}
+			// 	DEBUG ("DONE " << debug.str ());
+			// 	debug.str ("");
+			// }
+
+			TRACE ("Matrix solve complete.");
+
+			for (int i = 0; i < ldn; ++i) {
+				for (int j = 0; j < m; ++j) {
+					if (std::isnan (data_temp [ex_overlap_0 + i * m + j])) {
+						FATAL ("Found nan.");
+						for (int k = 0; k < m; ++k) {
+							printf ("%f ", data_temp [ex_overlap_0 + k * m + j]);
+						}
+						printf ("\n");
+						throw exceptions::nan ();
+					}
+				}
+			}
+
+			TRACE ("Updating...");
+			utils::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data, lda, m);
+
+			*component_flags |= transformed_vertical;
+
+			TRACE ("Solve complete.")
+			TRACE ("Execution complete.");
+		}
+		
+		template class collocation_solver <double>;
+		
+		template <class datatype>
+		fourier_solver <datatype>::fourier_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
+		bases::solver <datatype> (i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), data (i_data), timestep (i_timestep), excess_0 (i_grid_m.get_excess_0 ()), excess_n (i_grid_m.get_excess_n ()), pos_m (&i_grid_m [0]) {
+			TRACE ("Building solver...");
+			horizontal_matrix.resize (ldn);
+			factorized_horizontal_matrix.resize (ldn);
+			rhs_ptr = i_rhs;
+			
+			boundary_0 = i_boundary_0;
+			boundary_n = i_boundary_n;
+			
+			ex_overlap_0 = boundary_0 ? boundary_0->get_ex_overlap () : 0;
+			overlap_0 = boundary_0 ? boundary_0->get_overlap () : 0;
+			ex_overlap_n = boundary_n ? boundary_n->get_ex_overlap () : 0;
+			overlap_n = boundary_n ? boundary_n->get_overlap () : 0;
+			lda = m + ex_overlap_n + ex_overlap_0;
+			inner_m = lda - overlap_0 - overlap_n;
+			
+			data_temp.resize (lda * ldn);
+			TRACE ("Solver built.");
+		}
+		
+		template <class datatype>
+		fourier_solver <datatype>::fourier_solver (bases::master_solver <datatype> &i_solver, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n) : 
+		bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags), n (i_solver.grid_ptr (0)->get_n ()),  ldn (i_solver.grid_ptr (0)->get_ld ()),  m (i_solver.grid_ptr (1)->get_n ()), data (i_solver.data_ptr ()), timestep (i_timestep), excess_0 (i_solver.grid_ptr (1)->get_excess_0 ()),  excess_n (i_solver.grid_ptr (1)->get_excess_n ()), pos_m (&((*(i_solver.grid_ptr (1))) [0])) {
+			TRACE ("Building solver...");
+			horizontal_matrix.resize (ldn);
+			factorized_horizontal_matrix.resize (ldn);
+			rhs_ptr = i_solver.rhs_ptr (spectral_rhs);
+			
+			boundary_0 = i_boundary_0;
+			boundary_n = i_boundary_n;
+			
+			ex_overlap_0 = boundary_0 ? boundary_0->get_ex_overlap () : 0;
+			overlap_0 = boundary_0 ? boundary_0->get_overlap () : 0;
+			ex_overlap_n = boundary_n ? boundary_n->get_ex_overlap () : 0;
+			overlap_n = boundary_n ? boundary_n->get_overlap () : 0;
+			lda = m + ex_overlap_n + ex_overlap_0;
+			inner_m = lda - overlap_0 - overlap_n;
+			
+			data_temp.resize (lda * ldn);
+			
+			TRACE ("Solver built.");
+		}
+		
+		template <class datatype>
+		void fourier_solver <datatype>::factorize () {
+			
 			TRACE ("Factorizing...");
 			
 			for (int i = 0; i < ldn; ++i) {
 				factorized_horizontal_matrix [i] = 1.0 + timestep * horizontal_matrix [i];
 			}
 			
-			for (int j = 0; j < m; ++j) {
-				for (int i = 0; i < m; ++i) {
-					debug << matrix [i * m + j] << " ";
-				}
-				DEBUG ("MATRIX: " << debug.str ());
-				debug.str ("");
-			}
-			
-			utils::matrix_scale (lda, lda, 0.0, &factorized_matrix [0], lda);
-			utils::matrix_copy (m, m, default_matrix, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1)], m, lda);
-			
-			utils::matrix_add_scaled (m - excess_n - excess_0 - 2, m, timestep, &matrix [0] + excess_0 + 1, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + 1 + excess_0], m, lda);
-			if (ntop != 0) {
-				utils::matrix_add_scaled (ntop, m, alpha_0 * timestep, &matrix [0] + excess_0, &factorized_matrix [(ntop + ex_excess_0) * lda], m, m + ex_excess_0 + ex_excess_n + ntop + nbot);
-				utils::interpolate (ex_excess_0, m, m, timestep, 1.0, positions, &matrix [0], &positions_0 [0], &factorized_matrix [(ntop + ex_excess_0) * lda + ntop], m, lda);
-				utils::matrix_add_scaled (ntop, m, alpha_0 * timestep, &matrix [0] + excess_0, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + excess_0], m, m + ex_excess_0 + ex_excess_n + ntop + nbot);
-			}
-			if (nbot != 0) {
-				utils::matrix_add_scaled (nbot, m, alpha_n * timestep, &matrix [0] + m - nbot - excess_n, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + m - nbot - excess_n], m, lda);
-				utils::interpolate (ex_excess_n, m, m, timestep, 1.0, positions, &matrix [0], &positions_n [0], &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + m], m, lda);
-				utils::matrix_add_scaled (nbot, m, alpha_n * timestep, &matrix [0] + m - nbot - excess_n, &factorized_matrix [(ntop + ex_excess_0) * (lda + 1) + m + ex_excess_n], m, lda);
-			}
-			
-			for (int j = 0; j < lda; ++j) {
-				for (int i = 0; i < lda; ++i) {
-					debug << factorized_matrix [i * lda + j] << " ";
-				}
-				DEBUG ("BEFORE FACTOR: " << debug.str ());
-				debug.str ("");
-			}
-			
-			utils::p_block_matrix_factorize (messenger_ptr->get_id (), messenger_ptr->get_np (), m - excess_0 - excess_n - ntop - nbot, excess_0 + ex_excess_0 + 2 * ntop, excess_n + ex_excess_n + 2 * nbot, &factorized_matrix [0], &ipiv [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, lda, sqrt ((int) boundary_matrix.size ()));
-			
-			for (int j = 0; j < lda; ++j) {
-				for (int i = 0; i < lda; ++i) {
-					debug << factorized_matrix [i * lda + j] << " ";
-				}
-				DEBUG ("AFTER FACTOR: " << debug.str ());
-				debug.str ("");
-			}
-						
 			TRACE ("Done.");
 		}
 		
 		template <class datatype>
-		void solver <datatype>::_solve () {
-			int info, lda = m + ex_excess_0 + ex_excess_n + nbot + ntop;
+		void fourier_solver <datatype>::execute () {
 			std::stringstream debug;
 			TRACE ("Executing solve...");
 			
@@ -152,254 +294,73 @@ namespace two_d
 				TODO Add timestep check here?
 			*/
 			
-			transform->execute ();
+			// DEBUG ("Solving in n direction");
 			
 			utils::scale ((ldn) * lda, 0.0, &data_temp [0]);
 			
-			if (!(flags & first_run)) {
-				utils::copy (ldn, &data [0], &values_0 [0], m);
-				utils::copy (ldn, &data [m - 1], &values_n [0], m);
-				flags |= first_run;
+			if (rhs_ptr) {
+				utils::matrix_add_scaled (m, ldn, timestep, rhs_ptr, &data_temp [ex_overlap_0], m, lda);
 			}
+			
+			if (boundary_0) {
+				boundary_0->calculate_rhs (data + excess_0, data, &data_temp [0], &data_temp [ex_overlap_0 + excess_0], lda);
+			}
+			if (boundary_n) {
+				boundary_n->calculate_rhs (data + m - 1 - excess_n, data, &data_temp [0], &data_temp [lda - 1 - excess_n - ex_overlap_n], lda);
+			}
+			
+			utils::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
+			
+			if (boundary_0) {
+				boundary_0->send (&data_temp [0], lda);
+			}
+			if (boundary_n) {
+				boundary_n->receive (&data_temp [lda - overlap_n], lda);
+				boundary_n->send (&data_temp [lda - ex_overlap_n], lda);
+			}
+			if (boundary_0) {
+				boundary_0->receive (&data_temp [ex_overlap_0], lda);
+			}
+			
+			// DEBUG ("CHOICE RHS " << rhs_ptr [12 * m + 24] << " " << data [12 * m + 24]);
+			//
+			// for (int j = 0; j < lda; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << data_temp [i * lda + j] << " ";
+			// 	}
+			// 	DEBUG ("RHS " << debug.str ());
+			// 	debug.str ("");
+			// }
+			//
+			// for (int j = 0; j < m; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << data [i * m + j] << " ";
+			// 	}
+			// 	DEBUG ("DATA " << debug.str ());
+			// 	debug.str ("");
+			// }
+			
+			for (int j = excess_0; j < m - excess_n; ++j) {
+				utils::diagonal_solve (ldn, &factorized_horizontal_matrix [0], &data_temp [ex_overlap_0 + j], 1, lda);
+			}
+			utils::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data, lda);
 			
 			for (int i = 0; i < ldn; ++i) {
-				for (int j = 0; j < m; ++j) {
-					if (std::isnan (implicit_rhs_vec [i * m + j])) {
-						FATAL ("Found nan before scaling in implicit.");
-						for (int k = 0; k < m; ++k) {
-							printf ("%f ", implicit_rhs_vec [k * m + j]);
-						}
-						printf ("\n");
-						throw exceptions::nan ();
-					}
+				for (int j = excess_0 - 1; j >= 0; --j) {
+					data [i * m + j] = (data [i * m + j + 2] - data [i * m + j + 1]) / (pos_m [j + 2] - pos_m [j + 1]) * (pos_m [j] - pos_m [j + 1]) + data [i * m + j + 1];
+				}
+				for (int j = m - excess_n; j < m; ++j) {
+					data [i * m + j] = (data [i * m + j - 2] - data [i * m + j - 1]) / (pos_m [j - 2] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]) + data [i * m + j - 1];
 				}
 			}
 			
-			for (int i = 0; i < ldn; ++i) {
-				for (int j = 0; j < m; ++j) {
-					if (std::isnan (explicit_rhs_vec [i * m + j])) {
-						FATAL ("Found nan before scaling in explicit.");
-						for (int k = 0; k < m; ++k) {
-							printf ("%f ", explicit_rhs_vec [k * m + j]);
-						}
-						printf ("\n");
-						throw exceptions::nan ();
-					}
-				}
-			}
-			
-			for (int i = 0; i < ldn; ++i) {
-				for (int j = 0; j < m; ++j) {
-					if (std::isnan (real_rhs_vec [i * m + j])) {
-						FATAL ("Found nan before scaling in real.");
-						for (int k = 0; k < m; ++k) {
-							printf ("%f ", real_rhs_vec [k * m + j]);
-						}
-						printf ("\n");
-						throw exceptions::nan ();
-					}
-				}
-			}
-			
-			utils::matrix_add_scaled (m - excess_0 - excess_n, ldn, timestep, &implicit_rhs_vec [excess_0], &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
-			utils::matrix_add_scaled (m - excess_0 - excess_n, ldn, timestep, &real_rhs_vec [excess_0], &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
-			utils::matrix_add_scaled (m - excess_0 - excess_n, ldn, timestep, &explicit_rhs_vec [excess_0], &data_temp [ex_excess_0 + ntop + excess_0], m, lda);
-			
-			for (int i = 0; i < ldn; ++i) {
-				for (int j = 0; j < m; ++j) {
-					if (std::isnan (data_temp [ex_excess_0 + ntop + i * m + j])) {
-						FATAL ("Found nan after scaling.");
-						for (int k = 0; k < m; ++k) {
-							printf ("%f ", data_temp [ex_excess_0 + ntop + k * m + j]);
-						}
-						printf ("\n");
-						throw exceptions::nan ();
-					}
-				}
-			}
-			
-			if (ntop != 0) {
-				utils::interpolate (ex_excess_0, ldn, m - excess_0 - excess_n, 1.0, 1.0, positions + excess_0, &data_temp [ex_excess_0 + ntop + excess_0], &positions_0 [0], &data_temp [ntop], lda, lda);
-				utils::scale (ldn, alpha_0, &data_temp [0] + ntop + ex_excess_0 + excess_0, lda);
-				utils::copy (ldn, &data_temp [ntop + ex_excess_0 + excess_0], &data_temp [0], lda, lda);
-			} else {
-				utils::copy (ldn, &values_0 [0], &data_temp [0], 1, lda);
-			}
-			if (nbot != 0) {
-				utils::interpolate (ex_excess_n, ldn, m - excess_0 - excess_n, 1.0, 1.0, positions + excess_0, &data_temp [ex_excess_0 + ntop + excess_0], &positions_n [0], &data_temp [lda - nbot - ex_excess_n], lda, lda);
-				utils::scale (ldn, alpha_n, &data_temp [0] + lda - 2 * nbot - ex_excess_n - excess_n, lda);
-				utils::copy (ldn, &data_temp [0] + lda - 2 * nbot - ex_excess_n - excess_n, &data_temp [0] + lda - nbot, lda, lda);
-			} else {
-				utils::copy (ldn, &values_n [0], &data_temp [m - 1 + ntop + ex_excess_0], 1, lda);
-			}
-			
-			for (int i = 0; i < ldn; ++i) {
-				for (int j = 0; j < m; ++j) {
-					if (std::isnan (data_temp [ex_excess_0 + ntop + i * m + j])) {
-						FATAL ("Found nan after edges.");
-						for (int k = 0; k < m; ++k) {
-							debug << data_temp [ex_excess_0 + ntop + k * m + j] << " ";
-						}
-						DEBUG (debug.str ());
-						throw exceptions::nan ();
-					}
-				}
-			}
-			
-			for (int i = 0; i < ldn; ++i) {
-				for (int j = 0; j < ldn; ++j) {
-					if (std::isnan (data [i * m + j])) {
-						FATAL ("Found nan in data.");
-						throw exceptions::nan ();
-					}
-				}
-			}
-			
-			utils::matrix_add_scaled (m - 2 + ntop + nbot - excess_0 - excess_n, ldn, 1.0, data + 1 - ntop + excess_0, &data_temp [ex_excess_0 + 1 + excess_0], m, lda);
-			for (int i = 0; i < ldn; ++i) {
-				for (int j = 0; j < m; ++j) {
-					if (std::isnan (data_temp [ex_excess_0 + ntop + i * m + j])) {
-						FATAL ("Found nan.");
-						throw exceptions::nan ();
-					}
-				}
-			}
-			
-			utils::interpolate (ex_excess_0, ldn, m, 1.0, 1.0, positions, data, &positions_0 [0], &data_temp [1], m, lda);
-			utils::interpolate (ex_excess_n, ldn, m, 1.0, 1.0, positions, data, &positions_n [0], &data_temp [lda - 1 - ex_excess_n], m, lda);
-			
-			for (int i = 0; i < ldn; ++i) {
-				for (int j = 0; j < m; ++j) {
-					if (std::isnan (data_temp [ex_excess_0 + ntop + i * m + j])) {
-						FATAL ("Found nan.");
-						throw exceptions::nan ();
-					}
-				}
-			}
-			
-			if (*component_flags & x_solve) {
-				TRACE ("Solving in n direction...");
-				
-				std::vector <datatype> buffer_0 ((excess_0 > ex_excess_0 ? excess_0 + ntop : ex_excess_0 + ntop) * ldn);
-				std::vector <datatype> buffer_n ((excess_n > ex_excess_n ? excess_n + nbot : ex_excess_n + nbot) * ldn);
-				
-				for (int i = 0; i < ldn; ++i) {
-					for (int j = 0; j < ex_excess_0 + ntop; ++j) {
-						buffer_0 [j * ldn + i] = data_temp [i * lda + j];
-					}
-				}
-				
-				if (messenger_ptr->get_id () - 1 >= 0) {
-					messenger_ptr->send ((ex_excess_0 + ntop) * ldn, &buffer_0 [0], messenger_ptr->get_id () - 1, 0);
-				}
-				if (messenger_ptr->get_id () + 1 < messenger_ptr->get_np ()) {
-					messenger_ptr->recv ((excess_n + nbot) * ldn, &buffer_n [0], messenger_ptr->get_id () + 1, 0);
-				}
-				
-				for (int i = 0; i < ldn; ++i) {
-					for (int j = 0; j < ex_excess_n + nbot; ++j) {
-						data_temp [(i + 1) * lda - 2 * nbot - ex_excess_n - excess_n + j] += buffer_n [j * ldn + i];
-					}
-				}
-				for (int i = 0; i < ldn; ++i) {
-					for (int j = 0; j < excess_n + nbot; ++j) {
-						buffer_n [j * ldn + i] = data_temp [(i + 1) * lda - nbot - ex_excess_n + j];
-					}
-				}
-				
-				if (messenger_ptr->get_id () + 1 < messenger_ptr->get_np ()) {
-					messenger_ptr->send ((ex_excess_n + nbot) * ldn, &buffer_n [0], messenger_ptr->get_id () + 1, 1);
-				}
-				if (messenger_ptr->get_id () - 1 >= 0) {
-					messenger_ptr->recv ((excess_0 + ntop) * ldn, &buffer_0 [0], messenger_ptr->get_id () - 1, 1);
-				}
-				
-				for (int i = 0; i < ldn; ++i) {
-					for (int j = 0; j < ex_excess_0 + ntop; ++j) {
-						data_temp [i * lda + ntop + ex_excess_0 + j] += buffer_0 [j * ldn + i];
-					}
-				}
-				
-				for (int i = 0; i < ldn; ++i) {
-					debug << factorized_horizontal_matrix [i] << " = ";
-					for (int j = 0; j < m; ++j) {
-						debug << data_temp [i * m + j] << " ";
-					}
-					DEBUG ("X_SOLVE: " << debug.str ());
-					debug.str ("");
-				}
-				
-				for (int j = 0; j < m; ++j) {
-					utils::diagonal_solve (ldn, &factorized_horizontal_matrix [0], &data_temp [ntop + ex_excess_0 + j], 1, lda);
-				}
-				utils::matrix_copy (m, ldn, &data_temp [ntop + ex_excess_0], data, lda);
-				
-			} else if (*component_flags & z_solve) {
-				TRACE ("Solving in m direction...");
-				
-				for (int i = 0; i < ldn; ++i) {
-					for (int j = 0; j < m; ++j) {
-						if (std::isnan (data_temp [ex_excess_0 + ntop + i * m + j])) {
-							FATAL ("Found nan.");
-							for (int k = 0; k < m; ++k) {
-								printf ("%f ", data_temp [ex_excess_0 + ntop + k * m + j]);
-							}
-							printf ("\n");
-							throw exceptions::nan ();
-						}
-					}
-				}
-				
-				for (int j = 0; j < lda; ++j) {
-					for (int i = 0; i < lda; ++i) {
-						debug << factorized_matrix [i * lda + j] << " ";
-					}
-					debug << " = ";
-					for (int i = 0; i < ldn; ++i) {
-						debug << data_temp [i * m + j] << " ";
-					}
-					DEBUG ("Z_SOLVE: " << debug.str ());
-					debug.str ("");
-				}
-				
-				utils::p_block_matrix_solve (messenger_ptr->get_id (), messenger_ptr->get_np (), m - excess_0 - excess_n - ntop - nbot, excess_0 + ex_excess_0 + 2 * ntop, excess_n + ex_excess_n + 2 * nbot, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, ldn, lda, sqrt ((int) boundary_matrix.size ()), lda);
-				
-				TRACE ("Matrix solve complete.");
-				
-				for (int i = 0; i < ldn; ++i) {
-					for (int j = 0; j < m; ++j) {
-						if (std::isnan (data_temp [ex_excess_0 + ntop + i * m + j])) {
-							FATAL ("Found nan.");
-							for (int k = 0; k < m; ++k) {
-								printf ("%f ", data_temp [ex_excess_0 + ntop + k * m + j]);
-							}
-							printf ("\n");
-							throw exceptions::nan ();
-						}
-					}
-				}
-						
-				TRACE ("Updating...");
-				utils::matrix_copy (m, ldn, &data_temp [ex_excess_0 + ntop], data, lda, m);
-				
-				*component_flags |= transformed_vertical;
-				
-				TRACE ("Solve complete.")
-			}
-			if (*component_flags & z_solve) {
-				*component_flags &= ~z_solve;
-				*component_flags |= x_solve;
-			} else {
-				*component_flags &= ~x_solve;
-				*component_flags |= z_solve;
-			}
 			TRACE ("Execution complete.");
 		}
 		
-		template class solver <double>;
+		template class fourier_solver <double>;
 		
 		template <class datatype>
-		laplace_solver <datatype>::laplace_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
+		laplace_solver <datatype>::laplace_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
 		bases::solver <datatype> (i_element_flags, i_component_flags),
 		n (i_grid_n.get_n ()), 
 		ldn (i_grid_n.get_ld ()), 
@@ -412,11 +373,11 @@ namespace two_d
 		excess_0 (grid_m.get_excess_0 ()), 
 		excess_n (grid_m.get_excess_n ()),
 		messenger_ptr (i_messenger_ptr) {
+			TRACE ("Building laplace solver...");
 			sup.resize (m * ldn);
 			sub.resize (m * ldn);
 			diag.resize (m * ldn);
-			explicit_rhs_vec.resize (ldn * m);
-			real_rhs_vec.resize (ldn * m);
+			rhs_ptr = i_rhs;
 			
 			sup_ptr = &sup [0];
 			sub_ptr = &sub [0];
@@ -445,14 +406,61 @@ namespace two_d
 			if (id != 0) {
 				messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
 			}
-			
-			transform = std::shared_ptr <bases::plan <datatype> > (new horizontal_transform <datatype> (n, m, rhs_ptr (real_rhs), NULL, 0x00, i_element_flags, &flags));
 		}
 		
 		template <class datatype>
-		void laplace_solver <datatype>::_factorize () {
+		laplace_solver <datatype>::laplace_solver (bases::master_solver <datatype> &i_solver, utils::messenger* i_messenger_ptr) : 
+		bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags), n ((i_solver.grid_ptr (0))->get_n ()),
+		ldn ((i_solver.grid_ptr (0))->get_ld ()),
+		m ((i_solver.grid_ptr (1))->get_n ()),
+		data (i_solver.data_ptr ()),
+		grid_n (*(i_solver.grid_ptr (0))),
+		grid_m (*(i_solver.grid_ptr (1))),
+		pos_n (&grid_n [0]),
+		pos_m (&grid_m [0]),
+		excess_0 (grid_m.get_excess_0 ()), 
+		excess_n (grid_m.get_excess_n ()),
+		messenger_ptr (i_messenger_ptr) {
+			TRACE ("Building laplace solver...");
+			sup.resize (m * ldn);
+			sub.resize (m * ldn);
+			diag.resize (m * ldn);
+			// DEBUG ("SUP " << &sup [0]);
+			rhs_ptr = i_solver.rhs_ptr (spectral_rhs);
+
+			sup_ptr = &sup [0];
+			sub_ptr = &sub [0];
+			diag_ptr = &diag [0];
+
+			supsup.resize (ldn * m);
+			ipiv.resize (ldn * m);
+
+			if (messenger_ptr->get_id () == 0) {
+				x.resize ((m + 4 * messenger_ptr->get_np ()) * 2 * ldn);
+				xipiv.resize (2 * messenger_ptr->get_np () * ldn);
+			} else {
+				x.resize ((m + 4) * 2 * ldn);
+			}
+
+			id = messenger_ptr->get_id ();
+			np = messenger_ptr->get_np ();
+
+			if (id != 0) {
+				messenger_ptr->send (1, &pos_m [excess_0 + 1], id - 1, 0);
+			}
+			if (id != np - 1) {
+				messenger_ptr->recv (1, &ex_pos_m, id + 1, 0);
+				messenger_ptr->send (1, &pos_m [m - 1 - excess_n], id + 1, 1);
+			}
+			if (id != 0) {
+				messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
+			}
+		}
+		
+		template <class datatype>
+		void laplace_solver <datatype>::factorize () {
 			TRACE ("Factorizing laplace solver...");
-			
+
 			double scalar = 4.0 * std::acos (-1.0) / (pos_n [n - 1] - pos_n [0]);
 			int mm = m;
 			int nbegin = excess_0;
@@ -497,14 +505,14 @@ namespace two_d
 				sub_ptr [2 * m - 1] = 0.0;
 				diag_ptr [2 * m - 1] = 1.0;
 			}
-			
+
 			int info;
 			
 			utils::p_block_tridiag_factorize (id, np, mm, &sub [nbegin], &diag [nbegin], &sup [nbegin], &supsup [nbegin], &ipiv [nbegin], &x [0], &xipiv [0], &info, ldn, m);
 		}
 		
 		template <class datatype>
-		void laplace_solver <datatype>::_solve () {
+		void laplace_solver <datatype>::execute () {
 			TRACE ("Solving...");
 			int mm = m;
 			int nbegin = excess_0;
@@ -516,49 +524,11 @@ namespace two_d
 				mm -= excess_n + 1;
 			}
 			
-			// std::stringstream debug;
-			// for (int j = 0; j < m; ++j) {
-			// 	for (int i = 0; i < ldn; ++i) {
-			// 		debug << real_rhs_vec [i * m + j] << " ";
-			// 		if (std::isnan (real_rhs_vec [i * m + j])) {
-			// 			FATAL ("Nan in real rhs laplace solver.");
-			// 			throw exceptions::nan ();
-			// 		}
-			// 	}
-			// 	DEBUG (debug.str ());
-			// 	debug.str ("");
-			// }
+			if (rhs_ptr) {
+				// DEBUG (data+nbegin);
+				utils::matrix_copy (mm, ldn, rhs_ptr, data + nbegin);
+			}
 			
-			transform->execute ();
-			// for (int j = 0; j < m; ++j) {
-			// 	for (int i = 0; i < ldn; ++i) {
-			// 		debug << real_rhs_vec [i * m + j] << " ";
-			// 		if (std::isnan (real_rhs_vec [i * m + j])) {
-			// 			FATAL ("Nan in real rhs laplace solver.");
-			// 			throw exceptions::nan ();
-			// 		}
-			// 	}
-			// 	DEBUG (debug.str ());
-			// 	debug.str ("");
-			// }
-			utils::matrix_copy (mm, ldn, &explicit_rhs_vec [nbegin], data + nbegin);
-			for (int j = 0; j < m; ++j) {
-				for (int i = 0; i < ldn; ++i) {
-					if (std::isnan (data [i * m + j])) {
-						FATAL ("Nan after copy from explicit.");
-						throw exceptions::nan ();
-					}
-				}
-			}
-			utils::matrix_add_scaled (mm, ldn, 1.0, &real_rhs_vec [nbegin], data + nbegin);
-			for (int j = 0; j < m; ++j) {
-				for (int i = 0; i < ldn; ++i) {
-					if (std::isnan (data [i * m + j])) {
-						FATAL ("Nan after adding from real.");
-						throw exceptions::nan ();
-					}
-				}
-			}
 			if (id == 0) {
 				utils::scale (ldn, 0.0, data + nbegin, m);
 			}
@@ -569,17 +539,207 @@ namespace two_d
 			
 			int info;
 			
+			// DEBUG (&sub [nbegin]);
+			// DEBUG (&diag [nbegin]);
+			// DEBUG (&sup [nbegin]);
+			// DEBUG (&supsup [nbegin]);
+			// DEBUG (&ipiv [nbegin]);
+			// DEBUG (&x [0]);
+			// DEBUG (&xipiv [0]);
+			// DEBUG (" " << id << " " << np << " " << mm << " " << nbegin);
+			utils::p_block_tridiag_solve (id, np, mm, &sub [nbegin], &diag [nbegin], &sup [nbegin], &supsup [nbegin], &ipiv [nbegin], data + nbegin, &x [0], &xipiv [0], &info, ldn, m, m);
+
+			// DEBUG ("DONE");
+			for (int i = 0; i < ldn; ++i) {
+				for (int j = nbegin - 1; j >= 0; --j) {
+					data [i * m + j] = (data [i * m + j + 2] - data [i * m + j + 1]) / (pos_m [j + 2] - pos_m [j + 1]) * (pos_m [j] - pos_m [j + 1]) + data [i * m + j + 1];
+				}
+				for (int j = m - excess_n; j < m; ++j) {
+					data [i * m + j] = (data [i * m + j - 2] - data [i * m + j - 1]) / (pos_m [j - 2] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]) + data [i * m + j - 1];
+				}
+			}
+
 			for (int j = 0; j < m; ++j) {
 				for (int i = 0; i < ldn; ++i) {
 					if (std::isnan (data [i * m + j])) {
-						FATAL ("Nan before laplace solver.");
+						FATAL ("Nan in laplace solver.");
 						throw exceptions::nan ();
 					}
 				}
 			}
+
+			TRACE ("Solved.");
+		}
+		
+		template class laplace_solver <double>;
+		
+		template <class datatype>
+		incompressible_corrector <datatype>::incompressible_corrector (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype *i_rhs, datatype* i_data, datatype *i_data_x, datatype *i_data_z, int *i_element_flags, int *i_component_flags, int * i_component_flags_x, int *i_component_flags_z) : 
+		bases::solver <datatype> (i_element_flags, i_component_flags),
+		n (i_grid_n.get_n ()), 
+		ldn (i_grid_n.get_ld ()), 
+		m (i_grid_m.get_n ()),
+		data (i_data),
+		data_x (i_data_x),
+		data_z (i_data_z),
+		grid_n (i_grid_n),
+		grid_m (i_grid_m),
+		pos_n (&i_grid_n [0]),
+		pos_m (&i_grid_m [0]),
+		excess_0 (grid_m.get_excess_0 ()), 
+		excess_n (grid_m.get_excess_n ()),
+		messenger_ptr (i_messenger_ptr) {
+			TRACE ("Building laplace solver...");
+			sup.resize (m * ldn);
+			sub.resize (m * ldn);
+			diag.resize (m * ldn);
+			rhs_ptr = i_rhs;
+			component_flags_x = i_component_flags_x;
+			component_flags_z = i_component_flags_z;
+			
+			sup_ptr = &sup [0];
+			sub_ptr = &sub [0];
+			diag_ptr = &diag [0];
+			
+			supsup.resize (ldn * m);
+			ipiv.resize (ldn * m);
+			
+			if (messenger_ptr->get_id () == 0) {
+				x.resize ((m + 4 * messenger_ptr->get_np ()) * 2 * ldn);
+				xipiv.resize (2 * messenger_ptr->get_np () * ldn);
+			} else {
+				x.resize ((m + 4) * 2 * ldn);
+			}
+			
+			id = messenger_ptr->get_id ();
+			np = messenger_ptr->get_np ();
+			
+			if (id != 0) {
+				messenger_ptr->send (1, &pos_m [excess_0 + 1], id - 1, 0);
+			}
+			if (id != np - 1) {
+				messenger_ptr->recv (1, &ex_pos_m, id + 1, 0);
+				messenger_ptr->send (1, &pos_m [m - 1 - excess_n], id + 1, 1);
+			}
+			if (id != 0) {
+				messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
+			}
+			data_temp.resize (m * ldn);
+			flags = 0x00;
+			transform = std::shared_ptr <bases::plan <datatype> > (new fourier::vertical_transform <datatype> (n, m, &data_temp [0], NULL, inverse, i_element_flags, &flags));
+			transform_h = std::shared_ptr <bases::plan <datatype> > (new fourier::horizontal_transform <datatype> (n, m, &data_temp [0], NULL, inverse, i_element_flags, &flags));
+			z_deriv = std::shared_ptr <bases::plan <datatype >> (new fourier::z_derivative_source <datatype> (grid_n, grid_m, data, data, 1.0, data_z, i_element_flags, i_component_flags_z));
+			x_deriv = std::shared_ptr <bases::plan <datatype >> (new fourier::x_derivative_source <datatype> (grid_n, grid_m, data, data, 1.0, data_x, i_element_flags, i_component_flags_z));
+		}
+		
+		template <class datatype>
+		incompressible_corrector <datatype>::incompressible_corrector (bases::master_solver <datatype> &i_solver, bases::master_solver <datatype> &i_solver_x, bases::master_solver <datatype> &i_solver_z, utils::messenger* i_messenger_ptr) : incompressible_corrector (*(i_solver.grid_ptr (0)), *(i_solver.grid_ptr (1)), i_messenger_ptr, i_solver.rhs_ptr (spectral_rhs), i_solver.data_ptr (), i_solver_x.data_ptr (), i_solver_z.data_ptr (), i_solver.element_flags, i_solver.component_flags, i_solver_x.component_flags, i_solver_z.component_flags) {}
+		
+		template <class datatype>
+		void incompressible_corrector <datatype>::factorize () {
+			TRACE ("Factorizing laplace solver...");
+
+			double scalar = 4.0 * std::acos (-1.0) * std::acos (-1.0) / (pos_n [n - 1] - pos_n [0]) / (pos_n [n - 1] - pos_n [0]);
+			int mm = m;
+			int nbegin = excess_0;
+			if (id != 0) {
+				mm -= excess_0 + 2;
+				nbegin += 1;
+			}
+			if (id != np - 1) {
+				mm -= excess_n + 1;
+			}
+#pragma omp parallel for
+			for (int i = 0; i < ldn; ++i) {
+				if (id != 0) {
+					sub_ptr [i * m + nbegin] = 2.0 / (pos_m [nbegin + 1] - pos_m [nbegin]) / (pos_m [nbegin + 1] - ex_pos_0);
+					sup_ptr [i * m + nbegin] = 2.0 / (pos_m [nbegin] - ex_pos_0) / (pos_m [nbegin + 1] - ex_pos_0);
+					diag_ptr [i * m + nbegin] = -scalar * (i / 2) * (i / 2) - 2.0 / (pos_m [nbegin + 1] - ex_pos_0) * (1.0 / (pos_m [nbegin + 1] - pos_m [nbegin]) + 1.0 / (pos_m [nbegin] - ex_pos_0));
+				} else {
+					sup_ptr [i * m + nbegin] = -1.0 / (pos_m [nbegin + 1] - pos_m [nbegin]);
+					diag_ptr [i * m + nbegin] = 1.0 / (pos_m [nbegin + 1] - pos_m [nbegin]);
+					sub_ptr [i * m + nbegin] = 0.0;
+				}
+				for (int j = nbegin + 1; j < m - 1 - excess_n; ++j) {
+					sub_ptr [i * m + j] = 2.0 / (pos_m [j + 1] - pos_m [j]) / (pos_m [j + 1] - pos_m [j - 1]);
+					sup_ptr [i * m + j] = 2.0 / (pos_m [j] - pos_m [j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
+					diag_ptr [i * m + j] = -scalar * (i / 2) * (i / 2) - 2.0 / (pos_m [j + 1] - pos_m [j - 1]) * (1.0 / (pos_m [j + 1] - pos_m [j]) + 1.0 / (pos_m [j] - pos_m [j - 1]));
+				}
+				if (id != np - 1) {
+					sub_ptr [(i + 1) * m - 1 - excess_n] = 2.0 / (ex_pos_m - pos_m [m - 1 - excess_n]) / (ex_pos_m - pos_m [m - 2 - excess_n]);
+					sup_ptr [(i + 1) * m - 1 - excess_n] = 2.0 / (pos_m [m - 1 - excess_n] - pos_m [m - 2 - excess_n]) / (ex_pos_m - pos_m [m - 2 - excess_n]);
+					diag_ptr [(i + 1) * m - 1 - excess_n] = -scalar * (i / 2) * (i / 2) - 2.0 / (ex_pos_m - pos_m [m - 2 - excess_n]) * (1.0 / (ex_pos_m - pos_m [m - 1 - excess_n]) + 1.0 / (pos_m [m - 1 - excess_n] - pos_m [m - 2 - excess_n]));
+				} else {
+					sup_ptr [(i + 1) * m - 1 - excess_n] = 0.0;
+					diag_ptr [(i + 1) * m - 1 - excess_n] = 1.0 / (pos_m [m - 1 - excess_n] - pos_m [m - 2 - excess_n]);
+					sub_ptr [(i + 1) * m - 1 - excess_n] = -1.0 / (pos_m [m - 1 - excess_n] - pos_m [m - 2 - excess_n]);
+				}
+			}
+			if (id == np - 1) {
+				sup_ptr [m - 1] = 0.0;
+				sub_ptr [m - 1] = 0.0;
+				diag_ptr [m - 1] = 1.0;
+				sup_ptr [2 * m - 1] = 0.0;
+				sub_ptr [2 * m - 1] = 0.0;
+				diag_ptr [2 * m - 1] = 1.0;
+			}
+
+			int info;
+			
+			utils::p_block_tridiag_factorize (id, np, mm, &sub [nbegin], &diag [nbegin], &sup [nbegin], &supsup [nbegin], &ipiv [nbegin], &x [0], &xipiv [0], &info, ldn, m);
+		}
+		
+		template <class datatype>
+		void incompressible_corrector <datatype>::execute () {
+			std::stringstream debug;
+			TRACE ("Solving...");
+			int mm = m;
+			int nbegin = excess_0;
+			if (id != 0) {
+				mm -= excess_0 + 2;
+				nbegin += 1;
+			}
+			if (id != np - 1) {
+				mm -= excess_n + 1;
+			}
+			
+			// if (rhs_ptr) {
+			// 	DEBUG (data+nbegin);
+			// 	utils::matrix_copy (mm, ldn, rhs_ptr, data + nbegin);
+			// }
+			
+			
+			utils::matrix_scale (mm, ldn, 0.0, data);
+			
+			if (z_deriv) {
+				z_deriv->execute ();
+			}
+			
+			if (x_deriv) {
+				x_deriv->execute ();
+			}
+			
+			
+			if (id == 0) {
+				utils::scale (ldn, 0.0, data + nbegin, m);
+			}
+			if (id == np - 1) {
+				utils::scale (ldn, 0.0, data + m - 1 - excess_n, m);
+			}
+			utils::scale (2 * m, 0.0, data);
+			
+			int info;
+			
+			// for (int j = 0; j < m; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << data [i * m + j] << " ";
+			// 	}
+			// 	DEBUG ("RHS " << debug.str ());
+			// 	debug.str ("");
+			// }
 			
 			utils::p_block_tridiag_solve (id, np, mm, &sub [nbegin], &diag [nbegin], &sup [nbegin], &supsup [nbegin], &ipiv [nbegin], data + nbegin, &x [0], &xipiv [0], &info, ldn, m, m);
-			
+
 			for (int i = 0; i < ldn; ++i) {
 				for (int j = nbegin - 1; j >= 0; --j) {
 					data [i * m + j] = (data [i * m + j + 2] - data [i * m + j + 1]) / (pos_m [j + 2] - pos_m [j + 1]) * (pos_m [j] - pos_m [j + 1]) + data [i * m + j + 1];
@@ -589,6 +749,83 @@ namespace two_d
 				}
 			}
 			
+			utils::matrix_scale (m, ldn, 0.0, &data_temp [0]);
+			
+			for (int i = 2; i < ldn; i += 2) {
+				utils::add_scaled (m, 2.0 * acos (-1.0) / (grid_n [n - 1] - grid_n [0]) * (i / 2), data + i * m, &data_temp [0] + (i + 1) * m);
+				utils::add_scaled (m, -2.0 * acos (-1.0) / (grid_n [n - 1] - grid_n [0]) * (i / 2), data + (i + 1) * m, &data_temp [0] + i * m);
+			}
+			
+
+			
+			if (*component_flags_x & transformed_vertical) {
+				transform->execute ();
+			}
+			
+			// for (int j = 0; j < m; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << data [i * m + j] << " ";
+			// 	}
+			// 	DEBUG ("DATA " << debug.str ());
+			// 	debug.str ("");
+			// }
+			
+			// for (int j = 0; j < m; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << data_temp [i * m + j] << " ";
+			// 	}
+			// 	DEBUG ("GRAD X " << debug.str ());
+			// 	debug.str ("");
+			// }
+			
+			// for (int j = 0; j < m; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << data_x [i * m + j] << " ";
+			// 	}
+			// 	DEBUG ("DATA X " << debug.str ());
+			// 	debug.str ("");
+			// }
+			
+			utils::matrix_add_scaled (m, ldn, -1.0, &data_temp [0], data_x);
+			
+			const datatype *pos_m = &grid_m [0];
+			datatype *new_data = &data_temp [0];
+			
+			for (int i = 0; i < ldn; ++i) {
+				new_data [i * m] = (data [i * m + 1] - data [i * m]) / (pos_m [1] - pos_m [0]);
+				for (int j = 1; j < m - 1; ++j) {
+					new_data [i * m + j] = (data [i * m + j + 1] - data [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
+				}
+				new_data [(i + 1) * m - 1] = (data [(i + 1) * m - 1] - data [(i + 1) * m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
+			}
+			
+			if (*component_flags_x & transformed_vertical) {
+				transform->execute ();
+			}
+			
+			utils::matrix_add_scaled (m, ldn, -1.0, &data_temp [0], data_z);
+			
+			utils::scale (2 * m, 0.0, data_z);
+			
+			utils::matrix_scale (mm, ldn, 0.0, data);
+			
+			
+			if (z_deriv) {
+				z_deriv->execute ();
+			}
+			
+			if (x_deriv) {
+				x_deriv->execute ();
+			}
+			
+			// for (int j = 0; j < m; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << data [i * m + j] << " ";
+			// 	}
+			// 	DEBUG ("Div U " << debug.str ());
+			// 	debug.str ("");
+			// }
+			
 			for (int j = 0; j < m; ++j) {
 				for (int i = 0; i < ldn; ++i) {
 					if (std::isnan (data [i * m + j])) {
@@ -597,51 +834,11 @@ namespace two_d
 					}
 				}
 			}
-			
+
 			TRACE ("Solved.");
 		}
 		
-		template class laplace_solver <double>;
-	
-		template <class datatype>
-		divergence_solver <datatype>::divergence_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_x, datatype *i_data_z, int *i_element_flags, int *i_component_flags) : 
-		bases::solver <datatype> (i_element_flags, i_component_flags),
-		n (i_grid_n.get_n ()), 
-		ldn (i_grid_n.get_ld ()), 
-		m (i_grid_m.get_n ()),
-		pos_m (&(i_grid_m [0])),
-		data_x (i_data_x),
-		data_z (i_data_z),
-		scalar (2.0 * acos (-1.0) / (i_grid_n [n - 1] - i_grid_n [0])),
-		grid_n (i_grid_n),
-		grid_m (i_grid_m) {}
-		
-		template <class datatype>
-		void divergence_solver <datatype>::_factorize () {}
-		
-		template <class datatype>
-		void divergence_solver <datatype>::_solve () {
-			TRACE ("Solving...");
-			utils::scale (m * ldn, 0.0, data_x);
-			
-			for (int j = 0; j < m; ++j) {
-				data_z [j] = 0.0;
-				data_z [m + j] = 0.0;
-			}
-			
-			#pragma omp parallel for
-			for (int i = 2; i < ldn; i += 2) {
-				data_x [i * m] = -(data_z [(i + 1) * m + 1] - data_z [(i + 1) * m]) / (pos_m [1] - pos_m [0]) / scalar / (i / 2);
-				data_x [(i + 1) * m] = (data_z [i * m + 1] - data_z [i * m]) / (pos_m [1] - pos_m [0]) / scalar / (i / 2);
-				for (int j = 1; j < m - 1; ++j) {
-					data_x [i * m + j] = -(data_z [(i + 1) * m + j + 1] - data_z [(i + 1) * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]) / scalar / (i / 2);
-					data_x [(i + 1) * m + j] = (data_z [i * m + j + 1] - data_z [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]) / scalar / (i / 2);
-				}
-				data_x [(i + 1) * m - 1] = -(data_z [(i + 2) * m - 1] - data_z [(i + 2) * m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / scalar / (i / 2);
-				data_x [(i + 2) * m - 1] = (data_z [(i + 1) * m - 1] - data_z [(i + 1) * m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / scalar / (i / 2);
-			}
-		}
-		
-		template class divergence_solver <double>;
+		template class incompressible_corrector <double>;
+
 	} /* fourier */
 } /* two_d */

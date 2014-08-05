@@ -466,7 +466,7 @@ namespace io
 		 *********************************************************************/
 		template <class datatype>
 		void append (std::string name, datatype *data_ptr) {
-			TRACE ("Appending " << name << " to output...");
+			TRACE ("Appending " << name << " to output..." << *data_ptr);
 			for (int i = 0; i < (int) names.size (); ++i) {
 				if (names [i] == name) {
 					WARN ("Reuse of name " << name);
@@ -580,7 +580,7 @@ namespace io
 				}
 			}
 			
-			// OUtput the array data
+			// Output the array data
 			for (int i = 0; i < (int) names.size (); ++i) {
 				if (types [i] == &typeid (double)) {
 					format::template write <double> (file_name, names [i], (double *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset, record);
@@ -804,7 +804,6 @@ namespace io
 				} else {
 					throw 0;
 				}
-				DEBUG ("Done");
 			}
 
 			// Input the arrays from file

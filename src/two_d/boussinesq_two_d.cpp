@@ -20,7 +20,7 @@ namespace two_d
 {
 	namespace fourier
 	{
-		namespace cosine
+		namespace chebyshev
 		{
 			template <class datatype>
 			boussinesq_element <datatype>::boussinesq_element (bases::axis i_axis_n, bases::axis i_axis_m, int i_name, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_element_flags) : 
@@ -43,35 +43,63 @@ namespace two_d
 				advection_coeff = std::max (advection_coeff, i_params.get <datatype> ("composition.advection"));
 				cfl = i_params.get <datatype> ("time.cfl");
 				
+				std::shared_ptr <bases::boundary <datatype>> boundary_0, boundary_n, deriv_boundary_0, deriv_boundary_n;
+				if (messenger_ptr->get_id () > 0) {
+					boundary_0 = std::shared_ptr <bases::boundary <datatype>> (new communicating_boundary <datatype> (messenger_ptr, grids [0]->get_ld (), m, grids [1]->get_excess_0 (), &((*grids [1]) [0]), 0, false));
+					deriv_boundary_0 = boundary_0;
+				} else {
+					boundary_0 = std::shared_ptr <bases::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], 0.0, false));
+					deriv_boundary_0 = std::shared_ptr <bases::boundary <datatype>> (new fixed_deriv_boundary <datatype> (&*grids [0], &*grids [1], 0.0, false));
+				}
+				if (messenger_ptr->get_id () + 1 < messenger_ptr->get_np ()) {
+					boundary_n = std::shared_ptr <bases::boundary <datatype>> (new communicating_boundary <datatype> (messenger_ptr, grids [0]->get_ld (), m, grids [1]->get_excess_n (), &((*grids [1]) [0]), m - grids [1]->get_excess_n (), true));
+					deriv_boundary_n = boundary_n;
+				} else {
+					boundary_n = std::shared_ptr <bases::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], 0.0, true));
+					deriv_boundary_n = std::shared_ptr <bases::boundary <datatype>> (new fixed_deriv_boundary <datatype> (&*grids [0], &*grids [1], 0.0, true));
+				}
+				// deriv_boundary = boundary_0;
+
+				DEBUG ("HERE");
+				
+				/*
+					TODO Figure out how to more conveniently determine whether an edge effect is needed.
+				*/
+				
 				// Solve velocity
-				// element <datatype>::add_solver (x_velocity, new divergence_solver <datatype> (*grids [0], *grids [1], ptr (x_velocity), ptr (z_velocity), &element_flags [state], &element_flags [x_velocity]));
-				//
-				// element <datatype>::add_solver (z_velocity, new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, ptr (z_velocity), &element_flags [state], &element_flags [z_velocity]));
-				//
-				// solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new vertical_diffusion <datatype> (*solvers [z_velocity], i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha"))), pre_plan);
-				// solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new horizontal_diffusion <datatype> (*solvers [z_velocity], i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha"))), mid_plan);
-				// solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new advection <datatype> (*solvers [z_velocity], i_params.get <datatype> ("velocity.advection"), ptr (x_velocity), ptr (z_velocity))), post_plan);
-				// solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new source <datatype> (*solvers [z_velocity], i_params.get <datatype> ("velocity.buoyancy.temperature"), ptr (temp))), mid_plan);
-				// solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new source <datatype> (*solvers [z_velocity], i_params.get <datatype> ("velocity.buoyancy.composition"), ptr (composition))), mid_plan);
-				
-				// std::shared_ptr <bases::solver <datatype>> pressure_solver = std::shared_ptr <bases::solver <datatype>> (new laplace_solver <datatype> (*grids [0], *grids [1], messenger_ptr, ptr (pressure), &element_flags [state], &element_flags [pressure]));
-				// solvers [z_velocity]->add_plan (pressure_solver, pre_solve_plan);
-				// solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new z_derivative_source <datatype> (*pressure_solver, 1.0, ptr (temp))), mid_plan);
-				// solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new mixed_derivative_source <datatype> (*pressure_solver, -2.0, ptr (z_vel), ptr (x_vel))), post_plan);
-				// solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new square_z_derivative_source <datatype> (*pressure_solver, -1.0, ptr (z_vel))), post_plan);
-				// solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new square_x_derivative_source <datatype> (*pressure_solver, -1.0, ptr (x_vel))), post_plan);
-				// solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype> > (new z_derivative_source <datatype> (*solvers [z_velocity], -1.0, ptr (pressure))), pre_solve_plan);
-				
+				solvers [x_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new collocation_solver <datatype> (*solvers [x_velocity], messenger_ptr, timestep, deriv_boundary_0, deriv_boundary_n)), z_solver);
+				solvers [x_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new fourier_solver <datatype> (*solvers [x_velocity], timestep, deriv_boundary_0, deriv_boundary_n)), x_solver);
+			
+				solvers [x_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new vertical_diffusion <datatype> (*solvers [x_velocity], i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha"))), pre_plan);
+				solvers [x_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new horizontal_diffusion <datatype> (*solvers [x_velocity], i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha"))), mid_plan);
+				solvers [x_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new advection <datatype> (*solvers [x_velocity], i_params.get <datatype> ("velocity.advection"), ptr (x_velocity), ptr (z_velocity))), post_plan);
+
+				solvers [z_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new collocation_solver <datatype> (*solvers [z_velocity], messenger_ptr, timestep, boundary_0, boundary_n)),z_solver);
+				solvers [z_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new fourier_solver <datatype> (*solvers [z_velocity], timestep, boundary_0, boundary_n)), x_solver);
+
+				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new vertical_diffusion <datatype> (*solvers [z_velocity], i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha"))), pre_plan);
+				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new horizontal_diffusion <datatype> (*solvers [z_velocity], i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha"))), mid_plan);
+				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new advection <datatype> (*solvers [z_velocity], i_params.get <datatype> ("velocity.advection"), ptr (x_velocity), ptr (z_velocity))), post_plan);
+				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new source <datatype> (*solvers [z_velocity], i_params.get <datatype> ("velocity.buoyancy.temperature"), ptr (temp))), mid_plan);
+				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new source <datatype> (*solvers [z_velocity], i_params.get <datatype> ("velocity.buoyancy.composition"), ptr (composition))), mid_plan);
+
+				solvers [pressure]->add_solver (std::shared_ptr <bases::solver <datatype>> (new incompressible_corrector <datatype> (*solvers [pressure], *solvers [x_velocity], *solvers [z_velocity], messenger_ptr)));
+				solvers [pressure]->get_solver (x_solver)->add_dependency (z_velocity);
+				solvers [pressure]->get_solver (x_solver)->add_dependency (x_velocity);
+
 				// Solve temperature
-				element <datatype>::add_solver (temp, new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, ptr (temp), &element_flags [state], &element_flags [temp]));
-						
+				solvers [temp]->add_solver (std::shared_ptr <bases::solver <datatype>> (new collocation_solver <datatype> (*solvers [temp], messenger_ptr, timestep, boundary_0, boundary_n)), z_solver);
+				solvers [temp]->add_solver (std::shared_ptr <bases::solver <datatype>> (new fourier_solver <datatype> (*solvers [temp], timestep, boundary_0, boundary_n)), x_solver);
+
 				solvers [temp]->add_plan (std::shared_ptr <bases::plan <datatype>> (new vertical_diffusion <datatype> (*solvers [temp], i_params.get <datatype> ("temperature.diffusion"), i_params.get <datatype> ("time.alpha"))), pre_plan);
 				solvers [temp]->add_plan (std::shared_ptr <bases::plan <datatype>> (new horizontal_diffusion <datatype> (*solvers [temp], i_params.get <datatype> ("temperature.diffusion"), i_params.get <datatype> ("time.alpha"))), mid_plan);
 				solvers [temp]->add_plan (std::shared_ptr <bases::plan <datatype>> (new advection <datatype> (*solvers [temp], i_params.get <datatype> ("temperature.advection"), ptr (x_vel), ptr (z_vel))), post_plan);
-				// solvers [temp]->add_plan (std::shared_ptr <bases::plan <datatype>> (new source <datatype> (*solvers [temp], -i_params.get <datatype> ("temperature.stratification"), ptr (z_velocity))), mid_plan);
-				
-				// Solve composition
-				// element <datatype>::add_solver (composition, new solver <datatype> (*grids [0], *grids [1], messenger_ptr, timestep, alpha_0, alpha_n, ptr (composition), &element_flags [state], &element_flags [composition]));
+
+				solvers [temp]->add_plan (std::shared_ptr <bases::plan <datatype>> (new source <datatype> (*solvers [temp], -i_params.get <datatype> ("temperature.stratification"), ptr (z_velocity))), mid_plan);
+
+				// // Solve composition
+				// solvers [composition]->add_solver (std::shared_ptr <bases::solver <datatype>> (new collocation_solver <datatype> (*solvers [composition], messenger_ptr, timestep, boundary_0, boundary_n)), z_solver);
+				// solvers [composition]->add_solver (std::shared_ptr <bases::solver <datatype>> (new fourier_solver <datatype> (*solvers [composition], timestep, boundary_0, boundary_n)), x_solver);
 				//
 				// solvers [composition]->add_plan (std::shared_ptr <bases::plan <datatype>> (new vertical_diffusion <datatype> (*solvers [composition], i_params.get <datatype> ("composition.diffusion"), i_params.get <datatype> ("time.alpha"))), pre_plan);
 				// solvers [composition]->add_plan (std::shared_ptr <bases::plan <datatype>> (new horizontal_diffusion <datatype> (*solvers [composition], i_params.get <datatype> ("composition.diffusion"), i_params.get <datatype> ("time.alpha"))), mid_plan);
@@ -103,8 +131,6 @@ namespace two_d
 					}
 				}
 			}
-			
-			
 			
 			template class boussinesq_element <double>;
 		} /* cosine */

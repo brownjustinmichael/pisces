@@ -21,6 +21,7 @@
 #include "../utils/rezone.hpp"
 #include "../bases/grid.hpp"
 #include "../config.hpp"
+#include "solver_one_d.hpp"
 	
 namespace one_d
 {
@@ -210,6 +211,9 @@ namespace one_d
 #else
 					element <datatype>::add_transform (name, std::shared_ptr <master_transform <datatype> > (new master_transform <datatype> (*grids [0], ptr (name), NULL, forward_vertical | inverse_vertical, &element_flags [state], &element_flags [name])));
 #endif /* _CUDA */
+				}
+				if (!(flags & no_solve) && (name != position)) {
+					element <datatype>::add_solver (name, std::shared_ptr <master_solver <datatype> > (new master_solver <datatype> (*grids [0], ptr (name), &element_flags [state], &element_flags [name])));
 				}
 				return this->ptr (name);
 			}

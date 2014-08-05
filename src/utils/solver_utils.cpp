@@ -97,6 +97,7 @@ namespace utils
 		dgetrf_ (&m, &n, a, &lda, ipiv, info);
 		
 		if (*info != 0) {
+			FATAL ("ERROR " << *info);
 			throw exceptions::cannot_factor ();
 		}
 	}
@@ -145,6 +146,7 @@ namespace utils
 		sgetrf_ (&m, &n, a, &lda, ipiv, info);
 		
 		if (*info != 0) {
+			FATAL ("ERROR " << *info);
 			throw exceptions::cannot_factor ();
 		}
 	}
@@ -190,6 +192,7 @@ namespace utils
 		dgttrf_ (&n, dl, d, du, du2, ipiv, info);
 		
 		if (*info != 0) {
+			FATAL ("Info is " << *info);
 			throw exceptions::cannot_factor ();
 		}
 	}
@@ -284,8 +287,84 @@ namespace utils
 			throw exceptions::cannot_solve ();
 		}
 	}
+	
+	void tridiagonal_direct_solve (int n, double *dl, double *d, double *du, double* du2, double *b, int nrhs, int ldb) {
+		if (n == 0) {
+			return;
+		}
+		
+		if (ldb == -1) {
+			ldb = n;
+		}
 
+		dl -= 1;
+		
+		copy (n, du, du2);
+		
+		if (d [0] == 0.0) {
+			FATAL ("Algorithm can't handle 0 in first element of diagonal.");
+			throw 0;
+		}
+		
+		du2 [0] /= d [0];
+		for (int i = 0; i < nrhs; ++i) {
+			b [i * ldb] /= d [0];
+		}
+		for (int j = 1; j < n; ++j) {
+			du2 [j] /= d [j] - dl [j] * du2 [j - 1];
+			for (int i = 0; i < nrhs; ++i) {
+				b [i * ldb + j] = (b [i * ldb + j] - dl [j] * b [i * ldb + j - 1]) / (d [j] - dl [j] * du2 [j - 1]);
+				if (b [i * ldb + j] != b [i * ldb + j]) {
+					DEBUG ("FOUND NAN " << b [i * ldb + j] << " " << dl [j] << " " << b [i * ldb + j - 1] << " " << d [j] << " " << du2 [j - 1]);
+					throw 0;
+				}
+			}
+		}
+		
+		for (int j = n - 2; j >= 0; --j) {
+			for (int i = 0; i < nrhs; ++i) {
+				b [i * ldb + j] -= du2 [j] * b [i * ldb + j + 1];
+			}
+		}
+	}
 
+	void tridiagonal_direct_solve (int n, float *dl, float *d, float *du, float* du2, float *b, int nrhs, int ldb) {
+		if (n == 0) {
+			return;
+		}
+		
+		if (ldb == -1) {
+			ldb = n;
+		}
+		
+		dl -= 1;
+		copy (n, du, du2);
+		
+		if (d [0] == 0.0) {
+			FATAL ("Algorithm can't handle 0 in first element of diagonal.");
+			throw 0;
+		}
+		du2 [0] /= d [0];
+		for (int i = 0; i < nrhs; ++i) {
+			b [i * ldb] /= d [0];
+		}
+		for (int j = 1; j < n; ++j) {
+			du2 [j] /= d [j] - dl [j] * du2 [j - 1];
+			for (int i = 0; i < nrhs; ++i) {
+				b [i * ldb + j] = (b [i * ldb + j] - dl [j] * b [i * ldb + j - 1]) / (d [j] - dl [j] * du2 [j - 1]);
+			}
+		}
+		
+		for (int j = n - 2; j >= 0; ++j) {
+			for (int i = 0; i < nrhs; ++i) {
+				b [i * ldb + j] -= du2 [j] * b [i * ldb + j + 1];
+				if (b [i * ldb + j] != b [i * ldb + j]) {
+					FATAL ("FOUND NAN IN TRIDIAG DIRECT SOLVE");
+					throw 0;
+				}
+			}
+		}
+	}
 
 	void diagonal_solve (int n, float *a, float *b, int inca, int incb) {
 		for (int i = 0; i < n; ++i) {

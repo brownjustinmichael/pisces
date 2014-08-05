@@ -63,7 +63,7 @@ namespace bases
 		std::map <int, std::string> scalar_names; //!< A map of string representations of the scalars
 		std::map <int, int> element_flags; //!< A map of integer flags
 		
-		std::map<int, std::shared_ptr <solver <datatype>>> solvers; //!< A vector of shared pointers to the matrix solvers
+		std::map<int, std::shared_ptr <master_solver <datatype>>> solvers; //!< A vector of shared pointers to the matrix solvers
 		
 	private:
 		std::shared_ptr <io::output> normal_stream; //!< An implementation to output in normal space
@@ -72,10 +72,10 @@ namespace bases
 
 		std::vector <int> solver_keys; //!< A vector of integer keys to the solvers map
 		io::virtual_dump *rezone_dump; //!< A shared_ptr to a virtual dump object, for rezoning
-		std::vector <int> transforms; //!< A vector of integer keys to the transform maps
-		std::map <int, std::shared_ptr <master_transform <datatype>>> master_transforms; //!< A map of shared_ptrs to the transform objects
 		
 	public:
+		std::vector <int> transforms; //!< A vector of integer keys to the transform maps
+		std::map <int, std::shared_ptr <master_transform <datatype>>> master_transforms; //!< A map of shared_ptrs to the transform objects
 		/*!**********************************************************************
 		 * \brief Element iterator for iterating through the contained solvers
 		 ************************************************************************/
@@ -179,9 +179,9 @@ namespace bases
 		 * \param i_name The integer solver name to add
 		 * \param i_solver_ptr A pointer to a solver object
 		 *********************************************************************/
-		inline void add_solver (int i_name, solver <datatype>* i_solver_ptr) {
+		inline void add_solver (int i_name, std::shared_ptr <master_solver <datatype> > i_solver_ptr) {
 			TRACE ("Adding solver...");
-			solvers [i_name] = std::shared_ptr <solver <datatype>> (i_solver_ptr);
+			solvers [i_name] = i_solver_ptr;
 			solver_keys.push_back (i_name);
 			TRACE ("Solver added.");
 		}
@@ -365,18 +365,32 @@ namespace bases
 			TRACE ("Beginning solve...");
 			// Execute the solvers
 			for (iterator iter = begin (); iter != end (); iter++) {
-				TRACE ("Solving " << *iter);
-				try {
-					solvers [*iter]->execute ();
-				} catch (std::exception &except) {
-					FATAL ("Failure in solver " << *iter);
-					throw except;
-				}
+				// TRACE ("Solving " << *iter);
+				// solvers [*iter]->solve ();
+				
+				solve_recursive (*iter);
 			}
+			
+			for (iterator iter = begin (); iter != end (); iter++) {
+				element_flags [*iter] &= ~solved;
+			}
+			
 			// Make certain everything is fully transformed
+			
 			
 			transform (forward_vertical | no_read);
 			TRACE ("Solve complete.");
+		}
+		
+		virtual void solve_recursive (int name) {
+			if (!(element_flags [name] & solved)) {
+				int n_deps = solvers [name]->n_dependencies ();
+				for (int i = 0; i < n_deps; ++i) {
+					solve_recursive (solvers [name]->get_dependency (i));
+				}
+				solvers [name]->solve ();
+				element_flags [name] |= solved;
+			}
 		}
 		
 		/*!**********************************************************************
