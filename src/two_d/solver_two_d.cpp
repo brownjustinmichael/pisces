@@ -180,30 +180,7 @@ namespace two_d
 				boundary_n->calculate_rhs (data + m - 1 - excess_n, data, &data_temp [0], &data_temp [lda - 1 - excess_n - ex_overlap_n], lda);
 			}
 			
-			datatype max = 0.0;
-			int index = 0;
-			for (int j = 1; j < m - 1; ++j) {
-				for (int i = 0; i < ldn; ++i) {
-					if (rhs_ptr [i * m + j] < 0.0) {
-						if (rhs_ptr [i * m + j] < -max) {
-							max = -rhs_ptr [i * m + j];
-							index = i * m + j;
-						}
-					} else {
-						if (rhs_ptr [i * m + j] > max) {
-							max = rhs_ptr [i * m + j];
-							index = i * m + j;
-						}
-					}
-				}
-			}
-
 			utils::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
-
-			// DEBUG ("MAX RHS " << (index / m) << " " << (index % m) << " " << rhs_ptr [index] << " " << data [index]);
-			
-			// DEBUG ("CHOICE RHS " << rhs_ptr [12 * m + 24] << " " << data [12 * m + 24]);
-
 
 			// DEBUG ("Solving in m direction..." << &factorized_matrix [0] << " " << &data_temp [0] << " " << &boundary_matrix [0]);
 
