@@ -57,6 +57,8 @@ namespace two_d
 			}
 			
 			max_timestep = i_params.get <datatype> ("time.max");
+			init_timestep = i_params.get <datatype> ("time.init");
+			mult_timestep = i_params.get <datatype> ("time.mult");
 			timestep_safety = i_params.get <datatype> ("time.safety");
 			
 			TRACE ("Instantiated.");
@@ -148,7 +150,7 @@ namespace two_d
 		virtual datatype calculate_timestep (int i, int j, io::virtual_dump *dump = NULL) = 0;
 		
 		inline datatype calculate_min_timestep (io::virtual_dump *dump = NULL) {
-			double shared_min = max_timestep;
+			double shared_min = max_timestep / timestep_safety;
 			#pragma omp parallel 
 			{
 				double min = std::numeric_limits <double>::max ();
@@ -163,8 +165,14 @@ namespace two_d
 					shared_min = std::min (shared_min, min);
 				}
 			}
-			if ((shared_min < timestep || shared_min > 2.0 * timestep) || dump) {
-				return shared_min * timestep_safety;
+			shared_min *= timestep_safety;
+			if (timestep == 0.0) {
+				return init_timestep;
+			}
+			if (shared_min > mult_timestep * timestep) {
+				return std::min (mult_timestep * timestep, max_timestep);
+			} else if (shared_min < timestep) {
+				return shared_min;
 			} else {
 				return timestep;
 			}
@@ -238,6 +246,8 @@ namespace two_d
 		std::map <int, int> edge_size;
 		
 		datatype max_timestep;
+		datatype init_timestep;
+		datatype mult_timestep;
 		datatype timestep_safety;
 	};
 	

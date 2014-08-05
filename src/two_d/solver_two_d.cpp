@@ -200,9 +200,9 @@ namespace two_d
 
 			utils::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
 
-			DEBUG ("MAX RHS " << (index / m) << " " << (index % m) << " " << rhs_ptr [index] << " " << data [index]);
+			// DEBUG ("MAX RHS " << (index / m) << " " << (index % m) << " " << rhs_ptr [index] << " " << data [index]);
 			
-			DEBUG ("CHOICE RHS " << rhs_ptr [12 * m + 24] << " " << data [12 * m + 24]);
+			// DEBUG ("CHOICE RHS " << rhs_ptr [12 * m + 24] << " " << data [12 * m + 24]);
 
 
 			// DEBUG ("Solving in m direction..." << &factorized_matrix [0] << " " << &data_temp [0] << " " << &boundary_matrix [0]);
@@ -448,7 +448,7 @@ namespace two_d
 			sup.resize (m * ldn);
 			sub.resize (m * ldn);
 			diag.resize (m * ldn);
-			DEBUG ("SUP " << &sup [0]);
+			// DEBUG ("SUP " << &sup [0]);
 			rhs_ptr = i_solver.rhs_ptr (spectral_rhs);
 
 			sup_ptr = &sup [0];
@@ -548,7 +548,7 @@ namespace two_d
 			}
 			
 			if (rhs_ptr) {
-				DEBUG (data+nbegin);
+				// DEBUG (data+nbegin);
 				utils::matrix_copy (mm, ldn, rhs_ptr, data + nbegin);
 			}
 			
@@ -562,17 +562,17 @@ namespace two_d
 			
 			int info;
 			
-			DEBUG (&sub [nbegin]);
-			DEBUG (&diag [nbegin]);
-			DEBUG (&sup [nbegin]);
-			DEBUG (&supsup [nbegin]);
-			DEBUG (&ipiv [nbegin]);
-			DEBUG (&x [0]);
-			DEBUG (&xipiv [0]);
-			DEBUG (" " << id << " " << np << " " << mm << " " << nbegin);
+			// DEBUG (&sub [nbegin]);
+			// DEBUG (&diag [nbegin]);
+			// DEBUG (&sup [nbegin]);
+			// DEBUG (&supsup [nbegin]);
+			// DEBUG (&ipiv [nbegin]);
+			// DEBUG (&x [0]);
+			// DEBUG (&xipiv [0]);
+			// DEBUG (" " << id << " " << np << " " << mm << " " << nbegin);
 			utils::p_block_tridiag_solve (id, np, mm, &sub [nbegin], &diag [nbegin], &sup [nbegin], &supsup [nbegin], &ipiv [nbegin], data + nbegin, &x [0], &xipiv [0], &info, ldn, m, m);
 
-			DEBUG ("DONE");
+			// DEBUG ("DONE");
 			for (int i = 0; i < ldn; ++i) {
 				for (int j = nbegin - 1; j >= 0; --j) {
 					data [i * m + j] = (data [i * m + j + 2] - data [i * m + j + 1]) / (pos_m [j + 2] - pos_m [j + 1]) * (pos_m [j] - pos_m [j + 1]) + data [i * m + j + 1];
@@ -753,13 +753,13 @@ namespace two_d
 			
 			int info;
 			
-			for (int j = 0; j < m; ++j) {
-				for (int i = 0; i < ldn; ++i) {
-					debug << data [i * m + j] << " ";
-				}
-				DEBUG ("RHS " << debug.str ());
-				debug.str ("");
-			}
+			// for (int j = 0; j < m; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << data [i * m + j] << " ";
+			// 	}
+			// 	DEBUG ("RHS " << debug.str ());
+			// 	debug.str ("");
+			// }
 			
 			utils::p_block_tridiag_solve (id, np, mm, &sub [nbegin], &diag [nbegin], &sup [nbegin], &supsup [nbegin], &ipiv [nbegin], data + nbegin, &x [0], &xipiv [0], &info, ldn, m, m);
 
@@ -785,29 +785,29 @@ namespace two_d
 				transform->execute ();
 			}
 			
-			for (int j = 0; j < m; ++j) {
-				for (int i = 0; i < ldn; ++i) {
-					debug << data [i * m + j] << " ";
-				}
-				DEBUG ("DATA " << debug.str ());
-				debug.str ("");
-			}
+			// for (int j = 0; j < m; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << data [i * m + j] << " ";
+			// 	}
+			// 	DEBUG ("DATA " << debug.str ());
+			// 	debug.str ("");
+			// }
 			
-			for (int j = 0; j < m; ++j) {
-				for (int i = 0; i < ldn; ++i) {
-					debug << data_temp [i * m + j] << " ";
-				}
-				DEBUG ("GRAD X " << debug.str ());
-				debug.str ("");
-			}
+			// for (int j = 0; j < m; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << data_temp [i * m + j] << " ";
+			// 	}
+			// 	DEBUG ("GRAD X " << debug.str ());
+			// 	debug.str ("");
+			// }
 			
-			for (int j = 0; j < m; ++j) {
-				for (int i = 0; i < ldn; ++i) {
-					debug << data_x [i * m + j] << " ";
-				}
-				DEBUG ("DATA X " << debug.str ());
-				debug.str ("");
-			}
+			// for (int j = 0; j < m; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << data_x [i * m + j] << " ";
+			// 	}
+			// 	DEBUG ("DATA X " << debug.str ());
+			// 	debug.str ("");
+			// }
 			
 			utils::matrix_add_scaled (m, ldn, -1.0, &data_temp [0], data_x);
 			
@@ -841,13 +841,13 @@ namespace two_d
 				x_deriv->execute ();
 			}
 			
-			for (int j = 0; j < m; ++j) {
-				for (int i = 0; i < ldn; ++i) {
-					debug << data [i * m + j] << " ";
-				}
-				DEBUG ("Div U " << debug.str ());
-				debug.str ("");
-			}
+			// for (int j = 0; j < m; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << data [i * m + j] << " ";
+			// 	}
+			// 	DEBUG ("Div U " << debug.str ());
+			// 	debug.str ("");
+			// }
 			
 			for (int j = 0; j < m; ++j) {
 				for (int i = 0; i < ldn; ++i) {
