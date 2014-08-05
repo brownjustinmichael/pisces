@@ -67,8 +67,6 @@ namespace two_d
 				*/
 				
 				// Solve velocity
-				// solvers [x_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new divergence_solver <datatype> (*solvers [x_velocity], ptr (z_velocity))));
-
 				solvers [x_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new collocation_solver <datatype> (*solvers [x_velocity], messenger_ptr, timestep, deriv_boundary_0, deriv_boundary_n)), z_solver);
 				solvers [x_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new fourier_solver <datatype> (*solvers [x_velocity], timestep, deriv_boundary_0, deriv_boundary_n)), x_solver);
 			
@@ -98,14 +96,14 @@ namespace two_d
 				solvers [temp]->add_plan (std::shared_ptr <bases::plan <datatype>> (new advection <datatype> (*solvers [temp], i_params.get <datatype> ("temperature.advection"), ptr (x_vel), ptr (z_vel))), post_plan);
 				solvers [temp]->add_plan (std::shared_ptr <bases::plan <datatype>> (new source <datatype> (*solvers [temp], -i_params.get <datatype> ("temperature.stratification"), ptr (z_velocity))), mid_plan);
 
-				// Solve composition
-				solvers [composition]->add_solver (std::shared_ptr <bases::solver <datatype>> (new collocation_solver <datatype> (*solvers [composition], messenger_ptr, timestep, boundary_0, boundary_n)), z_solver);
-				solvers [composition]->add_solver (std::shared_ptr <bases::solver <datatype>> (new fourier_solver <datatype> (*solvers [composition], timestep, boundary_0, boundary_n)), x_solver);
-
-				solvers [composition]->add_plan (std::shared_ptr <bases::plan <datatype>> (new vertical_diffusion <datatype> (*solvers [composition], i_params.get <datatype> ("composition.diffusion"), i_params.get <datatype> ("time.alpha"))), pre_plan);
-				solvers [composition]->add_plan (std::shared_ptr <bases::plan <datatype>> (new horizontal_diffusion <datatype> (*solvers [composition], i_params.get <datatype> ("composition.diffusion"), i_params.get <datatype> ("time.alpha"))), mid_plan);
-				solvers [composition]->add_plan (std::shared_ptr <bases::plan <datatype>> (new advection <datatype> (*solvers [composition], i_params.get <datatype> ("composition.advection"), ptr (x_vel), ptr (z_vel))), post_plan);
-				solvers [composition]->add_plan (std::shared_ptr <bases::plan <datatype>> (new source <datatype> (*solvers [composition], -i_params.get <datatype> ("composition.stratification"), ptr (z_velocity))), mid_plan);
+				// // Solve composition
+				// solvers [composition]->add_solver (std::shared_ptr <bases::solver <datatype>> (new collocation_solver <datatype> (*solvers [composition], messenger_ptr, timestep, boundary_0, boundary_n)), z_solver);
+				// solvers [composition]->add_solver (std::shared_ptr <bases::solver <datatype>> (new fourier_solver <datatype> (*solvers [composition], timestep, boundary_0, boundary_n)), x_solver);
+				//
+				// solvers [composition]->add_plan (std::shared_ptr <bases::plan <datatype>> (new vertical_diffusion <datatype> (*solvers [composition], i_params.get <datatype> ("composition.diffusion"), i_params.get <datatype> ("time.alpha"))), pre_plan);
+				// solvers [composition]->add_plan (std::shared_ptr <bases::plan <datatype>> (new horizontal_diffusion <datatype> (*solvers [composition], i_params.get <datatype> ("composition.diffusion"), i_params.get <datatype> ("time.alpha"))), mid_plan);
+				// solvers [composition]->add_plan (std::shared_ptr <bases::plan <datatype>> (new advection <datatype> (*solvers [composition], i_params.get <datatype> ("composition.advection"), ptr (x_vel), ptr (z_vel))), post_plan);
+				// solvers [composition]->add_plan (std::shared_ptr <bases::plan <datatype>> (new source <datatype> (*solvers [composition], -i_params.get <datatype> ("composition.stratification"), ptr (z_velocity))), mid_plan);
 
 				TRACE ("Initialized.");
 			}

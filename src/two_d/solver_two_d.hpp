@@ -401,7 +401,7 @@ namespace two_d
 			datatype *sub_ptr, *diag_ptr, *sup_ptr;
 			int excess_0, excess_n, id, np;
 			datatype *rhs_ptr;
-			std::shared_ptr <bases::plan <datatype> > transform, x_deriv, z_deriv;
+			std::shared_ptr <bases::plan <datatype> > transform, transform_h, x_deriv, z_deriv;
 
 			utils::messenger* messenger_ptr;
 			
