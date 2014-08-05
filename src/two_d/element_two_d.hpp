@@ -172,7 +172,7 @@ namespace two_d
 			if (shared_min > mult_timestep * timestep) {
 				return std::min (mult_timestep * timestep, max_timestep);
 			} else if (shared_min < timestep) {
-				return shared_min;
+				return shared_min / mult_timestep;
 			} else {
 				return timestep;
 			}

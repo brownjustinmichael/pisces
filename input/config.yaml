@@ -6,10 +6,10 @@ grid:
     nrhs: 4096
     nb: 1
     x:
-        points: 64
+        points: 128
         width: 1.0
     z:
-        points: 64
+        points: 128
         width: 1.0
     rezone:
         check_every: -1
@@ -26,7 +26,7 @@ time:
     steps: 1000
     init: 1.0e-5
     max: 1.e-2
-    mult: 1.5
+    mult: 1.1
     safety: 0.8
     cfl: 0.1
     alpha: 1.0
@@ -51,7 +51,7 @@ input:
 output:
     file: output_%02i
     transform_file: output_t_%02i
-    every: 10
+    every: 80
     merge_file: merge_%04i
     full: true
 parallel:
