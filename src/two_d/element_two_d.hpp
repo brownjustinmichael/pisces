@@ -14,6 +14,7 @@
 #include <cmath>
 #include <sstream>
 #include "transform_two_d.hpp"
+#include "solver_two_d.hpp"
 #include "../utils/io.hpp"
 #include "../utils/formats.hpp"
 #include "../utils/rezone.hpp"
@@ -26,11 +27,6 @@ namespace two_d
 		edge_nn = 1, // Start at n, 0, increment by n
 		edge_m0 = 2, // Start at 0, 0, increment by 1
 		edge_mm = 3 // Start at 0, m, increment by 1
-	};
-	
-	enum solve_element_flags {
-		x_solve = 0x20,
-		z_solve = 0x80
 	};
 	
 	enum initialize_element_flags {
@@ -61,6 +57,8 @@ namespace two_d
 			}
 			
 			max_timestep = i_params.get <datatype> ("time.max");
+			init_timestep = i_params.get <datatype> ("time.init");
+			mult_timestep = i_params.get <datatype> ("time.mult");
 			timestep_safety = i_params.get <datatype> ("time.safety");
 			
 			TRACE ("Instantiated.");
@@ -152,7 +150,7 @@ namespace two_d
 		virtual datatype calculate_timestep (int i, int j, io::virtual_dump *dump = NULL) = 0;
 		
 		inline datatype calculate_min_timestep (io::virtual_dump *dump = NULL) {
-			double shared_min = max_timestep;
+			double shared_min = max_timestep / timestep_safety;
 			#pragma omp parallel 
 			{
 				double min = std::numeric_limits <double>::max ();
@@ -167,8 +165,14 @@ namespace two_d
 					shared_min = std::min (shared_min, min);
 				}
 			}
-			if ((shared_min < timestep || shared_min > 2.0 * timestep) || dump) {
-				return shared_min * timestep_safety;
+			shared_min *= timestep_safety;
+			if (timestep == 0.0) {
+				return init_timestep;
+			}
+			if (shared_min > mult_timestep * timestep) {
+				return std::min (mult_timestep * timestep, max_timestep);
+			} else if (shared_min < timestep) {
+				return shared_min / mult_timestep;
 			} else {
 				return timestep;
 			}
@@ -189,8 +193,6 @@ namespace two_d
 		virtual io::virtual_dump *make_rezoned_dump (datatype *positions, io::virtual_dump *old_dump, int flags = 0x00) {
 			bases::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
 			std::shared_ptr <bases::grid <datatype>> vertical_grid = generate_grid (&vertical_axis);
-			
-			DEBUG ("Old dimensions " << old_dump->dims ["T"] [0] << " " << old_dump->dims ["T"] [1]);
 			
 			utils::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_dump, &io::virtual_dumps ["two_d/element/new_dump"]);
 			
@@ -244,6 +246,8 @@ namespace two_d
 		std::map <int, int> edge_size;
 		
 		datatype max_timestep;
+		datatype init_timestep;
+		datatype mult_timestep;
 		datatype timestep_safety;
 	};
 	
@@ -286,14 +290,20 @@ namespace two_d
 					}
 				}
 				
-				virtual datatype *_initialize (int name, int i_threads = 0, datatype* initial_conditions = NULL, int i_element_flags = 0x00) {
+				virtual datatype *_initialize (int name, datatype* initial_conditions = NULL, int i_element_flags = 0x00) {
 					TRACE ("Initializing...");
 					two_d::element <datatype>::_initialize (name, initial_conditions, i_element_flags);
+					DEBUG ("Trying...");
 					/*
 						TODO Fix flaggin
 					*/
 					if ((name != x_position) && (name != z_position)) {
 						element <datatype>::add_transform (name, std::shared_ptr <master_transform <datatype> > (new master_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &element_flags [state], &element_flags [name], transform_threads)));
+					}
+					if ((name != x_position) && (name != z_position)) {
+						element <datatype>::add_solver (name, std::shared_ptr <master_solver <datatype> > (new master_solver <datatype> (*grids [0], *grids [1], ptr (name), &element_flags [state], &element_flags [name])));
+						DEBUG ("Adding " << name << " solver");
+						
 					}
 					TRACE ("Initialized.");
 					return this->ptr (name);
@@ -362,6 +372,9 @@ namespace two_d
 					*/
 					if ((name != x_position) && (name != z_position)) {
 						bases::element <datatype>::add_transform (name, std::shared_ptr <master_transform <datatype> > (new master_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal, &element_flags [state], &element_flags [name], transform_threads)));
+					}
+					if ((name != x_position) && (name != z_position)) {
+						element <datatype>::add_solver (name, std::shared_ptr <master_solver <datatype> > (new master_solver <datatype> (*grids [0], *grids [1], ptr (name), &element_flags [state], &element_flags [name])));
 					}
 					return this->ptr (name);
 				}

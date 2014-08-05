@@ -32,19 +32,27 @@ namespace two_d
 				alpha (i_alpha) {
 					TRACE ("Instantiating...");
 					pioL2 = 4.0 * (std::acos (-1.0) * std::acos (-1.0) / (grid_n [n - 1] - grid_n [0]) / (grid_n [n - 1] - grid_n [0]));
-					for (int i = 0; i < ldn; ++i) {
-						matrix_n [i] = coeff * alpha * pioL2 * (datatype) ((i / 2) * (i / 2));
+					if (matrix_n) {
+						for (int i = 0; i < ldn; ++i) {
+							matrix_n [i] = coeff * alpha * pioL2 * (datatype) ((i / 2) * (i / 2));
+						}
+					} else {
+						WARN ("No matrix");
 					}
 				}
 				
-				horizontal_diffusion (bases::solver <datatype> &i_solver, datatype i_coeff, datatype i_alpha) :
+				horizontal_diffusion (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype i_alpha) :
 				implicit_plan <datatype> (i_solver),
 				coeff (i_coeff),
 				alpha (i_alpha) {
 					TRACE ("Instantiating...");
 					pioL2 = 4.0 * (std::acos (-1.0) * std::acos (-1.0) / (grid_n [n - 1] - grid_n [0]) / (grid_n [n - 1] - grid_n [0]));
-					for (int i = 0; i < ldn; ++i) {
-						matrix_n [i] = coeff * alpha * pioL2 * (datatype) ((i / 2) * (i / 2));
+					if (matrix_n) {
+						for (int i = 0; i < ldn; ++i) {
+							matrix_n [i] = coeff * alpha * pioL2 * (datatype) ((i / 2) * (i / 2));
+						}
+					} else {
+						WARN ("No matrix");
 					}
 				}
 				
@@ -52,7 +60,6 @@ namespace two_d
 			
 				void execute () {	
 					TRACE ("Operating..." << element_flags);
-					std::stringstream debug;
 					if (*component_flags & x_solve) {
 						if (1.0 - alpha != 0.0) {
 							#pragma omp parallel for
@@ -93,32 +100,25 @@ namespace two_d
 				implicit_plan <datatype> (i_grid_n, i_grid_m, i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_element_flags, i_component_flags),
 				coeff (i_coeff),
 				alpha (i_alpha) {
-					for (int j = 0; j < m; ++j) {
-						utils::add_scaled (m, -coeff * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
+					if (matrix_m) {
+						for (int j = 0; j < m; ++j) {
+							utils::add_scaled (m, -coeff * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
+						}
+					} else {
+						WARN ("No matrix");
 					}
 				}
 				
-				vertical_diffusion (bases::solver <datatype> &i_solver, datatype i_coeff, datatype i_alpha) :
+				vertical_diffusion (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype i_alpha) :
 				implicit_plan <datatype> (i_solver),
 				coeff (i_coeff),
 				alpha (i_alpha) {
-					std::stringstream debug;
-					for (int j = 0; j < m; ++j) {
-						for (int i = 0; i < m; ++i) {
-							debug << matrix_m [i * m + j] << " ";
+					if (matrix_m) {
+						for (int j = 0; j < m; ++j) {
+							utils::add_scaled (m, -coeff * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
 						}
-						DEBUG ("BEFORE DIFFUSION: " << debug.str ());
-						debug.str ("");
-					}
-					for (int j = 0; j < m; ++j) {
-						utils::add_scaled (m, -coeff * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
-					}
-					for (int j = 0; j < m; ++j) {
-						for (int i = 0; i < m; ++i) {
-							debug << matrix_m [i * m + j] << " ";
-						}
-						DEBUG ("AFTER DIFFUSION: " << debug.str ());
-						debug.str ("");
+					} else {
+						WARN ("No matrix");
 					}
 				}
 				
@@ -126,7 +126,6 @@ namespace two_d
 			
 				void execute () {	
 					TRACE ("Operating..." << element_flags);
-					
 					if (*component_flags & z_solve) {
 						if (1.0 - alpha != 0.0) {
 							utils::matrix_matrix_multiply (m, ldn, m, coeff * (1.0 - alpha), grid_m.get_data (2), data_in, 1.0, data_out, m);
@@ -134,7 +133,6 @@ namespace two_d
 					} else {
 						utils::matrix_matrix_multiply (m, ldn, m, coeff, grid_m.get_data (2), data_in, 1.0, data_out, m);
 					}
-					
 					TRACE ("Operation complete.");
 				}
 			
@@ -159,7 +157,7 @@ namespace two_d
 			class finite_vertical_diffusion : public implicit_plan <datatype>
 			{
 			public:
-				finite_vertical_diffusion (bases::solver <datatype> &i_solver, datatype i_coeff, datatype i_alpha) :
+				finite_vertical_diffusion (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype i_alpha) :
 				implicit_plan <datatype> (i_solver),
 				coeff (i_coeff),
 				alpha (i_alpha) {

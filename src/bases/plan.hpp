@@ -53,7 +53,14 @@ enum plan_flags {
 	transform_output = 0x20000,
 	normal_output = 0x40000,
 	profile_only = 0x80000,
-	timestep_only = 0x100000
+	timestep_only = 0x100000,
+	no_solve = 0x200000,
+	solved = 0x4000000
+};
+
+enum solve_element_flags {
+	x_solve = 0x20,
+	z_solve = 0x80
 };
 
 namespace bases

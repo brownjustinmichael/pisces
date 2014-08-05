@@ -109,7 +109,8 @@ int main (int argc, char *argv[])
 			
 		omp_set_num_threads (config.get <int> ("parallel.maxthreads"));
 		
-		int m = config.get <int> ("grid.z.points") / n_elements + 1;
+		int m = config.get <int> ("grid.z.points") / n_elements;
+		m += m % 2;
 		
 		std::vector <double> positions (n_elements + 1);
 		for (int i = 0; i < n_elements + 1; ++i) {
@@ -120,13 +121,11 @@ int main (int argc, char *argv[])
 		
 		int n = config.get <int> ("grid.x.points");
 		
-		int n_steps = 0;
-		
 		bases::axis horizontal_axis (n, -config.get <double> ("grid.x.width") / 2.0, config.get <double> ("grid.x.width") / 2.0);
 		bases::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
 		
 		// one_d::cosine::advection_diffusion_element <double> element (&vertical_axis, name, config, &process_messenger, 0x00);
-		std::shared_ptr <bases::element <double>> element (new two_d::fourier::cosine::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, &process_messenger, 0x00));
+		std::shared_ptr <bases::element <double>> element (new two_d::fourier::chebyshev::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, &process_messenger, 0x00));
 		
 		TRACE ("Element constructed.");
 		
@@ -169,18 +168,19 @@ int main (int argc, char *argv[])
 		
 		cbegin = clock ();
 		begin = std::chrono::system_clock::now ();
-
+		
+		int n_steps = 0;
 		while (n_steps < config.get <int> ("time.steps")) {
 			if (config.get <int> ("grid.rezone.check_every") > 0) {
 				io::virtual_dumps ["main/dump"] = *(element->rezone_minimize_ts (&positions [0], config.get <double> ("grid.rezone.min_size"), config.get <double> ("grid.rezone.max_size"), config.get <int> ("grid.rezone.n_tries"), config.get <int> ("grid.rezone.iters_fixed_t"), config.get <double> ("grid.rezone.step_size"), config.get <double> ("grid.rezone.k"), config.get <double> ("grid.rezone.t_initial"), config.get <double> ("grid.rezone.mu_t"), config.get <double> ("grid.rezone.t_min")));
-			
+
 				bases::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
-				element.reset (new two_d::fourier::cosine::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, &process_messenger, 0x00));
-			
+				element.reset (new two_d::fourier::chebyshev::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, &process_messenger, 0x00));
+
 				/*
 					TODO It would be nice to combine the above construction of element with this one
 				*/
-			
+
 				io::input *virtual_input (new io::formatted_input <io::formats::two_d::virtual_format> ("main/dump", n, m));
 				element->setup (&*virtual_input);
 				if (normal_stream) {
@@ -192,7 +192,8 @@ int main (int argc, char *argv[])
 			}
 			element->run (n_steps, config.get <int> ("time.steps"), config.get <int> ("grid.rezone.check_every"));
 		}
-	
+		
+		
 		cend = clock ();
 		end = std::chrono::system_clock::now ();
 			

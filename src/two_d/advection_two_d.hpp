@@ -15,6 +15,22 @@ namespace two_d
 {
 	namespace fourier
 	{
+		void advection_term (int i, int j, int n, int m, double coeff, const double *pos_n, const double *pos_m, const double *vel_n, const double *vel_m, const double *data_in, double *data_out) {
+			data_out [i * m + j] += coeff * (vel_n [i * m + j] * (data_in [((i + 1) % n) * m + j] - data_in [((i - 1) % n) * m + j]) / (pos_n [(i + 1) % n] - pos_n [(i - 1) % n]) + vel_m [i * m + j] * (data_in [i * m + j + 1] - data_in [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]));
+		}
+		
+		void advection_term_quadratic (int i, int j, int n, int m, double coeff, const double *pos_n, const double *pos_m, const double *vel_n, const double *vel_m, const double *data_in, double *data_out) {
+			double denom = (pos_n [(i + 1) % n] - pos_n [i]) * (pos_n [(i + 1) % n] - pos_n [(i - 1) % n]) * (pos_n [i] - pos_n [(i - 1) % n]);
+			double A = (pos_n [(i - 1) % n] * (data_in [i * m + j] - data_in [((i + 1) % n) * m + j]) + pos_n [i] * (data_in [((i + 1) % n) * m + j] - data_in [((i - 1) % n) * m + j]) + pos_n [(i + 1) % n] * (data_in [((i - 1) % n) * m + j] - data_in [i * m + j])) / denom;
+			double B = (pos_n [(i - 1) % n] * pos_n [(i - 1) % n] * (data_in [((i + 1) % n) * m + j] - data_in [i * m + j]) + pos_n [i] * pos_n [i] * (data_in [((i - 1) % n) * m + j] - data_in [((i + 1) % n) * m + j]) + pos_n [(i + 1) % n] * pos_n [(i + 1) % n] * (data_in [i * m + j] - data_in [((i - 1) % n) * m + j])) / denom;
+			data_out [i * m + j] += coeff * vel_n [i * m + j] * (2.0 * A * pos_n [i] + B);
+				
+			denom = (pos_m [j + 1] - pos_m [j]) * (pos_m [j + 1] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]);
+			A = (pos_m [j - 1] * (data_in [i * m + j] - data_in [i * m + j + 1]) + pos_m [j] * (data_in [i * m + j + 1] - data_in [i * m + j - 1]) + pos_m [j + 1] * (data_in [i * m + j - 1] - data_in [i * m + j])) / denom;
+			B = (pos_m [j - 1] * pos_m [j - 1] * (data_in [i * m + j + 1] - data_in [i * m + j]) + pos_m [j] * pos_m [j] * (data_in [i * m + j - 1] - data_in [i * m + j + 1]) + pos_m [j + 1] * pos_m [j + 1] * (data_in [i * m + j] - data_in [i * m + j - 1])) / denom;
+			data_out [i * m + j] += coeff * vel_m [i * m + j] * (2.0 * A * pos_m [j] + B);
+		}
+		
 		// namespace chebyshev
 		// {
 			template <class datatype>
@@ -31,7 +47,7 @@ namespace two_d
 					TRACE ("Adding advection...");
 				}
 				
-				advection (bases::solver <datatype> &i_solver, datatype i_coeff, datatype* i_vel_n, datatype *i_vel_m) :
+				advection (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype* i_vel_n, datatype *i_vel_m) :
 				real_plan <datatype> (i_solver),
 				coeff (-i_coeff),
 				vel_n (i_vel_n),
@@ -48,7 +64,8 @@ namespace two_d
 					for (int j = 1; j < m - 1; ++j) {
 						data_out [j] += coeff * (vel_n [j] * (data_in [1 * m + j] - data_in [j]) / (pos_n [1] - pos_n [0]) + vel_m [j] * (data_in [j + 1] - data_in [j - 1]) / (pos_m [j + 1] - pos_m [j - 1]));
 						for (int i = 1; i < n - 1; ++i) {
-							data_out [i * m + j] += coeff * (vel_n [i * m + j] * (data_in [(i + 1) * m + j] - data_in [(i - 1) * m + j]) / (pos_n [i + 1] - pos_n [i - 1]) + vel_m [i * m + j] * (data_in [i * m + j + 1] - data_in [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]));
+							advection_term_quadratic (i, j, n, m, coeff, pos_n, pos_m, vel_n, vel_m, data_in, data_out);
+							// data_out [i * m + j] += coeff * (vel_n [i * m + j] * (data_in [(i + 1) * m + j] - data_in [(i - 1) * m + j]) / (pos_n [i + 1] - pos_n [i - 1]) + vel_m [i * m + j] * (data_in [i * m + j + 1] - data_in [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]));
 						}
 						data_out [(n - 1) * m + j] += coeff * (vel_n [(n - 1) * m + j] * (data_in [(n - 1) * m + j] - data_in [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]) + vel_m [(n - 1) * m + j] * (data_in [(n - 1) * m + j + 1] - data_in [(n - 1) * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]));
 					}
@@ -77,7 +94,7 @@ namespace two_d
 				pos_n (&(grid_n [0])),
 				pos_m (&(grid_m [0])) {}
 				
-				stream_advection (bases::solver <datatype> &i_solver, datatype i_coeff, datatype *i_stream) :
+				stream_advection (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype *i_stream) :
 				real_plan <datatype> (i_solver),
 				coeff (-i_coeff),
 				stream (i_stream),

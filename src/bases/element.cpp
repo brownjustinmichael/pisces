@@ -100,34 +100,34 @@ namespace bases
 				, output_time, output_duration);
 			}
 			
-			#pragma omp parallel sections num_threads(2)
-				{
-				#pragma omp section
-					{
+			// #pragma omp parallel sections num_threads(2)
+				// {
+				// #pragma omp section
+					// {
 			// Calculate the minimum timestep among all elements
-						omp_set_num_threads (threads);
+						// omp_set_num_threads (threads);
 						TIME (
 						t_timestep = calculate_min_timestep ();
 						messenger_ptr->min (&t_timestep);
 						, timestep_time, timestep_duration);
-					}
-				#pragma omp section
-					{
-						omp_set_num_threads (threads);
+					// }
+				// #pragma omp section
+					// {
+						// omp_set_num_threads (threads);
 						TIME (
 						for (iterator iter = begin (); iter != end (); iter++) {
 							solvers [*iter]->execute_plans (post_plan);
 						}
 						, execution_time, execution_duration);
-					}
-				}
+					// }
+				// }
 			TRACE ("Updating...");
 			
 			// Transform forward in the horizontal direction
 			TIME (
 			transform (do_not_transform | no_write);
 			, transform_time, transform_duration);
-	
+						
 			// Calculate the pre solver plans
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
@@ -173,19 +173,19 @@ namespace bases
 		INFO ("Profiling Solve: CPU Time: " << solve_time << " Wall Time: " << (double) solve_duration.count () << " Efficiency: " << solve_time / (double) solve_duration.count () / omp_get_max_threads () * 100. << "%");
 		INFO ("Profiling Output: CPU Time: " << output_time << " Wall Time: " << (double) output_duration.count () << " Efficiency: " << output_time / (double) output_duration.count () / omp_get_max_threads () * 100. << "%");
 		INFO ("Max Threads = " << threads << " of " << omp_get_max_threads ());
-		
 	}
 	
 	template <class datatype>
 	void element <datatype>::transform (int i_flags) {
 		TRACE ("Transforming...");
-		omp_set_nested (true);
 		
 		int threads = params.get <int> ("parallel.transform.threads");
-		
-		#pragma omp parallel for num_threads (threads)
-		for (int i = 0; i < (int) transforms.size (); ++i) {
-			master_transforms [transforms [i]]->transform (i_flags);
+#pragma omp parallel num_threads (threads)
+		{
+#pragma omp for
+			for (int i = 0; i < (int) transforms.size (); ++i) {
+				master_transforms [transforms [i]]->transform (i_flags);
+			}
 		}
 	}
 	

@@ -70,7 +70,7 @@ namespace two_d
 		 * \param i_data_out The integer scalar index of the output
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		explicit_plan (bases::solver <datatype> &i_solver) :
+		explicit_plan (bases::master_solver <datatype> &i_solver) :
 		bases::plan <datatype> (i_solver.element_flags, i_solver.component_flags),
 		n (i_solver.grid_ptr (0)->get_n ()),
 		ldn (i_solver.grid_ptr (0)->get_ld ()),
@@ -78,7 +78,7 @@ namespace two_d
 		grid_n (*(i_solver.grid_ptr (0))),
 		grid_m (*(i_solver.grid_ptr (1))),
 		data_in (i_solver.data_ptr ()),
-		data_out (i_solver.rhs_ptr (explicit_rhs)) {}
+		data_out (i_solver.rhs_ptr (spectral_rhs)) {}
 
 		virtual ~explicit_plan () {}
 
@@ -120,7 +120,7 @@ namespace two_d
 		 * \param i_data_out The integer scalar index of the output
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		real_plan (bases::solver <datatype> &i_solver) :
+		real_plan (bases::master_solver <datatype> &i_solver) :
 		bases::plan <datatype> (i_solver.element_flags, i_solver.component_flags),
 		n (i_solver.grid_ptr (0)->get_n ()),
 		ldn (i_solver.grid_ptr (0)->get_ld ()),
@@ -165,11 +165,11 @@ namespace two_d
 		 * \param i_matrix The datatype matrix to be updated
 		 * \copydoc plan::plan ()
 		 *********************************************************************/
-		implicit_plan (bases::solver <datatype> &i_solver) :
+		implicit_plan (bases::master_solver <datatype> &i_solver) :
 		explicit_plan <datatype> (i_solver), 
 		matrix_n (i_solver.matrix_ptr (0)),
 		matrix_m (i_solver.matrix_ptr (1)) {
-			data_out = i_solver.rhs_ptr (implicit_rhs);
+			data_out = i_solver.rhs_ptr (spectral_rhs);
 		}
 		
 		virtual ~implicit_plan () {}
