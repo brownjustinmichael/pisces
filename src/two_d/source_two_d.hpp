@@ -177,12 +177,9 @@ namespace two_d
 			
 			virtual void execute () {
 				TRACE ("Executing source...");
-				DEBUG ("COMPONENT FLAGS ?");
 				if (*component_flags & transformed_vertical) {
-					DEBUG ("Multiplying...");
 					utils::matrix_matrix_multiply (m, ldn, m, coeff, grid_m.get_data (1), data_source, 1.0, data_out, m);
 				} else {
-					DEBUG ("NORMAL EXECUTION");
 					#pragma omp parallel for
 					for (int i = 0; i < ldn; ++i) {
 						data_out [i * m] += coeff * (data_source [i * m + 1] - data_source [i * m]) / (pos_m [1] - pos_m [0]);
