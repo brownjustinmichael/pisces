@@ -216,6 +216,11 @@ namespace two_d
 				*component_flags &= ~transformed_horizontal;
 			} else {
 				*component_flags |= transformed_horizontal;
+				for (int i = 4 * (n / 2 + 1) / 3; i < 2 * (n / 2 + 1); ++i) {
+					for (int j = 0; j < m; ++j) {
+						data_out [i * m + j] *= 0.0;
+					}
+				}
 			}
 				
 			for (int i = 0; i < 2 * (n / 2 + 1) * m; ++i) {
@@ -235,6 +240,11 @@ namespace two_d
 				*component_flags &= ~transformed_horizontal;
 			} else {
 				*component_flags |= transformed_horizontal;
+				for (int i = 4 * (n / 2 + 1) / 3; i < 2 * (n / 2 + 1); ++i) {
+					for (int j = 0; j < m; ++j) {
+						data_out [i * m + j] *= 0.0;
+					}
+				}
 			}
 		
 			for (int i = 0; i < 2 * (n / 2 + 1) * m; ++i) {

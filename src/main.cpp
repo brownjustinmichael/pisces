@@ -147,6 +147,7 @@ int main (int argc, char *argv[])
 		
 			normal_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (buffer, config.get <int> ("output.every"), n, m, 1, 0, config.get <bool> ("output.full") ? n_elements * m : 0, 0, 0, config.get <bool> ("output.full") ? id * m : 0));
 			element->setup_output (normal_stream, normal_output);
+				
 		}
 		
 		std::shared_ptr <io::output> transform_stream;

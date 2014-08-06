@@ -590,25 +590,25 @@ namespace two_d
 		excess_n (grid_m.get_excess_n ()),
 		messenger_ptr (i_messenger_ptr) {
 			TRACE ("Building laplace solver...");
-			sup.resize (m * ldn);
-			sub.resize (m * ldn);
-			diag.resize (m * ldn);
+			sup.resize ((m + 1) * ldn);
+			sub.resize ((m + 1) * ldn);
+			diag.resize ((m + 1) * ldn);
 			rhs_ptr = i_rhs;
 			component_flags_x = i_component_flags_x;
 			component_flags_z = i_component_flags_z;
 			
-			sup_ptr = &sup [0];
-			sub_ptr = &sub [0];
-			diag_ptr = &diag [0];
+			sup_ptr = &sup [1];
+			sub_ptr = &sub [1];
+			diag_ptr = &diag [1];
 			
-			supsup.resize (ldn * m);
-			ipiv.resize (ldn * m);
+			supsup.resize (ldn * (m + 1));
+			ipiv.resize (ldn * (m + 1));
 			
 			if (messenger_ptr->get_id () == 0) {
-				x.resize ((m + 4 * messenger_ptr->get_np ()) * 2 * ldn);
+				x.resize (((m + 1) + 4 * messenger_ptr->get_np ()) * 2 * ldn);
 				xipiv.resize (2 * messenger_ptr->get_np () * ldn);
 			} else {
-				x.resize ((m + 4) * 2 * ldn);
+				x.resize (((m + 1) + 4) * 2 * ldn);
 			}
 			
 			id = messenger_ptr->get_id ();
@@ -624,12 +624,10 @@ namespace two_d
 			if (id != 0) {
 				messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
 			}
-			data_temp.resize (m * ldn);
+			data_temp.resize ((m + 1) * ldn);
 			flags = 0x00;
 			transform = std::shared_ptr <bases::plan <datatype> > (new fourier::vertical_transform <datatype> (n, m, &data_temp [0], NULL, inverse, i_element_flags, &flags));
 			transform_h = std::shared_ptr <bases::plan <datatype> > (new fourier::horizontal_transform <datatype> (n, m, &data_temp [0], NULL, inverse, i_element_flags, &flags));
-			z_deriv = std::shared_ptr <bases::plan <datatype >> (new fourier::z_derivative_source <datatype> (grid_n, grid_m, data, data, 1.0, data_z, i_element_flags, i_component_flags_z));
-			x_deriv = std::shared_ptr <bases::plan <datatype >> (new fourier::x_derivative_source <datatype> (grid_n, grid_m, data, data, 1.0, data_x, i_element_flags, i_component_flags_z));
 		}
 		
 		template <class datatype>
@@ -637,234 +635,115 @@ namespace two_d
 		
 		template <class datatype>
 		void incompressible_corrector <datatype>::factorize () {
+			std::stringstream debug;
+			int info;
 			TRACE ("Factorizing laplace solver...");
 
 			double scalar = 4.0 * std::acos (-1.0) * std::acos (-1.0) / (pos_n [n - 1] - pos_n [0]) / (pos_n [n - 1] - pos_n [0]);
-			int mm = m;
-			int nbegin = excess_0;
-			if (id != 0) {
-				mm -= excess_0 + 1;
-			}
-			if (id != np - 1) {
-				mm -= excess_n + 2;
-			}
-#pragma omp parallel for
+			
 			for (int i = 0; i < ldn; ++i) {
-				if (id != 0) {
-					sub_ptr [i * m + nbegin] = 2.0 / (pos_m [nbegin + 1] - pos_m [nbegin]) / (pos_m [nbegin + 1] - ex_pos_0);
-					sup_ptr [i * m + nbegin] = 2.0 / (pos_m [nbegin] - ex_pos_0) / (pos_m [nbegin + 1] - ex_pos_0);
-					diag_ptr [i * m + nbegin] = -scalar * (i / 2) * (i / 2) - 2.0 / (pos_m [nbegin + 1] - ex_pos_0) * (1.0 / (pos_m [nbegin + 1] - pos_m [nbegin]) + 1.0 / (pos_m [nbegin] - ex_pos_0));
-				} else {
-					sup_ptr [i * m + nbegin] = -1.0 / (pos_m [nbegin + 1] - pos_m [nbegin]);
-					diag_ptr [i * m + nbegin] = 1.0 / (pos_m [nbegin + 1] - pos_m [nbegin]);
-					sub_ptr [i * m + nbegin] = 0.0;
+				sub_ptr [i * (m + 1) - 1] = 0.0;
+				diag_ptr [i * (m + 1) - 1] = 1.0;
+				sup_ptr [i * (m + 1) - 1] = -1.0;
+				sub_ptr [i * (m + 1)] = 1.0 / (2.0 * pos_m [0] - (pos_m [0] + pos_m [1]) / 2.0) / (pos_m [1] - pos_m [0]);
+				diag_ptr [i * (m + 1)] = (-1.0 / (2.0 * pos_m [0] - (pos_m [0] + pos_m [1]) / 2.0) - 2.0 / (pos_m [2] - pos_m [0])) / (pos_m [1] - pos_m [0]) - scalar * (i / 2) * (i / 2);
+				sup_ptr [i * (m + 1)] = 2.0 / (pos_m [2] - pos_m [0]) / (pos_m [1] - pos_m [0]);
+				for (int j = 0; j < m - 2; ++j) {
+					sub_ptr [i * (m + 1) + j] = 2.0 / (pos_m [j + 1] - pos_m [j - 1]) / (pos_m [j + 1] - pos_m [j]);
+					diag_ptr [i * (m + 1) + j] = (-2.0 / (pos_m [j + 2] - pos_m [j]) - 2.0 / (pos_m [j + 1] - pos_m [j - 1])) / (pos_m [j + 1] - pos_m [j]) - scalar * (i / 2) * (i / 2);
+					sup_ptr [i * (m + 1) + j] = 2.0 / (pos_m [j + 2] - pos_m [j]) / (pos_m [j + 1] - pos_m [j]);
 				}
-				for (int j = nbegin + 1; j < m - 2 - excess_n; ++j) {
-					sub_ptr [i * m + j] = 2.0 / (pos_m [j + 1] - pos_m [j]) / (pos_m [j + 1] - pos_m [j - 1]);
-					sup_ptr [i * m + j] = 2.0 / (pos_m [j] - pos_m [j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
-					diag_ptr [i * m + j] = -scalar * (i / 2) * (i / 2) - 2.0 / (pos_m [j + 1] - pos_m [j - 1]) * (1.0 / (pos_m [j + 1] - pos_m [j]) + 1.0 / (pos_m [j] - pos_m [j - 1]));
-				}
-				if (id != np - 1) {
-					sub_ptr [(i + 1) * m - 2 - excess_n] = 2.0 / (ex_pos_m - pos_m [m - 2 - excess_n]) / (ex_pos_m - pos_m [m - 3 - excess_n]);
-					sup_ptr [(i + 1) * m - 2 - excess_n] = 2.0 / (pos_m [m - 2 - excess_n] - pos_m [m - 3 - excess_n]) / (ex_pos_m - pos_m [m - 3 - excess_n]);
-					diag_ptr [(i + 1) * m - 2 - excess_n] = -scalar * (i / 2) * (i / 2) - 2.0 / (ex_pos_m - pos_m [m - 3 - excess_n]) * (1.0 / (ex_pos_m - pos_m [m - 2 - excess_n]) + 1.0 / (pos_m [m - 2 - excess_n] - pos_m [m - 3 - excess_n]));
-				} else {
-					sub_ptr [i * m + m - 2] = 2.0 / (pos_m [m - 2 + 1] - pos_m [m - 2]) / (pos_m [m - 2 + 1] - pos_m [m - 2 - 1]);
-					sup_ptr [i * m + m - 2] = 2.0 / (pos_m [m - 2] - pos_m [m - 2 - 1]) / (pos_m [m - 2 + 1] - pos_m [m - 2 - 1]);
-					diag_ptr [i * m + m - 2] = -scalar * (i / 2) * (i / 2) - 2.0 / (pos_m [m - 2 + 1] - pos_m [m - 2 - 1]) * (1.0 / (pos_m [m - 2 + 1] - pos_m [m - 2]) + 1.0 / (pos_m [m - 2] - pos_m [m - 2 - 1]));
-					sup_ptr [(i + 1) * m - 1] = 0.0;
-					diag_ptr [(i + 1) * m - 1] = 1.0 / (pos_m [m - 1 - excess_n] - pos_m [m - 2 - excess_n]);
-					sub_ptr [(i + 1) * m - 1] = -1.0 / (pos_m [m - 1 - excess_n] - pos_m [m - 2 - excess_n]);
-				}
-			}
-			if (id == np - 1) {
-				sup_ptr [m - 1] = 0.0;
-				sub_ptr [m - 1] = 0.0;
-				diag_ptr [m - 1] = 1.0;
-				sup_ptr [2 * m - 1] = 0.0;
-				sub_ptr [2 * m - 1] = 0.0;
-				diag_ptr [2 * m - 1] = 1.0;
+				sub_ptr [i * (m + 1) + m - 2] = 2.0 / (pos_m [m - 1] - pos_m [m - 3]) / (pos_m [m - 1] - pos_m [m - 2]);
+				diag_ptr [i * (m + 1) + m - 2] = (-1.0 / (2.0 * pos_m [m - 1] - (pos_m [m - 1] + pos_m [m - 2]) / 2.0) - 2.0 / (pos_m [m - 1] - pos_m [m - 3])) / (pos_m [m - 1] - pos_m [m - 2]) - scalar * (i / 2) * (i / 2);
+				sup_ptr [i * (m + 1) + m - 2] = 1.0 / (2.0 * pos_m [m - 1] - (pos_m [m - 1] + pos_m [m - 2]) / 2.0) / (pos_m [m - 1] - pos_m [m - 2]);
+				sub_ptr [i * (m + 1) + m - 1] = -1.0;
+				diag_ptr [i * (m + 1) + m - 1] = 1.0;
+				sup_ptr [i * (m + 1) + m - 1] = 0.0;
 			}
 			
-			std::stringstream debug;
-			for (int j = 0; j < m; ++j) {
+			for (int j = -1; j < m; ++j) {
 				for (int i = 0; i < ldn; ++i) {
-					debug << "SUB " << sub_ptr [i * m + j] << " DIAG " << diag_ptr [i * m + j] << " SUP " << sup_ptr [i * m + j] << " POS " << pos_m [j] << " ";
-					
+					debug << diag_ptr [i * (m + 1) + j] << " ";
 				}
 				DEBUG (debug.str ());
 				debug.str ("");
 			}
-
-			int info;
 			
-			utils::p_block_tridiag_factorize (id, np, mm, &sub [nbegin], &diag [nbegin], &sup [nbegin], &supsup [nbegin], &ipiv [nbegin], &x [0], &xipiv [0], &info, ldn, m);
+			utils::p_block_tridiag_factorize (id, np, m + 1, &sub [0], &diag [0], &sup [0], &supsup [0], &ipiv [0], &x [0], &xipiv [0], &info, ldn, m + 1);
 		}
 		
 		template <class datatype>
 		void incompressible_corrector <datatype>::execute () {
 			std::stringstream debug;
-			TRACE ("Solving...");
-			int mm = m;
-			int nbegin = excess_0;
-			if (id != 0) {
-				mm -= excess_0 + 1;
-			}
-			if (id != np - 1) {
-				mm -= excess_n + 2;
-			}
-			
-			// if (rhs_ptr) {
-			// 	DEBUG (data+nbegin);
-			// 	utils::matrix_copy (mm, ldn, rhs_ptr, data + nbegin);
-			// }
-			
-			
-			utils::matrix_scale (m, ldn, 0.0, data);
-			
-			if (z_deriv) {
-				z_deriv->execute ();
-			}
-			
-			if (x_deriv) {
-				x_deriv->execute ();
-			}
-			
-			
-			if (id == 0) {
-				utils::scale (ldn, 0.0, data + nbegin, m);
-			}
-			if (id == np - 1) {
-				utils::scale (ldn, 0.0, data + m - 1 - excess_n, m);
-			}
-			utils::scale (2 * m, 0.0, data);
-			
 			int info;
+			TRACE ("Solving...");
 			
-			for (int j = 0; j < m; ++j) {
-				for (int i = 0; i < ldn; ++i) {
-					debug << data [i * m + j] << " ";
+			if (!(*component_flags_x & transformed_vertical)) {
+				datatype scalar = acos (-1.0) * 2.0 / (pos_n [n - 1] - pos_n [0]);
+				datatype *data_ptr = &data_temp [1];
+			
+				for (int i = 2; i < ldn; i += 2) {
+					data_ptr [i * (m + 1) - 1] = 0.0;
+					data_ptr [(i + 1) * (m + 1) - 1] = 0.0;
+					for (int j = 0; j < m - 1; ++j) {
+						data_ptr [i * (m + 1) + j] = -scalar * (data_x [(i + 1) * m + j + 1] + data_x [(i + 1) * m + j]) / 2.0;
+						data_ptr [(i + 1) * (m + 1) + j] = scalar * (data_x [i * m + j + 1] + data_x [i * m + j]) / 2.0;
+					}
+					data_ptr [i * (m + 1) + m - 1] = 0.0;
+					data_ptr [(i + 1) * (m + 1) + m - 1] = 0.0;
 				}
-				DEBUG ("RHS " << debug.str ());
-				debug.str ("");
-			}
 			
-			utils::p_block_tridiag_solve (id, np, mm, &sub [nbegin], &diag [nbegin], &sup [nbegin], &supsup [nbegin], &ipiv [nbegin], data + nbegin, &x [0], &xipiv [0], &info, ldn, m, m);
-			
-			for (int j = 0; j < m; ++j) {
-				for (int i = 0; i < ldn; ++i) {
-					debug << data [i * m + j] << " ";
+				for (int i = 2; i < ldn; ++i) {
+					for (int j = 0; j < m - 1; ++j) {
+						data_ptr [i * (m + 1) + j] += (data_z [i * m + j + 1] - data_z [i * m + j]) / (pos_m [j + 1] - pos_m [j]);
+					}
 				}
-				DEBUG ("DATA " << debug.str ());
-				debug.str ("");
+				
+				utils::p_block_tridiag_solve (id, np, m + 1, &sub [0], &diag [0], &sup [0], &supsup [0], &ipiv [0], &data_temp [0], &x [0], &xipiv [0], &info, ldn, m + 1, m + 1);
+				
+				for (int i = 2; i < ldn; i += 2) {
+					for (int j = 0; j < m; ++j) {
+						data_x [i * m + j] += scalar * (data_ptr [(i + 1) * (m + 1) + j] + data_ptr [(i + 1) * (m + 1) + j - 1]) / 2.0;
+						data_x [(i + 1) * m + j] -= scalar * (data_ptr [i * (m + 1) + j] + data_ptr [i * (m + 1) + j - 1]) / 2.0;
+					}
+				}
+			
+				for (int i = 2; i < ldn; ++i) {
+					for (int j = 1; j < m - 1; ++j) {
+						data_z [i * m + j] -= 2.0 * (data_ptr [i * (m + 1) + j] - data_ptr [i * (m + 1) + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
+					}
+				}
+				
+				for (int i = 2; i < ldn; i += 2) {
+					data_ptr [i * (m + 1) - 1] = 0.0;
+					data_ptr [(i + 1) * (m + 1) - 1] = 0.0;
+					for (int j = 0; j < m - 1; ++j) {
+						data_ptr [i * (m + 1) + j] = -scalar * (data_x [(i + 1) * m + j + 1] + data_x [(i + 1) * m + j]) / 2.0;
+						data_ptr [(i + 1) * (m + 1) + j] = scalar * (data_x [i * m + j + 1] + data_x [i * m + j]) / 2.0;
+					}
+					data_ptr [i * (m + 1) + m - 1] = 0.0;
+					data_ptr [(i + 1) * (m + 1) + m - 1] = 0.0;
+				}
+			
+				for (int i = 2; i < ldn; ++i) {
+					for (int j = 0; j < m - 1; ++j) {
+						data_ptr [i * (m + 1) + j] += (data_z [i * m + j + 1] - data_z [i * m + j]) / (pos_m [j + 1] - pos_m [j]);
+					}
+				}
+				
+				utils::scale (2 * m, 0.0, data_z);
+
+			
+				for (int j = 0; j < m; ++j) {
+					for (int i = 0; i < ldn; ++i) {
+						if (std::isnan (data [i * m + j])) {
+							FATAL ("Nan in laplace solver.");
+							throw exceptions::nan ();
+						}
+					}
+				}
 			}
 
-			for (int i = 0; i < ldn; ++i) {
-				if (id != 0) {
-					for (int j = nbegin - excess_0; j >= 0; --j) {
-						DEBUG ("EXCESS REGION 0 " << j);
-						data [i * m + j] = (data [i * m + j + 2] - data [i * m + j + 1]) / (pos_m [j + 2] - pos_m [j + 1]) * (pos_m [j] - pos_m [j + 1]) + data [i * m + j + 1];
-					}
-				}
-				if (id != np - 1) {
-					for (int j = m - excess_n - 1; j < m; ++j) {
-						DEBUG ("EXCESS REGION n " << j);
-						data [i * m + j] = (data [i * m + j - 2] - data [i * m + j - 1]) / (pos_m [j - 2] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]) + data [i * m + j - 1];
-					}
-				}
-			}
-			
-			// for (int i = ldn / 3 * 2; i < ldn; ++i) {
-			// 	for (int j = 0; j < m; ++j) {
-			// 		data [i * m + j] = 0.0;
-			// 	}
-			// }
-			
-			utils::matrix_scale (m, ldn, 0.0, &data_temp [0]);
-			
-			for (int i = 2; i < ldn; i += 2) {
-				utils::add_scaled (m, 2.0 * acos (-1.0) / (grid_n [n - 1] - grid_n [0]) * (i / 2), data + i * m, &data_temp [0] + (i + 1) * m);
-				utils::add_scaled (m, -2.0 * acos (-1.0) / (grid_n [n - 1] - grid_n [0]) * (i / 2), data + (i + 1) * m, &data_temp [0] + i * m);
-			}
-			
-
-			
-			if (*component_flags_x & transformed_vertical) {
-				transform->execute ();
-			}
-			
-			for (int j = 0; j < m; ++j) {
-				for (int i = 0; i < ldn; ++i) {
-					debug << data [i * m + j] << " ";
-				}
-				DEBUG ("DATA " << debug.str ());
-				debug.str ("");
-			}
-			
-			// for (int j = 0; j < m; ++j) {
-			// 	for (int i = 0; i < ldn; ++i) {
-			// 		debug << data_temp [i * m + j] << " ";
-			// 	}
-			// 	DEBUG ("GRAD X " << debug.str ());
-			// 	debug.str ("");
-			// }
-			
-			// for (int j = 0; j < m; ++j) {
-			// 	for (int i = 0; i < ldn; ++i) {
-			// 		debug << data_x [i * m + j] << " ";
-			// 	}
-			// 	DEBUG ("DATA X " << debug.str ());
-			// 	debug.str ("");
-			// }
-			
-			utils::matrix_add_scaled (m, ldn, -1.0, &data_temp [0], data_x);
-			
-			const datatype *pos_m = &grid_m [0];
-			datatype *new_data = &data_temp [0];
-			
-			for (int i = 0; i < ldn; ++i) {
-				new_data [i * m] = (data [i * m + 1] - data [i * m]) / (pos_m [1] - pos_m [0]);
-				for (int j = 1; j < m - 1; ++j) {
-					new_data [i * m + j] = (data [i * m + j + 1] - data [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
-				}
-				new_data [(i + 1) * m - 1] = (data [(i + 1) * m - 1] - data [(i + 1) * m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
-			}
-			
-			if (*component_flags_x & transformed_vertical) {
-				transform->execute ();
-			}
-			
-			utils::matrix_add_scaled (m, ldn, -1.0, &data_temp [0], data_z);
-			
-			utils::scale (2 * m, 0.0, data_z);
-			
-			utils::matrix_scale (mm, ldn, 0.0, data);
-			
-			
-			if (z_deriv) {
-				z_deriv->execute ();
-			}
-			
-			if (x_deriv) {
-				x_deriv->execute ();
-			}
-			
-			// for (int j = 0; j < m; ++j) {
-			// 	for (int i = 0; i < ldn; ++i) {
-			// 		debug << data [i * m + j] << " ";
-			// 	}
-			// 	DEBUG ("Div U " << debug.str ());
-			// 	debug.str ("");
-			// }
-			
-			for (int j = 0; j < m; ++j) {
-				for (int i = 0; i < ldn; ++i) {
-					if (std::isnan (data [i * m + j])) {
-						FATAL ("Nan in laplace solver.");
-						throw exceptions::nan ();
-					}
-				}
-			}
 
 			TRACE ("Solved.");
 		}

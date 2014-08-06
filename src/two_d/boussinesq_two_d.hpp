@@ -10,6 +10,8 @@
 #define BOUSSINESQ_TWO_D_HPP_OQ800X4X
 
 #include "element_two_d.hpp"
+#include "../utils/io.hpp"
+
 
 namespace two_d
 {
@@ -26,6 +28,12 @@ namespace two_d
 				virtual ~boussinesq_element () {}
 				
 				datatype calculate_timestep (int i, int j, io::virtual_dump *dump = NULL);
+				
+				virtual void setup_output (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
+					bases::element <datatype>::setup_output (output_ptr, flags);
+					DEBUG ("SETTING UP");
+					output_ptr->template append_functor <double> ("div", new io::div_functor <datatype> (ptr (x_position), ptr (z_position), ptr (x_velocity), ptr (z_velocity), n, m));
+				}
 				
 				virtual io::virtual_dump *make_dump (int flags = 0x00) {
 					std::shared_ptr <io::output> virtual_output;
