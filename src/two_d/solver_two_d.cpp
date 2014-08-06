@@ -615,11 +615,11 @@ namespace two_d
 			np = messenger_ptr->get_np ();
 			
 			if (id != 0) {
-				messenger_ptr->send (1, &pos_m [excess_0 + 1], id - 1, 0);
+				messenger_ptr->send (1, &pos_m [excess_0], id - 1, 0);
 			}
 			if (id != np - 1) {
 				messenger_ptr->recv (1, &ex_pos_m, id + 1, 0);
-				messenger_ptr->send (1, &pos_m [m - 1 - excess_n], id + 1, 1);
+				messenger_ptr->send (1, &pos_m [m - 2 - excess_n], id + 1, 1);
 			}
 			if (id != 0) {
 				messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
@@ -643,11 +643,10 @@ namespace two_d
 			int mm = m;
 			int nbegin = excess_0;
 			if (id != 0) {
-				mm -= excess_0 + 2;
-				nbegin += 1;
+				mm -= excess_0 + 1;
 			}
 			if (id != np - 1) {
-				mm -= excess_n + 1;
+				mm -= excess_n + 2;
 			}
 #pragma omp parallel for
 			for (int i = 0; i < ldn; ++i) {
@@ -660,19 +659,22 @@ namespace two_d
 					diag_ptr [i * m + nbegin] = 1.0 / (pos_m [nbegin + 1] - pos_m [nbegin]);
 					sub_ptr [i * m + nbegin] = 0.0;
 				}
-				for (int j = nbegin + 1; j < m - 1 - excess_n; ++j) {
+				for (int j = nbegin + 1; j < m - 2 - excess_n; ++j) {
 					sub_ptr [i * m + j] = 2.0 / (pos_m [j + 1] - pos_m [j]) / (pos_m [j + 1] - pos_m [j - 1]);
 					sup_ptr [i * m + j] = 2.0 / (pos_m [j] - pos_m [j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
 					diag_ptr [i * m + j] = -scalar * (i / 2) * (i / 2) - 2.0 / (pos_m [j + 1] - pos_m [j - 1]) * (1.0 / (pos_m [j + 1] - pos_m [j]) + 1.0 / (pos_m [j] - pos_m [j - 1]));
 				}
 				if (id != np - 1) {
-					sub_ptr [(i + 1) * m - 1 - excess_n] = 2.0 / (ex_pos_m - pos_m [m - 1 - excess_n]) / (ex_pos_m - pos_m [m - 2 - excess_n]);
-					sup_ptr [(i + 1) * m - 1 - excess_n] = 2.0 / (pos_m [m - 1 - excess_n] - pos_m [m - 2 - excess_n]) / (ex_pos_m - pos_m [m - 2 - excess_n]);
-					diag_ptr [(i + 1) * m - 1 - excess_n] = -scalar * (i / 2) * (i / 2) - 2.0 / (ex_pos_m - pos_m [m - 2 - excess_n]) * (1.0 / (ex_pos_m - pos_m [m - 1 - excess_n]) + 1.0 / (pos_m [m - 1 - excess_n] - pos_m [m - 2 - excess_n]));
+					sub_ptr [(i + 1) * m - 2 - excess_n] = 2.0 / (ex_pos_m - pos_m [m - 2 - excess_n]) / (ex_pos_m - pos_m [m - 3 - excess_n]);
+					sup_ptr [(i + 1) * m - 2 - excess_n] = 2.0 / (pos_m [m - 2 - excess_n] - pos_m [m - 3 - excess_n]) / (ex_pos_m - pos_m [m - 3 - excess_n]);
+					diag_ptr [(i + 1) * m - 2 - excess_n] = -scalar * (i / 2) * (i / 2) - 2.0 / (ex_pos_m - pos_m [m - 3 - excess_n]) * (1.0 / (ex_pos_m - pos_m [m - 2 - excess_n]) + 1.0 / (pos_m [m - 2 - excess_n] - pos_m [m - 3 - excess_n]));
 				} else {
-					sup_ptr [(i + 1) * m - 1 - excess_n] = 0.0;
-					diag_ptr [(i + 1) * m - 1 - excess_n] = 1.0 / (pos_m [m - 1 - excess_n] - pos_m [m - 2 - excess_n]);
-					sub_ptr [(i + 1) * m - 1 - excess_n] = -1.0 / (pos_m [m - 1 - excess_n] - pos_m [m - 2 - excess_n]);
+					sub_ptr [i * m + m - 2] = 2.0 / (pos_m [m - 2 + 1] - pos_m [m - 2]) / (pos_m [m - 2 + 1] - pos_m [m - 2 - 1]);
+					sup_ptr [i * m + m - 2] = 2.0 / (pos_m [m - 2] - pos_m [m - 2 - 1]) / (pos_m [m - 2 + 1] - pos_m [m - 2 - 1]);
+					diag_ptr [i * m + m - 2] = -scalar * (i / 2) * (i / 2) - 2.0 / (pos_m [m - 2 + 1] - pos_m [m - 2 - 1]) * (1.0 / (pos_m [m - 2 + 1] - pos_m [m - 2]) + 1.0 / (pos_m [m - 2] - pos_m [m - 2 - 1]));
+					sup_ptr [(i + 1) * m - 1] = 0.0;
+					diag_ptr [(i + 1) * m - 1] = 1.0 / (pos_m [m - 1 - excess_n] - pos_m [m - 2 - excess_n]);
+					sub_ptr [(i + 1) * m - 1] = -1.0 / (pos_m [m - 1 - excess_n] - pos_m [m - 2 - excess_n]);
 				}
 			}
 			if (id == np - 1) {
@@ -682,6 +684,16 @@ namespace two_d
 				sup_ptr [2 * m - 1] = 0.0;
 				sub_ptr [2 * m - 1] = 0.0;
 				diag_ptr [2 * m - 1] = 1.0;
+			}
+			
+			std::stringstream debug;
+			for (int j = 0; j < m; ++j) {
+				for (int i = 0; i < ldn; ++i) {
+					debug << "SUB " << sub_ptr [i * m + j] << " DIAG " << diag_ptr [i * m + j] << " SUP " << sup_ptr [i * m + j] << " POS " << pos_m [j] << " ";
+					
+				}
+				DEBUG (debug.str ());
+				debug.str ("");
 			}
 
 			int info;
@@ -696,11 +708,10 @@ namespace two_d
 			int mm = m;
 			int nbegin = excess_0;
 			if (id != 0) {
-				mm -= excess_0 + 2;
-				nbegin += 1;
+				mm -= excess_0 + 1;
 			}
 			if (id != np - 1) {
-				mm -= excess_n + 1;
+				mm -= excess_n + 2;
 			}
 			
 			// if (rhs_ptr) {
@@ -709,7 +720,7 @@ namespace two_d
 			// }
 			
 			
-			utils::matrix_scale (mm, ldn, 0.0, data);
+			utils::matrix_scale (m, ldn, 0.0, data);
 			
 			if (z_deriv) {
 				z_deriv->execute ();
@@ -730,24 +741,44 @@ namespace two_d
 			
 			int info;
 			
-			// for (int j = 0; j < m; ++j) {
-			// 	for (int i = 0; i < ldn; ++i) {
-			// 		debug << data [i * m + j] << " ";
-			// 	}
-			// 	DEBUG ("RHS " << debug.str ());
-			// 	debug.str ("");
-			// }
+			for (int j = 0; j < m; ++j) {
+				for (int i = 0; i < ldn; ++i) {
+					debug << data [i * m + j] << " ";
+				}
+				DEBUG ("RHS " << debug.str ());
+				debug.str ("");
+			}
 			
 			utils::p_block_tridiag_solve (id, np, mm, &sub [nbegin], &diag [nbegin], &sup [nbegin], &supsup [nbegin], &ipiv [nbegin], data + nbegin, &x [0], &xipiv [0], &info, ldn, m, m);
+			
+			for (int j = 0; j < m; ++j) {
+				for (int i = 0; i < ldn; ++i) {
+					debug << data [i * m + j] << " ";
+				}
+				DEBUG ("DATA " << debug.str ());
+				debug.str ("");
+			}
 
 			for (int i = 0; i < ldn; ++i) {
-				for (int j = nbegin - 1; j >= 0; --j) {
-					data [i * m + j] = (data [i * m + j + 2] - data [i * m + j + 1]) / (pos_m [j + 2] - pos_m [j + 1]) * (pos_m [j] - pos_m [j + 1]) + data [i * m + j + 1];
+				if (id != 0) {
+					for (int j = nbegin - excess_0; j >= 0; --j) {
+						DEBUG ("EXCESS REGION 0 " << j);
+						data [i * m + j] = (data [i * m + j + 2] - data [i * m + j + 1]) / (pos_m [j + 2] - pos_m [j + 1]) * (pos_m [j] - pos_m [j + 1]) + data [i * m + j + 1];
+					}
 				}
-				for (int j = m - excess_n; j < m; ++j) {
-					data [i * m + j] = (data [i * m + j - 2] - data [i * m + j - 1]) / (pos_m [j - 2] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]) + data [i * m + j - 1];
+				if (id != np - 1) {
+					for (int j = m - excess_n - 1; j < m; ++j) {
+						DEBUG ("EXCESS REGION n " << j);
+						data [i * m + j] = (data [i * m + j - 2] - data [i * m + j - 1]) / (pos_m [j - 2] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]) + data [i * m + j - 1];
+					}
 				}
 			}
+			
+			// for (int i = ldn / 3 * 2; i < ldn; ++i) {
+			// 	for (int j = 0; j < m; ++j) {
+			// 		data [i * m + j] = 0.0;
+			// 	}
+			// }
 			
 			utils::matrix_scale (m, ldn, 0.0, &data_temp [0]);
 			
@@ -762,13 +793,13 @@ namespace two_d
 				transform->execute ();
 			}
 			
-			// for (int j = 0; j < m; ++j) {
-			// 	for (int i = 0; i < ldn; ++i) {
-			// 		debug << data [i * m + j] << " ";
-			// 	}
-			// 	DEBUG ("DATA " << debug.str ());
-			// 	debug.str ("");
-			// }
+			for (int j = 0; j < m; ++j) {
+				for (int i = 0; i < ldn; ++i) {
+					debug << data [i * m + j] << " ";
+				}
+				DEBUG ("DATA " << debug.str ());
+				debug.str ("");
+			}
 			
 			// for (int j = 0; j < m; ++j) {
 			// 	for (int i = 0; i < ldn; ++i) {

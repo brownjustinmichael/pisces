@@ -6,11 +6,11 @@ grid:
     nrhs: 4096
     nb: 1
     x:
-        points: 128
-        width: 1.0
+        points: 32
+        width: 100.0
     z:
-        points: 128
-        width: 1.0
+        points: 32
+        width: 100.0
     rezone:
         check_every: -1
         min_size: 20.0
@@ -32,26 +32,26 @@ time:
     alpha: 1.0
     allow: 1000.0
 temperature:
-    diffusion: 0.10
+    diffusion: 1.0
     advection: 1.0
     stratification: -1.0
 composition:
-    diffusion: 0.0
-    advection: 0.0
-    stratification: 0.0
+    diffusion: 0.1
+    advection: 1.0
+    stratification: -2.0
 velocity:
-    diffusion: 0.01
+    diffusion: 0.1
     advection: 1.0
     buoyancy:
-        temperature: 1000.0
-        composition: -0.0
+        temperature: 1.0
+        composition: -1.0
 input:
     file: input_%02i
     full: true
 output:
     file: output_%02i
     transform_file: output_t_%02i
-    every: 80
+    every: 100
     merge_file: merge_%04i
     full: true
 parallel:
