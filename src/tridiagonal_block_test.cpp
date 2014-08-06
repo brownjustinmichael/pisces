@@ -16,6 +16,7 @@
 #include "utils/block_solver.hpp"
 #include "utils/solver_utils.hpp"
 #include "utils/utils.hpp"
+#include <sstream>
 
 int main (int argc, char *argv[])
 {
@@ -63,23 +64,15 @@ int main (int argc, char *argv[])
 
 	srand (1);
 	for (int i = 0; i < n; ++i) {
-		sub [i] = rand () % 100;
-		subcopy [i] = sub [i];
-		diag [i] = rand () % 100;
-		diagcopy [i] = diag [i];
-		sup [i] = rand () % 100;
-		supcopy [i] = sup [i];
-		b [i] = rand () % 100;
-		bcopy [i] = b [i];
-		for (int j = 1; j < nrhs; ++j) {
-			sub [i + j * n] = sub [i];
-			subcopy [i + j * n] = sub [i];
-			diag [i + j * n] = diag [i];
-			diagcopy [i + j * n] = diag [i];
-			sup [i + j * n] = sup [i];
-			supcopy [i + j * n] = sup [i];
-			b [i + j * n] = b [i];
-			bcopy [i + j * n] = b [i];
+		for (int j = 0; j < nrhs; ++j) {
+			sub [i * nrhs + j] = rand () % 100;
+			subcopy [i * nrhs + j] = sub [i * nrhs + j];
+			diag [i * nrhs + j] = rand () % 100;
+			diagcopy [i * nrhs + j] = diag [i * nrhs + j];
+			sup [i * nrhs + j] = rand () % 100;
+			supcopy [i * nrhs + j] = sup [i * nrhs + j];
+			b [i * nrhs + j] = rand () % 100;
+			bcopy [i * nrhs + j] = b [i * nrhs + j];
 		}
 	}
 	
@@ -90,10 +83,10 @@ int main (int argc, char *argv[])
 	}
 
 	try {
-		// utils::p_block_tridiag_factorize (id, np, n - ntop - nbot, &sub [0], &diag [0], &sup [0], &supsup [0], &ipiv [0], &x [0], &xipiv [0], &info, nrhs);
+		utils::p_block_tridiag_factorize (id, np, n - ntop - nbot, &sub [0], &diag [0], &sup [0], &supsup [0], &ipiv [0], &x [0], &xipiv [0], &info, nrhs);
 		// utils::p_block_tridiag_factorize (id, np, n - ntop - nbot, &sub [0], &diag [0], &sup [0], &supsup [0], &ipiv [0], &x [0], &xipiv [0], &info, 1);
 
-		// utils::p_block_tridiag_solve (id, np, n - ntop - nbot,  &sub [0], &diag [0], &sup [0], &supsup [0], &ipiv [0], &b [0], &x [0], &xipiv [0], &info, nrhs);
+		utils::p_block_tridiag_solve (id, np, n - ntop - nbot,  &sub [0], &diag [0], &sup [0], &supsup [0], &ipiv [0], &b [0], &x [0], &xipiv [0], &info, nrhs);
 		// utils::p_block_tridiag_solve (id, np, n - ntop - nbot,  &sub [0], &diag [0], &sup [0], &supsup [0], &ipiv [0], &b [0], &x [0], &xipiv [0], &info, 1, -1, -1, nrhs);
 		// utils::p_block_direct_tridiag_solve (id, np, n - ntop - nbot,  &sub [0], &diag [0], &sup [0], &supsup [0], &b [0], nrhs, n);
 	} catch (std::exception& except) {
@@ -116,26 +109,52 @@ int main (int argc, char *argv[])
 
 	double above;
 	double below;
-
-	if (id != 0) {
-		mess.send (1, &b [0], id - 1, 0);
-	}
-	if (id != np - 1) {
-		mess.recv (1, &below, id + 1, 0);
-		bcopy [n - 1] -= supcopy [n - 1] * below;
-	}
-	if (id != np - 1) {
-		mess.send (1, &b [n - 1], id + 1, 1);
-	}
-	if (id != 0) {
-		mess.recv (1, &above, id - 1, 1);
-		bcopy [0] -= subcopy [0] * above;
+	
+	std::vector <double> edge_0 (nrhs), edge_n (nrhs), redge_0 (nrhs), redge_n (nrhs);
+	
+	for (int i = 0; i < nrhs; ++i) {
+		edge_0 [i] = b [i * nrhs];
+		edge_n [i] = b [i * nrhs + n - 1];
 	}
 
-	for (int i = 0; i < n; ++i) {
-		for (int j = 0; j < nrhs; ++j) {
-			DEBUG ("[" << id << "] " << subcopy [i] << " " << diagcopy [i] << " " << supcopy [i] << " = " << bcopy [i]);
+	if (id != 0) {
+		// mess.send (1, &b [0], id - 1, 0);
+		mess.send (nrhs, &edge_0 [0], id - 1, 0);
+	}
+	if (id != np - 1) {
+		mess.recv (nrhs, &redge_n [0], id + 1, 0);
+		// mess.recv (1, &below, id + 1, 0);
+		// bcopy [n - 1] -= supcopy [n - 1] * below;
+		for (int i = 0; i < nrhs; ++i) {
+			bcopy [i * nrhs + n - 1] -= supcopy [i * nrhs + n - 1] * redge_n [i];
 		}
+	}
+	if (id != np - 1) {
+		// mess.send (1, &b [n - 1], id + 1, 1);
+		mess.send (nrhs, &edge_n [0], id + 1, 1);
+	}
+	if (id != 0) {
+		mess.recv (nrhs, &redge_0 [0], id - 1, 1);
+		// mess.recv (1, &above, id - 1, 1);
+		// bcopy [0] -= subcopy [0] * above;
+		for (int i = 0; i < nrhs; ++i) {
+			bcopy [i * nrhs] -= subcopy [i * nrhs] * redge_0 [i];
+		}
+	}
+
+	std::stringstream sub_debug, diag_debug, sup_debug, debug;
+	for (int j = 0; j < nrhs; ++j) {
+		for (int i = 0; i < n; ++i) {
+			sub_debug << subcopy [i * nrhs + j] << " ";
+			diag_debug << diagcopy [i * nrhs + j] << " ";
+			sup_debug << supcopy [i * nrhs + j] << " ";
+			debug << bcopy [i * nrhs + j] << " ";
+		}
+		DEBUG (sub_debug.str () << " | " << diag_debug.str () << " | " << sup_debug.str () << " = " << debug.str ());
+		sub_debug.str ("");
+		diag_debug.str ("");
+		sup_debug.str ("");
+		debug.str ("");
 	}
 	return 0;
 }

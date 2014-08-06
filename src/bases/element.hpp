@@ -270,7 +270,7 @@ namespace bases
 		 * 
 		 * Given an output object, prepare it to output all the scalar fields tracked directly by the element. Make it one of the output streams called during output. If flags is normal_stream, output the variables when in Cartesian space, else if flags is transform_stream, output with horizontal grid in Fourier space, but vertical grid in Cartesian space.
 		 ************************************************************************/
-		void setup_output (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
+		virtual void setup_output (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
 			// Iterate through the scalar fields and append them to the variables which the output will write to file
 			typedef typename std::map <int, std::vector <datatype> >::iterator iterator;
 			for (iterator iter = scalars.begin (); iter != scalars.end (); ++iter) {
