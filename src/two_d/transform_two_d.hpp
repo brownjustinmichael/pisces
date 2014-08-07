@@ -141,11 +141,27 @@ namespace two_d
 			}
 		
 			void write () {
+				std::stringstream debug;
+				for (int i = 0; i < 2 * (32 / 2 + 1); ++i) {
+					debug << data_in [i * 32 + 32 - 1] << " ";
+				}
+				DEBUG ("WRITING " << debug.str ());
+				debug.str ("");
 				utils::matrix_copy (ldm, ldn, data_in, &data [0]);
 			}
 	
 			void read () {
 				utils::matrix_copy (ldm, ldn, &data [0], data_out);
+				std::stringstream debug;
+				for (int i = 0; i < 2 * (32 / 2 + 1); ++i) {
+					debug << data_out [i * 32 + 32 - 1] << " ";
+				}
+				DEBUG ("READING " << debug.str ());
+				debug.str ("");
+			}
+			
+			virtual datatype *get_data () {
+				return &data [0];
 			}
 		
 		private:

@@ -206,6 +206,13 @@ namespace two_d
 		template <>
 		void horizontal_transform <float>::execute () {
 			TRACE ("Executing...");
+			if (*component_flags & transformed_horizontal) {
+				for (int i = 4 * (n / 2 + 1) / 3; i < 2 * (n / 2 + 1); ++i) {
+					for (int j = 0; j < m; ++j) {
+						data_out [i * m + j] *= 0.0;
+					}
+				}
+			}
 			
 // #pragma omp parallel for num_threads (threads)
 			for (int i = 0; i < threads; ++i) {
@@ -216,11 +223,6 @@ namespace two_d
 				*component_flags &= ~transformed_horizontal;
 			} else {
 				*component_flags |= transformed_horizontal;
-				for (int i = 4 * (n / 2 + 1) / 3; i < 2 * (n / 2 + 1); ++i) {
-					for (int j = 0; j < m; ++j) {
-						data_out [i * m + j] *= 0.0;
-					}
-				}
 			}
 				
 			for (int i = 0; i < 2 * (n / 2 + 1) * m; ++i) {
@@ -231,6 +233,21 @@ namespace two_d
 		template <>
 		void horizontal_transform <double>::execute () {
 			TRACE ("Executing...");
+			
+			std::stringstream debug;
+			for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
+				debug << data_in [i * m + m - 1] << " ";
+			}
+			DEBUG ("IN " << debug.str ());
+			debug.str ("");
+			if (*component_flags & transformed_horizontal) {
+				for (int i = 4 * (n / 2 + 1) / 3; i < 2 * (n / 2 + 1); ++i) {
+					for (int j = 0; j < m; ++j) {
+						data_in [i * m + j] = 0.0;
+					}
+				}
+			}
+
 // #pragma omp parallel for num_threads (threads)
 			for (int i = 0; i < threads; ++i) {
 				fftw_execute (plans [i]);
@@ -240,16 +257,15 @@ namespace two_d
 				*component_flags &= ~transformed_horizontal;
 			} else {
 				*component_flags |= transformed_horizontal;
-				for (int i = 4 * (n / 2 + 1) / 3; i < 2 * (n / 2 + 1); ++i) {
-					for (int j = 0; j < m; ++j) {
-						data_out [i * m + j] *= 0.0;
-					}
-				}
 			}
 		
 			for (int i = 0; i < 2 * (n / 2 + 1) * m; ++i) {
 				data_out [i] *= scalar;
 			}
+			for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
+				debug << data_out [i * m + m - 1] << " ";
+			}
+			DEBUG ("OUT " << debug.str ());
 			TRACE ("Execution Complete.");
 		}
 		
@@ -416,22 +432,37 @@ namespace two_d
 		template <>
 		void vertical_transform <double>::execute () {
 			TRACE ("Executing...");
+			DEBUG ("VERTI");
+			std::stringstream debug;
+			for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
+				debug << data_in [i * m + m - 1] << " ";
+			}
+			DEBUG ("IN " << debug.str ());
+			debug.str ("");
 			if (m > 1 && !(flags & ignore_m)) {
 // #pragma omp parallel for num_threads (threads)
 				for (int i = 0; i < threads; ++i) {
 					fftw_execute (plans [i]);
 				}
 			}
-			
+
 			if (*component_flags & transformed_vertical) {
 				*component_flags &= ~transformed_vertical;
+				DEBUG ("A");
 			} else {
 				*component_flags |= transformed_vertical;
+				DEBUG ("B");
 			}
 			
 			for (int i = 0; i < 2 * (n / 2 + 1) * m; ++i) {
 				data_out [i] *= scalar;
 			}
+			
+			for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
+				debug << data_out [i * m + m - 1] << " ";
+			}
+			DEBUG ("OUT " << debug.str ());
+			
 			TRACE ("Execution Complete.");
 		}
 		

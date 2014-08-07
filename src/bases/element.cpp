@@ -68,7 +68,6 @@ namespace bases
 			
 			TRACE ("Executing plans...");
 			
-
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
 				solvers [*iter]->execute_plans (pre_plan);
@@ -78,7 +77,12 @@ namespace bases
 			TIME (
 			transform (inverse_horizontal | no_write | no_read | read_before);
 			, transform_time, transform_duration);
-
+			
+			for (int i = 0; i < 32; i+= 2) {
+				DEBUG (-acos (-1.0) * 2.0 / (100.0) * ptr (x_velocity) [(i + 1) * 32 + 32 - 1] * (i / 2) + (ptr (z_velocity) [i * 32 + 32 - 1] - ptr (z_velocity) [i * 32 + 32 - 2]) / ((*(grids [1])) [32 - 1] - (*(grids [1])) [32 - 2]) << " " << acos (-1.0) * 2.0 / (100.0) * ptr (x_velocity) [(i) * 32 + 32 - 1] * (i / 2) + (ptr (z_velocity) [(i+1) * 32 + 32 - 1] - ptr (z_velocity) [(i+1) * 32 + 32 - 2]) / ((*(grids [1])) [32 - 1] - (*(grids [1])) [32 - 2]));
+				
+			}
+		
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
 				solvers [*iter]->execute_plans (mid_plan);
@@ -88,6 +92,11 @@ namespace bases
 			TIME (
 			transform (forward_horizontal | no_write | no_read | read_before);
 			, transform_time, transform_duration);
+			
+			for (int i = 1; i < 31; ++i) {
+				DEBUG ((ptr (x_velocity) [(i + 1) * 32 + 32 - 1] - ptr (x_velocity) [(i - 1) * 32 + 32 - 1]) / ((*(grids [0])) [i + 1] - (*(grids [0])) [i - 1]) + (ptr (z_velocity) [i * 32 + 32 - 1] - ptr (z_velocity) [i * 32 + 32 - 2]) / ((*(grids [1])) [32 - 1] - (*(grids [1])) [32 - 2]));
+				
+			}
 			
 			if (normal_stream) {
 				TIME (
@@ -147,6 +156,14 @@ namespace bases
 			solve ();
 			, solve_time, solve_duration);
 			
+			for (int i = 0; i < 32; i+= 2) {
+				DEBUG (-acos (-1.0) * 2.0 / (100.0) * ptr (x_velocity) [(i + 1) * 32 + 32 - 1] * (i / 2) + (ptr (z_velocity) [i * 32 + 32 - 1] - ptr (z_velocity) [i * 32 + 32 - 2]) / ((*(grids [1])) [32 - 1] - (*(grids [1])) [32 - 2]) << " " << acos (-1.0) * 2.0 / (100.0) * ptr (x_velocity) [(i) * 32 + 32 - 1] * (i / 2) + (ptr (z_velocity) [(i+1) * 32 + 32 - 1] - ptr (z_velocity) [(i+1) * 32 + 32 - 2]) / ((*(grids [1])) [32 - 1] - (*(grids [1])) [32 - 2]));
+				
+			}
+			
+			DEBUG ((master_transforms [11])->get_data () [32 - 1]);
+			
+			
 			// Check whether the timestep has changed. If it has, mark all solvers to be refactorized.
 			
 			duration += timestep;
@@ -178,12 +195,12 @@ namespace bases
 	template <class datatype>
 	void element <datatype>::transform (int i_flags) {
 		TRACE ("Transforming...");
-		
 		int threads = params.get <int> ("parallel.transform.threads");
 #pragma omp parallel num_threads (threads)
 		{
 #pragma omp for
 			for (int i = 0; i < (int) transforms.size (); ++i) {
+				DEBUG ("Transforming " << transforms [i]);
 				master_transforms [transforms [i]]->transform (i_flags);
 			}
 		}

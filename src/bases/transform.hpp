@@ -72,6 +72,10 @@ namespace bases
 			}
 		}
 		
+		virtual datatype *get_data () {
+			return NULL;
+		}
+		
 	protected:
 		/*!**********************************************************************
 		 * \brief Write the dataset to the tranform class

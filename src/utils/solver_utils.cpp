@@ -20,6 +20,7 @@
  * \param info A pointer to an integer indicating success (0 for successful exit)
  *********************************************************************/
 extern "C" void dgetrf_ (int *m, int *n, double *a, int *lda, int *ipiv, int *info);
+extern "C" void dgbtrf_ (int *m, int *n, int * kl, int * ku, double *ab, int *ldab, int *ipiv, int *info);
 
 /*!*******************************************************************
  * \brief Function from LAPACK that solves a factorized matrix equation
@@ -35,6 +36,7 @@ extern "C" void dgetrf_ (int *m, int *n, double *a, int *lda, int *ipiv, int *in
  * \param info A pointer to an integer indicating success (0 for successful exit)
  *********************************************************************/
 extern "C" void dgetrs_ (char *trans, int *n, int *nrhs, double *a, int *lda, int *ipiv, double *b, int *ldb, int *info);
+extern "C" void dgbtrs_ (char *trans, int *n, int *kl, int *ku, int *nrhs, double *ab, int *ldab, int *ipiv, double *b, int *ldb, int *info);
 
 /*!*******************************************************************
  * \brief Function from LAPACK that factorizes the matrix a by LU decomposition
@@ -123,6 +125,55 @@ namespace utils
 		}
 		
 		dgetrs_ (&charN, &n, &nrhs, a, &lda, ipiv, b, &ldb, info);
+		
+		if (*info != 0) {
+			throw exceptions::cannot_solve ();
+		}
+	}
+	
+	void matrix_banded_factorize (int m, int n, int kl, int ku, double* a, int *ipiv, int *info, int lda) {
+		int iinfo;
+		if (!info) {
+			info = &iinfo;
+		}
+		
+		if (m == 0 || n == 0) {
+			return;
+		}
+		
+		if (lda == -1) {
+			lda = m;
+		}
+		
+		dgbtrf_ (&m, &n, &kl, &ku, a, &lda, ipiv, info);
+		
+		if (*info != 0) {
+			FATAL ("ERROR " << *info);
+			throw exceptions::cannot_factor ();
+		}
+	}
+	
+	void matrix_banded_solve (int n, int kl, int ku, double* a, int* ipiv, double* b, int *info, int nrhs, int lda, int ldb) {
+		char charN = 'N';
+		int iinfo;
+		
+		if (!info) {
+			info = &iinfo;
+		}
+		
+		if (n == 0) {
+			return;
+		}
+		
+		if (lda == -1) {
+			lda = n;
+		}
+		
+		if (ldb == -1) {
+			ldb = n;
+		}
+		
+		dgbtrs_ (&charN, &n, &kl, &ku, &nrhs, a, &lda, ipiv, b, &ldb, info);
 		
 		if (*info != 0) {
 			throw exceptions::cannot_solve ();

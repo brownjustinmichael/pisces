@@ -400,7 +400,7 @@ namespace two_d
 			
 			std::vector <datatype> x;
 			std::vector <datatype> data_temp;
-			std::vector <datatype> sup, sub, diag, supsup; //!< A datatype vector to be used in lieu of data_out for non-updating steps
+			std::vector <datatype> sup, sub, diag, supsup, matrix; //!< A datatype vector to be used in lieu of data_out for non-updating steps
 			std::vector <int> ipiv, xipiv;
 		};
 	} /* fourier */
