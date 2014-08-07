@@ -657,7 +657,7 @@ namespace two_d
 				matrix_ptr [6] = -1.0;
 				
 				matrix_ptr [2] = 1.0 / (new_pos [0] - new_pos [-1]) / (pos_m [1] - pos_m [0]);
-				matrix_ptr [6 + 1] = -1.0 / (new_pos [1] - new_pos [0]) / (pos_m [1] - pos_m [0]) - 1.0 / (new_pos [0] - new_pos [-1]) / (pos_m [1] - pos_m [0]) - scalar * (i / 2) * (i / 2) / 2.0;
+				matrix_ptr [6 + 1] = -1.0 / (new_pos [1] - new_pos [0]) / (pos_m [1] - pos_m [0]) - 1.0 / (new_pos [0] - new_pos [-1]) / (pos_m [1] - pos_m [0]) - scalar * (i / 2) * (i / 2);
 				matrix_ptr [12] = 1.0 / (new_pos [1] - new_pos [0]) / (pos_m [1] - pos_m [0]);
 				for (int j = 1; j < m - 1; ++j) {
 					matrix_ptr [(j + 1 - 2) * 6 + 3] = 1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (pos_m [j + 1] - pos_m [j - 1]);
@@ -666,17 +666,13 @@ namespace two_d
 					matrix_ptr [(j + 1 + 1) * 6] = 1.0 / (new_pos [j + 1] - new_pos [j]) / (pos_m [j + 1] - pos_m [j - 1]);
 				}
 				
+				// matrix_ptr [(m) * 6 + 1] = 1.0 / (new_pos [m - 1] - new_pos [m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
+				// matrix_ptr [(m - 1) * 6 + 2] = -1.0 / (new_pos [m - 2] - new_pos [m - 3]) / (pos_m [m - 1] - pos_m [m - 2]) - 1.0 / (new_pos [m - 1] - new_pos [m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) - scalar * (i / 2) * (i / 2);
+				// matrix_ptr [(m - 2) * 6 + 3] = 1.0 / (new_pos [m - 2] - new_pos [m - 3]) / (pos_m [m - 1] - pos_m [m - 2]);
+				
 				matrix_ptr [(m - 2) * 6 + 3] = 0.0;
 				matrix_ptr [(m - 1) * 6 + 2] = -1.0;
 				matrix_ptr [(m) * 6 + 1] = 1.0;
-				
-				// for (int j = 0; j < m + 1; ++j) {
-				// 	for (int k = 0; k < 6; ++k) {
-				// 		debug << i * (m + 1) * 6 + j * 6 + k << " " << matrix [i * (m + 1) * 6 + j * 6 + k] << " ";
-				// 	}
-				// 	DEBUG (i << " " << debug.str ());
-				// 	debug.str ("");
-				// }
 				
 				utils::matrix_banded_factorize (m + 1, m + 1, 2, 1, matrix_ptr - 2, &ipiv [(m + 1) * i], &info, 2 * 2 + 1 + 1);
 			}
@@ -702,7 +698,7 @@ namespace two_d
 				new_pos [m - 1] = 2.0 * pos_m [m - 1] - (pos_m [m - 1] - pos_m [m - 2]) / 2.0;
 			
 				for (int i = 2; i < ldn; i += 2) {
-					for (int j = 0; j < m - 1; ++j) {
+					for (int j = 0; j < m; ++j) {
 						data_ptr [i * (m + 1) + j] = -scalar * (i / 2) * data_x [(i + 1) * m + j];
 						data_ptr [(i + 1) * (m + 1) + j] = scalar * (i / 2) * data_x [i * m + j];
 					}
@@ -714,6 +710,7 @@ namespace two_d
 					for (int j = 1; j < m - 1; ++j) {
 						data_ptr [i * (m + 1) + j] += (data_z [i * m + j + 1] - data_z [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
 					}
+					// data_ptr [i * (m + 1)] += (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
 					data_ptr [i * (m + 1) + m - 1] = 0.0;
 					
 					for (int j = 0; j < m; ++j) {
@@ -731,13 +728,13 @@ namespace two_d
 					}
 				}
 				
-				for (int j = 0; j < m; ++j) {
-					for (int i = 0; i < ldn; ++i) {
-						debug << data_temp [i * (m + 1) + j] << " ";
-					}
-					// DEBUG (debug.str ());
-					debug.str ("");
-				}
+				// for (int j = 0; j < m; ++j) {
+				// 	for (int i = 0; i < ldn; ++i) {
+				// 		debug << data_temp [i * (m + 1) + j] << " ";
+				// 	}
+				// 	// DEBUG (debug.str ());
+				// 	debug.str ("");
+				// }
 				
 				for (int i = 2; i < ldn; ++i) {
 					for (int j = 1; j < m - 1; ++j) {
@@ -753,36 +750,9 @@ namespace two_d
 						data_x [i * m + j] += scalar * (i / 2) * (data_ptr [(i + 1) * (m + 1) + j] + data_ptr [(i + 1) * (m + 1) + j - 1]) / 2.0;
 						data_x [(i + 1) * m + j] -= scalar * (i / 2) * (data_ptr [i * (m + 1) + j] + data_ptr [i * (m + 1) + j - 1]) / 2.0;
 					}
-					data_x [i * m + m - 1] = (data_z [(i + 1) * m + m - 1] - data_z [(i + 1) * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / (i / 2) / scalar;
-					// DEBUG (data_x [(i) * m + m - 1]);
-					// if (i > 4) data_x [i * m + m - 1] = 0.0;
-					data_x [(i + 1) * m + m - 1] = -(data_z [i * m + m - 1] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / (i / 2) / scalar;
-					// if (i > 4) data_x [(i + 1) * m + m - 1] = 0.0;
-					// DEBUG (-scalar * data_x [(i + 1) * m + m - 1] * (i / 2) + (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) << " " << scalar * data_x [(i) * m + m - 1] * (i / 2) + (data_z [(i + 1) * m + m - 1] - data_z [(i + 1) * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]));
-					for (int j = 0; j < m; ++j) {
-						// DEBUG (i << " " << j << " " << -scalar * data_x [(i + 1) * m + j] * (i / 2) + );
-					}
+					// data_x [i * m + m - 1] = (data_z [(i + 1) * m + m - 1] - data_z [(i + 1) * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / (i / 2) / scalar;
+					// data_x [(i + 1) * m + m - 1] = -(data_z [i * m + m - 1] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / (i / 2) / scalar;
 				}
-				
-				// for (int i = 2; i < ldn; i += 2) {
-				// 	for (int j = 0; j < m - 1; ++j) {
-				// 		data [i * m + j] = -scalar * data_x [(i + 1) * m + j];
-				// 		data [(i + 1) * m + j] = scalar * data_x [i * m + j];
-				// 	}
-				// }
-				//
-				// for (int i = 2; i < ldn; ++i) {
-				// 	// data [i * (m + 1) - 1] = 0.0;
-				// 	data [i * (m + 1)] += (data_z [i * m + 1] - data_z [i * m]) / (pos_m [1] - pos_m [0]);
-				// 	for (int j = 1; j < m - 1; ++j) {
-				// 		data [i * (m + 1) + j] += (data_z [i * m + j + 1] - data_z [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
-				// 	}
-				// 	data [i * (m + 1) + m - 1] = 0.0;
-				//
-				// 	for (int j = 0; j < m; ++j) {
-				// 		DEBUG ("RHS " << i << " " << data_ptr [i * (m + 1) + j]);
-				// 	}
-				// }
 				
 				utils::scale (2 * m, 0.0, data_z);
 				// utils::scale (m, 0.0, data_z, m);

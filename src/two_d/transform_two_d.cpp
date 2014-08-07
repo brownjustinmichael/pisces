@@ -234,12 +234,12 @@ namespace two_d
 		void horizontal_transform <double>::execute () {
 			TRACE ("Executing...");
 			
-			std::stringstream debug;
-			for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
-				debug << data_in [i * m + m - 1] << " ";
-			}
-			DEBUG ("IN " << debug.str ());
-			debug.str ("");
+			// std::stringstream debug;
+			// for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
+			// 	debug << data_in [i * m + m - 1] << " ";
+			// }
+			// DEBUG ("IN " << debug.str ());
+			// debug.str ("");
 			if (*component_flags & transformed_horizontal) {
 				for (int i = 4 * (n / 2 + 1) / 3; i < 2 * (n / 2 + 1); ++i) {
 					for (int j = 0; j < m; ++j) {
@@ -262,10 +262,10 @@ namespace two_d
 			for (int i = 0; i < 2 * (n / 2 + 1) * m; ++i) {
 				data_out [i] *= scalar;
 			}
-			for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
-				debug << data_out [i * m + m - 1] << " ";
-			}
-			DEBUG ("OUT " << debug.str ());
+			// for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
+			// 	debug << data_out [i * m + m - 1] << " ";
+			// }
+			// DEBUG ("OUT " << debug.str ());
 			TRACE ("Execution Complete.");
 		}
 		
@@ -432,13 +432,13 @@ namespace two_d
 		template <>
 		void vertical_transform <double>::execute () {
 			TRACE ("Executing...");
-			DEBUG ("VERTI");
-			std::stringstream debug;
-			for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
-				debug << data_in [i * m + m - 1] << " ";
-			}
-			DEBUG ("IN " << debug.str ());
-			debug.str ("");
+			// DEBUG ("VERTI");
+			// std::stringstream debug;
+			// for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
+			// 	debug << data_in [i * m + m - 1] << " ";
+			// }
+			// DEBUG ("IN " << debug.str ());
+			// debug.str ("");
 			if (m > 1 && !(flags & ignore_m)) {
 // #pragma omp parallel for num_threads (threads)
 				for (int i = 0; i < threads; ++i) {
@@ -448,20 +448,20 @@ namespace two_d
 
 			if (*component_flags & transformed_vertical) {
 				*component_flags &= ~transformed_vertical;
-				DEBUG ("A");
+				// DEBUG ("A");
 			} else {
 				*component_flags |= transformed_vertical;
-				DEBUG ("B");
+				// DEBUG ("B");
 			}
 			
 			for (int i = 0; i < 2 * (n / 2 + 1) * m; ++i) {
 				data_out [i] *= scalar;
 			}
 			
-			for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
-				debug << data_out [i * m + m - 1] << " ";
-			}
-			DEBUG ("OUT " << debug.str ());
+			// for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
+			// 	debug << data_out [i * m + m - 1] << " ";
+			// }
+			// DEBUG ("OUT " << debug.str ());
 			
 			TRACE ("Execution Complete.");
 		}
