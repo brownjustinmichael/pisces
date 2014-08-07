@@ -536,7 +536,6 @@ namespace io
 		datatype *calculate () {
 			for (int i = 0; i < n; ++i) {
 				for (int j = 0; j < m; ++j) {
-					DEBUG (i << " " << j << " " << data_1 [i * m + j] << " " << data_2 [i * m + j]);
 					inner_data [i * m + j] = data_1 [i * m + j] * data_2 [i * m + j];
 				}
 			}
@@ -750,7 +749,6 @@ namespace io
 			// Output the scalar_functors
 			for (int i = 0; i < (int) scalar_functor_names.size (); ++i) {
 				if (scalar_functor_types [i] == &typeid (double)) {
-					DEBUG ("Calculating " << scalar_functor_names [i]);
 					format::template write_scalar <double> (file_name, scalar_functor_names [i], ((format_functor <double> *) scalar_functor_ptrs [i])->calculate (), record);
 				} else if (scalar_functor_types [i] == &typeid (float)) {
 					format::template write_scalar <float> (file_name, scalar_functor_names [i], ((format_functor <float> *) scalar_functor_ptrs [i])->calculate (), record);
