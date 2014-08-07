@@ -755,9 +755,6 @@ namespace two_d
 				}
 				
 				utils::scale (2 * m, 0.0, data_z);
-				// utils::scale (m, 0.0, data_z, m);
-				// utils::scale (m, 0.0, data_z + m - 1, m);
-
 			
 				for (int j = 0; j < m; ++j) {
 					for (int i = 0; i < ldn; ++i) {

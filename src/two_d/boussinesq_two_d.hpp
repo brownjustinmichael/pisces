@@ -35,6 +35,19 @@ namespace two_d
 					output_ptr->template append_functor <double> ("div", new io::div_functor <datatype> (ptr (x_position), ptr (z_position), ptr (x_velocity), ptr (z_velocity), n, m));
 				}
 				
+				virtual void setup_stat (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
+					bases::element <datatype>::setup_stat (output_ptr, flags);
+					DEBUG ("SETTING UP");
+					area.resize (n * m);
+					for (int i = 1; i < n; ++i) {
+						for (int j = 1; j < m; ++j) {
+							area [i * m + j] = ((*(grids [0])) [i] - (*(grids [0])) [i - 1]) * ((*(grids [1])) [j] - (*(grids [1])) [j - 1]);
+						}
+					}
+					output_ptr->template append_scalar_functor <double> ("wT", new io::weighted_average_functor <datatype> (n, m, &area [0], new io::product_functor <datatype> (n, m, ptr (z_velocity), ptr (temperature))));
+					output_ptr->template append_scalar_functor <double> ("wS", new io::weighted_average_functor <datatype> (n, m, &area [0], new io::product_functor <datatype> (n, m, ptr (z_velocity), ptr (composition))));
+				}
+				
 				virtual io::virtual_dump *make_dump (int flags = 0x00) {
 					std::shared_ptr <io::output> virtual_output;
 					if (flags & profile_only) {
@@ -90,6 +103,7 @@ namespace two_d
 				using element <datatype>::scalars;
 				using element <datatype>::scalar_names;
 				
+				std::vector <datatype> area;
 				datatype advection_coeff, cfl, *x_ptr, *z_ptr, *x_vel_ptr, *z_vel_ptr;
 			};
 		} /* cosine */

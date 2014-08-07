@@ -331,6 +331,50 @@ namespace io
 	};
 	
 	/*!**********************************************************************
+	 * \brief Averages a two dimensional block of data
+	 ************************************************************************/
+	template <class datatype>
+	class weighted_average_functor : public format_functor <datatype>
+	{
+	private:
+		datatype *weight, *data; //!< A datatype pointer to the input data
+		format_functor <datatype> *functor;
+		int n; //!< The integer horizontal extent of the data
+		int m; //!< The integer vertical extent of the data
+		datatype inner_data; //!< A vector of processed data to output
+	
+	public:
+		/*!**********************************************************************
+		 * \param i_data The datatype pointer to the data to average
+		 * \param i_n The integer horizontal extent of the data
+		 * \param i_m The integer vertical extent of the data
+		 ************************************************************************/
+		weighted_average_functor (int i_n, int i_m, datatype *i_weight, datatype *i_data) : weight (i_weight), data (i_data), n (i_n), m (i_m) {
+		}
+	
+		weighted_average_functor (int i_n, int i_m, datatype *i_weight, format_functor <datatype> *i_functor) : weight (i_weight), data (i_functor->calculate ()), functor (i_functor), n (i_n), m (i_m) {
+		}
+	
+		/*!**********************************************************************
+		 * \brief Average the data and return a pointer to the first element
+		 * 
+		 * \return The first element of the averaged 1D array
+		 ************************************************************************/
+		datatype *calculate () {
+			if (functor) {
+				functor->calculate ();
+			}
+			inner_data = (datatype) 0;
+			for (int j = 0; j < m; ++j) {
+				for (int i = 0; i < n; ++i) {
+					inner_data += weight [i * m + j] * data [i * m + j];
+				}
+			}
+			return &inner_data;
+		}
+	};
+	
+	/*!**********************************************************************
 	 * \brief Averages a two dimensional block of data in the horizontal direction
 	 ************************************************************************/
 	template <class datatype>
@@ -338,6 +382,7 @@ namespace io
 	{
 	private:
 		datatype *data; //!< A datatype pointer to the input data
+		std::shared_ptr <format_functor <datatype>> functor;
 		int n; //!< The integer horizontal extent of the data
 		int m; //!< The integer vertical extent of the data
 		std::vector <datatype> inner_data; //!< A vector of processed data to output
@@ -352,12 +397,19 @@ namespace io
 			inner_data.resize (m);
 		}
 		
+		average_functor (format_functor <datatype> *i_functor, int i_n, int i_m) : data (i_functor->calculate ()), functor (std::shared_ptr <format_functor <datatype>> (i_functor)), n (i_n), m (i_m) {
+			inner_data.resize (m);
+		}
+		
 		/*!**********************************************************************
 		 * \brief Average the data and return a pointer to the first element
 		 * 
 		 * \return The first element of the averaged 1D array
 		 ************************************************************************/
 		datatype *calculate () {
+			if (functor) {
+				functor->calculate ();
+			}
 			for (int j = 0; j < m; ++j) {
 				inner_data [j] = (datatype) 0;
 				for (int i = 0; i < n; ++i) {
@@ -454,6 +506,44 @@ namespace io
 		}
 	};
 	
+	/*!**********************************************************************
+	 * \brief Averages a two dimensional block of data in the horizontal direction
+	 ************************************************************************/
+	template <class datatype>
+	class product_functor : public format_functor <datatype>
+	{
+	private:
+		datatype *data_1, *data_2; //!< A datatype pointer to the input data
+		int n; //!< The integer horizontal extent of the data
+		int m; //!< The integer vertical extent of the data
+		std::vector <datatype> inner_data; //!< A vector of processed data to output
+
+	public:
+		/*!**********************************************************************
+		 * \param i_data The datatype pointer to the data to average
+		 * \param i_n The integer horizontal extent of the data
+		 * \param i_m The integer vertical extent of the data
+		 ************************************************************************/
+		product_functor (int i_n, int i_m, datatype *i_data_1, datatype *i_data_2) : data_1 (i_data_1), data_2 (i_data_2), n (i_n), m (i_m) {
+			inner_data.resize (n * m);
+		}
+
+		/*!**********************************************************************
+		 * \brief Average the data and return a pointer to the first element
+		 * 
+		 * \return The first element of the averaged 1D array
+		 ************************************************************************/
+		datatype *calculate () {
+			for (int i = 0; i < n; ++i) {
+				for (int j = 0; j < m; ++j) {
+					DEBUG (i << " " << j << " " << data_1 [i * m + j] << " " << data_2 [i * m + j]);
+					inner_data [i * m + j] = data_1 [i * m + j] * data_2 [i * m + j];
+				}
+			}
+			return &inner_data [0];
+		}
+	};
+	
 	/*!*******************************************************************
 	 * \brief An abstract output stream base class that generates output files
 	 * 
@@ -476,12 +566,15 @@ namespace io
 		std::vector <std::string> names; //!< A vector of the string representations of the variables
 		std::vector <std::string> scalar_names; //!< A vector of the string representations of the scalar variables
 		std::vector <std::string> functor_names; //!< A vector of the string representations of the functor variables
+		std::vector <std::string> scalar_functor_names; //!< A vector of the string representations of the functor variables
 		std::vector <const std::type_info*> types; //!< A vector of the types of the variables
 		std::vector <const std::type_info*> scalar_types; //!< A vector of the types of the scalar variables
 		std::vector <const std::type_info*> functor_types; //!< A vector of the types of the functor variables
+		std::vector <const std::type_info*> scalar_functor_types; //!< A vector of the types of the functor variables
 		std::vector <void *> data_ptrs; //!< A vector of pointers to the arrays of data
 		std::vector <void *> scalar_ptrs; //!< A vector of pointers to the scalar data
 		std::vector <void *> functor_ptrs; //!< A vector of pointers to the functors
+		std::vector <void *> scalar_functor_ptrs; //!< A vector of pointers to the functors
 		
 	public:
 		/*!*******************************************************************
@@ -499,6 +592,10 @@ namespace io
 		 * This seems an extremely tedious way to do this. It might be superior to accept arrays or brace initialized lists
 		 *********************************************************************/
 		output (std::string i_file_name = "out", int i_file_format = replace_file, int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 0, int i_m_max = 0, int i_l_max = 0, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) : file_name (i_file_name), file_format (i_file_format), n (i_n), m (i_m), l (i_l), n_max (i_n_max ? i_n_max : n), m_max (i_m_max ? i_m_max : m), l_max (i_l_max ? i_l_max : l), n_offset (i_n_offset), m_offset (i_m_offset), l_offset (i_l_offset) {}
+		
+		/*
+			TODO This is a mess... the abstract output shouldn't need to know about the dimensions
+		*/
 		
 		virtual ~output () {}
 		
@@ -577,6 +674,30 @@ namespace io
 			TRACE ("Functor appended.");
 		}
 		
+		/*!**********************************************************************
+		 * \brief Append a datatype scalar_functor to the list to be output
+		 * 
+		 * \param name The string representation of the quantity
+		 * \param scalar_functor_ptr A pointer to the scalar_functor that will calculate the resulting quantity
+		 ************************************************************************/
+		template <class datatype>
+		void append_scalar_functor (std::string name, format_functor <datatype> *scalar_functor_ptr) {
+			TRACE ("Appending " << name << " to output...");
+			for (int i = 0; i < (int) scalar_functor_names.size (); ++i) {
+				if (scalar_functor_names [i] == name) {
+					WARN ("Reuse of name " << name);
+					scalar_functor_types [i] = &typeid (datatype);
+					scalar_functor_ptrs [i] = (void *) scalar_functor_ptr;
+					TRACE ("Scalar updated.");
+					return;
+				}
+			}
+			scalar_functor_types.push_back (&typeid (datatype));
+			scalar_functor_names.push_back (name);
+			scalar_functor_ptrs.push_back ((void *) scalar_functor_ptr);
+			TRACE ("Functor appended.");
+		}
+		
 		/*!*******************************************************************
 		 * \brief A function to output the data to file
 		 * 
@@ -626,6 +747,20 @@ namespace io
 				}
 			}
 			
+			// Output the scalar_functors
+			for (int i = 0; i < (int) scalar_functor_names.size (); ++i) {
+				if (scalar_functor_types [i] == &typeid (double)) {
+					DEBUG ("Calculating " << scalar_functor_names [i]);
+					format::template write_scalar <double> (file_name, scalar_functor_names [i], ((format_functor <double> *) scalar_functor_ptrs [i])->calculate (), record);
+				} else if (scalar_functor_types [i] == &typeid (float)) {
+					format::template write_scalar <float> (file_name, scalar_functor_names [i], ((format_functor <float> *) scalar_functor_ptrs [i])->calculate (), record);
+				} else if (scalar_functor_types [i] == &typeid (int)) {
+					format::template write_scalar <int> (file_name, scalar_functor_names [i], ((format_functor <int> *) scalar_functor_ptrs [i])->calculate (), record);
+				} else {
+					throw 0;
+				}
+			}
+			
 			// Output the array data
 			for (int i = 0; i < (int) names.size (); ++i) {
 				if (types [i] == &typeid (double)) {
@@ -654,6 +789,10 @@ namespace io
 			if (output::file_format != append_file) {
 				format::close_file (file_name.c_str (), output::file_format);
 			}
+			
+			/*
+				TODO This behavior means that in a crash, all output data are lost, appender files should be opened and closed like all others
+			*/
 		}
 	};
 	

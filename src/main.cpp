@@ -160,6 +160,20 @@ int main (int argc, char *argv[])
 			element->setup_output (transform_stream, transform_output);
 		}
 		
+		std::shared_ptr <io::output> stat_stream;
+		if (config ["output.stat.file"].IsDefined ()) {
+			std::string file_format = "../output/" + config.get <std::string> ("output.stat.file");
+			char buffer [file_format.size () * 2];
+			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
+		
+			stat_stream.reset (new io::appender_output <io::formats::ascii> (buffer, config.get <int> ("output.stat.every"), n, m));
+			element->setup_stat (stat_stream);
+		}
+		
+		/*
+			TODO Setting up the streams should be more convenient
+		*/
+		
 		/*
 			TODO Because the output files are not within the element anymore, they become useless once the element is destroyed. Ponder this.
 		*/

@@ -89,6 +89,7 @@ int main (int argc, char *argv[])
 		double duration = 0.0;
 		int mode = mode_flag;
 		output_stream.append <double> ("T", &temp [0]);
+		output_stream.append <double> ("S", &temp [0]);
 		// output_stream.append <double> ("w", &temp [0]);
 		// output_stream.append <double> ("u", &temp [0]);
 		output_stream.append_scalar <double> ("t", &duration);

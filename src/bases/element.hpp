@@ -68,6 +68,7 @@ namespace bases
 	private:
 		std::shared_ptr <io::output> normal_stream; //!< An implementation to output in normal space
 		std::shared_ptr <io::output> transform_stream; //!< An implementation to output in transform space
+		std::shared_ptr <io::output> stat_stream; //!< An implementation to output in transform space
 		std::vector <std::shared_ptr <io::output>> normal_profiles; //!< An implementation to output in transform space
 
 		std::vector <int> solver_keys; //!< A vector of integer keys to the solvers map
@@ -286,6 +287,14 @@ namespace bases
 			} else if (flags & normal_output) {
 				normal_stream = output_ptr;
 			}
+		}
+		
+		virtual void setup_stat (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
+			// Also prepare to output the total simulated time and geometry mode
+			output_ptr->template append_scalar <datatype> ("t", &duration);
+			output_ptr->template append_scalar <datatype> ("dt", &timestep);
+			// Check the desired output time and save the output object in the appropriate variable
+			stat_stream = output_ptr;
 		}
 		
 		/*!**********************************************************************
