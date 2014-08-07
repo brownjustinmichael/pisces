@@ -66,6 +66,9 @@ namespace utils
 	 *********************************************************************/
 	void matrix_solve (int n, float* a, int* ipiv, float* b, int *info = NULL, int nrhs = 1, int lda = -1, int ldb = -1);
 	
+	void matrix_banded_solve (int n, int kl, int ku, double* a, int* ipiv, double* b, int *info = NULL, int nrhs = 1, int lda = -1, int ldb = -1);
+	void matrix_banded_factorize (int m, int n, int kl, int ku, double* a, int *ipiv, int *info = NULL, int lda = -1);
+		
 	void tridiagonal_solve (int n, float *sub, float *diag, float *sup, float *b, int *info = NULL, int nrhs = 1, int ldb = -1);
 
 	void tridiagonal_solve (int n, double *sub, double *diag, double *sup, double *b, int *info = NULL, int nrhs = 1, int ldb = -1);
