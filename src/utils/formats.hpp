@@ -35,14 +35,12 @@ namespace io
 			static std::string extension () {return ".dat";}
 			
 			static void open_file (std::string file_name, int file_type, int n_max = 1, int m_max = 1, int l_max = 1) {
-				DEBUG ("OPENING " << file_name);
 				if (file_type == read_file) {
 					file_streams [file_name].open (file_name, std::ostream::in);
 				} else if (file_type == replace_file) {
 					file_streams [file_name].open (file_name, std::ostream::out | std::ostream::trunc);
 				} else if (file_type == append_file) {
 					if (!(file_streams [file_name].is_open ())) {
-						DEBUG ("At opening");
 						file_streams [file_name].open (file_name, std::ostream::out | std::ostream::trunc);
 					}
 				} else {
@@ -70,7 +68,6 @@ namespace io
 			}
 			
 			static void close_file (std::string file_name, int file_type) {
-				DEBUG ("CLOSING " << file_name);
 				if (header [file_name].str () != "") {
 					file_streams [file_name] << comment << " " << header [file_name].str () << "\n";
 				}
@@ -90,12 +87,10 @@ namespace io
 			
 			template <class datatype>
 			static void write_scalar (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0, int record = -1) {
-				DEBUG ("WRITING SCALAR " << name);
 				if (file_types [file_name] != append_file || count [file_name] == 1) {
 					header [file_name] << name << " ";
 				}
 				body [file_name] << *data << " ";
-				DEBUG (body [file_name].str ());
 			}
 			
 			template <class datatype>
