@@ -43,7 +43,6 @@ int main (int argc, char *argv[])
 	if (id != np - 1) {
 		nbot = 1;
 	}
-	int lda = n + ntop + nbot, ldx = 0, ldb = lda;
 
 	std::vector <double> sub (n * nrhs, 0.0);
 	std::vector <double> diag (n * nrhs, 0.0);
@@ -106,9 +105,6 @@ int main (int argc, char *argv[])
 		}
 		bcopy [n - 1 + j * n] -= subcopy [n - 1 + j * n] * b [n - 2 + j * n] + diagcopy [n - 1 + j * n] * b [n - 1 + j * n];
 	}
-
-	double above;
-	double below;
 	
 	std::vector <double> edge_0 (nrhs), edge_n (nrhs), redge_0 (nrhs), redge_n (nrhs);
 	

@@ -20,6 +20,13 @@ namespace io
 {
 	namespace formats
 	{
+		std::string ascii::comment = "#";
+		std::map <std::string, std::ofstream> ascii::file_streams;
+		std::map <std::string, int> ascii::count;
+		std::map <std::string, int> ascii::file_types;
+		std::map <std::string, std::stringstream> ascii::header;
+		std::map <std::string, std::stringstream> ascii::body;
+		
 		namespace one_d
 		{
 			// void ascii::open_file (std::string file_name, int file_type) {
