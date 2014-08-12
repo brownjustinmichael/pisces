@@ -60,6 +60,9 @@ namespace two_d
 			init_timestep = i_params.get <datatype> ("time.init");
 			mult_timestep = i_params.get <datatype> ("time.mult");
 			timestep_safety = i_params.get <datatype> ("time.safety");
+			next_timestep = 0.0;
+			count = 0;
+			previous = 0;
 			
 			TRACE ("Instantiated.");
 		}
@@ -170,8 +173,17 @@ namespace two_d
 				return init_timestep;
 			}
 			if (shared_min > mult_timestep * timestep) {
-				return std::min (mult_timestep * timestep, max_timestep);
-			} else if (shared_min < timestep) {
+				if (next_timestep != 0.0 && std::min (next_timestep, shared_min) > mult_timestep * timestep) {
+					next_timestep = 0.0;
+					return std::min (mult_timestep * timestep, max_timestep);
+				} else {
+					next_timestep = shared_min;
+					return timestep;
+				}
+			}
+			next_timestep = 0.0;
+			if (shared_min < timestep) {
+				previous = count;
 				return shared_min / mult_timestep;
 			} else {
 				return timestep;
@@ -249,6 +261,8 @@ namespace two_d
 		datatype init_timestep;
 		datatype mult_timestep;
 		datatype timestep_safety;
+		datatype next_timestep;
+		int count, previous;
 	};
 	
 	namespace fourier
