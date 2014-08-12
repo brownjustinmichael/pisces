@@ -206,14 +206,6 @@ namespace two_d
 		template <>
 		void horizontal_transform <float>::execute () {
 			TRACE ("Executing...");
-			if (*component_flags & transformed_horizontal) {
-				for (int i = 4 * (n / 2 + 1) / 3; i < 2 * (n / 2 + 1); ++i) {
-					for (int j = 0; j < m; ++j) {
-						data_out [i * m + j] *= 0.0;
-					}
-				}
-			}
-			
 // #pragma omp parallel for num_threads (threads)
 			for (int i = 0; i < threads; ++i) {
 				fftwf_execute (plans_float [i]);
@@ -223,6 +215,11 @@ namespace two_d
 				*component_flags &= ~transformed_horizontal;
 			} else {
 				*component_flags |= transformed_horizontal;
+				for (int i = 4 * (n / 2 + 1) / 3; i < 2 * (n / 2 + 1); ++i) {
+					for (int j = 0; j < m; ++j) {
+						data_out [i * m + j] *= 0.0;
+					}
+				}
 			}
 				
 			for (int i = 0; i < 2 * (n / 2 + 1) * m; ++i) {
@@ -240,13 +237,6 @@ namespace two_d
 			// }
 			// DEBUG ("IN " << debug.str ());
 			// debug.str ("");
-			if (*component_flags & transformed_horizontal) {
-				for (int i = 4 * (n / 2 + 1) / 3; i < 2 * (n / 2 + 1); ++i) {
-					for (int j = 0; j < m; ++j) {
-						data_in [i * m + j] = 0.0;
-					}
-				}
-			}
 
 // #pragma omp parallel for num_threads (threads)
 			for (int i = 0; i < threads; ++i) {
@@ -257,6 +247,11 @@ namespace two_d
 				*component_flags &= ~transformed_horizontal;
 			} else {
 				*component_flags |= transformed_horizontal;
+				for (int i = 4 * (n / 2 + 1) / 3; i < 2 * (n / 2 + 1); ++i) {
+					for (int j = 0; j < m; ++j) {
+						data_in [i * m + j] = 0.0;
+					}
+				}
 			}
 		
 			for (int i = 0; i < 2 * (n / 2 + 1) * m; ++i) {

@@ -146,7 +146,7 @@ namespace utils
 		}
 		
 		dgbtrf_ (&m, &n, &kl, &ku, a, &lda, ipiv, info);
-		
+			
 		if (*info != 0) {
 			FATAL ("ERROR " << *info);
 			throw exceptions::cannot_factor ();

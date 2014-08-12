@@ -606,26 +606,26 @@ namespace two_d
 			
 			matrix.resize ((2 * 2 + 1 + 1) * (m + 1) * ldn);
 			
-			if (messenger_ptr->get_id () == 0) {
-				x.resize (((m + 1) + 4 * messenger_ptr->get_np ()) * 2 * ldn);
-				xipiv.resize (2 * messenger_ptr->get_np () * ldn);
-			} else {
-				x.resize (((m + 1) + 4) * 2 * ldn);
-			}
+			// if (messenger_ptr->get_id () == 0) {
+			// 	x.resize (((m + 1) + 4 * messenger_ptr->get_np ()) * 2 * ldn);
+			// 	xipiv.resize (2 * messenger_ptr->get_np () * ldn);
+			// } else {
+			// 	x.resize (((m + 1) + 4) * 2 * ldn);
+			// }
 			
 			id = messenger_ptr->get_id ();
 			np = messenger_ptr->get_np ();
 			
-			if (id != 0) {
-				messenger_ptr->send (1, &pos_m [excess_0], id - 1, 0);
-			}
-			if (id != np - 1) {
-				messenger_ptr->recv (1, &ex_pos_m, id + 1, 0);
-				messenger_ptr->send (1, &pos_m [m - 2 - excess_n], id + 1, 1);
-			}
-			if (id != 0) {
-				messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
-			}
+			// if (id != 0) {
+			// 	messenger_ptr->send (1, &pos_m [excess_0], id - 1, 0);
+			// }
+			// if (id != np - 1) {
+			// 	messenger_ptr->recv (1, &ex_pos_m, id + 1, 0);
+			// 	messenger_ptr->send (1, &pos_m [m - 2 - excess_n], id + 1, 1);
+			// }
+			// if (id != 0) {
+			// 	messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
+			// }
 			data_temp.resize ((m + 1) * ldn);
 			flags = 0x00;
 			transform = std::shared_ptr <bases::plan <datatype> > (new fourier::vertical_transform <datatype> (n, m, &data_z [0], NULL, inverse, i_element_flags, &flags));
@@ -642,14 +642,15 @@ namespace two_d
 			TRACE ("Factorizing laplace solver...");
 
 			double scalar = 4.0 * std::acos (-1.0) * std::acos (-1.0) / (pos_n [n - 1] - pos_n [0]) / (pos_n [n - 1] - pos_n [0]);
-			std::vector <datatype> positions (m + 1);
+			std::vector <datatype> positions (m + 2);
 			datatype *matrix_ptr, *new_pos = &positions [1];
 			
 			new_pos [-1] = 2.0 * pos_m [0] - (pos_m [0] + pos_m [1]) / 2.0;
 			for (int j = 0; j < m - 1; ++j) {
 				new_pos [j] = (pos_m [j] + pos_m [j + 1]) / 2.0;
 			}
-			new_pos [m - 1] = 2.0 * pos_m [m - 1] - (pos_m [m - 1] - pos_m [m - 2]) / 2.0;
+			new_pos [m - 1] = 2.0 * pos_m [m - 1] - (pos_m [m - 1] + pos_m [m - 2]) / 2.0;
+			new_pos [m] = pos_m [m - 1] + (pos_m [m - 1] - new_pos [m - 3]);
 			
 			for (int i = 0; i < ldn; ++i) {
 				matrix_ptr = &matrix [i * (m + 1) * (2 * 2 + 1 + 1) + 2];
@@ -670,9 +671,22 @@ namespace two_d
 				// matrix_ptr [(m - 1) * 6 + 2] = -1.0 / (new_pos [m - 2] - new_pos [m - 3]) / (pos_m [m - 1] - pos_m [m - 2]) - 1.0 / (new_pos [m - 1] - new_pos [m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) - scalar * (i / 2) * (i / 2);
 				// matrix_ptr [(m - 2) * 6 + 3] = 1.0 / (new_pos [m - 2] - new_pos [m - 3]) / (pos_m [m - 1] - pos_m [m - 2]);
 				
-				matrix_ptr [(m - 2) * 6 + 3] = 0.0;
+				// matrix_ptr [(j + 1 - 2) * 6 + 3] = 1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (pos_m [j + 1] - pos_m [j - 1]);
+				// matrix_ptr [(j + 1 - 1) * 6 + 2] = -1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (pos_m [j + 1] - pos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
+				// matrix_ptr [(j + 1) * 6 + 1] = -1.0 / (new_pos [j + 1] - new_pos [j]) / (pos_m [j + 1] - pos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
+				// matrix_ptr [(j + 1 + 1) * 6] = 1.0 / (new_pos [j + 1] - new_pos [j]) / (pos_m [j + 1] - pos_m [j - 1]);
+
+				matrix_ptr [(m - 2) * 6 + 3] = 1.0e-10;
 				matrix_ptr [(m - 1) * 6 + 2] = -1.0;
 				matrix_ptr [(m) * 6 + 1] = 1.0;
+				
+				// for (int k = 0; k < 6; ++k) {
+				// 	for (int j = 0; j < m + 1; ++j) {
+				// 		debug << matrix [i * (m + 1) * 6 + j * 6 + k] << " ";
+				// 	}
+				// 	DEBUG (debug.str ());
+				// 	debug.str ("");
+				// }
 				
 				utils::matrix_banded_factorize (m + 1, m + 1, 2, 1, matrix_ptr - 2, &ipiv [(m + 1) * i], &info, 2 * 2 + 1 + 1);
 			}
@@ -695,7 +709,7 @@ namespace two_d
 				for (int j = 0; j < m - 1; ++j) {
 					new_pos [j] = (pos_m [j] + pos_m [j + 1]) / 2.0;
 				}
-				new_pos [m - 1] = 2.0 * pos_m [m - 1] - (pos_m [m - 1] - pos_m [m - 2]) / 2.0;
+				new_pos [m - 1] = 2.0 * pos_m [m - 1] - (pos_m [m - 1] + pos_m [m - 2]) / 2.0;
 			
 				for (int i = 2; i < ldn; i += 2) {
 					for (int j = 0; j < m; ++j) {
@@ -755,6 +769,7 @@ namespace two_d
 				}
 				
 				utils::scale (2 * m, 0.0, data_z);
+				utils::scale (2 * m, 0.0, data_x);
 			
 				for (int j = 0; j < m; ++j) {
 					for (int i = 0; i < ldn; ++i) {
