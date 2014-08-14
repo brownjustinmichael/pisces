@@ -772,30 +772,30 @@ namespace two_d
 				}
 				
 				
-				for (int i = 2; i < ldn; i += 2) {
-					for (int j = 0; j < m; ++j) {
-						data_ptr [i * (m + 2) + j] = -scalar * (i / 2) * data_x [(i + 1) * m + j];
-						data_ptr [(i + 1) * (m + 2) + j] = scalar * (i / 2) * data_x [i * m + j];
-					}
-					data_ptr [i * (m + 2) + m - 1] = -scalar * (i / 2) * data_x [(i + 1) * m + m - 1];
-					data_ptr [(i + 1) * (m + 2) + m - 1] = scalar * (i / 2) * data_x [i * m + m - 1];
-				}
+				// for (int i = 2; i < ldn; i += 2) {
+				// 	for (int j = 0; j < m; ++j) {
+				// 		data_ptr [i * (m + 2) + j] = -scalar * (i / 2) * data_x [(i + 1) * m + j];
+				// 		data_ptr [(i + 1) * (m + 2) + j] = scalar * (i / 2) * data_x [i * m + j];
+				// 	}
+				// 	data_ptr [i * (m + 2) + m - 1] = -scalar * (i / 2) * data_x [(i + 1) * m + m - 1];
+				// 	data_ptr [(i + 1) * (m + 2) + m - 1] = scalar * (i / 2) * data_x [i * m + m - 1];
+				// }
 				
-				for (int i = 2; i < ldn; ++i) {
-					data_ptr [i * (m + 2) - 1] = 0.0;
-					data_ptr [i * (m + 2)] += (data_z [i * m + 1] - data_z [i * m]) / (pos_m [1] - pos_m [0]);
-					for (int j = 1; j < m - 1; ++j) {
-						data_ptr [i * (m + 2) + j] += (data_z [i * m + j + 1] - data_z [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
-					}
-					// data_ptr [i * (m + 1)] += (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
-					// data_ptr [i * (m + 1) + m - 1] = 0.0;
-					data_ptr [i * (m + 2) + m - 1] += (out_z [i] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / 2.0;
-					data_ptr [i * (m + 2) + m] = 0.0;
-					
-					for (int j = -1; j < m + 1; ++j) {
-						// DEBUG ("RHS " << i * (m + 2) + j << " " << data_ptr [i * (m + 2) + j]);
-					}
-				}
+				// for (int i = 2; i < ldn; ++i) {
+				// 	data_ptr [i * (m + 2) - 1] = 0.0;
+				// 	data_ptr [i * (m + 2)] += (data_z [i * m + 1] - data_z [i * m]) / (pos_m [1] - pos_m [0]);
+				// 	for (int j = 1; j < m - 1; ++j) {
+				// 		data_ptr [i * (m + 2) + j] += (data_z [i * m + j + 1] - data_z [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
+				// 	}
+				// 	// data_ptr [i * (m + 1)] += (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
+				// 	// data_ptr [i * (m + 1) + m - 1] = 0.0;
+				// 	data_ptr [i * (m + 2) + m - 1] += (out_z [i] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / 2.0;
+				// 	data_ptr [i * (m + 2) + m] = 0.0;
+				//
+				// 	for (int j = -1; j < m + 1; ++j) {
+				// 		DEBUG ("RHS " << i * (m + 2) + j << " " << data_ptr [i * (m + 2) + j]);
+				// 	}
+				// }
 				
 				
 				// for (int i = 2; i < ldn; ++i) {
