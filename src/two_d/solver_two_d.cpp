@@ -144,13 +144,13 @@ namespace two_d
 			utils::matrix_add_scaled (m - 2 - excess_0 - excess_n, m, 1.0, default_matrix + excess_0 + 1, &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0 + 1], m, lda);
 			// utils::matrix_add_scaled (m, m, 1.0, default_matrix, &factorized_matrix [(ex_overlap_0) * (lda + 1)], m, lda);
 
-			// for (int j = 0; j < lda; ++j) {
-			// 	for (int i = 0; i < lda; ++i) {
-			// 		debug << factorized_matrix [i * lda + j] << " ";
-			// 	}
-			// 	DEBUG (debug.str ());
-			// 	debug.str ("");
-			// }
+			for (int j = 0; j < lda; ++j) {
+				for (int i = 0; i < lda; ++i) {
+					debug << factorized_matrix [i * lda + j] << " ";
+				}
+				DEBUG (debug.str ());
+				debug.str ("");
+			}
 
 			utils::p_block_matrix_factorize (messenger_ptr->get_id (), messenger_ptr->get_np (), inner_m, overlap_0, overlap_n, &factorized_matrix [0], &ipiv [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, lda, sqrt ((int) boundary_matrix.size ()));
 
@@ -174,16 +174,18 @@ namespace two_d
 			}
 
 			if (boundary_0) {
-				boundary_0->calculate_rhs (data + excess_0, data, &data_temp [0], &data_temp [ex_overlap_0 + excess_0], lda);
+				DEBUG ("BOUND 0 " << &data_temp [ex_overlap_0 + excess_0] << " " << data_temp [ex_overlap_0 + excess_0]);
+				boundary_0->calculate_rhs (data + excess_0, data, &data_temp [0], &data_temp [ex_overlap_0 + excess_0], m, lda, z_solve);
 			}
 			if (boundary_n) {
-				boundary_n->calculate_rhs (data + m - 1 - excess_n, data, &data_temp [0], &data_temp [lda - 1 - excess_n - ex_overlap_n], lda);
+				DEBUG ("BOUND N " << &data_temp [lda - 1 - excess_n - ex_overlap_n] << " " << data_temp [lda - 1 - excess_n - ex_overlap_n]);
+				boundary_n->calculate_rhs (data + m - 1 - excess_n, data, &data_temp [0], &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda, z_solve);
 			}
 			
 			utils::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
 
 			// DEBUG ("Solving in m direction..." << &factorized_matrix [0] << " " << &data_temp [0] << " " << &boundary_matrix [0]);
-
+		
 			// for (int j = 0; j < lda; ++j) {
 			// 	for (int i = 0; i < ldn; ++i) {
 			// 		debug << data_temp [i * lda + j] << " ";
@@ -195,11 +197,11 @@ namespace two_d
 			utils::p_block_matrix_solve (messenger_ptr->get_id (), messenger_ptr->get_np (), inner_m, overlap_0, overlap_n, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, ldn, lda, sqrt ((int) boundary_matrix.size ()), lda);
 
 			// for (int j = 0; j < lda; ++j) {
-			// 	for (int i = 0; i < ldn; ++i) {
-			// 		debug << data_temp [i * lda + j] << " ";
-			// 	}
-			// 	DEBUG ("DONE " << debug.str ());
-			// 	debug.str ("");
+			// 		for (int i = 0; i < ldn; ++i) {
+			// 			debug << data_temp [i * lda + j] << " ";
+			// 		}
+			// 		DEBUG ("DONE " << debug.str ());
+			// 		debug.str ("");
 			// }
 
 			TRACE ("Matrix solve complete.");
@@ -303,10 +305,10 @@ namespace two_d
 			}
 			
 			if (boundary_0) {
-				boundary_0->calculate_rhs (data + excess_0, data, &data_temp [0], &data_temp [ex_overlap_0 + excess_0], lda);
+				boundary_0->calculate_rhs (data + excess_0, data, &data_temp [0], &data_temp [ex_overlap_0 + excess_0], m, lda, x_solve);
 			}
 			if (boundary_n) {
-				boundary_n->calculate_rhs (data + m - 1 - excess_n, data, &data_temp [0], &data_temp [lda - 1 - excess_n - ex_overlap_n], lda);
+				boundary_n->calculate_rhs (data + m - 1 - excess_n, data, &data_temp [0], &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda, x_solve);
 			}
 			
 			utils::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
@@ -324,13 +326,13 @@ namespace two_d
 			
 			// DEBUG ("CHOICE RHS " << rhs_ptr [12 * m + 24] << " " << data [12 * m + 24]);
 			//
-			// for (int j = 0; j < lda; ++j) {
-			// 	for (int i = 0; i < ldn; ++i) {
-			// 		debug << data_temp [i * lda + j] << " ";
-			// 	}
-			// 	DEBUG ("RHS " << debug.str ());
-			// 	debug.str ("");
-			// }
+			for (int j = 0; j < lda; ++j) {
+				for (int i = 0; i < ldn; ++i) {
+					debug << data_temp [i * lda + j] << " ";
+				}
+				DEBUG ("RHS " << debug.str ());
+				debug.str ("");
+			}
 			//
 			// for (int j = 0; j < m; ++j) {
 			// 	for (int i = 0; i < ldn; ++i) {
@@ -673,13 +675,13 @@ namespace two_d
 				// matrix_ptr [(m - 1) * 6 + 2] = -1.0;
 				// matrix_ptr [(m) * 6 + 1] = 1.0;
 				
-				for (int k = 0; k < 6; ++k) {
-					for (int j = 0; j < m + 2; ++j) {
-						debug << matrix [i * (m + 2) * 6 + j * 6 + k] << " ";
-					}
-					DEBUG (debug.str ());
-					debug.str ("");
-				}
+				// for (int k = 0; k < 6; ++k) {
+				// 	for (int j = 0; j < m + 2; ++j) {
+				// 		debug << matrix [i * (m + 2) * 6 + j * 6 + k] << " ";
+				// 	}
+				// 	DEBUG (debug.str ());
+				// 	debug.str ("");
+				// }
 				
 				utils::matrix_banded_factorize (m + 2, m + 2, 2, 1, matrix_ptr - 2, &ipiv [(m + 2) * i], &info, 2 * 2 + 1 + 1);
 			}
@@ -726,13 +728,13 @@ namespace two_d
 					data_ptr [i * (m + 2) + m] = 0.0;
 					
 					for (int j = -1; j < m + 1; ++j) {
-						DEBUG ("RHS " << i * (m + 2) + j << " " << data_ptr [i * (m + 2) + j]);
+						// DEBUG ("RHS " << i * (m + 2) + j << " " << data_ptr [i * (m + 2) + j]);
 					}
 					
 					utils::matrix_banded_solve (m + 2, 2, 1, &matrix [i * (m + 2) * (2 * 2 + 1 + 1)], &ipiv [i * (m + 2)], &data_temp [i * (m + 2)], &info, 1, 2 * 2 + 1 + 1, m + 2);
 					
 					for (int j = -1; j < m + 1; ++j) {
-						DEBUG ("DONE " << data_ptr [i * (m + 2) + j]);
+						// DEBUG ("DONE " << data_ptr [i * (m + 2) + j]);
 					}
 					
 					for (int j = 0; j < m; ++j) {
@@ -747,6 +749,8 @@ namespace two_d
 				// 	// DEBUG (debug.str ());
 				// 	debug.str ("");
 				// }
+				
+				DEBUG ("Correcting");
 				
 				std::vector <datatype> out_z (ldn);
 				
@@ -793,7 +797,7 @@ namespace two_d
 					data_ptr [i * (m + 2) + m] = 0.0;
 					
 					for (int j = -1; j < m + 1; ++j) {
-						DEBUG ("RHS " << i * (m + 2) + j << " " << data_ptr [i * (m + 2) + j]);
+						// DEBUG ("RHS " << i * (m + 2) + j << " " << data_ptr [i * (m + 2) + j]);
 					}
 				}
 				

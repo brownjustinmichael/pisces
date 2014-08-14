@@ -60,5 +60,5 @@ output:
 parallel:
     maxthreads: 4
     transform:
-        threads: 4
+        threads: 1
         subthreads: 1

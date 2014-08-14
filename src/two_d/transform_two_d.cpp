@@ -428,11 +428,16 @@ namespace two_d
 		void vertical_transform <double>::execute () {
 			TRACE ("Executing...");
 			// DEBUG ("VERTI");
-			// std::stringstream debug;
-			// for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
-			// 	debug << data_in [i * m + m - 1] << " ";
-			// }
-			// DEBUG ("IN " << debug.str ());
+			std::stringstream debug;
+			for (int j = 0; j < m; ++j) {
+				for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
+					debug << data_in [i * m + j] << " ";
+				}
+				DEBUG ("IN " << debug.str ());
+				debug.str ("");
+			}
+
+			DEBUG ("IN " << debug.str ());
 			// debug.str ("");
 			if (m > 1 && !(flags & ignore_m)) {
 // #pragma omp parallel for num_threads (threads)
@@ -453,10 +458,13 @@ namespace two_d
 				data_out [i] *= scalar;
 			}
 			
-			// for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
-			// 	debug << data_out [i * m + m - 1] << " ";
-			// }
-			// DEBUG ("OUT " << debug.str ());
+			for (int j = 0; j < m; ++j) {
+				for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
+					debug << data_out [i * m + j] << " ";
+				}
+				DEBUG ("OUT " << debug.str ());
+				debug.str ("");
+			}
 			
 			TRACE ("Execution Complete.");
 		}

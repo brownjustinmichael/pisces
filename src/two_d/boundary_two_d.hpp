@@ -30,7 +30,7 @@ namespace two_d
 		
 		virtual ~fixed_boundary () {}
 		
-		virtual void calculate_rhs (datatype *data, datatype *interpolate_original, datatype *interpolate_data, datatype *data_temp, int lda) {
+		virtual void calculate_rhs (datatype *data, datatype *interpolate_original, datatype *interpolate_data, datatype *data_temp, int m, int lda, int flag) {
 			data_temp [0] = value;
 			for (int i = 1; i < ldn; ++i) {
 				data_temp [i * lda] = 0.0;
@@ -63,10 +63,18 @@ namespace two_d
 		
 		virtual ~fixed_deriv_boundary () {}
 		
-		virtual void calculate_rhs (datatype *data, datatype *interpolate_original, datatype *interpolate_data, datatype *data_temp, int lda) {
-			data_temp [0] = value;
-			for (int i = 1; i < ldn; ++i) {
-				data_temp [i * lda] = 0.0;
+		virtual void calculate_rhs (datatype *data, datatype *interpolate_original, datatype *interpolate_data, datatype *data_temp, int m, int lda, int flag) {
+			DEBUG ("Call " << data_temp);
+			if (flag & z_solve) {
+				data_temp [0] = value;
+				for (int i = 1; i < ldn; ++i) {
+					data_temp [i * lda] = 0.0;
+				}
+			}
+			if (flag & x_solve) {
+				for (int i = 0; i < lda; ++i) {
+					data_temp [i * lda] = data [i * m];
+				}
 			}
 		}
 		
@@ -149,7 +157,7 @@ namespace two_d
 			}
 		}
 		
-		virtual void calculate_rhs (datatype *data, datatype *interpolate_original, datatype *interpolate_data, datatype *data_temp, int lda) {
+		virtual void calculate_rhs (datatype *data, datatype *interpolate_original, datatype *interpolate_data, datatype *data_temp, int m, int lda, int flag) {
 			utils::matrix_scale (1 + n_boundary_out + n_boundary_in, ldn, 0.0, data_temp + (top ? 1 : -1 - n_boundary_out - n_boundary_in), lda);
 			// Setting the external overlapping boundary
 			// utils::interpolate (n_boundary_out, ldn, m, 1.0, 1.0, positions, interpolate_data, boundary_positions, data_temp + (top ? 1 + n_boundary_in : -n_boundary_in - n_boundary_out), lda, lda);

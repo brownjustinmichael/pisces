@@ -362,6 +362,7 @@ namespace bases
 			TRACE ("Factorizing...");
 			for (iterator iter = begin (); iter != end (); iter++) {
 				if (!(element_flags [*iter] & factorized)) {
+					DEBUG ("Factorizing " << *iter);
 					solvers [*iter]->factorize ();
 				}
 			}
