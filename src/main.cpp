@@ -109,7 +109,7 @@ int main (int argc, char *argv[])
 			
 		omp_set_num_threads (config.get <int> ("parallel.maxthreads"));
 		
-		int m = config.get <int> ("grid.z.points") / n_elements;
+		int m = config.get <int> ("grid.z.points") / n_elements + 1;
 		m += m % 2;
 		
 		std::vector <double> positions (n_elements + 1);

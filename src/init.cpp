@@ -41,7 +41,7 @@ int main (int argc, char *argv[])
 		if (!config ["grid.x.points"].IsDefined ()) config ["grid.x.points"] = 64;
 		if (!config ["grid.z.points"].IsDefined ()) config ["grid.z.points"] = 64;
 
-		int m = config.get <int> ("grid.z.points") / n_elements;
+		int m = config.get <int> ("grid.z.points") / n_elements + 1;
 		m += m % 2;
 		int n = config.get <int> ("grid.x.points");
 		double position_m0 = -config.get <double> ("grid.z.width") / 2.0 + config.get <double> ("grid.z.width") / n_elements * id;

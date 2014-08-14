@@ -496,11 +496,11 @@ namespace io
 				inner_data [i * m + m - 1] = (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / (pos_z [i * m + m - 1] - pos_z [i * m + m - 2]);
 			}
 			for (int j = 0; j < m; ++j) {
-				inner_data [j] += (data_x [m + j] - data_x [j]) / (pos_x [m + j] - pos_x [j]);
+				inner_data [j] += (data_x [m + j] - data_x [(n - 1) * m + j]) / (pos_x [m + j] - pos_x [(n - 1) * m + j]);
 				for (int i = 1; i < n - 1; ++i) {
 					inner_data [i * m + j] += (data_x [(i + 1) * m + j] - data_x [(i - 1) * m + j]) / (pos_x [(i + 1) * m + j] - pos_x [(i - 1) * m + j]);
 				}
-				inner_data [(n - 1) * m + j] += (data_x [(n - 1) * m + j] - data_x [(n - 2) * m + j]) / (pos_x [(n - 1) * m + j] - pos_x [(n - 2) * m + j]);
+				inner_data [(n - 1) * m + j] += (data_x [j] - data_x [(n - 2) * m + j]) / (pos_x [j] - pos_x [(n - 2) * m + j]);
 			}
 			return &inner_data [0];
 		}
