@@ -144,13 +144,13 @@ namespace two_d
 			utils::matrix_add_scaled (m - 2 - excess_0 - excess_n, m, 1.0, default_matrix + excess_0 + 1, &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0 + 1], m, lda);
 			// utils::matrix_add_scaled (m, m, 1.0, default_matrix, &factorized_matrix [(ex_overlap_0) * (lda + 1)], m, lda);
 
-			for (int j = 0; j < lda; ++j) {
-				for (int i = 0; i < lda; ++i) {
-					debug << factorized_matrix [i * lda + j] << " ";
-				}
-				DEBUG (debug.str ());
-				debug.str ("");
-			}
+			// for (int j = 0; j < lda; ++j) {
+			// 	for (int i = 0; i < lda; ++i) {
+			// 		debug << factorized_matrix [i * lda + j] << " ";
+			// 	}
+			// 	DEBUG (debug.str ());
+			// 	debug.str ("");
+			// }
 
 			utils::p_block_matrix_factorize (messenger_ptr->get_id (), messenger_ptr->get_np (), inner_m, overlap_0, overlap_n, &factorized_matrix [0], &ipiv [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, lda, sqrt ((int) boundary_matrix.size ()));
 
@@ -174,11 +174,9 @@ namespace two_d
 			}
 
 			if (boundary_0) {
-				DEBUG ("BOUND 0 " << &data_temp [ex_overlap_0 + excess_0] << " " << data_temp [ex_overlap_0 + excess_0]);
 				boundary_0->calculate_rhs (data + excess_0, data, &data_temp [0], &data_temp [ex_overlap_0 + excess_0], m, lda, z_solve);
 			}
 			if (boundary_n) {
-				DEBUG ("BOUND N " << &data_temp [lda - 1 - excess_n - ex_overlap_n] << " " << data_temp [lda - 1 - excess_n - ex_overlap_n]);
 				boundary_n->calculate_rhs (data + m - 1 - excess_n, data, &data_temp [0], &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda, z_solve);
 			}
 			
@@ -326,13 +324,13 @@ namespace two_d
 			
 			// DEBUG ("CHOICE RHS " << rhs_ptr [12 * m + 24] << " " << data [12 * m + 24]);
 			//
-			for (int j = 0; j < lda; ++j) {
-				for (int i = 0; i < ldn; ++i) {
-					debug << data_temp [i * lda + j] << " ";
-				}
-				DEBUG ("RHS " << debug.str ());
-				debug.str ("");
-			}
+			// for (int j = 0; j < lda; ++j) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << data_temp [i * lda + j] << " ";
+			// 	}
+			// 	DEBUG ("RHS " << debug.str ());
+			// 	debug.str ("");
+			// }
 			//
 			// for (int j = 0; j < m; ++j) {
 			// 	for (int i = 0; i < ldn; ++i) {
@@ -749,8 +747,6 @@ namespace two_d
 				// 	// DEBUG (debug.str ());
 				// 	debug.str ("");
 				// }
-				
-				DEBUG ("Correcting");
 				
 				std::vector <datatype> out_z (ldn);
 				

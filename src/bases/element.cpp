@@ -186,7 +186,7 @@ namespace bases
 		{
 #pragma omp for
 			for (int i = 0; i < (int) transforms.size (); ++i) {
-				DEBUG ("Transforming " << transforms [i]);
+				// DEBUG ("Transforming " << transforms [i]);
 				master_transforms [transforms [i]]->transform (i_flags);
 			}
 		}
