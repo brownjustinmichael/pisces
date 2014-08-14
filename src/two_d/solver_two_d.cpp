@@ -590,21 +590,13 @@ namespace two_d
 		excess_n (grid_m.get_excess_n ()),
 		messenger_ptr (i_messenger_ptr) {
 			TRACE ("Building laplace solver...");
-			sup.resize ((m + 1) * ldn);
-			sub.resize ((m + 1) * ldn);
-			diag.resize ((m + 1) * ldn);
 			rhs_ptr = i_rhs;
 			component_flags_x = i_component_flags_x;
 			component_flags_z = i_component_flags_z;
 			
-			sup_ptr = &sup [1];
-			sub_ptr = &sub [1];
-			diag_ptr = &diag [1];
+			ipiv.resize (ldn * (m + 2));
 			
-			supsup.resize (ldn * (m + 1));
-			ipiv.resize (ldn * (m + 1));
-			
-			matrix.resize ((2 * 2 + 1 + 1) * (m + 1) * ldn);
+			matrix.resize ((2 * 2 + 1 + 1) * (m + 2) * ldn);
 			
 			// if (messenger_ptr->get_id () == 0) {
 			// 	x.resize (((m + 1) + 4 * messenger_ptr->get_np ()) * 2 * ldn);
@@ -626,10 +618,7 @@ namespace two_d
 			// if (id != 0) {
 			// 	messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
 			// }
-			data_temp.resize ((m + 1) * ldn);
-			flags = 0x00;
-			transform = std::shared_ptr <bases::plan <datatype> > (new fourier::vertical_transform <datatype> (n, m, &data_z [0], NULL, inverse, i_element_flags, &flags));
-			transform_h = std::shared_ptr <bases::plan <datatype> > (new fourier::horizontal_transform <datatype> (n, m, &data_x [0], NULL, inverse, i_element_flags, &flags));
+			data_temp.resize ((m + 2) * ldn);
 		}
 		
 		template <class datatype>
@@ -653,7 +642,7 @@ namespace two_d
 			new_pos [m] = pos_m [m - 1] + (pos_m [m - 1] - new_pos [m - 3]);
 			
 			for (int i = 0; i < ldn; ++i) {
-				matrix_ptr = &matrix [i * (m + 1) * (2 * 2 + 1 + 1) + 2];
+				matrix_ptr = &matrix [i * (m + 2) * (2 * 2 + 1 + 1) + 2];
 				matrix_ptr [1] = 1.0;
 				matrix_ptr [6] = -1.0;
 				
@@ -671,24 +660,28 @@ namespace two_d
 				// matrix_ptr [(m - 1) * 6 + 2] = -1.0 / (new_pos [m - 2] - new_pos [m - 3]) / (pos_m [m - 1] - pos_m [m - 2]) - 1.0 / (new_pos [m - 1] - new_pos [m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) - scalar * (i / 2) * (i / 2);
 				// matrix_ptr [(m - 2) * 6 + 3] = 1.0 / (new_pos [m - 2] - new_pos [m - 3]) / (pos_m [m - 1] - pos_m [m - 2]);
 				
-				// matrix_ptr [(j + 1 - 2) * 6 + 3] = 1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (pos_m [j + 1] - pos_m [j - 1]);
-				// matrix_ptr [(j + 1 - 1) * 6 + 2] = -1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (pos_m [j + 1] - pos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
-				// matrix_ptr [(j + 1) * 6 + 1] = -1.0 / (new_pos [j + 1] - new_pos [j]) / (pos_m [j + 1] - pos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
-				// matrix_ptr [(j + 1 + 1) * 6] = 1.0 / (new_pos [j + 1] - new_pos [j]) / (pos_m [j + 1] - pos_m [j - 1]);
+				matrix_ptr [(m - 1 + 1 - 2) * 6 + 3] = 1.0 / (new_pos [m - 1 - 1] - new_pos [m - 1 - 2]) / 2.0 / (pos_m [m - 1] - pos_m [m - 2]);
+				matrix_ptr [(m - 1 + 1 - 1) * 6 + 2] = -1.0 / (new_pos [m - 1 - 1] - new_pos [m - 1 - 2]) / 2.0 / (pos_m [m - 1] - pos_m [m - 2]) - scalar * (i / 2) * (i / 2) / 2.0;
+				matrix_ptr [(m - 1 + 1) * 6 + 1] = -1.0 / (new_pos [m - 1 + 1] - new_pos [m - 1]) / 2.0 / (pos_m [m - 1] - pos_m [m - 2]) - scalar * (i / 2) * (i / 2) / 2.0;
+				matrix_ptr [(m - 1 + 1 + 1) * 6] = 1.0 / (new_pos [m - 1 + 1] - new_pos [m - 1]) / 2.0 / (pos_m [m - 1] - pos_m [m - 2]);
 
-				matrix_ptr [(m - 2) * 6 + 3] = 1.0e-10;
-				matrix_ptr [(m - 1) * 6 + 2] = -1.0;
-				matrix_ptr [(m) * 6 + 1] = 1.0;
+				matrix_ptr [(m - 1) * 6 + 3] = -1.0;
+				matrix_ptr [(m) * 6 + 2] = 1.0;
+				matrix_ptr [(m + 1) * 6 + 1] = 0.0e-10;
+
+				// matrix_ptr [(m - 2) * 6 + 3] = 1.0e-10;
+				// matrix_ptr [(m - 1) * 6 + 2] = -1.0;
+				// matrix_ptr [(m) * 6 + 1] = 1.0;
 				
-				// for (int k = 0; k < 6; ++k) {
-				// 	for (int j = 0; j < m + 1; ++j) {
-				// 		debug << matrix [i * (m + 1) * 6 + j * 6 + k] << " ";
-				// 	}
-				// 	DEBUG (debug.str ());
-				// 	debug.str ("");
-				// }
+				for (int k = 0; k < 6; ++k) {
+					for (int j = 0; j < m + 2; ++j) {
+						debug << matrix [i * (m + 2) * 6 + j * 6 + k] << " ";
+					}
+					DEBUG (debug.str ());
+					debug.str ("");
+				}
 				
-				utils::matrix_banded_factorize (m + 1, m + 1, 2, 1, matrix_ptr - 2, &ipiv [(m + 1) * i], &info, 2 * 2 + 1 + 1);
+				utils::matrix_banded_factorize (m + 2, m + 2, 2, 1, matrix_ptr - 2, &ipiv [(m + 2) * i], &info, 2 * 2 + 1 + 1);
 			}
 		}
 		
@@ -702,7 +695,7 @@ namespace two_d
 				datatype scalar = acos (-1.0) * 2.0 / (pos_n [n - 1] - pos_n [0]);
 				datatype *data_ptr = &data_temp [1];
 				
-				std::vector <datatype> positions (m + 1);
+				std::vector <datatype> positions (m + 2);
 				datatype *new_pos = &positions [1];
 			
 				new_pos [-1] = 2.0 * pos_m [0] - (pos_m [0] + pos_m [1]) / 2.0;
@@ -710,35 +703,40 @@ namespace two_d
 					new_pos [j] = (pos_m [j] + pos_m [j + 1]) / 2.0;
 				}
 				new_pos [m - 1] = 2.0 * pos_m [m - 1] - (pos_m [m - 1] + pos_m [m - 2]) / 2.0;
+				new_pos [m] = pos_m [m - 1] + (pos_m [m - 1] - new_pos [m - 3]);
 			
 				for (int i = 2; i < ldn; i += 2) {
 					for (int j = 0; j < m; ++j) {
-						data_ptr [i * (m + 1) + j] = -scalar * (i / 2) * data_x [(i + 1) * m + j];
-						data_ptr [(i + 1) * (m + 1) + j] = scalar * (i / 2) * data_x [i * m + j];
+						data_ptr [i * (m + 2) + j] = -scalar * (i / 2) * data_x [(i + 1) * m + j];
+						data_ptr [(i + 1) * (m + 2) + j] = scalar * (i / 2) * data_x [i * m + j];
 					}
+					// data_ptr [i * (m + 2) + m - 1] = -scalar * (i / 2) * data_x [(i + 1) * m + m - 1];
+					// data_ptr [(i + 1) * (m + 2) + m - 1] = scalar * (i / 2) * data_x [i * m + m - 1];
 				}
 				
 				for (int i = 2; i < ldn; ++i) {
-					data_ptr [i * (m + 1) - 1] = 0.0;
-					data_ptr [i * (m + 1)] += (data_z [i * m + 1] - data_z [i * m]) / (pos_m [1] - pos_m [0]);
+					data_ptr [i * (m + 2) - 1] = 0.0;
+					data_ptr [i * (m + 2)] += (data_z [i * m + 1] - data_z [i * m]) / (pos_m [1] - pos_m [0]);
 					for (int j = 1; j < m - 1; ++j) {
-						data_ptr [i * (m + 1) + j] += (data_z [i * m + j + 1] - data_z [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
+						data_ptr [i * (m + 2) + j] += (data_z [i * m + j + 1] - data_z [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
 					}
 					// data_ptr [i * (m + 1)] += (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
-					data_ptr [i * (m + 1) + m - 1] = 0.0;
+					// data_ptr [i * (m + 1) + m - 1] = 0.0;
+					data_ptr [i * (m + 2) + m - 1] += (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
+					data_ptr [i * (m + 2) + m] = 0.0;
 					
-					for (int j = 0; j < m; ++j) {
-						// DEBUG ("RHS " << i << " " << data_ptr [i * (m + 1) + j]);
+					for (int j = -1; j < m + 1; ++j) {
+						DEBUG ("RHS " << i * (m + 2) + j << " " << data_ptr [i * (m + 2) + j]);
 					}
 					
-					utils::matrix_banded_solve (m + 1, 2, 1, &matrix [i * (m + 1) * (2 * 2 + 1 + 1)], &ipiv [i * (m + 1)], &data_temp [i * (m + 1)], &info, 1, 2 * 2 + 1 + 1, m + 1);
+					utils::matrix_banded_solve (m + 2, 2, 1, &matrix [i * (m + 2) * (2 * 2 + 1 + 1)], &ipiv [i * (m + 2)], &data_temp [i * (m + 2)], &info, 1, 2 * 2 + 1 + 1, m + 2);
 					
-					for (int j = 0; j < m; ++j) {
-						// DEBUG ("DONE" << data_ptr [i * (m + 1) + j]);
+					for (int j = -1; j < m + 1; ++j) {
+						DEBUG ("DONE " << data_ptr [i * (m + 2) + j]);
 					}
 					
 					for (int j = 0; j < m; ++j) {
-						data [i * m + j] = (data_temp [i * (m + 1) + j] + data_temp [i * (m + 1) + j + 1]) / 2.0;
+						data [i * m + j] = (data_temp [i * (m + 2) + j] + data_temp [i * (m + 2) + j + 1]) / 2.0;
 					}
 				}
 				
@@ -750,25 +748,70 @@ namespace two_d
 				// 	debug.str ("");
 				// }
 				
+				std::vector <datatype> out_z (ldn);
+				
 				for (int i = 2; i < ldn; ++i) {
+					out_z [i] = -data_z [i * m + m - 2] - (data_ptr [i * (m + 2) + m] - data_ptr [i * (m + 2) + m - 1]) / (new_pos [m] - new_pos [m - 1]);
 					for (int j = 1; j < m - 1; ++j) {
-						data_z [i * m + j] -= (data_ptr [i * (m + 1) + j] - data_ptr [i * (m + 1) + j - 1]) / (new_pos [j] - new_pos [j - 1]);
+						data_z [i * m + j] -= (data_ptr [i * (m + 2) + j] - data_ptr [i * (m + 2) + j - 1]) / (new_pos [j] - new_pos [j - 1]);
 					}
 					for (int j = 1; j < m - 1; ++j) {
 						// DEBUG (i << " " << j << " " << (data_z [i * m + j + 1] - data_z [i * m + j - 1])/(pos_m [j + 1] - pos_m [j - 1]));
 					}
 				}
+					
+				for (int i = 2; i < ldn; i += 2) {
+					for (int j = 0; j < m; ++j) {
+						data_x [i * m + j] += scalar * (i / 2) * (data_ptr [(i + 1) * (m + 2) + j] + data_ptr [(i + 1) * (m + 2) + j - 1]) / 2.0;
+						data_x [(i + 1) * m + j] -= scalar * (i / 2) * (data_ptr [i * (m + 2) + j] + data_ptr [i * (m + 2) + j - 1]) / 2.0;
+					}
+					// data_x [i * m + m - 1] = (data_z [(i + 1) * m + m - 1] - data_z [(i + 1) * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / (i / 2) / scalar;
+					// data_x [i * m + m - 1] = 0.0;
+					// data_x [(i + 1) * m + m - 1] = -(data_z [i * m + m - 1] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / (i / 2) / scalar;
+					// data_x [(i + 1) * m + m - 1] = 0.0;
+				}
+				
 				
 				for (int i = 2; i < ldn; i += 2) {
 					for (int j = 0; j < m; ++j) {
-						data_x [i * m + j] += scalar * (i / 2) * (data_ptr [(i + 1) * (m + 1) + j] + data_ptr [(i + 1) * (m + 1) + j - 1]) / 2.0;
-						data_x [(i + 1) * m + j] -= scalar * (i / 2) * (data_ptr [i * (m + 1) + j] + data_ptr [i * (m + 1) + j - 1]) / 2.0;
+						data_ptr [i * (m + 2) + j] = -scalar * (i / 2) * data_x [(i + 1) * m + j];
+						data_ptr [(i + 1) * (m + 2) + j] = scalar * (i / 2) * data_x [i * m + j];
 					}
-					// data_x [i * m + m - 1] = (data_z [(i + 1) * m + m - 1] - data_z [(i + 1) * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / (i / 2) / scalar;
-					// data_x [(i + 1) * m + m - 1] = -(data_z [i * m + m - 1] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / (i / 2) / scalar;
+					data_ptr [i * (m + 2) + m - 1] = -scalar * (i / 2) * data_x [(i + 1) * m + m - 1];
+					data_ptr [(i + 1) * (m + 2) + m - 1] = scalar * (i / 2) * data_x [i * m + m - 1];
 				}
 				
+				for (int i = 2; i < ldn; ++i) {
+					data_ptr [i * (m + 2) - 1] = 0.0;
+					data_ptr [i * (m + 2)] += (data_z [i * m + 1] - data_z [i * m]) / (pos_m [1] - pos_m [0]);
+					for (int j = 1; j < m - 1; ++j) {
+						data_ptr [i * (m + 2) + j] += (data_z [i * m + j + 1] - data_z [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
+					}
+					// data_ptr [i * (m + 1)] += (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
+					// data_ptr [i * (m + 1) + m - 1] = 0.0;
+					data_ptr [i * (m + 2) + m - 1] += (out_z [i] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / 2.0;
+					data_ptr [i * (m + 2) + m] = 0.0;
+					
+					for (int j = -1; j < m + 1; ++j) {
+						DEBUG ("RHS " << i * (m + 2) + j << " " << data_ptr [i * (m + 2) + j]);
+					}
+				}
+				
+				
+				// for (int i = 2; i < ldn; ++i) {
+				// 	for (int j = 2; j < m - 2; ++j) {
+				// 		data [i * m + j] = ((data_ptr [i * (m + 2) + j + 1] - data_ptr [i * (m + 2) + j]) / (new_pos [j + 1] - new_pos [j]) - (data_ptr [i * (m + 2) + j - 1] - data_ptr [i * (m + 2) + j - 2]) / (new_pos [j - 1] - new_pos [j - 2])) / (pos_m [j + 1] - pos_m [j - 1]);
+				// 		data [i * m + j] -= scalar * scalar * (i / 2) * (i / 2) * (data_ptr [i * (m + 2) + j] + data_ptr [i * (m + 2) + j - 1]) / 2.0;
+				// 		DEBUG ("FINAL " << i * (m + 2) + j << " " << 1.0 / (new_pos [j + 1] - new_pos [j]) / (pos_m [j + 1] - pos_m [j - 1]) << " " << -1.0 / (new_pos [j + 1] - new_pos [j]) / (pos_m [j + 1] - pos_m [j - 1]) - scalar * scalar * (i / 2) * (i / 2) / 2.0 << " " <<  1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (pos_m [j + 1] - pos_m [j - 1]) << " "<< data [i * m + j]);
+				// 	}
+				// 	data [i * m + m - 1] = 1.0 / (new_pos [m - 1 + 1] - new_pos [m - 1]) / (pos_m [m - 1] - pos_m [m - 2]) / 2.0 * (data_ptr [i * (m + 2) + m - 1 + 1] + data_ptr [i * (m + 2) + m - 4]) + (-1.0 / (new_pos [m - 1 - 1] - new_pos [m - 1 - 2]) / 2.0 / (pos_m [m - 1] - pos_m [m - 2]) - scalar * scalar * (i / 2) * (i / 2) / 2.0) * (data_ptr [i * (m + 2) + m - 2] + data_ptr [i * (m + 2) + m - 3]);
+				// 	// data [i * m + m - 1] -= scalar * scalar * (i / 2) * (i / 2) * (data_ptr [i * (m + 2) + m - 1] + data_ptr [i * (m + 2) + m - 1 - 1]) / 2.0;
+				// 	DEBUG ("FINAL " << i * (m + 2) + m - 1 << " " << 1.0 / (new_pos [m - 1 + 1] - new_pos [m - 1]) / (pos_m [m - 1] - pos_m [m - 2]) / 2.0 << " " << -1.0 / (new_pos [m - 1 - 1] - new_pos [m - 1 - 2]) / 2.0 / (pos_m [m - 1] - pos_m [m - 2]) - scalar * scalar * (i / 2) * (i / 2) / 2.0 << " " << 1.0 / (new_pos [m - 1 + 1] - new_pos [m - 1]) / 2.0 / (pos_m [m - 1] - pos_m [m - 2]) << " " << data [i * m + m - 1]);
+				//
+				// }
+				
 				utils::scale (2 * m, 0.0, data_z);
+				// utils::scale (m, 0.0, data_x + 9 * m);
 				utils::scale (2 * m, 0.0, data_x);
 			
 				for (int j = 0; j < m; ++j) {
@@ -780,9 +823,8 @@ namespace two_d
 					}
 				}
 			}
-
-
-			TRACE ("Solved.");
+			
+			TRACE ("Solved");
 		}
 		
 		template class incompressible_corrector <double>;
