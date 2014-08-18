@@ -596,28 +596,34 @@ namespace two_d
 			
 			ipiv.resize (ldn * (m + 2));
 			
-			matrix.resize ((2 * 2 + 1 + 1) * (m + 2) * ldn);
-			
-			// if (messenger_ptr->get_id () == 0) {
-			// 	x.resize (((m + 1) + 4 * messenger_ptr->get_np ()) * 2 * ldn);
-			// 	xipiv.resize (2 * messenger_ptr->get_np () * ldn);
-			// } else {
-			// 	x.resize (((m + 1) + 4) * 2 * ldn);
-			// }
+			if (messenger_ptr->get_id () == 0) {
+				x.resize (4 * (3) * (3) * ldn * messenger_ptr->get_np () * messenger_ptr->get_np ());
+				xipiv.resize (2 * (3) * messenger_ptr->get_np () * ldn);
+			} else {
+				x.resize (4 * (3) * (3) * ldn);
+			}
 			
 			id = messenger_ptr->get_id ();
 			np = messenger_ptr->get_np ();
 			
-			// if (id != 0) {
+			ntop = 0;
+			nbot = 0;
+			if (id != 0) {
+				ntop = 2;
 			// 	messenger_ptr->send (1, &pos_m [excess_0], id - 1, 0);
-			// }
-			// if (id != np - 1) {
+			}
+			if (id != np - 1) {
+				nbot = 1;
 			// 	messenger_ptr->recv (1, &ex_pos_m, id + 1, 0);
 			// 	messenger_ptr->send (1, &pos_m [m - 2 - excess_n], id + 1, 1);
-			// }
+			}
 			// if (id != 0) {
 			// 	messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
 			// }
+			matrix.resize ((2 * 2 + 1 + 1) * (m + 2 + ntop + nbot) * ldn);
+			bufferl.resize (np * (m + 2) * 2 * ldn);
+			bufferl.resize (np * (m + 2) * 1 * ldn);
+			
 			data_temp.resize ((m + 2) * ldn);
 		}
 		
@@ -642,7 +648,8 @@ namespace two_d
 			new_pos [m] = pos_m [m - 1] + (pos_m [m - 1] - new_pos [m - 3]);
 			
 			for (int i = 0; i < ldn; ++i) {
-				matrix_ptr = &matrix [i * (m + 2) * (2 * 2 + 1 + 1) + 2];
+				DEBUG (ntop);
+				matrix_ptr = &matrix [(i + ntop) * (m + 2) * (2 * 2 + 1 + 1) + 2];
 				matrix_ptr [1] = 1.0;
 				matrix_ptr [6] = -1.0;
 				
@@ -681,8 +688,17 @@ namespace two_d
 				// 	debug.str ("");
 				// }
 				
-				utils::matrix_banded_factorize (m + 2, m + 2, 2, 1, matrix_ptr - 2, &ipiv [(m + 2) * i], &info, 2 * 2 + 1 + 1);
+				// utils::matrix_banded_factorize (m + 2, m + 2, 2, 1, matrix_ptr - 2, &ipiv [(m + 2) * i], &info, 2 * 2 + 1 + 1);
+				
+				// for (int k = 0; k < 6; ++k) {
+				// 	for (int j = 0; j < m + 2; ++j) {
+				// 		debug << matrix [i * (m + 2) * 6 + j * 6 + k] << " ";
+				// 	}
+				// 	DEBUG ("MID " <<  debug.str ());
+				// 	debug.str ("");
+				// }
 			}
+			utils::p_block_banded_factorize (id, np, m + 2 - ntop - nbot, 2, 1, &matrix [0], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn);
 		}
 		
 		template <class datatype>
@@ -725,28 +741,40 @@ namespace two_d
 					data_ptr [i * (m + 2) + m - 1] += (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
 					data_ptr [i * (m + 2) + m] = 0.0;
 					
-					for (int j = -1; j < m + 1; ++j) {
+					// for (int j = -1; j < m + 1; ++j) {
 						// DEBUG ("RHS " << i * (m + 2) + j << " " << data_ptr [i * (m + 2) + j]);
-					}
+					// }
 					
-					utils::matrix_banded_solve (m + 2, 2, 1, &matrix [i * (m + 2) * (2 * 2 + 1 + 1)], &ipiv [i * (m + 2)], &data_temp [i * (m + 2)], &info, 1, 2 * 2 + 1 + 1, m + 2);
-					
-					for (int j = -1; j < m + 1; ++j) {
-						// DEBUG ("DONE " << data_ptr [i * (m + 2) + j]);
-					}
-					
+					DEBUG ("" << m + 2 << " " << &matrix [i * (m + 2) * (2 * 2 + 1 + 1)] << " " << &ipiv [i * (m + 2)] << " " << &data_temp [i * (m + 2)]);
+					// utils::matrix_banded_solve (m + 2, 2, 1, &matrix [i * (m + 2) * (2 * 2 + 1 + 1)], &ipiv [i * (m + 2)], &data_temp [i * (m + 2)], &info, 1, 2 * 2 + 1 + 1);
+					//
+					// for (int j = -1; j < m + 1; ++j) {
+					// 	// DEBUG ("DONE " << data_ptr [i * (m + 2) + j]);
+					// }
+					//
+					// for (int j = 0; j < m; ++j) {
+					// 	data [i * m + j] = (data_temp [i * (m + 2) + j] + data_temp [i * (m + 2) + j + 1]) / 2.0;
+					// }
+				}
+				
+				utils::p_block_banded_solve (id, np, m + 2 - ntop - nbot, 2, 1, &matrix [0], &ipiv [0], &data_temp [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn);
+				// throw 0;
+				
+				
+				for (int i = 2; i < ldn; ++i) {
 					for (int j = 0; j < m; ++j) {
 						data [i * m + j] = (data_temp [i * (m + 2) + j] + data_temp [i * (m + 2) + j + 1]) / 2.0;
 					}
 				}
+
 				
-				// for (int j = 0; j < m; ++j) {
-				// 	for (int i = 0; i < ldn; ++i) {
-				// 		debug << data_temp [i * (m + 1) + j] << " ";
-				// 	}
-				// 	// DEBUG (debug.str ());
-				// 	debug.str ("");
-				// }
+				for (int j = 0; j < m; ++j) {
+					for (int i = 0; i < ldn; ++i) {
+						debug << data_temp [i * (m + 1) + j] << " ";
+					}
+					DEBUG (debug.str ());
+					debug.str ("");
+				}
 				
 				std::vector <datatype> out_z (ldn);
 				
