@@ -142,7 +142,7 @@ namespace utils
 		}
 		
 		if (lda == -1) {
-			lda = m;
+			lda = 2 * kl + ku + 1;
 		}
 		
 		dgbtrf_ (&m, &n, &kl, &ku, a, &lda, ipiv, info);
@@ -166,7 +166,7 @@ namespace utils
 		}
 		
 		if (lda == -1) {
-			lda = n;
+			lda = 2 * kl + ku + 1;
 		}
 		
 		if (ldb == -1) {

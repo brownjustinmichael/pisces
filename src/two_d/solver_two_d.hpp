@@ -384,6 +384,7 @@ namespace two_d
 			int n;
 			int ldn;
 			int m;
+			int ntop, nbot;
 			datatype *data, *data_x, *data_z;
 			datatype ex_pos_0, ex_pos_m;
 			int flags;
@@ -398,7 +399,7 @@ namespace two_d
 
 			utils::messenger* messenger_ptr;
 			
-			std::vector <datatype> x;
+			std::vector <datatype> x, bufferl, bufferr;
 			std::vector <datatype> data_temp;
 			std::vector <datatype> sup, sub, diag, supsup, matrix; //!< A datatype vector to be used in lieu of data_out for non-updating steps
 			std::vector <int> ipiv, xipiv;
