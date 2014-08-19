@@ -609,20 +609,21 @@ namespace two_d
 			ntop = 0;
 			nbot = 0;
 			if (id != 0) {
-				ntop = 2;
+				ntop = 1;
 			// 	messenger_ptr->send (1, &pos_m [excess_0], id - 1, 0);
 			}
 			if (id != np - 1) {
-				nbot = 1;
+				nbot = 2;
 			// 	messenger_ptr->recv (1, &ex_pos_m, id + 1, 0);
 			// 	messenger_ptr->send (1, &pos_m [m - 2 - excess_n], id + 1, 1);
 			}
 			// if (id != 0) {
 			// 	messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
 			// }
-			matrix.resize ((2 * 2 + 1 + 1) * (m + 2 + ntop + nbot) * ldn);
+			DEBUG (m + 2 + 2 + 1);
+			matrix.resize ((2 * 2 + 1 + 1) * (m + 2 + 2 + 1) * ldn);
 			bufferl.resize (np * (m + 2) * 2 * ldn);
-			bufferl.resize (np * (m + 2) * 1 * ldn);
+			bufferr.resize (np * (m + 2) * 1 * ldn);
 			
 			data_temp.resize ((m + 2) * ldn);
 		}
@@ -648,8 +649,8 @@ namespace two_d
 			new_pos [m] = pos_m [m - 1] + (pos_m [m - 1] - new_pos [m - 3]);
 			
 			for (int i = 0; i < ldn; ++i) {
-				DEBUG (ntop);
-				matrix_ptr = &matrix [(i + ntop) * (m + 2) * (2 * 2 + 1 + 1) + 2];
+				DEBUG (m + 2 + 3);
+				matrix_ptr = &matrix [(i) * (m + 2 + 3) * (2 * 2 + 1 + 1) + 2 + 2 * 6];
 				matrix_ptr [1] = 1.0;
 				matrix_ptr [6] = -1.0;
 				
@@ -680,13 +681,14 @@ namespace two_d
 				// matrix_ptr [(m - 1) * 6 + 2] = -1.0;
 				// matrix_ptr [(m) * 6 + 1] = 1.0;
 				
-				// for (int k = 0; k < 6; ++k) {
-				// 	for (int j = 0; j < m + 2; ++j) {
-				// 		debug << matrix [i * (m + 2) * 6 + j * 6 + k] << " ";
-				// 	}
-				// 	DEBUG (debug.str ());
-				// 	debug.str ("");
-				// }
+				DEBUG (matrix_ptr + ntop * 6);
+				for (int k = 0; k < 4; ++k) {
+					for (int j = 0; j < m + 2; ++j) {
+						debug << matrix_ptr [(j) * 6 + k] << " ";
+					}
+					DEBUG (debug.str ());
+					debug.str ("");
+				}
 				
 				// utils::matrix_banded_factorize (m + 2, m + 2, 2, 1, matrix_ptr - 2, &ipiv [(m + 2) * i], &info, 2 * 2 + 1 + 1);
 				
@@ -698,7 +700,10 @@ namespace two_d
 				// 	debug.str ("");
 				// }
 			}
+			DEBUG (ldn);
+			
 			utils::p_block_banded_factorize (id, np, m + 2 - ntop - nbot, 2, 1, &matrix [0], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn);
+			// throw 0;
 		}
 		
 		template <class datatype>
@@ -758,7 +763,7 @@ namespace two_d
 				}
 				
 				utils::p_block_banded_solve (id, np, m + 2 - ntop - nbot, 2, 1, &matrix [0], &ipiv [0], &data_temp [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn);
-				// throw 0;
+				throw 0;
 				
 				
 				for (int i = 2; i < ldn; ++i) {
