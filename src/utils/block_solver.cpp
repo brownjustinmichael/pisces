@@ -413,48 +413,47 @@ namespace utils
 #endif
 	}
 	
-	// void p_block_banded_factorize (int id, int np, int n, int kl, int ku, double* matrix, int* ipiv, double *x, int *xipiv, double *bufferl, double *bufferr, int *info, int nrhs, int lda) {
-		// int ntop, nbot;
-		// std::stringstream debug;
-		// int ldx = 2 * (kl + ku);
-		// int ldxx = ldx * ldx;
-		// if (id == 0) {
-		// 	ntop = 0;
-		// 	ldxx *= np * np;
-		// } else {
-		// 	ntop = ku;
-		// }
-		// if (id == np - 1) {
-		// 	nbot = 0;
-		// } else {
-		// 	nbot = kl;
-		// }
-		//
-		// if (lda == -1) {
-		// 	lda = 2 * kl + ku + 1;
-		// }
-		// DEBUG (n + ku + kl + ntop + nbot);
-		// int ldaa = n + ku + kl + ntop + nbot;
-		//
-		// DEBUG ("B " << bufferl << " " << bufferr);
-		//
-		// utils::scale (nrhs * ldxx, 0.0, x);
-		// utils::scale (nrhs * kl * n, 0.0, bufferl);
-		// utils::scale (nrhs * ku * n, 0.0, bufferr);
-		//
-		// for (int i = 0; i < nrhs; ++i) {
-		// 	for (int j = 0; j < lda; ++j) {
-		// 		for (int k = 0; k < n; ++k) {
-		// 			debug << matrix [(i) * lda * ldaa + (kl + ntop + k) * lda + j] << " ";
-		// 		}
-		// 		DEBUG (debug.str ());
-		// 		debug.str ("");
-		// 	}
-		// 	DEBUG (matrix << " " << ipiv);
-		// 	matrix_banded_factorize (n, n, kl, ku, matrix + (i) * lda * ldaa + (kl + ntop) * lda, ipiv + i * n, info, lda);
-		// }
-		
-		// DEBUG ("MOSTLY DONE");
+	void p_block_banded_factorize (int id, int np, int n, int kl, int ku, double* matrix, int* ipiv, double *x, int *xipiv, double *bufferl, double *bufferr, int *info, int nrhs, int lda) {
+		int ntop, nbot;
+		std::stringstream debug;
+		int ldx = 2 * (kl + ku);
+		int ldxx = ldx * ldx;
+		if (id == 0) {
+			ntop = 0;
+			ldxx *= np * np;
+		} else {
+			ntop = ku;
+		}
+		if (id == np - 1) {
+			nbot = 0;
+		} else {
+			nbot = kl;
+		}
+
+		if (lda == -1) {
+			lda = 2 * kl + ku + 1;
+		}
+		DEBUG (n + ku + kl + ntop + nbot);
+		int ldaa = n + ku + kl + ntop + nbot;
+
+		DEBUG ("B " << bufferl << " " << bufferr);
+
+		utils::scale (nrhs * ldxx, 0.0, x);
+		utils::scale (nrhs * kl * n, 0.0, bufferl);
+		utils::scale (nrhs * ku * n, 0.0, bufferr);
+
+		for (int i = 0; i < nrhs; ++i) {
+			for (int j = 0; j < lda; ++j) {
+				for (int k = 0; k < n; ++k) {
+					debug << matrix [(i) * lda * ldaa + (kl + ntop + k) * lda + j] << " ";
+				}
+				DEBUG (debug.str ());
+				debug.str ("");
+			}
+			DEBUG (matrix << " " << ipiv);
+			matrix_banded_factorize (n, n, kl, ku, matrix + (i) * lda * ldaa + (kl + ntop) * lda, ipiv + i * n, info, lda);
+		}
+		DEBUG ("MOSTLY DONE");
 
 // #ifdef _MPI
 // 		if (id != 0) {
@@ -641,55 +640,54 @@ namespace utils
 // 			}
 // 		}
 // #endif
-		//
-		// DEBUG ("All done");
-	// }
 
-	// void p_block_banded_solve (int id, int np, int n, int kl, int ku, double* matrix, int* ipiv, double* b, double *x, int *xipiv, double *bufferl, double *bufferr, int *info, int nrhs, int lda, int ldb) {
-		// DEBUG ("BEGIN");
-		// std::stringstream debug;
-		// std::vector <double> y (2 * (ku + kl) * np * nrhs, 0.0);
-		// DEBUG ("y len " << 2 * (ku + kl) * np * nrhs);
-		// int ntop, nbot;
-		// int ldx = 2 * (kl + ku);
-		// int ldxx = ldx * ldx;
-		// if (id == 0) {
-		// 	ntop = 0;
-		// 	ldxx *= np * np;
-		// } else {
-		// 	ntop = ku;
-		// }
-		// if (id == np - 1) {
-		// 	nbot = 0;
-		// } else {
-		// 	nbot = kl;
-		// }
-		//
-		//
-		// int ldy;
-		// if (id == 0) {
-		// 	ldy = 2 * (kl + ku) * np;
-		// } else {
-		// 	ldy = 2 * (kl + ku);
-		// }
-		//
-		// if (lda == -1) {
-		// 	lda = 2 * kl + ku + 1;
-		// }
-		// if (ldb == -1) {
-		// 	ldb = n + ntop + nbot;
-		// }
-		// int ldaa = n + ku + kl + ntop + nbot;
-		//
-		//
-		// add_scaled (ntop * nrhs, 1.0, b, &y [kl], ldb, ldy);
-		// add_scaled (nbot * nrhs, 1.0, b + ntop + n, &y [2 * kl - ku], ldb, ldy);
-		//
-		// for (int i = 0; i < nrhs; ++i) {
-		// 	matrix_banded_solve (n, kl, ku, matrix + i * lda * ldaa + (kl + ntop) * lda, ipiv + i * n, b + ntop + i * ldb, info);
-		// }
+		DEBUG ("All done");
+	}
+
+	void p_block_banded_solve (int id, int np, int n, int kl, int ku, double* matrix, int* ipiv, double* b, double *x, int *xipiv, double *bufferl, double *bufferr, int *info, int nrhs, int lda, int ldb) {
+		DEBUG ("BEGIN");
+		std::stringstream debug;
+		std::vector <double> y (2 * (ku + kl) * np * nrhs, 0.0);
+		DEBUG ("y len " << 2 * (ku + kl) * np * nrhs);
+		int ntop, nbot;
+		int ldx = 2 * (kl + ku);
+		int ldxx = ldx * ldx;
+		if (id == 0) {
+			ntop = 0;
+			ldxx *= np * np;
+		} else {
+			ntop = ku;
+		}
+		if (id == np - 1) {
+			nbot = 0;
+		} else {
+			nbot = kl;
+		}
+
+
+		int ldy;
+		if (id == 0) {
+			ldy = 2 * (kl + ku) * np;
+		} else {
+			ldy = 2 * (kl + ku);
+		}
+
+		if (lda == -1) {
+			lda = 2 * kl + ku + 1;
+		}
+		if (ldb == -1) {
+			ldb = n + ntop + nbot;
+		}
+		int ldaa = n + ku + kl + ntop + nbot;
+
+
+		add_scaled (ntop * nrhs, 1.0, b, &y [kl], ldb, ldy);
+		add_scaled (nbot * nrhs, 1.0, b + ntop + n, &y [2 * kl - ku], ldb, ldy);
+
+		for (int i = 0; i < nrhs; ++i) {
+			matrix_banded_solve (n, kl, ku, matrix + i * lda * ldaa + (kl + ntop) * lda, ipiv + i * n, b + ntop + i * ldb, info);
+		}
 		
-
 // #ifdef _MPI
 // 		if (id != 0) {
 // 			for (int i = 0; i < nrhs; ++i) {
@@ -781,256 +779,6 @@ namespace utils
 // 			matrix_matrix_multiply (n, 1, nbot, -1.0, &bufferr [i * n * ku], b + ntop + n + i * ldb, 1.0, b + ntop + i * ldb, n, ldb, ldb);
 // 		}
 //
-// 		DEBUG ("DONE");
-// #endif
-	}
-	
-	void p_block_banded_factorize (int id, int np, int n, int kl, int ku, double* matrix, int* ipiv, double *x, int *xipiv, double *bufferl, double *bufferr, int *info, int nrhs, int lda) {
-		int ntop, nbot;
-		std::stringstream debug;
-		int ldx = (kl + ku);
-		if (id == 0) {
-			ntop = 0;
-		} else {
-			ntop = ku;
-		}
-		if (id == np - 1) {
-			nbot = 0;
-		} else {
-			nbot = kl;
-		}
-
-		if (lda == -1) {
-			lda = 2 * kl + ku + 1;
-		}
-		int ldaa = n + ntop + nbot;
-
-		int ldxx = 2 * ku + 2 * kl;
-		utils::scale (nrhs * ldx, 0.0, x);
-		utils::scale (nrhs * kl, 0.0, bufferl);
-		utils::scale (nrhs * ku, 0.0, bufferl);
-
-		for (int i = 0; i < nrhs; ++i) {
-			matrix_banded_factorize (n, n, kl, ku, matrix + i * lda * ldaa + ntop * lda, ipiv + i * n, info, lda);
-		}
-
-#ifdef _MPI
-		if (id != 0) {
-			for (int i = 0; i < nrhs; ++i) {
-				for (int j = 0; j < kl + ku; ++j) {
-					for (int k = 0; k < ku; ++k) {
-						x [i * ldxx * ldx + j * ldx + k] = matrix [i * ldaa * lda + j * lda + kl + ku + 1 - j];
-					}
-				}
-				for (int j = 0; j < kl; ++j) {
-					for (int k = 0; k < j; ++k) {
-						bufferl [i * n * kl + j * n + k] = matrix [i * lda * ldaa + (j + ku) * lda + k + 2 * kl + ku - j];
-					}
-				}
-				
-				for (int k = 0; k < n; ++k) {
-					for (int j = 0; j < kl; ++j) {
-						debug << bufferl [i * nrhs * kl + j * n + k] << " "; 
-					}
-					DEBUG (debug.str ());
-					debug.str ("");
-				}
-				
-				matrix_banded_solve (n, kl, ku, matrix + i * lda * ldaa + ntop * lda, ipiv + i * n, &bufferl [i * n * kl], info);
-				for (int j = 0; j < ku; ++j) {
-					for (int k = 0; k < ku; ++k) {
-						for (int l = 0; l < j + 1; ++l) {
-							x [i * ldxx * ldx + (j + ku) * ldx + k] -= bufferl [i * n * kl + j * n + l] * matrix [i * lda * ldaa + (kl + ku + l) * lda + kl + ku - l];
-						}
-					}
-					if (id != np - 1) {
-						for (int k = 0; k < kl; ++k) {
-							for (int l = 0; l < j + 1; ++l) {
-								x [i * ldxx * ldx + (j + kl) * ldx + k] -= bufferr [i * n * ku + j * n + l] * matrix [i * lda * ldaa + (j + ldaa - ku - 2 * kl + l) * lda + kl + ku - l];
-							}
-						}
-					}
-				}
-			}
-		}
-
-		if (id != np - 1) {
-			for (int i = 0; i < nrhs; ++i) {
-				for (int j = 0; j < ku + kl; ++j) {
-					for (int k = 0; k < kl; ++k) {
-						x [i * ldxx * ldx + (j + ku + kl) * ldx + ku + 1 + k] = matrix [i * ldaa * lda + (j + ldaa - ku - kl) * lda + kl + ku + k - j];
-					}
-				}
-				for (int j = 0; j < ku; ++j) {
-					for (int k = -1; k >= -ku; --k) {
-						bufferr [i * n * ku + j * n + k + n] = matrix [i * lda * ldaa + (ldaa - kl - ku + j) * lda + k + kl + ku - j];
-					}
-				}
-				matrix_banded_solve (n, kl, ku, matrix + i * lda * ldaa + ntop * lda, ipiv + i * n, &bufferr [i * n * ku], info);
-				for (int j = 0; j < kl; ++j) {
-					for (int k = 0; k < kl; ++k) {
-						for (int l = 0; l < j + 1; ++l) {
-							x [i * ldxx * ldx + (j + ku + kl) * ldx + k] -= bufferl [i * n * kl + j * n + l] * matrix [i * ldaa * lda + (l + ldaa - ku - 2 * kl) * lda + kl + ku + k - l];
-						}
-					}
-					if (id != 0) {
-						for (int k = 0; k < kl; ++k) {
-							for (int l = 0; l < j + 1; ++l) {
-								x [i * ldxx * ldx + (j + ku + kl) * ldx + k] -= bufferr [i * n * ku + j * n + l] * matrix [i * lda * ldaa + (kl + ku + l) * lda + kl + ku - l];
-							}
-						}
-					}
-				}
-			}
-		}
-
-		DEBUG ("GATHER");
-
-		if (id == 0) {
-			ldx = np * (2 * ku + 2 * kl);
-			std::vector <double> buffer (np * (2 * ku + 2 * kl) * (ku + kl));
-			for (int q = 0; q < nrhs; ++q) {
-				MPI::COMM_WORLD.Gather (x + q * ldx * ldx, (2 * ku + 2 * kl) * (ku + kl), MPI::DOUBLE, &buffer [0], (2 * ku + 2 * kl) * (ku + kl), MPI::DOUBLE, 0);
-				
-				for (int i = 0; i < (np - 1) * (kl + ku); ++i) {
-					scale ((np - 1) * (kl + ku), 0.0, x + q * ldx * ldx + i * ldx);
-				}
-				int bcur = 0, xcur = 0;
-				for (int i = 0; i < np - 1; ++i) {
-					for (int j = 0; j < 2 * ku + 2 * kl; ++j) {
-						for (int k = kl; k < 2 * kl + ku; ++k) {
-							x [q * ldx * ldx + xcur + k * ldx + j] += buffer [bcur + (k - kl) * (kl + ku) + j];
-						}
-					}
-					bcur += (2 * ku + 2 * kl) * (ku + kl);
-					xcur += (ku + kl) * (ldx + 1);
-				}
-				for (int j = 0; j < 2 * ku + 2 * kl; ++j) {
-					for (int k = kl; k < 2 * kl + ku; ++k) {
-						x [q * ldx * ldx + xcur + k * ldx + j] += buffer [bcur + (k - kl) * (kl + ku) + j];
-					}
-				}
-				
-				matrix_factorize ((ku + kl) * (np - 1), (ku + kl) * (np - 1), x + q * ldx * ldx, xipiv + q * ldx, info, ldx);
-			}
-
-		} else {
-			MPI::COMM_WORLD.Gather (x, (2 * ku + 2 * kl) * (ku + kl), mpi_type (&typeid (double)), NULL, (2 * ku + 2 * kl) * (ku + kl), mpi_type (&typeid (double)), 0);
-		}
-#endif
-	}
-
-	void p_block_banded_solve (int id, int np, int n, int kl, int ku, double* matrix, int* ipiv, double* b, double *x, int *xipiv, double *bufferl, double *bufferr, int *info, int nrhs, int lda, int ldb) {
-		DEBUG ("BEGIN");
-		std::stringstream debug;
-		std::vector <double> y (2 * (ku + kl) * np * nrhs, 0.0);
-		DEBUG ("y len " << 2 * (ku + kl) * np * nrhs);
-		int ntop, nbot;
-		int ldx = (kl + ku);
-		if (id == 0) {
-			ntop = 0;
-		} else {
-			ntop = ku;
-		}
-		if (id == np - 1) {
-			nbot = 0;
-		} else {
-			nbot = kl;
-		}
-		
-		int ldy = 0;
-		if (id == 0) {
-			ldy = 2 * (kl + ku) * np;
-		} else {
-			ldy = 2 * (kl + ku);
-		}
-
-		if (lda == -1) {
-			lda = 2 * kl + ku + 1;
-		}
-		if (ldb == -1) {
-			ldb = n + ntop + nbot;
-		}
-		int ldaa = n + ntop + nbot;
-
-		int ldxx = 2 * ku + 2 * kl;
-
-		add_scaled (ntop * nrhs, 1.0, b, &y [kl], ldb, ldy);
-		add_scaled (nbot * nrhs, 1.0, b + ntop + n, &y [2 * kl - ku], ldb, ldy);
-
-		for (int i = 0; i < nrhs; ++i) {
-			matrix_banded_solve (n, kl, ku, matrix + i * lda * ldaa + ntop * lda, ipiv + i * n, b + ntop + i * ldb, info);
-		}
-		
-
-// #ifdef _MPI
-// 		if (id != 0) {
-// 			for (int j = 0; j < nrhs; ++j) {
-// 				for (int k = 0; k < ku; ++k) {
-// 					for (int l = 0; l < j + 1; ++l) {
-// 						y [j * ldy + k + kl] -= b [j * ldb + l + ku] * matrix [j * lda * ldaa + (kl + ku + l) * lda + kl + ku - l];
-// 					}
-// 				}
-// 			}
-// 		}
-// 		if (id != np - 1) {
-// 			for (int j = 0; j < nrhs; ++j) {
-// 				for (int k = 0; k < kl; ++k) {
-// 					for (int l = 0; l < j + 1; ++l) {
-// 						y [j * ldx + k + kl + ku] -= b [j * ldb + l + ku] * matrix [j * ldaa * lda + (l + ldaa - ku - 2 * kl) * lda + kl + ku + k - l];
-// 					}
-// 				}
-// 			}
-// 		}
-// 		if (id == 0) {
-// 			int ycur = 0, bcur = 0;
-// 			// DEBUG ("GATHERING" << &y [0]);
-// 			std::vector <double> buffer (2 * ldy);
-// 			// DEBUG ("BUFFER " << &buffer [0]);
-// 			for (int j = 0; j < nrhs; ++j) {
-// 				MPI::COMM_WORLD.Gather (&y [j * ldy], 2 * (kl + ku), mpi_type (&typeid (double)), &buffer [0], 2 * (kl + ku), mpi_type (&typeid (double)), 0);
-// 				utils::scale (ldy, 0.0, &y [0]);
-// 				for (int i = 0; i < np; ++i) {
-// 						for (int k = 0; k < 2 * (ku + kl); ++k) {
-// 							// DEBUG ("RUN " << j * ldy + ycur + k << " " << bcur + k << " " << buffer [bcur + k]);
-// 							y [j * ldy + ycur + k] += buffer [bcur + k];
-// 						}
-// 					ycur += ku + kl;
-// 					bcur += (ku + kl);
-// 				}
-//
-// 				// for (int i = 0; i < ldy; ++i) {
-// // 					DEBUG ("Y = " << y [j * ldy + i] << " " << j * ldy + i);
-// // 				}
-//
-// 				// DEBUG ("Solving");
-// 				matrix_solve ((ku + kl) * (np - 1), x + j * ldx * ldx, xipiv + j * ldx, &y [j * ldy + ku], info, 1, ldx);
-// 				// DEBUG ("Solved");
-//
-// 				ycur = 0;
-// 				bcur = 0;
-// 				for (int i = 0; i < np; ++i) {
-// 					for (int k = 0; k < (ku + kl); ++k) {
-// 						buffer [bcur + k] = y [j * ldy + ycur + k];
-// 					}
-// 					ycur += ku + kl;
-// 					bcur += (ku + kl);
-// 				}
-//
-// 				MPI::COMM_WORLD.Scatter (&buffer [0], 2 * (kl + ku), mpi_type (&typeid (double)), &y [j * ldy], 2 * (kl + ku), mpi_type (&typeid (double)), 0);
-// 			}
-// 		} else {
-// 			for (int j = 0; j < nrhs; ++j) {
-// 				MPI::COMM_WORLD.Gather (&y [j * ldy], 2 * (kl + ku), mpi_type (&typeid (double)), NULL, 2 * (kl + ku), mpi_type (&typeid (double)), 0);
-// 				MPI::COMM_WORLD.Scatter (NULL, 2 * (kl + ku), mpi_type (&typeid (double)), &y [j * ldy], 2 * (kl + ku), mpi_type (&typeid (double)), 0);
-// 			}
-// 		}
-// 		DEBUG ("OUT");
-// 		matrix_copy (ntop, nrhs, &y [0], b, ntop + nbot, ldb);
-// 		matrix_copy (nbot, nrhs, &y [ntop], b + ntop + n, ntop + nbot, ldb);
-//
-// 		matrix_matrix_multiply (n, nrhs, ntop, -1.0, &bufferl [0], b, 1.0, b + ntop, lda, ldb, ldb);
-// 		matrix_matrix_multiply (n, nrhs, nbot, -1.0, &bufferr [0], b + ntop + n, 1.0, b + ntop, lda, ldb, ldb);
 // 		DEBUG ("DONE");
 // #endif
 	}
