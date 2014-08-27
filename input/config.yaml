@@ -51,10 +51,10 @@ input:
 output:
     file: sc_gwave_%02i
     transform_file: sc_gwave_t_%02i
-    every: 50
+    every: 1
     stat:
         file: sc_gwave_%02i
-        every: 100
+        every: 50
     merge_file: merge_%04i
     full: true
 parallel:

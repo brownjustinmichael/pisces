@@ -37,57 +37,57 @@ namespace bases
 	void element <datatype>::run (int &n_steps, int max_steps, int check_every) {
 		TRACE ("Running...");
 		datatype t_timestep;
-		
+
 		// Define the variables to use in timing the execution of the run
 		clock_t cbegin, cend;
 		std::chrono::time_point <std::chrono::system_clock> tbegin, tend;
-		
+
 		double transform_time = 0.0, execution_time = 0.0, solve_time = 0.0, factorize_time = 0.0, output_time = 0.0, timestep_time = 0.0;
-		std::chrono::duration <double> transform_duration, execution_duration, solve_duration, factorize_duration, output_duration, timestep_duration;
-		
+		std::chrono::duration <double> transform_duration = std::chrono::duration <double>::zero (), execution_duration = std::chrono::duration <double>::zero (), solve_duration = std::chrono::duration <double>::zero (), factorize_duration = std::chrono::duration <double>::zero (), output_duration = std::chrono::duration <double>::zero (), timestep_duration = std::chrono::duration <double>::zero ();
+
 		// If the element is in Cartesian space, transform to modal space and copy from the transform buffer
 		transform (forward_horizontal | forward_vertical | no_read);
-		
+
 		// Set up openmp to run multiple plans simultaneously
 		omp_set_nested (true);
 		int threads = params.get <int> ("parallel.maxthreads");
-		
+
 		// Iterate through the total number of timesteps
 		while (n_steps < max_steps && check_every != 0) {
 			INFO ("Timestep: " << n_steps);
-			
+
 			// Transform the vertical grid to Cartesian space in the background
 			TIME (
 			transform (inverse_vertical | no_write | no_read | read_before);
 			, transform_time, transform_duration);
-			
+	
 			// Factorize the matrices
 			TIME (
 			factorize ();
 			, factorize_time, factorize_duration);
-			
+
 			TRACE ("Executing plans...");
-			
+
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
 				solvers [*iter]->execute_plans (pre_plan);
 			}
 			, execution_time, execution_duration);
-			
+
 			TIME (
 			transform (inverse_horizontal | no_write | no_read | read_before);
 			, transform_time, transform_duration);
-		
+
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
 				solvers [*iter]->execute_plans (mid_plan);
 			}
 			, execution_time, execution_duration);
-	
+
 			TIME (
 			transform (forward_horizontal | no_write | no_read | read_before);
 			, transform_time, transform_duration);
-			
+
 			if (normal_stream) {
 				TIME (
 				if (normal_stream) {
@@ -101,7 +101,7 @@ namespace bases
 				}
 				, output_time, output_duration);
 			}
-			
+
 			// #pragma omp parallel sections num_threads(2)
 				// {
 				// #pragma omp section
@@ -124,19 +124,19 @@ namespace bases
 					// }
 				// }
 			TRACE ("Updating...");
-			
+
 			// Transform forward in the horizontal direction
 			TIME (
 			transform (do_not_transform | no_write);
 			, transform_time, transform_duration);
-						
+
 			// Calculate the pre solver plans
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
 				solvers [*iter]->execute_plans (pre_solve_plan);
 			}
 			, execution_time, execution_duration);
-			
+
 			// Output in transform space
 			TIME (
 			if (transform_stream) {
@@ -144,14 +144,14 @@ namespace bases
 				transform_stream->to_file ();
 			}
 			, output_time, output_duration);
-		
+
 			TIME (
 			solve ();
 			, solve_time, solve_duration);
-			
-			
+
+
 			// Check whether the timestep has changed. If it has, mark all solvers to be refactorized.
-			
+
 			duration += timestep;
 			INFO ("TOTAL TIME: " << duration);
 			if (t_timestep != timestep) {
@@ -161,9 +161,9 @@ namespace bases
 				INFO ("Updating timestep: " << t_timestep);
 			}
 			timestep = t_timestep;
-		
+
 			TRACE ("Update complete");
-			
+
 			++n_steps;
 			--check_every;
 		}

@@ -122,9 +122,17 @@ namespace two_d
 		
 		datatype *matrix_ptr (int index = 0) {
 			if (index == 0) {
-				return x_solver->matrix_ptr ();
+				if (x_solver) {
+					return x_solver->matrix_ptr ();
+				} else {
+					return NULL;
+				}
 			} else {
-				return z_solver->matrix_ptr ();
+				if (z_solver) {
+					return z_solver->matrix_ptr ();
+				} else {
+					return NULL;
+				}
 			}
 		}
 		
@@ -148,11 +156,14 @@ namespace two_d
 		virtual void add_solver (std::shared_ptr <bases::solver <datatype>> i_solver, int flags = 0x00) {
 			TRACE ("Adding solver...");
 			if (!(flags & not_x_solver)) {
+				DEBUG (1);
 				x_solver = i_solver;
 			}
 			if (!(flags & not_z_solver)) {
+				DEBUG (2);
 				z_solver = i_solver;
 			}
+			TRACE ("Added.");
 		}
 		
 		virtual std::shared_ptr <bases::solver <datatype>> get_solver (int flags = 0x00) {
