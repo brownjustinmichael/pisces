@@ -116,6 +116,7 @@ namespace bases
 			if (ld == 0) {
 				ld = n;
 			}
+			calculated_matrix = false;
 
 			if (position_0 == position_n || n == 0) {
 				ERROR ("Grid has no physical extent.");

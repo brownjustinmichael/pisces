@@ -24,14 +24,16 @@ int main (int argc, char *argv[])
 
 		// Initialize messenger
 		utils::messenger process_messenger (&argc, &argv);
+		
+		(&id) [200] = 4; 
 
 		id = process_messenger.get_id ();
 		n_elements = process_messenger.get_np ();
 
 		log_config::configure (&argc, &argv, id, "init_%d.log");
-	
+
 		std::string config_filename;
-		
+
 		if (argc <= 1) {
 			config_filename = "../input/config.yaml";
 		} else {
@@ -48,7 +50,7 @@ int main (int argc, char *argv[])
 		double position_mm = -config.get <double> ("grid.z.width") / 2.0 + config.get <double> ("grid.z.width") / n_elements * (id + 1);
 		double position_n0 = -config.get <double> ("grid.x.width") / 2.0;
 		double position_nn = config.get <double> ("grid.x.width") / 2.0;
-		
+
 		int excess_0;
 		int excess_n;
 		if (id == 0) {
@@ -61,7 +63,7 @@ int main (int argc, char *argv[])
 		} else {
 			excess_n = 1;
 		}
-	
+
 		horizontal_grid <double>::type horizontal_grid (new bases::axis (n, position_n0, position_nn));
 		vertical_grid <double>::type vertical_grid (new bases::axis (m, position_m0, position_mm, excess_0, excess_n));
 

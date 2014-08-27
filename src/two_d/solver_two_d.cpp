@@ -573,6 +573,364 @@ namespace two_d
 		
 		template class laplace_solver <double>;
 		
+		// template <class datatype>
+		// incompressible_corrector <datatype>::incompressible_corrector (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype *i_rhs, datatype* i_data, datatype *i_data_x, datatype *i_data_z, int *i_element_flags, int *i_component_flags, int * i_component_flags_x, int *i_component_flags_z) :
+		// bases::solver <datatype> (i_element_flags, i_component_flags),
+		// n (i_grid_n.get_n ()),
+		// ldn (i_grid_n.get_ld ()),
+		// m (i_grid_m.get_n ()),
+		// data (i_data),
+		// data_x (i_data_x),
+		// data_z (i_data_z),
+		// grid_n (i_grid_n),
+		// grid_m (i_grid_m),
+		// pos_n (&i_grid_n [0]),
+		// pos_m (&i_grid_m [0]),
+		// excess_0 (grid_m.get_excess_0 ()),
+		// excess_n (grid_m.get_excess_n ()),
+		// messenger_ptr (i_messenger_ptr) {
+		// 	TRACE ("Building laplace solver...");
+		// 	rhs_ptr = i_rhs;
+		// 	component_flags_x = i_component_flags_x;
+		// 	component_flags_z = i_component_flags_z;
+		//
+		// 	ipiv.resize (ldn * (m + 2));
+		//
+		// 	if (messenger_ptr->get_id () == 0) {
+		// 		x.resize (4 * (3) * (3) * ldn * messenger_ptr->get_np () * messenger_ptr->get_np ());
+		// 		xipiv.resize (2 * (3) * messenger_ptr->get_np () * ldn);
+		// 	} else {
+		// 		x.resize (4 * (3) * (3) * ldn);
+		// 		xipiv.resize (1);
+		// 	}
+		//
+		// 	id = messenger_ptr->get_id ();
+		// 	np = messenger_ptr->get_np ();
+		//
+		// 	ntop = 0;
+		// 	nbot = 0;
+		// 	if (id != 0) {
+		// 		ntop = 1;
+		// 	// 	messenger_ptr->send (1, &pos_m [excess_0], id - 1, 0);
+		// 	}
+		// 	if (id != np - 1) {
+		// 		nbot = 2;
+		// 	// 	messenger_ptr->recv (1, &ex_pos_m, id + 1, 0);
+		// 	// 	messenger_ptr->send (1, &pos_m [m - 2 - excess_n], id + 1, 1);
+		// 	}
+		// 	// if (id != 0) {
+		// 	// 	messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
+		// 	// }
+		// 	DEBUG (m + 2 + 2 + 1);
+		// 	matrix.resize ((2 * 2 + 1 + 1) * (m + 2 + 2 + 1) * ldn);
+		// 	bufferl.resize (np * (m + 2) * 2 * ldn);
+		// 	bufferr.resize (np * (m + 2) * 1 * ldn);
+		//
+		// 	data_temp.resize ((m + 2) * ldn);
+		// }
+		//
+		// template <class datatype>
+		// incompressible_corrector <datatype>::incompressible_corrector (bases::master_solver <datatype> &i_solver, bases::master_solver <datatype> &i_solver_x, bases::master_solver <datatype> &i_solver_z, utils::messenger* i_messenger_ptr) :
+		// bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags),
+		// n ((i_solver.grid_ptr (0))->get_n ()),
+		// ldn ((i_solver.grid_ptr (0))->get_ld ()),
+		// m ((i_solver.grid_ptr (1))->get_n ()),
+		// data (i_solver.data_ptr ()),
+		// data_x (i_solver_x.data_ptr ()),
+		// data_z (i_solver_z.data_ptr ()),
+		// grid_n (*(i_solver.grid_ptr (0))),
+		// grid_m (*(i_solver.grid_ptr (1))),
+		// pos_n (&grid_n [0]),
+		// pos_m (&grid_m [0]),
+		// excess_0 (grid_m.get_excess_0 ()),
+		// excess_n (grid_m.get_excess_n ()),
+		// messenger_ptr (i_messenger_ptr) {
+		// 	TRACE ("Building laplace solver...");
+		// 	rhs_ptr = i_solver.rhs_ptr (spectral_rhs);
+		// 	component_flags_x = i_solver_x.component_flags;
+		// 	component_flags_z = i_solver_z.component_flags;
+		//
+		// 	ipiv.resize (ldn * (m + 2));
+		//
+		// 	if (messenger_ptr->get_id () == 0) {
+		// 		x.resize (4 * (3) * (3) * ldn * messenger_ptr->get_np () * messenger_ptr->get_np ());
+		// 		xipiv.resize (2 * (3) * messenger_ptr->get_np () * ldn);
+		// 	} else {
+		// 		x.resize (4 * (3) * (3) * ldn);
+		// 		xipiv.resize (1);
+		// 	}
+		//
+		// 	id = messenger_ptr->get_id ();
+		// 	np = messenger_ptr->get_np ();
+		//
+		// 	ntop = 0;
+		// 	nbot = 0;
+		// 	if (id != 0) {
+		// 		ntop = 1;
+		// 	// 	messenger_ptr->send (1, &pos_m [excess_0], id - 1, 0);
+		// 	}
+		// 	if (id != np - 1) {
+		// 		nbot = 2;
+		// 	// 	messenger_ptr->recv (1, &ex_pos_m, id + 1, 0);
+		// 	// 	messenger_ptr->send (1, &pos_m [m - 2 - excess_n], id + 1, 1);
+		// 	}
+		// 	// if (id != 0) {
+		// 	// 	messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
+		// 	// }
+		// 	DEBUG (m + 2 + 2 + 1);
+		// 	matrix.resize ((2 * 2 + 1 + 1) * (m + 2 + 2 + 1) * ldn);
+		// 	bufferl.resize (np * (m + 2) * 2 * ldn);
+		// 	bufferr.resize (np * (m + 2) * 1 * ldn);
+		//
+		// 	data_temp.resize ((m + 2) * ldn);
+		// }
+		//
+		// template <class datatype>
+		// void incompressible_corrector <datatype>::factorize () {
+		// 	std::stringstream debug;
+		// 	int info;
+		// 	TRACE ("Factorizing laplace solver...");
+		//
+		// 	double scalar = 4.0 * std::acos (-1.0) * std::acos (-1.0) / (pos_n [n - 1] - pos_n [0]) / (pos_n [n - 1] - pos_n [0]);
+		// 	std::vector <datatype> positions (m + 2);
+		// 	datatype *matrix_ptr, *new_pos = &positions [1];
+		//
+		// 	new_pos [-1] = 2.0 * pos_m [0] - (pos_m [0] + pos_m [1]) / 2.0;
+		// 	for (int j = 0; j < m - 1; ++j) {
+		// 		new_pos [j] = (pos_m [j] + pos_m [j + 1]) / 2.0;
+		// 	}
+		// 	new_pos [m - 1] = 2.0 * pos_m [m - 1] - (pos_m [m - 1] + pos_m [m - 2]) / 2.0;
+		// 	new_pos [m] = pos_m [m - 1] + (pos_m [m - 1] - new_pos [m - 3]);
+		//
+		// 	for (int i = 0; i < ldn; ++i) {
+		// 		DEBUG (m + 2 + 3);
+		// 		matrix_ptr = &matrix [(i) * (m + 2 + 3) * (2 * 2 + 1 + 1) + 2 + 2 * 6];
+		// 		matrix_ptr [1] = 1.0;
+		// 		matrix_ptr [6] = -1.0;
+		//
+		// 		matrix_ptr [2] = 1.0 / (new_pos [0] - new_pos [-1]) / (pos_m [1] - pos_m [0]);
+		// 		matrix_ptr [6 + 1] = -1.0 / (new_pos [1] - new_pos [0]) / (pos_m [1] - pos_m [0]) - 1.0 / (new_pos [0] - new_pos [-1]) / (pos_m [1] - pos_m [0]) - scalar * (i / 2) * (i / 2);
+		// 		matrix_ptr [12] = 1.0 / (new_pos [1] - new_pos [0]) / (pos_m [1] - pos_m [0]);
+		// 		for (int j = 1; j < m - 1; ++j) {
+		// 			matrix_ptr [(j + 1 - 2) * 6 + 3] = 1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (pos_m [j + 1] - pos_m [j - 1]);
+		// 			matrix_ptr [(j + 1 - 1) * 6 + 2] = -1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (pos_m [j + 1] - pos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
+		// 			matrix_ptr [(j + 1) * 6 + 1] = -1.0 / (new_pos [j + 1] - new_pos [j]) / (pos_m [j + 1] - pos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
+		// 			matrix_ptr [(j + 1 + 1) * 6] = 1.0 / (new_pos [j + 1] - new_pos [j]) / (pos_m [j + 1] - pos_m [j - 1]);
+		// 		}
+		//
+		// 		// matrix_ptr [(m) * 6 + 1] = 1.0 / (new_pos [m - 1] - new_pos [m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
+		// 		// matrix_ptr [(m - 1) * 6 + 2] = -1.0 / (new_pos [m - 2] - new_pos [m - 3]) / (pos_m [m - 1] - pos_m [m - 2]) - 1.0 / (new_pos [m - 1] - new_pos [m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) - scalar * (i / 2) * (i / 2);
+		// 		// matrix_ptr [(m - 2) * 6 + 3] = 1.0 / (new_pos [m - 2] - new_pos [m - 3]) / (pos_m [m - 1] - pos_m [m - 2]);
+		//
+		// 		matrix_ptr [(m - 1 + 1 - 2) * 6 + 3] = 1.0 / (new_pos [m - 1 - 1] - new_pos [m - 1 - 2]) / 2.0 / (pos_m [m - 1] - pos_m [m - 2]);
+		// 		matrix_ptr [(m - 1 + 1 - 1) * 6 + 2] = -1.0 / (new_pos [m - 1 - 1] - new_pos [m - 1 - 2]) / 2.0 / (pos_m [m - 1] - pos_m [m - 2]) - scalar * (i / 2) * (i / 2) / 2.0;
+		// 		matrix_ptr [(m - 1 + 1) * 6 + 1] = -1.0 / (new_pos [m - 1 + 1] - new_pos [m - 1]) / 2.0 / (pos_m [m - 1] - pos_m [m - 2]) - scalar * (i / 2) * (i / 2) / 2.0;
+		// 		matrix_ptr [(m - 1 + 1 + 1) * 6] = 1.0 / (new_pos [m - 1 + 1] - new_pos [m - 1]) / 2.0 / (pos_m [m - 1] - pos_m [m - 2]);
+		//
+		// 		matrix_ptr [(m - 1) * 6 + 3] = -1.0;
+		// 		matrix_ptr [(m) * 6 + 2] = 1.0;
+		// 		matrix_ptr [(m + 1) * 6 + 1] = 0.0e-10;
+		//
+		// 		// matrix_ptr [(m - 2) * 6 + 3] = 1.0e-10;
+		// 		// matrix_ptr [(m - 1) * 6 + 2] = -1.0;
+		// 		// matrix_ptr [(m) * 6 + 1] = 1.0;
+		//
+		// 		DEBUG (matrix_ptr + ntop * 6);
+		// 		for (int k = 0; k < 4; ++k) {
+		// 			for (int j = 0; j < m + 2; ++j) {
+		// 				debug << matrix_ptr [(j) * 6 + k] << " ";
+		// 			}
+		// 			DEBUG (debug.str ());
+		// 			debug.str ("");
+		// 		}
+		//
+		// 		// utils::matrix_banded_factorize (m + 2, m + 2, 2, 1, matrix_ptr - 2, &ipiv [(m + 2) * i], &info, 2 * 2 + 1 + 1);
+		//
+		// 		// for (int k = 0; k < 6; ++k) {
+		// 		// 	for (int j = 0; j < m + 2; ++j) {
+		// 		// 		debug << matrix [i * (m + 2) * 6 + j * 6 + k] << " ";
+		// 		// 	}
+		// 		// 	DEBUG ("MID " <<  debug.str ());
+		// 		// 	debug.str ("");
+		// 		// }
+		// 	}
+		// 	DEBUG (ldn);
+		//
+		// 	DEBUG (&matrix [0]);
+		// 	DEBUG (&ipiv [0]);
+		// 	DEBUG (&x [0]);
+		// 	DEBUG (&xipiv [0]);
+		// 	DEBUG (&bufferr [0]);
+		// 	DEBUG (&bufferl [0]);
+		//
+		// 	utils::p_block_banded_factorize (id, np, m + 2 - ntop - nbot, 2, 1, &matrix [0], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn);
+		// 	// throw 0;
+		// }
+		//
+		// template <class datatype>
+		// void incompressible_corrector <datatype>::execute () {
+		// 	std::stringstream debug;
+		// 	int info;
+		// 	TRACE ("Solving...");
+		//
+		// 	if (!(*component_flags_x & transformed_vertical)) {
+		// 		datatype scalar = acos (-1.0) * 2.0 / (pos_n [n - 1] - pos_n [0]);
+		// 		datatype *data_ptr = &data_temp [1];
+		//
+		// 		std::vector <datatype> positions (m + 2);
+		// 		datatype *new_pos = &positions [1];
+		//
+		// 		new_pos [-1] = 2.0 * pos_m [0] - (pos_m [0] + pos_m [1]) / 2.0;
+		// 		for (int j = 0; j < m - 1; ++j) {
+		// 			new_pos [j] = (pos_m [j] + pos_m [j + 1]) / 2.0;
+		// 		}
+		// 		new_pos [m - 1] = 2.0 * pos_m [m - 1] - (pos_m [m - 1] + pos_m [m - 2]) / 2.0;
+		// 		new_pos [m] = pos_m [m - 1] + (pos_m [m - 1] - new_pos [m - 3]);
+		//
+		// 		for (int i = 2; i < ldn; i += 2) {
+		// 			for (int j = 0; j < m; ++j) {
+		// 				data_ptr [i * (m + 2) + j] = -scalar * (i / 2) * data_x [(i + 1) * m + j];
+		// 				data_ptr [(i + 1) * (m + 2) + j] = scalar * (i / 2) * data_x [i * m + j];
+		// 			}
+		// 			// data_ptr [i * (m + 2) + m - 1] = -scalar * (i / 2) * data_x [(i + 1) * m + m - 1];
+		// 			// data_ptr [(i + 1) * (m + 2) + m - 1] = scalar * (i / 2) * data_x [i * m + m - 1];
+		// 		}
+		//
+		// 		for (int i = 2; i < ldn; ++i) {
+		// 			data_ptr [i * (m + 2) - 1] = 0.0;
+		// 			data_ptr [i * (m + 2)] += (data_z [i * m + 1] - data_z [i * m]) / (pos_m [1] - pos_m [0]);
+		// 			for (int j = 1; j < m - 1; ++j) {
+		// 				data_ptr [i * (m + 2) + j] += (data_z [i * m + j + 1] - data_z [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
+		// 			}
+		// 			// data_ptr [i * (m + 1)] += (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
+		// 			// data_ptr [i * (m + 1) + m - 1] = 0.0;
+		// 			data_ptr [i * (m + 2) + m - 1] += (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
+		// 			data_ptr [i * (m + 2) + m] = 0.0;
+		//
+		// 			// for (int j = -1; j < m + 1; ++j) {
+		// 				// DEBUG ("RHS " << i * (m + 2) + j << " " << data_ptr [i * (m + 2) + j]);
+		// 			// }
+		//
+		// 			DEBUG ("" << m + 2 << " " << &matrix [i * (m + 2) * (2 * 2 + 1 + 1)] << " " << &ipiv [i * (m + 2)] << " " << &data_temp [i * (m + 2)]);
+		// 			// utils::matrix_banded_solve (m + 2, 2, 1, &matrix [i * (m + 2) * (2 * 2 + 1 + 1)], &ipiv [i * (m + 2)], &data_temp [i * (m + 2)], &info, 1, 2 * 2 + 1 + 1);
+		// 			//
+		// 			// for (int j = -1; j < m + 1; ++j) {
+		// 			// 	// DEBUG ("DONE " << data_ptr [i * (m + 2) + j]);
+		// 			// }
+		// 			//
+		// 			// for (int j = 0; j < m; ++j) {
+		// 			// 	data [i * m + j] = (data_temp [i * (m + 2) + j] + data_temp [i * (m + 2) + j + 1]) / 2.0;
+		// 			// }
+		// 		}
+		//
+		// 		DEBUG (&matrix [0]);
+		// 		DEBUG (&ipiv [0]);
+		// 		DEBUG (&data_temp [0]);
+		// 		DEBUG (&x [0]);
+		// 		DEBUG (&xipiv [0]);
+		// 		DEBUG (&bufferr [0]);
+		// 		DEBUG (&bufferl [0]);
+		//
+		// 		utils::p_block_banded_solve (id, np, m + 2 - ntop - nbot, 2, 1, &matrix [0], &ipiv [0], &data_temp [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn);
+		// 		// throw 0;
+		//
+		//
+		// 		for (int i = 2; i < ldn; ++i) {
+		// 			for (int j = 0; j < m; ++j) {
+		// 				data [i * m + j] = (data_temp [i * (m + 2) + j] + data_temp [i * (m + 2) + j + 1]) / 2.0;
+		// 			}
+		// 		}
+		//
+		//
+		// 		for (int j = 0; j < m; ++j) {
+		// 			for (int i = 0; i < ldn; ++i) {
+		// 				debug << data_temp [i * (m + 1) + j] << " ";
+		// 			}
+		// 			DEBUG (debug.str ());
+		// 			debug.str ("");
+		// 		}
+		//
+		// 		std::vector <datatype> out_z (ldn);
+		//
+		// 		for (int i = 2; i < ldn; ++i) {
+		// 			out_z [i] = -data_z [i * m + m - 2] - (data_ptr [i * (m + 2) + m] - data_ptr [i * (m + 2) + m - 1]) / (new_pos [m] - new_pos [m - 1]);
+		// 			for (int j = 1; j < m - 1; ++j) {
+		// 				data_z [i * m + j] -= (data_ptr [i * (m + 2) + j] - data_ptr [i * (m + 2) + j - 1]) / (new_pos [j] - new_pos [j - 1]);
+		// 			}
+		// 			for (int j = 1; j < m - 1; ++j) {
+		// 				// DEBUG (i << " " << j << " " << (data_z [i * m + j + 1] - data_z [i * m + j - 1])/(pos_m [j + 1] - pos_m [j - 1]));
+		// 			}
+		// 		}
+		//
+		// 		for (int i = 2; i < ldn; i += 2) {
+		// 			for (int j = 0; j < m; ++j) {
+		// 				data_x [i * m + j] += scalar * (i / 2) * (data_ptr [(i + 1) * (m + 2) + j] + data_ptr [(i + 1) * (m + 2) + j - 1]) / 2.0;
+		// 				data_x [(i + 1) * m + j] -= scalar * (i / 2) * (data_ptr [i * (m + 2) + j] + data_ptr [i * (m + 2) + j - 1]) / 2.0;
+		// 			}
+		// 			// data_x [i * m + m - 1] = (data_z [(i + 1) * m + m - 1] - data_z [(i + 1) * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / (i / 2) / scalar;
+		// 			// data_x [i * m + m - 1] = 0.0;
+		// 			// data_x [(i + 1) * m + m - 1] = -(data_z [i * m + m - 1] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / (i / 2) / scalar;
+		// 			// data_x [(i + 1) * m + m - 1] = 0.0;
+		// 		}
+		//
+		//
+		// 		// for (int i = 2; i < ldn; i += 2) {
+		// 		// 	for (int j = 0; j < m; ++j) {
+		// 		// 		data_ptr [i * (m + 2) + j] = -scalar * (i / 2) * data_x [(i + 1) * m + j];
+		// 		// 		data_ptr [(i + 1) * (m + 2) + j] = scalar * (i / 2) * data_x [i * m + j];
+		// 		// 	}
+		// 		// 	data_ptr [i * (m + 2) + m - 1] = -scalar * (i / 2) * data_x [(i + 1) * m + m - 1];
+		// 		// 	data_ptr [(i + 1) * (m + 2) + m - 1] = scalar * (i / 2) * data_x [i * m + m - 1];
+		// 		// }
+		//
+		// 		// for (int i = 2; i < ldn; ++i) {
+		// 		// 	data_ptr [i * (m + 2) - 1] = 0.0;
+		// 		// 	data_ptr [i * (m + 2)] += (data_z [i * m + 1] - data_z [i * m]) / (pos_m [1] - pos_m [0]);
+		// 		// 	for (int j = 1; j < m - 1; ++j) {
+		// 		// 		data_ptr [i * (m + 2) + j] += (data_z [i * m + j + 1] - data_z [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
+		// 		// 	}
+		// 		// 	// data_ptr [i * (m + 1)] += (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
+		// 		// 	// data_ptr [i * (m + 1) + m - 1] = 0.0;
+		// 		// 	data_ptr [i * (m + 2) + m - 1] += (out_z [i] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / 2.0;
+		// 		// 	data_ptr [i * (m + 2) + m] = 0.0;
+		// 		//
+		// 		// 	for (int j = -1; j < m + 1; ++j) {
+		// 		// 		DEBUG ("RHS " << i * (m + 2) + j << " " << data_ptr [i * (m + 2) + j]);
+		// 		// 	}
+		// 		// }
+		//
+		//
+		// 		// for (int i = 2; i < ldn; ++i) {
+		// 		// 	for (int j = 2; j < m - 2; ++j) {
+		// 		// 		data [i * m + j] = ((data_ptr [i * (m + 2) + j + 1] - data_ptr [i * (m + 2) + j]) / (new_pos [j + 1] - new_pos [j]) - (data_ptr [i * (m + 2) + j - 1] - data_ptr [i * (m + 2) + j - 2]) / (new_pos [j - 1] - new_pos [j - 2])) / (pos_m [j + 1] - pos_m [j - 1]);
+		// 		// 		data [i * m + j] -= scalar * scalar * (i / 2) * (i / 2) * (data_ptr [i * (m + 2) + j] + data_ptr [i * (m + 2) + j - 1]) / 2.0;
+		// 		// 		DEBUG ("FINAL " << i * (m + 2) + j << " " << 1.0 / (new_pos [j + 1] - new_pos [j]) / (pos_m [j + 1] - pos_m [j - 1]) << " " << -1.0 / (new_pos [j + 1] - new_pos [j]) / (pos_m [j + 1] - pos_m [j - 1]) - scalar * scalar * (i / 2) * (i / 2) / 2.0 << " " <<  1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (pos_m [j + 1] - pos_m [j - 1]) << " "<< data [i * m + j]);
+		// 		// 	}
+		// 		// 	data [i * m + m - 1] = 1.0 / (new_pos [m - 1 + 1] - new_pos [m - 1]) / (pos_m [m - 1] - pos_m [m - 2]) / 2.0 * (data_ptr [i * (m + 2) + m - 1 + 1] + data_ptr [i * (m + 2) + m - 4]) + (-1.0 / (new_pos [m - 1 - 1] - new_pos [m - 1 - 2]) / 2.0 / (pos_m [m - 1] - pos_m [m - 2]) - scalar * scalar * (i / 2) * (i / 2) / 2.0) * (data_ptr [i * (m + 2) + m - 2] + data_ptr [i * (m + 2) + m - 3]);
+		// 		// 	// data [i * m + m - 1] -= scalar * scalar * (i / 2) * (i / 2) * (data_ptr [i * (m + 2) + m - 1] + data_ptr [i * (m + 2) + m - 1 - 1]) / 2.0;
+		// 		// 	DEBUG ("FINAL " << i * (m + 2) + m - 1 << " " << 1.0 / (new_pos [m - 1 + 1] - new_pos [m - 1]) / (pos_m [m - 1] - pos_m [m - 2]) / 2.0 << " " << -1.0 / (new_pos [m - 1 - 1] - new_pos [m - 1 - 2]) / 2.0 / (pos_m [m - 1] - pos_m [m - 2]) - scalar * scalar * (i / 2) * (i / 2) / 2.0 << " " << 1.0 / (new_pos [m - 1 + 1] - new_pos [m - 1]) / 2.0 / (pos_m [m - 1] - pos_m [m - 2]) << " " << data [i * m + m - 1]);
+		// 		//
+		// 		// }
+		//
+		// 		utils::scale (2 * m, 0.0, data_z);
+		// 		// utils::scale (m, 0.0, data_x + 9 * m);
+		// 		utils::scale (2 * m, 0.0, data_x);
+		//
+		// 		for (int j = 0; j < m; ++j) {
+		// 			for (int i = 0; i < ldn; ++i) {
+		// 				if (std::isnan (data [i * m + j])) {
+		// 					FATAL ("Nan in laplace solver.");
+		// 					throw exceptions::nan ();
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		//
+		// 	TRACE ("Solved");
+		// }
+		//
+		// template class incompressible_corrector <double>;
+		
 		template <class datatype>
 		incompressible_corrector <datatype>::incompressible_corrector (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype *i_rhs, datatype* i_data, datatype *i_data_x, datatype *i_data_z, int *i_element_flags, int *i_component_flags, int * i_component_flags_x, int *i_component_flags_z) : 
 		bases::solver <datatype> (i_element_flags, i_component_flags),
@@ -609,21 +967,20 @@ namespace two_d
 			ntop = 0;
 			nbot = 0;
 			if (id != 0) {
-				ntop = 1;
+				ntop = 2;
 			// 	messenger_ptr->send (1, &pos_m [excess_0], id - 1, 0);
 			}
 			if (id != np - 1) {
-				nbot = 2;
+				nbot = 1;
 			// 	messenger_ptr->recv (1, &ex_pos_m, id + 1, 0);
 			// 	messenger_ptr->send (1, &pos_m [m - 2 - excess_n], id + 1, 1);
 			}
 			// if (id != 0) {
 			// 	messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
 			// }
-			DEBUG (m + 2 + 2 + 1);
-			matrix.resize ((2 * 2 + 1 + 1) * (m + 2 + 2 + 1) * ldn);
+			matrix.resize ((2 * 2 + 1 + 1) * (m + 2 + ntop + nbot) * ldn);
 			bufferl.resize (np * (m + 2) * 2 * ldn);
-			bufferr.resize (np * (m + 2) * 1 * ldn);
+			bufferl.resize (np * (m + 2) * 1 * ldn);
 			
 			data_temp.resize ((m + 2) * ldn);
 		}
@@ -649,8 +1006,8 @@ namespace two_d
 			new_pos [m] = pos_m [m - 1] + (pos_m [m - 1] - new_pos [m - 3]);
 			
 			for (int i = 0; i < ldn; ++i) {
-				DEBUG (m + 2 + 3);
-				matrix_ptr = &matrix [(i) * (m + 2 + 3) * (2 * 2 + 1 + 1) + 2 + 2 * 6];
+				DEBUG (ntop);
+				matrix_ptr = &matrix [(i + ntop) * (m + 2) * (2 * 2 + 1 + 1) + 2];
 				matrix_ptr [1] = 1.0;
 				matrix_ptr [6] = -1.0;
 				
@@ -681,14 +1038,13 @@ namespace two_d
 				// matrix_ptr [(m - 1) * 6 + 2] = -1.0;
 				// matrix_ptr [(m) * 6 + 1] = 1.0;
 				
-				DEBUG (matrix_ptr + ntop * 6);
-				for (int k = 0; k < 4; ++k) {
-					for (int j = 0; j < m + 2; ++j) {
-						debug << matrix_ptr [(j) * 6 + k] << " ";
-					}
-					DEBUG (debug.str ());
-					debug.str ("");
-				}
+				// for (int k = 0; k < 6; ++k) {
+				// 	for (int j = 0; j < m + 2; ++j) {
+				// 		debug << matrix [i * (m + 2) * 6 + j * 6 + k] << " ";
+				// 	}
+				// 	DEBUG (debug.str ());
+				// 	debug.str ("");
+				// }
 				
 				// utils::matrix_banded_factorize (m + 2, m + 2, 2, 1, matrix_ptr - 2, &ipiv [(m + 2) * i], &info, 2 * 2 + 1 + 1);
 				
@@ -700,10 +1056,7 @@ namespace two_d
 				// 	debug.str ("");
 				// }
 			}
-			DEBUG (ldn);
-			
 			utils::p_block_banded_factorize (id, np, m + 2 - ntop - nbot, 2, 1, &matrix [0], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn);
-			// throw 0;
 		}
 		
 		template <class datatype>
@@ -763,7 +1116,7 @@ namespace two_d
 				}
 				
 				utils::p_block_banded_solve (id, np, m + 2 - ntop - nbot, 2, 1, &matrix [0], &ipiv [0], &data_temp [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn);
-				throw 0;
+				// throw 0;
 				
 				
 				for (int i = 2; i < ldn; ++i) {

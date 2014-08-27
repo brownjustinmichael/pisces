@@ -92,10 +92,10 @@ int main (int argc, char *argv[])
 	try {
 		id = process_messenger.get_id ();
 		n_elements = process_messenger.get_np ();
-		
+
 		log_config::configure (&argc, &argv, id, "process_%d.log");
 		std::string config_filename;
-		
+
 		if (argc <= 1) {
 			config_filename = "../input/config.yaml";
 		} else {
@@ -106,84 +106,84 @@ int main (int argc, char *argv[])
 		if (!config ["time.steps"].IsDefined ()) config ["time.steps"] = 1;
 		if (!config ["grid.x.points"].IsDefined ()) config ["grid.x.points"] = 64;
 		if (!config ["grid.z.points"].IsDefined ()) config ["grid.z.points"] = 64;
-			
+
 		omp_set_num_threads (config.get <int> ("parallel.maxthreads"));
-		
+
 		int m = config.get <int> ("grid.z.points") / n_elements + 1;
 		m += m % 2;
-		
+
 		std::vector <double> positions (n_elements + 1);
 		for (int i = 0; i < n_elements + 1; ++i) {
 			positions [i] = -config.get <double> ("grid.z.width") / 2.0 + config.get <double> ("grid.z.width") / n_elements * i;
 		}
-		
+
 		int name = id;
-		
+
 		int n = config.get <int> ("grid.x.points");
-		
+
 		bases::axis horizontal_axis (n, -config.get <double> ("grid.x.width") / 2.0, config.get <double> ("grid.x.width") / 2.0);
 		bases::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
-		
+
 		// one_d::cosine::advection_diffusion_element <double> element (&vertical_axis, name, config, &process_messenger, 0x00);
 		std::shared_ptr <bases::element <double>> element (new two_d::fourier::chebyshev::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, &process_messenger, 0x00));
-		
+
 		TRACE ("Element constructed.");
-		
+
 		if (config ["input.file"].IsDefined ()) {
 			std::string file_format = "../input/" + config.get <std::string> ("input.file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 			io::formatted_input <io::formats::two_d::netcdf> input_stream (buffer, n, m, 1, 0, config.get <bool> ("input.full") ? n_elements * m : 0, 0, 0, config.get <bool> ("input.full") ? id * m : 0);
-		
+
 			element->setup (&input_stream);
 		}
-		
+
 		// Set up output
 		std::shared_ptr <io::output> normal_stream;
 		if (config ["output.file"].IsDefined ()) {
 			std::string file_format = "../output/" + config.get <std::string> ("output.file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-		
+
 			normal_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (buffer, config.get <int> ("output.every"), n, m, 1, 0, config.get <bool> ("output.full") ? n_elements * m : 0, 0, 0, config.get <bool> ("output.full") ? id * m : 0));
 			element->setup_output (normal_stream, normal_output);
-				
+
 		}
-		
+
 		std::shared_ptr <io::output> transform_stream;
 		if (config ["output.transform_file"].IsDefined ()) {
 			std::string file_format = "../output/" + config.get <std::string> ("output.transform_file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-		
+
 			transform_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (buffer, config.get <int> ("output.every"), n, m, 1, 0, config.get <bool> ("output.full") ? n_elements * m : 0, 0, 0, config.get <bool> ("output.full") ? id * m : 0));
 			element->setup_output (transform_stream, transform_output);
 		}
-		
+
 		std::shared_ptr <io::output> stat_stream;
 		if (config ["output.stat.file"].IsDefined ()) {
 			std::string file_format = "../output/" + config.get <std::string> ("output.stat.file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-		
+
 			stat_stream.reset (new io::appender_output <io::formats::ascii> (buffer, config.get <int> ("output.stat.every"), n, m));
 			element->setup_stat (stat_stream);
 		}
-		
+
 		/*
 			TODO Setting up the streams should be more convenient
 		*/
-		
+
 		/*
 			TODO Because the output files are not within the element anymore, they become useless once the element is destroyed. Ponder this.
 		*/
-			
+
 		clock_t cbegin, cend;
 		std::chrono::time_point <std::chrono::system_clock> begin, end;
-		
+
 		cbegin = clock ();
 		begin = std::chrono::system_clock::now ();
-		
+
 		int n_steps = 0;
 		while (n_steps < config.get <int> ("time.steps")) {
 			if (config.get <int> ("grid.rezone.check_every") > 0) {
@@ -207,19 +207,18 @@ int main (int argc, char *argv[])
 			}
 			element->run (n_steps, config.get <int> ("time.steps"), config.get <int> ("grid.rezone.check_every"));
 		}
-		
-		
+
 		cend = clock ();
 		end = std::chrono::system_clock::now ();
-			
+
 		std::chrono::duration <double> eb = end - begin;
-			
+
 		INFO ("Main complete. CPU Time: " << ((double) (cend - cbegin))/CLOCKS_PER_SEC << " Wall Time: " << (double) eb.count () << " Efficiency: " << (((double) (cend - cbegin))/CLOCKS_PER_SEC / (double) eb.count () / omp_get_max_threads () * 100.) << "%");
 	} catch (std::exception &except) {
 		FATAL ("Fatal error occurred. Check log.");
 		FATAL (except.what ());
 		return 1;
-		
+
 		/*
 			TODO Last check all should be somewhere not defined by the user
 		*/
@@ -227,7 +226,7 @@ int main (int argc, char *argv[])
 		FATAL ("Fatal error occurred. Check log.");
 		FATAL (except);
 		return 1;
-		
+
 		/*
 			TODO Last check all should be somewhere not defined by the user
 		*/
