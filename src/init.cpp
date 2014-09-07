@@ -21,17 +21,15 @@ int main (int argc, char *argv[])
 {
 	try {
 		int id = 0, n_elements = 1;
-
+	
 		// Initialize messenger
 		utils::messenger process_messenger (&argc, &argv);
-		
-		(&id) [200] = 4; 
-
+	
 		id = process_messenger.get_id ();
 		n_elements = process_messenger.get_np ();
-
+	
 		log_config::configure (&argc, &argv, id, "init_%d.log");
-
+	
 		std::string config_filename;
 
 		if (argc <= 1) {

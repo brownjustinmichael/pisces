@@ -584,8 +584,6 @@ namespace two_d
 		data_z (i_data_z),
 		grid_n (i_grid_n),
 		grid_m (i_grid_m),
-		pos_n (&i_grid_n [0]),
-		pos_m (&i_grid_m [0]),
 		excess_0 (grid_m.get_excess_0 ()),
 		excess_n (grid_m.get_excess_n ()),
 		messenger_ptr (i_messenger_ptr) {
@@ -641,7 +639,6 @@ namespace two_d
 		grid_n (*(i_solver.grid_ptr (0))),
 		grid_m (*(i_solver.grid_ptr (1))),
 		pos_n (&grid_n [0]),
-		pos_m (&grid_m [0]),
 		excess_0 (grid_m.get_excess_0 ()),
 		excess_n (grid_m.get_excess_n ()),
 		messenger_ptr (i_messenger_ptr) {
@@ -662,23 +659,35 @@ namespace two_d
 
 			id = messenger_ptr->get_id ();
 			np = messenger_ptr->get_np ();
-
+			
+			positions.resize (m + 6);
+			pos_m = &positions [3];
+			
+			for (int j = excess_0; j < m - excess_n; ++j) {
+				pos_m [j] = grid_m [j];
+			}
+			
 			ntop = 0;
 			nbot = 0;
+			DEBUG ("1")
 			if (id != 0) {
 				ntop = 1;
-			// 	messenger_ptr->send (1, &pos_m [excess_0], id - 1, 0);
+				messenger_ptr->send (3, &pos_m [excess_0 + 1], id - 1, 0);
 			}
 			if (id != np - 1) {
 				nbot = 2;
-			// 	messenger_ptr->recv (1, &ex_pos_m, id + 1, 0);
-			// 	messenger_ptr->send (1, &pos_m [m - 2 - excess_n], id + 1, 1);
+				messenger_ptr->recv (3, &pos_m [m - excess_n], id + 1, 0);
+				messenger_ptr->send (3, &pos_m [m - 4 - excess_n], id + 1, 1);
+			} else {
+				pos_m [m] = pos_m [m - 1] + (pos_m [m - 1] - pos_m [m - 2]);
 			}
-			// if (id != 0) {
-			// 	messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
-			// }
-			DEBUG (m + 2 + 2 + 1);
-			matrix.resize ((2 * 2 + 1 + 1) * (m + 2 + 2 + 1) * ldn);
+			if (id != 0) {
+				messenger_ptr->recv (3, &pos_m [excess_0 - 3], id - 1, 1);
+			} else {
+				pos_m [-1] = pos_m [0] - (pos_m [1] - pos_m [0]);
+			}
+			
+			matrix.resize ((6) * (m + 2 + 2 + 1) * ldn);
 			bufferl.resize (np * (m + 2) * 2 * ldn);
 			bufferr.resize (np * (m + 2) * 1 * ldn);
 
@@ -692,78 +701,67 @@ namespace two_d
 			TRACE ("Factorizing laplace solver...");
 
 			double scalar = 4.0 * std::acos (-1.0) * std::acos (-1.0) / (pos_n [n - 1] - pos_n [0]) / (pos_n [n - 1] - pos_n [0]);
-			std::vector <datatype> positions (m + 2);
-			datatype *matrix_ptr, *new_pos = &positions [1];
-
-			new_pos [-1] = 2.0 * pos_m [0] - (pos_m [0] + pos_m [1]) / 2.0;
-			for (int j = 0; j < m - 1; ++j) {
+			std::vector <datatype> positions (m + 2 + 6);
+			datatype *matrix_ptr, *new_pos = &positions [3];
+	
+			for (int j = -3; j < m + 3; ++j) {
 				new_pos [j] = (pos_m [j] + pos_m [j + 1]) / 2.0;
 			}
-			new_pos [m - 1] = 2.0 * pos_m [m - 1] - (pos_m [m - 1] + pos_m [m - 2]) / 2.0;
-			new_pos [m] = pos_m [m - 1] + (pos_m [m - 1] - new_pos [m - 3]);
+			if (id == 0) {
+				new_pos [-1] = 2.0 * pos_m [0] - (pos_m [0] + pos_m [1]) / 2.0;
+			}
+			if (id == np - 1) {
+				new_pos [m - 1 - excess_n] = 2.0 * pos_m [m - 1 - excess_n] - (pos_m [m - 1 - excess_n] + pos_m [m - 2 - excess_n]) / 2.0;
+				new_pos [m - excess_n] = pos_m [m - 1 - excess_n] + (pos_m [m - 1 - excess_n] - new_pos [m - 3 - excess_n]);
+			}
 
 			for (int i = 0; i < ldn; ++i) {
-				DEBUG (m + 2 + 3);
-				matrix_ptr = &matrix [(i) * (m + 2 + 3) * (2 * 2 + 1 + 1) + 2 + 2 * 6];
-				matrix_ptr [1] = 1.0;
-				matrix_ptr [6] = -1.0;
+				matrix_ptr = &matrix [(i) * (m + 2 + 3) * (6) + 2 + 2 * 6];
+				if (id == 0) {
+					matrix_ptr [1 + excess_0 * 6] = 1.0;
+					matrix_ptr [6 + excess_0 * 6] = -1.0;
 
-				matrix_ptr [2] = 1.0 / (new_pos [0] - new_pos [-1]) / (pos_m [1] - pos_m [0]);
-				matrix_ptr [6 + 1] = -1.0 / (new_pos [1] - new_pos [0]) / (pos_m [1] - pos_m [0]) - 1.0 / (new_pos [0] - new_pos [-1]) / (pos_m [1] - pos_m [0]) - scalar * (i / 2) * (i / 2);
-				matrix_ptr [12] = 1.0 / (new_pos [1] - new_pos [0]) / (pos_m [1] - pos_m [0]);
-				for (int j = 1; j < m - 1; ++j) {
+					matrix_ptr [2 + excess_0 * 6] = 1.0 / (new_pos [0 + excess_0] - new_pos [-1 + excess_0]) / (pos_m [1 + excess_0] - pos_m [0 + excess_0]);
+					matrix_ptr [6 + 1 + excess_0 * 6] = -1.0 / (new_pos [1 + excess_0] - new_pos [0 + excess_0]) / (pos_m [1 + excess_0] - pos_m [0 + excess_0]) - 1.0 / (new_pos [0 + excess_0] - new_pos [-1 + excess_0]) / (pos_m [1 + excess_0] - pos_m [0 + excess_0]) - scalar * (i / 2) * (i / 2);
+					matrix_ptr [12 + excess_0 * 6] = 1.0 / (new_pos [1 + excess_0] - new_pos [0 + excess_0]) / (pos_m [1 + excess_0] - pos_m [0 + excess_0]);
+					DEBUG (pos_m [0]);
+				}
+				for (int j = id == 0 ? 1 : excess_0; j < ((id == np - 1) ? m : (m - 1 - excess_n)); ++j) {
 					matrix_ptr [(j + 1 - 2) * 6 + 3] = 1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (pos_m [j + 1] - pos_m [j - 1]);
 					matrix_ptr [(j + 1 - 1) * 6 + 2] = -1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (pos_m [j + 1] - pos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
 					matrix_ptr [(j + 1) * 6 + 1] = -1.0 / (new_pos [j + 1] - new_pos [j]) / (pos_m [j + 1] - pos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
 					matrix_ptr [(j + 1 + 1) * 6] = 1.0 / (new_pos [j + 1] - new_pos [j]) / (pos_m [j + 1] - pos_m [j - 1]);
+					DEBUG (new_pos [j + 1] << " " << new_pos [j] << " " << pos_m [j + 1] << " " << pos_m [j] << " " << pos_m [j - 1]);
 				}
-
-				// matrix_ptr [(m) * 6 + 1] = 1.0 / (new_pos [m - 1] - new_pos [m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
-				// matrix_ptr [(m - 1) * 6 + 2] = -1.0 / (new_pos [m - 2] - new_pos [m - 3]) / (pos_m [m - 1] - pos_m [m - 2]) - 1.0 / (new_pos [m - 1] - new_pos [m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) - scalar * (i / 2) * (i / 2);
-				// matrix_ptr [(m - 2) * 6 + 3] = 1.0 / (new_pos [m - 2] - new_pos [m - 3]) / (pos_m [m - 1] - pos_m [m - 2]);
-
-				matrix_ptr [(m - 1 + 1 - 2) * 6 + 3] = 1.0 / (new_pos [m - 1 - 1] - new_pos [m - 1 - 2]) / 2.0 / (pos_m [m - 1] - pos_m [m - 2]);
-				matrix_ptr [(m - 1 + 1 - 1) * 6 + 2] = -1.0 / (new_pos [m - 1 - 1] - new_pos [m - 1 - 2]) / 2.0 / (pos_m [m - 1] - pos_m [m - 2]) - scalar * (i / 2) * (i / 2) / 2.0;
-				matrix_ptr [(m - 1 + 1) * 6 + 1] = -1.0 / (new_pos [m - 1 + 1] - new_pos [m - 1]) / 2.0 / (pos_m [m - 1] - pos_m [m - 2]) - scalar * (i / 2) * (i / 2) / 2.0;
-				matrix_ptr [(m - 1 + 1 + 1) * 6] = 1.0 / (new_pos [m - 1 + 1] - new_pos [m - 1]) / 2.0 / (pos_m [m - 1] - pos_m [m - 2]);
-
-				matrix_ptr [(m - 1) * 6 + 3] = -1.0;
-				matrix_ptr [(m) * 6 + 2] = 1.0;
-				matrix_ptr [(m + 1) * 6 + 1] = 0.0e-10;
-
-				// matrix_ptr [(m - 2) * 6 + 3] = 1.0e-10;
-				// matrix_ptr [(m - 1) * 6 + 2] = -1.0;
-				// matrix_ptr [(m) * 6 + 1] = 1.0;
-
-				DEBUG (matrix_ptr + ntop * 6);
-				for (int k = 0; k < 4; ++k) {
-					for (int j = 0; j < m + 2; ++j) {
-						debug << matrix_ptr [(j) * 6 + k] << " ";
+				if (id == np - 1) {
+					matrix_ptr [(m - 1 - excess_n) * 6 + 3] = -1.0;
+					matrix_ptr [(m - excess_n) * 6 + 2] = 1.0;
+					matrix_ptr [(m + 1 - excess_n) * 6 + 1] = 0.0e-10;
+					
+					DEBUG (pos_m [m - 1 - excess_n])
+				}
+				DEBUG (exx_pos_m);
+				DEBUG (exxx_pos_m);
+				
+				for (int j = -2; j < m + 2; ++j) {
+					for (int k = 0; k < 6; ++k) {
+						debug << matrix_ptr [j * 6 + k] << " ";
 					}
 					DEBUG (debug.str ());
 					debug.str ("");
 				}
-
-				// utils::matrix_banded_factorize (m + 2, m + 2, 2, 1, matrix_ptr - 2, &ipiv [(m + 2) * i], &info, 2 * 2 + 1 + 1);
-
-				// for (int k = 0; k < 6; ++k) {
-				// 	for (int j = 0; j < m + 2; ++j) {
-				// 		debug << matrix [i * (m + 2) * 6 + j * 6 + k] << " ";
-				// 	}
-				// 	DEBUG ("MID " <<  debug.str ());
-				// 	debug.str ("");
-				// }
 			}
-			DEBUG (ldn);
-
-			DEBUG (&matrix [0]);
-			DEBUG (&ipiv [0]);
-			DEBUG (&x [0]);
-			DEBUG (&xipiv [0]);
-			DEBUG (&bufferr [0]);
-			DEBUG (&bufferl [0]);
-
-			utils::p_block_banded_factorize (id, np, m + 2 - ntop - nbot, 2, 1, &matrix [0], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn);
+			
+			for (int j = 0; j < m + 2 - ntop - nbot - excess_0 - excess_n + 2 + 1; ++j) {
+				for (int k = 0; k < 6; ++k) {
+					debug << matrix [j * 6 + k + excess_0 * 6] << " ";
+				}
+				DEBUG (debug.str ());
+				debug.str ("");
+			}
+			// throw 0;
+					
+			utils::p_block_banded_factorize (id, np, m + 1 - (ntop == 0 ? -1 : excess_0) - (excess_n == 0 ? 0 : excess_n + 1) - ntop - nbot, 2, 1, &matrix [excess_0 * 6], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn, 6, m + 2 + 3);
 			// throw 0;
 		}
 
@@ -792,46 +790,18 @@ namespace two_d
 						data_ptr [i * (m + 2) + j] = -scalar * (i / 2) * data_x [(i + 1) * m + j];
 						data_ptr [(i + 1) * (m + 2) + j] = scalar * (i / 2) * data_x [i * m + j];
 					}
-					// data_ptr [i * (m + 2) + m - 1] = -scalar * (i / 2) * data_x [(i + 1) * m + m - 1];
-					// data_ptr [(i + 1) * (m + 2) + m - 1] = scalar * (i / 2) * data_x [i * m + m - 1];
 				}
 
 				for (int i = 2; i < ldn; ++i) {
 					data_ptr [i * (m + 2) - 1] = 0.0;
 					data_ptr [i * (m + 2)] += (data_z [i * m + 1] - data_z [i * m]) / (pos_m [1] - pos_m [0]);
-					for (int j = 1; j < m - 1; ++j) {
+					for (int j = 1; j < m; ++j) {
 						data_ptr [i * (m + 2) + j] += (data_z [i * m + j + 1] - data_z [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
 					}
-					// data_ptr [i * (m + 1)] += (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
-					// data_ptr [i * (m + 1) + m - 1] = 0.0;
-					data_ptr [i * (m + 2) + m - 1] += (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
 					data_ptr [i * (m + 2) + m] = 0.0;
-
-					// for (int j = -1; j < m + 1; ++j) {
-						// DEBUG ("RHS " << i * (m + 2) + j << " " << data_ptr [i * (m + 2) + j]);
-					// }
-
-					DEBUG ("" << m + 2 << " " << &matrix [i * (m + 2) * (2 * 2 + 1 + 1)] << " " << &ipiv [i * (m + 2)] << " " << &data_temp [i * (m + 2)]);
-					// utils::matrix_banded_solve (m + 2, 2, 1, &matrix [i * (m + 2) * (2 * 2 + 1 + 1)], &ipiv [i * (m + 2)], &data_temp [i * (m + 2)], &info, 1, 2 * 2 + 1 + 1);
-					//
-					// for (int j = -1; j < m + 1; ++j) {
-					// 	// DEBUG ("DONE " << data_ptr [i * (m + 2) + j]);
-					// }
-					//
-					// for (int j = 0; j < m; ++j) {
-					// 	data [i * m + j] = (data_temp [i * (m + 2) + j] + data_temp [i * (m + 2) + j + 1]) / 2.0;
-					// }
 				}
 
-				DEBUG (&matrix [0]);
-				DEBUG (&ipiv [0]);
-				DEBUG (&data_temp [0]);
-				DEBUG (&x [0]);
-				DEBUG (&xipiv [0]);
-				DEBUG (&bufferr [0]);
-				DEBUG (&bufferl [0]);
-
-				utils::p_block_banded_solve (id, np, m + 2 - ntop - nbot, 2, 1, &matrix [0], &ipiv [0], &data_temp [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn);
+				utils::p_block_banded_solve (id, np, m + 1 - (ntop == 0 ? -1 : excess_0) - (excess_n == 0 ? 0 : excess_n + 1) - ntop - nbot, 2, 1, &matrix [0], &ipiv [0], &data_temp [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn, 6, m + 2 + 3, m + 2);
 				// throw 0;
 
 
@@ -842,9 +812,9 @@ namespace two_d
 				}
 
 
-				for (int j = 0; j < m; ++j) {
+				for (int j = 0; j < m + 2; ++j) {
 					for (int i = 0; i < ldn; ++i) {
-						debug << data_temp [i * (m + 1) + j] << " ";
+						debug << data_temp [i * (m + 2) + j] << " ";
 					}
 					DEBUG (debug.str ());
 					debug.str ("");
@@ -856,9 +826,6 @@ namespace two_d
 					out_z [i] = -data_z [i * m + m - 2] - (data_ptr [i * (m + 2) + m] - data_ptr [i * (m + 2) + m - 1]) / (new_pos [m] - new_pos [m - 1]);
 					for (int j = 1; j < m - 1; ++j) {
 						data_z [i * m + j] -= (data_ptr [i * (m + 2) + j] - data_ptr [i * (m + 2) + j - 1]) / (new_pos [j] - new_pos [j - 1]);
-					}
-					for (int j = 1; j < m - 1; ++j) {
-						// DEBUG (i << " " << j << " " << (data_z [i * m + j + 1] - data_z [i * m + j - 1])/(pos_m [j + 1] - pos_m [j - 1]));
 					}
 				}
 
@@ -873,47 +840,7 @@ namespace two_d
 					// data_x [(i + 1) * m + m - 1] = 0.0;
 				}
 
-
-				// for (int i = 2; i < ldn; i += 2) {
-				// 	for (int j = 0; j < m; ++j) {
-				// 		data_ptr [i * (m + 2) + j] = -scalar * (i / 2) * data_x [(i + 1) * m + j];
-				// 		data_ptr [(i + 1) * (m + 2) + j] = scalar * (i / 2) * data_x [i * m + j];
-				// 	}
-				// 	data_ptr [i * (m + 2) + m - 1] = -scalar * (i / 2) * data_x [(i + 1) * m + m - 1];
-				// 	data_ptr [(i + 1) * (m + 2) + m - 1] = scalar * (i / 2) * data_x [i * m + m - 1];
-				// }
-
-				// for (int i = 2; i < ldn; ++i) {
-				// 	data_ptr [i * (m + 2) - 1] = 0.0;
-				// 	data_ptr [i * (m + 2)] += (data_z [i * m + 1] - data_z [i * m]) / (pos_m [1] - pos_m [0]);
-				// 	for (int j = 1; j < m - 1; ++j) {
-				// 		data_ptr [i * (m + 2) + j] += (data_z [i * m + j + 1] - data_z [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
-				// 	}
-				// 	// data_ptr [i * (m + 1)] += (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
-				// 	// data_ptr [i * (m + 1) + m - 1] = 0.0;
-				// 	data_ptr [i * (m + 2) + m - 1] += (out_z [i] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / 2.0;
-				// 	data_ptr [i * (m + 2) + m] = 0.0;
-				//
-				// 	for (int j = -1; j < m + 1; ++j) {
-				// 		DEBUG ("RHS " << i * (m + 2) + j << " " << data_ptr [i * (m + 2) + j]);
-				// 	}
-				// }
-
-
-				// for (int i = 2; i < ldn; ++i) {
-				// 	for (int j = 2; j < m - 2; ++j) {
-				// 		data [i * m + j] = ((data_ptr [i * (m + 2) + j + 1] - data_ptr [i * (m + 2) + j]) / (new_pos [j + 1] - new_pos [j]) - (data_ptr [i * (m + 2) + j - 1] - data_ptr [i * (m + 2) + j - 2]) / (new_pos [j - 1] - new_pos [j - 2])) / (pos_m [j + 1] - pos_m [j - 1]);
-				// 		data [i * m + j] -= scalar * scalar * (i / 2) * (i / 2) * (data_ptr [i * (m + 2) + j] + data_ptr [i * (m + 2) + j - 1]) / 2.0;
-				// 		DEBUG ("FINAL " << i * (m + 2) + j << " " << 1.0 / (new_pos [j + 1] - new_pos [j]) / (pos_m [j + 1] - pos_m [j - 1]) << " " << -1.0 / (new_pos [j + 1] - new_pos [j]) / (pos_m [j + 1] - pos_m [j - 1]) - scalar * scalar * (i / 2) * (i / 2) / 2.0 << " " <<  1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (pos_m [j + 1] - pos_m [j - 1]) << " "<< data [i * m + j]);
-				// 	}
-				// 	data [i * m + m - 1] = 1.0 / (new_pos [m - 1 + 1] - new_pos [m - 1]) / (pos_m [m - 1] - pos_m [m - 2]) / 2.0 * (data_ptr [i * (m + 2) + m - 1 + 1] + data_ptr [i * (m + 2) + m - 4]) + (-1.0 / (new_pos [m - 1 - 1] - new_pos [m - 1 - 2]) / 2.0 / (pos_m [m - 1] - pos_m [m - 2]) - scalar * scalar * (i / 2) * (i / 2) / 2.0) * (data_ptr [i * (m + 2) + m - 2] + data_ptr [i * (m + 2) + m - 3]);
-				// 	// data [i * m + m - 1] -= scalar * scalar * (i / 2) * (i / 2) * (data_ptr [i * (m + 2) + m - 1] + data_ptr [i * (m + 2) + m - 1 - 1]) / 2.0;
-				// 	DEBUG ("FINAL " << i * (m + 2) + m - 1 << " " << 1.0 / (new_pos [m - 1 + 1] - new_pos [m - 1]) / (pos_m [m - 1] - pos_m [m - 2]) / 2.0 << " " << -1.0 / (new_pos [m - 1 - 1] - new_pos [m - 1 - 2]) / 2.0 / (pos_m [m - 1] - pos_m [m - 2]) - scalar * scalar * (i / 2) * (i / 2) / 2.0 << " " << 1.0 / (new_pos [m - 1 + 1] - new_pos [m - 1]) / 2.0 / (pos_m [m - 1] - pos_m [m - 2]) << " " << data [i * m + m - 1]);
-				//
-				// }
-
 				utils::scale (2 * m, 0.0, data_z);
-				// utils::scale (m, 0.0, data_x + 9 * m);
 				utils::scale (2 * m, 0.0, data_x);
 
 				for (int j = 0; j < m; ++j) {
