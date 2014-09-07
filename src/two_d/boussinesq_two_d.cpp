@@ -59,7 +59,7 @@ namespace two_d
 					deriv_boundary_n = std::shared_ptr <bases::boundary <datatype>> (new fixed_deriv_boundary <datatype> (&*grids [0], &*grids [1], 0.0, true));
 				}
 				// deriv_boundary = boundary_0;
-				
+
 				/*
 					TODO Figure out how to more conveniently determine whether an edge effect is needed.
 				*/
@@ -74,13 +74,13 @@ namespace two_d
 
 				solvers [z_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new collocation_solver <datatype> (*solvers [z_velocity], messenger_ptr, timestep, boundary_0, boundary_n)),z_solver);
 				solvers [z_velocity]->add_solver (std::shared_ptr <bases::solver <datatype>> (new fourier_solver <datatype> (*solvers [z_velocity], timestep, boundary_0, boundary_n)), x_solver);
-			
+
 				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new vertical_diffusion <datatype> (*solvers [z_velocity], i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha"))), pre_plan);
 				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new horizontal_diffusion <datatype> (*solvers [z_velocity], i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha"))), mid_plan);
 				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new advection <datatype> (*solvers [z_velocity], i_params.get <datatype> ("velocity.advection"), ptr (x_velocity), ptr (z_velocity))), post_plan);
 				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new source <datatype> (*solvers [z_velocity], i_params.get <datatype> ("velocity.buoyancy.temperature"), ptr (temp))), mid_plan);
 				solvers [z_velocity]->add_plan (std::shared_ptr <bases::plan <datatype>> (new source <datatype> (*solvers [z_velocity], i_params.get <datatype> ("velocity.buoyancy.composition"), ptr (composition))), mid_plan);
-			
+
 				solvers [pressure]->add_solver (std::shared_ptr <bases::solver <datatype>> (new incompressible_corrector <datatype> (*solvers [pressure], *solvers [x_velocity], *solvers [z_velocity], messenger_ptr)));
 				solvers [pressure]->get_solver (x_solver)->add_dependency (z_velocity);
 				solvers [pressure]->get_solver (x_solver)->add_dependency (x_velocity);

@@ -397,12 +397,13 @@ namespace two_d
 			int m;
 			int ntop, nbot;
 			datatype *data, *data_x, *data_z;
-			datatype ex_pos_0, ex_pos_m;
+			datatype ex_pos_0, ex_pos_m, exx_pos_0, exx_pos_m, exxx_pos_0, exxx_pos_m;
 			int flags;
 			int *component_flags_x, *component_flags_z;
 			bases::grid <datatype> &grid_n;
 			bases::grid <datatype> &grid_m;
-			const datatype *pos_n, *pos_m;
+			const datatype *pos_n;
+			datatype *pos_m;
 			datatype *sub_ptr, *diag_ptr, *sup_ptr;
 			int excess_0, excess_n, id, np;
 			datatype *rhs_ptr;
@@ -411,7 +412,7 @@ namespace two_d
 			utils::messenger* messenger_ptr;
 			
 			std::vector <datatype> x, bufferl, bufferr;
-			std::vector <datatype> data_temp;
+			std::vector <datatype> data_temp, positions;
 			std::vector <datatype> sup, sub, diag, supsup, matrix; //!< A datatype vector to be used in lieu of data_out for non-updating steps
 			std::vector <int> ipiv, xipiv;
 		};
