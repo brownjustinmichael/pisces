@@ -23,6 +23,9 @@ int main (int argc, char *argv[])
 	utils::messenger mess (&argc, &argv);
 	log_config::configure (&argc, &argv, mess.get_id (), "process_%d.log");
 	std::string config_filename;
+	std::stringstream debug;
+	std::stringstream matrix_debug;
+	
 	
 	if (argc <= 1) {
 		config_filename = "../input/config.yaml";
@@ -36,119 +39,207 @@ int main (int argc, char *argv[])
 
 	int id = mess.get_id ();
 	int np = mess.get_np ();
-	int n = config.get <int> ("grid.z.points"), nrhs = config.get <int> ("grid.x.points"), ntop = 0, nbot = 0;
+	int n = 60, nrhs = 10, ntop = 0, nbot = 0;
+
+	int ku = 1, kl = 2;
 	if (id != 0) {
-		ntop = 1;
+		ntop = ku;
 	}
 	if (id != np - 1) {
-		nbot = 1;
+		nbot = kl;
 	}
-	int ku = 3, kl = 4;
-	int lda = ku + 2 * kl + 1;
-	int ldaa = n + ku + kl;
+	int lda = ku + 2 * kl + 1 + 4;
+	int ldaa = n + ku + kl + 8;
+	int ldb = ldaa + 10;
 
 	std::vector <double> matrix (lda * ldaa * nrhs, 0.0);
 	std::vector <double> matrixcopy (lda * ldaa * nrhs, 0.0);
+	std::vector <double> bufferl (kl * nrhs * n, 0.0), bufferr (ku * nrhs * n, 0.0);
 	std::vector <int> ipiv (n * nrhs, 0);
 
 	std::vector <double> x ((ku + kl) * (ku + kl) * 4 * np * np * nrhs, 0.0);
 	std::vector <int> xipiv (2 * (ku + kl) * np * nrhs, 0);
 
-	std::vector <double> b (n * nrhs, 0.0);
-	std::vector <double> bcopy (n * nrhs, 0.0);
+	std::vector <double> b (ldb * nrhs, 0.0);
+	std::vector <double> bcopy (ldb * nrhs, 0.0);
 
 	int info;
 
 	srand (1);
 	for (int i = 0; i < n; ++i) {
 		for (int j = 0; j < nrhs; ++j) {
-			sub [i * nrhs + j] = rand () % 100;
-			subcopy [i * nrhs + j] = sub [i * nrhs + j];
-			diag [i * nrhs + j] = rand () % 100;
-			diagcopy [i * nrhs + j] = diag [i * nrhs + j];
-			sup [i * nrhs + j] = rand () % 100;
-			supcopy [i * nrhs + j] = sup [i * nrhs + j];
-			b [i * nrhs + j] = rand () % 100;
-			bcopy [i * nrhs + j] = b [i * nrhs + j];
+			for (int k = kl; k < 2 * kl + ku + 1; ++k) {
+				matrix [j * lda * ldaa + (i + kl) * lda + k] = rand () % 100;
+				matrixcopy [j * lda * ldaa + (i + kl) * lda + k] = matrix [j * lda * ldaa + (i + kl) * lda + k];
+			}
+			b [j * ldb + i + kl] = rand () % 100;
+			bcopy [j * ldb + i + kl] = b [j * ldb + i + kl];
 		}
 	}
 	
-	for (int i = 0; i < n; ++i) {
+	if (id != 0) {
 		for (int j = 0; j < nrhs; ++j) {
-			DEBUG ("[" << id << "] " << subcopy [i] << " " << diagcopy [i] << " " << supcopy [i] << " = " << bcopy [i]);
+			for (int i = 0; i < kl; ++i) {
+				for (int k = 2 * kl + ku - i; k < 2 * kl + ku + 1; ++k) {
+					matrix [j * lda * ldaa + (i) * lda + k] = rand () % 100;
+					matrixcopy [j * lda * ldaa + (i) * lda + k] = matrix [j * lda * ldaa + i * lda + k];
+				}
+			}
+		}
+	}
+	for (int j = 0; j < nrhs; ++j) {
+		for (int i = kl; i < kl + ku; ++i) {
+			for (int k = kl; k < 2 * kl + ku - i; ++k) {
+				matrix [j * lda * ldaa + (i) * lda + k] = 0.0;
+				matrixcopy [j * lda * ldaa + (i) * lda + k] = matrix [j * lda * ldaa + i * lda + k];
+			}
+		}
+	}
+
+	if (id != np - 1) {
+		for (int j = 0; j < nrhs; ++j) {
+			for (int i = kl + n; i < kl + n + ku; ++i) {
+				for (int k = kl; k < 2 * kl + ku - i + n; ++k) {
+					matrix [j * lda * ldaa + (i) * lda + k] = rand () % 100;
+					matrixcopy [j * lda * ldaa + (i) * lda + k] = matrix [j * lda * ldaa + i * lda + k];
+				}
+			}
+		}
+	}
+	for (int j = 0; j < nrhs; ++j) {
+		for (int i = n; i < kl + n; ++i) {
+			for (int k = 2 * kl + ku - i + n; k < 2 * kl + ku + 1; ++k) {
+				matrix [j * lda * ldaa + (i) * lda + k] = 0.0;
+				matrixcopy [j * lda * ldaa + (i) * lda + k] = matrix [j * lda * ldaa + i * lda + k];
+			}
+		}
+	}
+
+	for (int j = 0; j < nrhs; ++j) {
+		for (int i = -kl; i < n + ku; ++i) {
+			for (int k = 0; k < lda; ++k) {
+				debug << matrix [j * lda * ldaa + (i + kl) * lda + k] << " ";
+			}
+			DEBUG ("[" << id << "] " << debug.str () << "= " << ((i >= 0 && i < n) ? b [j * ldb + i + kl] : 0));
+			debug.str ("");
 		}
 	}
 
 	try {
-		utils::p_block_tridiag_factorize (id, np, n - ntop - nbot, &sub [0], &diag [0], &sup [0], &supsup [0], &ipiv [0], &x [0], &xipiv [0], &info, nrhs);
-		// utils::p_block_tridiag_factorize (id, np, n - ntop - nbot, &sub [0], &diag [0], &sup [0], &supsup [0], &ipiv [0], &x [0], &xipiv [0], &info, 1);
+		utils::p_block_banded_factorize (id, np, n - ntop - nbot, kl, ku, &matrix [0], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, nrhs, lda, ldaa);
 
-		utils::p_block_tridiag_solve (id, np, n - ntop - nbot,  &sub [0], &diag [0], &sup [0], &supsup [0], &ipiv [0], &b [0], &x [0], &xipiv [0], &info, nrhs);
-		// utils::p_block_tridiag_solve (id, np, n - ntop - nbot,  &sub [0], &diag [0], &sup [0], &supsup [0], &ipiv [0], &b [0], &x [0], &xipiv [0], &info, 1, -1, -1, nrhs);
-		// utils::p_block_direct_tridiag_solve (id, np, n - ntop - nbot,  &sub [0], &diag [0], &sup [0], &supsup [0], &b [0], nrhs, n);
+		utils::p_block_banded_solve (id, np, n - ntop - nbot, kl, ku, &matrix [0], &ipiv [0], &b [kl], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, nrhs, lda, ldaa, ldb);
 	} catch (std::exception& except) {
 		std::cout << except.what () << '\n';
 	}
 
-	for (int i = 0; i < n; ++i) {
-		for (int j = 0; j < nrhs; ++j) {
-			DEBUG ("[" << id << "] " << subcopy [i] << " " << diagcopy [i] << " " << supcopy [i] << " = " << bcopy [i] << " => " << sub [i] << " " << diag [i] << " " << sup [i] << " = " << b [i] << " | ");
+	for (int j = 0; j < nrhs; ++j) {
+		for (int i = 0; i < n + ku + kl; ++i) {
+			for (int k = 0; k < lda; ++k) {
+				debug << matrix [j * lda * ldaa + i * lda + k] << " ";
+			}
+			DEBUG ("[" << id << "] " << debug.str ());
+			debug.str ("");
 		}
 	}
 
 	for (int j = 0; j < nrhs; ++j) {
-		bcopy [j * n] -= diagcopy [j * n] * b [j * n] + supcopy [j * n] * b [1 + j * n];
-		for (int i = 1; i < n - 1; ++i) {
-			bcopy [i + j * n] -= subcopy [i + j * n] * b [i - 1 + j * n] + diagcopy [i + j * n] * b [i + j * n] + supcopy [i + j * n] * b [i + 1 + j * n];
-		}
-		bcopy [n - 1 + j * n] -= subcopy [n - 1 + j * n] * b [n - 2 + j * n] + diagcopy [n - 1 + j * n] * b [n - 1 + j * n];
-	}
-	
-	std::vector <double> edge_0 (nrhs), edge_n (nrhs), redge_0 (nrhs), redge_n (nrhs);
-	
-	for (int i = 0; i < nrhs; ++i) {
-		edge_0 [i] = b [i * nrhs];
-		edge_n [i] = b [i * nrhs + n - 1];
-	}
-
-	if (id != 0) {
-		// mess.send (1, &b [0], id - 1, 0);
-		mess.send (nrhs, &edge_0 [0], id - 1, 0);
-	}
-	if (id != np - 1) {
-		mess.recv (nrhs, &redge_n [0], id + 1, 0);
-		// mess.recv (1, &below, id + 1, 0);
-		// bcopy [n - 1] -= supcopy [n - 1] * below;
-		for (int i = 0; i < nrhs; ++i) {
-			bcopy [i * nrhs + n - 1] -= supcopy [i * nrhs + n - 1] * redge_n [i];
-		}
-	}
-	if (id != np - 1) {
-		// mess.send (1, &b [n - 1], id + 1, 1);
-		mess.send (nrhs, &edge_n [0], id + 1, 1);
-	}
-	if (id != 0) {
-		mess.recv (nrhs, &redge_0 [0], id - 1, 1);
-		// mess.recv (1, &above, id - 1, 1);
-		// bcopy [0] -= subcopy [0] * above;
-		for (int i = 0; i < nrhs; ++i) {
-			bcopy [i * nrhs] -= subcopy [i * nrhs] * redge_0 [i];
-		}
-	}
-
-	std::stringstream sub_debug, diag_debug, sup_debug, debug;
-	for (int j = 0; j < nrhs; ++j) {
+		DEBUG ("Mid " << j);
 		for (int i = 0; i < n; ++i) {
-			sub_debug << subcopy [i * nrhs + j] << " ";
-			diag_debug << diagcopy [i * nrhs + j] << " ";
-			sup_debug << supcopy [i * nrhs + j] << " ";
-			debug << bcopy [i * nrhs + j] << " ";
+			for (int k = 0; k < 2 * kl + ku + 1; ++k) {
+				matrix_debug << matrixcopy [j * lda * ldaa + (i + kl) * lda + k] << " ";
+			}
+			debug << bcopy [j * ldb + i + kl] << " ";
+			DEBUG (matrix_debug.str () << " = " << debug.str ());
+			matrix_debug.str ("");
+			debug.str ("");
 		}
-		DEBUG (sub_debug.str () << " | " << diag_debug.str () << " | " << sup_debug.str () << " = " << debug.str ());
-		sub_debug.str ("");
-		diag_debug.str ("");
-		sup_debug.str ("");
-		debug.str ("");
+	}
+
+	std::vector <double> edge_0 (nrhs * ku), edge_n (nrhs * kl), redge_0 (nrhs * kl), redge_n (nrhs * ku);
+
+	for (int j = 0; j < nrhs; ++j) {
+		DEBUG ("BEFORE SEND " << j);
+		for (int i = 0; i < kl + ku + n; ++i) {
+			for (int k = 0; k < 2 * kl + ku + 1; ++k) {
+				matrix_debug << matrixcopy [j * lda * ldaa + (i) * lda + k] << " ";
+			}
+			debug << b [j * ldb + i] << " ";
+			DEBUG (matrix_debug.str () << " = " << debug.str ());
+			matrix_debug.str ("");
+			debug.str ("");
+		}
+	}
+
+	for (int i = 0; i < nrhs; ++i) {
+		for (int j = 0; j < ku; ++j) {
+			edge_0 [i * ku + j] = b [i * ldb + j + kl];
+		}
+		for (int j = 0; j < kl; ++j) {
+			edge_n [i * kl + j] = b [i * ldb + n + j];
+		}
+	}
+
+	if (id != 0) {
+		mess.send (nrhs * ku, &edge_0 [0], id - 1, 0);
+	}
+	if (id != np - 1) {
+		mess.recv (nrhs * ku, &redge_n [0], id + 1, 0);
+	}
+	if (id != np - 1) {
+		mess.send (nrhs * kl, &edge_n [0], id + 1, 1);
+	}
+	if (id != 0) {
+		mess.recv (nrhs * kl, &redge_0 [0], id - 1, 1);
+	}
+
+	for (int i = 0; i < nrhs; ++i) {
+		for (int j = 0; j < kl; ++j) {
+			b [i * ldb + j] = redge_0 [i * kl + j];
+		}
+		for (int j = 0; j < kl; ++j) {
+			b [i * ldb + n + kl + j] = redge_n [i * ku + j];
+		}
+	}
+	
+	for (int j = 0; j < nrhs; ++j) {
+		DEBUG ("AFTER RECV " << j);
+		for (int i = 0; i < kl + ku + n; ++i) {
+			for (int k = 0; k < 2 * kl + ku + 1; ++k) {
+				matrix_debug << matrixcopy [j * lda * ldaa + (i) * lda + k] << " ";
+			}
+			debug << b [j * ldb + i] << " ";
+			DEBUG (matrix_debug.str () << " = " << debug.str () << "=> " << bcopy [j * ldb + i]);
+			matrix_debug.str ("");
+			debug.str ("");
+		}
+	}
+
+	for (int j = 0; j < nrhs; ++j) {
+		for (int i = 0; i < n + kl + ku; ++i) {
+			for (int k = -ku; k < kl + 1; ++k) {
+				if (i + k >= 0 && i + k < n + kl + ku) {
+					DEBUG (k << " " << i << " " << j * ldb + k + i << " " << bcopy [j * ldb + i + k] << " " << matrixcopy [j * lda * ldaa + (i) * lda + k + kl + ku] << " " << b [j * ldb + i]);
+					bcopy [j * ldb + k + i] -= matrixcopy [j * lda * ldaa + (i) * lda + k + kl + ku] * b [j * ldb + i];
+				}
+			}
+		}
+	}
+
+	for (int j = 0; j < nrhs; ++j) {
+		DEBUG ("END " << j);
+		for (int i = 0; i < kl + ku + n; ++i) {
+			for (int k = 0; k < 2 * kl + ku + 1; ++k) {
+				matrix_debug << matrix [j * lda * ldaa + (i) * lda + k] << " ";
+			}
+			debug << bcopy [j * ldb + i] << " ";
+			if (bcopy [j * ldb + i] > 1.0e-8) {
+				ERROR ("FAILED TO ACHIEVE TOLERANCE");
+			}
+			DEBUG (matrix_debug.str () << " = " << debug.str ());
+			matrix_debug.str ("");
+			debug.str ("");
+		}
 	}
 	return 0;
 }

@@ -716,52 +716,46 @@ namespace two_d
 			}
 
 			for (int i = 0; i < ldn; ++i) {
-				matrix_ptr = &matrix [(i) * (m + 2 + 3) * (6) + 2 + 2 * 6];
+				DEBUG (ntop)
+				matrix_ptr = &matrix [(i) * (m + 2 + 3) * (6) + 2 + (2 + (ntop == 0 ? 1 : 0)) * 6];
 				if (id == 0) {
-					matrix_ptr [1 + excess_0 * 6] = 1.0;
-					matrix_ptr [6 + excess_0 * 6] = -1.0;
+					matrix_ptr [1 - 6] = 1.0;
+					matrix_ptr [6 - 6] = -1.0;
 
-					matrix_ptr [2 + excess_0 * 6] = 1.0 / (new_pos [0 + excess_0] - new_pos [-1 + excess_0]) / (pos_m [1 + excess_0] - pos_m [0 + excess_0]);
-					matrix_ptr [6 + 1 + excess_0 * 6] = -1.0 / (new_pos [1 + excess_0] - new_pos [0 + excess_0]) / (pos_m [1 + excess_0] - pos_m [0 + excess_0]) - 1.0 / (new_pos [0 + excess_0] - new_pos [-1 + excess_0]) / (pos_m [1 + excess_0] - pos_m [0 + excess_0]) - scalar * (i / 2) * (i / 2);
-					matrix_ptr [12 + excess_0 * 6] = 1.0 / (new_pos [1 + excess_0] - new_pos [0 + excess_0]) / (pos_m [1 + excess_0] - pos_m [0 + excess_0]);
+					matrix_ptr [2 - 6] = 1.0 / (new_pos [0 + excess_0] - new_pos [-1 + excess_0]) / (pos_m [1 + excess_0] - pos_m [0 + excess_0]);
+					matrix_ptr [6 + 1 - 6] = -1.0 / (new_pos [1 + excess_0] - new_pos [0 + excess_0]) / (pos_m [1 + excess_0] - pos_m [0 + excess_0]) - 1.0 / (new_pos [0 + excess_0] - new_pos [-1]) / (pos_m [1 + excess_0] - pos_m [0 + excess_0]) - scalar * (i / 2) * (i / 2);
+					matrix_ptr [12 - 6] = 1.0 / (new_pos [1 + excess_0] - new_pos [0 + excess_0]) / (pos_m [1 + excess_0] - pos_m [0 + excess_0]);
 					DEBUG (pos_m [0]);
 				}
 				for (int j = id == 0 ? 1 : excess_0; j < ((id == np - 1) ? m : (m - 1 - excess_n)); ++j) {
-					matrix_ptr [(j + 1 - 2) * 6 + 3] = 1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (pos_m [j + 1] - pos_m [j - 1]);
-					matrix_ptr [(j + 1 - 1) * 6 + 2] = -1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (pos_m [j + 1] - pos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
-					matrix_ptr [(j + 1) * 6 + 1] = -1.0 / (new_pos [j + 1] - new_pos [j]) / (pos_m [j + 1] - pos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
-					matrix_ptr [(j + 1 + 1) * 6] = 1.0 / (new_pos [j + 1] - new_pos [j]) / (pos_m [j + 1] - pos_m [j - 1]);
+					matrix_ptr [(j - excess_0 - 2) * 6 + 3] = 1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (pos_m [j + 1] - pos_m [j - 1]);
+					matrix_ptr [(j - excess_0 - 1) * 6 + 2] = -1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (pos_m [j + 1] - pos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
+					matrix_ptr [(j - excess_0) * 6 + 1] = -1.0 / (new_pos [j + 1] - new_pos [j]) / (pos_m [j + 1] - pos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
+					matrix_ptr [(j - excess_0 + 1) * 6] = 1.0 / (new_pos [j + 1] - new_pos [j]) / (pos_m [j + 1] - pos_m [j - 1]);
 					DEBUG (new_pos [j + 1] << " " << new_pos [j] << " " << pos_m [j + 1] << " " << pos_m [j] << " " << pos_m [j - 1]);
 				}
 				if (id == np - 1) {
-					matrix_ptr [(m - 1 - excess_n) * 6 + 3] = -1.0;
-					matrix_ptr [(m - excess_n) * 6 + 2] = 1.0;
-					matrix_ptr [(m + 1 - excess_n) * 6 + 1] = 0.0e-10;
+					matrix_ptr [(m - 1 - excess_n - excess_0) * 6 + 3 - (ntop == 0 ? 6 : 6)] = -1.0;
+					matrix_ptr [(m - excess_n - excess_0) * 6 + 2 - (ntop == 0 ? 6 : 6)] = 1.0;
+					matrix_ptr [(m + 1 - excess_n - excess_0) * 6 + 1 - (ntop == 0 ? 6 : 6)] = 1.0e-10;
 					
 					DEBUG (pos_m [m - 1 - excess_n])
 				}
 				DEBUG (exx_pos_m);
 				DEBUG (exxx_pos_m);
 				
-				for (int j = -2; j < m + 2; ++j) {
+				for (int j = 0; j < m + 5; ++j) {
 					for (int k = 0; k < 6; ++k) {
-						debug << matrix_ptr [j * 6 + k] << " ";
+						debug << matrix [i * (m + 5) * 6 + j * 6 + k] << " ";
 					}
 					DEBUG (debug.str ());
 					debug.str ("");
 				}
 			}
 			
-			for (int j = 0; j < m + 2 - ntop - nbot - excess_0 - excess_n + 2 + 1; ++j) {
-				for (int k = 0; k < 6; ++k) {
-					debug << matrix [j * 6 + k + excess_0 * 6] << " ";
-				}
-				DEBUG (debug.str ());
-				debug.str ("");
-			}
 			// throw 0;
 					
-			utils::p_block_banded_factorize (id, np, m + 1 - (ntop == 0 ? -1 : excess_0) - (excess_n == 0 ? 0 : excess_n + 1) - ntop - nbot, 2, 1, &matrix [excess_0 * 6], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn, 6, m + 2 + 3);
+			utils::p_block_banded_factorize (id, np, m + 1 - (ntop == 0 ? -1 : excess_0) - (nbot == 0 ? 0 : excess_n + 2) - ntop - nbot, 2, 1, &matrix [0], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn, 6, m + 2 + 3);
 			// throw 0;
 		}
 
