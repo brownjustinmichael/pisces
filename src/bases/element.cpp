@@ -83,7 +83,7 @@ namespace bases
 				solvers [*iter]->execute_plans (mid_plan);
 			}
 			, execution_time, execution_duration);
-
+			
 			TIME (
 			transform (forward_horizontal | no_write | no_read | read_before);
 			, transform_time, transform_duration);
