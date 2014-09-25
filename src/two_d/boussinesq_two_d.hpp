@@ -10,7 +10,7 @@
 #define BOUSSINESQ_TWO_D_HPP_OQ800X4X
 
 #include "element_two_d.hpp"
-#include "../utils/io.hpp"
+#include "io/io.hpp"
 
 
 namespace two_d

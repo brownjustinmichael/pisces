@@ -9,8 +9,8 @@
 #ifndef REZONE_CPP_UEW78T7Q
 #define REZONE_CPP_UEW78T7Q
 
-#include "io.hpp"
-#include "formats.hpp"
+#include "io/io.hpp"
+#include "io/formats.hpp"
 #include "interpolate.hpp"
 #include "../bases/grid.hpp"
 #include "utils.hpp"

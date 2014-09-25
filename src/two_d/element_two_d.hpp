@@ -15,8 +15,8 @@
 #include <sstream>
 #include "transform_two_d.hpp"
 #include "solver_two_d.hpp"
-#include "../utils/io.hpp"
-#include "../utils/formats.hpp"
+#include "io/io.hpp"
+#include "io/formats.hpp"
 #include "../utils/rezone.hpp"
 #include "../config.hpp"
 

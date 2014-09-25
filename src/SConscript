@@ -12,7 +12,9 @@ def directory (path, dirname):
         return ""
     else:
         return dirname [len (path) + 1:] + "/"
-        
+
+env.Append (CPPPATH = os.getcwd ())
+
 if include_mpi:
     env ["CXX"] = "mpicxx"
 

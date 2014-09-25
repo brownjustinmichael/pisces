@@ -18,7 +18,7 @@
 #include <memory>
 #include "plan.hpp"
 #include "solver.hpp"
-#include "../utils/io.hpp"
+#include "io/io.hpp"
 #include "grid.hpp"
 #include "transform.hpp"
 #include "../config.hpp"

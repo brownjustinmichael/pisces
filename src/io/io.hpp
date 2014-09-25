@@ -22,7 +22,6 @@
 #include "../config.hpp"
 #include <yaml-cpp/yaml.h>
 #include <netcdf>
-#include "utils.hpp"
 
 namespace io
 {	

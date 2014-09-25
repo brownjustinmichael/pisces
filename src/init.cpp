@@ -10,8 +10,8 @@
 #include "config.hpp"
 #include "two_d/plan_two_d.hpp"
 #include "bases/grid.hpp"
-#include "utils/io.hpp"
-#include "utils/formats.hpp"
+#include "io/io.hpp"
+#include "io/formats.hpp"
 #include <sstream>
 #include <iomanip>
 

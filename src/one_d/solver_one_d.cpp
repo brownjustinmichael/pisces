@@ -16,6 +16,7 @@
 #include "../utils/block_solver.hpp"
 #include "../utils/interpolate.hpp"
 #include "element_one_d.hpp"
+#include "utils/exceptions.hpp"
 
 namespace one_d
 {
