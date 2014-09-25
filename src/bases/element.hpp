@@ -375,7 +375,7 @@ namespace bases
 			TRACE ("Beginning solve...");
 			// Execute the solvers
 			for (iterator iter = begin (); iter != end (); iter++) {
-				// DEBUG ("Solving " << *iter);
+				DEBUG ("Solving " << *iter);
 				// solvers [*iter]->solve ();
 				
 				solve_recursive (*iter);

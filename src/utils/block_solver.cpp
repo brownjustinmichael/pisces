@@ -441,83 +441,46 @@ namespace utils
 		utils::scale (nrhs * kl * n, 0.0, bufferl);
 		utils::scale (nrhs * ku * n, 0.0, bufferr);
 
-		DEBUG (kl + ntop << " " << n)
 		for (int i = 0; i < nrhs; ++i) {
-			for (int j = 0; j < lda; ++j) {
-				for (int k = 0; k < n; ++k) {
-					debug << matrix [(i) * lda * ldaa + (kl + ntop + k) * lda + j] << " ";
+			for (int k = 0; k < 2 * kl + ku + 1; ++k) {
+				for (int j = 0; j < n; ++j) {
+					debug << matrix [i * lda * ldaa + (kl + ntop + j) * lda + k] << " ";
 				}
 				DEBUG (debug.str ());
 				debug.str ("");
 			}
-			DEBUG (matrix << " " << ipiv);
 			matrix_banded_factorize (n, n, kl, ku, matrix + (i) * lda * ldaa + (kl + ntop) * lda, ipiv + i * n, info, lda);
 		}
-		DEBUG ("MOSTLY DONE");
 
 #ifdef _MPI
 		if (id != 0) {
 			for (int i = 0; i < nrhs; ++i) {
 				for (int j = 0; j < kl + ku; ++j) {
 					for (int k = 0; k < std::min (ku, j + 1); ++k) {
-						DEBUG ("COPY " << j << " " << 2 * kl + ku + k - j << " " << matrix [i * ldaa * lda + j * lda + 2 * kl + ku + k - j]);
 						x [i * ldxx + j * ldx + k + kl] = matrix [i * ldaa * lda + j * lda + 2 * kl + ku + k - j];
 					}
 				}
 				for (int j = 0; j < kl; ++j) {
 					for (int k = 0; k < j + 1; ++k) {
 						bufferl [i * n * kl + j * n + k] = matrix [i * lda * ldaa + (j + ku) * lda + k + 2 * kl + ku - j];
-						DEBUG ("For buff " << bufferl [i * n * kl + j * n + k])
 					}
 				}
-
-				for (int k = 0; k < n; ++k) {
-					for (int j = 0; j < kl; ++j) {
-						debug << bufferl [i * n * kl + j * n + k] << " ";
-					}
-					DEBUG (debug.str ());
-					debug.str ("");
-				}
-
-				// for (int k = 0; k < 2 * (ku + kl); ++k) {
-				// 	for (int j = 0; j < 2 * (ku + kl); ++j) {
-				// 		debug << x [i * ldxx + j * ldx + k] << " ";
-				// 	}
-				// 	DEBUG (debug.str ());
-				// 	debug.str ("");
-				// }
 
 				matrix_banded_solve (n, kl, ku, matrix + i * lda * ldaa + (ntop + kl) * lda, ipiv + i * n, &bufferl [i * n * kl], info, kl);
 
-				for (int k = 0; k < n; ++k) {
-					for (int j = 0; j < kl; ++j) {
-						debug << bufferl [i * n * kl + j * n + k] << " ";
-					}
-					DEBUG ("LBUFF " << debug.str ());
-					debug.str ("");
-				}
 				for (int j = 0; j < kl; ++j) {
 					for (int k = 0; k < ku; ++k) {
 						for (int l = 0; l < k + 1; ++l) {
-							DEBUG (bufferl [i * n * kl + j * n + l + k] << " " << matrix [i * lda * ldaa + (k + kl + ntop + l) * lda + kl - l]);
 							x [i * ldxx + (j + ku) * ldx + k + kl] -= bufferl [i * n * kl + j * n + l + k] * matrix [i * lda * ldaa + (k + kl + ntop + l) * lda + kl - l];
 						}
 					}
 					if (id != np - 1) {
 						for (int k = 0; k < kl; ++k) {
 							for (int l = 0; l < kl - k; ++l) {
-								DEBUG (k << " " << l << " " << n << " " << ntop << " " << bufferl [i * n * kl + j * n + l + k + n - kl] << " " << matrix [i * ldaa * lda + (k + l + n + ntop) * lda + 2 * kl + ku - l]);
 								x [i * ldxx + (j + ku) * ldx + k + kl + ku] -= bufferl [i * n * kl + j * n + l + k + n - kl] * matrix [i * ldaa * lda + (k + l + n + ntop) * lda + 2 * kl + ku - l];
 							}
 						}
 					}
-				}
-				for (int k = 0; k < 2 * (ku + kl); ++k) {
-					for (int j = 0; j < 2 * (ku + kl); ++j) {
-						debug << x [i * ldxx + j * ldx + k] << " ";
-					}
-					DEBUG (debug.str ());
-					debug.str ("");
 				}
 			}
 		}
@@ -527,41 +490,16 @@ namespace utils
 				for (int j = 0; j < ku + kl; ++j) {
 					for (int k = std::max (0, j - ku); k < kl; ++k) {
 						x [i * ldxx + (j + ku + kl) * ldx + ku + kl + k] = matrix [i * ldaa * lda + (j + n + ntop + kl) * lda + kl + ku + k - j];
-						DEBUG ("COPY " << j + n + ntop + kl << " " << kl + ku + k - j << " " << matrix [i * ldaa * lda + (j + n + ntop + kl) * lda + kl + ku + k - j] << " " << matrix [i * ldaa * lda + (j + n + ntop + kl - 1) * lda + kl + ku + k - j] << " " << matrix [i * ldaa * lda + (j + n + ntop + kl) * lda + kl + ku + k - j - 1]);
 					}
 				}
 				for (int j = 0; j < ku; ++j) {
 					for (int k = -1; k >= -ku; --k) {
 						bufferr [i * n * ku + j * n + k + n] = matrix [i * lda * ldaa + (n + ntop + j + kl) * lda + k + kl + ku - j];
-						DEBUG ("For buff " << bufferr [i * n * ku + j * n + k + n]);
 					}
-				}
-
-				for (int k = 0; k < n; ++k) {
-					for (int j = 0; j < ku; ++j) {
-						debug << bufferr [i * n * ku + j * n + k] << " ";
-					}
-					DEBUG ("R " << debug.str ());
-					debug.str ("");
-				}
-
-				for (int k = 0; k < 2 * (ku + kl); ++k) {
-					for (int j = 0; j < 2 * (ku + kl); ++j) {
-						debug << x [i * ldxx + j * ldx + k] << " ";
-					}
-					DEBUG (debug.str ());
-					debug.str ("");
 				}
 
 				matrix_banded_solve (n, kl, ku, matrix + i * lda * ldaa + (ntop + kl) * lda, ipiv + i * n, &bufferr [i * n * ku], info, ku);
 
-				for (int k = 0; k < n; ++k) {
-					for (int j = 0; j < ku; ++j) {
-						debug << bufferr [i * n * ku + j * n + k] << " ";
-					}
-					DEBUG ("RBUFF " << debug.str ());
-					debug.str ("");
-				}
 				for (int j = 0; j < ku; ++j) {
 					if (id != 0) {
 						for (int k = 0; k < ku; ++k) {
@@ -571,24 +509,13 @@ namespace utils
 						}
 					}
 					for (int k = 0; k < kl; ++k) {
-						DEBUG (j << " " << k);
 						for (int l = 0; l < kl - k; ++l) {
-							DEBUG (l << " " << n << " " << ntop << " " << bufferr [i * n * ku + j * n + l + k + n - kl] << " " << matrix [i * lda * ldaa + (k + l + n + ntop) * lda + 2 * kl + ku - l]);
 							x [i * ldxx + (j + ku + kl) * ldx + k + kl + ku] -= bufferr [i * n * ku + j * n + l + k + n - kl] * matrix [i * ldaa * lda + (k + l + n + ntop) * lda + 2 * kl + ku - l];
 						}
 					}
 				}
-				for (int k = 0; k < 2 * (ku + kl); ++k) {
-					for (int j = 0; j < 2 * (ku + kl); ++j) {
-						debug << x [i * ldxx + j * ldx + k] << " ";
-					}
-					DEBUG (debug.str ());
-					debug.str ("");
-				}
 			}
 		}
-
-		DEBUG ("GATHER");
 
 		if (id == 0) {
 			ldx = np * (2 * ku + 2 * kl);
@@ -597,14 +524,6 @@ namespace utils
 				MPI::COMM_WORLD.Gather (x + q * ldxx, 4 * (ku + kl) * (ku + kl), MPI::DOUBLE, &buffer [0], 4 * (ku + kl) * (ku + kl), MPI::DOUBLE, 0);
 
 				scale (ldx * ldx, 0.0, x + q * ldxx);
-
-				for (int i = 0; i < 2 * (kl + ku); ++i) {
-					for (int j = 0; j < 2 * (kl + ku) * np; ++j) {
-						debug << buffer [j * 2 * (kl + ku) + i] << " ";
-					}
-					DEBUG (debug.str ());
-					debug.str ("");
-				}
 
 				int bcur = 0, xcur = 0;
 				for (int i = 0; i < np - 1; ++i) {
@@ -622,23 +541,7 @@ namespace utils
 					}
 				}
 
-				for (int j = 0; j < (ku + kl) * np; ++j) {
-					for (int k = 0; k < (ku + kl) * np; ++k) {
-						debug << x [q * ldxx + k * ldx + j] << " ";
-					}
-					DEBUG (debug.str ());
-					debug.str ("");
-				}
-
 				matrix_factorize ((ku + kl) * (np - 1), (ku + kl) * (np - 1), x + q * ldxx + (kl + ku) * (ldx + 1), xipiv + q * ldx, info, ldx);
-				// for (int j = 0; j < (ku + kl) * np; ++j) {
-				// 	for (int k = 0; k < (ku + kl) * np; ++k) {
-				// 		debug << x [q * ldxx + k * ldx + j] << " ";
-				// 	}
-				// 	DEBUG ("F " << debug.str ());
-				// 	debug.str ("");
-				// }
-
 			}
 
 		} else {
@@ -647,15 +550,11 @@ namespace utils
 			}
 		}
 #endif
-
-		DEBUG ("All done");
 	}
 
 	void p_block_banded_solve (int id, int np, int n, int kl, int ku, double* matrix, int* ipiv, double* b, double *x, int *xipiv, double *bufferl, double *bufferr, int *info, int nrhs, int lda, int ldaa, int ldb) {
-		DEBUG ("BEGIN");
 		std::stringstream debug;
 		std::vector <double> y (2 * (ku + kl) * np * nrhs, 0.0);
-		DEBUG ("y len " << 2 * (ku + kl) * np * nrhs);
 		int ntop, nbot;
 		int ldx = 2 * (kl + ku);
 		int ldxx = ldx * ldx;
@@ -691,26 +590,13 @@ namespace utils
 		matrix_add_scaled (ntop, nrhs, 1.0, b, &y [kl], ldb, ldy);
 		matrix_add_scaled (nbot, nrhs, 1.0, b + ntop + n, &y [kl + ku], ldb, ldy);
 		
-		for (int j = 0; j < nrhs; ++j) {
-			for (int i = 0; i < ldy; ++i) {
-				DEBUG ("Y = " << y [j * ldy + i] << " " << j * ldy + i);
-			}
-		}
-		
-		for (int j = 0; j < nrhs; ++j) {
-			for (int i = 0; i < n + ntop + nbot; ++i) {
-				DEBUG ("b = " << b [j * ldb + i]);
-			}
-		}
-
 		for (int i = 0; i < nrhs; ++i) {
-			matrix_banded_solve (n, kl, ku, matrix + i * lda * ldaa + (kl + ntop) * lda, ipiv + i * n, b + ntop + i * ldb, info);
-		}
-		
-		for (int j = 0; j < nrhs; ++j) {
-			for (int i = 0; i < n + ntop + nbot; ++i) {
-				DEBUG ("b = " << b [j * ldb + i]);
+			for (int j = 0; j < n + ntop + nbot; ++j) {
+				debug << b [i * ldb + j] << " ";
 			}
+			DEBUG (debug.str ());
+			debug.str ("");
+			matrix_banded_solve (n, kl, ku, matrix + i * lda * ldaa + (kl + ntop) * lda, ipiv + i * n, b + ntop + i * ldb, info);
 		}
 		
 #ifdef _MPI
@@ -718,13 +604,9 @@ namespace utils
 			for (int i = 0; i < nrhs; ++i) {
 				for (int k = 0; k < ku; ++k) {
 					for (int l = 0; l < k + 1; ++l) {
-						DEBUG (y [i * ldy + k + kl] << " " << b [i * ldb + l + k + ntop] << " " << matrix [i * lda * ldaa + (k + kl + ntop + l) * lda + kl - l]);
 						y [i * ldy + k + kl] -= b [i * ldb + l + k + ntop] * matrix [i * lda * ldaa + (k + kl + ntop + l) * lda + kl - l];
 					}
-					debug << i * ldy + k + kl << " " << y [i * ldy + k + kl] << " ";
 				}
-				DEBUG ("BEFORE GATHER " << debug.str ());
-				debug.str ("");
 			}
 		}
 
@@ -732,13 +614,9 @@ namespace utils
 			for (int i = 0; i < nrhs; ++i) {
 				for (int k = 0; k < kl; ++k) {
 					for (int l = 0; l < kl - k; ++l) {
-						DEBUG (b [i * ldb + l + k + ntop + n - kl] << " " << matrix [i * ldaa * lda + (k + l + n + ntop) * lda + 2 * kl + ku - l])
 						y [i * ldy + k + kl + ku] -= b [i * ldb + l + k + ntop + n - kl] * matrix [i * ldaa * lda + (k + l + n + ntop) * lda + 2 * kl + ku - l];
 					}
-					debug << i * ldy + k + kl + ku << " " << y [i * ldy + k + kl + ku] << " ";
 				}
-				DEBUG ("BEFORE GATHER " << debug.str ());
-				debug.str ("");
 			}
 		}
 		if (id == 0) {
@@ -750,87 +628,37 @@ namespace utils
 				ycur = 0;
 				bcur = 0;
 				
-				for (int i = 0; i < ldy; ++i) {
-					DEBUG ("Y = " << y [j * ldy + i] << " " << j * ldy + i);
-				}
 				MPI::COMM_WORLD.Gather (&y [j * ldy], 2 * (kl + ku), mpi_type (&typeid (double)), &buffer [0], 2 * (kl + ku), mpi_type (&typeid (double)), 0);
 				utils::scale (ldy, 0.0, &y [j * ldy]);
-				for (int i = 0; i < ldy; ++i) {
-					DEBUG ("Y = " << y [j * ldy + i] << " " << j * ldy + i);
-				}
 				for (int i = 0; i < np; ++i) {
 						for (int k = 0; k < 2 * (ku + kl); ++k) {
-							debug << buffer [bcur + k] << " ";
 							y [j * ldy + ycur + k] += buffer [bcur + k];
 						}
-						DEBUG (debug.str ());
-						debug.str ("");
 					ycur += ku + kl;
 					bcur += 2 * (ku + kl);
 				}
 
-				for (int i = 0; i < ldy; ++i) {
-					DEBUG ("Y = " << y [j * ldy + i] << " " << j * ldy + i);
-				}
-
-				for (int i = 0; i < (ku + kl) * np; ++i) {
-					for (int k = 0; k < (ku + kl) * np; ++k) {
-						debug << x [j * ldxx + k * ldx + i] << " ";
-					}
-					DEBUG ("F " << debug.str ());
-					debug.str ("");
-				}
-
-				DEBUG ("Solving");
 				matrix_solve ((ku + kl) * (np - 1), x + j * ldx * ldx + (kl + ku) * (ldx + 1), xipiv + j * ldx, &y [j * ldy + kl + ku], info, 1, ldx);
-				DEBUG ("Solved");
-
-				for (int i = 0; i < ldy; ++i) {
-					DEBUG ("Y DONE = " << y [j * ldy + i] << " " << j * ldy + i);
-				}
 
 				ycur = 0;
 				bcur = 0;
 				for (int i = 0; i < np; ++i) {
 					for (int k = 0; k < 2 * (ku + kl); ++k) {
-						DEBUG (bcur << " " << ycur);
 						buffer [bcur + k] = y [j * ldy + ycur + k];
 					}
 					ycur += ku + kl;
 					bcur += 2 * (ku + kl);
 				}
 				
-				for (int i = 0; i < ldy; ++i) {
-					DEBUG ("BUFFER = " << buffer [i] << " " << j * ldy + i);
-				}
-
 				MPI::COMM_WORLD.Scatter (&buffer [0], 2 * (kl + ku), mpi_type (&typeid (double)), &y [j * ldy], 2 * (kl + ku), mpi_type (&typeid (double)), 0);
 			}
 		} else {
 			for (int j = 0; j < nrhs; ++j) {
-				for (int i = 0; i < ldy; ++i) {
-					DEBUG ("Y = " << y [j * ldy + i] << " " << j * ldy + i);
-				}
 				MPI::COMM_WORLD.Gather (&y [j * ldy], 2 * (kl + ku), mpi_type (&typeid (double)), NULL, 2 * (kl + ku), mpi_type (&typeid (double)), 0);
 				MPI::COMM_WORLD.Scatter (NULL, 2 * (kl + ku), mpi_type (&typeid (double)), &y [j * ldy], 2 * (kl + ku), mpi_type (&typeid (double)), 0);
 			}
 		}
 		
-		for (int j = 0; j < n; ++j) {
-			for (int i = 0; i < nrhs; ++i) {
-				debug << b [i * ldb + j] << " ";
-			}
-			DEBUG (debug.str ());
-			debug.str ("");
-		}
-		
-		
-		for (int j = 0; j < nrhs; ++j) {
-			for (int i = 0; i < ldy; ++i) {
-				DEBUG ("OUT = " << y [j * ldy + i] << " " << j * ldy + i);
-			}
-		}
-
 		if (id != 0) {
 			matrix_copy (ntop, nrhs, &y [kl], b, ldy, ldb);
 		}
@@ -838,16 +666,7 @@ namespace utils
 			matrix_copy (nbot, nrhs, &y [kl + ku], b + ntop + n, ldy, ldb);
 		}
 		
-		for (int j = 0; j < n + ntop + nbot; ++j) {
-			for (int i = 0; i < nrhs; ++i) {
-				debug << b [i * ldb + j] << " ";
-			}
-			DEBUG (debug.str ());
-			debug.str ("");
-		}
-		
 		for (int i = 0; i < nrhs; ++i) {
-			DEBUG (ntop + i * ldb << " " << y [ku + i * ldy] << " " << y [kl + ku + i * ldy]);
 			if (id != 0) {
 				matrix_matrix_multiply (n, 1, kl, -1.0, &bufferl [i * n * kl], &y [ku + i * ldy], 1.0, b + ntop + i * ldb, n, ldb, ldb);
 			}
@@ -855,16 +674,6 @@ namespace utils
 				matrix_matrix_multiply (n, 1, ku, -1.0, &bufferr [i * n * ku], &y [kl + ku + i * ldy], 1.0, b + ntop + i * ldb, n, ldb, ldb);
 			}
 		}
-		
-		for (int j = 0; j < n + ntop + nbot; ++j) {
-			for (int i = 0; i < nrhs; ++i) {
-				debug << b [i * ldb + j] << " ";
-			}
-			DEBUG (debug.str ());
-			debug.str ("");
-		}
-
-		DEBUG ("DONE");
 #endif
 	}
 } /* utils */
