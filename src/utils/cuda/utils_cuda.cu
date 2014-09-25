@@ -9,7 +9,7 @@
 #include <cuda_runtime.h>
 #include "../extern/helper_cuda.h"
 #include "utils_cuda.hpp"
-#include "../../config.hpp"
+#include "logger/logger.hpp"
 
 namespace utils
 {

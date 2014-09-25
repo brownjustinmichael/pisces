@@ -6,7 +6,7 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include "config.hpp"
+#include "logger/logger.hpp"
 #include <log4cplus/logger.h>
 #include <log4cplus/loggingmacros.h>
 #include <log4cplus/configurator.h>

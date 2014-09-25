@@ -10,7 +10,7 @@
 
 #include "messenger/messenger.hpp"
 #include <cmath>
-#include "../config.hpp"
+#include "logger/logger.hpp"
 #include "linalg/utils.hpp"
 #include "linalg/linalg.hpp"
 #include "../utils/block_solver.hpp"

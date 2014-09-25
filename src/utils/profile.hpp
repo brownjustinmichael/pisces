@@ -9,7 +9,7 @@
 #ifndef PROFILE_HPP_J7WU4I34
 #define PROFILE_HPP_J7WU4I34
 
-#include "../config.hpp"
+#include "logger/logger.hpp"
 
 namespace utils
 {

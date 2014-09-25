@@ -10,7 +10,7 @@
 #include <cmath>
 #include <cassert>
 #include "../bases/grid.hpp"
-#include "../config.hpp"
+#include "logger/logger.hpp"
 #include "diffusion_one_d.hpp"
 #include "linalg/utils.hpp"
 

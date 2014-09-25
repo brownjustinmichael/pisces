@@ -20,7 +20,7 @@
 #include "linalg/utils.hpp"
 #include "../utils/rezone.hpp"
 #include "../bases/grid.hpp"
-#include "../config.hpp"
+#include "logger/logger.hpp"
 #include "solver_one_d.hpp"
 	
 namespace one_d

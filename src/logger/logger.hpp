@@ -9,8 +9,8 @@
 #ifndef CONFIG_H_95CWOMPS
 #define CONFIG_H_95CWOMPS
 
-#include "config_log4cxx.hpp"
-#include "config_log4cplus.hpp"
+#include "logger_log4cxx.hpp"
+#include "logger_log4cplus.hpp"
 #include <iostream>
 #include <string>
 

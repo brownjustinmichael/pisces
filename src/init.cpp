@@ -7,7 +7,7 @@
  ************************************************************************/
 
 #include "messenger/messenger.hpp"
-#include "config.hpp"
+#include "logger/logger.hpp"
 #include "two_d/plan_two_d.hpp"
 #include "bases/grid.hpp"
 #include "io/io.hpp"

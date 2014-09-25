@@ -21,7 +21,7 @@
 #include "io/io.hpp"
 #include "grid.hpp"
 #include "transform.hpp"
-#include "../config.hpp"
+#include "logger/logger.hpp"
 #include <gsl/gsl_siman.h>
 
 namespace bases

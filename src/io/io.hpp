@@ -19,7 +19,7 @@
 #include <memory>
 #include <typeinfo>
 #include "exceptions.hpp"
-#include "../config.hpp"
+#include "logger/logger.hpp"
 #include <yaml-cpp/yaml.h>
 #include <netcdf>
 

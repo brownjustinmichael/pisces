@@ -9,7 +9,7 @@
 #ifndef FFTW_ONE_D_CUDA_HPP_G5118SR0
 #define FFTW_ONE_D_CUDA_HPP_G5118SR0
 
-#include "../../config.hpp"
+#include "logger/logger.hpp"
 #include "../../bases/plan.hpp"
 #include "../../utils/cuda/utils_cuda.hpp"
 #include "../../bases/transform.hpp"

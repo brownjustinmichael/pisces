@@ -11,7 +11,7 @@
 
 #include <cassert>
 #include <cmath>
-#include "../config.hpp"
+#include "logger/logger.hpp"
 #include "grid.hpp"
 
 namespace bases

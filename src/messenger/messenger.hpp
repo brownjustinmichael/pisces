@@ -16,7 +16,7 @@
 #include <algorithm>
 #include <vector>
 #include <typeinfo>
-#include "../config.hpp"
+#include "logger/logger.hpp"
 #include "linalg/utils.hpp"
 
 /*!**********************************************************************

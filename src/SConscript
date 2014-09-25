@@ -75,13 +75,6 @@ for dirname, dirnames, filenames in os.walk (path):
                 env.SConscript(dirname + '/' + filename, variant_dir = os.path.join (".", directory (path, dirname)), duplicate = 0, exports = {'env': env, "objects": objects, "include_cuda" : include_cuda, "include_mp": include_mp})
             if filename.split ('.') [-1] == 'cpp':
                 objects.append (env.Object (os.path.relpath (dirname, path) + '/' + filename))
-
-if logger.lower () == "log4cxx":
-    objects += env.Object ("config_log4cxx.cpp")
-elif logger.lower () == "log4cplus":
-    objects += env.Object ("config_log4cplus.cpp")
-else:
-    objects += env.Object ("config.cpp")
     
 conf = Configure (env)
 conf.CheckLib ("gfortran")

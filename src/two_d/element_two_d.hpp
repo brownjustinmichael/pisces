@@ -18,7 +18,7 @@
 #include "io/io.hpp"
 #include "io/formats.hpp"
 #include "../utils/rezone.hpp"
-#include "../config.hpp"
+#include "logger/logger.hpp"
 
 namespace two_d
 {

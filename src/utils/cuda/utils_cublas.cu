@@ -6,7 +6,7 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include "../../config.hpp"
+#include "logger/logger.hpp"
 #include "utils_cublas.hpp"
 #include "utils_cuda.hpp"
 #include <vector>

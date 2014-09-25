@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <memory>
 #include <iomanip>
-#include "../config.hpp"
+#include "logger/logger.hpp"
 #include "diffusion_one_d.hpp"
 #include "advection_one_d.hpp"
 #include "solver_one_d.hpp"

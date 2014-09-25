@@ -12,7 +12,7 @@
 #ifndef PLAN_HPP_S9YPWHOM
 #define PLAN_HPP_S9YPWHOM
 
-#include "../config.hpp"
+#include "logger/logger.hpp"
 #include <map>
 
 #define NANTRACK

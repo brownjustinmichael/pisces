@@ -9,7 +9,7 @@
 #include "element.hpp"
 
 #include <cassert>
-#include "../config.hpp"
+#include "logger/logger.hpp"
 #include "solver.hpp"
 #include "linalg/utils.hpp"
 #include <omp.h>

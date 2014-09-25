@@ -14,7 +14,7 @@
 #endif /* _CUDA */
 #include <fftw3.h>
 #include <memory>
-#include "../config.hpp"
+#include "logger/logger.hpp"
 #include "../bases/transform.hpp"
 #include "plan_one_d.hpp"
 #include "linalg/utils.hpp"
