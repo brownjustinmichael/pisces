@@ -540,7 +540,15 @@ namespace utils
 						x [q * ldxx + xcur + k * ldx + j] += buffer [bcur + k * 2 * (ku + kl) + j];
 					}
 				}
-
+				
+				for (int j = 0; j < (ku + kl) * (np - 1); ++j) {
+					for (int k = 0; k < (ku + kl) * (np - 1); ++k) {
+						debug << x [q * ldxx + (kl + ku) * (ldx + 1) + j * ldx + k] << " ";
+					}
+					DEBUG (debug.str ());
+					debug.str ("");
+				}
+				
 				matrix_factorize ((ku + kl) * (np - 1), (ku + kl) * (np - 1), x + q * ldxx + (kl + ku) * (ldx + 1), xipiv + q * ldx, info, ldx);
 			}
 
@@ -590,6 +598,8 @@ namespace utils
 		matrix_add_scaled (ntop, nrhs, 1.0, b, &y [kl], ldb, ldy);
 		matrix_add_scaled (nbot, nrhs, 1.0, b + ntop + n, &y [kl + ku], ldb, ldy);
 		
+		DEBUG (n);
+
 		for (int i = 0; i < nrhs; ++i) {
 			for (int j = 0; j < n + ntop + nbot; ++j) {
 				debug << b [i * ldb + j] << " ";
