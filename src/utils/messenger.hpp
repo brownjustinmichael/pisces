@@ -17,7 +17,7 @@
 #include <vector>
 #include <typeinfo>
 #include "../config.hpp"
-#include "../utils/utils.hpp"
+#include "linalg/utils.hpp"
 
 /*!**********************************************************************
  * An enum of MPI flags for checking the status of each process

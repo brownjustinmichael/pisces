@@ -11,10 +11,10 @@
 #include <cassert>
 #include "../config.hpp"
 #include "solver.hpp"
-#include "../utils/utils.hpp"
+#include "linalg/utils.hpp"
 #include <omp.h>
 #include <yaml-cpp/yaml.h>
-#include "../utils/exceptions.hpp"
+#include "linalg/exceptions.hpp"
 
 #include <ctime>
 #include <chrono>

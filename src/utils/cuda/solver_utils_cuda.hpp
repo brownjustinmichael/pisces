@@ -1,13 +1,13 @@
 /*!**********************************************************************
- * \file solver_utils_cuda.hpp
+ * \file linalg_cuda.hpp
  * /Users/justinbrown/Dropbox/pisces/src
  * 
  * Created by Justin Brown on 2013-08-22.
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#ifndef SOLVER_UTILS_HPP_T5OEKE5A
-#define SOLVER_UTILS_HPP_T5OEKE5A
+#ifndef linalg_HPP_T5OEKE5A
+#define linalg_HPP_T5OEKE5A
 
 namespace cuda
 {
@@ -19,4 +19,4 @@ namespace cuda
 	} /* utils */
 } /* cuda */
 
-#endif /* end of include guard: SOLVER_UTILS_HPP_T5OEKE5A */
+#endif /* end of include guard: linalg_HPP_T5OEKE5A */

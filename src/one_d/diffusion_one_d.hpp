@@ -16,7 +16,7 @@
 #include <vector>
 #include "plan_one_d.hpp"
 #include "../bases/grid.hpp"
-#include "../utils/utils.hpp"
+#include "linalg/utils.hpp"
 
 namespace one_d
 {

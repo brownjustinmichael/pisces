@@ -13,7 +13,7 @@
 #include "plan_two_d.hpp"
 #include "../bases/transform.hpp"
 #include <fftw3.h>
-#include "../utils/utils.hpp"
+#include "linalg/utils.hpp"
 
 namespace two_d
 {

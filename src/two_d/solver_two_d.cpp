@@ -7,14 +7,14 @@
  ************************************************************************/
 
 #include <cmath>
-#include "../utils/utils.hpp"
-#include "../utils/solver_utils.hpp"
+#include "linalg/utils.hpp"
+#include "linalg/linalg.hpp"
 #include "../utils/interpolate.hpp"
 #include "../utils/block_solver.hpp"
 #include "solver_two_d.hpp"
 #include "source_two_d.hpp"
 #include "transform_two_d.hpp"
-#include "../utils/exceptions.hpp"
+#include "linalg/exceptions.hpp"
 #include <sstream>
 
 /*

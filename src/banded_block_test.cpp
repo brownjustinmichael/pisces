@@ -14,8 +14,8 @@
 #include <ctime>
 #include <chrono>
 #include "utils/block_solver.hpp"
-#include "utils/solver_utils.hpp"
-#include "utils/utils.hpp"
+#include "linalg/linalg.hpp"
+#include "linalg/utils.hpp"
 #include <sstream>
 
 int main (int argc, char *argv[])

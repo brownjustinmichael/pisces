@@ -8,7 +8,7 @@
 
 #include "solver_one_d_cuda.hpp"
 #include "transform_one_d_cuda.hpp"
-#include "../../utils/cuda/solver_utils_cuda.hpp"
+#include "../../utils/cuda/linalg_cuda.hpp"
 #include "../../utils/cuda/utils_cuda.cuh"
 #include "../../utils/cuda/utils_cublas.hpp"
 

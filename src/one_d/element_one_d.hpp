@@ -17,7 +17,7 @@
 #include <cmath>
 #include "transform_one_d.hpp"
 #include "../bases/element.hpp"
-#include "../utils/utils.hpp"
+#include "linalg/utils.hpp"
 #include "../utils/rezone.hpp"
 #include "../bases/grid.hpp"
 #include "../config.hpp"

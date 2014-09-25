@@ -6,7 +6,7 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include "solver_utils.hpp"
+#include "linalg.hpp"
 #include "exceptions.hpp"
 
 /*!*******************************************************************

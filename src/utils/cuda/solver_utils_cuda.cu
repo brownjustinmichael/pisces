@@ -1,13 +1,13 @@
 /*!**********************************************************************
- * \file solver_utils_cuda.cu
+ * \file linalg_cuda.cu
  * /Users/justinbrown/Dropbox/pisces/src
  * 
  * Created by Justin Brown on 2013-08-22.
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include "solver_utils_cuda.hpp"
-#include "solver_utils_cuda.cuh"
+#include "linalg_cuda.hpp"
+#include "linalg_cuda.cuh"
 
 namespace cuda
 {

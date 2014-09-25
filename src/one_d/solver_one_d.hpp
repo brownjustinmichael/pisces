@@ -14,7 +14,7 @@
 #include <memory>
 #include "plan_one_d.hpp"
 #include "../bases/solver.hpp"
-#include "../utils/utils.hpp"
+#include "linalg/utils.hpp"
 
 namespace one_d
 {

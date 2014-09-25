@@ -11,12 +11,12 @@
 #include "../utils/messenger.hpp"
 #include <cmath>
 #include "../config.hpp"
-#include "../utils/utils.hpp"
-#include "../utils/solver_utils.hpp"
+#include "linalg/utils.hpp"
+#include "linalg/linalg.hpp"
 #include "../utils/block_solver.hpp"
 #include "../utils/interpolate.hpp"
 #include "element_one_d.hpp"
-#include "utils/exceptions.hpp"
+#include "linalg/exceptions.hpp"
 
 namespace one_d
 {

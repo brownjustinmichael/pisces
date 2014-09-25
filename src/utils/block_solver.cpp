@@ -10,8 +10,8 @@
 #ifdef _MPI
 #include <mpi.h>
 #endif
-#include "../utils/utils.hpp"
-#include "../utils/solver_utils.hpp"
+#include "linalg/utils.hpp"
+#include "linalg/linalg.hpp"
 #include "block_solver.hpp"
 
 namespace utils

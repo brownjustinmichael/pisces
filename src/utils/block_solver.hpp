@@ -10,8 +10,8 @@
 #define BLOCK_SOLVER_HPP_8C3ZNSDI
 
 #include "../utils/messenger.hpp"
-#include "../utils/utils.hpp"
-#include "../utils/solver_utils.hpp"
+#include "linalg/utils.hpp"
+#include "linalg/linalg.hpp"
 #include <vector>
 
 namespace utils

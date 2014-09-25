@@ -13,7 +13,7 @@
 #include "plan_two_d.hpp"
 #include "../bases/transform.hpp"
 #include "../../utils/cuda/utils_cuda.hpp"
-#include "../utils/utils.hpp"
+#include "linalg/utils.hpp"
 
 namespace two_d
 {

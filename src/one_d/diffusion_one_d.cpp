@@ -12,7 +12,7 @@
 #include "../bases/grid.hpp"
 #include "../config.hpp"
 #include "diffusion_one_d.hpp"
-#include "../utils/utils.hpp"
+#include "linalg/utils.hpp"
 
 namespace one_d
 {

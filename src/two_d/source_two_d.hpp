@@ -10,7 +10,7 @@
 #define SOURCE_TWO_D_HPP_G9AN5CH6
 
 #include "plan_two_d.hpp"
-#include "../utils/exceptions.hpp"
+#include "linalg/exceptions.hpp"
 #include <omp.h>
 
 namespace two_d

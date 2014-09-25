@@ -11,7 +11,7 @@
 
 #include "../bases/grid.hpp"
 #include "../bases/plan.hpp"
-#include "../utils/utils.hpp"
+#include "linalg/utils.hpp"
 #include "../bases/solver.hpp"
 
 namespace two_d
