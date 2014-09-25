@@ -6,7 +6,7 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include "utils/messenger.hpp"
+#include "messenger/messenger.hpp"
 #include "bases/plan.hpp"
 // #include "one_d/element_one_d.hpp"
 #include "two_d/boussinesq_two_d.hpp"

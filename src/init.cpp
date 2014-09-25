@@ -6,7 +6,7 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include "utils/messenger.hpp"
+#include "messenger/messenger.hpp"
 #include "config.hpp"
 #include "two_d/plan_two_d.hpp"
 #include "bases/grid.hpp"

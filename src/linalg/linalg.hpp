@@ -10,7 +10,7 @@
 #define UTILS_SOLVER_HPP_YSBJBB1J
 
 #include <cstddef>
-#include "../utils/messenger.hpp"
+#include "messenger/messenger.hpp"
 
 namespace utils
 {

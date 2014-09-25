@@ -12,7 +12,7 @@
 #ifndef ELEMENT_HPP_IUTSU4TQ
 #define ELEMENT_HPP_IUTSU4TQ
 
-#include "../utils/messenger.hpp"
+#include "messenger/messenger.hpp"
 #include <string>
 #include <cassert>
 #include <memory>

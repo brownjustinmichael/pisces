@@ -6,7 +6,7 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include "utils/messenger.hpp"
+#include "messenger/messenger.hpp"
 #include "io/io.hpp"
 #include <vector>
 #include <stdio.h>

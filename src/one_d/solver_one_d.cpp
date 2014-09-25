@@ -8,7 +8,7 @@
 
 #include "solver_one_d.hpp"
 
-#include "../utils/messenger.hpp"
+#include "messenger/messenger.hpp"
 #include <cmath>
 #include "../config.hpp"
 #include "linalg/utils.hpp"

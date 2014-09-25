@@ -9,7 +9,7 @@
 #ifndef SOLVER_HPP_N0BUAX6H
 #define SOLVER_HPP_N0BUAX6H
 
-#include "../utils/messenger.hpp"
+#include "messenger/messenger.hpp"
 #include <vector>
 #include <memory>
 #include "plan_one_d.hpp"

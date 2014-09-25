@@ -9,7 +9,7 @@
 #ifndef SOLVER_TWO_D_HPP_JW4BV4PS
 #define SOLVER_TWO_D_HPP_JW4BV4PS
 
-#include "../utils/messenger.hpp"
+#include "messenger/messenger.hpp"
 #include "../bases/solver.hpp"
 #include "transform_two_d.hpp"
 #include "../utils/interpolate.hpp"

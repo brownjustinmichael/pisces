@@ -9,7 +9,7 @@
 #ifndef BLOCK_SOLVER_HPP_8C3ZNSDI
 #define BLOCK_SOLVER_HPP_8C3ZNSDI
 
-#include "../utils/messenger.hpp"
+#include "messenger/messenger.hpp"
 #include "linalg/utils.hpp"
 #include "linalg/linalg.hpp"
 #include <vector>
