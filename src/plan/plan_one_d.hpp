@@ -11,7 +11,6 @@
 
 #include "grid.hpp"
 #include "plan.hpp"
-#include "../bases/solver.hpp"
 
 namespace one_d
 {

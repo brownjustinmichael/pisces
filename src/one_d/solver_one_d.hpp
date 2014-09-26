@@ -118,6 +118,25 @@ namespace one_d
 			return z_solver;
 		}
 		
+		void add_plan (const typename bases::explicit_plan <datatype>::factory &factory, int flags) {
+			TRACE ("Adding plan...");
+			bases::grid <datatype>* grids [1] = {&grid};
+			bases::master_solver <datatype>::add_plan (factory.instance (grids, data, rhs_ptr (spectral_rhs), element_flags, component_flags), flags);
+		}
+		
+		void add_plan (const typename bases::real_plan <datatype>::factory &factory, int flags) {
+			TRACE ("Adding plan...");
+			bases::grid <datatype>* grids [1] = {&grid};
+			bases::master_solver <datatype>::add_plan (factory.instance (grids, data, rhs_ptr (real_rhs), element_flags, component_flags), flags);
+		}
+		
+		void add_plan (const typename bases::implicit_plan <datatype>::factory &factory, int flags) {
+			TRACE ("Adding plan...");
+			bases::grid <datatype>* grids [1] = {&grid};
+			datatype* matrices [1] = {matrix_ptr (0)};
+			bases::master_solver <datatype>::add_plan (factory.instance (grids, matrices, data, rhs_ptr (spectral_rhs), element_flags, component_flags), flags);
+		}
+		
 	protected:
 		virtual void _factorize () {
 			z_solver->factorize ();

@@ -241,6 +241,12 @@ namespace bases
 			}
 			TRACE ("Added.");
 		}
+		
+		virtual void add_plan (const typename explicit_plan <datatype>::factory &factory, int flags) = 0;
+		
+		virtual void add_plan (const typename real_plan <datatype>::factory &factory, int flags) = 0;
+		
+		virtual void add_plan (const typename implicit_plan <datatype>::factory &factory, int flags) = 0;
 	
 		/*!**********************************************************************
 		 * \brief Execute the plans for the state given in flags

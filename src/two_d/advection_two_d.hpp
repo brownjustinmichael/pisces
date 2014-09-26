@@ -47,16 +47,6 @@ namespace two_d
 					TRACE ("Adding advection...");
 				}
 				
-				advection (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype* i_vel_n, datatype *i_vel_m) :
-				real_plan <datatype> (i_solver),
-				coeff (-i_coeff),
-				vel_n (i_vel_n),
-				vel_m (i_vel_m),
-				pos_n (&(grid_n [0])),
-				pos_m (&(grid_m [0])) {
-					TRACE ("Adding advection...");
-				}
-				
 				virtual ~advection () {}
 				
 				virtual void execute () {
@@ -70,6 +60,21 @@ namespace two_d
 						data_out [(n - 1) * m + j] += coeff * (vel_n [(n - 1) * m + j] * (data_in [(n - 1) * m + j] - data_in [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]) + vel_m [(n - 1) * m + j] * (data_in [(n - 1) * m + j + 1] - data_in [(n - 1) * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]));
 					}
 				}
+				
+				class factory : public real_plan <datatype>::factory
+				{
+				private:
+					datatype coeff;
+					datatype *vel_n, *vel_m;
+				public:
+					factory (datatype i_coeff, datatype* i_vel_n, datatype* i_vel_m) : coeff (i_coeff), vel_n (i_vel_n), vel_m (i_vel_m) {}
+					
+					virtual ~factory () {}
+					
+					virtual std::shared_ptr <bases::plan <datatype> > instance (bases::grid <datatype> **grids, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+						return std::shared_ptr <bases::plan <datatype> > (new advection <datatype> (*grids [0], *grids [1], coeff, vel_n, vel_m, i_data_in, i_data_out, i_element_flags, i_component_flags));
+					}
+				};
 			
 			private:
 				datatype coeff;
@@ -89,13 +94,6 @@ namespace two_d
 			public:
 				stream_advection (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype i_coeff, datatype* i_stream, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) :
 				real_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out, i_element_flags, i_component_flags),
-				coeff (-i_coeff),
-				stream (i_stream),
-				pos_n (&(grid_n [0])),
-				pos_m (&(grid_m [0])) {}
-				
-				stream_advection (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype *i_stream) :
-				real_plan <datatype> (i_solver),
 				coeff (-i_coeff),
 				stream (i_stream),
 				pos_n (&(grid_n [0])),

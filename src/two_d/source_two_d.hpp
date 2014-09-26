@@ -21,8 +21,8 @@ namespace two_d
 		class source : public explicit_plan <datatype>
 		{
 		public:
-			source (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype* i_data_source) :
-			explicit_plan <datatype> (i_solver),
+			source (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype i_coeff, datatype* i_data_source, datatype *i_data_in, datatype *i_data_out, int *i_element_flags, int *i_component_flags) :
+			explicit_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out, i_element_flags, i_component_flags),
 			coeff (i_coeff),
 			data_source (i_data_source) {
 				TRACE ("Adding source...");
@@ -37,6 +37,21 @@ namespace two_d
 				}
 			
 			}
+			
+			class factory : public explicit_plan <datatype>::factory
+			{
+			private:
+				datatype coeff;
+				datatype *data_source;
+			public:
+				factory (datatype i_coeff, datatype *i_data_source) : coeff (i_coeff), data_source (i_data_source) {}
+
+				virtual ~factory () {}
+
+				virtual std::shared_ptr <bases::plan <datatype> > instance (bases::grid <datatype> **grids, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+					return std::shared_ptr <bases::plan <datatype> > (new source <datatype> (*grids [0], *grids [1], coeff, data_source, i_data_in, i_data_out, i_element_flags, i_component_flags));
+				}
+			};
 		
 		private:
 			using explicit_plan <datatype>::n;
@@ -58,15 +73,6 @@ namespace two_d
 				data_temp.resize (m * ldn, 0.0);
 				flags = 0x00;
 				transform = std::shared_ptr <bases::plan <datatype> > (new fourier::vertical_transform <datatype> (n, m, data_source, &data_temp [0], inverse, element_flags, &flags));
-			}
-			
-			x_derivative_source (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype* i_data_source) :
-			explicit_plan <datatype> (i_solver),
-			coeff (i_coeff),
-			data_source (i_data_source) {
-				data_temp.resize (m * ldn, 0.0);
-				flags = 0x00;
-				transform = std::shared_ptr <bases::plan <datatype> > (new fourier::vertical_transform <datatype> (n, m, &data_temp [0], NULL, inverse, element_flags, &flags));
 			}
 			
 			virtual ~x_derivative_source () {}
@@ -114,12 +120,6 @@ namespace two_d
 			data_source (i_data_source),
 			pos_n (&(grid_n [0])) {}
 			
-			square_x_derivative_source (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype* i_data_source) :
-			real_plan <datatype> (i_solver),
-			coeff (i_coeff),
-			data_source (i_data_source),
-			pos_n (&(grid_n [0])) {}
-			
 			virtual ~square_x_derivative_source () {}
 			
 			virtual void execute () {
@@ -163,12 +163,6 @@ namespace two_d
 		public:
 			z_derivative_source (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype *i_data_in, datatype *i_data_out, datatype i_coeff, datatype* i_data_source, int *element_flags, int *component_flags) :
 			explicit_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out, element_flags, component_flags),
-			coeff (i_coeff),
-			data_source (i_data_source),
-			pos_m (&(grid_m [0])) {}
-
-			z_derivative_source (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype* i_data_source) :
-			explicit_plan <datatype> (i_solver),
 			coeff (i_coeff),
 			data_source (i_data_source),
 			pos_m (&(grid_m [0])) {}
@@ -221,14 +215,6 @@ namespace two_d
 		public:
 			square_z_derivative_source (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype *i_data_in, datatype *i_data_out, datatype i_coeff, datatype* i_data_source) :
 			real_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out),
-			coeff (i_coeff),
-			data_source (i_data_source),
-			pos_m (&(grid_m [0])) {
-				TRACE ("Adding square z derivative source...");
-			}
-
-			square_z_derivative_source (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype* i_data_source) :
-			real_plan <datatype> (i_solver),
 			coeff (i_coeff),
 			data_source (i_data_source),
 			pos_m (&(grid_m [0])) {

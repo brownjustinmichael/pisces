@@ -13,6 +13,7 @@
 #define PLAN_HPP_S9YPWHOM
 
 #include "logger/logger.hpp"
+#include "grid.hpp"
 #include <map>
 
 #define NANTRACK
@@ -94,6 +95,66 @@ namespace bases
 		* The plan class serves as a wrapper for this function.
 		*********************************************************************/
 		virtual void execute () = 0;
+	};
+	
+	template <class datatype>
+	class explicit_plan : public plan <datatype>
+	{
+	public:
+		explicit_plan <datatype> (int *i_element_flags = NULL, int *i_component_flags = NULL) : plan <datatype> (i_element_flags, i_component_flags) {}
+		
+		virtual ~explicit_plan () {}
+		
+		class factory
+		{
+		public:
+			virtual ~factory () {}
+		
+			virtual std::shared_ptr <bases::plan <datatype>> instance (bases::grid <datatype> **grids, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const = 0;
+		};
+		
+		using plan <datatype>::element_flags;
+		using plan <datatype>::component_flags;
+	};
+	
+	template <class datatype>
+	class real_plan : public plan <datatype>
+	{
+	public:
+		real_plan <datatype> (int *i_element_flags = NULL, int *i_component_flags = NULL) : plan <datatype> (i_element_flags, i_component_flags) {}
+		
+		virtual ~real_plan () {}
+		
+		class factory
+		{
+		public:
+			virtual ~factory () {}
+		
+			virtual std::shared_ptr <bases::plan <datatype>> instance (bases::grid <datatype> **grids, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const = 0;
+		};
+		
+		using plan <datatype>::element_flags;
+		using plan <datatype>::component_flags;
+	};
+
+	template <class datatype>
+	class implicit_plan : public plan <datatype>
+	{
+	public:
+		implicit_plan <datatype> (int *i_element_flags = NULL, int *i_component_flags = NULL) : plan <datatype> (i_element_flags, i_component_flags) {}
+		
+		virtual ~implicit_plan () {}
+		
+		class factory
+		{
+		public:
+			virtual ~factory () {}
+		
+			virtual std::shared_ptr <bases::plan <datatype>> instance (bases::grid <datatype> **grids, datatype **matrices, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const = 0;
+		};
+		
+		using plan <datatype>::element_flags;
+		using plan <datatype>::component_flags;
 	};
 } /* bases */
 #endif /* end of include guard: PLAN_HPP_S9YPWHOM */

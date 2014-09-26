@@ -176,6 +176,25 @@ namespace two_d
 			throw 0;
 		}
 		
+		void add_plan (const typename bases::explicit_plan <datatype>::factory &factory, int flags) {
+			TRACE ("Adding plan...");
+			bases::grid <datatype>* grids [2] = {&grid_n, &grid_m};
+			bases::master_solver <datatype>::add_plan (factory.instance (grids, data, rhs_ptr (spectral_rhs), element_flags, component_flags), flags);
+		}
+		
+		void add_plan (const typename bases::real_plan <datatype>::factory &factory, int flags) {
+			TRACE ("Adding plan...");
+			bases::grid <datatype>* grids [2] = {&grid_n, &grid_m};
+			bases::master_solver <datatype>::add_plan (factory.instance (grids, data, rhs_ptr (real_rhs), element_flags, component_flags), flags);
+		}
+		
+		void add_plan (const typename bases::implicit_plan <datatype>::factory &factory, int flags) {
+			TRACE ("Adding plan...");
+			bases::grid <datatype>* grids [2] = {&grid_n, &grid_m};
+			datatype* matrices [2] = {matrix_ptr (0), matrix_ptr (1)};
+			bases::master_solver <datatype>::add_plan (factory.instance (grids, matrices, data, rhs_ptr (spectral_rhs), element_flags, component_flags), flags);
+		}
+		
 	protected:
 		virtual void _factorize () {
 			if (x_solver) {

@@ -41,21 +41,6 @@ namespace two_d
 					}
 				}
 				
-				horizontal_diffusion (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype i_alpha) :
-				implicit_plan <datatype> (i_solver),
-				coeff (i_coeff),
-				alpha (i_alpha) {
-					TRACE ("Instantiating...");
-					pioL2 = 4.0 * (std::acos (-1.0) * std::acos (-1.0) / (grid_n [n - 1] - grid_n [0]) / (grid_n [n - 1] - grid_n [0]));
-					if (matrix_n) {
-						for (int i = 0; i < ldn; ++i) {
-							matrix_n [i] = coeff * alpha * pioL2 * (datatype) ((i / 2) * (i / 2));
-						}
-					} else {
-						WARN ("No matrix");
-					}
-				}
-				
 				virtual ~horizontal_diffusion () {}
 			
 				void execute () {	
@@ -78,6 +63,20 @@ namespace two_d
 				
 				using implicit_plan <datatype>::element_flags;
 				using implicit_plan <datatype>::component_flags;
+			
+				class factory : public implicit_plan <datatype>::factory
+				{
+				private:
+					datatype coeff, alpha;
+				public:
+					factory (datatype i_coeff, datatype i_alpha) : coeff (i_coeff), alpha (i_alpha) {}
+					
+					virtual ~factory () {}
+					
+					virtual std::shared_ptr <bases::plan <datatype> > instance (bases::grid <datatype> **grids, datatype **matrices, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+						return std::shared_ptr <bases::plan <datatype> > (new horizontal_diffusion <datatype> (*grids [0], *grids [1], coeff, alpha, matrices [0], matrices [1], i_data_in, i_data_out, i_element_flags, i_component_flags));
+					}
+				};
 			
 			private:
 				datatype coeff;
@@ -109,19 +108,6 @@ namespace two_d
 					}
 				}
 				
-				vertical_diffusion (bases::master_solver <datatype> &i_solver, datatype i_coeff, datatype i_alpha) :
-				implicit_plan <datatype> (i_solver),
-				coeff (i_coeff),
-				alpha (i_alpha) {
-					if (matrix_m) {
-						for (int j = 0; j < m; ++j) {
-							utils::add_scaled (m, -coeff * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
-						}
-					} else {
-						WARN ("No matrix");
-					}
-				}
-				
 				virtual ~vertical_diffusion () {}
 			
 				void execute () {	
@@ -135,6 +121,20 @@ namespace two_d
 					}
 					TRACE ("Operation complete.");
 				}
+			
+				class factory : public implicit_plan <datatype>::factory
+				{
+				private:
+					datatype coeff, alpha;
+				public:
+					factory (datatype i_coeff, datatype i_alpha) : coeff (i_coeff), alpha (i_alpha) {}
+					
+					virtual ~factory () {}
+					
+					virtual std::shared_ptr <bases::plan <datatype> > instance (bases::grid <datatype> **grids, datatype **matrices, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+						return std::shared_ptr <bases::plan <datatype> > (new vertical_diffusion <datatype> (*grids [0], *grids [1], coeff, alpha, matrices [0], matrices [1], i_data_in, i_data_out, i_element_flags, i_component_flags));
+					}
+				};
 			
 				using implicit_plan <datatype>::element_flags;
 				using implicit_plan <datatype>::component_flags;
