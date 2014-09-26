@@ -12,7 +12,7 @@
 #include "messenger/messenger.hpp"
 #include <vector>
 #include <memory>
-#include "plan_one_d.hpp"
+#include "plan/plan_one_d.hpp"
 #include "../bases/solver.hpp"
 #include "linalg/utils.hpp"
 

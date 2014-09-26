@@ -12,7 +12,7 @@
 #include "io/io.hpp"
 #include "io/formats.hpp"
 #include "interpolate.hpp"
-#include "../bases/grid.hpp"
+#include "plan/grid.hpp"
 #include "linalg/utils.hpp"
 
 namespace utils

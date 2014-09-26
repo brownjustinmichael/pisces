@@ -13,7 +13,7 @@
 #include "../bases/solver.hpp"
 #include "transform_two_d.hpp"
 #include "../utils/interpolate.hpp"
-#include "plan_two_d.hpp"
+#include "plan/plan_two_d.hpp"
 #include "boundary_two_d.hpp"
 
 namespace two_d

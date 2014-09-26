@@ -9,8 +9,8 @@
 #ifndef PLAN_TWO_D_HPP_XQ7AJI7K
 #define PLAN_TWO_D_HPP_XQ7AJI7K
 
-#include "../bases/grid.hpp"
-#include "../bases/plan.hpp"
+#include "grid.hpp"
+#include "plan.hpp"
 #include "linalg/utils.hpp"
 #include "../bases/solver.hpp"
 

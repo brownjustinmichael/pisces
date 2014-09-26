@@ -9,7 +9,7 @@
 #ifndef TRANSFORM_HPP_S8KRHTX3
 #define TRANSFORM_HPP_S8KRHTX3
 	
-#include "grid.hpp"
+#include "plan/grid.hpp"
 
 /*!**********************************************************************
  * \brief A set of flags to be used with setting up transforms

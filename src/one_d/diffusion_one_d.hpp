@@ -14,8 +14,8 @@
 
 #include <memory>
 #include <vector>
-#include "plan_one_d.hpp"
-#include "../bases/grid.hpp"
+#include "plan/plan_one_d.hpp"
+#include "plan/grid.hpp"
 #include "linalg/utils.hpp"
 
 namespace one_d

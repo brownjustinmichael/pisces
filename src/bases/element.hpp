@@ -16,10 +16,10 @@
 #include <string>
 #include <cassert>
 #include <memory>
-#include "plan.hpp"
+#include "plan/plan.hpp"
 #include "solver.hpp"
 #include "io/io.hpp"
-#include "grid.hpp"
+#include "plan/grid.hpp"
 #include "transform.hpp"
 #include "logger/logger.hpp"
 #include <gsl/gsl_siman.h>

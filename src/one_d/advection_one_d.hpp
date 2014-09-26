@@ -13,8 +13,8 @@
 
 #include <memory>
 #include <vector>
-#include "../bases/grid.hpp"
-#include "plan_one_d.hpp"
+#include "plan/grid.hpp"
+#include "plan/plan_one_d.hpp"
 
 namespace one_d
 {

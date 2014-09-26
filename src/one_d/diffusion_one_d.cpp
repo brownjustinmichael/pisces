@@ -9,7 +9,7 @@
 #include <iostream>
 #include <cmath>
 #include <cassert>
-#include "../bases/grid.hpp"
+#include "plan/grid.hpp"
 #include "logger/logger.hpp"
 #include "diffusion_one_d.hpp"
 #include "linalg/utils.hpp"

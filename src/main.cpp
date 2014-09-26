@@ -7,7 +7,7 @@
  ************************************************************************/
 
 #include "messenger/messenger.hpp"
-#include "bases/plan.hpp"
+#include "plan/plan.hpp"
 // #include "one_d/element_one_d.hpp"
 #include "two_d/boussinesq_two_d.hpp"
 #include "logger/logger.hpp"

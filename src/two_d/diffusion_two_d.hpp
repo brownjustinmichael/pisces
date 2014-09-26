@@ -9,7 +9,7 @@
 #ifndef DIFFUSION_TWO_D_HPP_YHECX9VS
 #define DIFFUSION_TWO_D_HPP_YHECX9VS
 
-#include "../bases/plan.hpp"
+#include "plan/plan.hpp"
 #include "solver_two_d.hpp"
 
 /*

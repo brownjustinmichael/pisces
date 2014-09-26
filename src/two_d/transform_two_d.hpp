@@ -10,7 +10,7 @@
 #define TRANSFORM_TWO_D_HPP_RAXYBFTC
 
 #include "logger/logger.hpp"
-#include "plan_two_d.hpp"
+#include "plan/plan_two_d.hpp"
 #include "../bases/transform.hpp"
 #include <fftw3.h>
 #include "linalg/utils.hpp"

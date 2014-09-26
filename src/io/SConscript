@@ -1,4 +1,13 @@
 Import ("env")
 Import ("objects")
+Import ("include_cuda")
 Import ("include_mp")
 
+import os, inspect
+
+conf = Configure (env)
+
+for lib in ["atlas", "netcdf_c++4", "netcdf", "irc", "imf", "yaml-cpp"]:
+    conf.CheckLib (lib)
+
+env = conf.Finish ()

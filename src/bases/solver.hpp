@@ -10,8 +10,8 @@
 #define SOLVER_HPP_BDH126SH
 	
 #include <memory>
-#include "plan.hpp"
-#include "grid.hpp"
+#include "plan/plan.hpp"
+#include "plan/grid.hpp"
 
 /*!*******************************************************************
  * \brief Execution flags used by the solver class

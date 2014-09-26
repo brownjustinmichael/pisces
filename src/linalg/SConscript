@@ -1,0 +1,20 @@
+Import ("env")
+Import ("objects")
+Import ("include_cuda")
+Import ("include_mp")
+
+import os, inspect
+
+conf = Configure (env)
+
+if include_cuda:
+    conf.CheckLib ("cublas")
+
+if not conf.CheckLib ("ptlapack"):
+    conf.CheckLib ("lapack")
+if not conf.CheckLib ("ptf77blas"):
+    conf.CheckLib ("blas")
+if not conf.CheckLib ("ptcblas"):
+    conf.CheckLib ("cblas")
+
+env = conf.Finish ()

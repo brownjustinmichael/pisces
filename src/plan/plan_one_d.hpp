@@ -9,8 +9,8 @@
 #ifndef PLAN_HPP_8B98W8AH
 #define PLAN_HPP_8B98W8AH
 
-#include "../bases/grid.hpp"
-#include "../bases/plan.hpp"
+#include "grid.hpp"
+#include "plan.hpp"
 #include "../bases/solver.hpp"
 
 namespace one_d

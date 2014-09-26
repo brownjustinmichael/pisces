@@ -10,7 +10,6 @@
 
 #include <cmath>
 #include "advection_one_d.hpp"
-#include "plan_one_d.hpp"
 #include "linalg/utils.hpp"
 
 namespace one_d

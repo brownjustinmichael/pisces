@@ -16,7 +16,7 @@
 #include <memory>
 #include "logger/logger.hpp"
 #include "../bases/transform.hpp"
-#include "plan_one_d.hpp"
+#include "plan/plan_one_d.hpp"
 #include "linalg/utils.hpp"
 
 namespace one_d
