@@ -33,7 +33,8 @@ namespace two_d
 					TRACE ("Instantiating...");
 					pioL2 = 4.0 * (std::acos (-1.0) * std::acos (-1.0) / (grid_n [n - 1] - grid_n [0]) / (grid_n [n - 1] - grid_n [0]));
 					if (matrix_n) {
-						for (int i = 0; i < ldn; ++i) {
+						matrix_n [0] = matrix_n [1] = 0.0;
+						for (int i = 2; i < ldn; ++i) {
 							matrix_n [i] = coeff * alpha * pioL2 * (datatype) ((i / 2) * (i / 2));
 						}
 					} else {
@@ -48,13 +49,15 @@ namespace two_d
 					if (*component_flags & x_solve) {
 						if (1.0 - alpha != 0.0) {
 							#pragma omp parallel for
-							for (int i = 0; i < ldn; ++i) {
+							for (int i = 2; i < ldn; ++i) {
+								DEBUG (-coeff * (1.0 - alpha) * pioL2 * (i / 2) * (i / 2));
 								utils::add_scaled (m, -coeff * (1.0 - alpha) * pioL2 * (i / 2) * (i / 2), data_in + i * m, data_out + i * m);
 							}
 						}
 					} else {
 						#pragma omp parallel for
-						for (int i = 0; i < ldn; ++i) {
+						for (int i = 2; i < ldn; ++i) {
+							DEBUG (-coeff * pioL2 * (i / 2) * (i / 2));
 							utils::add_scaled (m, -coeff * pioL2 * (i / 2) * (i / 2), data_in + i * m, data_out + i * m);
 						}
 					}

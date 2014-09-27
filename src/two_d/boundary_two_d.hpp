@@ -72,7 +72,7 @@ namespace two_d
 				}
 			}
 			if (flag & x_solve) {
-				for (int i = 0; i < lda; ++i) {
+				for (int i = 0; i < ldn; ++i) {
 					data_temp [i * lda] = data [i * m];
 				}
 			}

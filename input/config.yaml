@@ -6,7 +6,7 @@ grid:
     nrhs: 4096
     nb: 1
     x:
-        points: 32
+        points: 1
         width: 100.0
     z:
         points: 32
