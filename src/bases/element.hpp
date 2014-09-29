@@ -17,7 +17,7 @@
 #include <cassert>
 #include <memory>
 #include "plan/plan.hpp"
-#include "solver.hpp"
+#include "solver/solver.hpp"
 #include "io/io.hpp"
 #include "plan/grid.hpp"
 #include "transform/transform.hpp"

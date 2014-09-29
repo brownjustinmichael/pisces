@@ -10,7 +10,6 @@
 
 #include <cassert>
 #include "logger/logger.hpp"
-#include "solver.hpp"
 #include "linalg/utils.hpp"
 #include <omp.h>
 #include <yaml-cpp/yaml.h>

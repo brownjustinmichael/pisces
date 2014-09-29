@@ -10,11 +10,11 @@
 #define SOLVER_TWO_D_HPP_JW4BV4PS
 
 #include "messenger/messenger.hpp"
-#include "../bases/solver.hpp"
+#include "solver.hpp"
 #include "transform/transform_two_d.hpp"
 #include "../utils/interpolate.hpp"
 #include "plan/plan.hpp"
-#include "boundary_two_d.hpp"
+#include "two_d/boundary_two_d.hpp"
 
 namespace two_d
 {
