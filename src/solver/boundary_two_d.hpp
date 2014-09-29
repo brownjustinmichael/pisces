@@ -9,7 +9,7 @@
 #ifndef BOUNDARY_TWO_D_HPP_863EDB36
 #define BOUNDARY_TWO_D_HPP_863EDB36
 
-#include "../bases/boundary.hpp"
+#include "boundary.hpp"
 
 namespace two_d
 {

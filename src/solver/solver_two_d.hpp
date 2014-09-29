@@ -14,7 +14,7 @@
 #include "transform/transform_two_d.hpp"
 #include "../utils/interpolate.hpp"
 #include "plan/plan.hpp"
-#include "two_d/boundary_two_d.hpp"
+#include "boundary_two_d.hpp"
 
 namespace two_d
 {
