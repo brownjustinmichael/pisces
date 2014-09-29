@@ -20,7 +20,7 @@
 #include "solver.hpp"
 #include "io/io.hpp"
 #include "plan/grid.hpp"
-#include "transform.hpp"
+#include "transform/transform.hpp"
 #include "logger/logger.hpp"
 #include <gsl/gsl_siman.h>
 
