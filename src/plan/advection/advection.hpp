@@ -9,7 +9,7 @@
 #ifndef ADVECTION_TWO_D_HPP_GGR0NN1Q
 #define ADVECTION_TWO_D_HPP_GGR0NN1Q
 
-#include "../plan_two_d.hpp"
+#include "../real_plan.hpp"
 
 namespace two_d
 {

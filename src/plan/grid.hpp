@@ -371,4 +371,37 @@ namespace bases
 	} /* fourier */
 } /* bases */
 
+namespace two_d
+{
+	namespace fourier
+	{
+		namespace chebyshev
+		{
+			enum mode {
+				mode_flag = 0x10
+			};
+			
+			template <typename datatype>
+		    struct horizontal_grid { typedef bases::fourier::grid <datatype> type; };
+			
+			template <typename datatype>
+		    struct vertical_grid { typedef bases::chebyshev::grid <datatype> type; };
+		} /* chebyshev */
+		
+		namespace cosine
+		{
+			enum mode {
+				mode_flag = 0x20
+			};
+
+			template <typename datatype>
+		    struct horizontal_grid { typedef bases::fourier::grid <datatype> type; };
+			
+			template <typename datatype>
+		    struct vertical_grid { typedef bases::cosine::grid <datatype> type; };
+		} /* chebyshev */
+	} /* fourier */
+} /* two_d */	
+
+
 #endif /* end of include guard: COLLOCATION_HPP_3FRTUK5Z */

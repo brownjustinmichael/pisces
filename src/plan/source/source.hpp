@@ -9,7 +9,8 @@
 #ifndef SOURCE_TWO_D_HPP_G9AN5CH6
 #define SOURCE_TWO_D_HPP_G9AN5CH6
 
-#include "../plan_two_d.hpp"
+#include "../explicit_plan.hpp"
+#include "../real_plan.hpp"
 #include "linalg/exceptions.hpp"
 #include <omp.h>
 

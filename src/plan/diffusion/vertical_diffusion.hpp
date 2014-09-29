@@ -9,7 +9,7 @@
 #ifndef DIFFUSION_TWO_D_HPP_YHECX9VS
 #define DIFFUSION_TWO_D_HPP_YHECX9VS
 
-#include "../plan_two_d.hpp"
+#include "../implicit_plan.hpp"
 
 /*
 	TODO Should non-axis diffusion be in the explicit or implicit rhs?

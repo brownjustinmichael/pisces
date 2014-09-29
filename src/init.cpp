@@ -8,7 +8,6 @@
 
 #include "messenger/messenger.hpp"
 #include "logger/logger.hpp"
-#include "plan/plan_two_d.hpp"
 #include "plan/grid.hpp"
 #include "io/io.hpp"
 #include "io/formats.hpp"
