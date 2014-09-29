@@ -7,10 +7,10 @@
  ************************************************************************/
 
 #include "boussinesq_two_d.hpp"
-#include "advection_two_d.hpp"
-#include "diffusion_two_d.hpp"
+#include "plan/advection.hpp"
+#include "plan/diffusion.hpp"
+#include "plan/source.hpp"
 #include "transform_two_d.hpp"
-#include "source_two_d.hpp"
 #include "solver_two_d.hpp"
 #include <sstream>
 #include <iomanip>
