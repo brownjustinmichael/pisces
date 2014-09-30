@@ -32,7 +32,7 @@ int main (int argc, char *argv[])
 		std::string config_filename;
 
 		if (argc <= 1) {
-			config_filename = "../input/config.yaml";
+			config_filename = "config.yaml";
 		} else {
 			config_filename = argv [1];
 		}
@@ -80,7 +80,7 @@ int main (int argc, char *argv[])
 			}
 		}
 
-		std::string file_format = "../input/" + config.get <std::string> ("input.file");
+		std::string file_format = "input/" + config.get <std::string> ("input.file");
 		char buffer [file_format.size () * 2];
 		snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
 

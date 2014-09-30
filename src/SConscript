@@ -88,7 +88,6 @@ env.Default (env.Program(target = "../run/pisces", source = (["main.cpp"] + obje
 env.Default (env.Program(target = "../run/pisces_init", source = (["init.cpp"] + objects)))
 # env.Default (env.Program(target = "../run/pisces_init", source = (["init.cpp"])))
 
-env.Default (env.Program(target = "../run/block_test", source = (["block_test.cpp"] + objects)))
 env.Default (env.Program(target = "../run/tridiagonal_block_test", source = (["tridiagonal_block_test.cpp"] + objects)))
 env.Default (env.Program(target = "../run/banded_block_test", source = (["banded_block_test.cpp"] + objects)))
 

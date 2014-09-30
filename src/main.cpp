@@ -95,7 +95,7 @@ int main (int argc, char *argv[])
 		std::string config_filename;
 
 		if (argc <= 1) {
-			config_filename = "../input/config.yaml";
+			config_filename = "config.yaml";
 		} else {
 			config_filename = argv [1];
 		}
@@ -128,7 +128,7 @@ int main (int argc, char *argv[])
 		TRACE ("Element constructed.");
 
 		if (config ["input.file"].IsDefined ()) {
-			std::string file_format = "../input/" + config.get <std::string> ("input.file");
+			std::string file_format = "input/" + config.get <std::string> ("input.file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 			io::formatted_input <io::formats::two_d::netcdf> input_stream (buffer, n, m, 1, 0, config.get <bool> ("input.full") ? n_elements * m : 0, 0, 0, config.get <bool> ("input.full") ? id * m : 0);
@@ -139,7 +139,7 @@ int main (int argc, char *argv[])
 		// Set up output
 		std::shared_ptr <io::output> normal_stream;
 		if (config ["output.file"].IsDefined ()) {
-			std::string file_format = "../output/" + config.get <std::string> ("output.file");
+			std::string file_format = "output/" + config.get <std::string> ("output.file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 
@@ -150,7 +150,7 @@ int main (int argc, char *argv[])
 
 		std::shared_ptr <io::output> transform_stream;
 		if (config ["output.transform_file"].IsDefined ()) {
-			std::string file_format = "../output/" + config.get <std::string> ("output.transform_file");
+			std::string file_format = "output/" + config.get <std::string> ("output.transform_file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 
@@ -160,7 +160,7 @@ int main (int argc, char *argv[])
 
 		std::shared_ptr <io::output> stat_stream;
 		if (config ["output.stat.file"].IsDefined ()) {
-			std::string file_format = "../output/" + config.get <std::string> ("output.stat.file");
+			std::string file_format = "output/" + config.get <std::string> ("output.stat.file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 

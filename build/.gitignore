@@ -4,6 +4,8 @@
 */*.hpp
 */*/*.cpp
 *.cdf
+.scon*
+.scon*/*
 
 !SConstruct
 !Doxyfile
