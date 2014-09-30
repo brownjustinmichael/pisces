@@ -86,9 +86,5 @@ if include_vt:
 env.Default (env.Program(target = "../run/pisces", source = (["main.cpp"] + objects)))
 
 env.Default (env.Program(target = "../run/pisces_init", source = (["init.cpp"] + objects)))
-# env.Default (env.Program(target = "../run/pisces_init", source = (["init.cpp"])))
-
-env.Default (env.Program(target = "../run/tridiagonal_block_test", source = (["tridiagonal_block_test.cpp"] + objects)))
-env.Default (env.Program(target = "../run/banded_block_test", source = (["banded_block_test.cpp"] + objects)))
 
 env.SConscript('../test/SConscript', variant_dir = "./test", duplicate = 0, exports = {'env': env, "objects": objects, "include_cuda": include_cuda, "include_mp": include_mp})
