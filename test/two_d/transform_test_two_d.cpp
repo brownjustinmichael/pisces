@@ -6,10 +6,10 @@
  * Copyright 2014 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include "../../src/utils/messenger.hpp"
-#include "../../src/utils/io.hpp"
-#include "../../src/one_d/element_one_d.hpp"
-#include "../../src/config.hpp"
+#include "messenger/messenger.hpp"
+#include "io/io.hpp"
+#include "element/element_one_d.hpp"
+#include "logger/logger.hpp"
 #include <fftw3.h>
 
 #define TINY 1.e-4
