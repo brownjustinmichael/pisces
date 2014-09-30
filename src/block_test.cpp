@@ -13,7 +13,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <chrono>
-#include "solver/block_solver.hpp"
+#include "plan-solver/block_solver.hpp"
 #include "linalg/linalg.hpp"
 #include "linalg/utils.hpp"
 

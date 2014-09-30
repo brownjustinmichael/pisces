@@ -17,10 +17,10 @@
 #include <cassert>
 #include <memory>
 #include "plan/plan.hpp"
-#include "solver/solver.hpp"
+#include "plan-solver/solver.hpp"
 #include "io/io.hpp"
 #include "plan/grid.hpp"
-#include "transform/transform.hpp"
+#include "plan-transform/transform.hpp"
 #include "logger/logger.hpp"
 #include <gsl/gsl_siman.h>
 

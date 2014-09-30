@@ -13,8 +13,8 @@
 #include "element.hpp"
 #include <cmath>
 #include <sstream>
-#include "transform/transform_two_d.hpp"
-#include "solver/solver_two_d.hpp"
+#include "plan-transform/transform_two_d.hpp"
+#include "plan-solver/solver_two_d.hpp"
 #include "io/io.hpp"
 #include "io/formats.hpp"
 #include "rezone.hpp"
