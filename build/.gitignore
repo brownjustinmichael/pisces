@@ -1,4 +1,9 @@
-*
+*.o
+*/*.o
+*/*/*.o
+*/*.hpp
+*/*/*.cpp
+*.cdf
 
 !SConstruct
 !Doxyfile
