@@ -10,14 +10,14 @@
 #define ELEMENT_TWO_D_HPP_CJ68F4IB
 
 
-#include "../bases/element.hpp"
+#include "element.hpp"
 #include <cmath>
 #include <sstream>
 #include "transform/transform_two_d.hpp"
 #include "solver/solver_two_d.hpp"
 #include "io/io.hpp"
 #include "io/formats.hpp"
-#include "../utils/rezone.hpp"
+#include "rezone.hpp"
 #include "logger/logger.hpp"
 
 namespace two_d

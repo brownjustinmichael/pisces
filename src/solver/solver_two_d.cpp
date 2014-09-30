@@ -9,7 +9,7 @@
 #include <cmath>
 #include "linalg/utils.hpp"
 #include "linalg/linalg.hpp"
-#include "../utils/interpolate.hpp"
+#include "linalg/interpolate.hpp"
 #include "block_solver.hpp"
 #include "solver_two_d.hpp"
 #include "linalg/exceptions.hpp"

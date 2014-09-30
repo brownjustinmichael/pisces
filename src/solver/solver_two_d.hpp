@@ -12,7 +12,6 @@
 #include "messenger/messenger.hpp"
 #include "solver.hpp"
 #include "transform/transform_two_d.hpp"
-#include "../utils/interpolate.hpp"
 #include "plan/plan.hpp"
 #include "boundary_two_d.hpp"
 

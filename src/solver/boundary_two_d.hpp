@@ -10,6 +10,7 @@
 #define BOUNDARY_TWO_D_HPP_863EDB36
 
 #include "boundary.hpp"
+#include "linalg/interpolate.hpp"
 
 namespace two_d
 {

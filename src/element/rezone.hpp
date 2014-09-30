@@ -11,7 +11,7 @@
 
 #include "io/io.hpp"
 #include "io/formats.hpp"
-#include "interpolate.hpp"
+#include "linalg/interpolate.hpp"
 #include "plan/grid.hpp"
 #include "linalg/utils.hpp"
 
