@@ -9,7 +9,7 @@
 #ifndef REZONE_CPP_UEW78T7Q
 #define REZONE_CPP_UEW78T7Q
 
-#include "io/io.hpp"
+#include "io/output.hpp"
 #include "io/formats/virtual.hpp"
 #include "linalg/interpolate.hpp"
 #include "plan/grid.hpp"
@@ -18,7 +18,7 @@
 namespace utils
 {
 	template <class datatype>
-	void rezone (utils::messenger *inter_messenger, bases::grid <datatype> *input_grid, bases::grid <datatype> *output_grid, io::virtual_file *input_virtual_file, io::virtual_file *output_virtual_file) {
+	void rezone (utils::messenger *inter_messenger, bases::grid <datatype> *input_grid, bases::grid <datatype> *output_grid, io::formats::virtual_file *input_virtual_file, io::formats::virtual_file *output_virtual_file) {
 		if (output_virtual_file != input_virtual_file) {
 			*output_virtual_file = *input_virtual_file;
 		}

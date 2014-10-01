@@ -10,5 +10,5 @@
 
 namespace io
 {
-	std::map <std::string, virtual_file> virtual_files;
+	std::map <std::string, formats::virtual_file> virtual_files;
 } /* io */

@@ -134,17 +134,6 @@ namespace two_d
 					data_out [(n - 1) * m + j] += coeff * (data_source [j] - data_source [(n - 2) * m + j]) * (data_source [j] - data_source [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]) / (pos_n [n - 1] - pos_n [n - 2]) / 4.0;
 				}
 				TRACE ("Execution complete.");
-				
-#ifdef NANTRACK
-				for (int j = 0; j < m; ++j) {
-					for (int i = 0; i < n; ++i) {
-						if (std::isnan (data_out [i * m + j])) {
-							FATAL ("Nan in square x derivative source.");
-							throw exceptions::nan ();
-						}
-					}
-				}
-#endif
 			}
 		
 		private:
@@ -184,17 +173,6 @@ namespace two_d
 						data_out [(i + 1) * m - 1] += coeff * (data_source [(i + 1) * m - 1] - data_source [(i + 1) * m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
 					}
 				}
-				
-#ifdef NANTRACK
-				for (int j = 0; j < m; ++j) {
-					for (int i = 0; i < n; ++i) {
-						if (std::isnan (data_out [i * m + j])) {
-							FATAL ("Nan in z derivative source.");
-							throw exceptions::nan ();
-						}
-					}
-				}
-#endif
 			}
 		
 		private:
@@ -234,17 +212,6 @@ namespace two_d
 					}
 					data_out [(i + 1) * m - 1] += coeff * (data_source [(i + 1) * m - 1] - data_source [(i + 1) * m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) * (data_source [(i + 1) * m - 1] - data_source [(i + 1) * m - 2]) / (pos_m [m - 1] - pos_m [m - 2]);
 				}
-				
-#ifdef NANTRACK
-				for (int j = 0; j < m; ++j) {
-					for (int i = 0; i < n; ++i) {
-						if (std::isnan (data_out [i * m + j])) {
-							FATAL ("Nan in square z derivative source.");
-							throw exceptions::nan ();
-						}
-					}
-				}
-#endif
 			}
 		
 		private:
@@ -294,17 +261,6 @@ namespace two_d
 					data_out [(n - 1) * m + j] += coeff * (data_source_z [(n - 1) * m + j + 1] - data_source_z [(n - 1) * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]) * (data_source_x [j] - data_source_x [(n - 1) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]) / 2.0;
 				}
 				data_out [n * m - 1] += coeff * (data_source_z [n * m - 1] - data_source_z [n * m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) * (data_source_x [m - 1] - data_source_x [(n - 1) * m - 1]) / (pos_n [n - 1] - pos_n [n - 2]) / 2.0;
-				
-#ifdef NANTRACK
-				for (int j = 0; j < m; ++j) {
-					for (int i = 0; i < n; ++i) {
-						if (std::isnan (data_out [i * m + j])) {
-							FATAL ("Nan in mixed derivative source.");
-							throw exceptions::nan ();
-						}
-					}
-				}
-#endif
 			}
 		
 		private:

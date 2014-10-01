@@ -10,7 +10,8 @@
 #include <iomanip>
 
 #include "logger/logger.hpp"
-#include "io/io.hpp"
+#include "io/output.hpp"
+#include "io/parameters.hpp"
 #include "io/formats/netcdf.hpp"
 #include "messenger/messenger.hpp"
 #include "plan/grid.hpp"

@@ -12,18 +12,22 @@
 #ifndef ELEMENT_HPP_IUTSU4TQ
 #define ELEMENT_HPP_IUTSU4TQ
 
-#include "messenger/messenger.hpp"
 #include <string>
 #include <cassert>
 #include <memory>
+
+#include <gsl/gsl_siman.h>
+
+#include "logger/logger.hpp"
+#include "io/input.hpp"
+#include "io/output.hpp"
+#include "io/parameters.hpp"
+#include "io/formats/virtual.hpp"
+#include "messenger/messenger.hpp"
+#include "plan/grid.hpp"
 #include "plan/plan.hpp"
 #include "plan-solver/solver.hpp"
-#include "io/io.hpp"
-#include "io/formats/virtual.hpp"
-#include "plan/grid.hpp"
 #include "plan-transform/transform.hpp"
-#include "logger/logger.hpp"
-#include <gsl/gsl_siman.h>
 
 namespace bases
 {
@@ -73,7 +77,7 @@ namespace bases
 		std::vector <std::shared_ptr <io::output>> normal_profiles; //!< An implementation to output in transform space
 
 		std::vector <int> solver_keys; //!< A vector of integer keys to the solvers map
-		io::virtual_file *rezone_virtual_file; //!< A shared_ptr to a virtual file object, for rezoning
+		io::formats::virtual_file *rezone_virtual_file; //!< A shared_ptr to a virtual file object, for rezoning
 		
 	public:
 		std::vector <int> transforms; //!< A vector of integer keys to the transform maps
@@ -252,7 +256,7 @@ namespace bases
 			try {
 				// Read from the input into the element variables
 				input_ptr->from_file ();
-			} catch (exceptions::io::bad_variables &except) {
+			} catch (io::formats::exceptions::bad_variables &except) {
 				// Send a warning if there are missing variables in the input
 				WARN (except.what ());
 			}
@@ -412,7 +416,7 @@ namespace bases
 		 * 
 		 * \return The datatype recommended timestep for the next timestep
 		 ************************************************************************/
-		virtual datatype calculate_min_timestep (io::virtual_file *virtual_file = NULL) = 0;
+		virtual datatype calculate_min_timestep (io::formats::virtual_file *virtual_file = NULL) = 0;
 		
 		/*!**********************************************************************
 		 * \brief Caculate the zoning that minimizes the timestep according to size constraints
@@ -432,7 +436,7 @@ namespace bases
 		 * 
 		 * \return A shared_ptr to a virtual_file object containing the chosen rezoning
 		 ************************************************************************/
-		virtual io::virtual_file *rezone_minimize_ts (datatype * positions, datatype min_size, datatype max_size, int n_tries = 20, int iters_fixed_t = 1000, datatype step_size = 1.0, datatype k = 1.0, datatype t_initial = 0.008, datatype mu_t = 1.003, datatype t_min = 2.0e-6) {
+		virtual io::formats::virtual_file *rezone_minimize_ts (datatype * positions, datatype min_size, datatype max_size, int n_tries = 20, int iters_fixed_t = 1000, datatype step_size = 1.0, datatype k = 1.0, datatype t_initial = 0.008, datatype mu_t = 1.003, datatype t_min = 2.0e-6) {
 			TRACE ("Rezoning...");
 			transform (inverse_horizontal | inverse_vertical);
 
@@ -503,7 +507,7 @@ namespace bases
 		 * 
 		 * \return A shared_ptr to the virtual_file of the current state
 		 ************************************************************************/
-		virtual io::virtual_file *make_virtual_file (int flags = 0x00) = 0;
+		virtual io::formats::virtual_file *make_virtual_file (int flags = 0x00) = 0;
 		
 		/*!**********************************************************************
 		 * \brief Protected method to rezone the current state into a virtual file
@@ -516,7 +520,7 @@ namespace bases
 		 * 
 		 * \return A shared_ptr to the rezoned virtual file
 		 ************************************************************************/
-		virtual io::virtual_file *make_rezoned_virtual_file (datatype *positions, io::virtual_file *virtual_file_ptr, int flags = 0x00) = 0;
+		virtual io::formats::virtual_file *make_rezoned_virtual_file (datatype *positions, io::formats::virtual_file *virtual_file_ptr, int flags = 0x00) = 0;
 		
 		/*!**********************************************************************
 		 * \brief Get the current zoning position array

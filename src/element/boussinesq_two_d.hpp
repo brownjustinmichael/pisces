@@ -9,9 +9,10 @@
 #ifndef BOUSSINESQ_TWO_D_HPP_OQ800X4X
 #define BOUSSINESQ_TWO_D_HPP_OQ800X4X
 
-#include "element_two_d.hpp"
-#include "io/io.hpp"
+#include "io/functors/div.hpp"
+#include "io/functors/product.hpp"
 
+#include "element_two_d.hpp"
 
 namespace two_d
 {
@@ -27,12 +28,12 @@ namespace two_d
 				
 				virtual ~boussinesq_element () {}
 				
-				datatype calculate_timestep (int i, int j, io::virtual_file *virtual_file = NULL);
+				datatype calculate_timestep (int i, int j, io::formats::virtual_file *virtual_file = NULL);
 				
 				virtual void setup_output (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
 					bases::element <datatype>::setup_output (output_ptr, flags);
 					DEBUG ("SETTING UP");
-					output_ptr->template append_functor <double> ("div", new io::div_functor <datatype> (ptr (x_position), ptr (z_position), ptr (x_velocity), ptr (z_velocity), n, m));
+					output_ptr->template append_functor <double> ("div", new io::functors::div_functor <datatype> (ptr (x_position), ptr (z_position), ptr (x_velocity), ptr (z_velocity), n, m));
 				}
 				
 				virtual void setup_stat (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
@@ -44,17 +45,17 @@ namespace two_d
 							area [i * m + j] = ((*(grids [0])) [i] - (*(grids [0])) [i - 1]) * ((*(grids [1])) [j] - (*(grids [1])) [j - 1]);
 						}
 					}
-					output_ptr->template append_scalar_functor <double> ("wT", new io::weighted_average_functor <datatype> (n, m, &area [0], new io::product_functor <datatype> (n, m, ptr (z_velocity), ptr (temperature))));
-					output_ptr->template append_scalar_functor <double> ("wS", new io::weighted_average_functor <datatype> (n, m, &area [0], new io::product_functor <datatype> (n, m, ptr (z_velocity), ptr (composition))));
+					output_ptr->template append_scalar_functor <double> ("wT", new io::functors::weighted_average_functor <datatype> (n, m, &area [0], new io::functors::product_functor <datatype> (n, m, ptr (z_velocity), ptr (temperature))));
+					output_ptr->template append_scalar_functor <double> ("wS", new io::functors::weighted_average_functor <datatype> (n, m, &area [0], new io::functors::product_functor <datatype> (n, m, ptr (z_velocity), ptr (composition))));
 				}
 				
-				virtual io::virtual_file *make_virtual_file (int flags = 0x00) {
+				virtual io::formats::virtual_file *make_virtual_file (int flags = 0x00) {
 					std::shared_ptr <io::output> virtual_output;
 					if (flags & profile_only) {
 						virtual_output.reset (new io::formatted_output <io::formats::two_d::virtual_format> ("two_d/boussinesq/virtual_file", io::replace_file, 1, m));
 						if (flags & timestep_only) {
-							virtual_output->append_functor <datatype> ("z", new io::average_functor <datatype> (ptr (z_position), n, m));
-							virtual_output->append_functor <datatype> ("w", new io::root_mean_square_functor <datatype> (ptr (z_velocity), n, m));
+							virtual_output->append_functor <datatype> ("z", new io::functors::average_functor <datatype> (ptr (z_position), n, m));
+							virtual_output->append_functor <datatype> ("w", new io::functors::root_mean_square_functor <datatype> (ptr (z_velocity), n, m));
 						} else {
 							bases::element <datatype>::setup_profile (virtual_output);
 						}
@@ -73,7 +74,7 @@ namespace two_d
 					return &io::virtual_files ["two_d/boussinesq/virtual_file"];
 				}
 				
-				virtual io::virtual_file *make_rezoned_virtual_file (datatype *positions, io::virtual_file *old_virtual_file, int flags = 0x00) {
+				virtual io::formats::virtual_file *make_rezoned_virtual_file (datatype *positions, io::formats::virtual_file *old_virtual_file, int flags = 0x00) {
 					bases::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
 					std::shared_ptr <bases::grid <datatype>> vertical_grid = element <datatype>::generate_grid (&vertical_axis);
 					

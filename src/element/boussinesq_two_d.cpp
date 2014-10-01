@@ -109,7 +109,7 @@ namespace two_d
 			}
 			
 			template <class datatype>
-			datatype boussinesq_element <datatype>::calculate_timestep (int i, int j, io::virtual_file *virtual_file) {
+			datatype boussinesq_element <datatype>::calculate_timestep (int i, int j, io::formats::virtual_file *virtual_file) {
 				if (virtual_file) {
 					if (j == 0 || j == virtual_file->dims ["z"] [1] - 1) {
 						return 1.0 / 0.0;

@@ -16,6 +16,9 @@
 
 #include "logger/logger.hpp"
 #include "messenger/messenger.hpp"
+#include "io/parameters.hpp"
+#include "io/input.hpp"
+#include "io/output.hpp"
 #include "io/formats/ascii.hpp"
 #include "io/formats/netcdf.hpp"
 #include "plan/plan.hpp"

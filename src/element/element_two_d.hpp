@@ -10,14 +10,16 @@
 #define ELEMENT_TWO_D_HPP_CJ68F4IB
 
 
-#include "element.hpp"
 #include <cmath>
 #include <sstream>
+
+#include "logger/logger.hpp"
+#include "io/functors/average.hpp"
 #include "plan-transform/transform_two_d.hpp"
 #include "plan-solver/solver_two_d.hpp"
-#include "io/io.hpp"
+
+#include "element.hpp"
 #include "rezone.hpp"
-#include "logger/logger.hpp"
 
 namespace two_d
 {
@@ -99,8 +101,8 @@ namespace two_d
 			typedef typename std::map <int, std::vector <datatype> >::iterator iterator;
 			for (iterator iter = scalars.begin (); iter != scalars.end (); ++iter) {
 				output_stream->template append <datatype> (scalar_names [iter->first], ptr (iter->first));
-				output_stream->template append_functor <datatype> ("rms_" + scalar_names [iter->first], new io::root_mean_square_functor <datatype> (ptr (iter->first), n, m));
-				output_stream->template append_functor <datatype> ("avg_" + scalar_names [iter->first], new io::average_functor <datatype> (ptr (iter->first), n, m));
+				output_stream->template append_functor <datatype> ("rms_" + scalar_names [iter->first], new io::functors::root_mean_square_functor <datatype> (ptr (iter->first), n, m));
+				output_stream->template append_functor <datatype> ("avg_" + scalar_names [iter->first], new io::functors::average_functor <datatype> (ptr (iter->first), n, m));
 			}
 			output_stream->template append_scalar <datatype> ("t", &duration);
 			output_stream->template append_scalar <const int> ("mode", &(get_mode ()));
@@ -149,9 +151,9 @@ namespace two_d
 			return this->ptr (name);
 		}
 		
-		virtual datatype calculate_timestep (int i, int j, io::virtual_file *virtual_file = NULL) = 0;
+		virtual datatype calculate_timestep (int i, int j, io::formats::virtual_file *virtual_file = NULL) = 0;
 		
-		inline datatype calculate_min_timestep (io::virtual_file *virtual_file = NULL) {
+		inline datatype calculate_min_timestep (io::formats::virtual_file *virtual_file = NULL) {
 			double shared_min = max_timestep / timestep_safety;
 			#pragma omp parallel 
 			{
@@ -189,8 +191,8 @@ namespace two_d
 			}
 		}
 		
-		virtual io::virtual_file *make_virtual_file (int flags = 0x00) {
-			std::shared_ptr <io::virtual_file> virtual_file (new io::virtual_file);
+		virtual io::formats::virtual_file *make_virtual_file (int flags = 0x00) {
+			std::shared_ptr <io::formats::virtual_file> virtual_file (new io::formats::virtual_file);
 			
 			std::shared_ptr <io::output> virtual_output (new io::formatted_output <io::formats::two_d::virtual_format> ("two_d/element/virtual_file", io::replace_file, n, m));
 			bases::element <datatype>::setup_output (virtual_output);
@@ -201,7 +203,7 @@ namespace two_d
 		
 		virtual std::shared_ptr <bases::grid <datatype>> generate_grid (bases::axis *axis, int index = -1) = 0;
 		
-		virtual io::virtual_file *make_rezoned_virtual_file (datatype *positions, io::virtual_file *old_virtual_file, int flags = 0x00) {
+		virtual io::formats::virtual_file *make_rezoned_virtual_file (datatype *positions, io::formats::virtual_file *old_virtual_file, int flags = 0x00) {
 			bases::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
 			std::shared_ptr <bases::grid <datatype>> vertical_grid = generate_grid (&vertical_axis);
 			

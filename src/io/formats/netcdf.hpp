@@ -13,35 +13,35 @@
 
 #include "logger/logger.hpp"
 
-#include "../io.hpp"
-#include "../exceptions.hpp"
+#include "format.hpp"
+#include "exceptions.hpp"
 
 namespace io
 {
-	/*!**********************************************************************
-	 * \brief Returns the netCDF object associated with a given type
-	 * 
-	 * \param type A pointer to a type_info object associated with the object type in question
-	 * 
-	 * This function throws an io::bad_type exception if the type is not known
-	 * 
-	 * \return The netCDF::NcType object associated with the input type
-	 ************************************************************************/
-	inline netCDF::NcType netcdf_type (const std::type_info* type) {
-		if (type == &typeid (double)) {
-			return netCDF::ncDouble;
-		} else if (type == &typeid (int)) {
-			return netCDF::ncInt;
-		} else if (type == &typeid (float)) {
-			return netCDF::ncFloat;
-		} else {
-			FATAL ("Unrecognized NetCDF type");
-			throw exceptions::bad_type ();
-		}
-	}
-	
 	namespace formats
 	{
+		/*!**********************************************************************
+		 * \brief Returns the netCDF object associated with a given type
+		 * 
+		 * \param type A pointer to a type_info object associated with the object type in question
+		 * 
+		 * This function throws an io::bad_type exception if the type is not known
+		 * 
+		 * \return The netCDF::NcType object associated with the input type
+		 ************************************************************************/
+		inline netCDF::NcType netcdf_type (const std::type_info* type) {
+			if (type == &typeid (double)) {
+				return netCDF::ncDouble;
+			} else if (type == &typeid (int)) {
+				return netCDF::ncInt;
+			} else if (type == &typeid (float)) {
+				return netCDF::ncFloat;
+			} else {
+				FATAL ("Unrecognized NetCDF type");
+				throw exceptions::bad_type ();
+			}
+		}
+		
 		namespace two_d
 		{
 			class netcdf
