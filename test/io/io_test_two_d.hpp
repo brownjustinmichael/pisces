@@ -19,7 +19,7 @@ class io_two_d_test_suite : public CxxTest::TestSuite
 public:
 	void test_formatted_netcdf () {
 		int n = 100, m = 200;
-		std::vector <double> init (n * m), init_copy (n * m);
+		std::vector <double> init (n * m), init_copy (n * m), profile (n), profile2 (m);
 		double scalar, scalar_copy;
 		std::string file_name = "output";
 		{
@@ -36,7 +36,9 @@ public:
 			scalar_copy = scalar;
 	
 			output_stream.append <double> ("test", &init [0]);
-			output_stream.append_scalar <double> ("scale", &scalar);
+			output_stream.append <double> ("profile", &init [0], io::one_d);
+			output_stream.append <double> ("profile2", &init [0], io::m_profile);
+			output_stream.append <double> ("scale", &scalar, io::scalar);
 			output_stream.to_file ();
 		}
 
@@ -48,15 +50,26 @@ public:
 		io::formatted_input <io::formats::two_d::netcdf> input_stream (io::data_grid::two_d (n, m), file_name);
 	
 		input_stream.append <double> ("test", &init [0]);
-		input_stream.append_scalar <double> ("scale", &scalar);
+		input_stream.append <double> ("profile2", &profile2 [0], io::m_profile);
+		input_stream.append <double> ("profile", &profile [0], io::one_d);
+		input_stream.append <double> ("scale", &scalar, io::scalar);
 		input_stream.from_file ();
 	
+		for (int i = 0; i < n; ++i) {
+			TSM_ASSERT_DELTA ("IO failure in formatted netcdf", profile [i], init_copy [i], TEST_TINY);
+		}
+
+		for (int i = 0; i < m; ++i) {
+			TSM_ASSERT_DELTA ("IO failure in formatted netcdf", profile2 [i], init_copy [i], TEST_TINY);
+		}
+
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
 				TSM_ASSERT_DELTA ("IO failure in formatted netcdf", init [i * m + j], init_copy [i * m + j], TEST_TINY);
 			}
 		}
 		TSM_ASSERT_DELTA ("IO scalar failure in formatted netcdf", scalar, scalar_copy, TEST_TINY);
+		std::cout << "COMPLETE";
 	}
 	
 	void test_appending_netcdf () {
@@ -69,10 +82,12 @@ public:
 	
 		srand (1);
 		{
+			io::data_grid io_grid = io::data_grid::two_d (n, m);
+			std::cout << io_grid.get_n_dims ();
 			io::appender_output <io::formats::two_d::netcdf> output_stream (io::data_grid::two_d (n, m), file_name, 1);
 			for (int k = 0; k < records; ++k) {
 				output_stream.append <double> ("test", &init [k * n * m]);
-				output_stream.append_scalar <double> ("scale", &scalar [k]);
+				output_stream.append <double> ("scale", &scalar [k], io::scalar);
 				for (int i = 0; i < n; ++i) {
 					for (int j = 0; j < m; ++j) {
 						init [k * n * m + i * m + j] = rand () % 100;
@@ -95,7 +110,7 @@ public:
 		
 		for (int k = 0; k < records; ++k) {
 			input_stream.append <double> ("test", &init [k * n * m]);
-			input_stream.append_scalar <double> ("scale", &scalar [k]);
+			input_stream.append <double> ("scale", &scalar [k], io::scalar);
 			input_stream.from_file (k);
 				
 			for (int i = 0; i < n; ++i) {

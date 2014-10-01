@@ -58,51 +58,60 @@ namespace io
 				static void close_file (std::string file_name, int file_type);
 			
 				template <class datatype>
-				static void write (const data_grid &grid, std::string file_name, std::string name, datatype *data, int record = -1) {
+				static void write (const data_grid &grid, std::string file_name, std::string name, void *data, int record = -1, int flags = all_d) {
+					std::vector <netCDF::NcDim> scalar_dims;
 					std::vector <size_t> offsets = grid.offsets;
 					std::vector <size_t> sizes = grid.ns;
+					if (flags < 0) {
+						scalar_dims = dims [file_name];
+					} else {
+						scalar_dims = {dims [file_name] [0]};
+						offsets = {offsets [0]};
+						sizes = {sizes [0]};
+						int i = 0;
+						while (flags > 0) {
+							if (flags % 2 != 0) scalar_dims.push_back (dims [file_name] [i + 1]);
+							if (flags % 2 != 0) offsets.push_back (grid.offsets [i + 1]);
+							if (flags % 2 != 0) sizes.push_back (grid.ns [i + 1]);
+							flags = flags >> 1;
+							i++;
+						}
+					}
+					
 					offsets [0] = record < 0 ? records [file_name] : record;
+					
 					netCDF::NcVar ncdata = files [file_name]->getVar (name.c_str ());
 					if (ncdata.isNull ()) {
-						ncdata = files [file_name]->addVar (name.c_str (), netcdf_type (&typeid (datatype)), dims [file_name]);
+						ncdata = files [file_name]->addVar (name.c_str (), netcdf_type (&typeid (datatype)), scalar_dims);
 						ncdata.setFill (true, NULL);
 					}
 					ncdata.putVar (offsets, sizes, data);
 				}
 		
 				template <class datatype>
-				static void write_scalar (std::string file_name, std::string name, datatype *data, int record = -1) {
-					std::vector <netCDF::NcDim> scalar_dims = {dims [file_name] [0]};
-					// std::vector <netCDF::NcDim> scalar_dims;
-					std::vector <size_t> scalar_offset = {(size_t) (record < 0 ? records [file_name] : record)};
-					// std::vector <size_t> scalar_offset;
-					std::vector <size_t> sizes = {(size_t) 1};
-					netCDF::NcVar ncdata = files [file_name]->getVar (name.c_str ());
-					if (ncdata.isNull ()) {
-						ncdata = files [file_name]->addVar (name.c_str (), netcdf_type (&typeid (datatype)), scalar_dims);
+				static void read (const data_grid &grid, std::string file_name, std::string name, void *data, int record = -1, int flags = all_d) {
+					std::vector <size_t> scalar_offsets;
+					std::vector <size_t> sizes = grid.ns;
+					if (flags < 0) {
+						scalar_offsets = grid.offsets;
+					} else {
+						scalar_offsets = {grid.offsets [0]};
+						sizes = {sizes [0]};
+						int i = 0;
+						while (i < grid.get_n_dims ()) {
+							if (flags % 2 != 0) scalar_offsets.push_back (grid.offsets [i + 1]);
+							if (flags % 2 != 0) sizes.push_back (grid.ns [i + 1]);
+							flags = flags >> 1;
+							i++;
+						}
 					}
-					ncdata.putVar (scalar_offset, sizes, data);
-				}
-		
-				template <class datatype>
-				static void read (const data_grid &grid, std::string file_name, std::string name, datatype *data, int record = -1) {
 					try {
-						std::vector <size_t> offsets = grid.offsets;
-						std::vector <size_t> sizes = grid.ns;
-						offsets [0] = record < 0 ? records [file_name] : record;
+						scalar_offsets [0] = record < 0 ? records [file_name] : record;
 						netCDF::NcVar ncdata = files [file_name]->getVar (name.c_str ());
 						if (ncdata.isNull ()) {
 							throw 0;
 						}
-						ncdata.getVar (offsets, sizes, data);
-						for (int i = 0; i < grid.get_n (0); ++i) {
-							for (int j = 0; j < grid.get_n (1); ++j) {
-								if (*(data + i * grid.get_n (1) + j) != *(data + i * grid.get_n (1) + j)) {
-									FATAL ("NaN read in. ");
-									throw 0;
-								}
-							}
-						}
+						ncdata.getVar (scalar_offsets, sizes, data);
 					} catch (netCDF::exceptions::NcBadName &e) {
 						failures [file_name].push_back (name);
 						WARN ("Variable " << name << " not found in file");
@@ -110,25 +119,7 @@ namespace io
 						failures [file_name].push_back (name);
 						WARN ("Variable " << name << " not found in file");
 					}
-				}
-		
-				template <class datatype>
-				static void read_scalar (std::string file_name, std::string name, datatype *data, int record = -1) {
-					try {
-						std::vector <size_t> scalar_offset = {(size_t) (record < 0 ? records [file_name] : record), (size_t) 0,  (size_t) 0};
-						std::vector <size_t> sizes = {(size_t) 1, (size_t) 0, (size_t) 0};
-						netCDF::NcVar ncdata = files [file_name]->getVar (name.c_str ());
-						if (ncdata.isNull ()) {
-							throw 0;
-						}
-						ncdata.getVar (scalar_offset, sizes, data);
-					} catch (netCDF::exceptions::NcBadName &e) {
-						failures [file_name].push_back (name);
-						WARN ("Variable " << name << " not found in file");
-					} catch (int &e) {
-						failures [file_name].push_back (name);
-						WARN ("Variable " << name << " not found in file");
-					}
+					
 				}
 			
 			protected:

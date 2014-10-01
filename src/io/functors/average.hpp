@@ -19,11 +19,11 @@ namespace io
 		 * \brief Averages a two dimensional block of data
 		 ************************************************************************/
 		template <class datatype>
-		class weighted_average_functor : public functor <datatype>
+		class weighted_average_functor : public functor
 		{
 		private:
 			datatype *weight, *data; //!< A datatype pointer to the input data
-			functor <datatype> *func;
+			functor *func;
 			int n; //!< The integer horizontal extent of the data
 			int m; //!< The integer vertical extent of the data
 			datatype inner_data; //!< A vector of processed data to output
@@ -37,7 +37,7 @@ namespace io
 			weighted_average_functor (int i_n, int i_m, datatype *i_weight, datatype *i_data) : weight (i_weight), data (i_data), n (i_n), m (i_m) {
 			}
 	
-			weighted_average_functor (int i_n, int i_m, datatype *i_weight, functor <datatype> *i_func) : weight (i_weight), data (i_func->calculate ()), func (i_func), n (i_n), m (i_m) {
+			weighted_average_functor (int i_n, int i_m, datatype *i_weight, functor *i_func) : weight (i_weight), data ((datatype *) i_func->calculate ()), func (i_func), n (i_n), m (i_m) {
 			}
 	
 			/*!**********************************************************************
@@ -45,7 +45,7 @@ namespace io
 			 * 
 			 * \return The first element of the averaged 1D array
 			 ************************************************************************/
-			datatype *calculate () {
+			void *calculate () {
 				if (func) {
 					func->calculate ();
 				}
@@ -63,11 +63,11 @@ namespace io
 		 * \brief Averages a two dimensional block of data in the horizontal direction
 		 ************************************************************************/
 		template <class datatype>
-		class average_functor : public functor <datatype>
+		class average_functor : public functor
 		{
 		private:
 			datatype *data; //!< A datatype pointer to the input data
-			std::shared_ptr <functor <datatype>> func;
+			std::shared_ptr <functor> func;
 			int n; //!< The integer horizontal extent of the data
 			int m; //!< The integer vertical extent of the data
 			std::vector <datatype> inner_data; //!< A vector of processed data to output
@@ -82,7 +82,7 @@ namespace io
 				inner_data.resize (m);
 			}
 		
-			average_functor (functor <datatype> *i_func, int i_n, int i_m) : data (i_func->calculate ()), func (std::shared_ptr <functor <datatype>> (i_func)), n (i_n), m (i_m) {
+			average_functor (functor *i_func, int i_n, int i_m) : data (i_func->calculate ()), func (std::shared_ptr <functor> (i_func)), n (i_n), m (i_m) {
 				inner_data.resize (m);
 			}
 		
@@ -91,7 +91,7 @@ namespace io
 			 * 
 			 * \return The first element of the averaged 1D array
 			 ************************************************************************/
-			datatype *calculate () {
+			void *calculate () {
 				if (func) {
 					func->calculate ();
 				}
@@ -110,7 +110,7 @@ namespace io
 		 * \brief Finds the root-mean-square of data in the horizontal direction
 		 ************************************************************************/
 		template <class datatype>
-		class root_mean_square_functor : public functor <datatype>
+		class root_mean_square_functor : public functor
 		{
 		private:
 			datatype *data; //!< A datatype pointer to the input data
@@ -133,7 +133,7 @@ namespace io
 			 * 
 			 * \return The first element of the resulting array
 			 ************************************************************************/
-			datatype *calculate () {
+			void *calculate () {
 				for (int j = 0; j < m; ++j) {
 					inner_data [j] = (datatype) 0;
 					for (int i = 0; i < n; ++i) {

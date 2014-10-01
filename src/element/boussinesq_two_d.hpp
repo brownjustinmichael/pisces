@@ -33,7 +33,7 @@ namespace two_d
 				virtual void setup_output (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
 					bases::element <datatype>::setup_output (output_ptr, flags);
 					DEBUG ("SETTING UP");
-					output_ptr->template append_functor <double> ("div", new io::functors::div_functor <datatype> (ptr (x_position), ptr (z_position), ptr (x_velocity), ptr (z_velocity), n, m));
+					output_ptr->template append <double> ("div", new io::functors::div_functor <datatype> (ptr (x_position), ptr (z_position), ptr (x_velocity), ptr (z_velocity), n, m));
 				}
 				
 				virtual void setup_stat (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
@@ -45,8 +45,8 @@ namespace two_d
 							area [i * m + j] = ((*(grids [0])) [i] - (*(grids [0])) [i - 1]) * ((*(grids [1])) [j] - (*(grids [1])) [j - 1]);
 						}
 					}
-					output_ptr->template append_scalar_functor <double> ("wT", new io::functors::weighted_average_functor <datatype> (n, m, &area [0], new io::functors::product_functor <datatype> (n, m, ptr (z_velocity), ptr (temperature))));
-					output_ptr->template append_scalar_functor <double> ("wS", new io::functors::weighted_average_functor <datatype> (n, m, &area [0], new io::functors::product_functor <datatype> (n, m, ptr (z_velocity), ptr (composition))));
+					output_ptr->template append <double> ("wT", new io::functors::weighted_average_functor <datatype> (n, m, &area [0], new io::functors::product_functor <datatype> (n, m, ptr (z_velocity), ptr (temperature))), io::scalar);
+					output_ptr->template append <double> ("wS", new io::functors::weighted_average_functor <datatype> (n, m, &area [0], new io::functors::product_functor <datatype> (n, m, ptr (z_velocity), ptr (composition))), io::scalar);
 				}
 				
 				virtual io::formats::virtual_file *make_virtual_file (int flags = 0x00) {
@@ -54,8 +54,8 @@ namespace two_d
 					if (flags & profile_only) {
 						virtual_output.reset (new io::formatted_output <io::formats::two_d::virtual_format> (io::data_grid::two_d (1, m), "two_d/boussinesq/virtual_file", io::replace_file));
 						if (flags & timestep_only) {
-							virtual_output->append_functor <datatype> ("z", new io::functors::average_functor <datatype> (ptr (z_position), n, m));
-							virtual_output->append_functor <datatype> ("w", new io::functors::root_mean_square_functor <datatype> (ptr (z_velocity), n, m));
+							virtual_output->append <datatype> ("z", new io::functors::average_functor <datatype> (ptr (z_position), n, m));
+							virtual_output->append <datatype> ("w", new io::functors::root_mean_square_functor <datatype> (ptr (z_velocity), n, m));
 						} else {
 							bases::element <datatype>::setup_profile (virtual_output);
 						}

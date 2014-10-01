@@ -101,11 +101,11 @@ namespace two_d
 			typedef typename std::map <int, std::vector <datatype> >::iterator iterator;
 			for (iterator iter = scalars.begin (); iter != scalars.end (); ++iter) {
 				output_stream->template append <datatype> (scalar_names [iter->first], ptr (iter->first));
-				output_stream->template append_functor <datatype> ("rms_" + scalar_names [iter->first], new io::functors::root_mean_square_functor <datatype> (ptr (iter->first), n, m));
-				output_stream->template append_functor <datatype> ("avg_" + scalar_names [iter->first], new io::functors::average_functor <datatype> (ptr (iter->first), n, m));
+				output_stream->template append <datatype> ("rms_" + scalar_names [iter->first], new io::functors::root_mean_square_functor <datatype> (ptr (iter->first), n, m));
+				output_stream->template append <datatype> ("avg_" + scalar_names [iter->first], new io::functors::average_functor <datatype> (ptr (iter->first), n, m));
 			}
-			output_stream->template append_scalar <datatype> ("t", &duration);
-			output_stream->template append_scalar <const int> ("mode", &(get_mode ()));
+			output_stream->template append <datatype> ("t", &duration, io::scalar);
+			output_stream->template append <const int> ("mode", &(get_mode ()), io::scalar);
 			
 			bases::element <datatype>::setup_profile (output_stream, flags);
 		}

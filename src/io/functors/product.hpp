@@ -19,7 +19,7 @@ namespace io
 		 * \brief Averages a two dimensional block of data in the horizontal direction
 		 ************************************************************************/
 		template <class datatype>
-		class product_functor : public functor <datatype>
+		class product_functor : public functor
 		{
 		private:
 			datatype *data_1, *data_2; //!< A datatype pointer to the input data
@@ -42,7 +42,7 @@ namespace io
 			 * 
 			 * \return The first element of the averaged 1D array
 			 ************************************************************************/
-			datatype *calculate () {
+			void *calculate () {
 				for (int i = 0; i < n; ++i) {
 					for (int j = 0; j < m; ++j) {
 						inner_data [i * m + j] = data_1 [i * m + j] * data_2 [i * m + j];

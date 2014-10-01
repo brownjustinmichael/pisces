@@ -251,19 +251,13 @@ namespace io
 				}
 		
 				template <class datatype>
-				static void write (const data_grid &grid, std::string file_name, std::string name, datatype *data, int record = -1) {
+				static void write (const data_grid &grid, std::string file_name, std::string name, void *data, int record = -1, int flags = all_d) {
 					virtual_files [file_name].add_var <datatype> (name, grid.get_n (0), grid.get_n (1));
 					virtual_files [file_name].put <datatype> (name, (datatype *) data, grid.get_n (0), grid.get_n (1));
 				}
 	
 				template <class datatype>
-				static void write_scalar (std::string file_name, std::string name, datatype *data, int record = -1) {
-					virtual_files [file_name].add_var <datatype> (name);
-					virtual_files [file_name].put <datatype> (name, (datatype *) data);
-				}
-	
-				template <class datatype>
-				static void read (const data_grid &grid, std::string file_name, std::string name, datatype *data, int record = -1) {
+				static void read (const data_grid &grid, std::string file_name, std::string name, void *data, int record = -1, int flags = all_d) {
 					virtual_files [file_name].get <datatype> (name, (datatype *) data, grid.get_n (0), grid.get_n (1));
 				}
 	

@@ -249,9 +249,9 @@ namespace bases
 				input_ptr->template append <datatype> (scalar_names [iter->first], ptr (iter->first));
 			}
 			// Also look for the scalars for total simulated time and geometry mode
-			input_ptr->template append_scalar <datatype> ("t", &duration);
+			input_ptr->template append <datatype> ("t", &duration, io::scalar);
 			int mode;
-			input_ptr->template append_scalar <int> ("mode", &mode);
+			input_ptr->template append <int> ("mode", &mode, io::scalar);
 			
 			try {
 				// Read from the input into the element variables
@@ -283,8 +283,8 @@ namespace bases
 				output_ptr->template append <datatype> (scalar_names [iter->first], ptr (iter->first));
 			}
 			// Also prepare to output the total simulated time and geometry mode
-			output_ptr->template append_scalar <datatype> ("t", &duration);
-			output_ptr->template append_scalar <const int> ("mode", &(get_mode ()));
+			output_ptr->template append <datatype> ("t", &duration, io::scalar);
+			output_ptr->template append <const int> ("mode", &(get_mode ()), io::scalar);
 
 			// Check the desired output time and save the output object in the appropriate variable
 			if (flags & transform_output) {
@@ -296,8 +296,8 @@ namespace bases
 		
 		virtual void setup_stat (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
 			// Also prepare to output the total simulated time and geometry mode
-			output_ptr->template append_scalar <datatype> ("t", &duration);
-			output_ptr->template append_scalar <datatype> ("dt", &timestep);
+			output_ptr->template append <datatype> ("t", &duration, io::scalar);
+			output_ptr->template append <datatype> ("dt", &timestep, io::scalar);
 			// Check the desired output time and save the output object in the appropriate variable
 			stat_stream = output_ptr;
 		}

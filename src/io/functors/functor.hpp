@@ -18,7 +18,6 @@ namespace io
 		 * 
 		 * The functor class is designed to take an instruction and apply it to some data for visualization and optimization purposes. For example, a functor could take a two dimensional grid of data and produce a one dimensional average or profile. This class serves as a wrapper for the calculate function, which returns a pointer to the processed data.
 		 ************************************************************************/
-		template <class datatype>
 		class functor
 		{
 		public:
@@ -31,7 +30,7 @@ namespace io
 			 * 
 			 * \return A pointer to the processed data, for output
 			 ************************************************************************/
-			virtual datatype *calculate () = 0;
+			virtual void *calculate () = 0;
 		};
 	} /* functors */
 } /* io */

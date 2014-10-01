@@ -81,25 +81,19 @@ namespace io
 			}
 			
 			template <class datatype>
-			static void write (const data_grid &grid, std::string file_name, std::string name, datatype *data, int record = -1) {
-				FATAL ("ASCII write not implemented");
-				throw 0;
-			}
-			
-			/*
-				TODO Should there really be separate methods for writing data and scalars?
-			*/
-			
-			template <class datatype>
-			static void write_scalar (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0, int record = -1) {
+			static void write (const data_grid &grid, std::string file_name, std::string name, void *data, int record = -1, int flags = all_d) {
+				if (flags != scalar) {
+					FATAL ("ASCII write not implemented");
+					throw 0;
+				}
 				if (file_types [file_name] != append_file || count [file_name] == 1) {
 					header [file_name] << name << " ";
 				}
-				body [file_name] << *data << " ";
+				body [file_name] << * (datatype *) data << " ";
 			}
 			
 			template <class datatype>
-			static void read (const data_grid &grid, std::string file_name, std::string name, datatype *data, int record = -1) {
+			static void read (const data_grid &grid, std::string file_name, std::string name, void *data, int record = -1, int flags = all_d) {
 				FATAL ("ASCII read not implemented");
 				throw 0;
 			}

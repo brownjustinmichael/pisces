@@ -94,8 +94,8 @@ int main (int argc, char *argv[])
 		output_stream.append <double> ("S", &temp [0]);
 		// output_stream.append <double> ("w", &temp [0]);
 		// output_stream.append <double> ("u", &temp [0]);
-		output_stream.append_scalar <double> ("t", &duration);
-		output_stream.append_scalar <int> ("mode", &mode);
+		output_stream.append <double> ("t", &duration, io::scalar);
+		output_stream.append <int> ("mode", &mode, io::scalar);
 
 		output_stream.to_file ();
 	} catch (std::exception& except) {

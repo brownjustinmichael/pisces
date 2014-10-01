@@ -21,7 +21,7 @@ namespace io
 		 * \brief Averages a two dimensional block of data in the horizontal direction
 		 ************************************************************************/
 		template <class datatype>
-		class div_functor : public functor <datatype>
+		class div_functor : public functor
 		{
 		private:
 			datatype *pos_x, *pos_z, *data_x, *data_z; //!< A datatype pointer to the input data
@@ -44,7 +44,7 @@ namespace io
 			 * 
 			 * \return The first element of the averaged 1D array
 			 ************************************************************************/
-			datatype *calculate () {
+			void *calculate () {
 				for (int i = 0; i < n; ++i) {
 					inner_data [i * m] = (data_z [i * m + 1] - data_z [i * m]) / (pos_z [i * m + 1] - pos_z [i * m]);
 					for (int j = 1; j < m - 1; ++j) {

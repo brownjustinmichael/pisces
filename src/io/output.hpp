@@ -27,18 +27,12 @@ namespace io
 		std::string file_name; //!< The string file name
 		int file_format;
 		const data_grid grid;
+		typedef void func_t (const data_grid &grid, std::string file_name, std::string name, void *data, int record, int dims);
+		std::vector <func_t *> write_functions;
 		std::vector <std::string> names; //!< A vector of the string representations of the variables
-		std::vector <std::string> scalar_names; //!< A vector of the string representations of the scalar variables
-		std::vector <std::string> functor_names; //!< A vector of the string representations of the functor variables
-		std::vector <std::string> scalar_functor_names; //!< A vector of the string representations of the functor variables
-		std::vector <const std::type_info*> types; //!< A vector of the types of the variables
-		std::vector <const std::type_info*> scalar_types; //!< A vector of the types of the scalar variables
-		std::vector <const std::type_info*> functor_types; //!< A vector of the types of the functor variables
-		std::vector <const std::type_info*> scalar_functor_types; //!< A vector of the types of the functor variables
 		std::vector <void *> data_ptrs; //!< A vector of pointers to the arrays of data
-		std::vector <void *> scalar_ptrs; //!< A vector of pointers to the scalar data
-		std::vector <void *> functor_ptrs; //!< A vector of pointers to the functors
-		std::vector <void *> scalar_functor_ptrs; //!< A vector of pointers to the functors
+		std::vector <functors::functor *> functor_ptrs; //!< A vector of pointers to the functors
+		std::vector <int> dims;
 
 	public:
 		/*!*******************************************************************
@@ -49,6 +43,33 @@ namespace io
 		output (data_grid i_grid, std::string i_file_name = "out", int i_file_format = replace_file) : file_name (i_file_name), file_format (i_file_format), grid (i_grid) {}
 
 		virtual ~output () {}
+		
+		virtual func_t *get_function (const float *) = 0;
+		virtual func_t *get_function (const double *) = 0;
+		virtual func_t *get_function (const int *) = 0;
+
+		/*!**********************************************************************
+		 * \brief Append a datatype functor to the list to be output
+		 * 
+		 * \param name The string representation of the quantity
+		 * \param functor_ptr A pointer to the functor that will calculate the resulting quantity
+		 * 
+		 * WARNING: THIS WILL HAPPILY ACCEPT A FUNCTOR OF NON-DATATYPE TEMPLATE
+		 ************************************************************************/
+		template <class datatype>
+		void append (std::string name, functors::functor *functor_ptr, int flags = all_d) {
+			TRACE ("Appending " << name << " to output...");
+			for (int i = 0; i < (int) names.size (); ++i) {
+				if (names [i] == name) {
+					WARN ("Reuse of name " << name);
+					functor_ptrs [i] = functor_ptr;
+					return;
+				}
+			}
+			functor_ptrs.push_back (functor_ptr);
+			append <datatype> (name, (datatype *) functor_ptr->calculate (), flags);
+			TRACE ("Functor appended.");
+		}
 
 		/*!*******************************************************************
 		 * \brief Append a datatype array to the list to be output
@@ -59,96 +80,22 @@ namespace io
 		 * Since this is shared between input and output, we might give them a shared superclass in the future.
 		 *********************************************************************/
 		template <class datatype>
-		void append (std::string name, datatype *data_ptr) {
+		void append (std::string name, datatype *data_ptr, int flags = all_d) {
 			TRACE ("Appending " << name << " to output..." << *data_ptr);
 			for (int i = 0; i < (int) names.size (); ++i) {
 				if (names [i] == name) {
 					WARN ("Reuse of name " << name);
-					types [i] = &typeid (datatype);
 					data_ptrs [i] = (void *) data_ptr;
 					return;
 				}
 			}
 			names.push_back (name);
-			types.push_back (&typeid (datatype));
+			dims.push_back (flags);
 			data_ptrs.push_back ((void *) data_ptr);
+			write_functions.push_back (get_function (data_ptr));
 			TRACE ("Appended.");
 		}
-
-		/*!**********************************************************************
-		 * \brief Append a datatype scalar to the list to be output
-		 * 
-		 * \param name The string representation of the variable
-		 * \param data_ptr A datatype pointer to the data
-		 * 
-		 * Since this is shared between input and output, we might give them a shared superclass in the future.
-		 ************************************************************************/
-		template <class datatype>
-		void append_scalar (std::string name, datatype *data_ptr) {
-			TRACE ("Appending " << name << " to output...");
-			for (int i = 0; i < (int) scalar_names.size (); ++i) {
-				if (scalar_names [i] == name) {
-					WARN ("Reuse of name " << name);
-					scalar_types [i] = &typeid (datatype);
-					scalar_ptrs [i] = (void *) data_ptr;
-					TRACE ("Scalar updated.");
-					return;
-				}
-			}
-			scalar_types.push_back (&typeid (datatype));
-			scalar_names.push_back (name);
-			scalar_ptrs.push_back ((void *) data_ptr);
-			TRACE ("Scalar appended.");
-		}
-
-		/*!**********************************************************************
-		 * \brief Append a datatype functor to the list to be output
-		 * 
-		 * \param name The string representation of the quantity
-		 * \param functor_ptr A pointer to the functor that will calculate the resulting quantity
-		 ************************************************************************/
-		template <class datatype>
-		void append_functor (std::string name, functors::functor <datatype> *functor_ptr) {
-			TRACE ("Appending " << name << " to output...");
-			for (int i = 0; i < (int) functor_names.size (); ++i) {
-				if (functor_names [i] == name) {
-					WARN ("Reuse of name " << name);
-					functor_types [i] = &typeid (datatype);
-					functor_ptrs [i] = (void *) functor_ptr;
-					TRACE ("Scalar updated.");
-					return;
-				}
-			}
-			functor_types.push_back (&typeid (datatype));
-			functor_names.push_back (name);
-			functor_ptrs.push_back ((void *) functor_ptr);
-			TRACE ("Functor appended.");
-		}
-
-		/*!**********************************************************************
-		 * \brief Append a datatype scalar_functor to the list to be output
-		 * 
-		 * \param name The string representation of the quantity
-		 * \param scalar_functor_ptr A pointer to the scalar_functor that will calculate the resulting quantity
-		 ************************************************************************/
-		template <class datatype>
-		void append_scalar_functor (std::string name, functors::functor <datatype> *scalar_functor_ptr) {
-			TRACE ("Appending " << name << " to output...");
-			for (int i = 0; i < (int) scalar_functor_names.size (); ++i) {
-				if (scalar_functor_names [i] == name) {
-					WARN ("Reuse of name " << name);
-					scalar_functor_types [i] = &typeid (datatype);
-					scalar_functor_ptrs [i] = (void *) scalar_functor_ptr;
-					TRACE ("Scalar updated.");
-					return;
-				}
-			}
-			scalar_functor_types.push_back (&typeid (datatype));
-			scalar_functor_names.push_back (name);
-			scalar_functor_ptrs.push_back ((void *) scalar_functor_ptr);
-			TRACE ("Functor appended.");
-		}
-
+		
 		/*!*******************************************************************
 		 * \brief A function to output the data to file
 		 * 
@@ -174,7 +121,17 @@ namespace io
 		virtual ~formatted_output () {
 			format::close_file (file_name.c_str (), output::file_format);
 		}
-
+		
+		virtual func_t *get_function (const float *ptr) {
+			return &format::template write <float>;
+		}
+		virtual func_t *get_function (const double *ptr) {
+			return &format::template write <double>;
+		}
+		virtual func_t *get_function (const int *ptr) {
+			return &format::template write <int>;
+		}
+		
 		/*!**********************************************************************
 		 * \copybrief output::to_file
 		 ************************************************************************/
@@ -185,57 +142,16 @@ namespace io
 	
 			format::open_file (grid, file_name.c_str (), output::file_format);
 	
-			// Output the scalars
-			for (int i = 0; i < (int) scalar_names.size (); ++i) {
-				if (scalar_types [i] == &typeid (double)) {
-					format::template write_scalar <double> (file_name, scalar_names [i], (double *) scalar_ptrs [i], record);
-				} else if (scalar_types [i] == &typeid (float)) {
-					format::template write_scalar <float> (file_name, scalar_names [i], (float *) scalar_ptrs [i], record);
-				} else if (scalar_types [i] == &typeid (int)) {
-					format::template write_scalar <int> (file_name, scalar_names [i], (int *) scalar_ptrs [i], record);
-				} else {
-					throw 0;
-				}
-			}
-	
 			// Output the scalar_functors
-			for (int i = 0; i < (int) scalar_functor_names.size (); ++i) {
-				if (scalar_functor_types [i] == &typeid (double)) {
-					format::template write_scalar <double> (file_name, scalar_functor_names [i], ((functors::functor <double> *) scalar_functor_ptrs [i])->calculate (), record);
-				} else if (scalar_functor_types [i] == &typeid (float)) {
-					format::template write_scalar <float> (file_name, scalar_functor_names [i], ((functors::functor <float> *) scalar_functor_ptrs [i])->calculate (), record);
-				} else if (scalar_functor_types [i] == &typeid (int)) {
-					format::template write_scalar <int> (file_name, scalar_functor_names [i], ((functors::functor <int> *) scalar_functor_ptrs [i])->calculate (), record);
-				} else {
-					throw 0;
-				}
+			for (int i = 0; i < (int) functor_ptrs.size (); ++i) {
+				functor_ptrs [i]->calculate ();
 			}
-	
+			
 			// Output the array data
-			for (int i = 0; i < (int) names.size (); ++i) {
-				if (types [i] == &typeid (double)) {
-					format::template write <double> (grid, file_name, names [i], (double *) data_ptrs [i], record);
-				} else if (types [i] == &typeid (float)) {
-					format::template write <float> (grid, file_name, names [i], (float *) data_ptrs [i], record);
-				} else if (types [i] == &typeid (int)) {
-					format::template write <int> (grid, file_name, names [i], (int *) data_ptrs [i], record);
-				} else {
-					throw 0;
-				}
+			for (int i = 0; i < (int) write_functions.size (); ++i) {
+				write_functions [i] (grid, file_name, names [i], data_ptrs [i], record, dims [i]);
 			}
 	
-			// Output the results from the functors
-			for (int i = 0; i < (int) functor_names.size (); ++i) {
-				if (functor_types [i] == &typeid (double)) {
-					format::template write <double> (grid, file_name, functor_names [i], ((functors::functor <double> *) functor_ptrs [i])->calculate (), record);
-				} else if (functor_types [i] == &typeid (float)) {
-					format::template write <float> (grid, file_name, functor_names [i], ((functors::functor <float> *) functor_ptrs [i])->calculate (), record);
-				} else if (functor_types [i] == &typeid (int)) {
-					format::template write <int> (grid, file_name, functor_names [i], ((functors::functor <int> *) functor_ptrs [i])->calculate (), record);
-				} else {
-					throw 0;
-				}
-			}
 			if (output::file_format != append_file) {
 				format::close_file (file_name.c_str (), output::file_format);
 			}
