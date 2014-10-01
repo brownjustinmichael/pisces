@@ -13,7 +13,7 @@
 
 namespace io
 {
-	extern std::map <std::string, virtual_dump> virtual_dumps;
+	extern std::map <std::string, virtual_file> virtual_files;
 	
 	namespace formats
 	{
@@ -234,14 +234,14 @@ namespace io
 				static std::string extension () {return "";}
 			
 				static void open_file (std::string file_name, int file_type, int n_max, int m_max, int l_max) {
-					// if (file_type == read_file && (!virtual_dumps [file_name])) {
+					// if (file_type == read_file && (!virtual_files [file_name])) {
 						// ERROR ("Virtual file doesn't exist.");
 						// throw 0;
 					// } 
 					/*
 						TODO Check for virtual file existence
 					*/
-					virtual_dumps [file_name];
+					virtual_files [file_name];
 				}
 			
 				static void close_file (std::string file_name, int file_type) {
@@ -250,26 +250,26 @@ namespace io
 				template <class datatype>
 				static void write (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0, int record = -1) {
 					std::stringstream debug;
-					virtual_dumps [file_name].add_var <datatype> (name, n, m);
-					virtual_dumps [file_name].put <datatype> (name, (datatype *) data, n, m);
+					virtual_files [file_name].add_var <datatype> (name, n, m);
+					virtual_files [file_name].put <datatype> (name, (datatype *) data, n, m);
 					for (int i = 0; i < n; ++i) {
 						for (int j = 0; j < m; ++j) {
-							debug << data [i * m + j] << ":" << virtual_dumps [file_name].index <datatype> (name, i, j) << " ";
+							debug << data [i * m + j] << ":" << virtual_files [file_name].index <datatype> (name, i, j) << " ";
 						}
-						if (file_name == "main/dump") DEBUG (debug.str ());
+						if (file_name == "main/virtual_file") DEBUG (debug.str ());
 						debug.str ("");
 					}
 				}
 		
 				template <class datatype>
 				static void write_scalar (std::string file_name, std::string name, datatype *data, int record = -1) {
-					virtual_dumps [file_name].add_var <datatype> (name);
-					virtual_dumps [file_name].put <datatype> (name, (datatype *) data);
+					virtual_files [file_name].add_var <datatype> (name);
+					virtual_files [file_name].put <datatype> (name, (datatype *) data);
 				}
 		
 				template <class datatype>
 				static void read (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0, int record = -1) {
-					virtual_dumps [file_name].get <datatype> (name, (datatype *) data, n, m);
+					virtual_files [file_name].get <datatype> (name, (datatype *) data, n, m);
 					for (int i = 0; i < n; ++i) {
 						for (int j = 0; j < m; ++j) {
 							if (*(data + i * m + j) != *(data + i * m + j)) {
@@ -282,7 +282,7 @@ namespace io
 		
 				template <class datatype>
 				static void read_scalar (std::string file_name, std::string name, datatype *data, int record = -1) {
-					virtual_dumps [file_name].get <datatype> (name, (datatype *) data);
+					virtual_files [file_name].get <datatype> (name, (datatype *) data);
 				}
 			};
 			

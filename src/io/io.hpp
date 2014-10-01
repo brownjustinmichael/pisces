@@ -34,12 +34,12 @@ namespace io
 		append_file = 2
 	};
 
-	class virtual_dump;
+	class virtual_file;
 	
 	/*!**********************************************************************
-	 * \brief A map of virtual dumps to be used like disk output, i.e. every unique string input maps to exactly one virtual_dump object
+	 * \brief A map of virtual virtual_files to be used like disk output, i.e. every unique string input maps to exactly one virtual_file object
 	 ************************************************************************/
-	extern std::map <std::string, virtual_dump> virtual_dumps;
+	extern std::map <std::string, virtual_file> virtual_files;
 	
 	/*!**********************************************************************
 	 * \brief Returns the netCDF object associated with a given type
@@ -64,9 +64,9 @@ namespace io
 	}
 	
 	/*!**********************************************************************
-	 * \brief A class designed to act as a virtual dump file
+	 * \brief A class designed to act as a virtual virtual_file file
 	 ************************************************************************/
-	class virtual_dump
+	class virtual_file
 	{
 		std::map <std::string, void *> data_map; //!< A map containing void pointers to the data
 		std::map <std::string, const std::type_info *> types; //!< A map containing the types of the pointers in the data_map
@@ -78,9 +78,9 @@ namespace io
 			TODO The dims member is a bit messy
 		*/
 		
-		virtual_dump () {}
+		virtual_file () {}
 		
-		virtual ~virtual_dump () {
+		virtual ~virtual_file () {
 			for (std::map <std::string, void *>::iterator iter = data_map.begin (); iter != data_map.end (); iter++) {
 				free (iter->second);
 			}
@@ -89,21 +89,21 @@ namespace io
 		/*!**********************************************************************
 		 * \brief We redefine the assignment operator in order to perform a deep copy
 		 ************************************************************************/
-		virtual_dump &operator= (virtual_dump &dump) {
-			if (&dump == this) {
+		virtual_file &operator= (virtual_file &virtual_file) {
+			if (&virtual_file == this) {
 				return *this;
 			}
 		
-			for (std::map <std::string, void *>::iterator iter = dump.begin (); iter != dump.end (); ++iter) {
-				_add_var (iter->first, dump.types [iter->first], dump.sizes [iter->first], dump.dims [iter->first] [0], dump.dims [iter->first] [1]);
-				memcpy (data_map [iter->first], iter->second, dump.sizes [iter->first] * dump.dims [iter->first] [0] * dump.dims [iter->first] [1]);
+			for (std::map <std::string, void *>::iterator iter = virtual_file.begin (); iter != virtual_file.end (); ++iter) {
+				_add_var (iter->first, virtual_file.types [iter->first], virtual_file.sizes [iter->first], virtual_file.dims [iter->first] [0], virtual_file.dims [iter->first] [1]);
+				memcpy (data_map [iter->first], iter->second, virtual_file.sizes [iter->first] * virtual_file.dims [iter->first] [0] * virtual_file.dims [iter->first] [1]);
 			}
 		
 			return *this;
 		}
 		
 		/*!**********************************************************************
-		 * \brief Make an iterator at the start of the virtual_dump keys, for iterating through the keys
+		 * \brief Make an iterator at the start of the virtual_file keys, for iterating through the keys
 		 * 
 		 * I'm not certain this is a useful ability, considering that the contents can have varying types
 		 ************************************************************************/
@@ -112,14 +112,14 @@ namespace io
 		}
 		
 		/*!**********************************************************************
-		 * \brief Make an iterator at the end of the virtual_dump keys
+		 * \brief Make an iterator at the end of the virtual_file keys
 		 ************************************************************************/
 		std::map <std::string, void *>::iterator end () {
 			return data_map.end ();
 		}
 		
 		/*!**********************************************************************
-		 * \brief Reset the virtual_dump object and free its contents
+		 * \brief Reset the virtual_file object and free its contents
 		 ************************************************************************/
 		virtual void reset () {
 			for (std::map <std::string, void *>::iterator iter = data_map.begin (); iter != data_map.end (); iter++) {
@@ -186,7 +186,7 @@ namespace io
 		}
 		
 		/*!**********************************************************************
-		 * \brief Put data into the virtual_dump object
+		 * \brief Put data into the virtual_file object
 		 * 
 		 * \param name The string representation of the variable
 		 * \param data The pointer to the data to copy
@@ -210,7 +210,7 @@ namespace io
 		}
 		
 		/*!**********************************************************************
-		 * \brief Get the data from the virtual_dump object
+		 * \brief Get the data from the virtual_file object
 		 * 
 		 * \param name The string representation of the variable
 		 * \param data The pointer toward the final data location

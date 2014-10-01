@@ -150,17 +150,17 @@ namespace two_d
 			return this->ptr (name);
 		}
 		
-		virtual datatype calculate_timestep (int i, int j, io::virtual_dump *dump = NULL) = 0;
+		virtual datatype calculate_timestep (int i, int j, io::virtual_file *virtual_file = NULL) = 0;
 		
-		inline datatype calculate_min_timestep (io::virtual_dump *dump = NULL) {
+		inline datatype calculate_min_timestep (io::virtual_file *virtual_file = NULL) {
 			double shared_min = max_timestep / timestep_safety;
 			#pragma omp parallel 
 			{
 				double min = std::numeric_limits <double>::max ();
 				#pragma omp for nowait
-					for (int j = 1; j < (dump ? dump->dims ["z"] [1] : m) - 1; ++j) {
-						for (int i = 0; i < (dump ? dump->dims ["z"] [0] : n); ++i) {
-							min = std::min (calculate_timestep (i, j, dump), min);
+					for (int j = 1; j < (virtual_file ? virtual_file->dims ["z"] [1] : m) - 1; ++j) {
+						for (int i = 0; i < (virtual_file ? virtual_file->dims ["z"] [0] : n); ++i) {
+							min = std::min (calculate_timestep (i, j, virtual_file), min);
 						}
 					}
 				#pragma omp critical 
@@ -190,25 +190,25 @@ namespace two_d
 			}
 		}
 		
-		virtual io::virtual_dump *make_dump (int flags = 0x00) {
-			std::shared_ptr <io::virtual_dump> dump (new io::virtual_dump);
+		virtual io::virtual_file *make_virtual_file (int flags = 0x00) {
+			std::shared_ptr <io::virtual_file> virtual_file (new io::virtual_file);
 			
-			std::shared_ptr <io::output> virtual_output (new io::formatted_output <io::formats::two_d::virtual_format> ("two_d/element/dump", io::replace_file, n, m));
+			std::shared_ptr <io::output> virtual_output (new io::formatted_output <io::formats::two_d::virtual_format> ("two_d/element/virtual_file", io::replace_file, n, m));
 			bases::element <datatype>::setup_output (virtual_output);
 			
 			virtual_output->to_file ();
-			return &io::virtual_dumps ["two_d/element/dump"];
+			return &io::virtual_files ["two_d/element/virtual_file"];
 		}
 		
 		virtual std::shared_ptr <bases::grid <datatype>> generate_grid (bases::axis *axis, int index = -1) = 0;
 		
-		virtual io::virtual_dump *make_rezoned_dump (datatype *positions, io::virtual_dump *old_dump, int flags = 0x00) {
+		virtual io::virtual_file *make_rezoned_virtual_file (datatype *positions, io::virtual_file *old_virtual_file, int flags = 0x00) {
 			bases::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
 			std::shared_ptr <bases::grid <datatype>> vertical_grid = generate_grid (&vertical_axis);
 			
-			utils::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_dump, &io::virtual_dumps ["two_d/element/new_dump"]);
+			utils::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_virtual_file, &io::virtual_files ["two_d/element/new_virtual_file"]);
 			
-			return &io::virtual_dumps ["two_d/element/new_dump"];
+			return &io::virtual_files ["two_d/element/new_virtual_file"];
 		}
 		
 		/*

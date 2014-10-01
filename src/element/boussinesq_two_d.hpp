@@ -27,7 +27,7 @@ namespace two_d
 				
 				virtual ~boussinesq_element () {}
 				
-				datatype calculate_timestep (int i, int j, io::virtual_dump *dump = NULL);
+				datatype calculate_timestep (int i, int j, io::virtual_file *virtual_file = NULL);
 				
 				virtual void setup_output (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
 					bases::element <datatype>::setup_output (output_ptr, flags);
@@ -48,10 +48,10 @@ namespace two_d
 					output_ptr->template append_scalar_functor <double> ("wS", new io::weighted_average_functor <datatype> (n, m, &area [0], new io::product_functor <datatype> (n, m, ptr (z_velocity), ptr (composition))));
 				}
 				
-				virtual io::virtual_dump *make_dump (int flags = 0x00) {
+				virtual io::virtual_file *make_virtual_file (int flags = 0x00) {
 					std::shared_ptr <io::output> virtual_output;
 					if (flags & profile_only) {
-						virtual_output.reset (new io::formatted_output <io::formats::two_d::virtual_format> ("two_d/boussinesq/dump", io::replace_file, 1, m));
+						virtual_output.reset (new io::formatted_output <io::formats::two_d::virtual_format> ("two_d/boussinesq/virtual_file", io::replace_file, 1, m));
 						if (flags & timestep_only) {
 							virtual_output->append_functor <datatype> ("z", new io::average_functor <datatype> (ptr (z_position), n, m));
 							virtual_output->append_functor <datatype> ("w", new io::root_mean_square_functor <datatype> (ptr (z_velocity), n, m));
@@ -59,7 +59,7 @@ namespace two_d
 							bases::element <datatype>::setup_profile (virtual_output);
 						}
 					} else {
-						virtual_output.reset (new io::formatted_output <io::formats::two_d::virtual_format> ("two_d/boussinesq/dump", io::replace_file, n, m));
+						virtual_output.reset (new io::formatted_output <io::formats::two_d::virtual_format> ("two_d/boussinesq/virtual_file", io::replace_file, n, m));
 						if (flags & timestep_only) {
 							virtual_output->append <datatype> ("z", ptr (z_position));
 							virtual_output->append <datatype> ("x", ptr (x_position));
@@ -70,16 +70,16 @@ namespace two_d
 						}
 					}
 					virtual_output->to_file ();
-					return &io::virtual_dumps ["two_d/boussinesq/dump"];
+					return &io::virtual_files ["two_d/boussinesq/virtual_file"];
 				}
 				
-				virtual io::virtual_dump *make_rezoned_dump (datatype *positions, io::virtual_dump *old_dump, int flags = 0x00) {
+				virtual io::virtual_file *make_rezoned_virtual_file (datatype *positions, io::virtual_file *old_virtual_file, int flags = 0x00) {
 					bases::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
 					std::shared_ptr <bases::grid <datatype>> vertical_grid = element <datatype>::generate_grid (&vertical_axis);
 					
-					utils::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_dump, &io::virtual_dumps ["two_d/boussinesq/new_dump"]);
+					utils::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_virtual_file, &io::virtual_files ["two_d/boussinesq/new_virtual_file"]);
 					
-					return &io::virtual_dumps ["two_d/boussinesq/new_dump"];
+					return &io::virtual_files ["two_d/boussinesq/new_virtual_file"];
 				}
 				
 				using element <datatype>::ptr;

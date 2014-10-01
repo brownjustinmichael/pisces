@@ -109,15 +109,15 @@ namespace two_d
 			}
 			
 			template <class datatype>
-			datatype boussinesq_element <datatype>::calculate_timestep (int i, int j, io::virtual_dump *dump) {
-				if (dump) {
-					if (j == 0 || j == dump->dims ["z"] [1] - 1) {
+			datatype boussinesq_element <datatype>::calculate_timestep (int i, int j, io::virtual_file *virtual_file) {
+				if (virtual_file) {
+					if (j == 0 || j == virtual_file->dims ["z"] [1] - 1) {
 						return 1.0 / 0.0;
 					}
-					if (i == 0 || i == dump->dims ["z"] [0] - 1) {
-						return std::abs ((dump->index <datatype> ("z", i, j + 1) - dump->index <datatype> ("z", i, j - 1)) / dump->index <datatype> ("w", i, j) / advection_coeff) * cfl;
+					if (i == 0 || i == virtual_file->dims ["z"] [0] - 1) {
+						return std::abs ((virtual_file->index <datatype> ("z", i, j + 1) - virtual_file->index <datatype> ("z", i, j - 1)) / virtual_file->index <datatype> ("w", i, j) / advection_coeff) * cfl;
 					} else {
-						return std::min (std::abs ((dump->index <datatype> ("x", i + 1, j) - dump->index <datatype> ("x", i - 1, j)) / dump->index <datatype> ("u", i, j) / advection_coeff), std::abs ((dump->index <datatype> ("z", i, j + 1) - dump->index <datatype> ("z", i, j - 1)) / dump->index <datatype> ("w", i, j) / advection_coeff)) * cfl;
+						return std::min (std::abs ((virtual_file->index <datatype> ("x", i + 1, j) - virtual_file->index <datatype> ("x", i - 1, j)) / virtual_file->index <datatype> ("u", i, j) / advection_coeff), std::abs ((virtual_file->index <datatype> ("z", i, j + 1) - virtual_file->index <datatype> ("z", i, j - 1)) / virtual_file->index <datatype> ("w", i, j) / advection_coeff)) * cfl;
 					}
 				} else {
 					if (j == 0 || j == m - 1) {

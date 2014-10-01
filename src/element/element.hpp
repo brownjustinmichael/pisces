@@ -72,7 +72,7 @@ namespace bases
 		std::vector <std::shared_ptr <io::output>> normal_profiles; //!< An implementation to output in transform space
 
 		std::vector <int> solver_keys; //!< A vector of integer keys to the solvers map
-		io::virtual_dump *rezone_dump; //!< A shared_ptr to a virtual dump object, for rezoning
+		io::virtual_file *rezone_virtual_file; //!< A shared_ptr to a virtual virtual_file object, for rezoning
 		
 	public:
 		std::vector <int> transforms; //!< A vector of integer keys to the transform maps
@@ -411,7 +411,7 @@ namespace bases
 		 * 
 		 * \return The datatype recommended timestep for the next timestep
 		 ************************************************************************/
-		virtual datatype calculate_min_timestep (io::virtual_dump *dump = NULL) = 0;
+		virtual datatype calculate_min_timestep (io::virtual_file *virtual_file = NULL) = 0;
 		
 		/*!**********************************************************************
 		 * \brief Caculate the zoning that minimizes the timestep according to size constraints
@@ -429,13 +429,13 @@ namespace bases
 		 * 
 		 * Using a simulated annealing technique, rezone all the elements such that the timestep is minimized across them. This is an expensive operation and should be used sparingly.
 		 * 
-		 * \return A shared_ptr to a virtual_dump object containing the chosen rezoning
+		 * \return A shared_ptr to a virtual_file object containing the chosen rezoning
 		 ************************************************************************/
-		virtual io::virtual_dump *rezone_minimize_ts (datatype * positions, datatype min_size, datatype max_size, int n_tries = 20, int iters_fixed_t = 1000, datatype step_size = 1.0, datatype k = 1.0, datatype t_initial = 0.008, datatype mu_t = 1.003, datatype t_min = 2.0e-6) {
+		virtual io::virtual_file *rezone_minimize_ts (datatype * positions, datatype min_size, datatype max_size, int n_tries = 20, int iters_fixed_t = 1000, datatype step_size = 1.0, datatype k = 1.0, datatype t_initial = 0.008, datatype mu_t = 1.003, datatype t_min = 2.0e-6) {
 			TRACE ("Rezoning...");
 			transform (inverse_horizontal | inverse_vertical);
 
-			rezone_dump = make_dump (profile_only | timestep_only);
+			rezone_virtual_file = make_virtual_file (profile_only | timestep_only);
 			
 			rezone_union <datatype> rezone_data [(messenger_ptr->get_np () + 5)];
 			rezone_data [0].element_ptr = this;
@@ -469,7 +469,7 @@ namespace bases
 				}
 			}
 			
-			return make_rezoned_dump (positions, make_dump ());
+			return make_rezoned_virtual_file (positions, make_virtual_file ());
 		}
 		
 		/*!**********************************************************************
@@ -494,28 +494,28 @@ namespace bases
 		virtual datatype *_initialize (int i_name, datatype *initial_conditions = NULL, int i_flags = 0x00) = 0;
 		
 		/*!**********************************************************************
-		 * \brief Protected method to make a virtual dump of the current state
+		 * \brief Protected method to make a virtual virtual_file of the current state
 		 * 
 		 * \param flags The binary flags to pass to the method
 		 * 
 		 * This method needs to be overwritten in a subclass.
 		 * 
-		 * \return A shared_ptr to the dump of the current state
+		 * \return A shared_ptr to the virtual_file of the current state
 		 ************************************************************************/
-		virtual io::virtual_dump *make_dump (int flags = 0x00) = 0;
+		virtual io::virtual_file *make_virtual_file (int flags = 0x00) = 0;
 		
 		/*!**********************************************************************
-		 * \brief Protected method to rezone the current state into a virtual dump
+		 * \brief Protected method to rezone the current state into a virtual virtual_file
 		 * 
 		 * \param positions A datatype pointer to the zoning position array
-		 * \param dump_ptr A pointer to the dump to be rezoned (for speed)
+		 * \param virtual_file_ptr A pointer to the virtual_file to be rezoned (for speed)
 		 * \param flags The binary flags for method execution
 		 * 
 		 * The method needs to be overwritten in a subclass
 		 * 
-		 * \return A shared_ptr to the rezoned virtual dump
+		 * \return A shared_ptr to the rezoned virtual virtual_file
 		 ************************************************************************/
-		virtual io::virtual_dump *make_rezoned_dump (datatype *positions, io::virtual_dump *dump_ptr, int flags = 0x00) = 0;
+		virtual io::virtual_file *make_rezoned_virtual_file (datatype *positions, io::virtual_file *virtual_file_ptr, int flags = 0x00) = 0;
 		
 		/*!**********************************************************************
 		 * \brief Get the current zoning position array
@@ -541,7 +541,7 @@ namespace bases
 			for (int i = 0; i < ((rezone_union <datatype> *) i_rezone_data) [1].np + 1; ++i) {
 				positions [i] = ((rezone_union <datatype> *) i_rezone_data) [i + 4].position;
 			}
-			double timestep = element_ptr->calculate_min_timestep (element_ptr->make_rezoned_dump (positions, &*(element_ptr->rezone_dump), profile_only));
+			double timestep = element_ptr->calculate_min_timestep (element_ptr->make_rezoned_virtual_file (positions, &*(element_ptr->rezone_virtual_file), profile_only));
 			messenger_ptr->min (&timestep);
 			return -timestep;
 		}

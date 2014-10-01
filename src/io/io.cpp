@@ -10,7 +10,7 @@
 
 namespace io
 {	
-	std::map <std::string, virtual_dump> virtual_dumps;
+	std::map <std::string, virtual_file> virtual_files;
 	
 	YAML::Node parameters::operator [] (std::string key) {
 		std::istringstream ss (key);
