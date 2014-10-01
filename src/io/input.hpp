@@ -9,6 +9,8 @@
 #ifndef INPUT_HPP_EFD01D95
 #define INPUT_HPP_EFD01D95
 
+#include "logger/logger.hpp"
+
 #include "formats/format.hpp"
 #include "functors/functor.hpp"
 
@@ -23,15 +25,7 @@ namespace io
 	{
 	protected:
 		std::string file_name; //!< The string representation of the file
-		int n; //!< The integer number of points in the first dimension of the data
-		int m; //!< The integer number of points in the second dimension of the data
-		int l; //!< The integer number of points in the third dimension of the data
-		int n_max; //!< The integer total extent of the first dimension of the data
-		int m_max; //!< The integer total extent of the second dimension of the data
-		int l_max; //!< The integer total extent of the third dimension of the data
-		int n_offset; //!< The integer offset of the starting index in the first dimension
-		int m_offset; //!< The integer offset of the starting index in the second dimension
-		int l_offset; //!< The integer offset of the starting index in the third dimension
+		data_grid grid;
 		std::vector <std::string> names; //!< A vector of the string representations of the variables
 		std::vector <std::string> scalar_names; //!< A vector of the string representations of the scalar variables
 		std::vector <const std::type_info*> types; //!< A vector of the types of the variables
@@ -43,7 +37,7 @@ namespace io
 		/*!**********************************************************************
 		 * /copydoc output::output
 		 ************************************************************************/
-		input (std::string i_file_name = "in", int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 0, int i_m_max = 0, int i_l_max = 0, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) : file_name (i_file_name), n (i_n), m (i_m), l (i_l), n_max (i_n_max), m_max (i_m_max), l_max (i_l_max), n_offset (i_n_offset), m_offset (i_m_offset), l_offset (i_l_offset) {}
+		input (data_grid i_grid, std::string i_file_name = "in") : file_name (i_file_name), grid (i_grid) {}
 	
 		virtual ~input () {}
 	
@@ -112,8 +106,8 @@ namespace io
 		/*!**********************************************************************
 		 * \copydoc input::input
 		 ************************************************************************/
-		formatted_input (std::string i_file_name = "in", int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 0, int i_m_max = 0, int i_l_max = 0, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) :
-		input (i_file_name + format::extension (), i_n, i_m, i_l, i_n_max, i_m_max, i_l_max, i_n_offset, i_m_offset, i_l_offset) {}
+		formatted_input (data_grid i_grid, std::string i_file_name = "in") :
+		input (i_grid, i_file_name + format::extension ()) {}
 	
 		virtual ~formatted_input () {}
 	
@@ -123,7 +117,7 @@ namespace io
 		virtual void from_file (int record = -1) {
 			INFO ("Inputting from file " << file_name << "...");
 		
-			format::open_file (file_name.c_str (), read_file, n_max, m_max, l_max);
+			format::open_file (grid, file_name.c_str (), read_file);
 		
 			// Input the scalars from file
 			for (int i = 0; i < (int) scalar_names.size (); ++i) {
@@ -141,11 +135,11 @@ namespace io
 			// Input the arrays from file
 			for (int i = 0; i < (int) names.size (); ++i) {
 				if (types [i] == &typeid (double)) {
-					format::template read <double> (file_name, names [i], (double *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset, record);
+					format::template read <double> (grid, file_name, names [i], (double *) data_ptrs [i], record);
 				} else if (types [i] == &typeid (float)) {
-					format::template read <float> (file_name, names [i], (float *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset, record);
+					format::template read <float> (grid, file_name, names [i], (float *) data_ptrs [i], record);
 				} else if (types [i] == &typeid (int)) {
-					format::template read <int> (file_name, names [i], (int *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset, record);
+					format::template read <int> (grid, file_name, names [i], (int *) data_ptrs [i], record);
 				} else {
 					throw 0;
 				}

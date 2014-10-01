@@ -7,8 +7,10 @@
  ************************************************************************/
 
 #include <cxxtest/TestSuite.h>
-#include "io/io.hpp"
-#include "io/formats.hpp"
+#include "io/input.hpp"
+#include "io/output.hpp"
+#include "io/formats/netcdf.hpp"
+#include "io/formats/virtual.hpp"
 
 #define TEST_TINY 1.e-4
 
@@ -21,8 +23,8 @@ public:
 		double scalar, scalar_copy;
 		std::string file_name = "output";
 		{
-			io::formatted_output <io::formats::two_d::netcdf> output_stream (file_name, io::replace_file, n, m, 1, 0, 0, 0, 0, 0);
-	
+			io::formatted_output <io::formats::two_d::netcdf> output_stream (io::data_grid::two_d (n, m), file_name, io::replace_file);
+			
 			srand (1);
 			for (int i = 0; i < n; ++i) {
 				for (int j = 0; j < m; ++j) {
@@ -43,7 +45,7 @@ public:
 		}
 		scalar = 0.0;
 	
-		io::formatted_input <io::formats::two_d::netcdf> input_stream (file_name, n, m, 1, 0, 0, 0, 0, 0);
+		io::formatted_input <io::formats::two_d::netcdf> input_stream (io::data_grid::two_d (n, m), file_name);
 	
 		input_stream.append <double> ("test", &init [0]);
 		input_stream.append_scalar <double> ("scale", &scalar);
@@ -66,9 +68,8 @@ public:
 		std::vector <double> scalar (records), scalar_copy (records);
 	
 		srand (1);
-	
 		{
-			io::appender_output <io::formats::two_d::netcdf> output_stream (file_name, 1, n, m, 1, 0, 0, 0, 0, 0);
+			io::appender_output <io::formats::two_d::netcdf> output_stream (io::data_grid::two_d (n, m), file_name, 1);
 			for (int k = 0; k < records; ++k) {
 				output_stream.append <double> ("test", &init [k * n * m]);
 				output_stream.append_scalar <double> ("scale", &scalar [k]);
@@ -90,7 +91,7 @@ public:
 			}
 		}
 		
-		io::formatted_input <io::formats::two_d::netcdf> input_stream (file_name, n, m, 1, 0, 0, 0, 0, 0);
+		io::formatted_input <io::formats::two_d::netcdf> input_stream (io::data_grid::two_d (n, m), file_name);
 		
 		for (int k = 0; k < records; ++k) {
 			input_stream.append <double> ("test", &init [k * n * m]);
@@ -103,10 +104,11 @@ public:
 				}
 			}
 			TSM_ASSERT_DELTA ("IO scalar failure in appender netcdf", scalar [k], scalar_copy [k], TEST_TINY);
+			
 		}
 	}
 	
-	void test_virtual_dump () {
+	void test_virtual_file () {
 		int n = 100, m = 200;
 	
 		std::string file_name = "output_virtual";
@@ -115,7 +117,7 @@ public:
 	
 		srand (1);
 	
-		io::appender_output <io::formats::two_d::virtual_format> output_stream (file_name, 1, n, m, 1, 0, 0, 0, 0, 0);
+		io::appender_output <io::formats::two_d::virtual_format> output_stream (io::data_grid::two_d (n, m), file_name, 1);
 		output_stream.append <double> ("test", &init [0]);
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
@@ -128,7 +130,7 @@ public:
 		
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
-				TSM_ASSERT_DELTA ("IO failure in virtual format output", io::virtual_dumps [file_name].index <double> ("test", i, j), init_copy [i * m + j], TEST_TINY);
+				TSM_ASSERT_DELTA ("IO failure in virtual format output", io::virtual_files [file_name].index <double> ("test", i, j), init_copy [i * m + j], TEST_TINY);
 			}
 		}
 	
@@ -136,7 +138,7 @@ public:
 			init [i] = 0.0;
 		}
 		
-		io::formatted_input <io::formats::two_d::virtual_format> input_stream (file_name, n, m, 1, 0, 0, 0, 0, 0);
+		io::formatted_input <io::formats::two_d::virtual_format> input_stream (io::data_grid::two_d (n, m), file_name);
 		
 		input_stream.append <double> ("test", &init [0]);
 		input_stream.from_file ();

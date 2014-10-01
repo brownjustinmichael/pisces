@@ -39,7 +39,7 @@ namespace io
 			
 			static std::string extension () {return ".dat";}
 			
-			static void open_file (std::string file_name, int file_type, int n_max = 1, int m_max = 1, int l_max = 1) {
+			static void open_file (const data_grid &grid, std::string file_name, int file_type) {
 				if (file_type == read_file) {
 					file_streams [file_name].open (file_name, std::ostream::in);
 				} else if (file_type == replace_file) {
@@ -81,7 +81,7 @@ namespace io
 			}
 			
 			template <class datatype>
-			static void write (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0, int record = -1) {
+			static void write (const data_grid &grid, std::string file_name, std::string name, datatype *data, int record = -1) {
 				FATAL ("ASCII write not implemented");
 				throw 0;
 			}
@@ -99,7 +99,7 @@ namespace io
 			}
 			
 			template <class datatype>
-			static void read (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0, int record = -1) {
+			static void read (const data_grid &grid, std::string file_name, std::string name, datatype *data, int record = -1) {
 				FATAL ("ASCII read not implemented");
 				throw 0;
 			}

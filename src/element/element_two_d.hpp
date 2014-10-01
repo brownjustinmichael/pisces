@@ -194,7 +194,7 @@ namespace two_d
 		virtual io::formats::virtual_file *make_virtual_file (int flags = 0x00) {
 			std::shared_ptr <io::formats::virtual_file> virtual_file (new io::formats::virtual_file);
 			
-			std::shared_ptr <io::output> virtual_output (new io::formatted_output <io::formats::two_d::virtual_format> ("two_d/element/virtual_file", io::replace_file, n, m));
+			std::shared_ptr <io::output> virtual_output (new io::formatted_output <io::formats::two_d::virtual_format> (io::data_grid::two_d (n, m), "two_d/element/virtual_file", io::replace_file));
 			bases::element <datatype>::setup_output (virtual_output);
 			
 			virtual_output->to_file ();

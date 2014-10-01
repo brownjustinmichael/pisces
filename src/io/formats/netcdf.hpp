@@ -53,14 +53,15 @@ namespace io
 		
 				static std::string extension () {return ".cdf";}
 			
-				static void open_file (std::string file_name, int file_type, int n_max, int m_max, int l_max);
+				static void open_file (const data_grid &grid, std::string file_name, int file_type);
 		
 				static void close_file (std::string file_name, int file_type);
 			
 				template <class datatype>
-				static void write (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0, int record = -1) {
-					std::vector <size_t> offsets = {(size_t) (record < 0 ? records [file_name] : record), (size_t) n_offset, (size_t) m_offset};
-					std::vector <size_t> sizes = {(size_t) 1, (size_t) n, (size_t) m};
+				static void write (const data_grid &grid, std::string file_name, std::string name, datatype *data, int record = -1) {
+					std::vector <size_t> offsets = grid.offsets;
+					std::vector <size_t> sizes = grid.ns;
+					offsets [0] = record < 0 ? records [file_name] : record;
 					netCDF::NcVar ncdata = files [file_name]->getVar (name.c_str ());
 					if (ncdata.isNull ()) {
 						ncdata = files [file_name]->addVar (name.c_str (), netcdf_type (&typeid (datatype)), dims [file_name]);
@@ -70,7 +71,7 @@ namespace io
 				}
 		
 				template <class datatype>
-				static void write_scalar (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0, int record = -1) {
+				static void write_scalar (std::string file_name, std::string name, datatype *data, int record = -1) {
 					std::vector <netCDF::NcDim> scalar_dims = {dims [file_name] [0]};
 					// std::vector <netCDF::NcDim> scalar_dims;
 					std::vector <size_t> scalar_offset = {(size_t) (record < 0 ? records [file_name] : record)};
@@ -84,18 +85,19 @@ namespace io
 				}
 		
 				template <class datatype>
-				static void read (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0, int record = -1) {
+				static void read (const data_grid &grid, std::string file_name, std::string name, datatype *data, int record = -1) {
 					try {
-						std::vector <size_t> offsets = {(size_t) (record < 0 ? records [file_name] : record), (size_t) n_offset, (size_t) m_offset};
-						std::vector <size_t> sizes = {(size_t) 1, (size_t) n, (size_t) m};
+						std::vector <size_t> offsets = grid.offsets;
+						std::vector <size_t> sizes = grid.ns;
+						offsets [0] = record < 0 ? records [file_name] : record;
 						netCDF::NcVar ncdata = files [file_name]->getVar (name.c_str ());
 						if (ncdata.isNull ()) {
 							throw 0;
 						}
 						ncdata.getVar (offsets, sizes, data);
-						for (int i = 0; i < n; ++i) {
-							for (int j = 0; j < m; ++j) {
-								if (*(data + i * m + j) != *(data + i * m + j)) {
+						for (int i = 0; i < grid.get_n (0); ++i) {
+							for (int j = 0; j < grid.get_n (1); ++j) {
+								if (*(data + i * grid.get_n (1) + j) != *(data + i * grid.get_n (1) + j)) {
 									FATAL ("NaN read in. ");
 									throw 0;
 								}

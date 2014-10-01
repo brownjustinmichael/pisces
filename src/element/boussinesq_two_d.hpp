@@ -52,7 +52,7 @@ namespace two_d
 				virtual io::formats::virtual_file *make_virtual_file (int flags = 0x00) {
 					std::shared_ptr <io::output> virtual_output;
 					if (flags & profile_only) {
-						virtual_output.reset (new io::formatted_output <io::formats::two_d::virtual_format> ("two_d/boussinesq/virtual_file", io::replace_file, 1, m));
+						virtual_output.reset (new io::formatted_output <io::formats::two_d::virtual_format> (io::data_grid::two_d (1, m), "two_d/boussinesq/virtual_file", io::replace_file));
 						if (flags & timestep_only) {
 							virtual_output->append_functor <datatype> ("z", new io::functors::average_functor <datatype> (ptr (z_position), n, m));
 							virtual_output->append_functor <datatype> ("w", new io::functors::root_mean_square_functor <datatype> (ptr (z_velocity), n, m));
@@ -60,7 +60,7 @@ namespace two_d
 							bases::element <datatype>::setup_profile (virtual_output);
 						}
 					} else {
-						virtual_output.reset (new io::formatted_output <io::formats::two_d::virtual_format> ("two_d/boussinesq/virtual_file", io::replace_file, n, m));
+						virtual_output.reset (new io::formatted_output <io::formats::two_d::virtual_format> (io::data_grid::two_d (n, m), "two_d/boussinesq/virtual_file", io::replace_file));
 						if (flags & timestep_only) {
 							virtual_output->append <datatype> ("z", ptr (z_position));
 							virtual_output->append <datatype> ("x", ptr (x_position));

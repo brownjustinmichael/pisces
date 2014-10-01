@@ -9,7 +9,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "messenger/messenger.hpp"
-#include "io/io.hpp"
 #include <vector>
 #include <stdio.h>
 #include <cstdlib>

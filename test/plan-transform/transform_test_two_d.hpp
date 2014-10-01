@@ -8,8 +8,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include <fftw3.h>
-#include "io/io.hpp"
-#include "io/formats.hpp"
 
 #define TEST_TINY 1.e-4
 

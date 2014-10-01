@@ -9,6 +9,8 @@
 #ifndef OUTPUT_HPP_31603039
 #define OUTPUT_HPP_31603039
 
+#include "logger/logger.hpp"
+
 #include "formats/format.hpp"
 #include "functors/functor.hpp"
 
@@ -24,15 +26,7 @@ namespace io
 	protected:
 		std::string file_name; //!< The string file name
 		int file_format;
-		int n; //!< The integer number of points in the first dimension of the data
-		int m; //!< The integer number of points in the second dimension of the data
-		int l; //!< The integer number of points in the third dimension of the data
-		int n_max; //!< The integer total extent of the first dimension of the data
-		int m_max; //!< The integer total extent of the second dimension of the data
-		int l_max; //!< The integer total extent of the third dimension of the data
-		int n_offset; //!< The integer offset of the starting index in the first dimension
-		int m_offset; //!< The integer offset of the starting index in the second dimension
-		int l_offset; //!< The integer offset of the starting index in the third dimension
+		const data_grid grid;
 		std::vector <std::string> names; //!< A vector of the string representations of the variables
 		std::vector <std::string> scalar_names; //!< A vector of the string representations of the scalar variables
 		std::vector <std::string> functor_names; //!< A vector of the string representations of the functor variables
@@ -49,23 +43,10 @@ namespace io
 	public:
 		/*!*******************************************************************
 		 * \param i_file_name The string representation of the output file; do not include the extension; it will be added later
-		 * \param i_n The integer number of points in the first dimension of the data
-		 * \param i_m The integer number of points in the second dimension of the data
-		 * \param i_l The integer number of points in the third dimension of the data
-		 * \param i_n_max The integer total extent of the first dimension (including fill space; if 0, use i_n)
-		 * \param i_m_max The integer total extent of the second dimension (including fill space; if 0, use i_m)
-		 * \param i_l_max The integer total extent of the third dimension (including fill space; if 0, use i_l)
-		 * \param i_n_offset The integer offset of the starting index in the first dimension
-		 * \param i_m_offset The integer offset of the starting index in the second dimension
-		 * \param i_l_offset The integer offset of the starting index in the third dimension
 		 * 
 		 * This seems an extremely tedious way to do this. It might be superior to accept arrays or brace initialized lists
 		 *********************************************************************/
-		output (std::string i_file_name = "out", int i_file_format = replace_file, int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 0, int i_m_max = 0, int i_l_max = 0, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) : file_name (i_file_name), file_format (i_file_format), n (i_n), m (i_m), l (i_l), n_max (i_n_max ? i_n_max : n), m_max (i_m_max ? i_m_max : m), l_max (i_l_max ? i_l_max : l), n_offset (i_n_offset), m_offset (i_m_offset), l_offset (i_l_offset) {}
-
-		/*
-			TODO This is a mess... the abstract output shouldn't need to know about the dimensions
-		*/
+		output (data_grid i_grid, std::string i_file_name = "out", int i_file_format = replace_file) : file_name (i_file_name), file_format (i_file_format), grid (i_grid) {}
 
 		virtual ~output () {}
 
@@ -188,7 +169,7 @@ namespace io
 		/*!**********************************************************************
 		 * \copydoc output::output
 		 ************************************************************************/
-		formatted_output (std::string i_file_name = "out", int i_file_format = replace_file, int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 0, int i_m_max = 0, int i_l_max = 0, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) : output (i_file_name + format::extension (), i_file_format, i_n, i_m, i_l, i_n_max, i_m_max, i_l_max, i_n_offset, i_m_offset, i_l_offset) {}		
+		formatted_output (data_grid i_grid, std::string i_file_name = "out", int i_file_format = replace_file) : output (i_grid, i_file_name + format::extension (), i_file_format) {}		
 
 		virtual ~formatted_output () {
 			format::close_file (file_name.c_str (), output::file_format);
@@ -202,7 +183,7 @@ namespace io
 	
 			INFO ("Outputting to file " << file_name << "...");
 	
-			format::open_file (file_name.c_str (), output::file_format, n_max, m_max, l_max);
+			format::open_file (grid, file_name.c_str (), output::file_format);
 	
 			// Output the scalars
 			for (int i = 0; i < (int) scalar_names.size (); ++i) {
@@ -233,11 +214,11 @@ namespace io
 			// Output the array data
 			for (int i = 0; i < (int) names.size (); ++i) {
 				if (types [i] == &typeid (double)) {
-					format::template write <double> (file_name, names [i], (double *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset, record);
+					format::template write <double> (grid, file_name, names [i], (double *) data_ptrs [i], record);
 				} else if (types [i] == &typeid (float)) {
-					format::template write <float> (file_name, names [i], (float *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset, record);
+					format::template write <float> (grid, file_name, names [i], (float *) data_ptrs [i], record);
 				} else if (types [i] == &typeid (int)) {
-					format::template write <int> (file_name, names [i], (int *) data_ptrs [i], n, m, l, n_offset, m_offset, l_offset, record);
+					format::template write <int> (grid, file_name, names [i], (int *) data_ptrs [i], record);
 				} else {
 					throw 0;
 				}
@@ -246,11 +227,11 @@ namespace io
 			// Output the results from the functors
 			for (int i = 0; i < (int) functor_names.size (); ++i) {
 				if (functor_types [i] == &typeid (double)) {
-					format::template write <double> (file_name, functor_names [i], ((functors::functor <double> *) functor_ptrs [i])->calculate (), n, m, l, n_offset, m_offset, l_offset, record);
+					format::template write <double> (grid, file_name, functor_names [i], ((functors::functor <double> *) functor_ptrs [i])->calculate (), record);
 				} else if (functor_types [i] == &typeid (float)) {
-					format::template write <float> (file_name, functor_names [i], ((functors::functor <float> *) functor_ptrs [i])->calculate (), n, m, l, n_offset, m_offset, l_offset, record);
+					format::template write <float> (grid, file_name, functor_names [i], ((functors::functor <float> *) functor_ptrs [i])->calculate (), record);
 				} else if (functor_types [i] == &typeid (int)) {
-					format::template write <int> (file_name, functor_names [i], ((functors::functor <int> *) functor_ptrs [i])->calculate (), n, m, l, n_offset, m_offset, l_offset, record);
+					format::template write <int> (grid, file_name, functor_names [i], ((functors::functor <int> *) functor_ptrs [i])->calculate (), record);
 				} else {
 					throw 0;
 				}
@@ -282,8 +263,8 @@ namespace io
 		 * \param i_output_every The integer frequency of outputs
 		 * \copydoc formatted_output::formatted_output
 		 ************************************************************************/
-		incremental (std::string i_file_format, int i_output_every = 1, int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 0, int i_m_max = 0, int i_l_max = 0, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) :
-		formatted_output <format> ("", replace_file, i_n, i_m, i_l, i_n_max, i_m_max, i_l_max, i_n_offset, i_m_offset, i_l_offset),
+		incremental (data_grid i_grid, std::string i_file_format, int i_output_every = 1) :
+		formatted_output <format> (i_grid, "", replace_file),
 		file_format (i_file_format + format::extension ()),
 		output_every (i_output_every > 0 ? i_output_every : 1),
 		count (0) {}
@@ -320,7 +301,7 @@ namespace io
 		 * \param i_output_every The integer frequency of outputs
 		 * \copydoc formatted_output::formatted_output
 		 ************************************************************************/
-		appender_output (std::string i_file_name, int i_output_every = 1, int i_n = 1, int i_m = 1, int i_l = 1, int i_n_max = 0, int i_m_max = 0, int i_l_max = 0, int i_n_offset = 0, int i_m_offset = 0, int i_l_offset = 0) : formatted_output <format> (i_file_name, append_file, i_n, i_m, i_l, i_n_max, i_m_max, i_l_max, i_n_offset, i_m_offset, i_l_offset), output_every (i_output_every > 0 ? i_output_every : 1), count (0) {}
+		appender_output (data_grid i_grid, std::string i_file_name, int i_output_every = 1) : formatted_output <format> (i_grid, i_file_name, append_file), output_every (i_output_every > 0 ? i_output_every : 1), count (0) {}
 
 		virtual ~appender_output () {}
 

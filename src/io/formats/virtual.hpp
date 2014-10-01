@@ -14,6 +14,7 @@
 
 #include "logger/logger.hpp"
 
+#include "format.hpp"
 #include "exceptions.hpp"
 
 namespace io
@@ -235,7 +236,7 @@ namespace io
 	
 				static std::string extension () {return "";}
 		
-				static void open_file (std::string file_name, int file_type, int n_max, int m_max, int l_max) {
+				static void open_file (const data_grid &grid, std::string file_name, int file_type) {
 					// if (file_type == read_file && (!virtual_files [file_name])) {
 						// ERROR ("Virtual file doesn't exist.");
 						// throw 0;
@@ -250,17 +251,9 @@ namespace io
 				}
 		
 				template <class datatype>
-				static void write (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0, int record = -1) {
-					std::stringstream debug;
-					virtual_files [file_name].add_var <datatype> (name, n, m);
-					virtual_files [file_name].put <datatype> (name, (datatype *) data, n, m);
-					for (int i = 0; i < n; ++i) {
-						for (int j = 0; j < m; ++j) {
-							debug << data [i * m + j] << ":" << virtual_files [file_name].index <datatype> (name, i, j) << " ";
-						}
-						if (file_name == "main/virtual_file") DEBUG (debug.str ());
-						debug.str ("");
-					}
+				static void write (const data_grid &grid, std::string file_name, std::string name, datatype *data, int record = -1) {
+					virtual_files [file_name].add_var <datatype> (name, grid.get_n (0), grid.get_n (1));
+					virtual_files [file_name].put <datatype> (name, (datatype *) data, grid.get_n (0), grid.get_n (1));
 				}
 	
 				template <class datatype>
@@ -270,16 +263,8 @@ namespace io
 				}
 	
 				template <class datatype>
-				static void read (std::string file_name, std::string name, datatype *data, int n = 1, int m = 1, int l = 1, int n_offset = 0, int m_offset = 0, int l_offset = 0, int record = -1) {
-					virtual_files [file_name].get <datatype> (name, (datatype *) data, n, m);
-					for (int i = 0; i < n; ++i) {
-						for (int j = 0; j < m; ++j) {
-							if (*(data + i * m + j) != *(data + i * m + j)) {
-								FATAL ("NaN read in." << i << " " << j << " " << *(data + i * m + j));
-								throw 0;
-							}
-						}
-					}
+				static void read (const data_grid &grid, std::string file_name, std::string name, datatype *data, int record = -1) {
+					virtual_files [file_name].get <datatype> (name, (datatype *) data, grid.get_n (0), grid.get_n (1));
 				}
 	
 				template <class datatype>
