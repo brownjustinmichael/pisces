@@ -6,12 +6,6 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include "messenger/messenger.hpp"
-#include "plan/plan.hpp"
-// #include "one_d/element_one_d.hpp"
-#include "element/boussinesq_two_d.hpp"
-#include "logger/logger.hpp"
-#include "element/rezone.hpp"
 #include <memory>
 #include <omp.h>
 #include <ctime>
@@ -19,6 +13,14 @@
 #ifdef VTRACE
 #include "vt_user.h"
 #endif
+
+#include "logger/logger.hpp"
+#include "messenger/messenger.hpp"
+#include "io/formats/ascii.hpp"
+#include "io/formats/netcdf.hpp"
+#include "plan/plan.hpp"
+#include "element/boussinesq_two_d.hpp"
+#include "element/rezone.hpp"
 
 /*!*******************************************************************
  * \mainpage

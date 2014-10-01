@@ -6,13 +6,14 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include "messenger/messenger.hpp"
-#include "logger/logger.hpp"
-#include "plan/grid.hpp"
-#include "io/io.hpp"
-#include "io/formats.hpp"
 #include <sstream>
 #include <iomanip>
+
+#include "logger/logger.hpp"
+#include "io/io.hpp"
+#include "io/formats/netcdf.hpp"
+#include "messenger/messenger.hpp"
+#include "plan/grid.hpp"
 
 using namespace two_d::fourier::chebyshev;
 

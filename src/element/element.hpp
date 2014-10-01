@@ -19,6 +19,7 @@
 #include "plan/plan.hpp"
 #include "plan-solver/solver.hpp"
 #include "io/io.hpp"
+#include "io/formats/virtual.hpp"
 #include "plan/grid.hpp"
 #include "plan-transform/transform.hpp"
 #include "logger/logger.hpp"
@@ -72,7 +73,7 @@ namespace bases
 		std::vector <std::shared_ptr <io::output>> normal_profiles; //!< An implementation to output in transform space
 
 		std::vector <int> solver_keys; //!< A vector of integer keys to the solvers map
-		io::virtual_file *rezone_virtual_file; //!< A shared_ptr to a virtual virtual_file object, for rezoning
+		io::virtual_file *rezone_virtual_file; //!< A shared_ptr to a virtual file object, for rezoning
 		
 	public:
 		std::vector <int> transforms; //!< A vector of integer keys to the transform maps
@@ -494,7 +495,7 @@ namespace bases
 		virtual datatype *_initialize (int i_name, datatype *initial_conditions = NULL, int i_flags = 0x00) = 0;
 		
 		/*!**********************************************************************
-		 * \brief Protected method to make a virtual virtual_file of the current state
+		 * \brief Protected method to make a virtual file of the current state
 		 * 
 		 * \param flags The binary flags to pass to the method
 		 * 
@@ -505,7 +506,7 @@ namespace bases
 		virtual io::virtual_file *make_virtual_file (int flags = 0x00) = 0;
 		
 		/*!**********************************************************************
-		 * \brief Protected method to rezone the current state into a virtual virtual_file
+		 * \brief Protected method to rezone the current state into a virtual file
 		 * 
 		 * \param positions A datatype pointer to the zoning position array
 		 * \param virtual_file_ptr A pointer to the virtual_file to be rezoned (for speed)
@@ -513,7 +514,7 @@ namespace bases
 		 * 
 		 * The method needs to be overwritten in a subclass
 		 * 
-		 * \return A shared_ptr to the rezoned virtual virtual_file
+		 * \return A shared_ptr to the rezoned virtual file
 		 ************************************************************************/
 		virtual io::virtual_file *make_rezoned_virtual_file (datatype *positions, io::virtual_file *virtual_file_ptr, int flags = 0x00) = 0;
 		
