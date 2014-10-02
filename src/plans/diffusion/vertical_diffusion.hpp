@@ -87,7 +87,7 @@ namespace plans
 			class finite_vertical_diffusion : public implicit_plan <datatype>
 			{
 			public:
-				finite_vertical_diffusion (plans::solvers::equation <datatype> &i_solver, datatype i_coeff, datatype i_alpha) :
+				finite_vertical_diffusion (plans::equation <datatype> &i_solver, datatype i_coeff, datatype i_alpha) :
 				implicit_plan <datatype> (i_solver),
 				coeff (i_coeff),
 				alpha (i_alpha) {

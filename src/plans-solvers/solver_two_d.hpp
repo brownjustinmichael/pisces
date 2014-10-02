@@ -18,7 +18,7 @@
 namespace two_d
 {
 	template <class datatype>
-	class equation : public plans::solvers::equation <datatype>
+	class equation : public plans::equation <datatype>
 	{
 	private:
 		int n;
@@ -28,8 +28,8 @@ namespace two_d
 		plans::grid <datatype> &grid_n;
 		plans::grid <datatype> &grid_m;
 		
-		std::shared_ptr <plans::solvers::solver <datatype> > x_solver;
-		std::shared_ptr <plans::solvers::solver <datatype> > z_solver;
+		std::shared_ptr <plans::solver <datatype> > x_solver;
+		std::shared_ptr <plans::solver <datatype> > z_solver;
 		
 		std::vector <datatype> spectral_rhs_vec;
 		std::vector <datatype> real_rhs_vec;
@@ -39,12 +39,12 @@ namespace two_d
 		
 		std::shared_ptr <plans::plan <datatype> > transform;
 		
-		using plans::solvers::equation <datatype>::data;
-		using plans::solvers::equation <datatype>::element_flags;
-		using plans::solvers::equation <datatype>::component_flags;
+		using plans::equation <datatype>::data;
+		using plans::equation <datatype>::element_flags;
+		using plans::equation <datatype>::component_flags;
 		
 	public:
-		equation (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, datatype *i_data, int *i_element_flags, int *i_component_flags) : plans::solvers::equation <datatype> (i_data, i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), grid_n (i_grid_n), grid_m (i_grid_m) {
+		equation (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, datatype *i_data, int *i_element_flags, int *i_component_flags) : plans::equation <datatype> (i_data, i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), grid_n (i_grid_n), grid_m (i_grid_m) {
 			spectral_rhs_ptr = NULL;
 			real_rhs_ptr = NULL;
 		}
@@ -152,7 +152,7 @@ namespace two_d
 			}
 		}
 		
-		virtual void add_solver (std::shared_ptr <plans::solvers::solver <datatype>> i_solver, int flags = 0x00) {
+		virtual void add_solver (std::shared_ptr <plans::solver <datatype>> i_solver, int flags = 0x00) {
 			TRACE ("Adding solver...");
 			if (!(flags & not_x_solver)) {
 				DEBUG (1);
@@ -165,7 +165,7 @@ namespace two_d
 			TRACE ("Added.");
 		}
 		
-		virtual std::shared_ptr <plans::solvers::solver <datatype>> get_solver (int flags = 0x00) {
+		virtual std::shared_ptr <plans::solver <datatype>> get_solver (int flags = 0x00) {
 			if (!(flags & not_x_solver)) {
 				return x_solver;
 			}
@@ -178,20 +178,20 @@ namespace two_d
 		void add_plan (const typename plans::explicit_plan <datatype>::factory &factory, int flags) {
 			TRACE ("Adding plan...");
 			plans::grid <datatype>* grids [2] = {&grid_n, &grid_m};
-			plans::solvers::equation <datatype>::add_plan (factory.instance (grids, data, rhs_ptr (spectral_rhs), element_flags, component_flags), flags);
+			plans::equation <datatype>::add_plan (factory.instance (grids, data, rhs_ptr (spectral_rhs), element_flags, component_flags), flags);
 		}
 		
 		void add_plan (const typename plans::real_plan <datatype>::factory &factory, int flags) {
 			TRACE ("Adding plan...");
 			plans::grid <datatype>* grids [2] = {&grid_n, &grid_m};
-			plans::solvers::equation <datatype>::add_plan (factory.instance (grids, data, rhs_ptr (real_rhs), element_flags, component_flags), flags);
+			plans::equation <datatype>::add_plan (factory.instance (grids, data, rhs_ptr (real_rhs), element_flags, component_flags), flags);
 		}
 		
 		void add_plan (const typename plans::implicit_plan <datatype>::factory &factory, int flags) {
 			TRACE ("Adding plan...");
 			plans::grid <datatype>* grids [2] = {&grid_n, &grid_m};
 			datatype* matrices [2] = {matrix_ptr (0), matrix_ptr (1)};
-			plans::solvers::equation <datatype>::add_plan (factory.instance (grids, matrices, data, rhs_ptr (spectral_rhs), element_flags, component_flags), flags);
+			plans::equation <datatype>::add_plan (factory.instance (grids, matrices, data, rhs_ptr (spectral_rhs), element_flags, component_flags), flags);
 		}
 		
 	protected:
@@ -227,7 +227,7 @@ namespace two_d
 	namespace fourier
 	{
 		template <class datatype>
-		class collocation_solver : public plans::solvers::solver <datatype>
+		class collocation_solver : public plans::solver <datatype>
 		{
 		private:
 			int n;
@@ -265,8 +265,8 @@ namespace two_d
 			int overlap_n;
 			int lda;
 			
-			using plans::solvers::solver <datatype>::element_flags;
-			using plans::solvers::solver <datatype>::component_flags;
+			using plans::solver <datatype>::element_flags;
+			using plans::solver <datatype>::component_flags;
 			
 		public:
 			/*!**********************************************************************
@@ -283,7 +283,7 @@ namespace two_d
 			 * 0 0 boundary row for below element       0 0
 			 ************************************************************************/
 			collocation_solver (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
-			collocation_solver (plans::solvers::equation <datatype> &i_solver, utils::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n);
+			collocation_solver (plans::equation <datatype> &i_solver, utils::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n);
 			
 			virtual ~collocation_solver () {}
 			
@@ -296,7 +296,7 @@ namespace two_d
 		};
 		
 		template <class datatype>
-		class fourier_solver : public plans::solvers::solver <datatype>
+		class fourier_solver : public plans::solver <datatype>
 		{
 		private:
 			int n;
@@ -326,8 +326,8 @@ namespace two_d
 			int lda;
 			const datatype *pos_m;
 			
-			using plans::solvers::solver <datatype>::element_flags;
-			using plans::solvers::solver <datatype>::component_flags;
+			using plans::solver <datatype>::element_flags;
+			using plans::solver <datatype>::component_flags;
 			
 		public:
 			/*!**********************************************************************
@@ -344,7 +344,7 @@ namespace two_d
 			 * 0 0 boundary row for below element       0 0
 			 ************************************************************************/
 			fourier_solver (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
-			fourier_solver (plans::solvers::equation <datatype> &i_solver, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n);
+			fourier_solver (plans::equation <datatype> &i_solver, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n);
 			
 			virtual ~fourier_solver () {}
 			
@@ -357,11 +357,11 @@ namespace two_d
 		};
 		
 		template <class datatype>
-		class laplace_solver : public plans::solvers::solver <datatype>
+		class laplace_solver : public plans::solver <datatype>
 		{
 		public:
 			laplace_solver (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
-			laplace_solver (plans::solvers::equation <datatype> &i_solver, utils::messenger* i_messenger_ptr);
+			laplace_solver (plans::equation <datatype> &i_solver, utils::messenger* i_messenger_ptr);
 			
 			virtual ~laplace_solver () {}
 			
@@ -394,11 +394,11 @@ namespace two_d
 		};
 		
 		template <class datatype>
-		class incompressible_corrector : public plans::solvers::solver <datatype>
+		class incompressible_corrector : public plans::solver <datatype>
 		{
 		public:
 			incompressible_corrector (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype *i_rhs, datatype* i_data, datatype *i_data_x, datatype *i_data_z, int *i_element_flags, int *i_component_flags, int *i_component_x, int *i_component_z);
-			incompressible_corrector (plans::solvers::equation <datatype> &i_solver, plans::solvers::equation <datatype> &i_solver_x, plans::solvers::equation <datatype> &i_solver_z, utils::messenger* i_messenger_ptr);
+			incompressible_corrector (plans::equation <datatype> &i_solver, plans::equation <datatype> &i_solver_x, plans::equation <datatype> &i_solver_z, utils::messenger* i_messenger_ptr);
 			
 			virtual ~incompressible_corrector () {}
 			

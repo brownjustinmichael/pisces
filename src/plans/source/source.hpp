@@ -230,7 +230,7 @@ namespace plans
 	// 		class mixed_derivative_source : public real_plan <datatype>
 	// 		{
 	// 		public:
-	// 			mixed_derivative_source (plans::solvers::equation <datatype> &i_solver, datatype i_coeff, datatype* i_data_source_x, datatype* i_data_source_z) :
+	// 			mixed_derivative_source (plans::equation <datatype> &i_solver, datatype i_coeff, datatype* i_data_source_x, datatype* i_data_source_z) :
 	// 			real_plan <datatype> (i_solver),
 	// 			coeff (i_coeff),
 	// 			data_source_x (i_data_source_x),
