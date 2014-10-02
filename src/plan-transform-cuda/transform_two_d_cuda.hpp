@@ -134,11 +134,11 @@ namespace two_d
 			}
 		
 			void write () {
-				utils::matrix_copy (ldm, ldn, data_in, &data [0]);
+				linalg::matrix_copy (ldm, ldn, data_in, &data [0]);
 			}
 	
 			void read () {
-				utils::matrix_copy (ldm, ldn, &data [0], data_out);
+				linalg::matrix_copy (ldm, ldn, &data [0], data_out);
 			}
 		
 		private:

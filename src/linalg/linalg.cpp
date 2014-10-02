@@ -80,7 +80,7 @@ extern "C" void sgttrf_ (int *n, float *dl, float *d, float *du, float *du2, int
 extern "C" void sgttrs_ (char *trans, int *n, int *nrhs, float *dl, float *d, float *du, float *du2, int *ipiv, float *b, int *ldb, int *info);
 
 
-namespace utils
+namespace linalg
 {
 	void matrix_factorize (int m, int n, double* a, int *ipiv, int *info, int lda) {
 		int iinfo;
@@ -428,4 +428,4 @@ namespace utils
 			b [i * incb] /= a [i * inca]; 
 		}
 	}
-} /* utils */
+} /* linalg */

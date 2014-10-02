@@ -29,7 +29,7 @@ namespace two_d
 			alpha (i_alpha) {
 				if (matrix_m) {
 					for (int j = 0; j < m; ++j) {
-						utils::add_scaled (m, -coeff * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
+						linalg::add_scaled (m, -coeff * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
 					}
 				} else {
 					WARN ("No matrix");
@@ -42,10 +42,10 @@ namespace two_d
 				TRACE ("Operating..." << element_flags);
 				if (*component_flags & z_solve) {
 					if (1.0 - alpha != 0.0) {
-						utils::matrix_matrix_multiply (m, ldn, m, coeff * (1.0 - alpha), grid_m.get_data (2), data_in, 1.0, data_out, m);
+						linalg::matrix_matrix_multiply (m, ldn, m, coeff * (1.0 - alpha), grid_m.get_data (2), data_in, 1.0, data_out, m);
 					}
 				} else {
-					utils::matrix_matrix_multiply (m, ldn, m, coeff, grid_m.get_data (2), data_in, 1.0, data_out, m);
+					linalg::matrix_matrix_multiply (m, ldn, m, coeff, grid_m.get_data (2), data_in, 1.0, data_out, m);
 				}
 				TRACE ("Operation complete.");
 			}
@@ -91,7 +91,7 @@ namespace two_d
 			alpha (i_alpha) {
 				TRACE ("Instantiating...");
 				for (int j = 0; j < m; ++j) {
-					utils::add_scaled (m, -coeff * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
+					linalg::add_scaled (m, -coeff * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
 				}
 			}
 			

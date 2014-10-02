@@ -138,7 +138,7 @@ extern "C" void sgemm_ (char *transa, char *transb, int *m, int *n, int *k, floa
 extern "C" void dgemv_ (char *trans, int *m, int *n, double *alpha, double *a, int *lda, double *x, int *incx, double *beta, double *y, int *incy);
 extern "C" void dgemm_ (char *transa, char *transb, int *m, int *n, int *k, double *alpha, double *a, int *lda, double *b, int *ldb, double *beta, double *c, int *ldc);
 
-namespace utils
+namespace linalg
 {
 	void copy (int n, const float* x, float* y, int incx, int incy) {
 		if (x == y && incx == incy) {
@@ -414,4 +414,4 @@ namespace utils
 		}
 	}
 	
-} /* utils */
+} /* linalg */

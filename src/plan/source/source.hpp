@@ -34,7 +34,7 @@ namespace two_d
 			virtual void execute () {
 				TRACE ("Executing source...");
 				for (int j = 0; j < m; ++j) {
-					utils::add_scaled (ldn, coeff, data_source + j, data_out + j, m, m);
+					linalg::add_scaled (ldn, coeff, data_source + j, data_out + j, m, m);
 				}
 			
 			}
@@ -83,13 +83,13 @@ namespace two_d
 				if (*component_flags & transformed_vertical) {
 					transform->execute ();
 					for (int i = 2; i < ldn; i += 2) {
-						utils::add_scaled (m, coeff * 2.0 * acos (-1.0) / (grid_n [n - 1] - grid_n [0]) * (i / 2), &data_temp [0] + i * m, data_out + (i + 1) * m);
-						utils::add_scaled (m, coeff * -2.0 * acos (-1.0) / (grid_n [n - 1] - grid_n [0]) * (i / 2), &data_temp [0] + (i + 1) * m, data_out + i * m);
+						linalg::add_scaled (m, coeff * 2.0 * acos (-1.0) / (grid_n [n - 1] - grid_n [0]) * (i / 2), &data_temp [0] + i * m, data_out + (i + 1) * m);
+						linalg::add_scaled (m, coeff * -2.0 * acos (-1.0) / (grid_n [n - 1] - grid_n [0]) * (i / 2), &data_temp [0] + (i + 1) * m, data_out + i * m);
 					}
 				} else {
 					for (int i = 2; i < ldn; i += 2) {
-						utils::add_scaled (m, coeff * 2.0 * acos (-1.0) / (grid_n [n - 1] - grid_n [0]) * (i / 2), data_source + i * m, data_out + (i + 1) * m);
-						utils::add_scaled (m, coeff * -2.0 * acos (-1.0) / (grid_n [n - 1] - grid_n [0]) * (i / 2), data_source + (i + 1) * m, data_out + i * m);
+						linalg::add_scaled (m, coeff * 2.0 * acos (-1.0) / (grid_n [n - 1] - grid_n [0]) * (i / 2), data_source + i * m, data_out + (i + 1) * m);
+						linalg::add_scaled (m, coeff * -2.0 * acos (-1.0) / (grid_n [n - 1] - grid_n [0]) * (i / 2), data_source + (i + 1) * m, data_out + i * m);
 					}
 				}
 			}
@@ -162,7 +162,7 @@ namespace two_d
 			virtual void execute () {
 				TRACE ("Executing source...");
 				if (*component_flags & transformed_vertical) {
-					utils::matrix_matrix_multiply (m, ldn, m, coeff, grid_m.get_data (1), data_source, 1.0, data_out, m);
+					linalg::matrix_matrix_multiply (m, ldn, m, coeff, grid_m.get_data (1), data_source, 1.0, data_out, m);
 				} else {
 					#pragma omp parallel for
 					for (int i = 0; i < ldn; ++i) {

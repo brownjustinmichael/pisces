@@ -147,11 +147,11 @@ namespace two_d
 				// }
 				// DEBUG ("WRITING " << debug.str ());
 				// debug.str ("");
-				utils::matrix_copy (ldm, ldn, data_in, &data [0]);
+				linalg::matrix_copy (ldm, ldn, data_in, &data [0]);
 			}
 	
 			void read () {
-				utils::matrix_copy (ldm, ldn, &data [0], data_out);
+				linalg::matrix_copy (ldm, ldn, &data [0], data_out);
 				// std::stringstream debug;
 				// for (int i = 0; i < 2 * (32 / 2 + 1); ++i) {
 				// 	debug << data_out [i * 32 + 32 - 1] << " ";

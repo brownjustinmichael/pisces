@@ -46,12 +46,12 @@ namespace utils
 					}
 				}
 		
-				utils::matrix_switch (nn, input_virtual_file->dims [iter->first] [0], &(input_virtual_file->index <datatype> (iter->first)), &inter_buffer [nhere]);
+				linalg::matrix_switch (nn, input_virtual_file->dims [iter->first] [0], &(input_virtual_file->index <datatype> (iter->first)), &inter_buffer [nhere]);
 				inter_messenger->allgatherv <datatype> (nn * input_virtual_file->dims [iter->first] [0], &inter_buffer [0], &ns [0], &inter_buffer [0]);
-				utils::matrix_switch (input_virtual_file->dims [iter->first] [0], nsum, &inter_buffer [0], &value_buffer [0]);
+				linalg::matrix_switch (input_virtual_file->dims [iter->first] [0], nsum, &inter_buffer [0], &value_buffer [0]);
 				output_virtual_file->add_var <datatype> (iter->first, input_virtual_file->dims [iter->first] [0], input_grid->get_n ());
 
-				utils::interpolate <datatype> (output_grid->get_n (), output_virtual_file->dims [iter->first] [0], nsum, 1.0, 0.0, &position_buffer [0], &value_buffer [0], &((*output_grid) [0]), &(output_virtual_file->index <datatype> (iter->first)));
+				linalg::interpolate <datatype> (output_grid->get_n (), output_virtual_file->dims [iter->first] [0], nsum, 1.0, 0.0, &position_buffer [0], &value_buffer [0], &((*output_grid) [0]), &(output_virtual_file->index <datatype> (iter->first)));
 				for (int i = 0; i < output_virtual_file->dims [iter->first] [0]; ++i) {
 					for (int j = 0; j < output_virtual_file->dims [iter->first] [1]; ++j) {
 						if (std::isnan ((&(output_virtual_file->index <datatype> (iter->first))) [i * output_virtual_file->dims [iter->first] [1] + j])) {

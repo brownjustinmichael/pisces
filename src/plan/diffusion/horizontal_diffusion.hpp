@@ -44,14 +44,14 @@ namespace two_d
 						#pragma omp parallel for
 						for (int i = 2; i < ldn; ++i) {
 							DEBUG (-coeff * (1.0 - alpha) * pioL2 * (i / 2) * (i / 2));
-							utils::add_scaled (m, -coeff * (1.0 - alpha) * pioL2 * (i / 2) * (i / 2), data_in + i * m, data_out + i * m);
+							linalg::add_scaled (m, -coeff * (1.0 - alpha) * pioL2 * (i / 2) * (i / 2), data_in + i * m, data_out + i * m);
 						}
 					}
 				} else {
 					#pragma omp parallel for
 					for (int i = 2; i < ldn; ++i) {
 						DEBUG (-coeff * pioL2 * (i / 2) * (i / 2));
-						utils::add_scaled (m, -coeff * pioL2 * (i / 2) * (i / 2), data_in + i * m, data_out + i * m);
+						linalg::add_scaled (m, -coeff * pioL2 * (i / 2) * (i / 2), data_in + i * m, data_out + i * m);
 					}
 				}
 				TRACE ("Operation complete.");

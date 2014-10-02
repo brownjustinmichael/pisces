@@ -36,35 +36,35 @@ namespace utils
 		
 		int ldxx = 2 * nrhs;
 		double *bufferl = x, *bufferr = bufferl + n * nrhs, *xsub = bufferr + n * nrhs, *xdiag = xsub + ldxx, *xsup = xdiag + ldxx, *xsupsup = xsup + ldxx;
-		utils::scale (2 * nrhs * (n + 4), 0.0, x);
+		linalg::scale (2 * nrhs * (n + 4), 0.0, x);
 		
 		if (id != 0) {
-			copy (nrhs, sub, xsub, lda, ldx);
-			copy (nrhs, diag, xdiag, lda, ldx);
-			scale (nrhs, 0.0, xsup, ldx);
+			linalg::copy (nrhs, sub, xsub, lda, ldx);
+			linalg::copy (nrhs, diag, xdiag, lda, ldx);
+			linalg::scale (nrhs, 0.0, xsup, ldx);
 		}
 		if (id != np - 1) {
-			scale (nrhs, 0.0, xsub + 1, ldx);
-			copy (nrhs, diag + n + ntop + nbot - 1, xdiag + 1, lda, ldx);
-			copy (nrhs, sup + n + ntop + nbot - 1, xsup + 1, lda, ldx);
+			linalg::scale (nrhs, 0.0, xsub + 1, ldx);
+			linalg::copy (nrhs, diag + n + ntop + nbot - 1, xdiag + 1, lda, ldx);
+			linalg::copy (nrhs, sup + n + ntop + nbot - 1, xsup + 1, lda, ldx);
 		}
 		
 		for (int i = 0; i < nrhs; ++i) {
-			tridiagonal_factorize (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, info);
+			linalg::tridiagonal_factorize (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, info);
 		}
 		
 #ifdef _MPI
 		if (id != 0) {
-			copy (nrhs, sub + 1, bufferl, lda, n);
+			linalg::copy (nrhs, sub + 1, bufferl, lda, n);
 			for (int i = 0; i < nrhs; ++i) {
-				tridiagonal_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, &bufferl [i * n], info);
+				linalg::tridiagonal_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, &bufferl [i * n], info);
 			}
 		}
 		
 		if (id != np - 1) {
-			copy (nrhs, sup + n + ntop + nbot - 2, bufferr + n - 1, lda, n);
+			linalg::copy (nrhs, sup + n + ntop + nbot - 2, bufferr + n - 1, lda, n);
 			for (int i = 0; i < nrhs; ++i) {
-				tridiagonal_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, &bufferr [i * n], info);
+				linalg::tridiagonal_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, &bufferr [i * n], info);
 			}
 		}
 		if (id != 0) {
@@ -111,13 +111,13 @@ namespace utils
 			xdiag = xsub + 2 * nrhs * np;
 			xsup = xdiag + 2 * nrhs * np;
 			xsupsup = xsup + 2 * nrhs * np;
-			copy (2 * nrhs * np, &bsub [0], xsub);
-			copy (2 * nrhs * np, &bdiag [0], xdiag);
-			copy (2 * nrhs * np, &bsup [0], xsup);
+			linalg::copy (2 * nrhs * np, &bsub [0], xsub);
+			linalg::copy (2 * nrhs * np, &bdiag [0], xdiag);
+			linalg::copy (2 * nrhs * np, &bsup [0], xsup);
 			
 		
 			for (int i = 0; i < nrhs; ++i) {
-				tridiagonal_factorize (2 * np - 2, xsub + 2 + i * ldbuff, xdiag + 1 + i * ldbuff, xsup + 1 + i * ldbuff, xsupsup + 1 + i * ldbuff, xipiv + i * ldbuff, info);
+				linalg::tridiagonal_factorize (2 * np - 2, xsub + 2 + i * ldbuff, xdiag + 1 + i * ldbuff, xsup + 1 + i * ldbuff, xsupsup + 1 + i * ldbuff, xipiv + i * ldbuff, info);
 			}
 			
 		} else {
@@ -154,11 +154,11 @@ namespace utils
 		}
 		double *bufferl = x, *bufferr = bufferl + n * nrhs, *xsub = bufferr + n * nrhs, *xdiag = xsub + ldxx, *xsup = xdiag + ldxx, *xsupsup = xsup + ldxx;
 		
-		add_scaled (ntop * nrhs, 1.0, b, &y [0], ldb, ldy);
-		add_scaled (nbot * nrhs, 1.0, b + ntop + n, &y [1], ldb, ldy);
+		linalg::add_scaled (ntop * nrhs, 1.0, b, &y [0], ldb, ldy);
+		linalg::add_scaled (nbot * nrhs, 1.0, b + ntop + n, &y [1], ldb, ldy);
 		
 		for (int i = 0; i < nrhs; ++i) {
-			tridiagonal_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, b + ntop + i * ldb, info);
+			linalg::tridiagonal_solve (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, b + ntop + i * ldb, info);
 		}
 		
 #ifdef _MPI
@@ -188,10 +188,10 @@ namespace utils
 				}
 			}
 
-			copy (2 * nrhs * np, &buffer [0], &y [0]);
+			linalg::copy (2 * nrhs * np, &buffer [0], &y [0]);
 			
 			for (int i = 0; i < nrhs; ++i) {
-				tridiagonal_solve (2 * np - 2, xsub + 2 + i * ldx, xdiag + 1 + i * ldx, xsup + 1 + i * ldx, xsupsup + 1 + i * ldx, xipiv + i * ldx, &y [1 + i * ldbuff], info);
+				linalg::tridiagonal_solve (2 * np - 2, xsub + 2 + i * ldx, xdiag + 1 + i * ldx, xsup + 1 + i * ldx, xsupsup + 1 + i * ldx, xipiv + i * ldx, &y [1 + i * ldbuff], info);
 			}
 			
 			for (int i = 0; i < nrhs; ++i) {
@@ -201,7 +201,7 @@ namespace utils
 				}
 			}
 
-			copy (2 * nrhs * np, &buffer [0], &y [0]);
+			linalg::copy (2 * nrhs * np, &buffer [0], &y [0]);
 			
 			MPI::COMM_WORLD.Scatter (&y [0], 2 * nrhs, MPI::DOUBLE, &y [0], 2 * nrhs, MPI::DOUBLE, 0);
 		} else {
@@ -211,7 +211,7 @@ namespace utils
 		ldy = 2;
 				
 		if (id != 0) {
-			copy (nrhs, &y [0], b, ldy, ldb);
+			linalg::copy (nrhs, &y [0], b, ldy, ldb);
 			for (int i = 0; i < n; ++i) {
 				for (int j = 0; j < nrhs; ++j) {
 					b [ntop + i + j * ldb] -= bufferl [i + j * n] * y [j * ldy]; 
@@ -219,7 +219,7 @@ namespace utils
 			}
 		}
 		if (id != np - 1) {
-			copy (nrhs, &y [1], b + n + ntop + nbot - 1, ldy, ldb);
+			linalg::copy (nrhs, &y [1], b + n + ntop + nbot - 1, ldy, ldb);
 			for (int i = 0; i < n; ++i) {
 				for (int j = 0; j < nrhs; ++j) {
 					b [ntop + i + j * ldb] -= bufferr [i + j * n] * y [1 + j * ldy];
@@ -253,9 +253,9 @@ namespace utils
 			ldaa = n + ku + kl + ntop + nbot;
 		}
 		
-		utils::scale (nrhs * ldxx, 0.0, x);
-		utils::scale (nrhs * kl * n, 0.0, bufferl);
-		utils::scale (nrhs * ku * n, 0.0, bufferr);
+		linalg::scale (nrhs * ldxx, 0.0, x);
+		linalg::scale (nrhs * kl * n, 0.0, bufferl);
+		linalg::scale (nrhs * ku * n, 0.0, bufferr);
 		
 		DEBUG (n << " " << lda << " " << ldaa)
 
@@ -267,7 +267,7 @@ namespace utils
 				DEBUG (debug.str ());
 				debug.str ("");
 			}
-			matrix_banded_factorize (n, n, kl, ku, matrix + (i) * lda * ldaa + (kl + ntop) * lda, ipiv + i * n, info, lda);
+			linalg::matrix_banded_factorize (n, n, kl, ku, matrix + (i) * lda * ldaa + (kl + ntop) * lda, ipiv + i * n, info, lda);
 			for (int k = 0; k < 2 * kl + ku + 1; ++k) {
 				for (int j = 0; j < n; ++j) {
 					debug << matrix [i * lda * ldaa + (kl + ntop + j) * lda + k] << " ";
@@ -291,7 +291,7 @@ namespace utils
 					}
 				}
 
-				matrix_banded_solve (n, kl, ku, matrix + i * lda * ldaa + (ntop + kl) * lda, ipiv + i * n, &bufferl [i * n * kl], info, kl, lda);
+				linalg::matrix_banded_solve (n, kl, ku, matrix + i * lda * ldaa + (ntop + kl) * lda, ipiv + i * n, &bufferl [i * n * kl], info, kl, lda);
 
 				for (int j = 0; j < kl; ++j) {
 					for (int k = 0; k < ku; ++k) {
@@ -323,7 +323,7 @@ namespace utils
 					}
 				}
 
-				matrix_banded_solve (n, kl, ku, matrix + i * lda * ldaa + (ntop + kl) * lda, ipiv + i * n, &bufferr [i * n * ku], info, ku, lda);
+				linalg::matrix_banded_solve (n, kl, ku, matrix + i * lda * ldaa + (ntop + kl) * lda, ipiv + i * n, &bufferr [i * n * ku], info, ku, lda);
 
 				for (int j = 0; j < ku; ++j) {
 					if (id != 0) {
@@ -348,7 +348,7 @@ namespace utils
 			for (int q = 0; q < nrhs; ++q) {
 				MPI::COMM_WORLD.Gather (x + q * ldxx, 4 * (ku + kl) * (ku + kl), MPI::DOUBLE, &buffer [0], 4 * (ku + kl) * (ku + kl), MPI::DOUBLE, 0);
 
-				scale (ldx * ldx, 0.0, x + q * ldxx);
+				linalg::scale (ldx * ldx, 0.0, x + q * ldxx);
 
 				int bcur = 0, xcur = 0;
 				for (int i = 0; i < np - 1; ++i) {
@@ -374,7 +374,7 @@ namespace utils
 					debug.str ("");
 				}
 				
-				matrix_factorize ((ku + kl) * (np - 1), (ku + kl) * (np - 1), x + q * ldxx + (kl + ku) * (ldx + 1), xipiv + q * ldx, info, ldx);
+				linalg::matrix_factorize ((ku + kl) * (np - 1), (ku + kl) * (np - 1), x + q * ldxx + (kl + ku) * (ldx + 1), xipiv + q * ldx, info, ldx);
 			}
 
 		} else {
@@ -420,8 +420,8 @@ namespace utils
 			ldaa = n + ku + kl + ntop + nbot;
 		}
 
-		matrix_add_scaled (ntop, nrhs, 1.0, b, &y [kl], ldb, ldy);
-		matrix_add_scaled (nbot, nrhs, 1.0, b + ntop + n, &y [kl + ku], ldb, ldy);
+		linalg::matrix_add_scaled (ntop, nrhs, 1.0, b, &y [kl], ldb, ldy);
+		linalg::matrix_add_scaled (nbot, nrhs, 1.0, b + ntop + n, &y [kl + ku], ldb, ldy);
 		
 		DEBUG (n << " " << lda << " " << ldaa);
 
@@ -438,7 +438,7 @@ namespace utils
 				DEBUG ("MATRIX " << debug.str ());
 				debug.str ("");
 			}
-			matrix_banded_solve (n, kl, ku, matrix + i * lda * ldaa + (kl + ntop) * lda, ipiv + i * n, b + ntop + i * ldb, info, 1, lda);
+			linalg::matrix_banded_solve (n, kl, ku, matrix + i * lda * ldaa + (kl + ntop) * lda, ipiv + i * n, b + ntop + i * ldb, info, 1, lda);
 			for (int j = 0; j < n + ntop + nbot; ++j) {
 				debug << b [i * ldb + j] << " ";
 			}
@@ -476,7 +476,7 @@ namespace utils
 				bcur = 0;
 				
 				MPI::COMM_WORLD.Gather (&y [j * ldy], 2 * (kl + ku), mpi_type (&typeid (double)), &buffer [0], 2 * (kl + ku), mpi_type (&typeid (double)), 0);
-				utils::scale (ldy, 0.0, &y [j * ldy]);
+				linalg::scale (ldy, 0.0, &y [j * ldy]);
 				for (int i = 0; i < np; ++i) {
 						for (int k = 0; k < 2 * (ku + kl); ++k) {
 							y [j * ldy + ycur + k] += buffer [bcur + k];
@@ -485,7 +485,7 @@ namespace utils
 					bcur += 2 * (ku + kl);
 				}
 
-				matrix_solve ((ku + kl) * (np - 1), x + j * ldx * ldx + (kl + ku) * (ldx + 1), xipiv + j * ldx, &y [j * ldy + kl + ku], info, 1, ldx);
+				linalg::matrix_solve ((ku + kl) * (np - 1), x + j * ldx * ldx + (kl + ku) * (ldx + 1), xipiv + j * ldx, &y [j * ldy + kl + ku], info, 1, ldx);
 
 				ycur = 0;
 				bcur = 0;
@@ -507,18 +507,18 @@ namespace utils
 		}
 		
 		if (id != 0) {
-			matrix_copy (ntop, nrhs, &y [kl], b, ldy, ldb);
+			linalg::matrix_copy (ntop, nrhs, &y [kl], b, ldy, ldb);
 		}
 		if (id != np - 1) {
-			matrix_copy (nbot, nrhs, &y [kl + ku], b + ntop + n, ldy, ldb);
+			linalg::matrix_copy (nbot, nrhs, &y [kl + ku], b + ntop + n, ldy, ldb);
 		}
 		
 		for (int i = 0; i < nrhs; ++i) {
 			if (id != 0) {
-				matrix_matrix_multiply (n, 1, kl, -1.0, &bufferl [i * n * kl], &y [ku + i * ldy], 1.0, b + ntop + i * ldb, n, ldb, ldb);
+				linalg::matrix_matrix_multiply (n, 1, kl, -1.0, &bufferl [i * n * kl], &y [ku + i * ldy], 1.0, b + ntop + i * ldb, n, ldb, ldb);
 			}
 			if (id != np - 1) {
-				matrix_matrix_multiply (n, 1, ku, -1.0, &bufferr [i * n * ku], &y [kl + ku + i * ldy], 1.0, b + ntop + i * ldb, n, ldb, ldb);
+				linalg::matrix_matrix_multiply (n, 1, ku, -1.0, &bufferr [i * n * ku], &y [kl + ku + i * ldy], 1.0, b + ntop + i * ldb, n, ldb, ldb);
 			}
 		}
 #endif

@@ -9,7 +9,7 @@
 #ifndef UTILS_HPP_OOQZAQJE
 #define UTILS_HPP_OOQZAQJE
 
-namespace utils
+namespace linalg
 {
 	/*!*******************************************************************
 	 * \brief Copies a double array into another
@@ -178,6 +178,6 @@ namespace utils
 
 	void diagonal_multiply (int n, double alpha, double *a, double *x, double beta, double *y, int inca = 1, int incx = 1, int incy = 1);
 
-} /* utils */
+} /* linalg */
 
 #endif /* end of include guard: UTILS_HPP_OOQZAQJE */

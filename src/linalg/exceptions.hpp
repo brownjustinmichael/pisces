@@ -12,43 +12,46 @@
 #include <exception>
 #include <sstream>
 
-namespace exceptions
+namespace linalg
 {
-	class already_factorized : public std::exception
+	namespace exceptions
 	{
-	public:
-		inline const char *what () const throw () {return "Matrix already factorized";}
-	};
+		class already_factorized : public std::exception
+		{
+		public:
+			inline const char *what () const throw () {return "Matrix already factorized";}
+		};
 	
-	class cannot_factor : public std::exception
-	{
-	public:
-		virtual const char *what () const throw () {return "Unable to factor matrix";}
-	};
+		class cannot_factor : public std::exception
+		{
+		public:
+			virtual const char *what () const throw () {return "Unable to factor matrix";}
+		};
 	
-	class cannot_solve : public std::exception
-	{
-	public:
-		inline const char *what () const throw () {return "Unable to solve matrix";}
-	};
+		class cannot_solve : public std::exception
+		{
+		public:
+			inline const char *what () const throw () {return "Unable to solve matrix";}
+		};
 	
-	class nan : public std::exception
-	{
-	public:
-		inline const char *what () const throw () {return "Nan detected";}
-	};
+		class nan : public std::exception
+		{
+		public:
+			inline const char *what () const throw () {return "Nan detected";}
+		};
 	
-	class mpi_fatal : public std::exception
-	{
-	public:
-		inline const char *what () const throw () {return "One or more MPI Processes failed";}
-	};
+		class mpi_fatal : public std::exception
+		{
+		public:
+			inline const char *what () const throw () {return "One or more MPI Processes failed";}
+		};
 	
-	class mesh_adapt : public std::exception
-	{
-	public:
-		inline const char *what () const throw () {return "Mesh adaptation needed";}
-	};
-} /* exceptions */
+		class mesh_adapt : public std::exception
+		{
+		public:
+			inline const char *what () const throw () {return "Mesh adaptation needed";}
+		};
+	} /* exceptions */
+} /* linalg */
 
 #endif /* end of include guard: EXCEPTIONS_HPP_82T7S9HQ */

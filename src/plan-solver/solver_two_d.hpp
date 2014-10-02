@@ -137,10 +137,10 @@ namespace two_d
 		
 		virtual void reset () {
 			if (spectral_rhs_ptr) {
-				utils::scale (ldn * m, 0.0, spectral_rhs_ptr);
+				linalg::scale (ldn * m, 0.0, spectral_rhs_ptr);
 			}
 			if (real_rhs_ptr) {
-				utils::scale (ldn * m, 0.0, real_rhs_ptr);
+				linalg::scale (ldn * m, 0.0, real_rhs_ptr);
 			}
 			
 			if (*component_flags & z_solve) {
@@ -209,7 +209,7 @@ namespace two_d
 			if (transform) transform->execute ();
 			
 			if (spectral_rhs_ptr && real_rhs_ptr) {
-				utils::matrix_add_scaled (m, ldn, 1.0, real_rhs_ptr, spectral_rhs_ptr);
+				linalg::matrix_add_scaled (m, ldn, 1.0, real_rhs_ptr, spectral_rhs_ptr);
 			}
 			
 			if (*component_flags & x_solve) {

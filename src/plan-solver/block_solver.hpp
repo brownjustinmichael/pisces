@@ -57,21 +57,21 @@ namespace utils
 			throw 0;
 		}
 				
-		matrix_copy (ntop, ntop, a, x, lda, ldb);
-		matrix_copy (nbot, ntop, a + ntop + n, x + ntop, lda, ldb);
-		matrix_copy (ntop, nbot, a + (ntop + n) * lda, x + ntop * ldb, lda, ldb);
-		matrix_copy (nbot, nbot, a + (ntop + n) * (lda + 1), x + ntop * (ldb + 1), lda, ldb);
+		linalg::matrix_copy (ntop, ntop, a, x, lda, ldb);
+		linalg::matrix_copy (nbot, ntop, a + ntop + n, x + ntop, lda, ldb);
+		linalg::matrix_copy (ntop, nbot, a + (ntop + n) * lda, x + ntop * ldb, lda, ldb);
+		linalg::matrix_copy (nbot, nbot, a + (ntop + n) * (lda + 1), x + ntop * (ldb + 1), lda, ldb);
 		
-		matrix_factorize (n, n, am, ipiv, info, lda);
+		linalg::matrix_factorize (n, n, am, ipiv, info, lda);
 		
-		matrix_solve (n, am, ipiv, al, info, ntop, lda, lda);
-		matrix_solve (n, am, ipiv, ar, info, nbot, lda, lda);
+		linalg::matrix_solve (n, am, ipiv, al, info, ntop, lda, lda);
+		linalg::matrix_solve (n, am, ipiv, ar, info, nbot, lda, lda);
 		
 #ifdef _MPI
-		matrix_matrix_multiply (ntop, ntop, n, -1.0, at, al, 1.0, x, lda, lda, ldb);
-		matrix_matrix_multiply (nbot, ntop, n, -1.0, ab, al, 1.0, x + ntop, lda, lda, ldb);
-		matrix_matrix_multiply (ntop, nbot, n, -1.0, at, ar, 1.0, x + ntop * ldx, lda, lda, ldb);
-		matrix_matrix_multiply (nbot, nbot, n, -1.0, ab, ar, 1.0, x + ntop * (ldx + 1), lda, lda, ldb);
+		linalg::matrix_matrix_multiply (ntop, ntop, n, -1.0, at, al, 1.0, x, lda, lda, ldb);
+		linalg::matrix_matrix_multiply (nbot, ntop, n, -1.0, ab, al, 1.0, x + ntop, lda, lda, ldb);
+		linalg::matrix_matrix_multiply (ntop, nbot, n, -1.0, at, ar, 1.0, x + ntop * ldx, lda, lda, ldb);
+		linalg::matrix_matrix_multiply (nbot, nbot, n, -1.0, ab, ar, 1.0, x + ntop * (ldx + 1), lda, lda, ldb);
 
 		if (id == 0) {
 			std::vector <datatype> buffer (n2tot);
@@ -85,7 +85,7 @@ namespace utils
 			MPI::COMM_WORLD.Gatherv (x, (ntop + nbot) * (ntop + nbot), MPI::DOUBLE, &buffer [0], &ns2 [0], &displs [0], MPI::DOUBLE, 0);
 
 			for (int i = 0; i < ntot; ++i) {
-				scale (ntot, 0.0, x + i * ldx);
+				linalg::scale (ntot, 0.0, x + i * ldx);
 			}
 			int bcur = 0, xcur = 0;
 			for (int i = 0; i < np - 1; ++i) {
@@ -103,7 +103,7 @@ namespace utils
 				}
 			}
 			
-			matrix_factorize (ntot, ntot, x, xipiv, info, ldx);
+			linalg::matrix_factorize (ntot, ntot, x, xipiv, info, ldx);
 		} else {
 			MPI::COMM_WORLD.Gatherv (x, (ntop + nbot) * (ntop + nbot), mpi_type (&typeid (datatype)), NULL, NULL, NULL, mpi_type (&typeid (datatype)), 0);
 		}
@@ -146,14 +146,14 @@ namespace utils
 			ldx = ldy;
 		}
 
-		matrix_add_scaled (ntop, nrhs, 1.0, b, &y [0], ldb, ntop + nbot);
-		matrix_add_scaled (nbot, nrhs, 1.0, b + ntop + n, &y [ntop], ldb, ntop + nbot);
+		linalg::matrix_add_scaled (ntop, nrhs, 1.0, b, &y [0], ldb, ntop + nbot);
+		linalg::matrix_add_scaled (nbot, nrhs, 1.0, b + ntop + n, &y [ntop], ldb, ntop + nbot);
 		
-		matrix_solve (n, am, ipiv, b + ntop, info, nrhs, lda, ldb);
+		linalg::matrix_solve (n, am, ipiv, b + ntop, info, nrhs, lda, ldb);
 				
 #ifdef _MPI
-		matrix_matrix_multiply (ntop, nrhs, n, -1.0, at, b + ntop, 1.0, &y [0], lda, ldb, ntop + nbot);
-		matrix_matrix_multiply (nbot, nrhs, n, -1.0, ab, b + ntop, 1.0, &y [ntop], lda, ldb, ntop + nbot);
+		linalg::matrix_matrix_multiply (ntop, nrhs, n, -1.0, at, b + ntop, 1.0, &y [0], lda, ldb, ntop + nbot);
+		linalg::matrix_matrix_multiply (nbot, nrhs, n, -1.0, ab, b + ntop, 1.0, &y [ntop], lda, ldb, ntop + nbot);
 			
 		if (id == 0) {
 			int ycur = 0, bcur = 0;
@@ -166,7 +166,7 @@ namespace utils
 				}
 			}
 			MPI::COMM_WORLD.Gatherv (&y [0], (ntop + nbot) * nrhs, mpi_type (&typeid (datatype)), &buffer [0], &nsp [0], &displs [0], mpi_type (&typeid (datatype)), 0);
-			utils::scale (nrhs * ldy, 0.0, &y [0]);
+			linalg::scale (nrhs * ldy, 0.0, &y [0]);
 			for (int i = 0; i < np; ++i) {
 				for (int j = 0; j < nrhs; ++j) {
 					for (int k = 0; k < nsp [i] / nrhs; ++k) {
@@ -177,7 +177,7 @@ namespace utils
 				bcur += nsp [i];
 			}
 			
-			matrix_solve (ldy, x, xipiv, &y [0], info, nrhs, ldx, ldy);
+			linalg::matrix_solve (ldy, x, xipiv, &y [0], info, nrhs, ldx, ldy);
 			
 			ycur = 0;
 			bcur = 0;
@@ -197,11 +197,11 @@ namespace utils
 			MPI::COMM_WORLD.Scatterv (NULL, NULL, NULL, mpi_type (&typeid (datatype)), &y [0], (ntop + nbot) * nrhs, mpi_type (&typeid (datatype)), 0);
 		}
 		
-		matrix_copy (ntop, nrhs, &y [0], b, ntop + nbot, ldb);
-		matrix_copy (nbot, nrhs, &y [ntop], b + ntop + n, ntop + nbot, ldb);
+		linalg::matrix_copy (ntop, nrhs, &y [0], b, ntop + nbot, ldb);
+		linalg::matrix_copy (nbot, nrhs, &y [ntop], b + ntop + n, ntop + nbot, ldb);
 		
-		matrix_matrix_multiply (n, nrhs, ntop, -1.0, al, b, 1.0, b + ntop, lda, ldb, ldb);
-		matrix_matrix_multiply (n, nrhs, nbot, -1.0, ar, b + ntop + n, 1.0, b + ntop, lda, ldb, ldb);
+		linalg::matrix_matrix_multiply (n, nrhs, ntop, -1.0, al, b, 1.0, b + ntop, lda, ldb, ldb);
+		linalg::matrix_matrix_multiply (n, nrhs, nbot, -1.0, ar, b + ntop + n, 1.0, b + ntop, lda, ldb, ldb);
 #endif
 	}
 	

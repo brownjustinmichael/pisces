@@ -119,11 +119,11 @@ namespace two_d
 			scalars [name].resize (grids [0]->get_ld () * m, 0.0);
 			if (name == x_position) {
 				for (int j = 0; j < m; ++j) {
-					utils::copy (n, &((*grids [0]) [0]), ptr (name, 0, j), 1, m);
+					linalg::copy (n, &((*grids [0]) [0]), ptr (name, 0, j), 1, m);
 				}
 			} else if (name == z_position) {
 				for (int i = 0; i < n; ++i) {
-					utils::copy (m, &((*grids [1]) [0]), ptr (name, i, 0));
+					linalg::copy (m, &((*grids [1]) [0]), ptr (name, i, 0));
 				}
 			} else {
 				if (initial_conditions) {
@@ -135,14 +135,14 @@ namespace two_d
 						}
 					} else if (i_flags & uniform_m) {
 						for (int j = 0; j < m; ++j) {
-							utils::copy (n, initial_conditions, ptr (name, 0, j), 1, m);
+							linalg::copy (n, initial_conditions, ptr (name, 0, j), 1, m);
 						}
 					} else if (i_flags & uniform_n) {
 						for (int i = 0; i < n; ++i) {
-							utils::copy (m, initial_conditions, ptr (name, i, 0));
+							linalg::copy (m, initial_conditions, ptr (name, i, 0));
 						}
 					} else {
-						utils::copy (n * m, initial_conditions, ptr (name));
+						linalg::copy (n * m, initial_conditions, ptr (name));
 					}
 				}
 			}

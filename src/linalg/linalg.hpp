@@ -12,7 +12,7 @@
 #include <cstddef>
 #include "messenger/messenger.hpp"
 
-namespace utils
+namespace linalg
 {
 	/*!*******************************************************************
 	 * \brief LU Decompose the matrix a
@@ -87,6 +87,6 @@ namespace utils
 	void diagonal_solve (int n, double *a, double *b, int inca = 1, int incb = 1);
 
 	void diagonal_solve (int n, float *a, float *b, int inca = 1, int incb = 1);
-} /* utils */
+} /* linalg */
 
 #endif /* end of include guard: UTILS_SOLVER_HPP_YSBJBB1J */

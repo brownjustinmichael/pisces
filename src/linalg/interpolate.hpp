@@ -14,7 +14,7 @@
 #include "logger/logger.hpp"
 #include <cmath>
 
-namespace utils
+namespace linalg
 {
 	/*!**********************************************************************
 	 * \brief Interpolate over the array dy at points in
@@ -123,6 +123,6 @@ namespace utils
 	 * \param x_0 The double value at which to interpolate
 	 ************************************************************************/
 	float dot_interpolate (int n, float* x, int m, float* y, float* f, float x_0);
-} /* utils */
+} /* linalg */
 
 #endif /* end of include guard: INTERPOLATE_HPP_IZNK7T4T */

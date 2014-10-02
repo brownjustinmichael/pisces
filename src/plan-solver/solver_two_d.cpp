@@ -121,7 +121,7 @@ namespace two_d
 
 			TRACE ("Factorizing...");
 
-			utils::matrix_copy (m, m, &matrix [0], &factorized_matrix [(ex_overlap_0) * (lda + 1)], m, lda);
+			linalg::matrix_copy (m, m, &matrix [0], &factorized_matrix [(ex_overlap_0) * (lda + 1)], m, lda);
 
 			/*
 				TODO Should we do the matrix copy before the edges?
@@ -136,11 +136,11 @@ namespace two_d
 				boundary_n->calculate_matrix (timestep, default_matrix + m - 1 - excess_n, &matrix [m - 1 - excess_n], default_matrix, &factorized_matrix [(ex_overlap_0) * (lda + 1) + m - 1 - excess_n], lda);
 			}
 
-			utils::matrix_scale (lda - 2 - excess_0 - ex_overlap_0 - excess_n - ex_overlap_n, lda, timestep, &factorized_matrix [ex_overlap_0 + 1 + excess_0], lda);
-			// utils::matrix_scale (lda, lda, timestep, &factorized_matrix [(ex_overlap_0) * (lda + 1)], lda);
+			linalg::matrix_scale (lda - 2 - excess_0 - ex_overlap_0 - excess_n - ex_overlap_n, lda, timestep, &factorized_matrix [ex_overlap_0 + 1 + excess_0], lda);
+			// linalg::matrix_scale (lda, lda, timestep, &factorized_matrix [(ex_overlap_0) * (lda + 1)], lda);
 
-			utils::matrix_add_scaled (m - 2 - excess_0 - excess_n, m, 1.0, default_matrix + excess_0 + 1, &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0 + 1], m, lda);
-			// utils::matrix_add_scaled (m, m, 1.0, default_matrix, &factorized_matrix [(ex_overlap_0) * (lda + 1)], m, lda);
+			linalg::matrix_add_scaled (m - 2 - excess_0 - excess_n, m, 1.0, default_matrix + excess_0 + 1, &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0 + 1], m, lda);
+			// linalg::matrix_add_scaled (m, m, 1.0, default_matrix, &factorized_matrix [(ex_overlap_0) * (lda + 1)], m, lda);
 
 			// for (int j = 0; j < lda; ++j) {
 			// 	for (int i = 0; i < lda; ++i) {
@@ -165,10 +165,10 @@ namespace two_d
 				TODO Add timestep check here?
 			*/
 
-			utils::scale ((ldn) * lda, 0.0, &data_temp [0]);
+			linalg::scale ((ldn) * lda, 0.0, &data_temp [0]);
 
 			if (rhs_ptr) {
-				utils::matrix_add_scaled (m, ldn, timestep, rhs_ptr, &data_temp [ex_overlap_0], m, lda);
+				linalg::matrix_add_scaled (m, ldn, timestep, rhs_ptr, &data_temp [ex_overlap_0], m, lda);
 			}
 
 			if (boundary_0) {
@@ -178,7 +178,7 @@ namespace two_d
 				boundary_n->calculate_rhs (data + m - 1 - excess_n, data, &data_temp [0], &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda, z_solve);
 			}
 			
-			utils::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
+			linalg::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
 
 			// DEBUG ("Solving in m direction..." << &factorized_matrix [0] << " " << &data_temp [0] << " " << &boundary_matrix [0]);
 		
@@ -210,13 +210,13 @@ namespace two_d
 							printf ("%f ", data_temp [ex_overlap_0 + k * m + j]);
 						}
 						printf ("\n");
-						throw exceptions::nan ();
+						throw linalg::exceptions::nan ();
 					}
 				}
 			}
 
 			TRACE ("Updating...");
-			utils::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data, lda, m);
+			linalg::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data, lda, m);
 
 			*component_flags |= transformed_vertical;
 
@@ -294,10 +294,10 @@ namespace two_d
 			
 			// DEBUG ("Solving in n direction");
 			
-			utils::scale ((ldn) * lda, 0.0, &data_temp [0]);
+			linalg::scale ((ldn) * lda, 0.0, &data_temp [0]);
 			
 			if (rhs_ptr) {
-				utils::matrix_add_scaled (m, ldn, timestep, rhs_ptr, &data_temp [ex_overlap_0], m, lda);
+				linalg::matrix_add_scaled (m, ldn, timestep, rhs_ptr, &data_temp [ex_overlap_0], m, lda);
 			}
 			
 			if (boundary_0) {
@@ -307,7 +307,7 @@ namespace two_d
 				boundary_n->calculate_rhs (data + m - 1 - excess_n, data, &data_temp [0], &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda, x_solve);
 			}
 			
-			utils::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
+			linalg::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
 			
 			if (boundary_0) {
 				boundary_0->send (&data_temp [0], lda);
@@ -339,9 +339,9 @@ namespace two_d
 			// }
 			
 			for (int j = excess_0; j < m - excess_n; ++j) {
-				utils::diagonal_solve (ldn, &factorized_horizontal_matrix [0], &data_temp [ex_overlap_0 + j], 1, lda);
+				linalg::diagonal_solve (ldn, &factorized_horizontal_matrix [0], &data_temp [ex_overlap_0 + j], 1, lda);
 			}
-			utils::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data, lda);
+			linalg::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data, lda);
 			
 			for (int i = 0; i < ldn; ++i) {
 				for (int j = excess_0 - 1; j >= 0; --j) {
@@ -524,16 +524,16 @@ namespace two_d
 			
 			if (rhs_ptr) {
 				// DEBUG (data+nbegin);
-				utils::matrix_copy (mm, ldn, rhs_ptr, data + nbegin);
+				linalg::matrix_copy (mm, ldn, rhs_ptr, data + nbegin);
 			}
 			
 			if (id == 0) {
-				utils::scale (ldn, 0.0, data + nbegin, m);
+				linalg::scale (ldn, 0.0, data + nbegin, m);
 			}
 			if (id == np - 1) {
-				utils::scale (ldn, 0.0, data + m - 1 - excess_n, m);
+				linalg::scale (ldn, 0.0, data + m - 1 - excess_n, m);
 			}
-			utils::scale (2 * m, 0.0, data);
+			linalg::scale (2 * m, 0.0, data);
 			
 			int info;
 			
@@ -561,7 +561,7 @@ namespace two_d
 				for (int i = 0; i < ldn; ++i) {
 					if (std::isnan (data [i * m + j])) {
 						FATAL ("Nan in laplace solver.");
-						throw exceptions::nan ();
+						throw linalg::exceptions::nan ();
 					}
 				}
 			}
@@ -773,7 +773,7 @@ namespace two_d
 			int info;
 			TRACE ("Solving...");
 			
-			utils::scale ((m + 2) * ldn, 0.0, &data_temp [0]);
+			linalg::scale ((m + 2) * ldn, 0.0, &data_temp [0]);
 
 			if (!(*component_flags_x & transformed_vertical)) {
 				datatype scalar = acos (-1.0) * 2.0 / (pos_n [n - 1] - pos_n [0]);
@@ -833,7 +833,7 @@ namespace two_d
 				utils::p_block_banded_solve (id, np, m + (nbot == 0 ? 1 : -nbot - excess_n - 1) + (id == 0 ? 1: -excess_0 - ntop), 2, 1, &matrix [(id == 0 ? 0 : 1 + excess_0) * 6], &ipiv [0], &data_temp [(id == 0 ? 0 : 1 + excess_0)], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn, 6, m + 2 + 3, m + 2);
 				// throw 0;
 
-				utils::scale (2 * (m + 2), 0.0, &data_temp [0]);
+				linalg::scale (2 * (m + 2), 0.0, &data_temp [0]);
 
 				// for (int i = 2; i < ldn; ++i) {
 				// 	for (int j = 0; j < m; ++j) {
@@ -887,14 +887,14 @@ namespace two_d
 					}
 				}
 
-				utils::scale (2 * m, 0.0, data_z);
-				utils::scale (2 * m, 0.0, data_x);
+				linalg::scale (2 * m, 0.0, data_z);
+				linalg::scale (2 * m, 0.0, data_x);
 
 				for (int j = 0; j < m; ++j) {
 					for (int i = 0; i < ldn; ++i) {
 						if (std::isnan (data [i * m + j])) {
 							FATAL ("Nan in laplace solver.");
-							throw exceptions::nan ();
+							throw linalg::exceptions::nan ();
 						}
 					}
 				}
