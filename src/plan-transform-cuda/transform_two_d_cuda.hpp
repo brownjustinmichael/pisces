@@ -20,7 +20,7 @@ namespace two_d
 	namespace fourier
 	{
 		template <class datatype>
-		class horizontal_transform : public bases::plan <datatype>
+		class horizontal_transform : public plans::plan <datatype>
 		{
 		public:
 			/*!**********************************************************************
@@ -28,7 +28,7 @@ namespace two_d
 			 ************************************************************************/
 			horizontal_transform (int n, int m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags = 0);
 
-			horizontal_transform (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags = 0);
+			horizontal_transform (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags = 0);
 			
 			virtual ~horizontal_transform () {}
 			
@@ -47,7 +47,7 @@ namespace two_d
 		};
 		
 		template <class datatype>
-		class vertical_transform : public bases::plan <datatype>
+		class vertical_transform : public plans::plan <datatype>
 		{
 		public:
 			/*!**********************************************************************
@@ -55,7 +55,7 @@ namespace two_d
 			 ************************************************************************/
 			vertical_transform (int n, int m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags = 0);
 
-			vertical_transform (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags = 0);
+			vertical_transform (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags = 0);
 			
 			virtual ~vertical_transform () {}
 			
@@ -78,7 +78,7 @@ namespace two_d
 		class master_transform : public bases::master_transform <datatype>
 		{
 		public:
-			master_transform (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *element_flags, int *component_flags) : 
+			master_transform (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *element_flags, int *component_flags) : 
 			bases::master_transform <datatype> (element_flags, component_flags),
 			ldn (i_grid_n.ld),
 			ldm (i_grid_m.ld),
@@ -146,10 +146,10 @@ namespace two_d
 			datatype *data_in, *data_out;
 			utils::cuda::vector <datatype> data;
 			
-			bases::plan <datatype> *forward_horizontal_transform;
-			bases::plan <datatype> *forward_vertical_transform;
-			bases::plan <datatype> *inverse_horizontal_transform;
-			bases::plan <datatype> *inverse_vertical_transform;
+			plans::plan <datatype> *forward_horizontal_transform;
+			plans::plan <datatype> *forward_vertical_transform;
+			plans::plan <datatype> *inverse_horizontal_transform;
+			plans::plan <datatype> *inverse_vertical_transform;
 			
 			using bases::master_transform <datatype>::component_flags;
 		};

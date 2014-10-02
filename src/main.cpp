@@ -21,7 +21,7 @@
 #include "io/output.hpp"
 #include "io/formats/ascii.hpp"
 #include "io/formats/netcdf.hpp"
-#include "plan/plan.hpp"
+#include "plans/plan.hpp"
 #include "element/boussinesq_two_d.hpp"
 #include "element/rezone.hpp"
 
@@ -124,8 +124,8 @@ int main (int argc, char *argv[])
 
 		int n = config.get <int> ("grid.x.points");
 
-		bases::axis horizontal_axis (n, -config.get <double> ("grid.x.width") / 2.0, config.get <double> ("grid.x.width") / 2.0);
-		bases::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
+		plans::axis horizontal_axis (n, -config.get <double> ("grid.x.width") / 2.0, config.get <double> ("grid.x.width") / 2.0);
+		plans::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
 
 		// one_d::cosine::advection_diffusion_element <double> element (&vertical_axis, name, config, &process_messenger, 0x00);
 		std::shared_ptr <bases::element <double>> element (new two_d::fourier::chebyshev::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, &process_messenger, 0x00));
@@ -194,7 +194,7 @@ int main (int argc, char *argv[])
 			if (config.get <int> ("grid.rezone.check_every") > 0) {
 				io::virtual_files ["main/virtual_file"] = *(element->rezone_minimize_ts (&positions [0], config.get <double> ("grid.rezone.min_size"), config.get <double> ("grid.rezone.max_size"), config.get <int> ("grid.rezone.n_tries"), config.get <int> ("grid.rezone.iters_fixed_t"), config.get <double> ("grid.rezone.step_size"), config.get <double> ("grid.rezone.k"), config.get <double> ("grid.rezone.t_initial"), config.get <double> ("grid.rezone.mu_t"), config.get <double> ("grid.rezone.t_min")));
 
-				bases::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
+				plans::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
 				element.reset (new two_d::fourier::chebyshev::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, &process_messenger, 0x00));
 
 				/*

@@ -15,7 +15,7 @@ namespace two_d
 	{
 		template <>
 		horizontal_transform <float>::horizontal_transform (int n, int m, float* i_data_in, float* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags) :
-		bases::plan <float> (i_element_flags, i_component_flags),
+		plans::plan <float> (i_element_flags, i_component_flags),
 		n (n), 
 		m (m), 
 		data_in (i_data_in),
@@ -33,8 +33,8 @@ namespace two_d
 		}
 		
 		template <>
-		horizontal_transform <float>::horizontal_transform (bases::grid <float> &i_grid_n, bases::grid <float> &i_grid_m, float* i_data_in, float* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags) :
-		bases::plan <float> (i_element_flags, i_component_flags),
+		horizontal_transform <float>::horizontal_transform (plans::grid <float> &i_grid_n, plans::grid <float> &i_grid_m, float* i_data_in, float* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags) :
+		plans::plan <float> (i_element_flags, i_component_flags),
 		n (i_grid_n.n), 
 		m (i_grid_m.n), 
 		data_in (i_data_in),
@@ -58,7 +58,7 @@ namespace two_d
 		
 		template <>
 		horizontal_transform <double>::horizontal_transform (int n, int m, double* i_data_in, double* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags) :
-		bases::plan <double> (i_element_flags, i_component_flags),
+		plans::plan <double> (i_element_flags, i_component_flags),
 		n (n), 
 		m (m), 
 		data_in (i_data_in),
@@ -76,8 +76,8 @@ namespace two_d
 		}
 		
 		template <>
-		horizontal_transform <double>::horizontal_transform (bases::grid <double> &i_grid_n, bases::grid <double> &i_grid_m, double* i_data_in, double* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags) :
-		bases::plan <double> (i_element_flags, i_component_flags),
+		horizontal_transform <double>::horizontal_transform (plans::grid <double> &i_grid_n, plans::grid <double> &i_grid_m, double* i_data_in, double* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags) :
+		plans::plan <double> (i_element_flags, i_component_flags),
 		n (i_grid_n.n), 
 		m (i_grid_m.n), 
 		data_in (i_data_in),
@@ -144,7 +144,7 @@ namespace two_d
 		
 		template <>
 		vertical_transform <float>::vertical_transform (int n, int m, float* i_data_in, float* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags) :
-		bases::plan <float> (i_element_flags, i_component_flags),
+		plans::plan <float> (i_element_flags, i_component_flags),
 		n (n), 
 		m (m), 
 		data_in (i_data_in),
@@ -165,8 +165,8 @@ namespace two_d
 		}
 		
 		template <>
-		vertical_transform <float>::vertical_transform (bases::grid <float> &i_grid_n, bases::grid <float> &i_grid_m, float* i_data_in, float* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags) :
-		bases::plan <float> (i_element_flags, i_component_flags),
+		vertical_transform <float>::vertical_transform (plans::grid <float> &i_grid_n, plans::grid <float> &i_grid_m, float* i_data_in, float* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags) :
+		plans::plan <float> (i_element_flags, i_component_flags),
 		n (i_grid_n.n), 
 		m (i_grid_m.n), 
 		data_in (i_data_in),
@@ -193,7 +193,7 @@ namespace two_d
 		
 		template <>
 		vertical_transform <double>::vertical_transform (int n, int m, double* i_data_in, double* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags) :
-		bases::plan <double> (i_element_flags, i_component_flags),
+		plans::plan <double> (i_element_flags, i_component_flags),
 		n (n), 
 		m (m), 
 		data_in (i_data_in),
@@ -218,8 +218,8 @@ namespace two_d
 		}
 
 		template <>
-		vertical_transform <double>::vertical_transform (bases::grid <double> &i_grid_n, bases::grid <double> &i_grid_m, double* i_data_in, double* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags) :
-		bases::plan <double> (i_element_flags, i_component_flags),
+		vertical_transform <double>::vertical_transform (plans::grid <double> &i_grid_n, plans::grid <double> &i_grid_m, double* i_data_in, double* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags) :
+		plans::plan <double> (i_element_flags, i_component_flags),
 		n (i_grid_n.n), 
 		m (i_grid_m.n), 
 		data_in (i_data_in),
@@ -371,8 +371,8 @@ namespace one_d
 	namespace cuda
 	{
 		template <>
-		transform <double>::transform (bases::grid <double> &i_grid, double* i_data_in, double* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags) : 
-		bases::plan <double> (i_element_flags, i_component_flags), 
+		transform <double>::transform (plans::grid <double> &i_grid, double* i_data_in, double* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags) : 
+		plans::plan <double> (i_element_flags, i_component_flags), 
 		n (i_grid.n),
 		data_in (i_data_in),
 		data_out (i_data_out) {
@@ -385,8 +385,8 @@ namespace one_d
 		}
 	
 		template <>
-		transform <float>::transform (bases::grid <float> &i_grid, float* i_data_in, float* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags) : 
-		bases::plan <float> (i_element_flags, i_component_flags), 
+		transform <float>::transform (plans::grid <float> &i_grid, float* i_data_in, float* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags) : 
+		plans::plan <float> (i_element_flags, i_component_flags), 
 		n (i_grid.n),
 		data_in (i_data_in),
 		data_out (i_data_out) {

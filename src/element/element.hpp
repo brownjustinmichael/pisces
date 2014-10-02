@@ -24,8 +24,8 @@
 #include "io/parameters.hpp"
 #include "io/formats/virtual.hpp"
 #include "messenger/messenger.hpp"
-#include "plan/grid.hpp"
-#include "plan/plan.hpp"
+#include "plans/grid.hpp"
+#include "plans/plan.hpp"
 #include "plan-solver/solver.hpp"
 #include "plan-transform/transform.hpp"
 
@@ -54,7 +54,7 @@ namespace bases
 	class element
 	{
 	protected:
-		std::vector <bases::axis> axes; //!< A vector of axis objects, containing the basic grid information
+		std::vector <plans::axis> axes; //!< A vector of axis objects, containing the basic grid information
 		utils::messenger* messenger_ptr; //!< A pointer to the messenger object
 		int name; //!< An integer representation of the element, to be used in file output
 		int dimensions; //!< The integer number of dimensions in the element
@@ -63,12 +63,12 @@ namespace bases
 		datatype duration; //!< The datatype total simulated time
 		datatype timestep; //!< The datatype timestep length
 
-		std::vector <std::shared_ptr <grid <datatype>>> grids; //!< A vector of shared pointers to the collocation grids
+		std::vector <std::shared_ptr <plans::grid <datatype>>> grids; //!< A vector of shared pointers to the collocation grids
 		std::map <int, std::vector <datatype> > scalars; //!< A map of scalar vectors
 		std::map <int, std::string> scalar_names; //!< A map of string representations of the scalars
 		std::map <int, int> element_flags; //!< A map of integer flags
 		
-		std::map<int, std::shared_ptr <master_solver <datatype>>> solvers; //!< A vector of shared pointers to the matrix solvers
+		std::map<int, std::shared_ptr <plans::solvers::equation <datatype>>> solvers; //!< A vector of shared pointers to the matrix solvers
 		
 	private:
 		std::shared_ptr <io::output> normal_stream; //!< An implementation to output in normal space
@@ -185,7 +185,7 @@ namespace bases
 		 * \param i_name The integer solver name to add
 		 * \param i_solver_ptr A pointer to a solver object
 		 *********************************************************************/
-		inline void add_solver (int i_name, std::shared_ptr <master_solver <datatype> > i_solver_ptr) {
+		inline void add_solver (int i_name, std::shared_ptr <plans::solvers::equation <datatype> > i_solver_ptr) {
 			TRACE ("Adding solver...");
 			solvers [i_name] = i_solver_ptr;
 			solver_keys.push_back (i_name);
@@ -235,7 +235,7 @@ namespace bases
 		 * \param axis_ptr A pointer to an axis object, which contains the extent of the grid and number of gridpoints
 		 * \param 
 		 ************************************************************************/
-		virtual std::shared_ptr <grid <datatype>> generate_grid (bases::axis *axis_ptr, int index = -1) = 0;
+		virtual std::shared_ptr <plans::grid <datatype>> generate_grid (plans::axis *axis_ptr, int index = -1) = 0;
 		
 		/*!**********************************************************************
 		 * \brief Given an input stream, load all the relevant data into the element

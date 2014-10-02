@@ -34,8 +34,8 @@ namespace two_d
 	namespace fourier
 	{
 		template <class datatype>
-		collocation_solver <datatype>::collocation_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
-		bases::solver <datatype> (i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), data (i_data), messenger_ptr (i_messenger_ptr), timestep (i_timestep), positions (&(i_grid_m [0])), excess_0 (i_grid_m.get_excess_0 ()), excess_n (i_grid_m.get_excess_n ()), default_matrix (i_grid_m.get_data (0)) {
+		collocation_solver <datatype>::collocation_solver (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
+		plans::solvers::solver <datatype> (i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), data (i_data), messenger_ptr (i_messenger_ptr), timestep (i_timestep), positions (&(i_grid_m [0])), excess_0 (i_grid_m.get_excess_0 ()), excess_n (i_grid_m.get_excess_n ()), default_matrix (i_grid_m.get_data (0)) {
 			TRACE ("Building solver...");
 			matrix.resize (m * m, 0.0);
 			rhs_ptr = i_rhs;
@@ -72,8 +72,8 @@ namespace two_d
 		}
 		
 		template <class datatype>
-		collocation_solver <datatype>::collocation_solver (bases::master_solver <datatype> &i_solver, utils::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n) : 
-		bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags), n (i_solver.grid_ptr (0)->get_n ()),  ldn (i_solver.grid_ptr (0)->get_ld ()),  m (i_solver.grid_ptr (1)->get_n ()), data (i_solver.data_ptr ()), messenger_ptr (i_messenger_ptr),  timestep (i_timestep),  positions (&((*(i_solver.grid_ptr (1))) [0])), excess_0 (i_solver.grid_ptr (1)->get_excess_0 ()),  excess_n (i_solver.grid_ptr (1)->get_excess_n ()), default_matrix (i_solver.grid_ptr (1)->get_data (0)) {
+		collocation_solver <datatype>::collocation_solver (plans::solvers::equation <datatype> &i_solver, utils::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n) : 
+		plans::solvers::solver <datatype> (i_solver.element_flags, i_solver.component_flags), n (i_solver.grid_ptr (0)->get_n ()),  ldn (i_solver.grid_ptr (0)->get_ld ()),  m (i_solver.grid_ptr (1)->get_n ()), data (i_solver.data_ptr ()), messenger_ptr (i_messenger_ptr),  timestep (i_timestep),  positions (&((*(i_solver.grid_ptr (1))) [0])), excess_0 (i_solver.grid_ptr (1)->get_excess_0 ()),  excess_n (i_solver.grid_ptr (1)->get_excess_n ()), default_matrix (i_solver.grid_ptr (1)->get_data (0)) {
 			TRACE ("Building solver...");
 			matrix.resize (m * m);
 			rhs_ptr = i_solver.rhs_ptr (spectral_rhs);
@@ -109,7 +109,7 @@ namespace two_d
 			data_temp.resize (lda * ldn);
 			
 			/*
-				TODO Move this plan to master_solver
+				TODO Move this plan to equation
 			*/
 			TRACE ("Solver built.");
 		}
@@ -227,8 +227,8 @@ namespace two_d
 		template class collocation_solver <double>;
 		
 		template <class datatype>
-		fourier_solver <datatype>::fourier_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
-		bases::solver <datatype> (i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), data (i_data), timestep (i_timestep), excess_0 (i_grid_m.get_excess_0 ()), excess_n (i_grid_m.get_excess_n ()), pos_m (&i_grid_m [0]) {
+		fourier_solver <datatype>::fourier_solver (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
+		plans::solvers::solver <datatype> (i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), data (i_data), timestep (i_timestep), excess_0 (i_grid_m.get_excess_0 ()), excess_n (i_grid_m.get_excess_n ()), pos_m (&i_grid_m [0]) {
 			TRACE ("Building solver...");
 			horizontal_matrix.resize (ldn);
 			factorized_horizontal_matrix.resize (ldn);
@@ -249,8 +249,8 @@ namespace two_d
 		}
 		
 		template <class datatype>
-		fourier_solver <datatype>::fourier_solver (bases::master_solver <datatype> &i_solver, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n) : 
-		bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags), n (i_solver.grid_ptr (0)->get_n ()),  ldn (i_solver.grid_ptr (0)->get_ld ()),  m (i_solver.grid_ptr (1)->get_n ()), data (i_solver.data_ptr ()), timestep (i_timestep), excess_0 (i_solver.grid_ptr (1)->get_excess_0 ()),  excess_n (i_solver.grid_ptr (1)->get_excess_n ()), pos_m (&((*(i_solver.grid_ptr (1))) [0])) {
+		fourier_solver <datatype>::fourier_solver (plans::solvers::equation <datatype> &i_solver, datatype& i_timestep, std::shared_ptr <bases::boundary <datatype>> i_boundary_0, std::shared_ptr <bases::boundary <datatype>> i_boundary_n) : 
+		plans::solvers::solver <datatype> (i_solver.element_flags, i_solver.component_flags), n (i_solver.grid_ptr (0)->get_n ()),  ldn (i_solver.grid_ptr (0)->get_ld ()),  m (i_solver.grid_ptr (1)->get_n ()), data (i_solver.data_ptr ()), timestep (i_timestep), excess_0 (i_solver.grid_ptr (1)->get_excess_0 ()),  excess_n (i_solver.grid_ptr (1)->get_excess_n ()), pos_m (&((*(i_solver.grid_ptr (1))) [0])) {
 			TRACE ("Building solver...");
 			horizontal_matrix.resize (ldn);
 			factorized_horizontal_matrix.resize (ldn);
@@ -358,8 +358,8 @@ namespace two_d
 		template class fourier_solver <double>;
 		
 		template <class datatype>
-		laplace_solver <datatype>::laplace_solver (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
-		bases::solver <datatype> (i_element_flags, i_component_flags),
+		laplace_solver <datatype>::laplace_solver (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
+		plans::solvers::solver <datatype> (i_element_flags, i_component_flags),
 		n (i_grid_n.get_n ()), 
 		ldn (i_grid_n.get_ld ()), 
 		m (i_grid_m.get_n ()),
@@ -407,8 +407,8 @@ namespace two_d
 		}
 		
 		template <class datatype>
-		laplace_solver <datatype>::laplace_solver (bases::master_solver <datatype> &i_solver, utils::messenger* i_messenger_ptr) : 
-		bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags), n ((i_solver.grid_ptr (0))->get_n ()),
+		laplace_solver <datatype>::laplace_solver (plans::solvers::equation <datatype> &i_solver, utils::messenger* i_messenger_ptr) : 
+		plans::solvers::solver <datatype> (i_solver.element_flags, i_solver.component_flags), n ((i_solver.grid_ptr (0))->get_n ()),
 		ldn ((i_solver.grid_ptr (0))->get_ld ()),
 		m ((i_solver.grid_ptr (1))->get_n ()),
 		data (i_solver.data_ptr ()),
@@ -572,8 +572,8 @@ namespace two_d
 		template class laplace_solver <double>;
 		
 		template <class datatype>
-		incompressible_corrector <datatype>::incompressible_corrector (bases::grid <datatype> &i_grid_n, bases::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype *i_rhs, datatype* i_data, datatype *i_data_x, datatype *i_data_z, int *i_element_flags, int *i_component_flags, int * i_component_flags_x, int *i_component_flags_z) :
-		bases::solver <datatype> (i_element_flags, i_component_flags),
+		incompressible_corrector <datatype>::incompressible_corrector (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, utils::messenger* i_messenger_ptr, datatype *i_rhs, datatype* i_data, datatype *i_data_x, datatype *i_data_z, int *i_element_flags, int *i_component_flags, int * i_component_flags_x, int *i_component_flags_z) :
+		plans::solvers::solver <datatype> (i_element_flags, i_component_flags),
 		n (i_grid_n.get_n ()),
 		ldn (i_grid_n.get_ld ()),
 		m (i_grid_m.get_n ()),
@@ -626,8 +626,8 @@ namespace two_d
 		}
 
 		template <class datatype>
-		incompressible_corrector <datatype>::incompressible_corrector (bases::master_solver <datatype> &i_solver, bases::master_solver <datatype> &i_solver_x, bases::master_solver <datatype> &i_solver_z, utils::messenger* i_messenger_ptr) :
-		bases::solver <datatype> (i_solver.element_flags, i_solver.component_flags),
+		incompressible_corrector <datatype>::incompressible_corrector (plans::solvers::equation <datatype> &i_solver, plans::solvers::equation <datatype> &i_solver_x, plans::solvers::equation <datatype> &i_solver_z, utils::messenger* i_messenger_ptr) :
+		plans::solvers::solver <datatype> (i_solver.element_flags, i_solver.component_flags),
 		n ((i_solver.grid_ptr (0))->get_n ()),
 		ldn ((i_solver.grid_ptr (0))->get_ld ()),
 		m ((i_solver.grid_ptr (1))->get_n ()),

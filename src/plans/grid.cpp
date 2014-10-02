@@ -14,13 +14,13 @@
 #include "logger/logger.hpp"
 #include "grid.hpp"
 
-namespace bases
+namespace plans
 {
 	namespace chebyshev
 	{
 		template <class datatype>
 		grid <datatype>::grid (axis *i_axis_ptr) : 
-		bases::grid <datatype> (i_axis_ptr, 3) {
+		plans::grid <datatype> (i_axis_ptr, 3) {
 			TRACE ("Instantiating...");
 
 			scale = sqrt (2.0 / (n - 1));
@@ -55,7 +55,7 @@ namespace bases
 			// Use the recursion relations to calculate the correct value of the polynomial at the collocation point
 			if (exists (d, m, k)) {
 				// This value has already been calculated
-				return bases::grid <datatype>::index (d, m, k);
+				return plans::grid <datatype>::index (d, m, k);
 			} else if ((d == 2 && (m == 0 || m == 1)) || (d == 1 && m == 0)) {
 				// The first two polynomials of the second derivative and the first polynomial of the first derivative are 0.0
 				return 0.0;
@@ -88,7 +88,7 @@ namespace bases
 	{
 		template <class datatype>
 		grid <datatype>::grid (axis *i_axis_ptr) : 
-		bases::grid <datatype> (i_axis_ptr, 3) {
+		plans::grid <datatype> (i_axis_ptr, 3) {
 			TRACE ("Instantiating...");
 			
 			scale = sqrt (2.0 / (n - 1));
@@ -116,7 +116,7 @@ namespace bases
 	{
 		template <class datatype>
 		grid <datatype>::grid (axis *i_axis_ptr) : 
-		bases::grid <datatype> (i_axis_ptr, 3, 2 * (i_axis_ptr->get_n () / 2 + 1)) {
+		plans::grid <datatype> (i_axis_ptr, 3, 2 * (i_axis_ptr->get_n () / 2 + 1)) {
 			TRACE ("Instantiating...");
 
 			scale = 2.0 / sqrt (n);
@@ -138,10 +138,7 @@ namespace bases
 		
 	template class grid <double>;
 	} /* fourier */
-} /* bases */
-
-namespace bases
-{
+	
 	namespace chebyshev
 	{
 		template <class datatype>
@@ -157,7 +154,7 @@ namespace bases
 			for (int d = 0; d < 3; ++d) {
 				for (int k = 0; k < n; ++k) {
 					for (int m = 0; m < n; ++m) {
-						bases::grid <datatype>::index (d, m, k) = recursion (d, m, k);
+						plans::grid <datatype>::index (d, m, k) = recursion (d, m, k);
 						exists (d, m, k) = true;
 					}
 				}
@@ -165,15 +162,15 @@ namespace bases
 
 			for (int k = 0; k < n; ++k) {
 				for (int m = 0; m < n; ++m) {
-					bases::grid <datatype>::index (1, m, k) *= 2.0 / width;
-					bases::grid <datatype>::index (2, m, k) *= 2.0 / width * 2.0 / width;
+					plans::grid <datatype>::index (1, m, k) *= 2.0 / width;
+					plans::grid <datatype>::index (2, m, k) *= 2.0 / width * 2.0 / width;
 				}
 			}
 
 			for (int d = 0; d < 3; ++d) {
 				for (int k = 0; k < n; ++k) {
-					bases::grid <datatype>::index (d, 0, k) /= 2.0;
-					bases::grid <datatype>::index (d, n - 1, k) /= 2.0;
+					plans::grid <datatype>::index (d, 0, k) /= 2.0;
+					plans::grid <datatype>::index (d, n - 1, k) /= 2.0;
 				}
 			}
 		}
@@ -191,17 +188,17 @@ namespace bases
 			datatype pioL = std::acos (-1.0) / width;
 
 			for (int k = 0; k < n; ++k) {
-				bases::grid <datatype>::index (0, 0, k) = scale / 2.0;
-				bases::grid <datatype>::index (1, 0, k) = 0.0;
-				bases::grid <datatype>::index (2, 0, k) = 0.0;
+				plans::grid <datatype>::index (0, 0, k) = scale / 2.0;
+				plans::grid <datatype>::index (1, 0, k) = 0.0;
+				plans::grid <datatype>::index (2, 0, k) = 0.0;
 				for (int m = 1; m < n - 1; ++m) {
-					bases::grid <datatype>::index (0, m, k) = scale * std::cos (pioN * k * m);
-					bases::grid <datatype>::index (1, m, k) = (((datatype) -m) * pioL) * scale * std::sin (pioN * k * m);
-					bases::grid <datatype>::index (2, m, k) = -((datatype) m * m * pioL * pioL) * scale * std::cos (pioN * k * m);
+					plans::grid <datatype>::index (0, m, k) = scale * std::cos (pioN * k * m);
+					plans::grid <datatype>::index (1, m, k) = (((datatype) -m) * pioL) * scale * std::sin (pioN * k * m);
+					plans::grid <datatype>::index (2, m, k) = -((datatype) m * m * pioL * pioL) * scale * std::cos (pioN * k * m);
 				}
-				bases::grid <datatype>::index (0, n - 1, k) = scale / 2.0 * std::cos (pioN * k * (n - 1));
-				bases::grid <datatype>::index (1, n - 1, k) = (((datatype) -(n - 1)) * pioL) * scale / 2.0 * std::sin (pioN * k * (n - 1));
-				bases::grid <datatype>::index (2, n - 1, k) = -((datatype) (n - 1) * (n - 1) * pioL * pioL) * scale / 2.0 * std::cos (pioN * k * (n - 1));
+				plans::grid <datatype>::index (0, n - 1, k) = scale / 2.0 * std::cos (pioN * k * (n - 1));
+				plans::grid <datatype>::index (1, n - 1, k) = (((datatype) -(n - 1)) * pioL) * scale / 2.0 * std::sin (pioN * k * (n - 1));
+				plans::grid <datatype>::index (2, n - 1, k) = -((datatype) (n - 1) * (n - 1) * pioL * pioL) * scale / 2.0 * std::cos (pioN * k * (n - 1));
 			}
 		}
 		
@@ -214,35 +211,35 @@ namespace bases
 			width = positions [n - 1] - positions [0];
 
 			for (int k = 0; k < n; ++k) {
-				bases::grid <datatype>::index (0, 0, k) = scale / 2.0;
-				bases::grid <datatype>::index (0, 1, k) = 0.0;
-				bases::grid <datatype>::index (1, 0, k) = 0.0;
-				bases::grid <datatype>::index (1, 1, k) = 0.0;
-				bases::grid <datatype>::index (2, 0, k) = 0.0;
-				bases::grid <datatype>::index (2, 1, k) = 0.0;
+				plans::grid <datatype>::index (0, 0, k) = scale / 2.0;
+				plans::grid <datatype>::index (0, 1, k) = 0.0;
+				plans::grid <datatype>::index (1, 0, k) = 0.0;
+				plans::grid <datatype>::index (1, 1, k) = 0.0;
+				plans::grid <datatype>::index (2, 0, k) = 0.0;
+				plans::grid <datatype>::index (2, 1, k) = 0.0;
 				for (int m = 2; m < ld; m += 2) {
-					bases::grid <datatype>::index (0, m, k) = scale * std::cos (pioN * k * (m / 2));
-					bases::grid <datatype>::index (0, m + 1, k) = scale * std::sin (pioN * k * (m / 2));
-					bases::grid <datatype>::index (1, m, k) = (((datatype) -(m / 2)) / width) * scale * std::sin (pioN * k * (m / 2));
-					bases::grid <datatype>::index (1, m + 1, k) = (((datatype) (m / 2))/ width) * scale * std::cos (pioN * k * (m / 2));
-					bases::grid <datatype>::index (2, m, k) = -(((datatype) (m / 2) * (m / 2)) / width / width) * scale * std::cos (pioN * k * (m / 2));
-					bases::grid <datatype>::index (2, m + 1, k) = -(((datatype) (m / 2) * (m / 2)) / width / width) * scale * std::sin (pioN * k * (m / 2));
+					plans::grid <datatype>::index (0, m, k) = scale * std::cos (pioN * k * (m / 2));
+					plans::grid <datatype>::index (0, m + 1, k) = scale * std::sin (pioN * k * (m / 2));
+					plans::grid <datatype>::index (1, m, k) = (((datatype) -(m / 2)) / width) * scale * std::sin (pioN * k * (m / 2));
+					plans::grid <datatype>::index (1, m + 1, k) = (((datatype) (m / 2))/ width) * scale * std::cos (pioN * k * (m / 2));
+					plans::grid <datatype>::index (2, m, k) = -(((datatype) (m / 2) * (m / 2)) / width / width) * scale * std::cos (pioN * k * (m / 2));
+					plans::grid <datatype>::index (2, m + 1, k) = -(((datatype) (m / 2) * (m / 2)) / width / width) * scale * std::sin (pioN * k * (m / 2));
 				}
 			}
 		
-			bases::grid <datatype>::index (0, 1, n) = 1.0;
+			plans::grid <datatype>::index (0, 1, n) = 1.0;
 			for (int k = n + 1; k < ld; ++k) {
-				bases::grid <datatype>::index (0, k, k) = 1.0;
+				plans::grid <datatype>::index (0, k, k) = 1.0;
 			}
 			// for (d = 0; d < 3; ++d) {
 			// 	for (k = 0; k < n; ++k) {
-			// 		bases::grid <datatype>::index (d, 0, k) /= 2.0;
-			// 		bases::grid <datatype>::index (d, n - 1, k) /= 2.0;
+			// 		plans::grid <datatype>::index (d, 0, k) /= 2.0;
+			// 		plans::grid <datatype>::index (d, n - 1, k) /= 2.0;
 			// 	}
 			// }
 		}
 		
 	} /* fourier */
-} /* bases */
+} /* plans */
 
 #endif /* end of include guard: COLLOCATION_CPP_HV4P0UOP */

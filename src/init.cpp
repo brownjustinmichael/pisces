@@ -14,7 +14,7 @@
 #include "io/parameters.hpp"
 #include "io/formats/netcdf.hpp"
 #include "messenger/messenger.hpp"
-#include "plan/grid.hpp"
+#include "plans/grid.hpp"
 
 using namespace two_d::fourier::chebyshev;
 
@@ -63,8 +63,8 @@ int main (int argc, char *argv[])
 			excess_n = 1;
 		}
 
-		horizontal_grid <double>::type horizontal_grid (new bases::axis (n, position_n0, position_nn));
-		vertical_grid <double>::type vertical_grid (new bases::axis (m, position_m0, position_mm, excess_0, excess_n));
+		horizontal_grid <double>::type horizontal_grid (new plans::axis (n, position_n0, position_nn));
+		vertical_grid <double>::type vertical_grid (new plans::axis (m, position_m0, position_mm, excess_0, excess_n));
 
 		std::vector <double> temp (n * m);
 

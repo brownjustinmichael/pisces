@@ -39,7 +39,7 @@ namespace two_d
 	class element : public bases::element <datatype>
 	{
 	public:
-		element (bases::axis i_axis_n, bases::axis i_axis_m, int i_name, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_element_flags) : 
+		element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_element_flags) : 
 		bases::element <datatype> (i_name, 2, i_params, i_messenger_ptr, i_element_flags),
 		n (i_axis_n.get_n ()), m (i_axis_m.get_n ()) {
 			TRACE ("Instantiating...");
@@ -201,11 +201,11 @@ namespace two_d
 			return &io::virtual_files ["two_d/element/virtual_file"];
 		}
 		
-		virtual std::shared_ptr <bases::grid <datatype>> generate_grid (bases::axis *axis, int index = -1) = 0;
+		virtual std::shared_ptr <plans::grid <datatype>> generate_grid (plans::axis *axis, int index = -1) = 0;
 		
 		virtual io::formats::virtual_file *make_rezoned_virtual_file (datatype *positions, io::formats::virtual_file *old_virtual_file, int flags = 0x00) {
-			bases::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
-			std::shared_ptr <bases::grid <datatype>> vertical_grid = generate_grid (&vertical_axis);
+			plans::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
+			std::shared_ptr <plans::grid <datatype>> vertical_grid = generate_grid (&vertical_axis);
 			
 			utils::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_virtual_file, &io::virtual_files ["two_d/element/new_virtual_file"]);
 			
@@ -277,7 +277,7 @@ namespace two_d
 				/*!*******************************************************************
 				 * \copydoc one_d::element::element ()
 				 *********************************************************************/
-				element (bases::axis i_axis_n, bases::axis i_axis_m, int i_name, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_element_flags) : 
+				element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_element_flags) : 
 				two_d::element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_messenger_ptr, i_element_flags) {
 					TRACE ("Instantiating...");
 					initialize (x_position, "x");
@@ -295,11 +295,11 @@ namespace two_d
 					return mode;
 				}
 				
-				virtual std::shared_ptr <bases::grid <datatype>> generate_grid (bases::axis *axis, int index = -1) {
+				virtual std::shared_ptr <plans::grid <datatype>> generate_grid (plans::axis *axis, int index = -1) {
 					if (index == 0) {
-						return std::shared_ptr <bases::grid <datatype>> (new typename horizontal_grid <datatype>::type (axis));
+						return std::shared_ptr <plans::grid <datatype>> (new typename horizontal_grid <datatype>::type (axis));
 					} else if (index == 1 || index == -1) {
-						return std::shared_ptr <bases::grid <datatype>> (new typename vertical_grid <datatype>::type (axis));
+						return std::shared_ptr <plans::grid <datatype>> (new typename vertical_grid <datatype>::type (axis));
 					} else {
 						throw 0;
 					}
@@ -316,7 +316,7 @@ namespace two_d
 						element <datatype>::add_transform (name, std::shared_ptr <master_transform <datatype> > (new master_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &element_flags [state], &element_flags [name], transform_threads)));
 					}
 					if ((name != x_position) && (name != z_position)) {
-						element <datatype>::add_solver (name, std::shared_ptr <master_solver <datatype> > (new master_solver <datatype> (*grids [0], *grids [1], ptr (name), &element_flags [state], &element_flags [name])));
+						element <datatype>::add_solver (name, std::shared_ptr <equation <datatype> > (new equation <datatype> (*grids [0], *grids [1], ptr (name), &element_flags [state], &element_flags [name])));
 						DEBUG ("Adding " << name << " solver");
 						
 					}
@@ -349,7 +349,7 @@ namespace two_d
 				/*!*******************************************************************
 				 * \copydoc one_d::element::element ()
 				 *********************************************************************/
-				element (bases::axis i_axis_n, bases::axis i_axis_m, int i_name, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_element_flags) : 
+				element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_element_flags) : 
 				two_d::element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_messenger_ptr, i_element_flags) {
 					TRACE ("Instantiating...");
 					initialize (x_position, "x");
@@ -369,11 +369,11 @@ namespace two_d
 					return mode;
 				}
 				
-				virtual std::shared_ptr <bases::grid <datatype>> generate_grid (bases::axis *axis, int index = -1) {
+				virtual std::shared_ptr <plans::grid <datatype>> generate_grid (plans::axis *axis, int index = -1) {
 					if (index == 0) {
-						return std::shared_ptr <bases::grid <datatype>> (new typename horizontal_grid <datatype>::type (axis));
+						return std::shared_ptr <plans::grid <datatype>> (new typename horizontal_grid <datatype>::type (axis));
 					} else if (index == 1 || index == -1) {
-						return std::shared_ptr <bases::grid <datatype>> (new typename vertical_grid <datatype>::type (axis));
+						return std::shared_ptr <plans::grid <datatype>> (new typename vertical_grid <datatype>::type (axis));
 					} else {
 						throw 0;
 					}
@@ -389,7 +389,7 @@ namespace two_d
 						bases::element <datatype>::add_transform (name, std::shared_ptr <master_transform <datatype> > (new master_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal, &element_flags [state], &element_flags [name], transform_threads)));
 					}
 					if ((name != x_position) && (name != z_position)) {
-						element <datatype>::add_solver (name, std::shared_ptr <master_solver <datatype> > (new master_solver <datatype> (*grids [0], *grids [1], ptr (name), &element_flags [state], &element_flags [name])));
+						element <datatype>::add_solver (name, std::shared_ptr <equation <datatype> > (new equation <datatype> (*grids [0], *grids [1], ptr (name), &element_flags [state], &element_flags [name])));
 					}
 					return this->ptr (name);
 				}

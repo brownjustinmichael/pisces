@@ -23,7 +23,7 @@ namespace two_d
 		int ldn, m;
 		
 	public:
-		fixed_boundary (bases::grid <datatype> *i_grid_n, bases::grid <datatype> *i_grid_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n->get_n ())), top (i_top) {
+		fixed_boundary (plans::grid <datatype> *i_grid_n, plans::grid <datatype> *i_grid_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n->get_n ())), top (i_top) {
 			DEBUG ("Fixed boundary initialized");
 			ldn = i_grid_n->get_ld ();
 			m = i_grid_m->get_n ();
@@ -54,7 +54,7 @@ namespace two_d
 		datatype *deriv_matrix;
 		
 	public:
-		fixed_deriv_boundary (bases::grid <datatype> *i_grid_n, bases::grid <datatype> *i_grid_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n->get_n ())), top (i_top) {
+		fixed_deriv_boundary (plans::grid <datatype> *i_grid_n, plans::grid <datatype> *i_grid_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n->get_n ())), top (i_top) {
 			DEBUG ("Fixed boundary initialized");
 			ldn = i_grid_n->get_ld ();
 			m = i_grid_m->get_n ();

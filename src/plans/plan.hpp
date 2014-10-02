@@ -64,7 +64,7 @@ enum solve_element_flags {
 	z_solve = 0x80
 };
 
-namespace bases
+namespace plans
 {
 	/*!*******************************************************************
 	* \brief The basic functional unit, containing a recipe for execution
@@ -110,7 +110,7 @@ namespace bases
 		public:
 			virtual ~factory () {}
 		
-			virtual std::shared_ptr <bases::plan <datatype>> instance (bases::grid <datatype> **grids, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const = 0;
+			virtual std::shared_ptr <plans::plan <datatype>> instance (plans::grid <datatype> **grids, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const = 0;
 		};
 		
 		using plan <datatype>::element_flags;
@@ -130,7 +130,7 @@ namespace bases
 		public:
 			virtual ~factory () {}
 		
-			virtual std::shared_ptr <bases::plan <datatype>> instance (bases::grid <datatype> **grids, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const = 0;
+			virtual std::shared_ptr <plans::plan <datatype>> instance (plans::grid <datatype> **grids, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const = 0;
 		};
 		
 		using plan <datatype>::element_flags;
@@ -150,11 +150,11 @@ namespace bases
 		public:
 			virtual ~factory () {}
 		
-			virtual std::shared_ptr <bases::plan <datatype>> instance (bases::grid <datatype> **grids, datatype **matrices, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const = 0;
+			virtual std::shared_ptr <plans::plan <datatype>> instance (plans::grid <datatype> **grids, datatype **matrices, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const = 0;
 		};
 		
 		using plan <datatype>::element_flags;
 		using plan <datatype>::component_flags;
 	};
-} /* bases */
+} /* plans */
 #endif /* end of include guard: PLAN_HPP_S9YPWHOM */
