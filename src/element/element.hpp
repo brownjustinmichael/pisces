@@ -26,8 +26,8 @@
 #include "messenger/messenger.hpp"
 #include "plans/grid.hpp"
 #include "plans/plan.hpp"
-#include "plan-solver/solver.hpp"
-#include "plan-transform/transform.hpp"
+#include "plans-solvers/solver.hpp"
+#include "plans-transforms/transform.hpp"
 
 namespace bases
 {

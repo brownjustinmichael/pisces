@@ -10,8 +10,8 @@
 #include "plans/advection.hpp"
 #include "plans/diffusion.hpp"
 #include "plans/source.hpp"
-#include "plan-transform/transform_two_d.hpp"
-#include "plan-solver/solver_two_d.hpp"
+#include "plans-transforms/transform_two_d.hpp"
+#include "plans-solvers/solver_two_d.hpp"
 #include <sstream>
 #include <iomanip>
 #include <stdlib.h>

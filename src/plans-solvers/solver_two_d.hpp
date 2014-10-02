@@ -11,7 +11,7 @@
 
 #include "messenger/messenger.hpp"
 #include "solver.hpp"
-#include "plan-transform/transform_two_d.hpp"
+#include "plans-transforms/transform_two_d.hpp"
 #include "plans/plan.hpp"
 #include "boundary_two_d.hpp"
 
