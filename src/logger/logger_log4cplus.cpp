@@ -13,67 +13,71 @@
 #include <log4cplus/fileappender.h>
 #include <log4cplus/layout.h>
 
-log4cplus::BasicConfigurator config;
-log4cplus::Logger logger = log4cplus::Logger::getRoot ();
-log4cplus::SharedAppenderPtr append;
-int severity = 2;
+namespace logger
+{
+	log4cplus::BasicConfigurator config;
+	log4cplus::Logger logger = log4cplus::Logger::getRoot ();
+	log4cplus::SharedAppenderPtr append;
+	int severity = 2;
 
-log_config log_config_instance;
+	log_config log_config_instance;
 
-log4cplus::LogLevel int_to_severity (int severity_index) {
-	switch (severity_index) {
-		case 0:
-		return log4cplus::TRACE_LOG_LEVEL; break;
-		case 1:
-		return log4cplus::DEBUG_LOG_LEVEL; break;
-		case 2:
-		return log4cplus::INFO_LOG_LEVEL; break;
-		case 3:
-		return log4cplus::WARN_LOG_LEVEL; break;
-		case 4:
-		return log4cplus::ERROR_LOG_LEVEL; break;
-		default:
-		return log4cplus::FATAL_LOG_LEVEL; break;
-	}
-}
-
-log_config::log_config () {
-	config.configure();
-    logger.setLogLevel (int_to_severity (severity));
-}
-
-void log_config::configure (int* argc, char*** argv, int id, std::string log_file) {
-	for (int i = 0; i < *argc; ++i) {
-		if (((*argv) [i] [0] == '-') && ((*argv) [i] [1] == 'D')) {
-			severity = atoi (&((*argv) [i] [2]));
-			--*argc;
-			for (int j = i; j < *argc; ++j) {
-				(*argv) [j] = (*argv) [j + 1];
-			}
-			--i;
-		}
-		if (((*argv) [i] [0] == '-') && ((*argv) [i] [1] == 'L')) {
-			log_file = (*argv) [i + 1];
-			*argc -= 2;
-			for (int j = i; j < *argc; ++j) {
-				(*argv) [j] = (*argv) [j + 2];
-				(*argv) [j + 1] = (*argv) [j + 3];
-			}
-			i -= 2;
+	log4cplus::LogLevel int_to_severity (int severity_index) {
+		switch (severity_index) {
+			case 0:
+			return log4cplus::TRACE_LOG_LEVEL; break;
+			case 1:
+			return log4cplus::DEBUG_LOG_LEVEL; break;
+			case 2:
+			return log4cplus::INFO_LOG_LEVEL; break;
+			case 3:
+			return log4cplus::WARN_LOG_LEVEL; break;
+			case 4:
+			return log4cplus::ERROR_LOG_LEVEL; break;
+			default:
+			return log4cplus::FATAL_LOG_LEVEL; break;
 		}
 	}
 
-	std::ostringstream convert;
-	convert << id;
-    logger.setLogLevel (int_to_severity (severity));
-	if (log_file != "") {
-		char buffer [log_file.size () * 2];
-		snprintf (buffer, log_file.size () * 2, log_file.c_str (), id);
-		append = new log4cplus::FileAppender (buffer);
+	log_config::log_config () {
+		config.configure();
+	    logger.setLogLevel (int_to_severity (severity));
+	}
+
+	void log_config::configure (int* argc, char*** argv, int id, std::string log_file) {
+		for (int i = 0; i < *argc; ++i) {
+			if (((*argv) [i] [0] == '-') && ((*argv) [i] [1] == 'D')) {
+				severity = atoi (&((*argv) [i] [2]));
+				--*argc;
+				for (int j = i; j < *argc; ++j) {
+					(*argv) [j] = (*argv) [j + 1];
+				}
+				--i;
+			}
+			if (((*argv) [i] [0] == '-') && ((*argv) [i] [1] == 'L')) {
+				log_file = (*argv) [i + 1];
+				*argc -= 2;
+				for (int j = i; j < *argc; ++j) {
+					(*argv) [j] = (*argv) [j + 2];
+					(*argv) [j + 1] = (*argv) [j + 3];
+				}
+				i -= 2;
+			}
+		}
+
+		std::ostringstream convert;
+		convert << id;
+	    logger.setLogLevel (int_to_severity (severity));
+		if (log_file != "") {
+			char buffer [log_file.size () * 2];
+			snprintf (buffer, log_file.size () * 2, log_file.c_str (), id);
+			append = new log4cplus::FileAppender (buffer);
+			append->setLayout (std::auto_ptr<log4cplus::Layout> (new log4cplus::PatternLayout ("%d %-5p: (%M %L) - %m%n")));
+			logger.addAppender (append);
+		}
 		append->setLayout (std::auto_ptr<log4cplus::Layout> (new log4cplus::PatternLayout ("%d %-5p: (%M %L) - %m%n")));
 		logger.addAppender (append);
 	}
-	append->setLayout (std::auto_ptr<log4cplus::Layout> (new log4cplus::PatternLayout ("%d %-5p: (%M %L) - %m%n")));
-	logger.addAppender (append);
-}
+} /* logger */
+
 

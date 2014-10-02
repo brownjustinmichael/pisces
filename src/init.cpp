@@ -29,7 +29,7 @@ int main (int argc, char *argv[])
 		id = process_messenger.get_id ();
 		n_elements = process_messenger.get_np ();
 	
-		log_config::configure (&argc, &argv, id, "init_%d.log");
+		logger::log_config::configure (&argc, &argv, id, "init_%d.log");
 	
 		std::string config_filename;
 

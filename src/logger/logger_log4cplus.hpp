@@ -14,38 +14,41 @@
 #include <log4cplus/logger.h>
 #include <log4cplus/loggingmacros.h>
 
-extern log4cplus::Logger logger;
+namespace logger
+{
+	extern log4cplus::Logger logger;
+} /* logger */
 
 /*!*******************************************************************
  * \def TRACE(int,str)
  * Logs a trace-level logging statement
  *********************************************************************/
-#define TRACE(str) LOG4CPLUS_TRACE(logger, str);
+#define TRACE(str) LOG4CPLUS_TRACE(logger::logger, str);
 /*!*******************************************************************
  * \def DEBUG(int,str)
  * Logs a debug-level logging statement
  *********************************************************************/
-#define DEBUG(str) LOG4CPLUS_DEBUG(logger, str);
+#define DEBUG(str) LOG4CPLUS_DEBUG(logger::logger, str);
 /*!*******************************************************************
  * \def INFO(int,str)
  * Logs an info-level logging statement
  *********************************************************************/
-#define INFO(str) LOG4CPLUS_INFO(logger, str);
+#define INFO(str) LOG4CPLUS_INFO(logger::logger, str);
 /*!*******************************************************************
  * \def WARN(int,str)
  * Logs a warning-level logging statement
  *********************************************************************/
-#define WARN(str) LOG4CPLUS_WARN(logger, str);
+#define WARN(str) LOG4CPLUS_WARN(logger::logger, str);
 /*!*******************************************************************
  * \def ERROR(int,str)
  * Logs an error-level logging statement
  *********************************************************************/
-#define ERROR(str) LOG4CPLUS_ERROR(logger, str);
+#define ERROR(str) LOG4CPLUS_ERROR(logger::logger, str);
 /*!*******************************************************************
  * \def FATAL(int,str)
  * Logs a fatal-level logging statement
  *********************************************************************/
-#define FATAL(str) LOG4CPLUS_FATAL(logger, str);
+#define FATAL(str) LOG4CPLUS_FATAL(logger::logger, str);
 
 #endif // _LOG4CPLUS
 

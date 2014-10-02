@@ -62,15 +62,18 @@ extern int severity;
 /*!*******************************************************************
  * \brief A class containing the relevant configuration details, such as logging severity
  *********************************************************************/
-class log_config {
-public:
-	log_config ();
+namespace logger
+{
+	class log_config {
+	public:
+		log_config ();
 	
-	virtual ~log_config () {
-		// printf ("Destroying log config\n");
-	}
+		virtual ~log_config () {
+			// printf ("Destroying log config\n");
+		}
 	
-	static void configure (int *argc, char ***argv, int id = 0, std::string log_file = "");
-};
+		static void configure (int *argc, char ***argv, int id = 0, std::string log_file = "");
+	};
+} /* logger */
 
 #endif /* end of include guard: CONFIG_H_95CWOMPS */
