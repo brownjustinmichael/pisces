@@ -10,7 +10,9 @@
 #define SOLVER_HPP_BDH126SH
 	
 #include <memory>
-#include "plans/plan.hpp"
+#include "plans/explicit_plan.hpp"
+#include "plans/implicit_plan.hpp"
+#include "plans/real_plan.hpp"
 #include "plans/grid.hpp"
 
 /*!*******************************************************************

@@ -23,7 +23,7 @@ namespace two_d
 	{
 		namespace chebyshev
 		{
-			using namespace plans::two_d::fourier;
+			using namespace plans;
 			
 			template <class datatype>
 			boussinesq_element <datatype>::boussinesq_element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_element_flags) : 
