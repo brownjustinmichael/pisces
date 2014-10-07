@@ -16,14 +16,6 @@
 
 namespace plans
 {
-	enum mode {
-		mode_flag = 0x10
-	};
-
-	// enum mode {
-	// 	mode_flag = 0x20
-	// };
-	
 	/*!**********************************************************************
 	 * \brief A class containing the basic dimension information
 	 ************************************************************************/
@@ -230,6 +222,11 @@ namespace plans
 		}
 	};
 	
+#ifndef _VCOS
+	enum mode {
+		mode_flag = 0x10
+	};
+
 	namespace vertical
 	{
 		/*!*******************************************************************
@@ -296,47 +293,52 @@ namespace plans
 			 *********************************************************************/
 			datatype recursion (int d, int m, int k);
 		};
-	} /* chebyshev */
+	} /* vertical */
+#else
+	enum mode {
+		mode_flag = 0x20
+	};
 	
-	// namespace vertical
-	// {
-	// 	/*!*******************************************************************
-	// 	 * \brief A collocation grid for Chebyshev polynomials
-	// 	 *
-	// 	 * This collocation grid stores the N collocation points for up to the Mth order cosine modes and their first and second derivatives
-	// 	 *********************************************************************/
-	// 	template <class datatype>
-	// 	class grid : public plans::grid <datatype>
-	// 	{
-	// 	private:
-	// 		using plans::grid <datatype>::n;
-	// 		using plans::grid <datatype>::ld;
-	// 		using plans::grid <datatype>::excess_0;
-	// 		using plans::grid <datatype>::excess_n;
-	// 		using plans::grid <datatype>::position_0;
-	// 		using plans::grid <datatype>::position_n;
-	// 		using plans::grid <datatype>::derivs;
-	// 		using plans::grid <datatype>::positions;
-	//
-	// 		datatype scale; //!< A datatype by which the collocation grid should be scaled
-	// 		datatype width; //!< The datatype width of the collocation region
-	// 		datatype pioN; //!< The datatype 3.14159.../N, for use in calculations
-	//
-	// 	public:
-	// 		/*!*******************************************************************
-	// 		 * \param i_axis_ptr A pointer to an axis object
-	// 		 *********************************************************************/
-	// 		grid (axis *i_axis_ptr);
-	//
-	// 		virtual ~grid () {};
-	//
-	// 	protected:
-	// 		/*!**********************************************************************
-	// 		 * \copydoc plans::grid::_calculate_matrix()
-	// 		 ************************************************************************/
-	// 		void _calculate_matrix ();
-	// 	};
-	// } /* chebyshev */
+	namespace vertical
+	{
+		/*!*******************************************************************
+		 * \brief A collocation grid for Chebyshev polynomials
+		 *
+		 * This collocation grid stores the N collocation points for up to the Mth order cosine modes and their first and second derivatives
+		 *********************************************************************/
+		template <class datatype>
+		class grid : public plans::grid <datatype>
+		{
+		private:
+			using plans::grid <datatype>::n;
+			using plans::grid <datatype>::ld;
+			using plans::grid <datatype>::excess_0;
+			using plans::grid <datatype>::excess_n;
+			using plans::grid <datatype>::position_0;
+			using plans::grid <datatype>::position_n;
+			using plans::grid <datatype>::derivs;
+			using plans::grid <datatype>::positions;
+
+			datatype scale; //!< A datatype by which the collocation grid should be scaled
+			datatype width; //!< The datatype width of the collocation region
+			datatype pioN; //!< The datatype 3.14159.../N, for use in calculations
+
+		public:
+			/*!*******************************************************************
+			 * \param i_axis_ptr A pointer to an axis object
+			 *********************************************************************/
+			grid (axis *i_axis_ptr);
+
+			virtual ~grid () {};
+
+		protected:
+			/*!**********************************************************************
+			 * \copydoc plans::grid::_calculate_matrix()
+			 ************************************************************************/
+			void _calculate_matrix ();
+		};
+	} /* vertical */
+#endif
 	
 	namespace horizontal
 	{

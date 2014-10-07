@@ -44,13 +44,22 @@ if include_vt:
 if include_mp:
     env.Append (CPPFLAGS = ["-fopenmp"])
     env.Append (CPPFLAGS = ["-D_MP"])
-env.Append (LINKFLAGS = ["-fopenmp"])
+    env.Append (LINKFLAGS = ["-fopenmp"])
 
 # If using CUDA, load the cuda scons tool and add some compiler flags
 if include_cuda:
     env.Tool ('cuda')
     env.Append (NVCCFLAGS = ["-g", "-arch=sm_20"])
     env.Append (CPPFLAGS = ["-D_CUDA"])
+    
+if vertical_grid.lower () == 'cosine':
+    env.Append (CPPFLAGS = ["-D_VCOS"])
+elif vertical_grid.lower () != 'chebyshev':
+    raise ValueError ("PISCES can currently only handle a vertical grid type of either 'cosine' or 'chebyshev'")
+    
+if dimensions != 2:
+    raise ValueError ("PISCES can currently only handle 2 dimensions")
+env.Append (CPPFLAGS = ["-DND=%d" % dimensions])
 
 # Add standard compiler flags and c++0x functionality
 env.Append (CPPFLAGS = ["-Wall", "-g", "-std=c++0x"])
