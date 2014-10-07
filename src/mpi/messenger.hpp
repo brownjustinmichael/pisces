@@ -68,6 +68,18 @@ namespace mpi
 		
 		std::vector <int> stati; //!< A vector of the status of each processor
 		
+		class config
+		{
+		public:
+			config (int *argc = NULL, char *** argv = NULL) {
+				MPI::Init (*argc, *argv);
+			}
+			
+			virtual ~config () {
+				MPI::Finalize ();
+			}
+		};
+		
 	public:
 		/*!**********************************************************************
 		 * \param argc An integer pointer to the number of command arguments
@@ -75,7 +87,7 @@ namespace mpi
 		 ************************************************************************/
 		messenger (int* argc = NULL, char*** argv = NULL) {
 #ifdef _MPI
-			MPI::Init (*argc, *argv);
+			static config config_instance (argc, argv);
 			np = MPI::COMM_WORLD.Get_size ();
 			id = MPI::COMM_WORLD.Get_rank ();
 			MPI::COMM_WORLD.Set_errhandler(MPI::ERRORS_THROW_EXCEPTIONS);
@@ -88,9 +100,6 @@ namespace mpi
 		
 		virtual ~messenger () {
 			kill_all ();
-#ifdef _MPI
-			MPI::Finalize ();
-#endif // _MPI
 		}
 		
 		/*!**********************************************************************
