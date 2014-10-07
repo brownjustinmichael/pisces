@@ -75,11 +75,11 @@ namespace two_d
 		};
 		
 		template <class datatype>
-		class master_transform : public bases::master_transform <datatype>
+		class transformer : public plans::transformer <datatype>
 		{
 		public:
-			master_transform (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *element_flags, int *component_flags) : 
-			bases::master_transform <datatype> (element_flags, component_flags),
+			transformer (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *element_flags, int *component_flags) : 
+			plans::transformer <datatype> (element_flags, component_flags),
 			ldn (i_grid_n.ld),
 			ldm (i_grid_m.ld),
 			data_in (i_data_in),
@@ -103,7 +103,7 @@ namespace two_d
 				}
 			}
 			
-			virtual ~master_transform () {
+			virtual ~transformer () {
 				delete (forward_horizontal_transform);
 				delete (forward_vertical_transform);
 				delete (inverse_horizontal_transform);
@@ -151,7 +151,7 @@ namespace two_d
 			plans::plan <datatype> *inverse_horizontal_transform;
 			plans::plan <datatype> *inverse_vertical_transform;
 			
-			using bases::master_transform <datatype>::component_flags;
+			using plans::transformer <datatype>::component_flags;
 		};
 	} /* fourier */
 } /* two_d */

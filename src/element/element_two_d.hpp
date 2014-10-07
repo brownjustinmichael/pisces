@@ -15,7 +15,7 @@
 
 #include "logger/logger.hpp"
 #include "io/functors/average.hpp"
-#include "plans-transforms/transform_two_d.hpp"
+#include "plans-transforms/implemented_transformer.hpp"
 #include "plans-solvers/implemented_equation.hpp"
 
 #include "element.hpp"
@@ -313,7 +313,7 @@ namespace two_d
 						TODO Fix flaggin
 					*/
 					if ((name != x_position) && (name != z_position)) {
-						element <datatype>::add_transform (name, std::shared_ptr <master_transform <datatype> > (new master_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &element_flags [state], &element_flags [name], transform_threads)));
+						element <datatype>::add_transform (name, std::shared_ptr <plans::transformer <datatype> > (new plans::implemented_transformer <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &element_flags [state], &element_flags [name], transform_threads)));
 					}
 					if ((name != x_position) && (name != z_position)) {
 						element <datatype>::add_solver (name, std::shared_ptr <plans::equation <datatype> > (new plans::implemented_equation <datatype> (*grids [0], *grids [1], ptr (name), &element_flags [state], &element_flags [name])));
@@ -386,7 +386,7 @@ namespace two_d
 						TODO Fix flaggin
 					*/
 					if ((name != x_position) && (name != z_position)) {
-						bases::element <datatype>::add_transform (name, std::shared_ptr <master_transform <datatype> > (new master_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal, &element_flags [state], &element_flags [name], transform_threads)));
+						bases::element <datatype>::add_transform (name, std::shared_ptr <plans::transformer <datatype> > (new plans::implemented_transformer <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal, &element_flags [state], &element_flags [name], transform_threads)));
 					}
 					if ((name != x_position) && (name != z_position)) {
 						element <datatype>::add_solver (name, std::shared_ptr <plans::equation <datatype> > (new plans::implemented_equation <datatype> (*grids [0], *grids [1], ptr (name), &element_flags [state], &element_flags [name])));

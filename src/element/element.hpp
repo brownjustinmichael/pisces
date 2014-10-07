@@ -27,7 +27,7 @@
 #include "plans/grid.hpp"
 #include "plans/plan.hpp"
 #include "plans-solvers/equation.hpp"
-#include "plans-transforms/transform.hpp"
+#include "plans-transforms/transformer.hpp"
 
 namespace bases
 {
@@ -81,7 +81,7 @@ namespace bases
 		
 	public:
 		std::vector <int> transforms; //!< A vector of integer keys to the transform maps
-		std::map <int, std::shared_ptr <master_transform <datatype>>> master_transforms; //!< A map of shared_ptrs to the transform objects
+		std::map <int, std::shared_ptr <plans::transformer <datatype>>> transformers; //!< A map of shared_ptrs to the transform objects
 		/*!**********************************************************************
 		 * \brief Element iterator for iterating through the contained solvers
 		 ************************************************************************/
@@ -332,11 +332,11 @@ namespace bases
 		 * \brief Add a transform operation to a specific scalar fields
 		 * 
 		 * \param i_name The integer name of the scalar associated with the transform
-		 * \param i_transform_ptr A shared_ptr to the master_transform plan
+		 * \param i_transform_ptr A shared_ptr to the transformer plan
 		 * 
-		 * The master_transform class contains both horizontal and vertical transforms in both directions. It can also send all the transformations to the GPU if desired.
+		 * The transformer class contains both horizontal and vertical transforms in both directions. It can also send all the transformations to the GPU if desired.
 		 *********************************************************************/
-		inline void add_transform (int i_name, std::shared_ptr <master_transform <datatype>> i_transform_ptr) {
+		inline void add_transform (int i_name, std::shared_ptr <plans::transformer <datatype>> i_transform_ptr) {
 			TRACE ("Adding transform...");
 			bool found = false;
 			for (int i = 0; i < (int) transforms.size (); ++i) {
@@ -348,7 +348,7 @@ namespace bases
 				transforms.push_back (i_name);
 			}
 			
-			master_transforms [i_name] = i_transform_ptr;
+			transformers [i_name] = i_transform_ptr;
 		}
 		
 		/*!**********************************************************************

@@ -10,7 +10,6 @@
 #include "plans/advection.hpp"
 #include "plans/diffusion.hpp"
 #include "plans/source.hpp"
-#include "plans-transforms/transform_two_d.hpp"
 #include "plans-solvers/solvers/collocation.hpp"
 #include "plans-solvers/solvers/fourier.hpp"
 #include "plans-solvers/solvers/incompressible.hpp"
