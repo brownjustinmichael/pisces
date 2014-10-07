@@ -229,7 +229,7 @@ namespace pisces
 			plans::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
 			std::shared_ptr <plans::grid <datatype>> vertical_grid = generate_grid (&vertical_axis);
 			
-			utils::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_virtual_file, &io::virtual_files ["two_d/element/new_virtual_file"]);
+			pisces::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_virtual_file, &io::virtual_files ["two_d/element/new_virtual_file"]);
 			
 			return &io::virtual_files ["two_d/element/new_virtual_file"];
 		}

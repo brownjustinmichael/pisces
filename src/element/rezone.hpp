@@ -15,7 +15,7 @@
 #include "plans/grid.hpp"
 #include "linalg/utils.hpp"
 
-namespace utils
+namespace pisces
 {
 	template <class datatype>
 	void rezone (mpi::messenger *inter_messenger, plans::grid <datatype> *input_grid, plans::grid <datatype> *output_grid, io::formats::virtual_file *input_virtual_file, io::formats::virtual_file *output_virtual_file) {
@@ -81,9 +81,7 @@ namespace utils
 		
 		return element->calculate_min_timestep (&io::virtual_files ["rezone/new_virtual_file"]);
 	}
-	
-	
-} /* utils */
+} /* pisces */
 
 
 #endif /* end of include guard: REZONE_CPP_UEW78T7Q */

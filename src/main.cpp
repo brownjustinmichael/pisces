@@ -22,7 +22,7 @@
 #include "io/formats/ascii.hpp"
 #include "io/formats/netcdf.hpp"
 #include "plans/plan.hpp"
-#include "element/boussinesq_two_d.hpp"
+#include "element/boussinesq.hpp"
 #include "element/rezone.hpp"
 
 /*!*******************************************************************

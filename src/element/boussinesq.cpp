@@ -20,7 +20,7 @@
 #include "plans-solvers/solvers/fourier.hpp"
 #include "plans-solvers/solvers/incompressible.hpp"
 
-#include "boussinesq_two_d.hpp"
+#include "boussinesq.hpp"
 
 namespace pisces
 {
