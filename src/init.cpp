@@ -13,7 +13,7 @@
 #include "io/output.hpp"
 #include "io/parameters.hpp"
 #include "io/formats/netcdf.hpp"
-#include "messenger/messenger.hpp"
+#include "mpi/messenger.hpp"
 #include "plans/grid.hpp"
 
 using namespace two_d::fourier::chebyshev;
@@ -24,7 +24,7 @@ int main (int argc, char *argv[])
 		int id = 0, n_elements = 1;
 	
 		// Initialize messenger
-		utils::messenger process_messenger (&argc, &argv);
+		mpi::messenger process_messenger (&argc, &argv);
 	
 		id = process_messenger.get_id ();
 		n_elements = process_messenger.get_np ();

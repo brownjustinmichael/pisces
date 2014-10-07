@@ -15,7 +15,7 @@
 #endif
 
 #include "logger/logger.hpp"
-#include "messenger/messenger.hpp"
+#include "mpi/messenger.hpp"
 #include "io/parameters.hpp"
 #include "io/input.hpp"
 #include "io/output.hpp"
@@ -90,7 +90,7 @@ int main (int argc, char *argv[])
 	int id = 0, n_elements = 1;
 
 	// Initialize messenger
-	utils::messenger process_messenger (&argc, &argv);
+	mpi::messenger process_messenger (&argc, &argv);
 
 	try {
 		id = process_messenger.get_id ();

@@ -24,7 +24,7 @@ namespace two_d
 			class boussinesq_element : public element <datatype>
 			{
 			public:
-				boussinesq_element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_element_flags);
+				boussinesq_element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, mpi::messenger* i_messenger_ptr, int i_element_flags);
 				
 				virtual ~boussinesq_element () {}
 				

@@ -11,7 +11,9 @@
 #include "plans/diffusion.hpp"
 #include "plans/source.hpp"
 #include "plans-transforms/transform_two_d.hpp"
-#include "plans-solvers/solver_two_d.hpp"
+#include "plans-solvers/solvers/collocation.hpp"
+#include "plans-solvers/solvers/fourier.hpp"
+#include "plans-solvers/solvers/incompressible.hpp"
 #include <sstream>
 #include <iomanip>
 #include <stdlib.h>
@@ -26,7 +28,7 @@ namespace two_d
 			using namespace plans;
 			
 			template <class datatype>
-			boussinesq_element <datatype>::boussinesq_element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_element_flags) : 
+			boussinesq_element <datatype>::boussinesq_element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
 			element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_messenger_ptr, i_element_flags) {
 		
 				assert (n > 0);
@@ -46,20 +48,20 @@ namespace two_d
 				advection_coeff = std::max (advection_coeff, i_params.get <datatype> ("composition.advection"));
 				cfl = i_params.get <datatype> ("time.cfl");
 
-				std::shared_ptr <bases::boundary <datatype>> boundary_0, boundary_n, deriv_boundary_0, deriv_boundary_n;
+				std::shared_ptr <plans::boundary <datatype>> boundary_0, boundary_n, deriv_boundary_0, deriv_boundary_n;
 				if (messenger_ptr->get_id () > 0) {
-					boundary_0 = std::shared_ptr <bases::boundary <datatype>> (new communicating_boundary <datatype> (messenger_ptr, grids [0]->get_ld (), m, grids [1]->get_excess_0 (), &((*grids [1]) [0]), 0, false));
+					boundary_0 = std::shared_ptr <plans::boundary <datatype>> (new communicating_boundary <datatype> (messenger_ptr, grids [0]->get_ld (), m, grids [1]->get_excess_0 (), &((*grids [1]) [0]), 0, false));
 					deriv_boundary_0 = boundary_0;
 				} else {
-					boundary_0 = std::shared_ptr <bases::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], 0.0, false));
-					deriv_boundary_0 = std::shared_ptr <bases::boundary <datatype>> (new fixed_deriv_boundary <datatype> (&*grids [0], &*grids [1], 0.0, false));
+					boundary_0 = std::shared_ptr <plans::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], 0.0, false));
+					deriv_boundary_0 = std::shared_ptr <plans::boundary <datatype>> (new fixed_deriv_boundary <datatype> (&*grids [0], &*grids [1], 0.0, false));
 				}
 				if (messenger_ptr->get_id () + 1 < messenger_ptr->get_np ()) {
-					boundary_n = std::shared_ptr <bases::boundary <datatype>> (new communicating_boundary <datatype> (messenger_ptr, grids [0]->get_ld (), m, grids [1]->get_excess_n (), &((*grids [1]) [0]), m - grids [1]->get_excess_n (), true));
+					boundary_n = std::shared_ptr <plans::boundary <datatype>> (new communicating_boundary <datatype> (messenger_ptr, grids [0]->get_ld (), m, grids [1]->get_excess_n (), &((*grids [1]) [0]), m - grids [1]->get_excess_n (), true));
 					deriv_boundary_n = boundary_n;
 				} else {
-					boundary_n = std::shared_ptr <bases::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], 0.0, true));
-					deriv_boundary_n = std::shared_ptr <bases::boundary <datatype>> (new fixed_deriv_boundary <datatype> (&*grids [0], &*grids [1], 0.0, true));
+					boundary_n = std::shared_ptr <plans::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], 0.0, true));
+					deriv_boundary_n = std::shared_ptr <plans::boundary <datatype>> (new fixed_deriv_boundary <datatype> (&*grids [0], &*grids [1], 0.0, true));
 				}
 				// deriv_boundary_0 = boundary_0;
 				// deriv_boundary_n = boundary_n;

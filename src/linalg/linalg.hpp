@@ -10,7 +10,7 @@
 #define UTILS_SOLVER_HPP_YSBJBB1J
 
 #include <cstddef>
-#include "messenger/messenger.hpp"
+#include "mpi/messenger.hpp"
 
 namespace linalg
 {

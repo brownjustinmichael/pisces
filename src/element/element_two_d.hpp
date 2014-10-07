@@ -16,7 +16,7 @@
 #include "logger/logger.hpp"
 #include "io/functors/average.hpp"
 #include "plans-transforms/transform_two_d.hpp"
-#include "plans-solvers/solver_two_d.hpp"
+#include "plans-solvers/implemented_equation.hpp"
 
 #include "element.hpp"
 #include "rezone.hpp"
@@ -39,7 +39,7 @@ namespace two_d
 	class element : public bases::element <datatype>
 	{
 	public:
-		element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_element_flags) : 
+		element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
 		bases::element <datatype> (i_name, 2, i_params, i_messenger_ptr, i_element_flags),
 		n (i_axis_n.get_n ()), m (i_axis_m.get_n ()) {
 			TRACE ("Instantiating...");
@@ -277,7 +277,7 @@ namespace two_d
 				/*!*******************************************************************
 				 * \copydoc one_d::element::element ()
 				 *********************************************************************/
-				element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_element_flags) : 
+				element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
 				two_d::element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_messenger_ptr, i_element_flags) {
 					TRACE ("Instantiating...");
 					initialize (x_position, "x");
@@ -316,7 +316,7 @@ namespace two_d
 						element <datatype>::add_transform (name, std::shared_ptr <master_transform <datatype> > (new master_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &element_flags [state], &element_flags [name], transform_threads)));
 					}
 					if ((name != x_position) && (name != z_position)) {
-						element <datatype>::add_solver (name, std::shared_ptr <equation <datatype> > (new equation <datatype> (*grids [0], *grids [1], ptr (name), &element_flags [state], &element_flags [name])));
+						element <datatype>::add_solver (name, std::shared_ptr <plans::equation <datatype> > (new plans::implemented_equation <datatype> (*grids [0], *grids [1], ptr (name), &element_flags [state], &element_flags [name])));
 						DEBUG ("Adding " << name << " solver");
 						
 					}
@@ -349,7 +349,7 @@ namespace two_d
 				/*!*******************************************************************
 				 * \copydoc one_d::element::element ()
 				 *********************************************************************/
-				element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_element_flags) : 
+				element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
 				two_d::element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_messenger_ptr, i_element_flags) {
 					TRACE ("Instantiating...");
 					initialize (x_position, "x");
@@ -389,7 +389,7 @@ namespace two_d
 						bases::element <datatype>::add_transform (name, std::shared_ptr <master_transform <datatype> > (new master_transform <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal, &element_flags [state], &element_flags [name], transform_threads)));
 					}
 					if ((name != x_position) && (name != z_position)) {
-						element <datatype>::add_solver (name, std::shared_ptr <equation <datatype> > (new equation <datatype> (*grids [0], *grids [1], ptr (name), &element_flags [state], &element_flags [name])));
+						element <datatype>::add_solver (name, std::shared_ptr <plans::equation <datatype> > (new plans::implemented_equation <datatype> (*grids [0], *grids [1], ptr (name), &element_flags [state], &element_flags [name])));
 					}
 					return this->ptr (name);
 				}

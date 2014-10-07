@@ -9,13 +9,18 @@
 #ifndef BOUNDARY_TWO_D_HPP_863EDB36
 #define BOUNDARY_TWO_D_HPP_863EDB36
 
-#include "boundary.hpp"
+#include "mpi/messenger.hpp"
+#include "linalg/utils.hpp"
 #include "linalg/interpolate.hpp"
+#include "plans/grid.hpp"
+
+#include "boundary.hpp"
+#include "solver.hpp"
 
 namespace two_d
 {
 	template <class datatype>
-	class fixed_boundary : public bases::boundary <datatype>
+	class fixed_boundary : public plans::boundary <datatype>
 	{
 	private:
 		datatype value;
@@ -45,7 +50,7 @@ namespace two_d
 	};
 	
 	template <class datatype>
-	class fixed_deriv_boundary : public bases::boundary <datatype>
+	class fixed_deriv_boundary : public plans::boundary <datatype>
 	{
 	private:
 		datatype value;
@@ -86,11 +91,11 @@ namespace two_d
 	};
 	
 	template <class datatype>
-	class communicating_boundary : public bases::boundary <datatype>
+	class communicating_boundary : public plans::boundary <datatype>
 	{
 	private:
 		datatype alpha;
-		utils::messenger *messenger_ptr;
+		mpi::messenger *messenger_ptr;
 		bool top;
 		int n_boundary_in;
 		int n_boundary_out;
@@ -102,7 +107,7 @@ namespace two_d
 		int ldn, m;
 		
 	public:
-		communicating_boundary (utils::messenger *i_messenger_ptr, int i_ldn, int i_m, int i_n_boundary_in, const datatype *i_positions, int index, bool i_top) : messenger_ptr (i_messenger_ptr) {
+		communicating_boundary (mpi::messenger *i_messenger_ptr, int i_ldn, int i_m, int i_n_boundary_in, const datatype *i_positions, int index, bool i_top) : messenger_ptr (i_messenger_ptr) {
 			/*
 				TODO Take grid as input
 			*/

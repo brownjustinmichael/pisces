@@ -1,20 +1,23 @@
 /*!**********************************************************************
- * \file block_solver.hpp
- * /Users/justinbrown/Dropbox/pisces/src/utils
+ * \file solver.hpp
+ * /Users/justinbrown/Dropbox/pisces
  * 
- * Created by Justin Brown on 2013-11-17.
- * Copyright 2013 Justin Brown. All rights reserved.
+ * Created by Justin Brown on 2014-10-06.
+ * Copyright 2014 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#ifndef BLOCK_SOLVER_HPP_8C3ZNSDI
-#define BLOCK_SOLVER_HPP_8C3ZNSDI
+#ifndef SOLVER_HPP_6489A25E
+#define SOLVER_HPP_6489A25E
 
-#include "messenger/messenger.hpp"
+#include <vector>
+#ifdef _MPI
+#include <mpi.h>
+#endif
 #include "linalg/utils.hpp"
 #include "linalg/linalg.hpp"
-#include <vector>
+#include "mpi/messenger.hpp"
 
-namespace utils
+namespace linalg
 {
 	/*!**********************************************************************
 	 * \brief Factorize a tridiagonal block matrix
@@ -105,7 +108,7 @@ namespace utils
 			
 			linalg::matrix_factorize (ntot, ntot, x, xipiv, info, ldx);
 		} else {
-			MPI::COMM_WORLD.Gatherv (x, (ntop + nbot) * (ntop + nbot), mpi_type (&typeid (datatype)), NULL, NULL, NULL, mpi_type (&typeid (datatype)), 0);
+			MPI::COMM_WORLD.Gatherv (x, (ntop + nbot) * (ntop + nbot), mpi::mpi_type (&typeid (datatype)), NULL, NULL, NULL, mpi::mpi_type (&typeid (datatype)), 0);
 		}
 #endif
 		/*
@@ -165,7 +168,7 @@ namespace utils
 					displs [i] = displs [i - 1] + nsp [i - 1];
 				}
 			}
-			MPI::COMM_WORLD.Gatherv (&y [0], (ntop + nbot) * nrhs, mpi_type (&typeid (datatype)), &buffer [0], &nsp [0], &displs [0], mpi_type (&typeid (datatype)), 0);
+			MPI::COMM_WORLD.Gatherv (&y [0], (ntop + nbot) * nrhs, mpi::mpi_type (&typeid (datatype)), &buffer [0], &nsp [0], &displs [0], mpi::mpi_type (&typeid (datatype)), 0);
 			linalg::scale (nrhs * ldy, 0.0, &y [0]);
 			for (int i = 0; i < np; ++i) {
 				for (int j = 0; j < nrhs; ++j) {
@@ -191,10 +194,10 @@ namespace utils
 				bcur += nsp [i];
 			}
 			
-			MPI::COMM_WORLD.Scatterv (&buffer [0], &nsp [0], &displs [0], mpi_type (&typeid (datatype)), &y [0], (ntop + nbot) * nrhs, mpi_type (&typeid (datatype)), 0);
+			MPI::COMM_WORLD.Scatterv (&buffer [0], &nsp [0], &displs [0], mpi::mpi_type (&typeid (datatype)), &y [0], (ntop + nbot) * nrhs, mpi::mpi_type (&typeid (datatype)), 0);
 		} else {
-			MPI::COMM_WORLD.Gatherv (&y [0], (ntop + nbot) * nrhs, mpi_type (&typeid (datatype)), NULL, NULL, NULL, mpi_type (&typeid (datatype)), 0);
-			MPI::COMM_WORLD.Scatterv (NULL, NULL, NULL, mpi_type (&typeid (datatype)), &y [0], (ntop + nbot) * nrhs, mpi_type (&typeid (datatype)), 0);
+			MPI::COMM_WORLD.Gatherv (&y [0], (ntop + nbot) * nrhs, mpi::mpi_type (&typeid (datatype)), NULL, NULL, NULL, mpi::mpi_type (&typeid (datatype)), 0);
+			MPI::COMM_WORLD.Scatterv (NULL, NULL, NULL, mpi::mpi_type (&typeid (datatype)), &y [0], (ntop + nbot) * nrhs, mpi::mpi_type (&typeid (datatype)), 0);
 		}
 		
 		linalg::matrix_copy (ntop, nrhs, &y [0], b, ntop + nbot, ldb);
@@ -204,15 +207,6 @@ namespace utils
 		linalg::matrix_matrix_multiply (n, nrhs, nbot, -1.0, ar, b + ntop + n, 1.0, b + ntop, lda, ldb, ldb);
 #endif
 	}
-	
-	void p_block_tridiag_factorize (int id, int np, int n, double* sub, double *diag, double *sup, double *supsup, int* ipiv, double *x, int *xipiv, int *info, int nrhs = 1, int lda = -1);
-	
-	void p_block_tridiag_solve (int id, int np, int n, double* sub, double *diag, double *sup, double *supsup, int* ipiv, double* b, double *x, int *xipiv, int *info, int nrhs = 1, int lda = -1, int ldb = -1);
-	
-	void p_block_banded_factorize (int id, int np, int n, int kl, int ku, double* matrix, int* ipiv, double *x, int *xipiv, double *bufferl, double *bufferr, int *info = NULL, int nrhs = 1, int lda = -1, int ldaa = -1);
-	
-	void p_block_banded_solve (int id, int np, int n, int kl, int ku, double* matrix, int* ipiv, double* b, double *x, int *xipiv, double *bufferl, double *bufferr, int *info = NULL, int nrhs = 1, int lda = -1, int ldaa = -1, int ldb = -1);
-	
-} /* utils */
+} /* linalg */
 
-#endif /* end of include guard: BLOCK_SOLVER_HPP_8C3ZNSDI */
+#endif /* end of include guard: SOLVER_HPP_6489A25E */

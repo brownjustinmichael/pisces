@@ -18,7 +18,7 @@
 namespace utils
 {
 	template <class datatype>
-	void rezone (utils::messenger *inter_messenger, plans::grid <datatype> *input_grid, plans::grid <datatype> *output_grid, io::formats::virtual_file *input_virtual_file, io::formats::virtual_file *output_virtual_file) {
+	void rezone (mpi::messenger *inter_messenger, plans::grid <datatype> *input_grid, plans::grid <datatype> *output_grid, io::formats::virtual_file *input_virtual_file, io::formats::virtual_file *output_virtual_file) {
 		if (output_virtual_file != input_virtual_file) {
 			*output_virtual_file = *input_virtual_file;
 		}
@@ -65,7 +65,7 @@ namespace utils
 	}
 	
 	template <class datatype>
-	datatype minimum_timestep (int n, int m, bases::element <datatype> *element, utils::messenger *messenger, datatype *positions) {
+	datatype minimum_timestep (int n, int m, bases::element <datatype> *element, mpi::messenger *messenger, datatype *positions) {
 		std::shared_ptr <io::output> virtual_output (new io::formatted_output <io::formats::two_d::virtual_format> (io::data_grid::two_d (n, m), "rezone/virtual_file", io::replace_file));
 		element->setup_output (virtual_output);
 		

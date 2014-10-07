@@ -28,7 +28,7 @@ enum mpi_flags {
 	mpi_skip = 0x02
 };
 
-namespace utils
+namespace mpi
 {	
 #ifdef _MPI
 	/*!**********************************************************************
@@ -330,6 +330,6 @@ namespace utils
 			}
 		}
 	};
-} /* bases */
+} /* mpi */
 
 #endif /* end of include guard: MESSENGER_HPP_JNOTV271 */

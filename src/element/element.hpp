@@ -23,10 +23,10 @@
 #include "io/output.hpp"
 #include "io/parameters.hpp"
 #include "io/formats/virtual.hpp"
-#include "messenger/messenger.hpp"
+#include "mpi/messenger.hpp"
 #include "plans/grid.hpp"
 #include "plans/plan.hpp"
-#include "plans-solvers/solver.hpp"
+#include "plans-solvers/equation.hpp"
 #include "plans-transforms/transform.hpp"
 
 namespace bases
@@ -55,7 +55,7 @@ namespace bases
 	{
 	protected:
 		std::vector <plans::axis> axes; //!< A vector of axis objects, containing the basic grid information
-		utils::messenger* messenger_ptr; //!< A pointer to the messenger object
+		mpi::messenger* messenger_ptr; //!< A pointer to the messenger object
 		int name; //!< An integer representation of the element, to be used in file output
 		int dimensions; //!< The integer number of dimensions in the element
 		io::parameters& params; //!< The map that contains the input parameters
@@ -112,7 +112,7 @@ namespace bases
 		* \param i_messenger_ptr A pointer to a messenger object for inter-element communication
 		* \param i_element_flags An integer set of global flags for the element
 		*********************************************************************/
-		element (int i_name, int i_dimensions, io::parameters& i_params, utils::messenger* i_messenger_ptr, int i_element_flags) : 
+		element (int i_name, int i_dimensions, io::parameters& i_params, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
 		dimensions (i_dimensions),
 		params (i_params) {
 			element_flags [state] = i_element_flags;
@@ -542,7 +542,7 @@ namespace bases
 		static double rezone_calculate_ts (void *i_rezone_data) {
 			bases::element <datatype> *element_ptr = ((rezone_union <datatype> *) i_rezone_data)->element_ptr;
 			datatype positions [((rezone_union <datatype> *) i_rezone_data) [1].np + 1];
-			utils::messenger *messenger_ptr = element_ptr->messenger_ptr;
+			mpi::messenger *messenger_ptr = element_ptr->messenger_ptr;
 			for (int i = 0; i < ((rezone_union <datatype> *) i_rezone_data) [1].np + 1; ++i) {
 				positions [i] = ((rezone_union <datatype> *) i_rezone_data) [i + 4].position;
 			}
@@ -583,7 +583,7 @@ namespace bases
 			for (int i = 0; i < ((rezone_union <datatype> *) i_old_rezone_data) [1].np + 1; ++i) {
 				old_positions [i] = ((rezone_union <datatype> *) i_old_rezone_data) [i + 4].position;
 			}
-			utils::messenger *messenger_ptr = element_ptr->messenger_ptr;
+			mpi::messenger *messenger_ptr = element_ptr->messenger_ptr;
 			for (int i = 1; i < messenger_ptr->get_np (); ++i) {
 				total += (new_positions [i] - old_positions [i]) * (new_positions [i] - old_positions [i]);
 			}
@@ -606,7 +606,7 @@ namespace bases
 			for (int i = 0; i < rezone_data [1].np + 1; ++i) {
 				positions [i] = rezone_data [i + 4].position;
 			}
-			utils::messenger *messenger_ptr = element_ptr->messenger_ptr;
+			mpi::messenger *messenger_ptr = element_ptr->messenger_ptr;
 			if (messenger_ptr->get_id () == 0) {
 				// Generate a random radius that is less than or equal to the step size
 				datatype radius = gsl_rng_uniform (r) * step_size;
