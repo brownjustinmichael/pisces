@@ -20,7 +20,6 @@ namespace plans
 	{
 	public:
 		incompressible_corrector (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, mpi::messenger* i_messenger_ptr, datatype *i_rhs, datatype* i_data, datatype *i_data_x, datatype *i_data_z, int *i_element_flags, int *i_component_flags, int *i_component_x, int *i_component_z);
-		incompressible_corrector (plans::equation <datatype> &i_solver, plans::equation <datatype> &i_solver_x, plans::equation <datatype> &i_solver_z, mpi::messenger* i_messenger_ptr);
 		
 		virtual ~incompressible_corrector () {}
 		
@@ -30,6 +29,24 @@ namespace plans
 
 		void factorize ();
 		void execute ();
+	
+		class factory : public plans::solver <datatype>::factory
+		{
+		private:
+			mpi::messenger *messenger_ptr;
+			plans::equation <datatype> &equation_x, &equation_z;
+
+		public:
+			factory (mpi::messenger *i_messenger_ptr, plans::equation <datatype> &i_equation_x, plans::equation <datatype> &i_equation_z) : messenger_ptr (i_messenger_ptr), equation_x (i_equation_x), equation_z (i_equation_z) {
+				DEBUG ("MESS " << i_messenger_ptr << " " << equation_x.data_ptr () << " " << equation_z.data_ptr ());
+			}
+			
+			virtual ~factory () {}
+			
+			virtual std::shared_ptr <plans::solver <datatype>> instance (plans::grid <datatype> **grids, datatype *i_data, datatype *i_rhs, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+				return std::shared_ptr <plans::solver <datatype>> (new incompressible_corrector (*grids [0], *grids [1], messenger_ptr, i_rhs, i_data, equation_x.data_ptr (), equation_z.data_ptr (), i_element_flags, i_component_flags, equation_x.component_flags, equation_z.component_flags));
+			}
+		};
 	
 	private:
 		int n;

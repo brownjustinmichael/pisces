@@ -66,55 +66,6 @@ namespace plans
 	}
 	
 	template <class datatype>
-	laplace_solver <datatype>::laplace_solver (plans::equation <datatype> &i_solver, mpi::messenger* i_messenger_ptr) : 
-	plans::solver <datatype> (i_solver.element_flags, i_solver.component_flags), n ((i_solver.grid_ptr (0))->get_n ()),
-	ldn ((i_solver.grid_ptr (0))->get_ld ()),
-	m ((i_solver.grid_ptr (1))->get_n ()),
-	data (i_solver.data_ptr ()),
-	grid_n (*(i_solver.grid_ptr (0))),
-	grid_m (*(i_solver.grid_ptr (1))),
-	pos_n (&grid_n [0]),
-	pos_m (&grid_m [0]),
-	excess_0 (grid_m.get_excess_0 ()), 
-	excess_n (grid_m.get_excess_n ()),
-	messenger_ptr (i_messenger_ptr) {
-		TRACE ("Building laplace solver...");
-		sup.resize (m * ldn);
-		sub.resize (m * ldn);
-		diag.resize (m * ldn);
-		// DEBUG ("SUP " << &sup [0]);
-		rhs_ptr = i_solver.rhs_ptr (spectral_rhs);
-
-		sup_ptr = &sup [0];
-		sub_ptr = &sub [0];
-		diag_ptr = &diag [0];
-
-		supsup.resize (ldn * m);
-		ipiv.resize (ldn * m);
-
-		if (messenger_ptr->get_id () == 0) {
-			x.resize ((m + 4 * messenger_ptr->get_np ()) * 2 * ldn);
-			xipiv.resize (2 * messenger_ptr->get_np () * ldn);
-		} else {
-			x.resize ((m + 4) * 2 * ldn);
-		}
-
-		id = messenger_ptr->get_id ();
-		np = messenger_ptr->get_np ();
-
-		if (id != 0) {
-			messenger_ptr->send (1, &pos_m [excess_0 + 1], id - 1, 0);
-		}
-		if (id != np - 1) {
-			messenger_ptr->recv (1, &ex_pos_m, id + 1, 0);
-			messenger_ptr->send (1, &pos_m [m - 1 - excess_n], id + 1, 1);
-		}
-		if (id != 0) {
-			messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
-		}
-	}
-	
-	template <class datatype>
 	void laplace_solver <datatype>::factorize () {
 		TRACE ("Factorizing laplace solver...");
 

@@ -39,29 +39,6 @@ namespace plans
 	}
 	
 	template <class datatype>
-	fourier_solver <datatype>::fourier_solver (plans::equation <datatype> &i_solver, datatype& i_timestep, std::shared_ptr <plans::boundary <datatype>> i_boundary_0, std::shared_ptr <plans::boundary <datatype>> i_boundary_n) : 
-	plans::solver <datatype> (i_solver.element_flags, i_solver.component_flags), n (i_solver.grid_ptr (0)->get_n ()),  ldn (i_solver.grid_ptr (0)->get_ld ()),  m (i_solver.grid_ptr (1)->get_n ()), data (i_solver.data_ptr ()), timestep (i_timestep), excess_0 (i_solver.grid_ptr (1)->get_excess_0 ()),  excess_n (i_solver.grid_ptr (1)->get_excess_n ()), pos_m (&((*(i_solver.grid_ptr (1))) [0])) {
-		TRACE ("Building solver...");
-		horizontal_matrix.resize (ldn);
-		factorized_horizontal_matrix.resize (ldn);
-		rhs_ptr = i_solver.rhs_ptr (spectral_rhs);
-		
-		boundary_0 = i_boundary_0;
-		boundary_n = i_boundary_n;
-		
-		ex_overlap_0 = boundary_0 ? boundary_0->get_ex_overlap () : 0;
-		overlap_0 = boundary_0 ? boundary_0->get_overlap () : 0;
-		ex_overlap_n = boundary_n ? boundary_n->get_ex_overlap () : 0;
-		overlap_n = boundary_n ? boundary_n->get_overlap () : 0;
-		lda = m + ex_overlap_n + ex_overlap_0;
-		inner_m = lda - overlap_0 - overlap_n;
-		
-		data_temp.resize (lda * ldn);
-		
-		TRACE ("Solver built.");
-	}
-	
-	template <class datatype>
 	void fourier_solver <datatype>::factorize () {
 		
 		TRACE ("Factorizing...");

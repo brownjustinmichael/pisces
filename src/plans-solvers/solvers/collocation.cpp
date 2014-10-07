@@ -54,49 +54,6 @@ namespace plans
 	}
 	
 	template <class datatype>
-	collocation_solver <datatype>::collocation_solver (plans::equation <datatype> &i_solver, mpi::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <plans::boundary <datatype>> i_boundary_0, std::shared_ptr <plans::boundary <datatype>> i_boundary_n) : 
-	plans::solver <datatype> (i_solver.element_flags, i_solver.component_flags), n (i_solver.grid_ptr (0)->get_n ()),  ldn (i_solver.grid_ptr (0)->get_ld ()),  m (i_solver.grid_ptr (1)->get_n ()), data (i_solver.data_ptr ()), messenger_ptr (i_messenger_ptr),  timestep (i_timestep),  positions (&((*(i_solver.grid_ptr (1))) [0])), excess_0 (i_solver.grid_ptr (1)->get_excess_0 ()),  excess_n (i_solver.grid_ptr (1)->get_excess_n ()), default_matrix (i_solver.grid_ptr (1)->get_data (0)) {
-		TRACE ("Building solver...");
-		matrix.resize (m * m);
-		rhs_ptr = i_solver.rhs_ptr (spectral_rhs);
-		
-		boundary_0 = i_boundary_0;
-		boundary_n = i_boundary_n;
-		
-		ex_overlap_0 = boundary_0 ? boundary_0->get_ex_overlap () : 0;
-		overlap_0 = boundary_0 ? boundary_0->get_overlap () : 0;
-		ex_overlap_n = boundary_n ? boundary_n->get_ex_overlap () : 0;
-		overlap_n = boundary_n ? boundary_n->get_overlap () : 0;
-		lda = m + ex_overlap_n + ex_overlap_0;
-		inner_m = lda - overlap_0 - overlap_n;
-		
-		int ns0 = overlap_0;
-		
-		if (messenger_ptr->get_id () == 0) {
-			ns.resize (messenger_ptr->get_np ());
-			messenger_ptr->template gather <int> (1, &ns0, &ns [0]);
-			int ntot = 0;
-			for (int i = 0; i < messenger_ptr->get_np (); ++i) {
-				ntot += ns [i];
-			}
-			boundary_matrix.resize (ntot * ntot);
-			bipiv.resize (ntot);
-		} else {
-			messenger_ptr->template gather <int> (1, &ns0, NULL);
-			boundary_matrix.resize ((overlap_0 + overlap_n) * (overlap_0 + overlap_n));
-		}
-		
-		factorized_matrix.resize (lda * lda, 0.0);
-		ipiv.resize (m); // TODO Should be n - ntop - nbot - excess_0 - excess_n
-		data_temp.resize (lda * ldn);
-		
-		/*
-			TODO Move this plan to equation
-		*/
-		TRACE ("Solver built.");
-	}
-	
-	template <class datatype>
 	void collocation_solver <datatype>::factorize () {
 		int info;
 		std::stringstream debug;

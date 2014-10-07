@@ -44,6 +44,7 @@ namespace plans
 	data_z (i_data_z),
 	grid_n (i_grid_n),
 	grid_m (i_grid_m),
+	pos_n (&grid_n [0]),
 	excess_0 (grid_m.get_excess_0 ()),
 	excess_n (grid_m.get_excess_n ()),
 	messenger_ptr (i_messenger_ptr) {
@@ -51,61 +52,6 @@ namespace plans
 		rhs_ptr = i_rhs;
 		component_flags_x = i_component_flags_x;
 		component_flags_z = i_component_flags_z;
-
-		ipiv.resize (ldn * (m + 2));
-
-		if (messenger_ptr->get_id () == 0) {
-			x.resize (4 * (3) * (3) * ldn * messenger_ptr->get_np () * messenger_ptr->get_np ());
-			xipiv.resize (2 * (3) * messenger_ptr->get_np () * ldn);
-		} else {
-			x.resize (4 * (3) * (3) * ldn);
-			xipiv.resize (1);
-		}
-
-		id = messenger_ptr->get_id ();
-		np = messenger_ptr->get_np ();
-
-		ntop = 0;
-		nbot = 0;
-		if (id != 0) {
-			ntop = 1;
-		// 	messenger_ptr->send (1, &pos_m [excess_0], id - 1, 0);
-		}
-		if (id != np - 1) {
-			nbot = 2;
-		// 	messenger_ptr->recv (1, &ex_pos_m, id + 1, 0);
-		// 	messenger_ptr->send (1, &pos_m [m - 2 - excess_n], id + 1, 1);
-		}
-		// if (id != 0) {
-		// 	messenger_ptr->recv (1, &ex_pos_0, id - 1, 1);
-		// }
-		DEBUG (m + 2 + 2 + 1);
-		matrix.resize ((2 * 2 + 1 + 1) * (m + 2 + 2 + 1) * ldn);
-		bufferl.resize (np * (m + 2) * 2 * ldn);
-		bufferr.resize (np * (m + 2) * 1 * ldn);
-
-		data_temp.resize ((m + 2) * ldn);
-	}
-
-	template <class datatype>
-	incompressible_corrector <datatype>::incompressible_corrector (plans::equation <datatype> &i_solver, plans::equation <datatype> &i_solver_x, plans::equation <datatype> &i_solver_z, mpi::messenger* i_messenger_ptr) :
-	plans::solver <datatype> (i_solver.element_flags, i_solver.component_flags),
-	n ((i_solver.grid_ptr (0))->get_n ()),
-	ldn ((i_solver.grid_ptr (0))->get_ld ()),
-	m ((i_solver.grid_ptr (1))->get_n ()),
-	data (i_solver.data_ptr ()),
-	data_x (i_solver_x.data_ptr ()),
-	data_z (i_solver_z.data_ptr ()),
-	grid_n (*(i_solver.grid_ptr (0))),
-	grid_m (*(i_solver.grid_ptr (1))),
-	pos_n (&grid_n [0]),
-	excess_0 (grid_m.get_excess_0 ()),
-	excess_n (grid_m.get_excess_n ()),
-	messenger_ptr (i_messenger_ptr) {
-		TRACE ("Building laplace solver...");
-		rhs_ptr = i_solver.rhs_ptr (spectral_rhs);
-		component_flags_x = i_solver_x.component_flags;
-		component_flags_z = i_solver_z.component_flags;
 
 		ipiv.resize (ldn * (m + 2));
 

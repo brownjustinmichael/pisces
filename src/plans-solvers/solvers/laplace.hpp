@@ -12,7 +12,6 @@
 #include "mpi/messenger.hpp"
 #include "plans/plan.hpp"
 
-#include "../equation.hpp"
 #include "../solver.hpp"
 #include "../boundary.hpp"
 
@@ -23,7 +22,6 @@ namespace plans
 	{
 	public:
 		laplace_solver (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, mpi::messenger* i_messenger_ptr, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
-		laplace_solver (plans::equation <datatype> &i_solver, mpi::messenger* i_messenger_ptr);
 		
 		virtual ~laplace_solver () {}
 		

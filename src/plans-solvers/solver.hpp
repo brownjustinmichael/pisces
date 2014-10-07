@@ -110,6 +110,14 @@ namespace plans
 		 * This method does not contain the actual implementation of the solution, which should be handled in _solve.
 		 *********************************************************************/
 		virtual void execute () = 0;
+		
+		class factory
+		{
+		public:
+			virtual ~factory () {}
+		
+			virtual std::shared_ptr <plans::solver <datatype>> instance (plans::grid <datatype> **grids, datatype *i_data, datatype *i_rhs, int *i_element_flags = NULL, int *i_component_flags = NULL) const = 0;
+		};
 	};
 } /* plans */
 

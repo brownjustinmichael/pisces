@@ -162,6 +162,11 @@ namespace plans
 			TRACE ("Added.");
 		}
 		
+		virtual void add_solver (const typename plans::solver <datatype>::factory &factory, int flags = 0x00) {
+			plans::grid <datatype>* grids [2] = {&grid_n, &grid_m};
+			plans::implemented_equation <datatype>::add_solver (factory.instance (grids, data, rhs_ptr (spectral_rhs), element_flags, component_flags), flags);
+		}
+		
 		virtual std::shared_ptr <plans::solver <datatype>> get_solver (int flags = 0x00) {
 			if (!(flags & not_x_solver)) {
 				return x_solver;

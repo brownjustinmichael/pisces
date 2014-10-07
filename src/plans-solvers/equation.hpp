@@ -122,6 +122,8 @@ namespace plans
 		}
 
 		virtual void add_solver (std::shared_ptr <solver <datatype> > i_solver, int flags = 0x00) = 0;
+		
+		virtual void add_solver (const typename plans::solver <datatype>::factory &factory, int flags = 0x00) = 0;
 
 		virtual std::shared_ptr <plans::solver <datatype>> get_solver (int flags = 0x00) = 0;
 
