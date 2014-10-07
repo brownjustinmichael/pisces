@@ -9,53 +9,97 @@
 #ifndef CONFIG_H_95CWOMPS
 #define CONFIG_H_95CWOMPS
 
-#include "logger_log4cplus.hpp"
+#ifdef _LOG4CPLUS
+
+#include <log4cplus/logger.h>
+#include <log4cplus/loggingmacros.h>
+
+namespace logger
+{
+	extern log4cplus::Logger logger;
+} /* logger */
+
+/*!*******************************************************************
+ * \def TRACE(int,str)
+ * Logs a trace-level logging statement
+ *********************************************************************/
+#define TRACE(str) LOG4CPLUS_TRACE(logger::logger, str);
+/*!*******************************************************************
+ * \def DEBUG(int,str)
+ * Logs a debug-level logging statement
+ *********************************************************************/
+#define DEBUG(str) LOG4CPLUS_DEBUG(logger::logger, str);
+/*!*******************************************************************
+ * \def INFO(int,str)
+ * Logs an info-level logging statement
+ *********************************************************************/
+#define INFO(str) LOG4CPLUS_INFO(logger::logger, str);
+/*!*******************************************************************
+ * \def WARN(int,str)
+ * Logs a warning-level logging statement
+ *********************************************************************/
+#define WARN(str) LOG4CPLUS_WARN(logger::logger, str);
+/*!*******************************************************************
+ * \def ERROR(int,str)
+ * Logs an error-level logging statement
+ *********************************************************************/
+#define ERROR(str) LOG4CPLUS_ERROR(logger::logger, str);
+/*!*******************************************************************
+ * \def FATAL(int,str)
+ * Logs a fatal-level logging statement
+ *********************************************************************/
+#define FATAL(str) LOG4CPLUS_FATAL(logger::logger, str);
+
+#endif
 #include <iostream>
 #include <string>
 
-extern int severity;
+namespace logger
+{
+	extern int severity;
+} /* logger */
 
 /*!*******************************************************************
  * \def TRACE(int,str)
  * Logs a debug-level logging statement
  *********************************************************************/
 #ifndef TRACE
-#define TRACE(str) if(severity<=0){std::cout<<"TRACE "<<str<<std::endl;}else{}
+#define TRACE(str) if(logger::severity<=0){std::cout<<"TRACE - "<<str<<std::endl;}else{}
 #endif
 /*!*******************************************************************
  * \def DEBUG(int,str)
  * Logs a debug-level logging statement
  *********************************************************************/
 #ifndef DEBUG
-#define DEBUG(str) if(severity<=1){std::cout<<"DEBUG "<<str<<std::endl;}else{}
+#define DEBUG(str) if(logger::severity<=1){std::cout<<"DEBUG - "<<str<<std::endl;}else{}
 #endif
 /*!*******************************************************************
  * \def INFO(int,str)
  * Logs an info-level logging statement
  *********************************************************************/
 #ifndef INFO
-#define INFO(str) if(severity<=2){std::cout<<"INFO "<<str<<std::endl;}else{}
+#define INFO(str) if(logger::severity<=2){std::cout<<"INFO - "<<str<<std::endl;}else{}
 #endif
 /*!*******************************************************************
  * \def WARN(int,str)
  * Logs a warning-level logging statement
  *********************************************************************/
 #ifndef WARN
-#define WARN(str) if(severity<=3){std::cout<<"WARN "<<str<<std::endl;}else{}
+#define WARN(str) if(logger::severity<=3){std::cout<<"WARN - "<<str<<std::endl;}else{}
 #endif
 /*!*******************************************************************
  * \def ERROR(int,str)
  * Logs an error-level logging statement
  *********************************************************************/
 #ifndef ERROR
-#define ERROR(str) if(severity<=4){std::cout<<"ERROR "<<str<<std::endl;}else{}
+#define ERROR(str) if(logger::severity<=4){std::cout<<"ERROR - "<<str<<std::endl;}else{}
 #endif
 /*!*******************************************************************
  * \def FATAL(int,str)
  * Logs a fatal-level logging statement
  *********************************************************************/
 #ifndef FATAL
-#define FATAL(str) if(severity<=5){std::cout<<"FATAL "<<str<<std::endl;}else{}
+#define FATAL(str) if(logger::severity<=5){std::cout<<"FATAL - "<<str<<std::endl;}else{}
 #endif
 
 /*!*******************************************************************

@@ -81,7 +81,7 @@ for dirname, dirnames, filenames in os.walk (path):
             if filename.split ('.') [-1] == 'cpp':
                 # Add any .cpp files found to the list of objects to compile
                 objects.append (env.Object (os.path.relpath (dirname, path) + '/' + filename))
-    
+
 # Occasionally, the code won't work without the gfortran library, so check for it
 conf = Configure (env)
 conf.CheckLib ("gfortran")

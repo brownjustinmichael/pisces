@@ -52,7 +52,6 @@ namespace plans
 	
 	template <class datatype>
 	void fourier_solver <datatype>::execute () {
-		std::stringstream debug;
 		TRACE ("Executing solve...");
 		
 		/*

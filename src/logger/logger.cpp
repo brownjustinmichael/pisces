@@ -6,7 +6,10 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include "logger/logger.hpp"
+#include "logger.hpp"
+
+#ifdef _LOG4CPLUS
+
 #include <log4cplus/logger.h>
 #include <log4cplus/loggingmacros.h>
 #include <log4cplus/configurator.h>
@@ -80,4 +83,26 @@ namespace logger
 	}
 } /* logger */
 
+#else
 
+namespace logger
+{
+	int severity = 2;
+	log_config log_config_instance;
+
+	log_config::log_config () {}
+
+	void log_config::configure (int* argc, char*** argv, int id, std::string log_file) {
+		for (int i = 0; i < *argc; ++i) {
+			if (((*argv) [i] [0] == '-') && ((*argv) [i] [1] == 'D')) {
+				severity = atoi (&((*argv) [i] [2]));
+				--*argc;
+				for (int j = i; j < *argc; ++j) {
+					(*argv) [j] = (*argv) [j + 1];
+				}
+			}
+		}
+	}
+} /* logger */
+
+#endif

@@ -7,6 +7,7 @@
  ************************************************************************/
 
 #include <vector>
+#include <sstream>
 #ifdef _MPI
 #include <mpi.h>
 #endif

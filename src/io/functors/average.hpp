@@ -9,6 +9,9 @@
 #ifndef AVERAGE_HPP_9C2B188F
 #define AVERAGE_HPP_9C2B188F
 
+#include <vector>
+#include <memory>
+
 #include "functor.hpp"
 
 namespace io

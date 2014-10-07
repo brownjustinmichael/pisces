@@ -11,6 +11,7 @@
 
 #include <map>
 #include <cstring>
+#include <typeinfo>
 
 #include "logger/logger.hpp"
 

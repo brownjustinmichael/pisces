@@ -2,6 +2,7 @@ Import ("env")
 
 conf = Configure (env)
 
-conf.CheckLib ("log4cplus")
+if conf.CheckLib ("log4cplus"):
+    env.Append (CPPFLAGS = ["-D_LOG4CPLUS"])
 
 env = conf.Finish ()
