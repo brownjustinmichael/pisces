@@ -17,7 +17,7 @@
 #include "boundary.hpp"
 #include "solver.hpp"
 
-namespace two_d
+namespace plans
 {
 	template <class datatype>
 	class fixed_boundary : public plans::boundary <datatype>
@@ -200,6 +200,6 @@ namespace two_d
 			DEBUG ("Calculated.");
 		}
 	};
-} /* two_d */
+} /* plans */
 
 #endif /* end of include guard: BOUNDARY_TWO_D_HPP_863EDB36 */

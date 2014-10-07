@@ -9,6 +9,8 @@
 #ifndef HORIZONTAL_DIFFUSION_HPP_E1A9847D
 #define HORIZONTAL_DIFFUSION_HPP_E1A9847D
 
+#include "linalg/utils.hpp"
+
 #include "../implicit_plan.hpp"
 
 namespace plans

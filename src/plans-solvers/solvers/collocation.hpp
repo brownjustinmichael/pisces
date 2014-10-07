@@ -9,8 +9,10 @@
 #ifndef COLLOCATION_SOLVER_HPP_76DA75C5
 #define COLLOCATION_SOLVER_HPP_76DA75C5
 
-#include "../boundary_two_d.hpp"
 #include "linalg-block/solver.hpp"
+
+#include "../boundary.hpp"
+#include "../solver.hpp"
 
 namespace plans
 {

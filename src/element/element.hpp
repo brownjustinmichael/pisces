@@ -29,7 +29,7 @@
 #include "plans-solvers/equation.hpp"
 #include "plans-transforms/transformer.hpp"
 
-namespace bases
+namespace pisces
 {
 	template <class datatype>
 	class element;
@@ -39,7 +39,7 @@ namespace bases
 	 ************************************************************************/
 	template <class datatype>
 	union rezone_union {
-		bases::element <datatype> *element_ptr; //! A pointer to an element
+		element <datatype> *element_ptr; //! A pointer to an element
 		int np; //! The integer number of elements
 		datatype position; //! A real zoning position
 	};
@@ -540,7 +540,7 @@ namespace bases
 		 * In order, the rezone_union objects must contain 1) a pointer to the element, 2) the total number of elements in the system, 3) min_size argument from rezone_minimize_ts, 4) max_size argument from rezone_minimize_ts, 5-n) positions of the zonal boundaries. This method is to be called by the GSL simulated annealing routine.
 		 ************************************************************************/
 		static double rezone_calculate_ts (void *i_rezone_data) {
-			bases::element <datatype> *element_ptr = ((rezone_union <datatype> *) i_rezone_data)->element_ptr;
+			element <datatype> *element_ptr = ((rezone_union <datatype> *) i_rezone_data)->element_ptr;
 			datatype positions [((rezone_union <datatype> *) i_rezone_data) [1].np + 1];
 			mpi::messenger *messenger_ptr = element_ptr->messenger_ptr;
 			for (int i = 0; i < ((rezone_union <datatype> *) i_rezone_data) [1].np + 1; ++i) {
@@ -574,7 +574,7 @@ namespace bases
 		 ************************************************************************/
 		static double rezone_step_size (void *i_new_rezone_data, void *i_old_rezone_data) {
 			datatype total = 0;
-			bases::element <datatype> *element_ptr = ((rezone_union <datatype> *) i_new_rezone_data)->element_ptr;
+			element <datatype> *element_ptr = ((rezone_union <datatype> *) i_new_rezone_data)->element_ptr;
 			datatype new_positions [((rezone_union <datatype> *) i_new_rezone_data) [1].np + 1];
 			for (int i = 0; i < ((rezone_union <datatype> *) i_new_rezone_data) [1].np + 1; ++i) {
 				new_positions [i] = ((rezone_union <datatype> *) i_new_rezone_data) [i + 4].position;
@@ -601,7 +601,7 @@ namespace bases
 		 ************************************************************************/
 		static void rezone_generate_step (const gsl_rng *r, void *i_rezone_data, datatype step_size) {
 			rezone_union <datatype> *rezone_data = (rezone_union <datatype> *) i_rezone_data;
-			bases::element <datatype> *element_ptr = rezone_data->element_ptr;
+			element <datatype> *element_ptr = rezone_data->element_ptr;
 			datatype positions [rezone_data [1].np + 1];
 			for (int i = 0; i < rezone_data [1].np + 1; ++i) {
 				positions [i] = rezone_data [i + 4].position;
@@ -675,6 +675,6 @@ namespace bases
 			TODO Allow for upside-down elements
 		*/
 	};
-} /* bases */
+} /* pisces */
 
 #endif /* end of include guard: ELEMENT_HPP_IUTSU4TQ */

@@ -16,7 +16,7 @@
 #include "mpi/messenger.hpp"
 #include "plans/grid.hpp"
 
-using namespace two_d::fourier::chebyshev;
+using namespace plans;
 
 int main (int argc, char *argv[])
 {
@@ -63,8 +63,8 @@ int main (int argc, char *argv[])
 			excess_n = 1;
 		}
 
-		horizontal_grid <double>::type horizontal_grid (new plans::axis (n, position_n0, position_nn));
-		vertical_grid <double>::type vertical_grid (new plans::axis (m, position_m0, position_mm, excess_0, excess_n));
+		horizontal::grid <double> horizontal_grid (new plans::axis (n, position_n0, position_nn));
+		vertical::grid <double> vertical_grid (new plans::axis (m, position_m0, position_mm, excess_0, excess_n));
 
 		std::vector <double> temp (n * m);
 

@@ -6,8 +6,8 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#ifndef EXCEPTIONS_HPP_82T7S9HQ
-#define EXCEPTIONS_HPP_82T7S9HQ
+#ifndef EXCEPTIONS_HPP_82T7S9HZ
+#define EXCEPTIONS_HPP_82T7S9HZ
 
 #include <exception>
 #include <sstream>
@@ -54,4 +54,4 @@ namespace linalg
 	} /* exceptions */
 } /* linalg */
 
-#endif /* end of include guard: EXCEPTIONS_HPP_82T7S9HQ */
+#endif /* end of include guard: EXCEPTIONS_HPP_82T7S9HZ */

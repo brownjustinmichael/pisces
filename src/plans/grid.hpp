@@ -16,6 +16,14 @@
 
 namespace plans
 {
+	enum mode {
+		mode_flag = 0x10
+	};
+
+	// enum mode {
+	// 	mode_flag = 0x20
+	// };
+	
 	/*!**********************************************************************
 	 * \brief A class containing the basic dimension information
 	 ************************************************************************/
@@ -222,7 +230,7 @@ namespace plans
 		}
 	};
 	
-	namespace chebyshev
+	namespace vertical
 	{
 		/*!*******************************************************************
 		 * \brief A collocation grid for Chebyshev polynomials
@@ -290,47 +298,47 @@ namespace plans
 		};
 	} /* chebyshev */
 	
-	namespace cosine
-	{
-		/*!*******************************************************************
-		 * \brief A collocation grid for Chebyshev polynomials
-		 * 
-		 * This collocation grid stores the N collocation points for up to the Mth order cosine modes and their first and second derivatives
-		 *********************************************************************/
-		template <class datatype>
-		class grid : public plans::grid <datatype>
-		{
-		private:
-			using plans::grid <datatype>::n;
-			using plans::grid <datatype>::ld;
-			using plans::grid <datatype>::excess_0;
-			using plans::grid <datatype>::excess_n;
-			using plans::grid <datatype>::position_0;
-			using plans::grid <datatype>::position_n;
-			using plans::grid <datatype>::derivs;
-			using plans::grid <datatype>::positions;
+	// namespace vertical
+	// {
+	// 	/*!*******************************************************************
+	// 	 * \brief A collocation grid for Chebyshev polynomials
+	// 	 *
+	// 	 * This collocation grid stores the N collocation points for up to the Mth order cosine modes and their first and second derivatives
+	// 	 *********************************************************************/
+	// 	template <class datatype>
+	// 	class grid : public plans::grid <datatype>
+	// 	{
+	// 	private:
+	// 		using plans::grid <datatype>::n;
+	// 		using plans::grid <datatype>::ld;
+	// 		using plans::grid <datatype>::excess_0;
+	// 		using plans::grid <datatype>::excess_n;
+	// 		using plans::grid <datatype>::position_0;
+	// 		using plans::grid <datatype>::position_n;
+	// 		using plans::grid <datatype>::derivs;
+	// 		using plans::grid <datatype>::positions;
+	//
+	// 		datatype scale; //!< A datatype by which the collocation grid should be scaled
+	// 		datatype width; //!< The datatype width of the collocation region
+	// 		datatype pioN; //!< The datatype 3.14159.../N, for use in calculations
+	//
+	// 	public:
+	// 		/*!*******************************************************************
+	// 		 * \param i_axis_ptr A pointer to an axis object
+	// 		 *********************************************************************/
+	// 		grid (axis *i_axis_ptr);
+	//
+	// 		virtual ~grid () {};
+	//
+	// 	protected:
+	// 		/*!**********************************************************************
+	// 		 * \copydoc plans::grid::_calculate_matrix()
+	// 		 ************************************************************************/
+	// 		void _calculate_matrix ();
+	// 	};
+	// } /* chebyshev */
 	
-			datatype scale; //!< A datatype by which the collocation grid should be scaled
-			datatype width; //!< The datatype width of the collocation region
-			datatype pioN; //!< The datatype 3.14159.../N, for use in calculations
-			
-		public:
-			/*!*******************************************************************
-			 * \param i_axis_ptr A pointer to an axis object
-			 *********************************************************************/
-			grid (axis *i_axis_ptr);
-				
-			virtual ~grid () {};
-			
-		protected:
-			/*!**********************************************************************
-			 * \copydoc plans::grid::_calculate_matrix()
-			 ************************************************************************/
-			void _calculate_matrix ();
-		};
-	} /* chebyshev */
-	
-	namespace fourier
+	namespace horizontal
 	{
 		/*!*******************************************************************
 		 * \brief A collocation grid for Chebyshev polynomials
@@ -370,38 +378,5 @@ namespace plans
 		};
 	} /* fourier */
 } /* plans */
-
-namespace two_d
-{
-	namespace fourier
-	{
-		namespace chebyshev
-		{
-			enum mode {
-				mode_flag = 0x10
-			};
-			
-			template <typename datatype>
-		    struct horizontal_grid { typedef plans::fourier::grid <datatype> type; };
-			
-			template <typename datatype>
-		    struct vertical_grid { typedef plans::chebyshev::grid <datatype> type; };
-		} /* chebyshev */
-		
-		namespace cosine
-		{
-			enum mode {
-				mode_flag = 0x20
-			};
-
-			template <typename datatype>
-		    struct horizontal_grid { typedef plans::fourier::grid <datatype> type; };
-			
-			template <typename datatype>
-		    struct vertical_grid { typedef plans::cosine::grid <datatype> type; };
-		} /* chebyshev */
-	} /* fourier */
-} /* two_d */	
-
 
 #endif /* end of include guard: COLLOCATION_HPP_3FRTUK5Z */

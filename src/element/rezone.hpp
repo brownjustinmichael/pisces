@@ -65,7 +65,7 @@ namespace utils
 	}
 	
 	template <class datatype>
-	datatype minimum_timestep (int n, int m, bases::element <datatype> *element, mpi::messenger *messenger, datatype *positions) {
+	datatype minimum_timestep (int n, int m, pisces::element <datatype> *element, mpi::messenger *messenger, datatype *positions) {
 		std::shared_ptr <io::output> virtual_output (new io::formatted_output <io::formats::two_d::virtual_format> (io::data_grid::two_d (n, m), "rezone/virtual_file", io::replace_file));
 		element->setup_output (virtual_output);
 		

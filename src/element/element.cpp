@@ -30,7 +30,7 @@
  ************************************************************************/
 #define TIME(call,cputime,duration) cbegin=clock(); tbegin=std::chrono::system_clock::now(); call; cend=clock(); tend=std::chrono::system_clock::now(); cputime+=((double) (cend - cbegin))/CLOCKS_PER_SEC; duration+=tend-tbegin;
 
-namespace bases
+namespace pisces
 {
 	template <class datatype>
 	void element <datatype>::run (int &n_steps, int max_steps, int check_every) {
@@ -192,4 +192,4 @@ namespace bases
 	}
 	
 	template class element <double>;
-} /* bases */
+} /* pisces */

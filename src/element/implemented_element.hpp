@@ -21,26 +21,19 @@
 #include "element.hpp"
 #include "rezone.hpp"
 
-namespace two_d
+namespace pisces
 {
-	enum edges {
-		edge_n0 = 0, // Start at 0, 0, increment by n
-		edge_nn = 1, // Start at n, 0, increment by n
-		edge_m0 = 2, // Start at 0, 0, increment by 1
-		edge_mm = 3 // Start at 0, m, increment by 1
-	};
-	
 	enum initialize_element_flags {
 		uniform_n = 0x01,
 		uniform_m = 0x02
 	};
 	
 	template <class datatype>
-	class element : public bases::element <datatype>
+	class implemented_element : public pisces::element <datatype>
 	{
 	public:
-		element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
-		bases::element <datatype> (i_name, 2, i_params, i_messenger_ptr, i_element_flags),
+		implemented_element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
+		element <datatype> (i_name, 2, i_params, i_messenger_ptr, i_element_flags),
 		n (i_axis_n.get_n ()), m (i_axis_m.get_n ()) {
 			TRACE ("Instantiating...");
 			axes [0] = i_axis_n;
@@ -65,10 +58,18 @@ namespace two_d
 			count = 0;
 			previous = 0;
 			
+			element <datatype>::initialize (x_position, "x");
+			element <datatype>::initialize (z_position, "z");
+			if (i_params ["parallel.transform.subthreads"].IsDefined ()) {
+				transform_threads = i_params.get <int> ("parallel.transform.subthreads");
+			} else {
+				transform_threads = 0;
+			}
+			
 			TRACE ("Instantiated.");
 		}
 		
-		virtual ~element () {}
+		virtual ~implemented_element () {}
 		
 		/*!*******************************************************************
 		 * \brief Get the datatype reference to the named scalar
@@ -86,15 +87,15 @@ namespace two_d
 		}
 		
 		inline datatype& operator() (int name, int i = 0, int j = 0) {
-			return bases::element <datatype>::operator() (name, i * m + j);
+			return element <datatype>::operator() (name, i * m + j);
 		}
 		
 		inline datatype* ptr (int name, int i = 0) {
-			return bases::element <datatype>::ptr (name, i);
+			return element <datatype>::ptr (name, i);
 		}
 
 		inline datatype* ptr (int name, int i, int j) {
-			return bases::element <datatype>::ptr (name, i * m + j);
+			return element <datatype>::ptr (name, i * m + j);
 		}
 		
 		virtual void setup_profile (std::shared_ptr <io::output> output_stream, int flags = 0x00) {
@@ -107,11 +108,11 @@ namespace two_d
 			output_stream->template append <datatype> ("t", &duration, io::scalar);
 			output_stream->template append <const int> ("mode", &(get_mode ()), io::scalar);
 			
-			bases::element <datatype>::setup_profile (output_stream, flags);
+			element <datatype>::setup_profile (output_stream, flags);
 		}
 	
 		/*!*******************************************************************
-		 * \copydoc bases::element <datatype>::initialize ()
+		 * \copydoc element <datatype>::initialize ()
 		 *********************************************************************/
 		virtual datatype *_initialize (int name, datatype* initial_conditions = NULL, int i_flags = 0x00) {
 			TRACE ("Initializing " << name << "...");
@@ -147,6 +148,15 @@ namespace two_d
 				}
 			}
 			
+			if ((name != x_position) && (name != z_position)) {
+				element <datatype>::add_transform (name, std::shared_ptr <plans::transformer <datatype> > (new plans::implemented_transformer <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &element_flags [state], &element_flags [name], transform_threads)));
+			}
+			if ((name != x_position) && (name != z_position)) {
+				element <datatype>::add_solver (name, std::shared_ptr <plans::equation <datatype> > (new plans::implemented_equation <datatype> (*grids [0], *grids [1], ptr (name), &element_flags [state], &element_flags [name])));
+				DEBUG ("Adding " << name << " solver");
+				
+			}
+			TRACE ("Initialized.");
 			TRACE ("Initialized.");
 			return this->ptr (name);
 		}
@@ -195,13 +205,25 @@ namespace two_d
 			std::shared_ptr <io::formats::virtual_file> virtual_file (new io::formats::virtual_file);
 			
 			std::shared_ptr <io::output> virtual_output (new io::formatted_output <io::formats::two_d::virtual_format> (io::data_grid::two_d (n, m), "two_d/element/virtual_file", io::replace_file));
-			bases::element <datatype>::setup_output (virtual_output);
+			element <datatype>::setup_output (virtual_output);
 			
 			virtual_output->to_file ();
 			return &io::virtual_files ["two_d/element/virtual_file"];
 		}
 		
-		virtual std::shared_ptr <plans::grid <datatype>> generate_grid (plans::axis *axis, int index = -1) = 0;
+		const int &get_mode () {
+			return mode;
+		}
+		
+		virtual std::shared_ptr <plans::grid <datatype>> generate_grid (plans::axis *axis, int index = -1) {
+			if (index == 0) {
+				return std::shared_ptr <plans::grid <datatype>> (new typename plans::horizontal::grid <datatype> (axis));
+			} else if (index == 1 || index == -1) {
+				return std::shared_ptr <plans::grid <datatype>> (new typename plans::vertical::grid <datatype> (axis));
+			} else {
+				throw 0;
+			}
+		}
 		
 		virtual io::formats::virtual_file *make_rezoned_virtual_file (datatype *positions, io::formats::virtual_file *old_virtual_file, int flags = 0x00) {
 			plans::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
@@ -235,16 +257,16 @@ namespace two_d
 		}
 	
 	protected:
-		using bases::element <datatype>::scalars;
-		using bases::element <datatype>::grids;
-		using bases::element <datatype>::name;
-		using bases::element <datatype>::messenger_ptr;
-		using bases::element <datatype>::element_flags;
-		using bases::element <datatype>::timestep;
-		using bases::element <datatype>::axes;
-		using bases::element <datatype>::scalar_names;
-		using bases::element <datatype>::get_mode;
-		using bases::element <datatype>::duration;
+		using element <datatype>::scalars;
+		using element <datatype>::grids;
+		using element <datatype>::name;
+		using element <datatype>::messenger_ptr;
+		using element <datatype>::element_flags;
+		using element <datatype>::timestep;
+		using element <datatype>::axes;
+		using element <datatype>::scalar_names;
+		using element <datatype>::get_mode;
+		using element <datatype>::duration;
 		
 		int n; //!< The number of elements in each 1D array
 		int m;
@@ -264,153 +286,9 @@ namespace two_d
 		datatype timestep_safety;
 		datatype next_timestep;
 		int count, previous;
+		int transform_threads;
+		static int mode;
 	};
-	
-	namespace fourier
-	{
-		namespace chebyshev
-		{
-			template <class datatype>
-			class element : public two_d::element <datatype>
-			{
-			public:
-				/*!*******************************************************************
-				 * \copydoc one_d::element::element ()
-				 *********************************************************************/
-				element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
-				two_d::element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_messenger_ptr, i_element_flags) {
-					TRACE ("Instantiating...");
-					initialize (x_position, "x");
-					initialize (z_position, "z");
-					if (i_params ["parallel.transform.subthreads"].IsDefined ()) {
-						transform_threads = i_params.get <int> ("parallel.transform.subthreads");
-					} else {
-						transform_threads = 0;
-					}
-					TRACE ("Instantiated.");
-				}
-				virtual ~element () {}
-				
-				const int &get_mode () {
-					return mode;
-				}
-				
-				virtual std::shared_ptr <plans::grid <datatype>> generate_grid (plans::axis *axis, int index = -1) {
-					if (index == 0) {
-						return std::shared_ptr <plans::grid <datatype>> (new typename horizontal_grid <datatype>::type (axis));
-					} else if (index == 1 || index == -1) {
-						return std::shared_ptr <plans::grid <datatype>> (new typename vertical_grid <datatype>::type (axis));
-					} else {
-						throw 0;
-					}
-				}
-				
-				virtual datatype *_initialize (int name, datatype* initial_conditions = NULL, int i_element_flags = 0x00) {
-					TRACE ("Initializing...");
-					two_d::element <datatype>::_initialize (name, initial_conditions, i_element_flags);
-					DEBUG ("Trying...");
-					/*
-						TODO Fix flaggin
-					*/
-					if ((name != x_position) && (name != z_position)) {
-						element <datatype>::add_transform (name, std::shared_ptr <plans::transformer <datatype> > (new plans::implemented_transformer <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &element_flags [state], &element_flags [name], transform_threads)));
-					}
-					if ((name != x_position) && (name != z_position)) {
-						element <datatype>::add_solver (name, std::shared_ptr <plans::equation <datatype> > (new plans::implemented_equation <datatype> (*grids [0], *grids [1], ptr (name), &element_flags [state], &element_flags [name])));
-						DEBUG ("Adding " << name << " solver");
-						
-					}
-					TRACE ("Initialized.");
-					return this->ptr (name);
-				}
-		
-				using two_d::element <datatype>::ptr;
-			protected:
-				using two_d::element <datatype>::initialize;
-				using two_d::element <datatype>::element_flags;
-				using two_d::element <datatype>::positions;
-				using two_d::element <datatype>::excesses;
-				using two_d::element <datatype>::n;
-				using two_d::element <datatype>::m;
-				using two_d::element <datatype>::params;
-				using two_d::element <datatype>::grids;
-				
-				int transform_threads;
-				static int mode;
-			};
-		}
-		
-		namespace cosine
-		{	
-			template <class datatype>
-			class element : public two_d::element <datatype>
-			{
-			public:
-				/*!*******************************************************************
-				 * \copydoc one_d::element::element ()
-				 *********************************************************************/
-				element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
-				two_d::element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_messenger_ptr, i_element_flags) {
-					TRACE ("Instantiating...");
-					initialize (x_position, "x");
-					initialize (z_position, "z");
-					
-					if (i_params ["parallel.transform.subthreads"].IsDefined ()) {
-						transform_threads = i_params.get <int> ("parallel.transform.subthreads");
-					} else {
-						transform_threads = 0;
-					}
-					TRACE ("Instantiated.");
-				}
-				
-				virtual ~element () {}
-				
-				const int &get_mode () {
-					return mode;
-				}
-				
-				virtual std::shared_ptr <plans::grid <datatype>> generate_grid (plans::axis *axis, int index = -1) {
-					if (index == 0) {
-						return std::shared_ptr <plans::grid <datatype>> (new typename horizontal_grid <datatype>::type (axis));
-					} else if (index == 1 || index == -1) {
-						return std::shared_ptr <plans::grid <datatype>> (new typename vertical_grid <datatype>::type (axis));
-					} else {
-						throw 0;
-					}
-				}
-				
-				virtual datatype *_initialize (int name, datatype* initial_conditions = NULL, int i_element_flags = 0x00) {
-					TRACE ("Initializing...");
-					two_d::element <datatype>::_initialize (name, initial_conditions, i_element_flags);
-					/*
-						TODO Fix flaggin
-					*/
-					if ((name != x_position) && (name != z_position)) {
-						bases::element <datatype>::add_transform (name, std::shared_ptr <plans::transformer <datatype> > (new plans::implemented_transformer <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal, &element_flags [state], &element_flags [name], transform_threads)));
-					}
-					if ((name != x_position) && (name != z_position)) {
-						element <datatype>::add_solver (name, std::shared_ptr <plans::equation <datatype> > (new plans::implemented_equation <datatype> (*grids [0], *grids [1], ptr (name), &element_flags [state], &element_flags [name])));
-					}
-					return this->ptr (name);
-				}
-		
-				using two_d::element <datatype>::ptr;
-			protected:
-				using two_d::element <datatype>::initialize;
-				using two_d::element <datatype>::element_flags;
-				using two_d::element <datatype>::positions;
-				using two_d::element <datatype>::excesses;
-				using two_d::element <datatype>::n;
-				using two_d::element <datatype>::m;
-				using two_d::element <datatype>::params;
-				using two_d::element <datatype>::grids;
-				
-				int transform_threads;
-				
-				static int mode;
-			};
-		}
-	} /* fourier */
-} /* two_d */
+} /* pisces */
 
 #endif /* end of include guard: ELEMENT_TWO_D_HPP_CJ68F4IB */
