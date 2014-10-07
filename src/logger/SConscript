@@ -2,7 +2,6 @@ Import ("env")
 
 conf = Configure (env)
 
-conf.CheckLib ("fftw3")
-conf.CheckLib ("fftw3f")
-    
+conf.CheckLib ("log4cplus")
+
 env = conf.Finish ()

@@ -9,8 +9,6 @@
 #ifndef CONFIG_LOG4CPLUS_H_95CWOMPS
 #define CONFIG_LOG4CPLUS_H_95CWOMPS
 
-#ifdef _LOG4CPLUS
-
 #include <log4cplus/logger.h>
 #include <log4cplus/loggingmacros.h>
 
@@ -49,7 +47,5 @@ namespace logger
  * Logs a fatal-level logging statement
  *********************************************************************/
 #define FATAL(str) LOG4CPLUS_FATAL(logger::logger, str);
-
-#endif // _LOG4CPLUS
 
 #endif /* end of include guard: CONFIG_LOG4CPLUS_HPP_6G0PF3RA */

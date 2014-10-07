@@ -1,9 +1,5 @@
 Import ("env")
-Import ("objects")
 Import ("include_cuda")
-Import ("include_mp")
-
-import os, inspect
 
 conf = Configure (env)
 
