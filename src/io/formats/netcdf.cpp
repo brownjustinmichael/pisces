@@ -20,6 +20,7 @@ namespace io
 			std::map <std::string, int> netcdf::records;
 		
 			void netcdf::open_file (const data_grid &grid, std::string file_name, int file_type) {
+				TRACE ("Opening NetCDF file");
 				if (file_type == read_file) {
 					if (files [file_name]) {
 						FATAL ("File already open");

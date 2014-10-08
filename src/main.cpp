@@ -131,17 +131,19 @@ int main (int argc, char *argv[])
 
 		TRACE ("Element constructed.");
 
-		const io::data_grid io_grid = io::data_grid::two_d (n, m, 0, config.get <bool> ("input.full") ? n_elements * m : 0, 0, config.get <bool> ("input.full") ? id * m : 0);
+		const io::data_grid i_grid = io::data_grid::two_d (n, m, 0, config.get <bool> ("input.full") ? n_elements * m : 0, 0, config.get <bool> ("input.full") ? id * m : 0);
 		
 		if (config ["input.file"].IsDefined ()) {
 			std::string file_format = "input/" + config.get <std::string> ("input.file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-			io::formatted_input <io::formats::two_d::netcdf> input_stream (io_grid, buffer);
+			io::formatted_input <io::formats::two_d::netcdf> input_stream (i_grid, buffer);
 
 			element->setup (&input_stream);
 		}
-
+		
+		const io::data_grid o_grid = io::data_grid::two_d (n, m, 0, config.get <bool> ("output.full") ? n_elements * m : 0, 0, config.get <bool> ("output.full") ? id * m : 0);
+		
 		// Set up output
 		std::shared_ptr <io::output> normal_stream;
 		if (config ["output.file"].IsDefined ()) {
@@ -149,7 +151,7 @@ int main (int argc, char *argv[])
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 
-			normal_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (io_grid, buffer, config.get <int> ("output.every")));
+			normal_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (o_grid, buffer, config.get <int> ("output.every")));
 			element->setup_output (normal_stream, normal_output);
 
 		}
@@ -160,7 +162,7 @@ int main (int argc, char *argv[])
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 
-			transform_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (io_grid, buffer, config.get <int> ("output.every")));
+			transform_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (o_grid, buffer, config.get <int> ("output.every")));
 			element->setup_output (transform_stream, transform_output);
 		}
 
