@@ -32,8 +32,8 @@ namespace pisces
 	class implemented_element : public pisces::element <datatype>
 	{
 	public:
-		implemented_element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
-		element <datatype> (i_name, 2, i_params, i_messenger_ptr, i_element_flags),
+		implemented_element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
+		element <datatype> (i_name, 2, i_params, i_data, i_messenger_ptr, i_element_flags),
 		n (i_axis_n.get_n ()), m (i_axis_m.get_n ()) {
 			TRACE ("Instantiating...");
 			axes [0] = i_axis_n;
@@ -71,20 +71,20 @@ namespace pisces
 		
 		virtual ~implemented_element () {}
 		
-		/*!*******************************************************************
-		 * \brief Get the datatype reference to the named scalar
-		 * 
-		 * \param name The integer name from the index enumeration
-		 * 
-		 * \return A datatype reference to the first element of the named scalar
-		 *********************************************************************/
-		inline datatype& operator[] (int name) {
-			if (scalars.find (name) == scalars.end ()) {
-				FATAL ("Index " << name << " not found in element.");
-				throw 0;
-			}
-			return scalars [name] [0];
-		}
+		// /*!*******************************************************************
+		//  * \brief Get the datatype reference to the named scalar
+		//  *
+		//  * \param name The integer name from the index enumeration
+		//  *
+		//  * \return A datatype reference to the first element of the named scalar
+		//  *********************************************************************/
+		// inline datatype& operator[] (int name) {
+		// 	if (scalars.find (name) == scalars.end ()) {
+		// 		FATAL ("Index " << name << " not found in element.");
+		// 		throw 0;
+		// 	}
+		// 	return scalars [name] [0];
+		// }
 		
 		inline datatype& operator() (int name, int i = 0, int j = 0) {
 			return element <datatype>::operator() (name, i * m + j);
@@ -107,7 +107,7 @@ namespace pisces
 			}
 			output_stream->template append <datatype> ("t", &duration, io::scalar);
 			output_stream->template append <const int> ("mode", &(get_mode ()), io::scalar);
-			
+
 			element <datatype>::setup_profile (output_stream, flags);
 		}
 	
@@ -117,46 +117,45 @@ namespace pisces
 		virtual datatype *_initialize (int name, datatype* initial_conditions = NULL, int i_flags = 0x00) {
 			TRACE ("Initializing " << name << "...");
 			// Size allowing for real FFT buffer
-			scalars [name].resize (grids [0]->get_ld () * m, 0.0);
-			if (name == x_position) {
-				for (int j = 0; j < m; ++j) {
-					linalg::copy (n, &((*grids [0]) [0]), ptr (name, 0, j), 1, m);
-				}
-			} else if (name == z_position) {
-				for (int i = 0; i < n; ++i) {
-					linalg::copy (m, &((*grids [1]) [0]), ptr (name, i, 0));
-				}
-			} else {
-				if (initial_conditions) {
-					if ((i_flags & uniform_m) && (i_flags & uniform_n)) {
-						for (int i = 0; i < n; ++i) {
-							for (int j = 0; j < m; ++j) {
-								(*this) (name, i, j) = *initial_conditions;
-							}
-						}
-					} else if (i_flags & uniform_m) {
-						for (int j = 0; j < m; ++j) {
-							linalg::copy (n, initial_conditions, ptr (name, 0, j), 1, m);
-						}
-					} else if (i_flags & uniform_n) {
-						for (int i = 0; i < n; ++i) {
-							linalg::copy (m, initial_conditions, ptr (name, i, 0));
-						}
-					} else {
-						linalg::copy (n * m, initial_conditions, ptr (name));
-					}
-				}
-			}
-			
+			// scalars [name].resize (grids [0]->get_ld () * m, 0.0);
+			// if (name == x_position) {
+			// 	for (int j = 0; j < m; ++j) {
+			// 		linalg::copy (n, &((*grids [0]) [0]), ptr (name, 0, j), 1, m);
+			// 	}
+			// } else if (name == z_position) {
+			// 	for (int i = 0; i < n; ++i) {
+			// 		linalg::copy (m, &((*grids [1]) [0]), ptr (name, i, 0));
+			// 	}
+			// } else {
+			// 	if (initial_conditions) {
+			// 		if ((i_flags & uniform_m) && (i_flags & uniform_n)) {
+			// 			for (int i = 0; i < n; ++i) {
+			// 				for (int j = 0; j < m; ++j) {
+			// 					(*this) (name, i, j) = *initial_conditions;
+			// 				}
+			// 			}
+			// 		} else if (i_flags & uniform_m) {
+			// 			for (int j = 0; j < m; ++j) {
+			// 				linalg::copy (n, initial_conditions, ptr (name, 0, j), 1, m);
+			// 			}
+			// 		} else if (i_flags & uniform_n) {
+			// 			for (int i = 0; i < n; ++i) {
+			// 				linalg::copy (m, initial_conditions, ptr (name, i, 0));
+			// 			}
+			// 		} else {
+			// 			linalg::copy (n * m, initial_conditions, ptr (name));
+			// 		}
+			// 	}
+			// }
+			//
+			// if ((name != x_position) && (name != z_position)) {
+			// 	element <datatype>::add_transform (name, std::shared_ptr <plans::transformer <datatype> > (new plans::implemented_transformer <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &element_flags [state], &element_flags [name], transform_threads)));
+			// }
 			if ((name != x_position) && (name != z_position)) {
-				element <datatype>::add_transform (name, std::shared_ptr <plans::transformer <datatype> > (new plans::implemented_transformer <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &element_flags [state], &element_flags [name], transform_threads)));
-			}
-			if ((name != x_position) && (name != z_position)) {
+				DEBUG (ptr (name));
 				element <datatype>::add_solver (name, std::shared_ptr <plans::equation <datatype> > (new plans::implemented_equation <datatype> (*grids [0], *grids [1], ptr (name), &element_flags [state], &element_flags [name])));
-				DEBUG ("Adding " << name << " solver");
 				
 			}
-			TRACE ("Initialized.");
 			TRACE ("Initialized.");
 			return this->ptr (name);
 		}
@@ -267,6 +266,7 @@ namespace pisces
 		using element <datatype>::scalar_names;
 		using element <datatype>::get_mode;
 		using element <datatype>::duration;
+		using element <datatype>::data;
 		
 		int n; //!< The number of elements in each 1D array
 		int m;

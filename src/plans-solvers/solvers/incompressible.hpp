@@ -38,7 +38,6 @@ namespace plans
 
 		public:
 			factory (mpi::messenger *i_messenger_ptr, plans::equation <datatype> &i_equation_x, plans::equation <datatype> &i_equation_z) : messenger_ptr (i_messenger_ptr), equation_x (i_equation_x), equation_z (i_equation_z) {
-				DEBUG ("MESS " << i_messenger_ptr << " " << equation_x.data_ptr () << " " << equation_z.data_ptr ());
 			}
 			
 			virtual ~factory () {}

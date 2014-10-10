@@ -127,7 +127,9 @@ int main (int argc, char *argv[])
 		plans::axis horizontal_axis (n, -config.get <double> ("grid.x.width") / 2.0, config.get <double> ("grid.x.width") / 2.0);
 		plans::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
 
-		std::shared_ptr <pisces::element <double>> element (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, &process_messenger, 0x00));
+		data::implemented_data <double> data (&horizontal_axis, &vertical_axis);
+		
+		std::shared_ptr <pisces::element <double>> element (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, data, &process_messenger, 0x00));
 
 		TRACE ("Element constructed.");
 
@@ -139,7 +141,7 @@ int main (int argc, char *argv[])
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 			io::formatted_input <io::formats::two_d::netcdf> input_stream (i_grid, buffer);
 
-			element->setup (&input_stream);
+			data.setup (&input_stream);
 		}
 		
 		const io::data_grid o_grid = io::data_grid::two_d (n, m, 0, config.get <bool> ("output.full") ? n_elements * m : 0, 0, config.get <bool> ("output.full") ? id * m : 0);
@@ -152,8 +154,7 @@ int main (int argc, char *argv[])
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 
 			normal_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (o_grid, buffer, config.get <int> ("output.every")));
-			element->setup_output (normal_stream, normal_output);
-
+			data.setup_output (normal_stream, normal_output);
 		}
 
 		std::shared_ptr <io::output> transform_stream;
@@ -163,7 +164,7 @@ int main (int argc, char *argv[])
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 
 			transform_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (o_grid, buffer, config.get <int> ("output.every")));
-			element->setup_output (transform_stream, transform_output);
+			data.setup_output (transform_stream, transform_output);
 		}
 
 		std::shared_ptr <io::output> stat_stream;
@@ -173,7 +174,7 @@ int main (int argc, char *argv[])
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 
 			stat_stream.reset (new io::appender_output <io::formats::ascii> (io::data_grid::two_d (n, m), buffer, config.get <int> ("output.stat.every")));
-			element->setup_stat (stat_stream);
+			data.setup_stat (stat_stream);
 		}
 
 		/*
@@ -196,7 +197,7 @@ int main (int argc, char *argv[])
 				io::virtual_files ["main/virtual_file"] = *(element->rezone_minimize_ts (&positions [0], config.get <double> ("grid.rezone.min_size"), config.get <double> ("grid.rezone.max_size"), config.get <int> ("grid.rezone.n_tries"), config.get <int> ("grid.rezone.iters_fixed_t"), config.get <double> ("grid.rezone.step_size"), config.get <double> ("grid.rezone.k"), config.get <double> ("grid.rezone.t_initial"), config.get <double> ("grid.rezone.mu_t"), config.get <double> ("grid.rezone.t_min")));
 
 				plans::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
-				element.reset (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, &process_messenger, 0x00));
+				element.reset (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, data, &process_messenger, 0x00));
 
 				/*
 					TODO It would be nice to combine the above construction of element with this one

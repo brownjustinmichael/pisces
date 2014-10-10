@@ -20,7 +20,7 @@ namespace pisces
 	class boussinesq_element : public implemented_element <datatype>
 	{
 	public:
-		boussinesq_element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, mpi::messenger* i_messenger_ptr, int i_element_flags);
+		boussinesq_element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags);
 		
 		virtual ~boussinesq_element () {}
 		
@@ -28,13 +28,11 @@ namespace pisces
 		
 		virtual void setup_output (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
 			element <datatype>::setup_output (output_ptr, flags);
-			DEBUG ("SETTING UP");
 			output_ptr->template append <double> ("div", new io::functors::div_functor <datatype> (ptr (x_position), ptr (z_position), ptr (x_velocity), ptr (z_velocity), n, m));
 		}
 		
 		virtual void setup_stat (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
 			element <datatype>::setup_stat (output_ptr, flags);
-			DEBUG ("SETTING UP");
 			area.resize (n * m);
 			for (int i = 1; i < n; ++i) {
 				for (int j = 1; j < m; ++j) {
@@ -99,6 +97,7 @@ namespace pisces
 		using implemented_element <datatype>::solvers;
 		using implemented_element <datatype>::scalars;
 		using implemented_element <datatype>::scalar_names;
+		using implemented_element <datatype>::data;
 		
 		std::vector <datatype> area;
 		datatype advection_coeff, cfl, *x_ptr, *z_ptr, *x_vel_ptr, *z_vel_ptr;

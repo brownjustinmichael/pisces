@@ -43,14 +43,12 @@ namespace plans
 				if (1.0 - alpha != 0.0) {
 					#pragma omp parallel for
 					for (int i = 2; i < ldn; ++i) {
-						DEBUG (-coeff * (1.0 - alpha) * pioL2 * (i / 2) * (i / 2));
 						linalg::add_scaled (m, -coeff * (1.0 - alpha) * pioL2 * (i / 2) * (i / 2), data_in + i * m, data_out + i * m);
 					}
 				}
 			} else {
 				#pragma omp parallel for
 				for (int i = 2; i < ldn; ++i) {
-					DEBUG (-coeff * pioL2 * (i / 2) * (i / 2));
 					linalg::add_scaled (m, -coeff * pioL2 * (i / 2) * (i / 2), data_in + i * m, data_out + i * m);
 				}
 			}

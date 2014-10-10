@@ -37,7 +37,7 @@ namespace plans
 		virtual ~vertical_diffusion () {}
 
 		void execute () {	
-			TRACE ("Operating..." << element_flags);
+			TRACE ("Operating..." << element_flags << " " << component_flags<< " " << data_in << " " << data_out);
 			if (*component_flags & z_solve) {
 				if (1.0 - alpha != 0.0) {
 					linalg::matrix_matrix_multiply (m, ldn, m, coeff * (1.0 - alpha), grid_m.get_data (2), data_in, 1.0, data_out, m);

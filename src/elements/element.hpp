@@ -29,6 +29,8 @@
 #include "plans-solvers/equation.hpp"
 #include "plans-transforms/transformer.hpp"
 
+#include "data.hpp"
+
 namespace pisces
 {
 	template <class datatype>
@@ -60,13 +62,14 @@ namespace pisces
 		int dimensions; //!< The integer number of dimensions in the element
 		io::parameters& params; //!< The map that contains the input parameters
 		
-		datatype duration; //!< The datatype total simulated time
-		datatype timestep; //!< The datatype timestep length
+		datatype &duration; //!< The datatype total simulated time
+		datatype &timestep; //!< The datatype timestep length
 
 		std::vector <std::shared_ptr <plans::grid <datatype>>> grids; //!< A vector of shared pointers to the collocation grids
+		data::data <datatype> &data;
 		std::map <int, std::vector <datatype> > scalars; //!< A map of scalar vectors
 		std::map <int, std::string> scalar_names; //!< A map of string representations of the scalars
-		std::map <int, int> element_flags; //!< A map of integer flags
+		std::map <int, int> &element_flags; //!< A map of integer flags
 		
 		std::map<int, std::shared_ptr <plans::equation <datatype>>> solvers; //!< A vector of shared pointers to the matrix solvers
 		
@@ -112,9 +115,13 @@ namespace pisces
 		* \param i_messenger_ptr A pointer to a messenger object for inter-element communication
 		* \param i_element_flags An integer set of global flags for the element
 		*********************************************************************/
-		element (int i_name, int i_dimensions, io::parameters& i_params, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
+		element (int i_name, int i_dimensions, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
 		dimensions (i_dimensions),
-		params (i_params) {
+		params (i_params),
+		duration (i_data.duration),
+		timestep (i_data.timestep),
+		data (i_data),
+		element_flags (data.flags) {
 			element_flags [state] = i_element_flags;
 			name = i_name;
 			grids.resize (i_dimensions);
@@ -134,11 +141,12 @@ namespace pisces
 		 * \return A datatype reference to the first element of the named scalar
 		 *********************************************************************/
 		inline datatype& operator[] (int name) {
-			if (scalars.find (name) == scalars.end ()) {
-				FATAL ("Index " << name << " not found in element.");
-				throw 0;
-			}
-			return scalars [name] [0];
+			// if (scalars.find (name) == scalars.end ()) {
+			// 	FATAL ("Index " << name << " not found in element.");
+			// 	throw 0;
+			// }
+			// return scalars [name] [0];
+			return *data [name];
 		}
 		
 		/*!*******************************************************************
@@ -176,7 +184,8 @@ namespace pisces
 			/*
 				TODO It would be nice to check if name exists in debug mode...
 			*/
-			return &((*this) [name]) + index;
+			// return &((*this) [name]) + index;
+			return data (name, index);
 		}
 		
 		/*!*******************************************************************
@@ -226,7 +235,10 @@ namespace pisces
 				}
 			}
 			scalar_names [i_name] = i_str;
-			return _initialize (i_name, initial_conditions, i_flags);
+			datatype * value = data.initialize (i_name, i_str, initial_conditions, i_flags);
+			_initialize (i_name, initial_conditions, i_flags);
+			return value;
+			// return _initialize (i_name, initial_conditions, i_flags);
 		}
 		
 		/*!**********************************************************************
@@ -243,29 +255,25 @@ namespace pisces
 		 * \param input_stream_ptr A pointer to an input object
 		 ************************************************************************/
 		void setup (io::input *input_ptr) {
-			// Iterate through the scalar fields and append them to the variables for which the input will search
-			typedef typename std::map <int, std::vector <datatype> >::iterator iterator;
-			for (iterator iter = scalars.begin (); iter != scalars.end (); ++iter) {
-				input_ptr->template append <datatype> (scalar_names [iter->first], ptr (iter->first));
-			}
-			// Also look for the scalars for total simulated time and geometry mode
-			input_ptr->template append <datatype> ("t", &duration, io::scalar);
-			int mode;
-			input_ptr->template append <int> ("mode", &mode, io::scalar);
+			data.setup (input_ptr);
 			
-			try {
-				// Read from the input into the element variables
-				input_ptr->from_file ();
-			} catch (io::formats::exceptions::bad_variables &except) {
-				// Send a warning if there are missing variables in the input
-				WARN (except.what ());
-			}
-			
-			// Make sure that the mode matched the mode of the element
-			if (mode != get_mode ()) {
-				FATAL ("Loading simulation in different mode: " << mode << " instead of " << get_mode ());
-				throw 0;
-			}
+			// input_ptr->template append <datatype> ("t", &duration, io::scalar);
+			// int mode;
+			// input_ptr->template append <int> ("mode", &mode, io::scalar);
+			//
+			// try {
+			// 	// Read from the input into the element variables
+			// 	input_ptr->from_file ();
+			// } catch (io::formats::exceptions::bad_variables &except) {
+			// 	// Send a warning if there are missing variables in the input
+			// 	WARN (except.what ());
+			// }
+			//
+			// // Make sure that the mode matched the mode of the element
+			// if (mode != get_mode ()) {
+			// 	FATAL ("Loading simulation in different mode: " << mode << " instead of " << get_mode ());
+			// 	throw 0;
+			// }
 		}
 		
 		/*!**********************************************************************
@@ -277,29 +285,26 @@ namespace pisces
 		 * Given an output object, prepare it to output all the scalar fields tracked directly by the element. Make it one of the output streams called during output. If flags is normal_stream, output the variables when in Cartesian space, else if flags is transform_stream, output with horizontal grid in Fourier space, but vertical grid in Cartesian space.
 		 ************************************************************************/
 		virtual void setup_output (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
-			// Iterate through the scalar fields and append them to the variables which the output will write to file
-			typedef typename std::map <int, std::vector <datatype> >::iterator iterator;
-			for (iterator iter = scalars.begin (); iter != scalars.end (); ++iter) {
-				output_ptr->template append <datatype> (scalar_names [iter->first], ptr (iter->first));
-			}
-			// Also prepare to output the total simulated time and geometry mode
-			output_ptr->template append <datatype> ("t", &duration, io::scalar);
-			output_ptr->template append <const int> ("mode", &(get_mode ()), io::scalar);
-
-			// Check the desired output time and save the output object in the appropriate variable
-			if (flags & transform_output) {
-				transform_stream = output_ptr;
-			} else if (flags & normal_output) {
-				normal_stream = output_ptr;
-			}
+			data.setup_output (output_ptr, flags);
+			
+			// output_ptr->template append <datatype> ("t", &duration, io::scalar);
+			// output_ptr->template append <const int> ("mode", &(get_mode ()), io::scalar);
+			//
+			// // Check the desired output time and save the output object in the appropriate variable
+			// if (flags & transform_output) {
+			// 	transform_stream = output_ptr;
+			// } else if (flags & normal_output) {
+			// 	normal_stream = output_ptr;
+			// }
 		}
 		
 		virtual void setup_stat (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
 			// Also prepare to output the total simulated time and geometry mode
-			output_ptr->template append <datatype> ("t", &duration, io::scalar);
-			output_ptr->template append <datatype> ("dt", &timestep, io::scalar);
-			// Check the desired output time and save the output object in the appropriate variable
-			stat_stream = output_ptr;
+			data.setup_stat (output_ptr, flags);
+			// output_ptr->template append <datatype> ("t", &duration, io::scalar);
+			// output_ptr->template append <datatype> ("dt", &timestep, io::scalar);
+			// // Check the desired output time and save the output object in the appropriate variable
+			// stat_stream = output_ptr;
 		}
 		
 		/*!**********************************************************************
@@ -380,8 +385,7 @@ namespace pisces
 			TRACE ("Beginning solve...");
 			// Execute the solvers
 			for (iterator iter = begin (); iter != end (); iter++) {
-				DEBUG ("Solving " << *iter);
-				// solvers [*iter]->solve ();
+				// DEBUG ("Solving " << *iter);
 				
 				solve_recursive (*iter);
 			}

@@ -87,19 +87,13 @@ namespace pisces
 			transform (forward_horizontal | no_write | no_read | read_before);
 			, transform_time, transform_duration);
 
-			if (normal_stream) {
-				TIME (
-				if (normal_stream) {
-					normal_stream->to_file ();
-				}
-				if (stat_stream) {
-					stat_stream->to_file ();
-				}
-				for (int i = 0; i < (int) normal_profiles.size (); ++i) {
-					normal_profiles [i]->to_file ();
-				}
-				, output_time, output_duration);
+			TIME (
+			data.output ();
+			data.output_stat ();
+			for (int i = 0; i < (int) normal_profiles.size (); ++i) {
+				normal_profiles [i]->to_file ();
 			}
+			, output_time, output_duration);
 
 			// #pragma omp parallel sections num_threads(2)
 				// {
@@ -138,10 +132,7 @@ namespace pisces
 
 			// Output in transform space
 			TIME (
-			if (transform_stream) {
-				TRACE ("Writing to file...");
-				transform_stream->to_file ();
-			}
+			data.output_transform ();
 			, output_time, output_duration);
 
 			TIME (
@@ -180,15 +171,16 @@ namespace pisces
 	template <class datatype>
 	void element <datatype>::transform (int i_flags) {
 		TRACE ("Transforming...");
-		int threads = params.get <int> ("parallel.transform.threads");
-#pragma omp parallel num_threads (threads)
-		{
-#pragma omp for
-			for (int i = 0; i < (int) transforms.size (); ++i) {
-				// DEBUG ("Transforming " << transforms [i]);
-				transformers [transforms [i]]->transform (i_flags);
-			}
-		}
+		data.transform (i_flags);
+// 		int threads = params.get <int> ("parallel.transform.threads");
+// #pragma omp parallel num_threads (threads)
+// 		{
+// #pragma omp for
+// 			for (int i = 0; i < (int) transforms.size (); ++i) {
+// 				DEBUG ("Transforming " << transforms [i]);
+// 				transformers [transforms [i]]->transform (i_flags);
+// 			}
+// 		}
 	}
 	
 	template class element <double>;

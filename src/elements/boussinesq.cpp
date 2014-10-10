@@ -27,8 +27,8 @@ namespace pisces
 	using namespace plans;
 	
 	template <class datatype>
-	boussinesq_element <datatype>::boussinesq_element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
-	implemented_element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_messenger_ptr, i_element_flags) {
+	boussinesq_element <datatype>::boussinesq_element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
+	implemented_element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags) {
 
 		assert (n > 0);
 		assert (m > 0);
@@ -37,15 +37,20 @@ namespace pisces
 		x_ptr = ptr (x_position);
 		z_ptr = ptr (z_position);
 		initialize (temp, "T");
+		// data.initialize (temp, "T");
 		initialize (composition, "S");
 		x_vel_ptr = initialize (x_velocity, "u");
 		z_vel_ptr = initialize (z_velocity, "w");
 		initialize (pressure, "P");
-
+		
+		DEBUG ("OUT." << x_vel_ptr << " " << z_vel_ptr);
+		
 		advection_coeff = i_params.get <datatype> ("temperature.advection");
 		advection_coeff = std::max (advection_coeff, i_params.get <datatype> ("velocity.advection"));
 		advection_coeff = std::max (advection_coeff, i_params.get <datatype> ("composition.advection"));
 		cfl = i_params.get <datatype> ("time.cfl");
+
+		DEBUG ("NEXT");
 
 		std::shared_ptr <plans::boundary <datatype>> boundary_0, boundary_n, deriv_boundary_0, deriv_boundary_n;
 		if (messenger_ptr->get_id () > 0) {
@@ -69,9 +74,13 @@ namespace pisces
 			TODO Figure out how to more conveniently determine whether an edge effect is needed.
 		*/
 
+		DEBUG ("Now it gets complicated" << solvers [x_velocity]);
+
 		// Solve velocity
 		solvers [x_velocity]->add_solver (typename collocation_solver <datatype>::factory (messenger_ptr, timestep, deriv_boundary_0, deriv_boundary_n), z_solver);
 		solvers [x_velocity]->add_solver (typename fourier_solver <datatype>::factory (timestep, deriv_boundary_0, deriv_boundary_n), x_solver);
+
+		DEBUG ("First solver set added.")
 
 		solvers [x_velocity]->add_plan (typename vertical_diffusion <datatype>::factory (i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha")), pre_plan);
 		solvers [x_velocity]->add_plan (typename horizontal_diffusion <datatype>::factory (i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha")), mid_plan);

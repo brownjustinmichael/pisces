@@ -29,7 +29,6 @@ namespace plans
 		
 	public:
 		fixed_boundary (plans::grid <datatype> *i_grid_n, plans::grid <datatype> *i_grid_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n->get_n ())), top (i_top) {
-			DEBUG ("Fixed boundary initialized");
 			ldn = i_grid_n->get_ld ();
 			m = i_grid_m->get_n ();
 		}
@@ -60,17 +59,14 @@ namespace plans
 		
 	public:
 		fixed_deriv_boundary (plans::grid <datatype> *i_grid_n, plans::grid <datatype> *i_grid_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n->get_n ())), top (i_top) {
-			DEBUG ("Fixed boundary initialized");
 			ldn = i_grid_n->get_ld ();
 			m = i_grid_m->get_n ();
 			deriv_matrix = i_grid_m->get_data (1) + (top ? m - 1 : 0);
-			DEBUG ("Done");
 		}
 		
 		virtual ~fixed_deriv_boundary () {}
 		
 		virtual void calculate_rhs (datatype *data, datatype *interpolate_original, datatype *interpolate_data, datatype *data_temp, int m, int lda, int flag) {
-			DEBUG ("Call " << data_temp);
 			if (flag & z_solve) {
 				data_temp [0] = value;
 				for (int i = 1; i < ldn; ++i) {
@@ -111,7 +107,6 @@ namespace plans
 			/*
 				TODO Take grid as input
 			*/
-			DEBUG ("Boundary Initialized");
 			alpha = 0.5;
 			positions = i_positions;
 			n_boundary_in = i_n_boundary_in;
@@ -197,7 +192,6 @@ namespace plans
 			}
 			linalg::interpolate (n_boundary_out, m, m, -1.0, 0.0, positions, interpolate_matrix, boundary_positions, matrix_out + (top ? 1 + n_boundary_in : -n_boundary_in - n_boundary_out), m, lda);
 			
-			DEBUG ("Calculated.");
 		}
 	};
 } /* plans */

@@ -152,11 +152,9 @@ namespace plans
 		virtual void add_solver (std::shared_ptr <plans::solver <datatype>> i_solver, int flags = 0x00) {
 			TRACE ("Adding solver...");
 			if (!(flags & not_x_solver)) {
-				DEBUG (1);
 				x_solver = i_solver;
 			}
 			if (!(flags & not_z_solver)) {
-				DEBUG (2);
 				z_solver = i_solver;
 			}
 			TRACE ("Added.");

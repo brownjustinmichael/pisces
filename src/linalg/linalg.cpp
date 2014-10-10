@@ -365,10 +365,6 @@ namespace linalg
 			du2 [j] /= d [j] - dl [j] * du2 [j - 1];
 			for (int i = 0; i < nrhs; ++i) {
 				b [i * ldb + j] = (b [i * ldb + j] - dl [j] * b [i * ldb + j - 1]) / (d [j] - dl [j] * du2 [j - 1]);
-				if (b [i * ldb + j] != b [i * ldb + j]) {
-					DEBUG ("FOUND NAN " << b [i * ldb + j] << " " << dl [j] << " " << b [i * ldb + j - 1] << " " << d [j] << " " << du2 [j - 1]);
-					throw 0;
-				}
 			}
 		}
 		

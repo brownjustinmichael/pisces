@@ -46,24 +46,8 @@ namespace linalg
 		linalg::scale (nrhs * kl * n, 0.0, bufferl);
 		linalg::scale (nrhs * ku * n, 0.0, bufferr);
 		
-		DEBUG (n << " " << lda << " " << ldaa)
-
 		for (int i = 0; i < nrhs; ++i) {
-			for (int k = 0; k < 2 * kl + ku + 1; ++k) {
-				for (int j = 0; j < n; ++j) {
-					debug << matrix [i * lda * ldaa + (kl + ntop + j) * lda + k] << " ";
-				}
-				DEBUG (debug.str ());
-				debug.str ("");
-			}
 			linalg::matrix_banded_factorize (n, n, kl, ku, matrix + (i) * lda * ldaa + (kl + ntop) * lda, ipiv + i * n, info, lda);
-			for (int k = 0; k < 2 * kl + ku + 1; ++k) {
-				for (int j = 0; j < n; ++j) {
-					debug << matrix [i * lda * ldaa + (kl + ntop + j) * lda + k] << " ";
-				}
-				DEBUG ("AFTER " << debug.str ());
-				debug.str ("");
-			}
 		}
 
 #ifdef _MPI
@@ -155,14 +139,6 @@ namespace linalg
 					}
 				}
 				
-				for (int j = 0; j < (ku + kl) * (np - 1); ++j) {
-					for (int k = 0; k < (ku + kl) * (np - 1); ++k) {
-						debug << x [q * ldxx + (kl + ku) * (ldx + 1) + j * ldx + k] << " ";
-					}
-					DEBUG (debug.str ());
-					debug.str ("");
-				}
-				
 				linalg::matrix_factorize ((ku + kl) * (np - 1), (ku + kl) * (np - 1), x + q * ldxx + (kl + ku) * (ldx + 1), xipiv + q * ldx, info, ldx);
 			}
 
@@ -212,27 +188,8 @@ namespace linalg
 		linalg::matrix_add_scaled (ntop, nrhs, 1.0, b, &y [kl], ldb, ldy);
 		linalg::matrix_add_scaled (nbot, nrhs, 1.0, b + ntop + n, &y [kl + ku], ldb, ldy);
 		
-		DEBUG (n << " " << lda << " " << ldaa);
-
 		for (int i = 0; i < nrhs; ++i) {
-			for (int j = 0; j < n + ntop + nbot; ++j) {
-				debug << b [i * ldb + j] << " ";
-			}
-			DEBUG (debug.str ());
-			debug.str ("");
-			for (int k = 0; k < 2 * kl + ku + 1; ++k) {
-				for (int j = 0; j < n; ++j) {
-					debug << matrix [i * lda * ldaa + (kl + ntop + j) * lda + k] << " ";
-				}
-				DEBUG ("MATRIX " << debug.str ());
-				debug.str ("");
-			}
 			linalg::matrix_banded_solve (n, kl, ku, matrix + i * lda * ldaa + (kl + ntop) * lda, ipiv + i * n, b + ntop + i * ldb, info, 1, lda);
-			for (int j = 0; j < n + ntop + nbot; ++j) {
-				debug << b [i * ldb + j] << " ";
-			}
-			DEBUG ("BEFORE " << debug.str ());
-			debug.str ("");
 		}
 		
 #ifdef _MPI

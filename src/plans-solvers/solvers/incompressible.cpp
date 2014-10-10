@@ -75,7 +75,6 @@ namespace plans
 		
 		ntop = 0;
 		nbot = 0;
-		DEBUG ("1")
 		if (id != 0) {
 			ntop = 1;
 			messenger_ptr->send (3, &pos_m [excess_0 + 1], id - 1, 0);
@@ -91,10 +90,6 @@ namespace plans
 			messenger_ptr->recv (3, &pos_m [excess_0 - 3], id - 1, 1);
 		} else {
 			pos_m [-1] = pos_m [0] - (pos_m [1] - pos_m [0]);
-		}
-		
-		for (int j = -3; j < m + 3; ++j) {
-			DEBUG ("POS " << pos_m [j])
 		}
 		
 		matrix.resize ((6) * (m + 2 + 2 + 1) * ldn);
@@ -126,10 +121,6 @@ namespace plans
 		}
 		new_pos += excess_0;
 		
-		for (int j = -3; j < m + 3; ++j) {
-			DEBUG ("POS " << new_pos [j]);
-		}
-
 		for (int i = 0; i < ldn; ++i) {
 			matrix_ptr = &matrix [(i) * (m + 2 + 3) * (6) + 2 + (2 + 1 + excess_0) * 6];
 			for (int j = 0; j < m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
@@ -137,7 +128,6 @@ namespace plans
 				matrix_ptr [(j - 1) * 6 + 2] = -1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (npos_m [j + 1] - npos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
 				matrix_ptr [(j) * 6 + 1] = -1.0 / (new_pos [j + 1] - new_pos [j]) / (npos_m [j + 1] - npos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
 				matrix_ptr [(j + 1) * 6] = 1.0 / (new_pos [j + 1] - new_pos [j]) / (npos_m [j + 1] - npos_m [j - 1]);
-				// DEBUG (j - excess_0 << " " << pos_m [j]);
 			}
 			if (id == 0) {
 				matrix_ptr [-15] = 0.0;
@@ -149,28 +139,16 @@ namespace plans
 				matrix_ptr [2 - 6] = 1.0 / (new_pos [0] - new_pos [-1]) / (npos_m [1] - npos_m [0]);
 				matrix_ptr [6 + 1 - 6] = -1.0 / (new_pos [1] - new_pos [0]) / (npos_m [1] - npos_m [0]) - 1.0 / (new_pos [0] - new_pos [-1]) / (npos_m [1] - npos_m [0]) - scalar * (i / 2) * (i / 2);
 				matrix_ptr [12 - 6] = 1.0 / (new_pos [1] - new_pos [0]) / (npos_m [1] - npos_m [0]);
-				// DEBUG (pos_m [0]);
 			}
 			if (id == np - 1) {
 				matrix_ptr [((m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0)) - 2) * 6 + 3] = -1.0;
 				matrix_ptr [((m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0)) - 1) * 6 + 2] = 1.0;
 				matrix_ptr [((m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0))) * 6 + 1] = 1.0e-10;
 				matrix_ptr [((m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0)) + 1) * 6 + 0] = 0.0;
-				
-				// DEBUG (pos_m [m - 1 - excess_n - excess_0]);
-			}
-			
-			for (int j = 0; j < m + 5; ++j) {
-				for (int k = 0; k < 6; ++k) {
-					debug << matrix [i * (m + 5) * 6 + j * 6 + k] << " ";
-				}
-				DEBUG (debug.str ());
-				debug.str ("");
 			}
 		}
 		
 		// throw 0;
-		DEBUG (m + 2 << " " << m + (nbot == 0 ? 1 : -nbot - excess_n - 1) + (id == 0 ? 1: -excess_0 - ntop - 1));
 		linalg::p_block_banded_factorize (id, np, m + (nbot == 0 ? 1 : -nbot - excess_n - 1) + (id == 0 ? 1: -excess_0 - ntop), 2, 1, &matrix [(id == 0 ? 0 : 1 + excess_0) * 6], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn, 6, m + 2 + 3);
 		// throw 0;
 	}
@@ -212,32 +190,17 @@ namespace plans
 			}
 			
 			for (int i = 0; i < ldn; ++i) {
-				for (int j = 0; j < m; ++j) {
-					debug << data_z [i * m + j] << " ";
-				}
-				DEBUG (debug.str ());
-				debug.str ("");
-			}
-			
-			for (int i = 0; i < ldn; ++i) {
 				if (id == 0) {
-					DEBUG (data_ptr - 1 + i * (m + 2))
 					data_ptr [i * (m + 2) - 1] = 0.0;
 					data_ptr [i * (m + 2)] += (ndata_z [i * m + 1] - ndata_z [i * m]) / (npos_m [1] - npos_m [0]);
-					// DEBUG (pos_m [0]);
 				}
 				for (int j = (id == 0 ? 1 : 0); j < m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
-					DEBUG (j << " " << ndata_z [i * m + j + 1] << " " << ndata_z [i * m + j - 1]);
 					data_ptr [i * (m + 2) + j] += (ndata_z [i * m + j + 1] - ndata_z [i * m + j - 1]) / (npos_m [j + 1] - npos_m [j - 1]);
 				}
 				if (id == np - 1) {
-					DEBUG ("Last " << (m + (nbot == 0 ? 1 : -excess_n - 1) + (id == 0 ? 1: -excess_0 - ntop)))
 					data_ptr [i * (m + 2) + (m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0))] = 0.0;
-				
-					// DEBUG (pos_m [m - 1 - excess_n - excess_0]);
 				}
 			}
-			DEBUG (data_temp [excess_0 + (m + 2)]);
 			linalg::p_block_banded_solve (id, np, m + (nbot == 0 ? 1 : -nbot - excess_n - 1) + (id == 0 ? 1: -excess_0 - ntop), 2, 1, &matrix [(id == 0 ? 0 : 1 + excess_0) * 6], &ipiv [0], &data_temp [(id == 0 ? 0 : 1 + excess_0)], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn, 6, m + 2 + 3, m + 2);
 			// throw 0;
 
@@ -254,15 +217,6 @@ namespace plans
 				}
 			}
 
-
-			for (int j = 0; j < m + 2; ++j) {
-				for (int i = 0; i < ldn; ++i) {
-					debug << data_temp [i * (m + 2) + j] << " ";
-				}
-				DEBUG (debug.str ());
-				debug.str ("");
-			}
-
 			// std::vector <datatype> out_z (ldn);
 			//
 			// for (int i = 2; i < ldn; ++i) {
@@ -275,7 +229,6 @@ namespace plans
 				for (int j = 1; j < m - 1 + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
 					ndata_z [i * m + j] -= (data_ptr [i * (m + 2) + j] - data_ptr [i * (m + 2) + j - 1]) / (new_pos [j] - new_pos [j - 1]);
 				}
-				// DEBUG (data_ptr [i * (m + 2) + m - (nbot == 0 ? 0 : excess_n + 1) - excess_0])
 			}
 
 			// for (int i = 2; i < ldn; i += 2) {
