@@ -23,11 +23,21 @@ namespace io
 			 *********************************************************************/
 			class file_exception : public std::exception
 			{
+			private:
+				std::string file_name;
 			public:
+				file_exception (std::string i_file_name) {
+					file_name = i_file_name;
+				}
+				
 				/*!*******************************************************************
 				 * \brief Describe the nature of the exception
 				 *********************************************************************/
-				inline const char *what () const throw () {return "File couldn't be opened";}
+				inline const char *what () const throw () {
+					std::stringstream message;
+					message << "File " << file_name << " couldn't be opened";
+					return message.str ().c_str ();
+				}
 			};
 
 			/*!**********************************************************************

@@ -9,9 +9,12 @@
 #ifndef OUTPUT_HPP_31603039
 #define OUTPUT_HPP_31603039
 
+#include <fstream>
+
 #include "logger/logger.hpp"
 
 #include "formats/format.hpp"
+#include "formats/exceptions.hpp"
 #include "functors/functor.hpp"
 
 namespace io
@@ -132,6 +135,20 @@ namespace io
 			return &format::template write <int>;
 		}
 		
+		virtual void check_file (std::string file_name) {
+			std::ifstream filestr;
+			filestr.open (file_name);
+			if (!(filestr.is_open ())) {
+				std::ofstream filestr;
+				filestr.open (file_name);
+				if (!(filestr.is_open ())) {
+					throw formats::exceptions::file_exception (file_name);
+				}
+				filestr.close ();
+			}
+			filestr.close ();
+		}
+		
 		/*!**********************************************************************
 		 * \copybrief output::to_file
 		 ************************************************************************/
@@ -139,7 +156,8 @@ namespace io
 			TRACE ("Sending to file...");
 	
 			INFO ("Outputting to file " << file_name << "...");
-	
+			
+			check_file (file_name.c_str ());
 			format::open_file (grid, file_name.c_str (), output::file_format);
 	
 			// Output the scalar_functors

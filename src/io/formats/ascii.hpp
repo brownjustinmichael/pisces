@@ -55,7 +55,7 @@ namespace io
 				
 				if (! file_streams [file_name].is_open ()) {
 					ERROR ("Failed to open file " << file_name);
-					throw exceptions::file_exception ();
+					throw exceptions::file_exception (file_name);
 				}
 				
 				if (header [file_name].str () != "") {
