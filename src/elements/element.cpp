@@ -53,6 +53,7 @@ namespace pisces
 
 		// Iterate through the total number of timesteps
 		while (n_steps < max_steps && check_every != 0) {
+			data.reset ();
 			INFO ("Timestep: " << n_steps);
 
 			// Transform the vertical grid to Cartesian space in the background
