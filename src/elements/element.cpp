@@ -45,7 +45,7 @@ namespace pisces
 		std::chrono::duration <double> transform_duration = std::chrono::duration <double>::zero (), execution_duration = std::chrono::duration <double>::zero (), solve_duration = std::chrono::duration <double>::zero (), factorize_duration = std::chrono::duration <double>::zero (), output_duration = std::chrono::duration <double>::zero (), timestep_duration = std::chrono::duration <double>::zero ();
 
 		// If the element is in Cartesian space, transform to modal space and copy from the transform buffer
-		transform (forward_horizontal | forward_vertical | no_read);
+		data.transform (forward_horizontal | forward_vertical | no_read);
 
 		// Set up openmp to run multiple plans simultaneously
 		omp_set_nested (true);
@@ -58,7 +58,7 @@ namespace pisces
 
 			// Transform the vertical grid to Cartesian space in the background
 			TIME (
-			transform (inverse_vertical | no_write | no_read | read_before);
+			data.transform (inverse_vertical | no_write | no_read | read_before);
 			, transform_time, transform_duration);
 	
 			// Factorize the matrices
@@ -75,7 +75,7 @@ namespace pisces
 			, execution_time, execution_duration);
 
 			TIME (
-			transform (inverse_horizontal | no_write | no_read | read_before);
+			data.transform (inverse_horizontal | no_write | no_read | read_before);
 			, transform_time, transform_duration);
 
 			TIME (
@@ -85,7 +85,7 @@ namespace pisces
 			, execution_time, execution_duration);
 			
 			TIME (
-			transform (forward_horizontal | no_write | no_read | read_before);
+			data.transform (forward_horizontal | no_write | no_read | read_before);
 			, transform_time, transform_duration);
 
 			// #pragma omp parallel sections num_threads(2)
@@ -113,7 +113,7 @@ namespace pisces
 
 			// Transform forward in the horizontal direction
 			TIME (
-			transform (do_not_transform | no_write);
+			data.transform (do_not_transform | no_write);
 			, transform_time, transform_duration);
 
 			// Calculate the pre solver plans
@@ -145,7 +145,7 @@ namespace pisces
 			++n_steps;
 			--check_every;
 		}
-		transform (do_not_transform | no_write);
+		data.transform (do_not_transform | no_write);
 		
 		INFO ("Profiling Factorize: CPU Time: " << factorize_time << " Wall Time: " << (double) factorize_duration.count () << " Efficiency: " << factorize_time / (double) factorize_duration.count () / omp_get_max_threads () * 100. << "%");
 		INFO ("Profiling Transform: CPU Time: " << transform_time << " Wall Time: " << (double) transform_duration.count () << " Efficiency: " << transform_time / (double) transform_duration.count () / omp_get_max_threads () * 100. << "%");
@@ -154,21 +154,6 @@ namespace pisces
 		INFO ("Profiling Solve: CPU Time: " << solve_time << " Wall Time: " << (double) solve_duration.count () << " Efficiency: " << solve_time / (double) solve_duration.count () / omp_get_max_threads () * 100. << "%");
 		INFO ("Profiling Output: CPU Time: " << output_time << " Wall Time: " << (double) output_duration.count () << " Efficiency: " << output_time / (double) output_duration.count () / omp_get_max_threads () * 100. << "%");
 		INFO ("Max Threads = " << threads << " of " << omp_get_max_threads ());
-	}
-	
-	template <class datatype>
-	void element <datatype>::transform (int i_flags) {
-		TRACE ("Transforming...");
-		data.transform (i_flags);
-// 		int threads = params.get <int> ("parallel.transform.threads");
-// #pragma omp parallel num_threads (threads)
-// 		{
-// #pragma omp for
-// 			for (int i = 0; i < (int) transforms.size (); ++i) {
-// 				DEBUG ("Transforming " << transforms [i]);
-// 				transformers [transforms [i]]->transform (i_flags);
-// 			}
-// 		}
 	}
 	
 	template class element <double>;

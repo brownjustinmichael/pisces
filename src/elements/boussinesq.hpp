@@ -26,23 +26,6 @@ namespace pisces
 		
 		datatype calculate_timestep (int i, int j, io::formats::virtual_file *virtual_file = NULL);
 		
-		virtual void setup_output (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
-			element <datatype>::setup_output (output_ptr, flags);
-			output_ptr->template append <double> ("div", new io::functors::div_functor <datatype> (ptr (x_position), ptr (z_position), ptr (x_velocity), ptr (z_velocity), n, m));
-		}
-		
-		virtual void setup_stat (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
-			element <datatype>::setup_stat (output_ptr, flags);
-			area.resize (n * m);
-			for (int i = 1; i < n; ++i) {
-				for (int j = 1; j < m; ++j) {
-					area [i * m + j] = ((*(grids [0])) [i] - (*(grids [0])) [i - 1]) * ((*(grids [1])) [j] - (*(grids [1])) [j - 1]);
-				}
-			}
-			output_ptr->template append <double> ("wT", new io::functors::weighted_average_functor <datatype> (n, m, &area [0], new io::functors::product_functor <datatype> (n, m, ptr (z_velocity), ptr (temperature))), io::scalar);
-			output_ptr->template append <double> ("wS", new io::functors::weighted_average_functor <datatype> (n, m, &area [0], new io::functors::product_functor <datatype> (n, m, ptr (z_velocity), ptr (composition))), io::scalar);
-		}
-		
 		virtual io::formats::virtual_file *make_virtual_file (int flags = 0x00) {
 			std::shared_ptr <io::output> virtual_output;
 			if (flags & profile_only) {
@@ -51,7 +34,8 @@ namespace pisces
 					virtual_output->append <datatype> ("z", new io::functors::average_functor <datatype> (ptr (z_position), n, m));
 					virtual_output->append <datatype> ("w", new io::functors::root_mean_square_functor <datatype> (ptr (z_velocity), n, m));
 				} else {
-					element <datatype>::setup_profile (virtual_output);
+					FATAL ("HAVEN'T GOT A TREATMENT FOR THIS YET");
+					throw 0;
 				}
 			} else {
 				virtual_output.reset (new io::formatted_output <io::formats::two_d::virtual_format> (io::data_grid::two_d (n, m), "two_d/boussinesq/virtual_file", io::replace_file));
@@ -61,7 +45,8 @@ namespace pisces
 					virtual_output->append <datatype> ("w", ptr (z_velocity));
 					virtual_output->append <datatype> ("u", ptr (x_velocity));
 				} else {
-					element <datatype>::setup_output (virtual_output);
+					FATAL ("HAVEN'T GOT A TREATMENT FOR THIS YET");
+					throw 0;
 				}
 			}
 			virtual_output->to_file ();

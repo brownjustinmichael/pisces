@@ -97,19 +97,6 @@ namespace pisces
 		inline datatype* ptr (int name, int i, int j) {
 			return element <datatype>::ptr (name, i * m + j);
 		}
-		
-		virtual void setup_profile (std::shared_ptr <io::output> output_stream, int flags = 0x00) {
-			typedef typename std::map <int, std::vector <datatype> >::iterator iterator;
-			for (iterator iter = scalars.begin (); iter != scalars.end (); ++iter) {
-				output_stream->template append <datatype> (scalar_names [iter->first], ptr (iter->first));
-				output_stream->template append <datatype> ("rms_" + scalar_names [iter->first], new io::functors::root_mean_square_functor <datatype> (ptr (iter->first), n, m));
-				output_stream->template append <datatype> ("avg_" + scalar_names [iter->first], new io::functors::average_functor <datatype> (ptr (iter->first), n, m));
-			}
-			output_stream->template append <datatype> ("t", &duration, io::scalar);
-			output_stream->template append <const int> ("mode", &(get_mode ()), io::scalar);
-
-			element <datatype>::setup_profile (output_stream, flags);
-		}
 	
 		/*!*******************************************************************
 		 * \copydoc element <datatype>::initialize ()
@@ -204,7 +191,7 @@ namespace pisces
 			std::shared_ptr <io::formats::virtual_file> virtual_file (new io::formats::virtual_file);
 			
 			std::shared_ptr <io::output> virtual_output (new io::formatted_output <io::formats::two_d::virtual_format> (io::data_grid::two_d (n, m), "two_d/element/virtual_file", io::replace_file));
-			element <datatype>::setup_output (virtual_output);
+			data.setup_output (virtual_output, ::data::no_save);
 			
 			virtual_output->to_file ();
 			return &io::virtual_files ["two_d/element/virtual_file"];

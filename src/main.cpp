@@ -155,6 +155,7 @@ int main (int argc, char *argv[])
 
 			normal_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (o_grid, buffer, config.get <int> ("output.every")));
 			data.setup_output (normal_stream);
+			normal_stream->template append <double> ("div", new io::functors::div_functor <double> (data (x_position), data (z_position), data (x_velocity), data (z_velocity), n, m));
 		}
 
 		std::shared_ptr <io::output> transform_stream;
@@ -167,14 +168,24 @@ int main (int argc, char *argv[])
 			data.setup_output (transform_stream, transformed_horizontal | transformed_vertical);
 		}
 
+		std::vector <double> area;
 		std::shared_ptr <io::output> stat_stream;
 		if (config ["output.stat.file"].IsDefined ()) {
 			std::string file_format = "output/" + config.get <std::string> ("output.stat.file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
+			
+			area.resize (n * m);
+			for (int i = 1; i < n; ++i) {
+				for (int j = 1; j < m; ++j) {
+					area [i * m + j] = ((*(element->grids [0])) [i] - (*(element->grids [0])) [i - 1]) * ((*(element->grids [1])) [j] - (*(element->grids [1])) [j - 1]);
+				}
+			}
 
 			stat_stream.reset (new io::appender_output <io::formats::ascii> (io::data_grid::two_d (n, m), buffer, config.get <int> ("output.stat.every")));
 			data.setup_stat (stat_stream);
+			stat_stream->template append <double> ("wT", new io::functors::weighted_average_functor <double> (n, m, &area [0], new io::functors::product_functor <double> (n, m, data (z_velocity), data (temperature))), io::scalar);
+			stat_stream->template append <double> ("wS", new io::functors::weighted_average_functor <double> (n, m, &area [0], new io::functors::product_functor <double> (n, m, data (z_velocity), data (composition))), io::scalar);
 		}
 
 		/*
@@ -200,7 +211,7 @@ int main (int argc, char *argv[])
 				*/
 
 				io::input *virtual_input (new io::formatted_input <io::formats::two_d::virtual_format> (io::data_grid::two_d (n, m), "main/virtual_file"));
-				element->setup (&*virtual_input);
+				data.setup (&*virtual_input);
 			}
 			element->run (n_steps, config.get <int> ("time.steps"), config.get <int> ("grid.rezone.check_every"));
 		}

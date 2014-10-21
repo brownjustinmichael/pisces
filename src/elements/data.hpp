@@ -16,7 +16,9 @@
 #include "linalg/utils.hpp"
 
 #include "io/input.hpp"
+#include "io/formats/format.hpp"
 #include "io/output.hpp"
+#include "io/functors/average.hpp"
 #include "io/formats/exceptions.hpp"
 #include "plans/grid.hpp"
 #include "plans-transforms/implemented_transformer.hpp"
@@ -25,13 +27,14 @@ namespace data
 {
 	enum initialize_element_flags {
 		uniform_n = 0x01,
-		uniform_m = 0x02
+		uniform_m = 0x02,
+		no_save = 0x10,
 	};
 	
 	template <class datatype>
 	class data
 	{
-	private:
+	protected:
 		std::map <int, std::string> scalar_names;
 		static int mode;
 		
@@ -159,9 +162,11 @@ namespace data
 			output_ptr->template append <const int> ("mode", &(get_mode ()), io::scalar);
 
 			// Check the desired output time and save the output object in the appropriate variable
-			streams.push_back (output_ptr);
-			done.push_back (false);
-			stream_conditions.push_back (flags);
+			if (!(flags & no_save)) {
+				streams.push_back (output_ptr);
+				done.push_back (false);
+				stream_conditions.push_back (flags);
+			}
 		}
 		
 		virtual void setup_stat (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
@@ -169,9 +174,28 @@ namespace data
 			output_ptr->template append <datatype> ("t", &duration, io::scalar);
 			output_ptr->template append <datatype> ("dt", &timestep, io::scalar);
 			// Check the desired output time and save the output object in the appropriate variable
-			streams.push_back (output_ptr);
-			stream_conditions.push_back (0x00);
+			if (!(flags & no_save)){
+				streams.push_back (output_ptr);
+				stream_conditions.push_back (0x00);
+				done.push_back (false);
+			}
 		}
+		
+		/*!**********************************************************************
+		 * \brief Given an output stream, append all relevant outputs for profiling
+		 * 
+		 * \param output_ptr A shared_ptr to the output object
+		 * \param flags The integer flags to specify the type of output profile
+		 * 
+		 * Given an output object, prepare it to output all the profiles of the scalar fields tracked directly by the element. Make it one of the output streams called during output. This method must be overwritten in subclasses and should be concluded by calling this method.
+		 ************************************************************************/
+		virtual void setup_profile (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
+			// normal_profiles.push_back (output_ptr);
+		}
+	
+		/*
+			TODO These three methods are related in purpose but varied in design; they should be unified
+		*/
 		
 	protected:
 		std::map <int, std::vector <datatype>> scalars;
@@ -195,6 +219,19 @@ namespace data
 		
 		datatype *operator () (const int name, const int i = 0, const int j = 0) {
 			return data <datatype>::operator() (name, i * grid_m->get_ld () + j); 
+		}
+		
+		virtual void setup_profile (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
+			typedef typename std::map <int, std::vector <datatype> >::iterator iterator;
+			for (iterator iter = data <datatype>::scalars.begin (); iter != data <datatype>::scalars.end (); ++iter) {
+				output_ptr->template append <datatype> (data <datatype>::scalar_names [iter->first], (*this) (iter->first));
+				output_ptr->template append <datatype> ("rms_" + data <datatype>::scalar_names [iter->first], new io::functors::root_mean_square_functor <datatype> ((*this) (iter->first), n, m));
+				output_ptr->template append <datatype> ("avg_" + data <datatype>::scalar_names [iter->first], new io::functors::average_functor <datatype> ((*this) (iter->first), n, m));
+			}
+			output_ptr->template append <datatype> ("t", &(data <datatype>::duration), io::scalar);
+			output_ptr->template append <const int> ("mode", &(data <datatype>::get_mode ()), io::scalar);
+
+			data <datatype>::setup_profile (output_ptr, flags);
 		}
 	
 	protected:

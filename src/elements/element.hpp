@@ -65,7 +65,6 @@ namespace pisces
 		datatype &duration; //!< The datatype total simulated time
 		datatype &timestep; //!< The datatype timestep length
 
-		std::vector <std::shared_ptr <plans::grid <datatype>>> grids; //!< A vector of shared pointers to the collocation grids
 		data::data <datatype> &data;
 		std::map <int, std::vector <datatype> > scalars; //!< A map of scalar vectors
 		std::map <int, std::string> scalar_names; //!< A map of string representations of the scalars
@@ -74,17 +73,11 @@ namespace pisces
 		std::map<int, std::shared_ptr <plans::equation <datatype>>> solvers; //!< A vector of shared pointers to the matrix solvers
 		
 	private:
-		std::shared_ptr <io::output> normal_stream; //!< An implementation to output in normal space
-		std::shared_ptr <io::output> transform_stream; //!< An implementation to output in transform space
-		std::shared_ptr <io::output> stat_stream; //!< An implementation to output in transform space
-		std::vector <std::shared_ptr <io::output>> normal_profiles; //!< An implementation to output in transform space
-
 		std::vector <int> solver_keys; //!< A vector of integer keys to the solvers map
 		io::formats::virtual_file *rezone_virtual_file; //!< A shared_ptr to a virtual file object, for rezoning
 		
 	public:
-		std::vector <int> transforms; //!< A vector of integer keys to the transform maps
-		std::map <int, std::shared_ptr <plans::transformer <datatype>>> transformers; //!< A map of shared_ptrs to the transform objects
+		std::vector <std::shared_ptr <plans::grid <datatype>>> grids; //!< A vector of shared pointers to the collocation grids
 		/*!**********************************************************************
 		 * \brief Element iterator for iterating through the contained solvers
 		 ************************************************************************/
@@ -250,122 +243,6 @@ namespace pisces
 		virtual std::shared_ptr <plans::grid <datatype>> generate_grid (plans::axis *axis_ptr, int index = -1) = 0;
 		
 		/*!**********************************************************************
-		 * \brief Given an input stream, load all the relevant data into the element
-		 * 
-		 * \param input_stream_ptr A pointer to an input object
-		 ************************************************************************/
-		void setup (io::input *input_ptr) {
-			data.setup (input_ptr);
-			
-			// input_ptr->template append <datatype> ("t", &duration, io::scalar);
-			// int mode;
-			// input_ptr->template append <int> ("mode", &mode, io::scalar);
-			//
-			// try {
-			// 	// Read from the input into the element variables
-			// 	input_ptr->from_file ();
-			// } catch (io::formats::exceptions::bad_variables &except) {
-			// 	// Send a warning if there are missing variables in the input
-			// 	WARN (except.what ());
-			// }
-			//
-			// // Make sure that the mode matched the mode of the element
-			// if (mode != get_mode ()) {
-			// 	FATAL ("Loading simulation in different mode: " << mode << " instead of " << get_mode ());
-			// 	throw 0;
-			// }
-		}
-		
-		/*!**********************************************************************
-		 * \brief Given an output_stream, append all relevant outputs
-		 * 
-		 * \param output_ptr A shared_ptr to the output object
-		 * \param flags The integer flags to specify the type of output (transform stream, normal_stream)
-		 * 
-		 * Given an output object, prepare it to output all the scalar fields tracked directly by the element. Make it one of the output streams called during output. If flags is normal_stream, output the variables when in Cartesian space, else if flags is transform_stream, output with horizontal grid in Fourier space, but vertical grid in Cartesian space.
-		 ************************************************************************/
-		virtual void setup_output (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
-			data.setup_output (output_ptr, flags);
-			
-			// output_ptr->template append <datatype> ("t", &duration, io::scalar);
-			// output_ptr->template append <const int> ("mode", &(get_mode ()), io::scalar);
-			//
-			// // Check the desired output time and save the output object in the appropriate variable
-			// if (flags & transform_output) {
-			// 	transform_stream = output_ptr;
-			// } else if (flags & normal_output) {
-			// 	normal_stream = output_ptr;
-			// }
-		}
-		
-		virtual void setup_stat (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
-			// Also prepare to output the total simulated time and geometry mode
-			data.setup_stat (output_ptr, flags);
-			// output_ptr->template append <datatype> ("t", &duration, io::scalar);
-			// output_ptr->template append <datatype> ("dt", &timestep, io::scalar);
-			// // Check the desired output time and save the output object in the appropriate variable
-			// stat_stream = output_ptr;
-		}
-		
-		/*!**********************************************************************
-		 * \brief Given an output stream, append all relevant outputs for profiling
-		 * 
-		 * \param output_ptr A shared_ptr to the output object
-		 * \param flags The integer flags to specify the type of output profile
-		 * 
-		 * Given an output object, prepare it to output all the profiles of the scalar fields tracked directly by the element. Make it one of the output streams called during output. This method must be overwritten in subclasses and should be concluded by calling this method.
-		 ************************************************************************/
-		virtual void setup_profile (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
-			normal_profiles.push_back (output_ptr);
-		}
-		
-		/*
-			TODO These three methods are related in purpose but varied in design; they should be unified
-		*/
-		
-		/*!**********************************************************************
-		 * \brief Output to file
-		 ************************************************************************/
-		virtual void output () {
-			TRACE ("Writing to file...");
-			if (normal_stream) {
-				normal_stream->to_file ();
-			}
-		}
-		
-		/*!*******************************************************************
-		 * \brief Add a transform operation to a specific scalar fields
-		 * 
-		 * \param i_name The integer name of the scalar associated with the transform
-		 * \param i_transform_ptr A shared_ptr to the transformer plan
-		 * 
-		 * The transformer class contains both horizontal and vertical transforms in both directions. It can also send all the transformations to the GPU if desired.
-		 *********************************************************************/
-		inline void add_transform (int i_name, std::shared_ptr <plans::transformer <datatype>> i_transform_ptr) {
-			TRACE ("Adding transform...");
-			bool found = false;
-			for (int i = 0; i < (int) transforms.size (); ++i) {
-				if (transforms [i] == i_name) {
-					found = true;
-				}
-			}
-			if (!found) {
-				transforms.push_back (i_name);
-			}
-			
-			transformers [i_name] = i_transform_ptr;
-		}
-		
-		/*!**********************************************************************
-		 * \brief Transform the element
-		 * 
-		 * \param i_flags The integer transform flag indicating the transform direction
-		 * 
-		 * The flags should come from the transform_flags enumeration.
-		 ************************************************************************/
-		virtual void transform (int i_flags);
-		
-		/*!**********************************************************************
 		 * \brief Factorize all solvers
 		 ************************************************************************/
 		virtual void factorize () {
@@ -397,7 +274,7 @@ namespace pisces
 			// Make certain everything is fully transformed
 			
 			
-			transform (forward_vertical | no_read);
+			data.transform (forward_vertical | no_read);
 			TRACE ("Solve complete.");
 		}
 		
@@ -442,7 +319,7 @@ namespace pisces
 		 ************************************************************************/
 		virtual io::formats::virtual_file *rezone_minimize_ts (datatype * positions, datatype min_size, datatype max_size, int n_tries = 20, int iters_fixed_t = 1000, datatype step_size = 1.0, datatype k = 1.0, datatype t_initial = 0.008, datatype mu_t = 1.003, datatype t_min = 2.0e-6) {
 			TRACE ("Rezoning...");
-			transform (inverse_horizontal | inverse_vertical);
+			data.transform (inverse_horizontal | inverse_vertical);
 
 			rezone_virtual_file = make_virtual_file (profile_only | timestep_only);
 			
