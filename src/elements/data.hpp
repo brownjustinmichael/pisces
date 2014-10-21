@@ -160,14 +160,14 @@ namespace data
 			output_ptr->template append <const int> ("mode", &(get_mode ()), io::scalar);
 
 			// Check the desired output time and save the output object in the appropriate variable
-			streams.push_back (output_ptr);
+			// streams.push_back (output_ptr);
 			// stream_conditions.push_back (flags);
 			if (flags & transform_output) {
-				stream_conditions.push_back (transformed_vertical | transformed_horizontal);
-				// transform_stream = output_ptr;
+				// stream_conditions.push_back (transformed_vertical | transformed_horizontal);
+				transform_stream = output_ptr;
 			} else if (flags & normal_output) {
-				stream_conditions.push_back (0x00);
-				// normal_stream = output_ptr;
+				// stream_conditions.push_back (0x00);
+				normal_stream = output_ptr;
 			}
 		}
 		

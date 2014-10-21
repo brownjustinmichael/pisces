@@ -63,6 +63,8 @@ namespace plans
 		 * By default, this method will write the data into the transform class, perform the transform, and read the data back out into the element. This is chosen in order to allow for GPU usage in the future.
 		 *********************************************************************/
 		virtual void transform (int flags = 0x00) {
+			DEBUG ("STATE BEFORE: " << (*component_flags & transformed_vertical) << " " << (*component_flags & transformed_horizontal));
+			DEBUG ("ISTATE BEFORE: " << (internal_state & transformed_vertical) << " " << (internal_state & transformed_horizontal));
 			if (flags & read_before) {
 				read ();
 				if (internal_state & transformed_horizontal) {
@@ -78,7 +80,7 @@ namespace plans
 			}
 			if (!(flags & no_write)) {
 				write ();
-				// internal_state |= component_flags;
+				internal_state = *component_flags;
 			}
 			_transform (flags);
 			if (!(flags & no_read)) {
@@ -94,6 +96,8 @@ namespace plans
 					*component_flags &= ~transformed_vertical;
 				}
 			}
+			DEBUG ("STATE AFTER: " << (*component_flags & transformed_vertical) << " " << (*component_flags & transformed_horizontal));
+			DEBUG ("ISTATE AFTER: " << (internal_state & transformed_vertical) << " " << (internal_state & transformed_horizontal));
 		}
 		
 		const int get_internal_state () {
