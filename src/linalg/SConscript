@@ -6,6 +6,8 @@ conf = Configure (env)
 if include_cuda:
     conf.CheckLib ("cublas")
 
+conf.CheckLib ("atlas")
+
 if not conf.CheckLib ("ptlapack"):
     conf.CheckLib ("lapack")
 if not conf.CheckLib ("ptf77blas"):

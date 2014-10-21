@@ -221,13 +221,13 @@ namespace pisces
 			/*
 				TODO List possible flags in all documentation
 			*/
-			element_flags [i_name] = 0x00;
-			for (int i = 0; i < dimensions; ++i) {
-				if (!grids [i]) {
-					grids [i] = generate_grid (&axes [i], i);
-				}
-			}
-			scalar_names [i_name] = i_str;
+			// element_flags [i_name] = 0x00;
+			// for (int i = 0; i < dimensions; ++i) {
+			// 	if (!grids [i]) {
+			// 		grids [i] = generate_grid (&axes [i], i);
+			// 	}
+			// }
+			// scalar_names [i_name] = i_str;
 			// datatype * value = data.initialize (i_name, i_str, initial_conditions, i_flags);
 			
 			return _initialize (i_name, initial_conditions, i_flags);

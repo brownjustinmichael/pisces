@@ -66,6 +66,9 @@ namespace pisces
 				transform_threads = 0;
 			}
 			
+			grids [0] = data.get_grid (0);
+			grids [1] = data.get_grid (1);
+			
 			for (typename data::data <datatype>::iterator iter = data.begin (); iter != data.end (); ++iter) {
 				if ((iter->first != x_position) && (iter->first != z_position)) {
 					DEBUG (ptr (iter->first));

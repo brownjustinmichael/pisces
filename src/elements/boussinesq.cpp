@@ -109,8 +109,8 @@ namespace pisces
 	implemented_element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags) {
 
 		TRACE ("Initializing...");
-		x_ptr = ptr (x_position);
-		z_ptr = ptr (z_position);
+		x_ptr = data (x_position);
+		z_ptr = data (z_position);
 		x_vel_ptr = data (x_velocity);
 		z_vel_ptr = data (z_velocity);
 		

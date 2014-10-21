@@ -42,6 +42,8 @@ namespace data
 		std::vector <int> stream_conditions;
 		std::vector <bool> done;
 		
+		std::vector <std::shared_ptr <plans::grid <datatype>>> grids;
+		
 	public:
 		datatype duration;
 		datatype timestep;
@@ -86,6 +88,10 @@ namespace data
 		
 		const int &get_mode () {
 			return mode;
+		}
+		
+		virtual std::shared_ptr <plans::grid <datatype>> get_grid (int i) {
+			return grids [i];
 		}
 		
 		virtual datatype *initialize (int i_name, std::string i_str, datatype* initial_conditions = NULL, int i_flags = 0x00) {
@@ -239,6 +245,9 @@ namespace data
 		implemented_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int i_transform_threads = 1) : data <datatype> (i_transform_threads), grid_n (std::shared_ptr <plans::grid <datatype>> (new typename plans::horizontal::grid <datatype> (i_axis_n))), grid_m (std::shared_ptr <plans::grid <datatype>> (new typename plans::vertical::grid <datatype> (i_axis_m))), n (grid_n->get_n ()), m (grid_m->get_n ()) {
 			this->initialize (x_position, "x");
 			this->initialize (z_position, "z");
+			
+			this->grids.push_back (grid_n);
+			this->grids.push_back (grid_m);
 		}
 		
 		virtual ~implemented_data () {}
