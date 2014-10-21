@@ -228,9 +228,9 @@ namespace pisces
 				}
 			}
 			scalar_names [i_name] = i_str;
-			datatype * value = data.initialize (i_name, i_str, initial_conditions, i_flags);
-			_initialize (i_name, initial_conditions, i_flags);
-			return value;
+			// datatype * value = data.initialize (i_name, i_str, initial_conditions, i_flags);
+			
+			return _initialize (i_name, initial_conditions, i_flags);
 			// return _initialize (i_name, initial_conditions, i_flags);
 		}
 		

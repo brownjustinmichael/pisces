@@ -127,70 +127,11 @@ int main (int argc, char *argv[])
 		plans::axis horizontal_axis (n, -config.get <double> ("grid.x.width") / 2.0, config.get <double> ("grid.x.width") / 2.0);
 		plans::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
 
-		data::implemented_data <double> data (&horizontal_axis, &vertical_axis);
+		data::thermo_compositional_data <double> data (&horizontal_axis, &vertical_axis, id, n_elements, config);
 		
 		std::shared_ptr <pisces::element <double>> element (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, data, &process_messenger, 0x00));
 
 		TRACE ("Element constructed.");
-
-		const io::data_grid i_grid = io::data_grid::two_d (n, m, 0, config.get <bool> ("input.full") ? n_elements * m : 0, 0, config.get <bool> ("input.full") ? id * m : 0);
-		
-		if (config ["input.file"].IsDefined ()) {
-			std::string file_format = "input/" + config.get <std::string> ("input.file");
-			char buffer [file_format.size () * 2];
-			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-			io::formatted_input <io::formats::two_d::netcdf> input_stream (i_grid, buffer);
-
-			data.setup (&input_stream);
-		}
-		
-		const io::data_grid o_grid = io::data_grid::two_d (n, m, 0, config.get <bool> ("output.full") ? n_elements * m : 0, 0, config.get <bool> ("output.full") ? id * m : 0);
-		
-		// Set up output
-		std::shared_ptr <io::output> normal_stream;
-		if (config ["output.file"].IsDefined ()) {
-			std::string file_format = "output/" + config.get <std::string> ("output.file");
-			char buffer [file_format.size () * 2];
-			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-
-			normal_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (o_grid, buffer, config.get <int> ("output.every")));
-			data.setup_output (normal_stream);
-			normal_stream->template append <double> ("div", new io::functors::div_functor <double> (data (x_position), data (z_position), data (x_velocity), data (z_velocity), n, m));
-		}
-
-		std::shared_ptr <io::output> transform_stream;
-		if (config ["output.transform_file"].IsDefined ()) {
-			std::string file_format = "output/" + config.get <std::string> ("output.transform_file");
-			char buffer [file_format.size () * 2];
-			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-
-			transform_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (o_grid, buffer, config.get <int> ("output.every")));
-			data.setup_output (transform_stream, transformed_horizontal | transformed_vertical);
-		}
-
-		std::vector <double> area;
-		std::shared_ptr <io::output> stat_stream;
-		if (config ["output.stat.file"].IsDefined ()) {
-			std::string file_format = "output/" + config.get <std::string> ("output.stat.file");
-			char buffer [file_format.size () * 2];
-			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-			
-			area.resize (n * m);
-			for (int i = 1; i < n; ++i) {
-				for (int j = 1; j < m; ++j) {
-					area [i * m + j] = ((*(element->grids [0])) [i] - (*(element->grids [0])) [i - 1]) * ((*(element->grids [1])) [j] - (*(element->grids [1])) [j - 1]);
-				}
-			}
-
-			stat_stream.reset (new io::appender_output <io::formats::ascii> (io::data_grid::two_d (n, m), buffer, config.get <int> ("output.stat.every")));
-			data.setup_stat (stat_stream);
-			stat_stream->template append <double> ("wT", new io::functors::weighted_average_functor <double> (n, m, &area [0], new io::functors::product_functor <double> (n, m, data (z_velocity), data (temperature))), io::scalar);
-			stat_stream->template append <double> ("wS", new io::functors::weighted_average_functor <double> (n, m, &area [0], new io::functors::product_functor <double> (n, m, data (z_velocity), data (composition))), io::scalar);
-		}
-
-		/*
-			TODO Setting up the streams should be more convenient
-		*/
 
 		clock_t cbegin, cend;
 		std::chrono::time_point <std::chrono::system_clock> begin, end;

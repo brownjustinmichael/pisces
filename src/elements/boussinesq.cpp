@@ -11,6 +11,9 @@
 #include <stdlib.h>
 #include <memory>
 
+#include "io/formats/netcdf.hpp"
+#include "io/formats/ascii.hpp"
+
 #include "plans/plan.hpp"
 #include "plans/advection.hpp"
 #include "plans/diffusion.hpp"
@@ -22,6 +25,81 @@
 
 #include "boussinesq.hpp"
 
+namespace data
+{
+	template <class datatype>
+	thermo_compositional_data <datatype>::thermo_compositional_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int id, int n_elements, io::parameters& i_params, int i_transform_threads) : implemented_data <datatype> (i_axis_n, i_axis_m, i_transform_threads) {
+		initialize (x_velocity, "u");
+		initialize (z_velocity, "w");
+		initialize (temp, "T");
+		initialize (composition, "S");
+		initialize (pressure, "P");
+		
+		int name = id;
+		
+		const io::data_grid i_grid = io::data_grid::two_d (n, m, 0, i_params.get <bool> ("input.full") ? n_elements * m : 0, 0, i_params.get <bool> ("input.full") ? id * m : 0);
+		
+		if (i_params ["input.file"].IsDefined ()) {
+			std::string file_format = "input/" + i_params.get <std::string> ("input.file");
+			char buffer [file_format.size () * 2];
+			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
+			io::formatted_input <io::formats::two_d::netcdf> input_stream (i_grid, buffer);
+
+			(*this).setup (&input_stream);
+		}
+		
+		const io::data_grid o_grid = io::data_grid::two_d (n, m, 0, i_params.get <bool> ("output.full") ? n_elements * m : 0, 0, i_params.get <bool> ("output.full") ? id * m : 0);
+		
+		// Set up output
+		std::shared_ptr <io::output> normal_stream;
+		if (i_params ["output.file"].IsDefined ()) {
+			std::string file_format = "output/" + i_params.get <std::string> ("output.file");
+			char buffer [file_format.size () * 2];
+			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
+
+			normal_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (o_grid, buffer, i_params.get <int> ("output.every")));
+			this->setup_output (normal_stream);
+			normal_stream->template append <double> ("div", new io::functors::div_functor <double> ((*this) (x_position), (*this) (z_position), (*this) (x_velocity), (*this) (z_velocity), n, m));
+		}
+
+		std::shared_ptr <io::output> transform_stream;
+		if (i_params ["output.transform_file"].IsDefined ()) {
+			std::string file_format = "output/" + i_params.get <std::string> ("output.transform_file");
+			char buffer [file_format.size () * 2];
+			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
+
+			transform_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (o_grid, buffer, i_params.get <int> ("output.every")));
+			this->setup_output (transform_stream, transformed_horizontal | transformed_vertical);
+		}
+
+		std::vector <double> area;
+		std::shared_ptr <io::output> stat_stream;
+		if (i_params ["output.stat.file"].IsDefined ()) {
+			std::string file_format = "output/" + i_params.get <std::string> ("output.stat.file");
+			char buffer [file_format.size () * 2];
+			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
+			
+			area.resize (n * m);
+			for (int i = 1; i < n; ++i) {
+				for (int j = 1; j < m; ++j) {
+					area [i * m + j] = ((*(this->grid_n)) [i] - (*(this->grid_n)) [i - 1]) * ((*(this->grid_m)) [j] - (*(this->grid_m)) [j - 1]);
+				}
+			}
+
+			stat_stream.reset (new io::appender_output <io::formats::ascii> (io::data_grid::two_d (n, m), buffer, i_params.get <int> ("output.stat.every")));
+			this->setup_stat (stat_stream);
+			stat_stream->template append <double> ("wT", new io::functors::weighted_average_functor <double> (n, m, &area [0], new io::functors::product_functor <double> (n, m, (*this) (z_velocity), (*this) (temperature))), io::scalar);
+			stat_stream->template append <double> ("wS", new io::functors::weighted_average_functor <double> (n, m, &area [0], new io::functors::product_functor <double> (n, m, (*this) (z_velocity), (*this) (composition))), io::scalar);
+		}
+
+		/*
+			TODO Setting up the streams should be more convenient
+		*/
+	}
+	
+	template class thermo_compositional_data <double>;
+} /* data */
+
 namespace pisces
 {
 	using namespace plans;
@@ -30,18 +108,11 @@ namespace pisces
 	boussinesq_element <datatype>::boussinesq_element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
 	implemented_element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags) {
 
-		assert (n > 0);
-		assert (m > 0);
-
 		TRACE ("Initializing...");
 		x_ptr = ptr (x_position);
 		z_ptr = ptr (z_position);
-		initialize (temp, "T");
-		// data.initialize (temp, "T");
-		initialize (composition, "S");
-		x_vel_ptr = initialize (x_velocity, "u");
-		z_vel_ptr = initialize (z_velocity, "w");
-		initialize (pressure, "P");
+		x_vel_ptr = data (x_velocity);
+		z_vel_ptr = data (z_velocity);
 		
 		DEBUG ("OUT." << x_vel_ptr << " " << z_vel_ptr);
 		

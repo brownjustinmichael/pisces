@@ -57,6 +57,29 @@ namespace data
 			return &(scalars [name] [0]);
 		}
 		
+		/*!**********************************************************************
+		 * \brief Element iterator for iterating through the contained data
+		 ************************************************************************/
+		typedef typename std::map <int, std::vector <datatype>>::iterator iterator;
+	
+		/*!**********************************************************************
+		 * \brief Generate an iterator to iterate through the data
+		 * 
+		 * \return Beginning iterator
+		 ************************************************************************/
+		iterator begin () {
+			return scalars.begin ();
+		}
+	
+		/*!**********************************************************************
+		 * \brief Generate a finishing iterator for comparison
+		 * 
+		 * \return Ending iterator
+		 ************************************************************************/
+		iterator end () {
+			return scalars.end ();
+		}
+		
 		datatype *operator() (const int name, const int index = 0) {
 			return &(scalars [name] [index]);
 		}
@@ -208,12 +231,15 @@ namespace data
 	template <class datatype>
 	class implemented_data : public data <datatype>
 	{
-	private:
+	protected:
 		std::shared_ptr <plans::grid <datatype>> grid_n, grid_m;
 		int n, m;
 		
 	public:
-		implemented_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int i_transform_threads = 1) : data <datatype> (i_transform_threads), grid_n (std::shared_ptr <plans::grid <datatype>> (new typename plans::horizontal::grid <datatype> (i_axis_n))), grid_m (std::shared_ptr <plans::grid <datatype>> (new typename plans::vertical::grid <datatype> (i_axis_m))), n (grid_n->get_n ()), m (grid_m->get_n ()) {}
+		implemented_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int i_transform_threads = 1) : data <datatype> (i_transform_threads), grid_n (std::shared_ptr <plans::grid <datatype>> (new typename plans::horizontal::grid <datatype> (i_axis_n))), grid_m (std::shared_ptr <plans::grid <datatype>> (new typename plans::vertical::grid <datatype> (i_axis_m))), n (grid_n->get_n ()), m (grid_m->get_n ()) {
+			this->initialize (x_position, "x");
+			this->initialize (z_position, "z");
+		}
 		
 		virtual ~implemented_data () {}
 		

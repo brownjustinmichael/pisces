@@ -14,6 +14,8 @@
 
 #include "implemented_element.hpp"
 
+#include "data.hpp"
+
 namespace pisces
 {
 	template <class datatype>
@@ -88,5 +90,22 @@ namespace pisces
 		datatype advection_coeff, cfl, *x_ptr, *z_ptr, *x_vel_ptr, *z_vel_ptr;
 	};
 } /* pisces */
+
+namespace data
+{
+	template <class datatype>
+	class thermo_compositional_data : public implemented_data <datatype>
+	{
+	protected:
+		using implemented_data <datatype>::initialize;
+		using implemented_data <datatype>::n;
+		using implemented_data <datatype>::m;
+		
+	public:
+		thermo_compositional_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int id, int n_elements, io::parameters& i_params, int i_transform_threads = 1);
+		
+		virtual ~thermo_compositional_data () {}
+	};
+} /* data */
 
 #endif /* end of include guard: BOUSSINESQ_TWO_D_HPP_OQ800X4X */

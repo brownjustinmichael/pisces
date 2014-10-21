@@ -66,6 +66,14 @@ namespace pisces
 				transform_threads = 0;
 			}
 			
+			for (typename data::data <datatype>::iterator iter = data.begin (); iter != data.end (); ++iter) {
+				if ((iter->first != x_position) && (iter->first != z_position)) {
+					DEBUG (ptr (iter->first));
+					element <datatype>::add_solver (iter->first, std::shared_ptr <plans::equation <datatype> > (new plans::implemented_equation <datatype> (*grids [0], *grids [1], ptr (iter->first), &element_flags [state], &element_flags [iter->first])));
+				
+				}
+			}
+			
 			TRACE ("Instantiated.");
 		}
 		
@@ -138,11 +146,11 @@ namespace pisces
 			// if ((name != x_position) && (name != z_position)) {
 			// 	element <datatype>::add_transform (name, std::shared_ptr <plans::transformer <datatype> > (new plans::implemented_transformer <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &element_flags [state], &element_flags [name], transform_threads)));
 			// }
-			if ((name != x_position) && (name != z_position)) {
-				DEBUG (ptr (name));
-				element <datatype>::add_solver (name, std::shared_ptr <plans::equation <datatype> > (new plans::implemented_equation <datatype> (*grids [0], *grids [1], ptr (name), &element_flags [state], &element_flags [name])));
-				
-			}
+			// if ((name != x_position) && (name != z_position)) {
+			// 	DEBUG (ptr (name));
+			// 	element <datatype>::add_solver (name, std::shared_ptr <plans::equation <datatype> > (new plans::implemented_equation <datatype> (*grids [0], *grids [1], ptr (name), &element_flags [state], &element_flags [name])));
+			//
+			// }
 			TRACE ("Initialized.");
 			return this->ptr (name);
 		}
