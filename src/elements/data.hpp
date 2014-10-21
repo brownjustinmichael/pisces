@@ -35,13 +35,9 @@ namespace data
 		std::map <int, std::string> scalar_names;
 		static int mode;
 		
-		std::shared_ptr <io::output> normal_stream; //!< An implementation to output in normal space
-		std::shared_ptr <io::output> transform_stream; //!< An implementation to output in transform space
-		std::shared_ptr <io::output> stat_stream; //!< An implementation to output in transform space
 		std::vector <std::shared_ptr <io::output>> streams;
 		std::vector <int> stream_conditions;
 		std::vector <bool> done;
-		std::vector <std::shared_ptr <io::output>> normal_profiles; //!< An implementation to output in transform space
 		
 	public:
 		datatype duration;
@@ -64,19 +60,6 @@ namespace data
 		
 		const int &get_mode () {
 			return mode;
-		}
-		
-		void output () {
-			INFO ("OUTPUT");
-			if (normal_stream) normal_stream->to_file ();
-		}
-		
-		void output_transform () {
-			if (transform_stream) transform_stream->to_file ();
-		}
-		
-		void output_stat () {
-			if (stat_stream) stat_stream->to_file ();
 		}
 		
 		virtual datatype *initialize (int i_name, std::string i_str, datatype* initial_conditions = NULL, int i_flags = 0x00) {
@@ -178,14 +161,7 @@ namespace data
 			// Check the desired output time and save the output object in the appropriate variable
 			streams.push_back (output_ptr);
 			done.push_back (false);
-			// stream_conditions.push_back (flags);
-			if (flags & transform_output) {
-				stream_conditions.push_back (transformed_vertical | transformed_horizontal);
-				// transform_stream = output_ptr;
-			} else if (flags & normal_output) {
-				stream_conditions.push_back (0x00);
-				// normal_stream = output_ptr;
-			}
+			stream_conditions.push_back (flags);
 		}
 		
 		virtual void setup_stat (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
@@ -193,8 +169,8 @@ namespace data
 			output_ptr->template append <datatype> ("t", &duration, io::scalar);
 			output_ptr->template append <datatype> ("dt", &timestep, io::scalar);
 			// Check the desired output time and save the output object in the appropriate variable
-			DEBUG ("SETTING STAT")
-			stat_stream = output_ptr;
+			streams.push_back (output_ptr);
+			stream_conditions.push_back (0x00);
 		}
 		
 	protected:

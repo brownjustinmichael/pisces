@@ -88,14 +88,6 @@ namespace pisces
 			transform (forward_horizontal | no_write | no_read | read_before);
 			, transform_time, transform_duration);
 
-			TIME (
-			data.output ();
-			data.output_stat ();
-			for (int i = 0; i < (int) normal_profiles.size (); ++i) {
-				normal_profiles [i]->to_file ();
-			}
-			, output_time, output_duration);
-
 			// #pragma omp parallel sections num_threads(2)
 				// {
 				// #pragma omp section
@@ -130,11 +122,6 @@ namespace pisces
 				solvers [*iter]->execute_plans (pre_solve_plan);
 			}
 			, execution_time, execution_duration);
-
-			// Output in transform space
-			TIME (
-			data.output_transform ();
-			, output_time, output_duration);
 
 			TIME (
 			solve ();

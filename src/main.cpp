@@ -154,7 +154,7 @@ int main (int argc, char *argv[])
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 
 			normal_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (o_grid, buffer, config.get <int> ("output.every")));
-			data.setup_output (normal_stream, normal_output);
+			data.setup_output (normal_stream);
 		}
 
 		std::shared_ptr <io::output> transform_stream;
@@ -164,7 +164,7 @@ int main (int argc, char *argv[])
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 
 			transform_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (o_grid, buffer, config.get <int> ("output.every")));
-			data.setup_output (transform_stream, transform_output);
+			data.setup_output (transform_stream, transformed_horizontal | transformed_vertical);
 		}
 
 		std::shared_ptr <io::output> stat_stream;
