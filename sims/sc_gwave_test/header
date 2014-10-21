@@ -1,0 +1,43 @@
+# ==========================================================
+# ===            Double Diffusive Convection             ===
+# ==            Written by Stephan Stellmach              ==
+# ==    Contact stellma@uni-muenster.de for questions     ==
+# ==========================================================
+#
+# Execution date and time:
+# ------------------------
+# Run started: year:2014, month: 2, day:10, Time:15:34:21
+#
+# Parameter values:
+# -----------------
+# Thermal buoyancy coefficient        :       0.1000000E+00
+# Compositional buoyancy coefficient  :       0.1000000E+00
+# Viscous diffusion parameter         :       0.1000000E+00
+# Thermal diffusion parameter         :       0.1000000E+01
+# Compositional diffusion parameter   :       0.1000000E+00
+# Thermal background stratification parameter       :      -0.1000000E+01
+# Compositional background stratification parameter :      -0.2000000E+01
+# Length of box            :       0.1000000E+03
+# Width of box             :       0.1000000E+01
+# Height of box            :       0.1000000E+03
+# CFL_safety_factor 0       0.9000000E+00
+# Maximum allowed time step length =       0.5000000E+00
+# Initial time step length =       0.5000000E-06
+# Lmax = :   128
+# Mmax = :     0
+# Nmax = :   128
+# Nx = :   384
+# Ny = :     1
+# Nz = :   384
+# number_of_tasks_1st_transpose = :     1
+# number_of_tasks_2nd_transpose = :    16
+#
+# Compilation info - Compiled with following flags defined
+#  -TEMPERATURE_FIELD
+#  -CHEMICAL_FIELD
+#  -TWO_DIMENSIONAL
+#  -AB_BDF3
+#  -DOUBLE_PRECISION
+#
+# ==========================================================
+ 

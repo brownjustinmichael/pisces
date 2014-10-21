@@ -4,7 +4,7 @@ import os, inspect
 
 conf = Configure (env)
 
-for lib in ["atlas", "netcdf_c++4", "netcdf", "irc", "imf", "yaml-cpp"]:
+for lib in ["netcdf_c++4", "netcdf", "irc", "imf", "yaml-cpp"]:
     conf.CheckLib (lib)
 
 env = conf.Finish ()
