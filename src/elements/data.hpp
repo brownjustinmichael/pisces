@@ -38,6 +38,8 @@ namespace data
 		std::shared_ptr <io::output> normal_stream; //!< An implementation to output in normal space
 		std::shared_ptr <io::output> transform_stream; //!< An implementation to output in transform space
 		std::shared_ptr <io::output> stat_stream; //!< An implementation to output in transform space
+		std::vector <std::shared_ptr <io::output>> streams;
+		std::vector <int> stream_conditions;
 		std::vector <std::shared_ptr <io::output>> normal_profiles; //!< An implementation to output in transform space
 		
 	public:
@@ -85,6 +87,19 @@ namespace data
 		void transform (int i_flags) {
 			TRACE ("Transforming...");
 			int threads = transform_threads;
+			for (int i = 0; i < (int) streams.size (); ++i) {
+				if (stream_conditions [i] & transformed_vertical) {
+					if (!(flags [transforms [0]] & transformed_vertical)) {
+						continue;
+					}
+				}
+				if (stream_conditions [i] & transformed_horizontal) {
+					if (!(flags [transforms [0]] & transformed_horizontal)) {
+						continue;
+					}
+				}
+				streams [i]->to_file ();
+			}
 #pragma omp parallel num_threads (threads)
 			{
 #pragma omp for
@@ -145,9 +160,13 @@ namespace data
 			output_ptr->template append <const int> ("mode", &(get_mode ()), io::scalar);
 
 			// Check the desired output time and save the output object in the appropriate variable
+			// streams.push_back (output_ptr);
+			// stream_conditions.push_back (flags);
 			if (flags & transform_output) {
+				// stream_conditions.push_back (transformed_vertical | transformed_horizontal);
 				transform_stream = output_ptr;
 			} else if (flags & normal_output) {
+				// stream_conditions.push_back (0x00);
 				normal_stream = output_ptr;
 			}
 		}
