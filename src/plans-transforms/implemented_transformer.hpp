@@ -71,23 +71,11 @@ namespace plans
 		}
 	
 		void write () {
-			// std::stringstream debug;
-			// for (int i = 0; i < 2 * (32 / 2 + 1); ++i) {
-			// 	debug << data_in [i * 32 + 32 - 1] << " ";
-			// }
-			DEBUG ("WRITING " << (internal_state & transformed_vertical) << " " << (internal_state & transformed_horizontal));
-			// debug.str ("");
 			linalg::matrix_copy (ldm, ldn, data_in, &data [0]);
 		}
 
 		void read () {
 			linalg::matrix_copy (ldm, ldn, &data [0], data_out);
-			// std::stringstream debug;
-			// for (int i = 0; i < 2 * (32 / 2 + 1); ++i) {
-			// 	debug << data_out [i * 32 + 32 - 1] << " ";
-			// }
-			DEBUG ("READING " << (internal_state & transformed_vertical) << " " << (internal_state & transformed_horizontal));
-			// debug.str ("");
 		}
 		
 		virtual datatype *get_data () {

@@ -194,6 +194,7 @@ namespace io
 				TRACE ("Getting " << name << "...");
 				if (check_type <datatype> (name)) {
 					ldm = ldm == -1 ? m : ldm;
+					DEBUG ("STUFF " << data << " " << data_map [name]);
 					memcpy (data, data_map [name], sizeof (datatype) * n * ldm);
 					TRACE ("Done.");
 				} else {
@@ -255,13 +256,30 @@ namespace io
 		
 				template <class datatype>
 				static void write (const data_grid &grid, std::string file_name, std::string name, void *data, int record = -1, int flags = all_d) {
-					virtual_files [file_name].add_var <datatype> (name, grid.get_n (0), grid.get_n (1));
-					virtual_files [file_name].put <datatype> (name, (datatype *) data, grid.get_n (0), grid.get_n (1));
+					int n = grid.get_n (0), m = grid.get_n (1);
+					if (! (flags & one_d)) {
+						n = 1;
+					}
+					if (! (flags & m_profile)) {
+						m = 1;
+					}
+					DEBUG ("WRITING " << ((datatype *) data) [0] << " " << n << " " << m);
+					virtual_files [file_name].add_var <datatype> (name, n, m);
+					virtual_files [file_name].put <datatype> (name, (datatype *) data, n, m);
 				}
 	
 				template <class datatype>
 				static void read (const data_grid &grid, std::string file_name, std::string name, void *data, int record = -1, int flags = all_d) {
-					virtual_files [file_name].get <datatype> (name, (datatype *) data, grid.get_n (0), grid.get_n (1));
+					int n = grid.get_n (0), m = grid.get_n (1);
+					if (! (flags & one_d)) {
+						n = 1;
+					}
+					if (! (flags & m_profile)) {
+						m = 1;
+					}
+					DEBUG ("POINTER " << data << " " << file_name << " " << n << " " << m);
+					virtual_files [file_name].get <datatype> (name, (datatype *) data, n, m);
+					DEBUG ("READING " << ((datatype *) data) [0])
 				}
 	
 				template <class datatype>

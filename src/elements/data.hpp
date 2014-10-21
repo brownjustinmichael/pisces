@@ -143,6 +143,8 @@ namespace data
 			int mode;
 			input_ptr->template append <int> ("mode", &mode, io::scalar);
 			
+			DEBUG ("READING");
+			
 			try {
 				// Read from the input into the element variables
 				input_ptr->from_file ();

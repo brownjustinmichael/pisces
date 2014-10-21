@@ -38,6 +38,7 @@ namespace pisces
 				} else {
 					FATAL ("HAVEN'T GOT A TREATMENT FOR THIS YET");
 					throw 0;
+					data.setup_profile (virtual_output, data::no_save);
 				}
 			} else {
 				virtual_output.reset (new io::formatted_output <io::formats::two_d::virtual_format> (io::data_grid::two_d (n, m), "two_d/boussinesq/virtual_file", io::replace_file));
@@ -47,8 +48,7 @@ namespace pisces
 					virtual_output->append <datatype> ("w", ptr (z_velocity));
 					virtual_output->append <datatype> ("u", ptr (x_velocity));
 				} else {
-					FATAL ("HAVEN'T GOT A TREATMENT FOR THIS YET");
-					throw 0;
+					data.setup_output (virtual_output, data::no_save);
 				}
 			}
 			virtual_output->to_file ();
