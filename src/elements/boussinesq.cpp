@@ -28,7 +28,7 @@
 namespace data
 {
 	template <class datatype>
-	thermo_compositional_data <datatype>::thermo_compositional_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int id, int n_elements, io::parameters& i_params, int i_transform_threads) : implemented_data <datatype> (i_axis_n, i_axis_m, i_transform_threads) {
+	thermo_compositional_data <datatype>::thermo_compositional_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int id, int n_elements, io::parameters& i_params) : implemented_data <datatype> (i_axis_n, i_axis_m) {
 		initialize (x_velocity, "u");
 		initialize (z_velocity, "w");
 		initialize (temp, "T");
@@ -72,7 +72,6 @@ namespace data
 			this->setup_output (transform_stream, transformed_horizontal | transformed_vertical);
 		}
 
-		std::vector <double> area;
 		std::shared_ptr <io::output> stat_stream;
 		if (i_params ["output.stat.file"].IsDefined ()) {
 			std::string file_format = "output/" + i_params.get <std::string> ("output.stat.file");
@@ -83,6 +82,7 @@ namespace data
 			for (int i = 1; i < n; ++i) {
 				for (int j = 1; j < m; ++j) {
 					area [i * m + j] = ((*(this->grid_n)) [i] - (*(this->grid_n)) [i - 1]) * ((*(this->grid_m)) [j] - (*(this->grid_m)) [j - 1]);
+					DEBUG (area [i * m + j]);
 				}
 			}
 

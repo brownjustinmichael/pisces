@@ -100,9 +100,11 @@ namespace data
 		using implemented_data <datatype>::initialize;
 		using implemented_data <datatype>::n;
 		using implemented_data <datatype>::m;
+		std::vector <double> area;
+		
 		
 	public:
-		thermo_compositional_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int id, int n_elements, io::parameters& i_params, int i_transform_threads = 1);
+		thermo_compositional_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int id, int n_elements, io::parameters& i_params);
 		
 		virtual ~thermo_compositional_data () {}
 	};

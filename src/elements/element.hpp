@@ -70,7 +70,10 @@ namespace pisces
 		std::map <int, std::string> scalar_names; //!< A map of string representations of the scalars
 		std::map <int, int> &element_flags; //!< A map of integer flags
 		
-		std::map<int, std::shared_ptr <plans::equation <datatype>>> solvers; //!< A vector of shared pointers to the matrix solvers
+		std::map <int, std::shared_ptr <plans::equation <datatype>>> solvers; //!< A vector of shared pointers to the matrix solvers
+		std::map <int, std::shared_ptr <plans::transformer <datatype>>> transformers;
+		std::vector <int> transforms;
+		int transform_threads;
 		
 	private:
 		std::vector <int> solver_keys; //!< A vector of integer keys to the solvers map
@@ -122,6 +125,7 @@ namespace pisces
 			messenger_ptr = i_messenger_ptr;
 			timestep = 0.0;
 			duration = 0.0;
+			transform_threads = params.get <int> ("parallel.transform.threads");
 		}
 		
 		virtual ~element () {}
@@ -192,6 +196,18 @@ namespace pisces
 			solvers [i_name] = i_solver_ptr;
 			solver_keys.push_back (i_name);
 			TRACE ("Solver added.");
+		}
+		
+		void transform (int i_flags) {
+			TRACE ("Transforming...");
+			int threads = transform_threads;
+#pragma omp parallel num_threads (threads)
+			{
+#pragma omp for
+				for (int i = 0; i < (int) transforms.size (); ++i) {
+					transformers [transforms [i]]->transform (i_flags);
+				}
+			}
 		}
 	
 		/*!**********************************************************************
@@ -274,7 +290,7 @@ namespace pisces
 			// Make certain everything is fully transformed
 			
 			
-			data.transform (forward_vertical | no_read);
+			transform (forward_vertical | no_read);
 			TRACE ("Solve complete.");
 		}
 		
@@ -319,7 +335,7 @@ namespace pisces
 		 ************************************************************************/
 		virtual io::formats::virtual_file *rezone_minimize_ts (datatype * positions, datatype min_size, datatype max_size, int n_tries = 20, int iters_fixed_t = 1000, datatype step_size = 1.0, datatype k = 1.0, datatype t_initial = 0.008, datatype mu_t = 1.003, datatype t_min = 2.0e-6) {
 			TRACE ("Rezoning...");
-			data.transform (inverse_horizontal | inverse_vertical);
+			transform (inverse_horizontal | inverse_vertical);
 
 			rezone_virtual_file = make_virtual_file (profile_only | timestep_only);
 			

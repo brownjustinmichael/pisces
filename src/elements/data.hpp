@@ -28,7 +28,7 @@ namespace data
 	enum initialize_element_flags {
 		uniform_n = 0x01,
 		uniform_m = 0x02,
-		no_save = 0x10,
+		no_save = 0x04,
 	};
 	
 	template <class datatype>
@@ -42,13 +42,11 @@ namespace data
 		std::vector <int> stream_conditions;
 		std::vector <bool> done;
 		
-		std::vector <std::shared_ptr <plans::grid <datatype>>> grids;
-		
 	public:
 		datatype duration;
 		datatype timestep;
 		std::map <int, int> flags;
-		data (int i_transform_threads = 1) : transform_threads (i_transform_threads) {
+		data () {
 			flags [0] = 0x0;
 			duration = 0.0;
 		}
@@ -90,48 +88,36 @@ namespace data
 			return mode;
 		}
 		
-		virtual std::shared_ptr <plans::grid <datatype>> get_grid (int i) {
-			return grids [i];
-		}
-		
 		virtual datatype *initialize (int i_name, std::string i_str, datatype* initial_conditions = NULL, int i_flags = 0x00) {
 			flags [i_name] = 0x00;
 			scalar_names [i_name] = i_str;
 			return _initialize (i_name, initial_conditions, i_flags);
 		}
 		
-		void transform (int i_flags) {
+		void check_streams (int i_flags = 0x00) {
 			TRACE ("Transforming...");
-			int threads = transform_threads;
 			for (int i = 0; i < (int) streams.size (); ++i) {
 				if (done [i]) continue;
 				if (stream_conditions [i] & transformed_vertical) {
-					if (!(flags [transforms [0]] & transformed_vertical)) {
+					if (!(i_flags & transformed_vertical)) {
 						continue;
 					}
 				} else {
-					if ((flags [transforms [0]] & transformed_vertical)) {
+					if ((i_flags & transformed_vertical)) {
 						continue;
 					}
 				}
 				if (stream_conditions [i] & transformed_horizontal) {
-					if (!(flags [transforms [0]] & transformed_horizontal)) {
+					if (!(i_flags & transformed_horizontal)) {
 						continue;
 					}
 				} else {
-					if ((flags [transforms [0]] & transformed_horizontal)) {
+					if ((i_flags & transformed_horizontal)) {
 						continue;
 					}
 				}
 				streams [i]->to_file ();
 				done [i] = true;
-			}
-#pragma omp parallel num_threads (threads)
-			{
-#pragma omp for
-				for (int i = 0; i < (int) transforms.size (); ++i) {
-					transformers [transforms [i]]->transform (i_flags);
-				}
 			}
 		}
 		
@@ -228,10 +214,7 @@ namespace data
 		
 	protected:
 		std::map <int, std::vector <datatype>> scalars;
-		std::map <int, std::shared_ptr <plans::transformer <datatype>>> transformers;
 		virtual datatype *_initialize (int i_name, datatype* initial_conditions = NULL, int i_flags = 0x00) = 0;
-		std::vector <int> transforms; //!< A vector of integer keys to the transform maps
-		int transform_threads;
 	};
 	
 	template <class datatype>
@@ -242,12 +225,9 @@ namespace data
 		int n, m;
 		
 	public:
-		implemented_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int i_transform_threads = 1) : data <datatype> (i_transform_threads), grid_n (std::shared_ptr <plans::grid <datatype>> (new typename plans::horizontal::grid <datatype> (i_axis_n))), grid_m (std::shared_ptr <plans::grid <datatype>> (new typename plans::vertical::grid <datatype> (i_axis_m))), n (grid_n->get_n ()), m (grid_m->get_n ()) {
+		implemented_data (plans::axis *i_axis_n, plans::axis *i_axis_m) : grid_n (std::shared_ptr <plans::grid <datatype>> (new typename plans::horizontal::grid <datatype> (i_axis_n))), grid_m (std::shared_ptr <plans::grid <datatype>> (new typename plans::vertical::grid <datatype> (i_axis_m))), n (grid_n->get_n ()), m (grid_m->get_n ()) {
 			this->initialize (x_position, "x");
 			this->initialize (z_position, "z");
-			
-			this->grids.push_back (grid_n);
-			this->grids.push_back (grid_m);
 		}
 		
 		virtual ~implemented_data () {}
@@ -302,11 +282,6 @@ namespace data
 						linalg::copy (n * m, initial_conditions, (*this) (name));
 					}
 				}
-			}
-			
-			if ((name != x_position) && (name != z_position)) {
-				data <datatype>::transforms.push_back (name);
-				data <datatype>::transformers [name] = std::shared_ptr <plans::transformer <datatype> > (new plans::implemented_transformer <datatype> (*grid_n, *grid_m, (*this) (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &data <datatype>::flags [state], &data <datatype>::flags [name], data <datatype>::transform_threads));
 			}
 			TRACE ("Done.");
 			return &(data <datatype>::scalars [name] [0]);
