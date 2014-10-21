@@ -28,20 +28,20 @@ namespace plans
 		data_out (i_data_out ? i_data_out : i_data_in) {
 			data.resize (ldn * ldm, 0.0);
 			if (i_flags & forward_vertical) {
-				forward_vertical_transform = std::shared_ptr <plans::plan <datatype>> (new plans::vertical_transform <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], 0x00, element_flags, component_flags, i_threads));
+				forward_vertical_transform = std::shared_ptr <plans::plan <datatype>> (new plans::vertical_transform <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], 0x00, element_flags, &internal_state, i_threads));
 			}
 			if (i_flags & inverse_vertical) {
 				if (forward_vertical_transform) {
 					inverse_vertical_transform = forward_vertical_transform;
 				} else {
-					inverse_vertical_transform = std::shared_ptr <plans::plan <datatype>> (new plans::vertical_transform <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], inverse, element_flags, component_flags, i_threads));
+					inverse_vertical_transform = std::shared_ptr <plans::plan <datatype>> (new plans::vertical_transform <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], inverse, element_flags, &internal_state, i_threads));
 				}
 			}
 			if (i_flags & forward_horizontal) {
-				forward_horizontal_transform = std::shared_ptr <plans::plan <datatype>> (new plans::horizontal_transform <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], 0x00, element_flags, component_flags, i_threads));
+				forward_horizontal_transform = std::shared_ptr <plans::plan <datatype>> (new plans::horizontal_transform <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], 0x00, element_flags, &internal_state, i_threads));
 			}
 			if (i_flags & inverse_horizontal) {
-				inverse_horizontal_transform = std::shared_ptr <plans::plan <datatype>> (new plans::horizontal_transform <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], inverse, element_flags, component_flags, i_threads));
+				inverse_horizontal_transform = std::shared_ptr <plans::plan <datatype>> (new plans::horizontal_transform <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], inverse, element_flags, &internal_state, i_threads));
 			}
 		}
 		
@@ -49,22 +49,22 @@ namespace plans
 	
 		void _transform (int flags) {
 			if (flags & forward_horizontal) {
-				if (!(*component_flags & transformed_horizontal) && forward_horizontal_transform) {
+				if (!(internal_state & transformed_horizontal) && forward_horizontal_transform) {
 					forward_horizontal_transform->execute ();
 				}
 			}
 			if (flags & forward_vertical) {
-				if (!(*component_flags & transformed_vertical) && forward_vertical_transform) {
+				if (!(internal_state & transformed_vertical) && forward_vertical_transform) {
 					forward_vertical_transform->execute ();
 				}
 			}
 			if (flags & inverse_horizontal) {
-				if ((*component_flags & transformed_horizontal) && inverse_horizontal_transform) {
+				if ((internal_state & transformed_horizontal) && inverse_horizontal_transform) {
 					inverse_horizontal_transform->execute ();
 				}
 			}
 			if (flags & inverse_vertical) {
-				if ((*component_flags & transformed_vertical) && inverse_vertical_transform) {
+				if ((internal_state & transformed_vertical) && inverse_vertical_transform) {
 					inverse_vertical_transform->execute ();
 				}
 			}
@@ -75,7 +75,7 @@ namespace plans
 			// for (int i = 0; i < 2 * (32 / 2 + 1); ++i) {
 			// 	debug << data_in [i * 32 + 32 - 1] << " ";
 			// }
-			// DEBUG ("WRITING " << debug.str ());
+			DEBUG ("WRITING " << (internal_state & transformed_vertical) << " " << (internal_state & transformed_horizontal));
 			// debug.str ("");
 			linalg::matrix_copy (ldm, ldn, data_in, &data [0]);
 		}
@@ -86,7 +86,7 @@ namespace plans
 			// for (int i = 0; i < 2 * (32 / 2 + 1); ++i) {
 			// 	debug << data_out [i * 32 + 32 - 1] << " ";
 			// }
-			// DEBUG ("READING " << debug.str ());
+			DEBUG ("READING " << (internal_state & transformed_vertical) << " " << (internal_state & transformed_horizontal));
 			// debug.str ("");
 		}
 		
@@ -104,6 +104,7 @@ namespace plans
 		std::shared_ptr <plans::plan <datatype>> inverse_horizontal_transform;
 		std::shared_ptr <plans::plan <datatype>> inverse_vertical_transform;
 		
+		using plans::transformer <datatype>::internal_state;
 		using plans::transformer <datatype>::component_flags;
 	};
 } /* plans */

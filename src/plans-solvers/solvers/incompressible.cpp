@@ -162,6 +162,7 @@ namespace plans
 		linalg::scale ((m + 2) * ldn, 0.0, &data_temp [0]);
 
 		if (!(*component_flags_x & transformed_vertical)) {
+			DEBUG ("COMPRESSION SOLVE");
 			datatype scalar = acos (-1.0) * 2.0 / (pos_n [n - 1] - pos_n [0]);
 			datatype *data_ptr = &data_temp [1];
 

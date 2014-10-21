@@ -181,10 +181,6 @@ int main (int argc, char *argv[])
 			TODO Setting up the streams should be more convenient
 		*/
 
-		/*
-			TODO Because the output files are not within the element anymore, they become useless once the element is destroyed. Ponder this.
-		*/
-
 		clock_t cbegin, cend;
 		std::chrono::time_point <std::chrono::system_clock> begin, end;
 
@@ -205,12 +201,6 @@ int main (int argc, char *argv[])
 
 				io::input *virtual_input (new io::formatted_input <io::formats::two_d::virtual_format> (io::data_grid::two_d (n, m), "main/virtual_file"));
 				element->setup (&*virtual_input);
-				if (normal_stream) {
-					element->setup_output (normal_stream, normal_output);
-				}
-				if (transform_stream) {
-					element->setup_output (transform_stream, transform_output);
-				}
 			}
 			element->run (n_steps, config.get <int> ("time.steps"), config.get <int> ("grid.rezone.check_every"));
 		}

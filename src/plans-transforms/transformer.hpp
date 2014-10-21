@@ -40,6 +40,7 @@ namespace plans
 	protected:
 		int *element_flags; //!< A pointer to the flags describing the global state of the element
 		int *component_flags; //!< A pointer to the flags describing the state of the local variable
+		int internal_state;
 
 	public:
 		/*!**********************************************************************
@@ -48,7 +49,9 @@ namespace plans
 		 ************************************************************************/
 		transformer (int *i_element_flags, int *i_component_flags) :
 		element_flags (i_component_flags),
-		component_flags (i_component_flags) {}
+		component_flags (i_component_flags) {
+			internal_state = 0x00;
+		}
 		
 		virtual ~transformer () {}
 		
@@ -62,14 +65,39 @@ namespace plans
 		virtual void transform (int flags = 0x00) {
 			if (flags & read_before) {
 				read ();
+				if (internal_state & transformed_horizontal) {
+					*component_flags |= transformed_horizontal;
+				} else {
+					*component_flags &= ~transformed_horizontal;
+				}
+				if (internal_state & transformed_vertical) {
+					*component_flags |= transformed_vertical;
+				} else {
+					*component_flags &= ~transformed_vertical;
+				}
 			}
 			if (!(flags & no_write)) {
 				write ();
+				// internal_state |= component_flags;
 			}
 			_transform (flags);
 			if (!(flags & no_read)) {
 				read ();
+				if (internal_state & transformed_horizontal) {
+					*component_flags |= transformed_horizontal;
+				} else {
+					*component_flags &= ~transformed_horizontal;
+				}
+				if (internal_state & transformed_vertical) {
+					*component_flags |= transformed_vertical;
+				} else {
+					*component_flags &= ~transformed_vertical;
+				}
 			}
+		}
+		
+		const int get_internal_state () {
+			return internal_state;
 		}
 		
 		virtual datatype *get_data () {
