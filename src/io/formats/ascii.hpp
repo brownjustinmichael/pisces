@@ -33,6 +33,7 @@ namespace io
 			static std::map <std::string, std::stringstream> body;
 			
 		public:
+			static bool uses_files;
 			ascii () {}
 			
 			~ascii () {}

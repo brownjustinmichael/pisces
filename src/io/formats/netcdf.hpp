@@ -122,6 +122,7 @@ namespace io
 					
 				}
 			
+				static bool uses_files;
 			protected:
 				static std::map <std::string, netCDF::NcFile *> files;
 				static std::map <std::string, std::vector <netCDF::NcDim>> dims;

@@ -18,6 +18,7 @@ namespace io
 			std::map <std::string, std::vector <netCDF::NcDim>> netcdf::dims;
 			std::map <std::string, std::vector <std::string>> netcdf::failures;
 			std::map <std::string, int> netcdf::records;
+			bool netcdf::uses_files = true;
 		
 			void netcdf::open_file (const data_grid &grid, std::string file_name, int file_type) {
 				TRACE ("Opening NetCDF file");

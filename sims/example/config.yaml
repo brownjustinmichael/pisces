@@ -12,7 +12,7 @@ grid:
         points: 32
         width: 100.0
     rezone:
-        check_every: -1
+        check_every: 500
         min_size: 20.0
         max_size: 50.0
         n_tries: 1

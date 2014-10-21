@@ -231,6 +231,8 @@ namespace io
 			class virtual_format
 			{
 			public:
+				static bool uses_files;
+				
 				virtual_format () {}
 	
 				~virtual_format () {}

@@ -157,7 +157,7 @@ namespace io
 	
 			INFO ("Outputting to file " << file_name << "...");
 			
-			check_file (file_name.c_str ());
+			if (format::uses_files) check_file (file_name.c_str ());
 			format::open_file (grid, file_name.c_str (), output::file_format);
 	
 			// Output the scalar_functors

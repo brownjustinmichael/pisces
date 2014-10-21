@@ -18,5 +18,6 @@ namespace io
 		std::map <std::string, int> ascii::file_types;
 		std::map <std::string, std::stringstream> ascii::header;
 		std::map <std::string, std::stringstream> ascii::body;
+		bool ascii::uses_files = true;
 	} /* formats */
 } /* io */

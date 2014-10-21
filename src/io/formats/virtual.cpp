@@ -11,4 +11,12 @@
 namespace io
 {
 	std::map <std::string, formats::virtual_file> virtual_files;
+	
+	namespace formats
+	{
+		namespace two_d
+		{
+			bool virtual_format::uses_files = false;
+		} /* two_d */
+	} /* formats */
 } /* io */
