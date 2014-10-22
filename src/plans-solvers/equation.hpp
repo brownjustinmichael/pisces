@@ -40,7 +40,9 @@ namespace plans
 		 * \param i_element_flags A pointer to the flags describing the global state of the element
 		 * \param i_component_flags A pointer to the flags describing the state of the local variable
 		 ************************************************************************/
-		equation (datatype *i_data, int *i_element_flags, int *i_component_flags) : element_flags (i_element_flags), component_flags (i_component_flags), data (i_data) {}
+		equation (datatype *i_data, int *i_element_flags, int *i_component_flags) : element_flags (i_element_flags), component_flags (i_component_flags), data (i_data) {
+			*component_flags &= ~factorized;
+		}
 		/*
 			TODO Have this take an array of grid pointers?
 		*/	

@@ -103,6 +103,14 @@ namespace plans
 		/*
 			TODO Add timestep check here?
 		*/
+		
+		// for (int j = 0; j < m; ++j) {
+		// 	for (int i = 0; i < ldn; ++i) {
+		// 		debug << data [i * m + j] << " ";
+		// 	}
+		// 	DEBUG ("DATA " << debug.str ());
+		// 	debug.str ("");
+		// }
 
 		linalg::scale ((ldn) * lda, 0.0, &data_temp [0]);
 

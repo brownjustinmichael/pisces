@@ -160,7 +160,7 @@ namespace pisces
 		
 		virtual datatype calculate_timestep (int i, int j, io::formats::virtual_file *virtual_file = NULL) = 0;
 		
-		inline datatype calculate_min_timestep (io::formats::virtual_file *virtual_file = NULL) {
+		inline datatype calculate_min_timestep (io::formats::virtual_file *virtual_file = NULL, bool limiters = true) {
 			double shared_min = max_timestep / timestep_safety;
 			#pragma omp parallel 
 			{
@@ -176,25 +176,29 @@ namespace pisces
 					shared_min = std::min (shared_min, min);
 				}
 			}
-			shared_min *= timestep_safety;
-			if (timestep == 0.0) {
-				return init_timestep;
-			}
-			if (shared_min > mult_timestep * timestep) {
-				if (next_timestep != 0.0 && std::min (next_timestep, shared_min) > mult_timestep * timestep) {
-					next_timestep = 0.0;
-					return std::min (mult_timestep * timestep, max_timestep);
+			if (limiters) {
+				shared_min *= timestep_safety;
+				if (timestep == 0.0) {
+					return init_timestep;
+				}
+				if (shared_min > mult_timestep * timestep) {
+					if (next_timestep != 0.0 && std::min (next_timestep, shared_min) > mult_timestep * timestep) {
+						next_timestep = 0.0;
+						return std::min (mult_timestep * timestep, max_timestep);
+					} else {
+						next_timestep = shared_min;
+						return timestep;
+					}
+				}
+				next_timestep = 0.0;
+				if (shared_min < timestep) {
+					previous = count;
+					return shared_min / mult_timestep;
 				} else {
-					next_timestep = shared_min;
 					return timestep;
 				}
-			}
-			next_timestep = 0.0;
-			if (shared_min < timestep) {
-				previous = count;
-				return shared_min / mult_timestep;
 			} else {
-				return timestep;
+				return shared_min;
 			}
 		}
 		

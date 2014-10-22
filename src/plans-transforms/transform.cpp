@@ -211,10 +211,8 @@ namespace plans
 		}				
 		
 		if (*component_flags & transformed_horizontal) {
-			DEBUG ("Horizontal Transform Inverse");
 			*component_flags &= ~transformed_horizontal;
 		} else {
-			DEBUG ("Horizontal Transform Forward");
 			*component_flags |= transformed_horizontal;
 			// for (int i = 4 * (n / 2 + 1) / 3; i < 2 * (n / 2 + 1); ++i) {
 			// 	for (int j = 0; j < m; ++j) {
@@ -245,11 +243,8 @@ namespace plans
 		}		
 		
 		if (*component_flags & transformed_horizontal) {
-			DEBUG ("Horizontal Transform Inverse");
 			*component_flags &= ~transformed_horizontal;
 		} else {
-			DEBUG ("Horizontal Transform Forward");
-			
 			*component_flags |= transformed_horizontal;
 			// for (int i = 4 * (n / 2 + 1) / 3; i < 2 * (n / 2 + 1); ++i) {
 			// 	for (int j = 0; j < m; ++j) {
@@ -418,11 +413,8 @@ namespace plans
 		}
 		
 		if (*component_flags & transformed_vertical) {
-			DEBUG ("Vertical Transform Inverse");
-			
 			*component_flags &= ~transformed_vertical;
 		} else {
-			DEBUG ("Vertical Transform Forward");
 			*component_flags |= transformed_vertical;
 		}
 							
@@ -452,13 +444,9 @@ namespace plans
 		}
 
 		if (*component_flags & transformed_vertical) {
-			DEBUG ("Vertical Transform Inverse");
-			
 			*component_flags &= ~transformed_vertical;
 			// DEBUG ("A");
 		} else {
-			DEBUG ("Vertical Transform Forward");
-			
 			*component_flags |= transformed_vertical;
 			// DEBUG ("B");
 		}

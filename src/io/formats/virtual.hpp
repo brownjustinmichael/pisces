@@ -263,7 +263,6 @@ namespace io
 					if (! (flags & m_profile)) {
 						m = 1;
 					}
-					DEBUG ("WRITING " << ((datatype *) data) [0] << " " << n << " " << m);
 					virtual_files [file_name].add_var <datatype> (name, n, m);
 					virtual_files [file_name].put <datatype> (name, (datatype *) data, n, m);
 				}
@@ -277,9 +276,7 @@ namespace io
 					if (! (flags & m_profile)) {
 						m = 1;
 					}
-					DEBUG ("POINTER " << data << " " << file_name << " " << n << " " << m);
 					virtual_files [file_name].get <datatype> (name, (datatype *) data, n, m);
-					DEBUG ("READING " << ((datatype *) data) [0])
 				}
 	
 				template <class datatype>

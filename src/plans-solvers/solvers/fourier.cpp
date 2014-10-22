@@ -45,6 +45,7 @@ namespace plans
 		
 		for (int i = 0; i < ldn; ++i) {
 			factorized_horizontal_matrix [i] = 1.0 + timestep * horizontal_matrix [i];
+			// DEBUG ("FACT " << factorized_horizontal_matrix [i]);
 		}
 		
 		TRACE ("Done.");
@@ -87,7 +88,7 @@ namespace plans
 		}
 		
 		// DEBUG ("CHOICE RHS " << rhs_ptr [12 * m + 24] << " " << data [12 * m + 24]);
-		//
+		// std::stringstream debug;
 		// for (int j = 0; j < lda; ++j) {
 		// 	for (int i = 0; i < ldn; ++i) {
 		// 		debug << data_temp [i * lda + j] << " ";
@@ -105,7 +106,9 @@ namespace plans
 		// }
 		
 		for (int j = excess_0; j < m - excess_n; ++j) {
+			// DEBUG ("BEF " << data_temp [ex_overlap_0 + j] << " " << factorized_horizontal_matrix [0]);
 			linalg::diagonal_solve (ldn, &factorized_horizontal_matrix [0], &data_temp [ex_overlap_0 + j], 1, lda);
+			// DEBUG ("AFT " << data_temp [ex_overlap_0 + j]);
 		}
 		linalg::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data, lda);
 		
@@ -117,6 +120,14 @@ namespace plans
 				data [i * m + j] = (data [i * m + j - 2] - data [i * m + j - 1]) / (pos_m [j - 2] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]) + data [i * m + j - 1];
 			}
 		}
+		
+		// for (int j = 0; j < m; ++j) {
+		// 	for (int i = 0; i < ldn; ++i) {
+		// 		debug << data [i * m + j] << " ";
+		// 	}
+		// 	DEBUG ("DATAOUT " << debug.str ());
+		// 	debug.str ("");
+		// }
 		
 		TRACE ("Execution complete.");
 	}

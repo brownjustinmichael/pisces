@@ -50,7 +50,7 @@ namespace pisces
 		// Set up openmp to run multiple plans simultaneously
 		omp_set_nested (true);
 		int threads = params.get <int> ("parallel.maxthreads");
-
+		std::stringstream debug;
 		// Iterate through the total number of timesteps
 		while (n_steps < max_steps && check_every != 0) {
 			data.reset ();
@@ -63,6 +63,14 @@ namespace pisces
 			TIME (
 			data.check_streams (transformed_horizontal | transformed_vertical);
 			, output_time, output_duration)
+				
+			// for (int j = 0; j < 16; ++j) {
+			// 	for (int i = 0; i < 32; ++i) {
+			// 		debug << data (x_velocity) [i * 16 + j] << " ";
+			// 	}
+			// 	DEBUG ("DATA U LOOP " << debug.str ());
+			// 	debug.str ("");
+			// }
 	
 			// Factorize the matrices
 			TIME (
@@ -131,10 +139,23 @@ namespace pisces
 			}
 			, execution_time, execution_duration);
 
+			// for (int j = 0; j < 16; ++j) {
+			// 	for (int i = 0; i < 32; ++i) {
+			// 		debug << data (x_velocity) [i * 16 + j] << " ";
+			// 	}
+			// 	DEBUG ("DATA U LOOP BSOLVE " << debug.str ());
+			// 	debug.str ("");
+			// }
 			TIME (
 			solve ();
 			, solve_time, solve_duration);
-
+			// for (int j = 0; j < 16; ++j) {
+			// 	for (int i = 0; i < 32; ++i) {
+			// 		debug << data (x_velocity) [i * 16 + j] << " ";
+			// 	}
+			// 	DEBUG ("DATA U LOOP ASOLVE " << debug.str ());
+			// 	debug.str ("");
+			// }
 
 			// Check whether the timestep has changed. If it has, mark all solvers to be refactorized.
 

@@ -148,13 +148,32 @@ int main (int argc, char *argv[])
 				
 				DEBUG (io::virtual_files ["main/virtual_file"].index <double> ("T", 16, 16));
 				DEBUG (data.duration);
+				DEBUG (io::virtual_files ["main/virtual_file"].index <double> ("t"));
 
 				io::input *virtual_input (new io::formatted_input <io::formats::two_d::virtual_format> (io::data_grid::two_d (n, m), "main/virtual_file"));
 				data.setup (&*virtual_input);
+				DEBUG (data.duration);
+				
+				std::stringstream debug;
+				for (int i = 0; i < n; ++i) {
+					for (int j = 0; j < m; ++j) {
+						debug << *(data (temp, i, j)) << " ";
+					}
+					DEBUG ("OUT " << debug.str ());
+					debug.str ("");
+				}
 				
 				DEBUG ("DONE THERE");
 				
 				element.reset (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, data, &process_messenger, 0x00));
+				
+				for (int j = 0; j < m; ++j) {
+					for (int i = 0; i < n; ++i) {
+						debug << data (x_velocity) [i * m + j] << " ";
+					}
+					DEBUG ("DATA U OUT " << debug.str ());
+					debug.str ("");
+				}
 
 				/*
 					TODO It would be nice to combine the above construction of element with this one

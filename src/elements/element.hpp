@@ -124,7 +124,6 @@ namespace pisces
 			axes.resize (i_dimensions);
 			messenger_ptr = i_messenger_ptr;
 			timestep = 0.0;
-			duration = 0.0;
 			transform_threads = params.get <int> ("parallel.transform.threads");
 		}
 		
@@ -313,7 +312,7 @@ namespace pisces
 		 * 
 		 * \return The datatype recommended timestep for the next timestep
 		 ************************************************************************/
-		virtual datatype calculate_min_timestep (io::formats::virtual_file *virtual_file = NULL) = 0;
+		virtual datatype calculate_min_timestep (io::formats::virtual_file *virtual_file = NULL, bool limiters = true) = 0;
 		
 		/*!**********************************************************************
 		 * \brief Caculate the zoning that minimizes the timestep according to size constraints
@@ -364,6 +363,8 @@ namespace pisces
 		    gsl_siman_solve(r, rezone_data, element <datatype>::rezone_calculate_ts, element <datatype>::rezone_generate_step, element <datatype>::rezone_step_size, NULL, NULL, NULL, NULL, sizeof(rezone_union <datatype>) * (messenger_ptr->get_np () + 5), params);
 
 		    gsl_rng_free (r);
+			
+			DEBUG (rezone_calculate_ts (rezone_data) << " " << timestep);
 			
 			if (rezone_calculate_ts (rezone_data) < -timestep) {
 				for (int i = 0; i < messenger_ptr->get_np () + 1; ++i) {
@@ -443,7 +444,7 @@ namespace pisces
 			for (int i = 0; i < ((rezone_union <datatype> *) i_rezone_data) [1].np + 1; ++i) {
 				positions [i] = ((rezone_union <datatype> *) i_rezone_data) [i + 4].position;
 			}
-			double timestep = element_ptr->calculate_min_timestep (element_ptr->make_rezoned_virtual_file (positions, &*(element_ptr->rezone_virtual_file), profile_only));
+			double timestep = element_ptr->calculate_min_timestep (element_ptr->make_rezoned_virtual_file (positions, &*(element_ptr->rezone_virtual_file), profile_only), false);
 			messenger_ptr->min (&timestep);
 			return -timestep;
 		}
