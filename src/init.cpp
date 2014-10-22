@@ -29,8 +29,6 @@ int main (int argc, char *argv[])
 		id = process_messenger.get_id ();
 		n_elements = process_messenger.get_np ();
 		
-		std::cout << &argc << " " << &argv << " " << id << " " << "init_%d.log\n";
-		
 		logger::log_config::configure (&argc, &argv, id, "init_%d.log");
 
 		std::string config_filename;
@@ -78,7 +76,7 @@ int main (int argc, char *argv[])
 		double height = std::max (scale * std::exp (- (-width / 2.0 - mean) * (-width / 2.0 - mean) / 2.0 / sigma / sigma), scale * std::exp (- (width / 2.0 - mean) * (width / 2.0 - mean) / 2.0 / sigma / sigma));
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
-				temp [i * m + j] = -scale * (std::exp (- (horizontal_grid [i] - mean) * (horizontal_grid [i] - mean) / 2.0 / sigma / sigma) - height) * (std::exp (- (vertical_grid [j] - mean) * (vertical_grid [j] - mean) / 2.0 / sigma / sigma) - height) * sin (vertical_grid [j] / 3.14159 * 2 / width);
+				temp [i * m + j] = -scale * (std::exp (- (horizontal_grid [i]) * (horizontal_grid [i]) / 2.0 / sigma / sigma) - height) * (std::exp (- (vertical_grid [j] - mean) * (vertical_grid [j] - mean) / 2.0 / sigma / sigma) - height) * sin (vertical_grid [j] / 3.14159 * 2 / width);
 				// temp [i * m + j] = (double) (rand () % 1000 - 500) / 100000.0 * (-vertical_grid [j] * vertical_grid [j] + config.get <double> ("grid.z.width") * config.get <double> ("grid.z.width") / 4.0) / config.get <double> ("grid.z.width") / config.get <double> ("grid.z.width");
 				// temp [i * m + j] = 0.01 * std::cos (std::acos (-1.0) * vertical_grid [j]) * std::sin (8.0 * std::acos (-1.0) * horizontal_grid [i] / 3.0);
 			}
