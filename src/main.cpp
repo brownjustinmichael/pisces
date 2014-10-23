@@ -6,14 +6,6 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include "utils/messenger.hpp"
-#include "bases/plan.hpp"
-// #include "one_d/element_one_d.hpp"
-#include "two_d/boussinesq_two_d.hpp"
-#include "config.hpp"
-#include "two_d/transform_two_d.hpp"
-#include "utils/profile.hpp"
-#include "utils/rezone.hpp"
 #include <memory>
 #include <omp.h>
 #include <ctime>
@@ -21,6 +13,17 @@
 #ifdef VTRACE
 #include "vt_user.h"
 #endif
+
+#include "logger/logger.hpp"
+#include "mpi/messenger.hpp"
+#include "io/parameters.hpp"
+#include "io/input.hpp"
+#include "io/output.hpp"
+#include "io/formats/ascii.hpp"
+#include "io/formats/netcdf.hpp"
+#include "plans/plan.hpp"
+#include "elements/boussinesq.hpp"
+#include "elements/rezone.hpp"
 
 /*!*******************************************************************
  * \mainpage
@@ -87,17 +90,17 @@ int main (int argc, char *argv[])
 	int id = 0, n_elements = 1;
 
 	// Initialize messenger
-	utils::messenger process_messenger (&argc, &argv);
+	mpi::messenger process_messenger (&argc, &argv);
 
 	try {
 		id = process_messenger.get_id ();
 		n_elements = process_messenger.get_np ();
 
-		log_config::configure (&argc, &argv, id, "process_%d.log");
+		logger::log_config::configure (&argc, &argv, id, "process_%d.log");
 		std::string config_filename;
 
 		if (argc <= 1) {
-			config_filename = "../input/config.yaml";
+			config_filename = "config.yaml";
 		} else {
 			config_filename = argv [1];
 		}
@@ -121,62 +124,14 @@ int main (int argc, char *argv[])
 
 		int n = config.get <int> ("grid.x.points");
 
-		bases::axis horizontal_axis (n, -config.get <double> ("grid.x.width") / 2.0, config.get <double> ("grid.x.width") / 2.0);
-		bases::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
+		plans::axis horizontal_axis (n, -config.get <double> ("grid.x.width") / 2.0, config.get <double> ("grid.x.width") / 2.0);
+		plans::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
 
-		// one_d::cosine::advection_diffusion_element <double> element (&vertical_axis, name, config, &process_messenger, 0x00);
-		std::shared_ptr <bases::element <double>> element (new two_d::fourier::chebyshev::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, &process_messenger, 0x00));
+		data::thermo_compositional_data <double> data (&horizontal_axis, &vertical_axis, id, n_elements, config);
+		
+		std::shared_ptr <pisces::element <double>> element (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, data, &process_messenger, 0x00));
 
 		TRACE ("Element constructed.");
-
-		if (config ["input.file"].IsDefined ()) {
-			std::string file_format = "../input/" + config.get <std::string> ("input.file");
-			char buffer [file_format.size () * 2];
-			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-			io::formatted_input <io::formats::two_d::netcdf> input_stream (buffer, n, m, 1, 0, config.get <bool> ("input.full") ? n_elements * m : 0, 0, 0, config.get <bool> ("input.full") ? id * m : 0);
-
-			element->setup (&input_stream);
-		}
-
-		// Set up output
-		std::shared_ptr <io::output> normal_stream;
-		if (config ["output.file"].IsDefined ()) {
-			std::string file_format = "../output/" + config.get <std::string> ("output.file");
-			char buffer [file_format.size () * 2];
-			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-
-			normal_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (buffer, config.get <int> ("output.every"), n, m, 1, 0, config.get <bool> ("output.full") ? n_elements * m : 0, 0, 0, config.get <bool> ("output.full") ? id * m : 0));
-			element->setup_output (normal_stream, normal_output);
-
-		}
-
-		std::shared_ptr <io::output> transform_stream;
-		if (config ["output.transform_file"].IsDefined ()) {
-			std::string file_format = "../output/" + config.get <std::string> ("output.transform_file");
-			char buffer [file_format.size () * 2];
-			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-
-			transform_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (buffer, config.get <int> ("output.every"), n, m, 1, 0, config.get <bool> ("output.full") ? n_elements * m : 0, 0, 0, config.get <bool> ("output.full") ? id * m : 0));
-			element->setup_output (transform_stream, transform_output);
-		}
-
-		std::shared_ptr <io::output> stat_stream;
-		if (config ["output.stat.file"].IsDefined ()) {
-			std::string file_format = "../output/" + config.get <std::string> ("output.stat.file");
-			char buffer [file_format.size () * 2];
-			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-
-			stat_stream.reset (new io::appender_output <io::formats::ascii> (buffer, config.get <int> ("output.stat.every"), n, m));
-			element->setup_stat (stat_stream);
-		}
-
-		/*
-			TODO Setting up the streams should be more convenient
-		*/
-
-		/*
-			TODO Because the output files are not within the element anymore, they become useless once the element is destroyed. Ponder this.
-		*/
 
 		clock_t cbegin, cend;
 		std::chrono::time_point <std::chrono::system_clock> begin, end;
@@ -187,23 +142,42 @@ int main (int argc, char *argv[])
 		int n_steps = 0;
 		while (n_steps < config.get <int> ("time.steps")) {
 			if (config.get <int> ("grid.rezone.check_every") > 0) {
-				io::virtual_dumps ["main/dump"] = *(element->rezone_minimize_ts (&positions [0], config.get <double> ("grid.rezone.min_size"), config.get <double> ("grid.rezone.max_size"), config.get <int> ("grid.rezone.n_tries"), config.get <int> ("grid.rezone.iters_fixed_t"), config.get <double> ("grid.rezone.step_size"), config.get <double> ("grid.rezone.k"), config.get <double> ("grid.rezone.t_initial"), config.get <double> ("grid.rezone.mu_t"), config.get <double> ("grid.rezone.t_min")));
+				io::virtual_files ["main/virtual_file"] = *(element->rezone_minimize_ts (&positions [0], config.get <double> ("grid.rezone.min_size"), config.get <double> ("grid.rezone.max_size"), config.get <int> ("grid.rezone.n_tries"), config.get <int> ("grid.rezone.iters_fixed_t"), config.get <double> ("grid.rezone.step_size"), config.get <double> ("grid.rezone.k"), config.get <double> ("grid.rezone.t_initial"), config.get <double> ("grid.rezone.mu_t"), config.get <double> ("grid.rezone.t_min")));
 
-				bases::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
-				element.reset (new two_d::fourier::chebyshev::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, &process_messenger, 0x00));
+				plans::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
+				
+				DEBUG (io::virtual_files ["main/virtual_file"].index <double> ("T", 16, 16));
+				DEBUG (data.duration);
+				DEBUG (io::virtual_files ["main/virtual_file"].index <double> ("t"));
+
+				io::input *virtual_input (new io::formatted_input <io::formats::two_d::virtual_format> (io::data_grid::two_d (n, m), "main/virtual_file"));
+				data.setup (&*virtual_input);
+				DEBUG (data.duration);
+				
+				std::stringstream debug;
+				for (int i = 0; i < n; ++i) {
+					for (int j = 0; j < m; ++j) {
+						debug << *(data (temp, i, j)) << " ";
+					}
+					DEBUG ("OUT " << debug.str ());
+					debug.str ("");
+				}
+				
+				DEBUG ("DONE THERE");
+				
+				element.reset (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, data, &process_messenger, 0x00));
+				
+				for (int j = 0; j < m; ++j) {
+					for (int i = 0; i < n; ++i) {
+						debug << data (x_velocity) [i * m + j] << " ";
+					}
+					DEBUG ("DATA U OUT " << debug.str ());
+					debug.str ("");
+				}
 
 				/*
 					TODO It would be nice to combine the above construction of element with this one
 				*/
-
-				io::input *virtual_input (new io::formatted_input <io::formats::two_d::virtual_format> ("main/dump", n, m));
-				element->setup (&*virtual_input);
-				if (normal_stream) {
-					element->setup_output (normal_stream, normal_output);
-				}
-				if (transform_stream) {
-					element->setup_output (transform_stream, transform_output);
-				}
 			}
 			element->run (n_steps, config.get <int> ("time.steps"), config.get <int> ("grid.rezone.check_every"));
 		}

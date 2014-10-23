@@ -5,9 +5,15 @@ Import ("include_opencl")
 Import ("include_mp")
 Import ("include_mpi")
 Import ("include_vt")
-Import ("logger")
+Import ("dimensions")
+Import ("vertical_grid")
 
 def directory (path, dirname):
+    """
+    Get the directory name relative to the given path
+    
+    For the build stage to produce an identical directory structure as the code
+    """
     if dirname [len (path) + 1:] == "":
         return ""
     else:
@@ -45,56 +51,80 @@ if include_opencl:
 env.Append (CPPFLAGS = ["-Wall", "-g", "-std=c++0x"])
 env.Append (LINKFLAGS = ["-Wall", "-g", "-std=c++0x"])
 
+# Add the source directory to the include path for better package importing
+env.Append (CPPPATH = os.getcwd ())
+
+# If using MPI, change the compiler and add a compiler flag to let the code know to include MPI functionality
+if include_mpi:
+    env ["CXX"] = "mpicxx"
+
+    env.Append (CPPFLAGS = ["-D_MPI", "-fexceptions"])
+    if include_cuda:
+        env.Append (NVCCFLAGS = ["-D_MPI"])
+
+# If using vampirtrace, change the compiler, and add a compiler flag to let the code know to include vampirtrace and MPI functionality
+if include_vt:
+    env ["CXX"] = "vtcxx"
+    env.Append (CPPFLAGS = ["-DVTRACE"])
+    env.Append (VTFLAGS = ["-vt:cxx", "mpicxx"])
+    env.Append (CPPFLAGS = env ["VTFLAGS"])
+    conf = Configure (env)
+    conf.CheckLib ("mpi")
+    conf.CheckLib ("mpi_cxx")
+    env = conf.Finish ()
+
+# If using openmp, add compiler and link flags to let the code know to include openmp functionality
+if include_mp:
+    env.Append (CPPFLAGS = ["-fopenmp"])
+    env.Append (CPPFLAGS = ["-D_MP"])
+    env.Append (LINKFLAGS = ["-fopenmp"])
+
+# If using CUDA, load the cuda scons tool and add some compiler flags
+if include_cuda:
+    env.Tool ('cuda')
+    env.Append (NVCCFLAGS = ["-g", "-arch=sm_20"])
+    env.Append (CPPFLAGS = ["-D_CUDA"])
+    
+if vertical_grid.lower () == 'cosine':
+    env.Append (CPPFLAGS = ["-D_VCOS"])
+elif vertical_grid.lower () != 'chebyshev':
+    raise ValueError ("PISCES can currently only handle a vertical grid type of either 'cosine' or 'chebyshev'")
+    
+if dimensions != 2:
+    raise ValueError ("PISCES can currently only handle 2 dimensions")
+env.Append (CPPFLAGS = ["-DND=%d" % dimensions])
+
+# Add standard compiler flags and c++0x functionality
+env.Append (CPPFLAGS = ["-Wall", "-g", "-std=c++0x"])
+env.Append (LINKFLAGS = ["-Wall", "-g", "-std=c++0x"])
+
 objects = []
 
-if logger.lower () == "log4cxx":
-    conf = Configure (env)
-    if conf.CheckLib ("log4cxx"):
-        env.Append (CPPFLAGS = ["-D_LOG4CXX"])
-        env.Append (NVCCFLAGS = ["-D_LOG4CXX"])
-    else:
-        logger == "none"
-    env = conf.Finish ()
-elif logger.lower () == "log4cplus":
-    conf = Configure (env)
-    if conf.CheckLib ("log4cplus"):
-        env.Append (CPPFLAGS = ["-D_LOG4CPLUS"])
-        env.Append (NVCCFLAGS = ["-D_LOG4CPLUS"])
-    else:
-        logger == "none"
-    env = conf.Finish ()
-
+# Get the path of this file
 path = os.path.dirname (inspect.getfile (inspect.currentframe ()))
 
+# Walk through the directory structure, looking for SConscript files and .cpp files
 for dirname, dirnames, filenames in os.walk (path):
     if dirname != path:
         for filename in filenames:
             if filename == "SConscript":
+                # Load any SConscript files found
                 env.SConscript(dirname + '/' + filename, variant_dir = os.path.join (".", directory (path, dirname)), duplicate = 0, exports = {'env': env, "objects": objects, "include_cuda" : include_cuda, "include_mp": include_mp})
+                
             if filename.split ('.') [-1] == 'cpp':
+                # Add any .cpp files found to the list of objects to compile
                 objects.append (env.Object (os.path.relpath (dirname, path) + '/' + filename))
 
-if logger.lower () == "log4cxx":
-    objects += env.Object ("config_log4cxx.cpp")
-elif logger.lower () == "log4cplus":
-    objects += env.Object ("config_log4cplus.cpp")
-else:
-    objects += env.Object ("config.cpp")
-    
+# Occasionally, the code won't work without the gfortran library, so check for it
 conf = Configure (env)
 conf.CheckLib ("gfortran")
 env = conf.Finish ()
 
-if include_vt:
-    env.Append (CPPFLAGS = env ["VTFLAGS"])
-
+# Compile the main code
 env.Default (env.Program(target = "../run/pisces", source = (["main.cpp"] + objects)))
 
+# Compile the code initializer
 env.Default (env.Program(target = "../run/pisces_init", source = (["init.cpp"] + objects)))
-# env.Default (env.Program(target = "../run/pisces_init", source = (["init.cpp"])))
 
-env.Default (env.Program(target = "../run/block_test", source = (["block_test.cpp"] + objects)))
-env.Default (env.Program(target = "../run/tridiagonal_block_test", source = (["tridiagonal_block_test.cpp"] + objects)))
-env.Default (env.Program(target = "../run/banded_block_test", source = (["banded_block_test.cpp"] + objects)))
-
+# Add the tests, which can be run with scons check
 env.SConscript('../test/SConscript', variant_dir = "./test", duplicate = 0, exports = {'env': env, "objects": objects, "include_cuda": include_cuda, "include_mp": include_mp})

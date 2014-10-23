@@ -1,0 +1,18 @@
+Import ("env")
+Import ("include_cuda")
+
+conf = Configure (env)
+
+if include_cuda:
+    conf.CheckLib ("cublas")
+
+conf.CheckLib ("atlas")
+
+if not conf.CheckLib ("ptlapack"):
+    conf.CheckLib ("lapack")
+if not conf.CheckLib ("ptf77blas"):
+    conf.CheckLib ("blas")
+if not conf.CheckLib ("ptcblas"):
+    conf.CheckLib ("cblas")
+
+env = conf.Finish ()

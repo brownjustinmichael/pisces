@@ -18,4 +18,7 @@ for dirname, dirnames, filenames in os.walk (path):
             if filename == "SConscript":
                 env.SConscript(dirname + '/' + filename, variant_dir = os.path.join (".", directory (path, dirname)), duplicate = 0, exports = {'env': env, "objects": objects, "include_cuda" : include_cuda, "include_mp": include_mp})
             if filename.split ('.') [-1] == 'hpp':
-                env.CxxTest('tests_' + filename, source = [os.path.relpath (dirname, path) + '/' + filename] + objects) 
+                if filename [:3] == "mpi":
+                    env.CxxTest('tests_' + filename, source = [os.path.relpath (dirname, path) + '/' + filename] + objects, ranks = [3]) 
+                else:
+                    env.CxxTest('tests_' + filename, source = [os.path.relpath (dirname, path) + '/' + filename] + objects)

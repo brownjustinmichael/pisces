@@ -1,0 +1,9 @@
+Import ("env")
+
+conf = Configure (env)
+
+if not conf.CheckLib ("gsl"):
+    conf.CheckLib ("gslcblas")
+    conf.CheckLib ("gsl")
+    
+env = conf.Finish ()

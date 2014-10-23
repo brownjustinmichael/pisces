@@ -1,7 +1,0 @@
-Import ("env")
-Import ("objects")
-
-conf = Configure (env)
-for lib in ["fftw3", "fftw3f"]:
-    conf.CheckLib (lib)
-env = conf.Finish ()

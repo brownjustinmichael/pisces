@@ -6,34 +6,35 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include "utils/messenger.hpp"
-#include "config.hpp"
-#include "two_d/plan_two_d.hpp"
-#include "bases/grid.hpp"
-#include "utils/io.hpp"
-#include "utils/formats.hpp"
 #include <sstream>
 #include <iomanip>
 
-using namespace two_d::fourier::chebyshev;
+#include "logger/logger.hpp"
+#include "io/output.hpp"
+#include "io/parameters.hpp"
+#include "io/formats/netcdf.hpp"
+#include "mpi/messenger.hpp"
+#include "plans/grid.hpp"
+
+using namespace plans;
 
 int main (int argc, char *argv[])
 {
 	try {
 		int id = 0, n_elements = 1;
-	
+
 		// Initialize messenger
-		utils::messenger process_messenger (&argc, &argv);
-	
+		mpi::messenger process_messenger (&argc, &argv);
+
 		id = process_messenger.get_id ();
 		n_elements = process_messenger.get_np ();
-	
-		log_config::configure (&argc, &argv, id, "init_%d.log");
-	
+		
+		logger::log_config::configure (&argc, &argv, id, "init_%d.log");
+
 		std::string config_filename;
 
 		if (argc <= 1) {
-			config_filename = "../input/config.yaml";
+			config_filename = "config.yaml";
 		} else {
 			config_filename = argv [1];
 		}
@@ -62,8 +63,8 @@ int main (int argc, char *argv[])
 			excess_n = 1;
 		}
 
-		horizontal_grid <double>::type horizontal_grid (new bases::axis (n, position_n0, position_nn));
-		vertical_grid <double>::type vertical_grid (new bases::axis (m, position_m0, position_mm, excess_0, excess_n));
+		horizontal::grid <double> horizontal_grid (new plans::axis (n, position_n0, position_nn));
+		vertical::grid <double> vertical_grid (new plans::axis (m, position_m0, position_mm, excess_0, excess_n));
 
 		std::vector <double> temp (n * m);
 
@@ -73,19 +74,23 @@ int main (int argc, char *argv[])
 		double width = config.get <double> ("grid.z.width");
 		srand (id);
 		double height = std::max (scale * std::exp (- (-width / 2.0 - mean) * (-width / 2.0 - mean) / 2.0 / sigma / sigma), scale * std::exp (- (width / 2.0 - mean) * (width / 2.0 - mean) / 2.0 / sigma / sigma));
+
+		DEBUG (height);
+		height = 0.;
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
-				temp [i * m + j] = -scale * (std::exp (- (horizontal_grid [i] - mean) * (horizontal_grid [i] - mean) / 2.0 / sigma / sigma) - height) * (std::exp (- (vertical_grid [j] - mean) * (vertical_grid [j] - mean) / 2.0 / sigma / sigma) - height) * sin (vertical_grid [j] / 3.14159 * 2 / width);
+				DEBUG ((horizontal_grid [i]) * (horizontal_grid [i]) / 2.0 / sigma / sigma << " " << std::exp (- (horizontal_grid [i]) * (horizontal_grid [i]) / 2.0 / sigma / sigma) - height << " " << std::exp (- (vertical_grid [j] - mean) * (vertical_grid [j] - mean) / 2.0 / sigma / sigma) - height);
+				temp [i * m + j] = scale * (std::exp (- (horizontal_grid [i]) * (horizontal_grid [i]) / 2.0 / sigma / sigma) - height) * (std::exp (- (vertical_grid [j] - mean) * (vertical_grid [j] - mean) / 2.0 / sigma / sigma) - height);// * sin (vertical_grid [j] / 3.14159 * 2 / width);
 				// temp [i * m + j] = (double) (rand () % 1000 - 500) / 100000.0 * (-vertical_grid [j] * vertical_grid [j] + config.get <double> ("grid.z.width") * config.get <double> ("grid.z.width") / 4.0) / config.get <double> ("grid.z.width") / config.get <double> ("grid.z.width");
 				// temp [i * m + j] = 0.01 * std::cos (std::acos (-1.0) * vertical_grid [j]) * std::sin (8.0 * std::acos (-1.0) * horizontal_grid [i] / 3.0);
 			}
 		}
 
-		std::string file_format = "../input/" + config.get <std::string> ("input.file");
+		std::string file_format = "input/" + config.get <std::string> ("input.file");
 		char buffer [file_format.size () * 2];
 		snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
 
-		io::formatted_output <io::formats::two_d::netcdf> output_stream (buffer, io::replace_file, n, m, 1, 0, config.get <bool> ("input.full") ? n_elements * m : 0, 0, 0, config.get <bool> ("input.full") ? id * m : 0);
+		io::formatted_output <io::formats::two_d::netcdf> output_stream (io::data_grid::two_d (n, m, 0, config.get <bool> ("input.full") ? n_elements * m : 0, 0, config.get <bool> ("input.full") ? id * m : 0), buffer, io::replace_file);
 
 		double duration = 0.0;
 		int mode = mode_flag;
@@ -93,8 +98,9 @@ int main (int argc, char *argv[])
 		output_stream.append <double> ("S", &temp [0]);
 		// output_stream.append <double> ("w", &temp [0]);
 		// output_stream.append <double> ("u", &temp [0]);
-		output_stream.append_scalar <double> ("t", &duration);
-		output_stream.append_scalar <int> ("mode", &mode);
+
+		output_stream.append <double> ("t", &duration, io::scalar);
+		output_stream.append <int> ("mode", &mode, io::scalar);
 
 		output_stream.to_file ();
 	} catch (std::exception& except) {

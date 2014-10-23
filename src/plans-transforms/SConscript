@@ -1,0 +1,8 @@
+Import ("env")
+
+conf = Configure (env)
+
+conf.CheckLib ("fftw3")
+conf.CheckLib ("fftw3f")
+    
+env = conf.Finish ()
