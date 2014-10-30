@@ -208,6 +208,11 @@ namespace plans
 			TRACE ("Solving...");
 			if (transform) transform->execute ();
 			
+			// De-alias the RHS
+			if (real_rhs_ptr) {
+				linalg::matrix_scale (m, n / 3, 0.0, real_rhs_ptr + m * (n - n / 3));
+			}
+			
 			if (spectral_rhs_ptr && real_rhs_ptr) {
 				linalg::matrix_add_scaled (m, ldn, 1.0, real_rhs_ptr, spectral_rhs_ptr);
 			}

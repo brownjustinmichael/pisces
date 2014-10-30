@@ -19,6 +19,7 @@
 #include <gsl/gsl_siman.h>
 
 #include "logger/logger.hpp"
+#include "versions/version.hpp"
 #include "io/input.hpp"
 #include "io/output.hpp"
 #include "io/parameters.hpp"
@@ -81,6 +82,7 @@ namespace pisces
 		
 	public:
 		std::vector <std::shared_ptr <plans::grid <datatype>>> grids; //!< A vector of shared pointers to the collocation grids
+		static const versions::version version;
 		/*!**********************************************************************
 		 * \brief Element iterator for iterating through the contained solvers
 		 ************************************************************************/

@@ -33,6 +33,9 @@
 namespace pisces
 {
 	template <class datatype>
+	const versions::version element <datatype>::version ("0.5.0.0");
+	
+	template <class datatype>
 	void element <datatype>::run (int &n_steps, int max_steps, int check_every) {
 		TRACE ("Running...");
 		datatype t_timestep;
@@ -63,15 +66,7 @@ namespace pisces
 			TIME (
 			data.check_streams (transformed_horizontal | transformed_vertical);
 			, output_time, output_duration)
-				
-			// for (int j = 0; j < 16; ++j) {
-			// 	for (int i = 0; i < 32; ++i) {
-			// 		debug << data (x_velocity) [i * 16 + j] << " ";
-			// 	}
-			// 	DEBUG ("DATA U LOOP " << debug.str ());
-			// 	debug.str ("");
-			// }
-	
+			
 			// Factorize the matrices
 			TIME (
 			factorize ();
@@ -139,23 +134,9 @@ namespace pisces
 			}
 			, execution_time, execution_duration);
 
-			// for (int j = 0; j < 16; ++j) {
-			// 	for (int i = 0; i < 32; ++i) {
-			// 		debug << data (x_velocity) [i * 16 + j] << " ";
-			// 	}
-			// 	DEBUG ("DATA U LOOP BSOLVE " << debug.str ());
-			// 	debug.str ("");
-			// }
 			TIME (
 			solve ();
 			, solve_time, solve_duration);
-			// for (int j = 0; j < 16; ++j) {
-			// 	for (int i = 0; i < 32; ++i) {
-			// 		debug << data (x_velocity) [i * 16 + j] << " ";
-			// 	}
-			// 	DEBUG ("DATA U LOOP ASOLVE " << debug.str ());
-			// 	debug.str ("");
-			// }
 
 			// Check whether the timestep has changed. If it has, mark all solvers to be refactorized.
 
