@@ -69,7 +69,8 @@ namespace data
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 
 			transform_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (o_grid, buffer, i_params.get <int> ("output.every")));
-			this->setup_output (transform_stream, transformed_horizontal | transformed_vertical);
+			this->setup_output (transform_stream, transformed_horizontal);
+			transform_stream->template append <double> ("div", new io::functors::transform_div_functor <double> ((*this) (x_position), (*this) (z_position), (*this) (x_velocity), (*this) (z_velocity), n, m));
 		}
 
 		std::shared_ptr <io::output> stat_stream;

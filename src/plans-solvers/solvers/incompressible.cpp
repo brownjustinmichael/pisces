@@ -16,6 +16,7 @@
 #include "linalg-block/banded.hpp"
 
 #include "incompressible.hpp"
+#include "plans-transforms/transform.hpp"
 
 /*
 	TODO boundary class:
@@ -158,10 +159,21 @@ namespace plans
 		std::stringstream debug;
 		int info;
 		TRACE ("Solving...");
+		bool retransform = false;
 		
 		linalg::scale ((m + 2) * ldn, 0.0, &data_temp [0]);
+		
+		std::shared_ptr <plans::plan <datatype> > transform_x = std::shared_ptr <plans::plan <datatype> > (new plans::vertical_transform <datatype> (n, m, data_x, NULL, 0x00, element_flags, component_flags_x));
+		std::shared_ptr <plans::plan <datatype> > transform_z = std::shared_ptr <plans::plan <datatype> > (new plans::vertical_transform <datatype> (n, m, data_z, NULL, 0x00, element_flags, component_flags_z));
+		
+		if (*component_flags_x & transformed_vertical) {
+			transform_x->execute ();
+			transform_z->execute ();
+			retransform = true;
+		}
 
 		if (!(*component_flags_x & transformed_vertical)) {
+			DEBUG ("Here");
 			datatype scalar = acos (-1.0) * 2.0 / (pos_n [n - 1] - pos_n [0]);
 			datatype *data_ptr = &data_temp [1];
 
@@ -206,47 +218,47 @@ namespace plans
 
 			linalg::scale (2 * (m + 2), 0.0, &data_temp [0]);
 
-			// for (int i = 2; i < ldn; ++i) {
-			// 	for (int j = 0; j < m; ++j) {
-			// 		data [i * m + j] = (data_temp [i * (m + 2) + j] + data_temp [i * (m + 2) + j + 1]) / 2.0;
-			// 	}
-			// }
 			for (int i = 2; i < ldn; ++i) {
 				for (int j = 0; j < m + 1 - (nbot == 0 ? 0 : excess_n + 1) - excess_0; ++j) {
 					data [i * m + j + excess_0] = (data_temp [i * (m + 2) + j + excess_0] + data_temp [i * (m + 2) + j + 1 + excess_0]) / 2.0;
 				}
 			}
 
-			// std::vector <datatype> out_z (ldn);
-			//
-			// for (int i = 2; i < ldn; ++i) {
-			// 	out_z [i] = -data_z [i * m + m - 2] - (data_ptr [i * (m + 2) + m] - data_ptr [i * (m + 2) + m - 1]) / (new_pos [m] - new_pos [m - 1]);
-			// 	for (int j = 1; j < m - 1; ++j) {
-			// 		data_z [i * m + j] -= (data_ptr [i * (m + 2) + j] - data_ptr [i * (m + 2) + j - 1]) / (new_pos [j] - new_pos [j - 1]);
-			// 	}
-			// }
 			for (int i = 2; i < ldn; ++i) {
 				for (int j = 1; j < m - 1 + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
 					ndata_z [i * m + j] -= (data_ptr [i * (m + 2) + j] - data_ptr [i * (m + 2) + j - 1]) / (new_pos [j] - new_pos [j - 1]);
 				}
 			}
 
-			// for (int i = 2; i < ldn; i += 2) {
-			// 	for (int j = 0; j < m; ++j) {
-			// 		data_x [i * m + j] += scalar * (i / 2) * (data_ptr [(i + 1) * (m + 2) + j] + data_ptr [(i + 1) * (m + 2) + j - 1]) / 2.0;
-			// 		data_x [(i + 1) * m + j] -= scalar * (i / 2) * (data_ptr [i * (m + 2) + j] + data_ptr [i * (m + 2) + j - 1]) / 2.0;
-			// 	}
-			// 	// data_x [i * m + m - 1] = (data_z [(i + 1) * m + m - 1] - data_z [(i + 1) * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / (i / 2) / scalar;
-			// 	// data_x [i * m + m - 1] = 0.0;
-			// 	// data_x [(i + 1) * m + m - 1] = -(data_z [i * m + m - 1] - data_z [i * m + m - 2]) / (pos_m [m - 1] - pos_m [m - 2]) / (i / 2) / scalar;
-			// 	// data_x [(i + 1) * m + m - 1] = 0.0;
-			// }
 			for (int i = 2; i < ldn; i += 2) {
 				for (int j = 0; j < m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
 					ndata_x [i * m + j] += scalar * (i / 2) * (data_ptr [(i + 1) * (m + 2) + j] + data_ptr [(i + 1) * (m + 2) + j - 1]) / 2.0;
 					ndata_x [(i + 1) * m + j] -= scalar * (i / 2) * (data_ptr [i * (m + 2) + j] + data_ptr [i * (m + 2) + j - 1]) / 2.0;
 				}
 			}
+			
+			for (int i = 0; i < n; ++i) {
+				for (int j = excess_0 - 1; j >= 0; --j) {
+					data_x [i * m + j] = data_x [i * m + j + 1] + (data_x [i * m + j + 2] - data_x [i * m + j + 1]) / (pos_m [j + 2] - pos_m [j + 1]) * (pos_m [j] - pos_m [j + 1]);
+					data_z [i * m + j] = data_z [i * m + j + 1] + (data_z [i * m + j + 2] - data_z [i * m + j + 1]) / (pos_m [j + 2] - pos_m [j + 1]) * (pos_m [j] - pos_m [j + 1]);
+				}
+				
+				for (int j = m - excess_n - 1; j < m; ++j) {
+					data_x [i * m + j] = data_x [i * m + j - 1] + (data_x [i * m + j - 2] - data_x [i * m + j - 1]) / (pos_m [j - 2] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]);
+					data_z [i * m + j] = data_z [i * m + j - 1] + (data_z [i * m + j - 2] - data_z [i * m + j + 1]) / (pos_m [j + 2] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]);
+				}
+			}
+			
+			// for (int i = 0; i < n; ++i) {
+			// 	data [i * m] = 0.0;
+			// 	data [i * m + m - 1] = 0.0;
+			// }
+			// for (int j = 1; j < m - 1; ++j) {
+			// 	for (int i = 0; i < n; i += 2) {
+			// 		data [i * m + j] = -scalar * (i / 2) * data_x [(i + 1) * m + j] + (data_z [i * m + j + 1] - data_z [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
+			// 		data [(i + 1) * m + j] = scalar * (i / 2) * data_x [i * m + j] + (data_z [(i + 1) * m + j + 1] - data_z [(i + 1) * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
+			// 	}
+			// }
 
 			linalg::scale (2 * m, 0.0, data_z);
 			linalg::scale (2 * m, 0.0, data_x);
@@ -259,6 +271,14 @@ namespace plans
 					}
 				}
 			}
+		} else {
+			FATAL ("SHOULDN'T BE HERE");
+			throw 0;
+		}
+		
+		if (retransform) {
+			transform_x->execute ();
+			transform_z->execute ();
 		}
 
 		TRACE ("Solved");
