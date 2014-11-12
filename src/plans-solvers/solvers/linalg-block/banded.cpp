@@ -47,6 +47,13 @@ namespace linalg
 		linalg::scale (nrhs * ku * n, 0.0, bufferr);
 		
 		for (int i = 0; i < nrhs; ++i) {
+			// for (int j = kl + ntop; j < n + kl + ntop; ++j) {
+			// 	for (int k = 0; k < lda; ++k) {
+			// 		debug << matrix [i * lda * ldaa + j * lda + k] << " ";
+			// 	}
+			// 	DEBUG ("MAT " << debug.str ());
+			// 	debug.str ("");
+			// }
 			linalg::matrix_banded_factorize (n, n, kl, ku, matrix + (i) * lda * ldaa + (kl + ntop) * lda, ipiv + i * n, info, lda);
 		}
 

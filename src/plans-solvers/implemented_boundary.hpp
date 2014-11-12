@@ -20,6 +20,53 @@
 namespace plans
 {
 	template <class datatype>
+	class fixed_flux_boundary : public plans::boundary <datatype>
+	{
+	private:
+		datatype coeff, value;
+		bool top;
+		int ldn, m;
+		datatype *zvel, *deriv_matrix;
+		
+	public:
+		fixed_flux_boundary (plans::grid <datatype> *i_grid_n, plans::grid <datatype> *i_grid_m, datatype i_coeff, datatype i_value, datatype* i_zvel, bool i_top) : coeff (i_coeff), value (i_value * std::sqrt (i_grid_n->get_n ())), top (i_top) {
+			ldn = i_grid_n->get_ld ();
+			m = i_grid_m->get_n ();
+			zvel = i_zvel;
+			deriv_matrix = i_grid_m->get_data (1) + (top ? m - 1 : 0);
+		}
+		
+		virtual ~fixed_flux_boundary () {}
+		
+		virtual void calculate_rhs (datatype *data, datatype *interpolate_original, datatype *interpolate_data, datatype *data_temp, int m, int lda, int flag) {
+			// if (flag & z_solve) {
+				data_temp [0] = value;
+				for (int i = 1; i < ldn; ++i) {
+					data_temp [i * lda] = 0.0;
+				}
+				for (int i = 0; i < ldn; i += 2) {
+					for (int j = 0; j < ldn; j += 2) {
+						if (i + j < ldn) {
+							data_temp [(i + j) * lda] += zvel [i * m] * data [j * m] - zvel [(i + 1) * m] * data [(j + 1) * m];
+							data_temp [(i + j + 1) * lda] += zvel [i * m] * data [(j + 1) * m] + zvel [(i + 1) * m] * data [j * m];
+						}
+					}
+				}
+			// }
+			// if (flag & x_solve) {
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		data_temp [i * lda] = data [i * m];
+			// 	}
+			// }
+		}
+		
+		virtual void calculate_matrix (datatype timestep, datatype *default_matrix, datatype *matrix_in, datatype *interpolate_matrix, datatype *matrix_out, int lda, bool diverging = false) {
+			linalg::scale (m, 0.0, matrix_out, lda);
+			linalg::add_scaled (m, coeff, deriv_matrix, matrix_out, m, lda);
+		}
+	};
+
+	template <class datatype>
 	class fixed_boundary : public plans::boundary <datatype>
 	{
 	private:

@@ -66,22 +66,14 @@ int main (int argc, char *argv[])
 		horizontal::grid <double> horizontal_grid (new plans::axis (n, position_n0, position_nn));
 		vertical::grid <double> vertical_grid (new plans::axis (m, position_m0, position_mm, excess_0, excess_n));
 
-		std::vector <double> temp (n * m);
+		std::vector <double> temps (n * m), tempt (n * m);
 
 		double scale = config.get <double> ("init.scale");
-		double mean = config.get <double> ("init.mean");
-		double sigma = config.get <double> ("init.sigma");
-		double width = config.get <double> ("grid.z.width");
-		srand (id);
-		double height = std::max (scale * std::exp (- (-width / 2.0 - mean) * (-width / 2.0 - mean) / 2.0 / sigma / sigma), scale * std::exp (- (width / 2.0 - mean) * (width / 2.0 - mean) / 2.0 / sigma / sigma));
-
-		DEBUG (height);
-		height = 0.;
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
-				DEBUG ((horizontal_grid [i]) * (horizontal_grid [i]) / 2.0 / sigma / sigma << " " << std::exp (- (horizontal_grid [i]) * (horizontal_grid [i]) / 2.0 / sigma / sigma) - height << " " << std::exp (- (vertical_grid [j] - mean) * (vertical_grid [j] - mean) / 2.0 / sigma / sigma) - height);
-				temp [i * m + j] = scale * (std::exp (- (horizontal_grid [i]) * (horizontal_grid [i]) / 2.0 / sigma / sigma) - height) * (std::exp (- (vertical_grid [j] - mean) * (vertical_grid [j] - mean) / 2.0 / sigma / sigma) - height);// * sin (vertical_grid [j] / 3.14159 * 2 / width);
-				// temp [i * m + j] = (double) (rand () % 1000 - 500) / 100000.0 * (-vertical_grid [j] * vertical_grid [j] + config.get <double> ("grid.z.width") * config.get <double> ("grid.z.width") / 4.0) / config.get <double> ("grid.z.width") / config.get <double> ("grid.z.width");
+				temps [i * m + j] = scale * (vertical_grid [j]);
+				temps [i * m + j] += (double) (rand () % 1000 - 500) / 100000.0 * (-vertical_grid [j] * vertical_grid [j] + config.get <double> ("grid.z.width") * config.get <double> ("grid.z.width") / 4.0) / config.get <double> ("grid.z.width") / config.get <double> ("grid.z.width");
+				tempt [i * m + j] += (double) (rand () % 1000 - 500) / 100000.0 * (-vertical_grid [j] * vertical_grid [j] + config.get <double> ("grid.z.width") * config.get <double> ("grid.z.width") / 4.0) / config.get <double> ("grid.z.width") / config.get <double> ("grid.z.width");
 				// temp [i * m + j] = 0.01 * std::cos (std::acos (-1.0) * vertical_grid [j]) * std::sin (8.0 * std::acos (-1.0) * horizontal_grid [i] / 3.0);
 			}
 		}
@@ -94,10 +86,8 @@ int main (int argc, char *argv[])
 
 		double duration = 0.0;
 		int mode = mode_flag;
-		output_stream.append <double> ("T", &temp [0]);
-		output_stream.append <double> ("S", &temp [0]);
-		// output_stream.append <double> ("w", &temp [0]);
-		// output_stream.append <double> ("u", &temp [0]);
+		output_stream.append <double> ("T", &tempt [0]);
+		output_stream.append <double> ("S", &temps [0]);
 
 		output_stream.append <double> ("t", &duration, io::scalar);
 		output_stream.append <int> ("mode", &mode, io::scalar);
