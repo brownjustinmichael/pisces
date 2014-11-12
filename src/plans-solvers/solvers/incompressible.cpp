@@ -116,7 +116,7 @@ namespace plans
 		int kl = 2;
 		int ku = 1;
 		int lda = 2 * kl + ku + 1;
-		
+
 		for (int j = -3; j < m + 3; ++j) {
 			new_pos [j] = (pos_m [j] + pos_m [j + 1]) / 2.0;
 		}
@@ -128,7 +128,7 @@ namespace plans
 			new_pos [m] = pos_m [m - 1] + (pos_m [m - 1] - new_pos [m - 3]);
 		}
 		new_pos += excess_0;
-		
+
 		for (int i = 0; i < ldn; ++i) {
 			matrix_ptr = &matrix [(i) * (m + 2 + kl + ku) * lda + kl + ku + (kl + ku + excess_0) * lda];
 			for (int j = 0; j < m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
@@ -158,14 +158,14 @@ namespace plans
 				matrix_ptr [(j - 2) * lda + 2] = -1.0;
 				matrix_ptr [(j - 1) * lda + 1] = 1.0;
 				matrix_ptr [j * lda] = 1.0e-10;
-				matrix_ptr [j * lda - 1] = 0.0;
+				matrix_ptr [(j + 1) * lda - 1] = 0.0;
 				// matrix_ptr [(j - 2) * 6 + 3] = 1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (npos_m [j + 1] - npos_m [j - 1]);
 				// matrix_ptr [(j - 1) * 6 + 2] = -1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (npos_m [j + 1] - npos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
 				// matrix_ptr [(j) * 6 + 1] = -1.0 / (new_pos [j + 1] - new_pos [j]) / (npos_m [j + 1] - npos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
 				// matrix_ptr [(j + 1) * 6] = 1.0 / (new_pos [j + 1] - new_pos [j]) / (npos_m [j + 1] - npos_m [j - 1]);
 			}
 		}
-		
+
 		// throw 0;
 		linalg::p_block_banded_factorize (id, np, m + (nbot == 0 ? 1 : -nbot - excess_n - 1) + (id == 0 ? 1: -excess_0 - ntop), kl, ku, &matrix [(id == 0 ? 0 : 1 + excess_0) * lda], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn, lda, m + 2 + kl + ku);
 		// throw 0;
