@@ -128,7 +128,9 @@ namespace pisces
 			boundary_0 = std::shared_ptr <plans::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], 0.0, false));
 			deriv_boundary_0 = std::shared_ptr <plans::boundary <datatype>> (new fixed_deriv_boundary <datatype> (&*grids [0], &*grids [1], 0.0, false));
 			thermal_flux_boundary_0 = std::shared_ptr <plans::boundary <datatype>> (new fixed_flux_boundary <datatype> (&*grids [0], &*grids [1], i_params.get <datatype> ("temperature.diffusion"), 0.0, z_vel_ptr, false));
+			thermal_flux_boundary_0 = boundary_0;
 			compositional_flux_boundary_0 = std::shared_ptr <plans::boundary <datatype>> (new fixed_flux_boundary <datatype> (&*grids [0], &*grids [1], i_params.get <datatype> ("composition.diffusion"), 0.0, z_vel_ptr, false));
+			compositional_flux_boundary_0 = boundary_0;
 		}
 		if (messenger_ptr->get_id () + 1 < messenger_ptr->get_np ()) {
 			boundary_n = std::shared_ptr <plans::boundary <datatype>> (new communicating_boundary <datatype> (messenger_ptr, grids [0]->get_ld (), m, grids [1]->get_excess_n (), &((*grids [1]) [0]), m - grids [1]->get_excess_n (), true));
@@ -139,7 +141,9 @@ namespace pisces
 			boundary_n = std::shared_ptr <plans::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], 0.0, true));
 			deriv_boundary_n = std::shared_ptr <plans::boundary <datatype>> (new fixed_deriv_boundary <datatype> (&*grids [0], &*grids [1], 0.0, true));
 			thermal_flux_boundary_n = std::shared_ptr <plans::boundary <datatype>> (new fixed_flux_boundary <datatype> (&*grids [0], &*grids [1], i_params.get <datatype> ("temperature.diffusion"), 0.0, z_vel_ptr, true));
+			thermal_flux_boundary_n = boundary_n;
 			compositional_flux_boundary_n = std::shared_ptr <plans::boundary <datatype>> (new fixed_flux_boundary <datatype> (&*grids [0], &*grids [1], i_params.get <datatype> ("composition.diffusion"), 0.0, z_vel_ptr, true));
+			compositional_flux_boundary_n = boundary_n;
 		}
 
 		/*

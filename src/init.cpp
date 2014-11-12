@@ -66,7 +66,7 @@ int main (int argc, char *argv[])
 		horizontal::grid <double> horizontal_grid (new plans::axis (n, position_n0, position_nn));
 		vertical::grid <double> vertical_grid (new plans::axis (m, position_m0, position_mm, excess_0, excess_n));
 
-		std::vector <double> temps (n * m), tempt (n * m);
+		std::vector <double> temps (n * m, 0.0), tempt (n * m, 0.0);
 
 		double scale = config.get <double> ("init.scale");
 		for (int i = 0; i < n; ++i) {
