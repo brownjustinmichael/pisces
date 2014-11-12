@@ -278,6 +278,7 @@ namespace pisces
 		virtual void solve () {
 			TRACE ("Beginning solve...");
 			// Execute the solvers
+			std::vector <plans::equations <datatype>*> solver_queue;
 			for (iterator iter = begin (); iter != end (); iter++) {
 				// DEBUG ("Solving " << *iter);
 				
@@ -293,6 +294,14 @@ namespace pisces
 			
 			transform (forward_vertical | no_read);
 			TRACE ("Solve complete.");
+		}
+		
+		virtual void enqueue_recursive (int name, std::vector <plans::equations <datatype>*> &solver_queue) {
+			int n_deps = solvers [name]->n_dependencies ();
+			for (int i = 0; i < n_deps; ++i) {
+				
+				enqueue_recursive (solvers [name]->get_dependency (i))
+			}
 		}
 		
 		virtual void solve_recursive (int name) {
