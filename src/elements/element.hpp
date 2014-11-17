@@ -15,8 +15,10 @@
 #include <string>
 #include <cassert>
 #include <memory>
+#include <pthread.h>
 
 #include <gsl/gsl_siman.h>
+#include <omp.h>
 
 #include "logger/logger.hpp"
 #include "versions/version.hpp"
@@ -278,15 +280,52 @@ namespace pisces
 		virtual void solve () {
 			TRACE ("Beginning solve...");
 			// Execute the solvers
-			std::vector <plans::equations <datatype>*> solver_queue;
+			std::map <int, omp_lock_t> locks;
 			for (iterator iter = begin (); iter != end (); iter++) {
-				// DEBUG ("Solving " << *iter);
-				
-				solve_recursive (*iter);
+				omp_init_lock (&locks [*iter]);
+				element_flags [*iter] &= ~solved;
 			}
 			
+			int threads = params.get <int> ("parallel.solver.threads");
+			DEBUG (threads)
+			#pragma omp parallel num_threads (threads)
+			{
+				bool completely_solved = false;
+				bool skip = false;
+				int i = -1;
+				int tid = omp_get_thread_num();
+				int name = 0;
+				while (!completely_solved) {
+					i += 1;
+					
+					name = solver_keys [(i + tid) % (int) solver_keys.size ()];
+					completely_solved = true;
+					for (iterator iter = begin (); iter != end (); iter++) {
+						completely_solved = completely_solved && (element_flags [*iter] & solved);
+					}
+					
+					if (element_flags [name] & solved) continue;
+						
+					for (int j = 0; j < solvers [name]->n_dependencies (); ++j) {
+						if (!(element_flags [solvers [name]->get_dependency (j)] & solved)) {
+							skip = true;
+							break;
+						}
+					}
+					if (skip) continue;
+					
+					if (omp_test_lock (&locks [name])) {
+						DEBUG ("Solving " << name << " with " << tid);
+						solvers [name]->solve ();
+						#pragma omp atomic
+						element_flags [name] |= solved;
+						omp_unset_lock (&locks [name]);
+					}
+				}
+			}
 			for (iterator iter = begin (); iter != end (); iter++) {
-				element_flags [*iter] &= ~solved;
+				solvers [*iter]->reset ();
+				omp_destroy_lock (&locks [*iter]);
 			}
 			
 			// Make certain everything is fully transformed
@@ -294,14 +333,6 @@ namespace pisces
 			
 			transform (forward_vertical | no_read);
 			TRACE ("Solve complete.");
-		}
-		
-		virtual void enqueue_recursive (int name, std::vector <plans::equations <datatype>*> &solver_queue) {
-			int n_deps = solvers [name]->n_dependencies ();
-			for (int i = 0; i < n_deps; ++i) {
-				
-				enqueue_recursive (solvers [name]->get_dependency (i))
-			}
 		}
 		
 		virtual void solve_recursive (int name) {
