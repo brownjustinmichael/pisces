@@ -57,6 +57,7 @@ namespace linalg
 			}
 		}
 		if (ldx < ntop + nbot) {
+			FATAL ("Leading dimension of x too small.");
 			throw 0;
 		}
 				

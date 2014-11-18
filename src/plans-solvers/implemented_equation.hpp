@@ -72,6 +72,7 @@ namespace plans
 			} else if (*component_flags & z_solve) {
 				return z_solver->get_dependency (i);
 			} else {
+				FATAL ("Cannot get dependency without valid solve direction " << *component_flags);
 				throw 0;
 			}
 		}
@@ -172,6 +173,7 @@ namespace plans
 			if (!(flags & not_z_solver)) {
 				return z_solver;
 			}
+			FATAL ("Invalid flags: " << flags);
 			throw 0;
 		}
 		

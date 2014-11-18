@@ -120,7 +120,6 @@ namespace plans
 				factorize ();
 			}
 			_solve ();
-			reset ();
 		}
 
 		virtual void add_solver (std::shared_ptr <solver <datatype> > i_solver, int flags = 0x00) = 0;
