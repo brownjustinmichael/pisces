@@ -417,7 +417,7 @@ namespace plans
 		} else {
 			*component_flags |= transformed_vertical;
 		}
-							
+						
 		for (int i = 0; i < 2 * (n / 2 + 1) * m; ++i) {
 			data_out [i] *= scalar;
 		}
@@ -436,6 +436,8 @@ namespace plans
 		// 	debug.str ("");
 		// }
 
+		DEBUG ("N, M " << n << " " << m);
+		DEBUG ("Execution " << data_in + 2 * (n / 2 + 1) * m << " " << data_out + 2 * (n / 2 + 1) * m);
 		if (m > 1 && !(flags & ignore_m)) {
 // #pragma omp parallel for num_threads (threads)
 			for (int i = 0; i < threads; ++i) {
@@ -443,6 +445,7 @@ namespace plans
 			}
 		}
 
+		DEBUG ("Flagging");
 		if (*component_flags & transformed_vertical) {
 			*component_flags &= ~transformed_vertical;
 			// DEBUG ("A");
@@ -451,6 +454,7 @@ namespace plans
 			// DEBUG ("B");
 		}
 		
+		DEBUG ("Scaling");	
 		for (int i = 0; i < 2 * (n / 2 + 1) * m; ++i) {
 			data_out [i] *= scalar;
 		}
