@@ -11,10 +11,6 @@
 
 #include "../implicit_plan.hpp"
 
-/*
-	TODO Should non-axis diffusion be in the explicit or implicit rhs?
-*/
-
 namespace plans
 {
 	template <class datatype>
