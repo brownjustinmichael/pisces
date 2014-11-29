@@ -11,5 +11,6 @@
 
 #include "diffusion/horizontal_diffusion.hpp"
 #include "diffusion/vertical_diffusion.hpp"
+#include "diffusion/variable_diffusion.hpp"
 
 #endif /* end of include guard: DIFFUSION_HPP_C1935DDC */

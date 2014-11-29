@@ -87,6 +87,7 @@ namespace pisces
 		using implemented_element <datatype>::data;
 		
 		std::vector <datatype> area;
+		std::vector <datatype> diffusion;
 		datatype advection_coeff, cfl, *x_ptr, *z_ptr, *x_vel_ptr, *z_vel_ptr;
 	};
 } /* pisces */

@@ -150,12 +150,20 @@ namespace pisces
 			TODO Figure out how to more conveniently determine whether an edge effect is needed.
 		*/
 		
+		diffusion.resize (m);
+		for (int j = 0; j < m; ++j) {
+			diffusion [j] = i_params.get <datatype> ("temperature.diffusion") + i_params.get <datatype> ("temperature.bg_diffusion") * (*grids [1]) [j];
+			DEBUG (diffusion [j]);
+		}
+		
 		// Solve temperature
 		solvers [temp]->add_solver (typename collocation_solver <datatype>::factory (messenger_ptr, timestep, thermal_boundary_0, thermal_boundary_n), z_solver);
 		solvers [temp]->add_solver (typename fourier_solver <datatype>::factory (timestep, thermal_boundary_0, thermal_boundary_n), x_solver);
 	
-		solvers [temp]->add_plan (typename vertical_diffusion <datatype>::factory (i_params.get <datatype> ("temperature.diffusion"), i_params.get <datatype> ("time.alpha")), pre_plan);
+		// solvers [temp]->add_plan (typename vertical_diffusion <datatype>::factory (i_params.get <datatype> ("temperature.diffusion"), i_params.get <datatype> ("time.alpha")), pre_plan);
+		solvers [temp]->add_plan (typename background_vertical_diffusion <datatype>::factory (i_params.get <datatype> ("time.alpha"), &diffusion [0]), pre_plan);
 		solvers [temp]->add_plan (typename horizontal_diffusion <datatype>::factory (i_params.get <datatype> ("temperature.diffusion"), i_params.get <datatype> ("time.alpha")), mid_plan);
+		// solvers [temp]->add_plan (typename linear_diffusion <datatype>::factory (i_params.get <datatype> ("temperature.linear_diffusion"), ptr (composition)), post_plan);
 		solvers [temp]->add_plan (typename advection <datatype>::factory (i_params.get <datatype> ("temperature.advection"), ptr (x_vel), ptr (z_vel)), post_plan);
 		solvers [temp]->add_plan (typename source <datatype>::factory (-i_params.get <datatype> ("temperature.stratification"), ptr (z_velocity)), mid_plan);
 
