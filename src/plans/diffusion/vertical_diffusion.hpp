@@ -87,11 +87,11 @@ namespace plans
 			if (matrix_m) {
 				for (int j = 0; j < m; ++j) {
 					linalg::add_scaled (m, -diffusion [j] * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
-					for (int i = 0; i < m; ++i) {
-						debug << matrix_m [i * m + j] << " ";
-					}
-					DEBUG ("MATRIX " << debug.str ());
-					debug.str ("");
+					// for (int i = 0; i < m; ++i) {
+					// 	debug << matrix_m [i * m + j] << " ";
+					// }
+					// DEBUG ("MATRIX " << debug.str ());
+					// debug.str ("");
 				}
 			} else {
 				WARN ("No matrix");

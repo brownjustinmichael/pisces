@@ -20,8 +20,8 @@ namespace plans
 	fourier_solver <datatype>::fourier_solver (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, datatype& i_timestep, std::shared_ptr <plans::boundary <datatype>> i_boundary_0, std::shared_ptr <plans::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
 	plans::solver <datatype> (i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), data (i_data), timestep (i_timestep), excess_0 (i_grid_m.get_excess_0 ()), excess_n (i_grid_m.get_excess_n ()), pos_m (&i_grid_m [0]) {
 		TRACE ("Building solver...");
-		horizontal_matrix.resize (ldn);
-		factorized_horizontal_matrix.resize (ldn);
+		horizontal_matrix.resize (m * ldn);
+		factorized_horizontal_matrix.resize (m * ldn);
 		rhs_ptr = i_rhs;
 		
 		boundary_0 = i_boundary_0;
@@ -43,9 +43,11 @@ namespace plans
 		
 		TRACE ("Factorizing...");
 		
-		for (int i = 0; i < ldn; ++i) {
-			factorized_horizontal_matrix [i] = 1.0 + timestep * horizontal_matrix [i];
-			// DEBUG ("FACT " << factorized_horizontal_matrix [i]);
+		for (int j = 0; j < m; ++j) {
+			for (int i = 0; i < ldn; ++i) {
+				factorized_horizontal_matrix [i * m + j] = 1.0 + timestep * horizontal_matrix [i * m + j];
+				DEBUG ("FACT " << i << " " << j << " " << factorized_horizontal_matrix [i * m + j] << " " << horizontal_matrix [i * m + j]);
+			}
 		}
 		
 		TRACE ("Done.");
@@ -111,7 +113,7 @@ namespace plans
 		
 		for (int j = excess_0; j < m - excess_n; ++j) {
 			// DEBUG ("BEF " << data_temp [ex_overlap_0 + j] << " " << factorized_horizontal_matrix [0]);
-			linalg::diagonal_solve (ldn, &factorized_horizontal_matrix [0], &data_temp [ex_overlap_0 + j], 1, lda);
+			linalg::diagonal_solve (ldn, &factorized_horizontal_matrix [j], &data_temp [ex_overlap_0 + j], m, lda);
 			// DEBUG ("AFT " << data_temp [ex_overlap_0 + j]);
 		}
 		linalg::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data, lda);
