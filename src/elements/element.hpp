@@ -68,7 +68,7 @@ namespace pisces
 		datatype &duration; //!< The datatype total simulated time
 		datatype &timestep; //!< The datatype timestep length
 
-		data::data <datatype> &data;
+		data::data <datatype> &data; //!< An object that contains all the data in the simulation
 		std::map <int, std::vector <datatype> > scalars; //!< A map of scalar vectors
 		std::map <int, std::string> scalar_names; //!< A map of string representations of the scalars
 		std::map <int, int> &element_flags; //!< A map of integer flags
@@ -287,8 +287,7 @@ namespace pisces
 			}
 			
 			int threads = params.get <int> ("parallel.solver.threads");
-			DEBUG (threads)
-			#pragma omp parallel num_threads (threads)
+#pragma omp parallel num_threads (threads)
 			{
 				bool completely_solved = false;
 				bool skip = false;
@@ -315,7 +314,7 @@ namespace pisces
 					if (skip) continue;
 					
 					if (omp_test_lock (&locks [name])) {
-						DEBUG ("Solving " << name << " with " << tid);
+						// DEBUG ("Solving " << name << " with " << tid);
 						solvers [name]->solve ();
 						#pragma omp atomic
 						element_flags [name] |= solved;

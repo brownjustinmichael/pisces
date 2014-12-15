@@ -8,6 +8,7 @@
 
 #include "linalg.hpp"
 #include "exceptions.hpp"
+#include <omp.h>
 
 /*!*******************************************************************
  * \brief Function from LAPACK that factorizes the matrix a by LU decomposition
@@ -124,7 +125,13 @@ namespace linalg
 			ldb = n;
 		}
 		
-		dgetrs_ (&charN, &n, &nrhs, a, &lda, ipiv, b, &ldb, info);
+		int threads = omp_get_max_threads ();
+		#pragma omp parallel for
+		for (int i = 0; i < threads; ++i) {
+			int tnrhs = nrhs / threads + (i < nrhs % threads ? 1 : 0);
+			int tldb = threads * ldb;
+			dgetrs_ (&charN, &n, &tnrhs, a, &lda, ipiv, b + i * ldb, &tldb, info);
+		}
 		
 		if (*info != 0) {
 			throw exceptions::cannot_solve ();

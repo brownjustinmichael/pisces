@@ -63,7 +63,6 @@ namespace plans
 		 * By default, this method will write the data into the transform class, perform the transform, and read the data back out into the element. This is chosen in order to allow for GPU usage in the future.
 		 *********************************************************************/
 		virtual void transform (int flags = 0x00) {
-			DEBUG ("TRANSFORMING...");
 			if (flags & read_before) {
 				read ();
 				if (internal_state & transformed_horizontal) {

@@ -193,7 +193,6 @@ namespace plans
 		}
 
 		if (!(*component_flags_x & transformed_vertical)) {
-			DEBUG ("Here");
 			datatype scalar = acos (-1.0) * 2.0 / (pos_n [n - 1] - pos_n [0]);
 			datatype *data_ptr = &data_temp [1];
 
@@ -292,7 +291,7 @@ namespace plans
 				}
 			}
 		} else {
-			FATAL ("SHOULDN'T BE HERE");
+			FATAL ("SHOULDN'T BE HERE" << *component_flags_x);
 			throw 0;
 		}
 		

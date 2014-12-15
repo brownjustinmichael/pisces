@@ -25,27 +25,35 @@
 
 namespace data
 {
+	/*!**********************************************************************
+	 * \brief A set of flags used when initializing data
+	 ************************************************************************/
 	enum initialize_element_flags {
-		uniform_n = 0x01,
-		uniform_m = 0x02,
+		uniform_n = 0x01, //!< Copy the input array across the data in the n direction
+		uniform_m = 0x02, //!< Copy the input array across the data in the m direction
 		no_save = 0x04,
 	};
 	
+	/*!**********************************************************************
+	 * \brief A container object for the scalar data in the simulation
+	 * 
+	 * This object contains both the physical data and the output instructions.
+	 ************************************************************************/
 	template <class datatype>
 	class data
 	{
 	protected:
-		std::map <int, std::string> scalar_names;
-		static int mode;
+		std::map <int, std::string> scalar_names; //!< A map of the string names for each data component
+		static int mode; //!< The integer mode of the simulation (to prevent loading Chebyshev data into an even grid)
 		
-		std::vector <std::shared_ptr <io::output>> streams;
-		std::vector <int> stream_conditions;
-		std::vector <bool> done;
+		std::vector <std::shared_ptr <io::output>> streams; //!< A vector of pointers to output streams
+		std::vector <int> stream_conditions; //!< A vector of flags to match to output
+		std::vector <bool> done; //!< A vector of booleans informing whether an output has been made this timestep
 		
 	public:
-		datatype duration;
-		datatype timestep;
-		std::map <int, int> flags;
+		datatype duration; //!< The total time elapsed in the simulation thus far
+		datatype timestep; //!< The current timestep
+		std::map <int, int> flags; //!< A map of the simulation flags
 		data () {
 			flags [0] = 0x0;
 			duration = 0.0;
@@ -53,6 +61,13 @@ namespace data
 		
 		virtual ~data () {}
 		
+		/*!**********************************************************************
+		 * \brief Given an integer index to one of the scalar variables, return a pointer to that dataset
+		 * 
+		 * \param name The integer name to index
+		 * 
+		 * \return A pointer to the indexed data
+		 ************************************************************************/
 		datatype *operator[] (const int name) {
 			return &(scalars [name] [0]);
 		}
@@ -80,20 +95,48 @@ namespace data
 			return scalars.end ();
 		}
 		
+		/*!**********************************************************************
+		 * \brief Given an integer name to one of the scalar variables and an index within that dataset, return a pointer to that dataset at the given index
+		 * 
+		 * \param name The integer name to index
+		 * \param index The integer index inside the named variable
+		 * 
+		 * \return A pointer to the indexed data
+		 ************************************************************************/
 		datatype *operator() (const int name, const int index = 0) {
 			return &(scalars [name] [index]);
 		}
 		
+		/*!**********************************************************************
+		 * \brief Get the mode of the simulation
+		 * 
+		 * \return A reference to the integer mode of the simulation
+		 ************************************************************************/
 		const int &get_mode () {
 			return mode;
 		}
 		
+		/*!**********************************************************************
+		 * \brief Initialize a dataset for the simulation
+		 * 
+		 * \param i_name The integer name to give the new dataset
+		 * \param i_str The string name of the new dataset
+		 * \param initial_conditions The initial values of the dataset
+		 * \param i_flags The flags indicating how to apply the initial conditions (uniform_n, uniform_m, or NULL)
+		 * 
+		 * This function initializes the dataset.
+		 * 
+		 * \return A pointer to the dataset
+		 ************************************************************************/
 		virtual datatype *initialize (int i_name, std::string i_str, datatype* initial_conditions = NULL, int i_flags = 0x00) {
 			flags [i_name] = 0x00;
 			scalar_names [i_name] = i_str;
 			return _initialize (i_name, initial_conditions, i_flags);
 		}
 		
+		/*!**********************************************************************
+		 * \brief Check whether any streams can be output and output them
+		 ************************************************************************/
 		void check_streams (int i_flags = 0x00) {
 			TRACE ("Transforming...");
 			for (int i = 0; i < (int) streams.size (); ++i) {
@@ -121,6 +164,9 @@ namespace data
 			}
 		}
 		
+		/*!**********************************************************************
+		 * \brief Every timestep, reset the output stream conditions
+		 ************************************************************************/
 		void reset () {
 			for (int i = 0; i < (int) done.size (); ++i) {
 				done [i] = false;
@@ -128,7 +174,7 @@ namespace data
 		}
 		
 		/*!**********************************************************************
-		 * \brief Given an input stream, load all the relevant data into the element
+		 * \brief Given an input stream, load all the relevant data into the data object
 		 * 
 		 * \param input_stream_ptr A pointer to an input object
 		 ************************************************************************/
@@ -186,6 +232,12 @@ namespace data
 			}
 		}
 		
+		/*!**********************************************************************
+		 * \brief Given an output stream, prepare the stat output
+		 * 
+		 * \param output_ptr A shared_ptr to the output object
+		 * \param flags The integer flags to specify the time of output
+		 ************************************************************************/
 		virtual void setup_stat (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
 			// Also prepare to output the total simulated time and geometry mode
 			output_ptr->template append <datatype> ("t", &duration, io::scalar);
@@ -216,6 +268,10 @@ namespace data
 		
 	protected:
 		std::map <int, std::vector <datatype>> scalars;
+		
+		/*!**********************************************************************
+		 * \brief Initialize a new dataset in the data object
+		 ************************************************************************/
 		virtual datatype *_initialize (int i_name, datatype* initial_conditions = NULL, int i_flags = 0x00) = 0;
 	};
 	

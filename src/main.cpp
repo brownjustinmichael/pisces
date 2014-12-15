@@ -152,7 +152,7 @@ int main (int argc, char *argv[])
 				io::virtual_files ["main/virtual_file"] = *(element->rezone_minimize_ts (&positions [0], config.get <double> ("grid.rezone.min_size"), config.get <double> ("grid.rezone.max_size"), config.get <int> ("grid.rezone.n_tries"), config.get <int> ("grid.rezone.iters_fixed_t"), config.get <double> ("grid.rezone.step_size"), config.get <double> ("grid.rezone.k"), config.get <double> ("grid.rezone.t_initial"), config.get <double> ("grid.rezone.mu_t"), config.get <double> ("grid.rezone.t_min")));
 
 				plans::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
-				
+
 				DEBUG (io::virtual_files ["main/virtual_file"].index <double> ("T", 16, 16));
 				DEBUG (data.duration);
 				DEBUG (io::virtual_files ["main/virtual_file"].index <double> ("t"));
@@ -160,7 +160,7 @@ int main (int argc, char *argv[])
 				io::input *virtual_input (new io::formatted_input <io::formats::two_d::virtual_format> (io::data_grid::two_d (n, m), "main/virtual_file"));
 				data.setup (&*virtual_input);
 				DEBUG (data.duration);
-				
+
 				std::stringstream debug;
 				for (int i = 0; i < n; ++i) {
 					for (int j = 0; j < m; ++j) {
@@ -169,11 +169,11 @@ int main (int argc, char *argv[])
 					DEBUG ("OUT " << debug.str ());
 					debug.str ("");
 				}
-				
+
 				DEBUG ("DONE THERE");
-				
+
 				element.reset (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, data, &process_messenger, 0x00));
-				
+
 				for (int j = 0; j < m; ++j) {
 					for (int i = 0; i < n; ++i) {
 						debug << data (x_velocity) [i * m + j] << " ";

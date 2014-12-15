@@ -46,7 +46,7 @@ namespace plans
 		for (int j = 0; j < m; ++j) {
 			for (int i = 0; i < ldn; ++i) {
 				factorized_horizontal_matrix [i * m + j] = 1.0 + timestep * horizontal_matrix [i * m + j];
-				DEBUG ("FACT " << i << " " << j << " " << factorized_horizontal_matrix [i * m + j] << " " << horizontal_matrix [i * m + j]);
+				// DEBUG ("FACT " << i << " " << j << " " << factorized_horizontal_matrix [i * m + j] << " " << horizontal_matrix [i * m + j]);
 			}
 		}
 		

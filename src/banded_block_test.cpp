@@ -116,15 +116,15 @@ int main (int argc, char *argv[])
 			}
 		}
 
-		for (int j = 0; j < nrhs; ++j) {
-			for (int i = -kl; i < n + ku; ++i) {
-				for (int k = 0; k < lda; ++k) {
-					debug << matrix [j * lda * ldaa + (i + kl) * lda + k] << " ";
-				}
-				DEBUG ("[" << id << "] " << debug.str () << "= " << ((i >= 0 && i < n) ? b [j * ldb + i + kl] : 0));
-				debug.str ("");
-			}
-		}
+		// for (int j = 0; j < nrhs; ++j) {
+		// 	for (int i = -kl; i < n + ku; ++i) {
+		// 		for (int k = 0; k < lda; ++k) {
+		// 			debug << matrix [j * lda * ldaa + (i + kl) * lda + k] << " ";
+		// 		}
+		// 		DEBUG ("[" << id << "] " << debug.str () << "= " << ((i >= 0 && i < n) ? b [j * ldb + i + kl] : 0));
+		// 		debug.str ("");
+		// 	}
+		// }
 	
 		try {
 			utils::p_block_banded_factorize (id, np, n - ntop - nbot, kl, ku, &matrix [0], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, nrhs, lda, ldaa);
@@ -134,43 +134,43 @@ int main (int argc, char *argv[])
 			std::cout << except.what () << '\n';
 		}
 
-		for (int j = 0; j < nrhs; ++j) {
-			for (int i = 0; i < n + ku + kl; ++i) {
-				for (int k = 0; k < lda; ++k) {
-					debug << matrix [j * lda * ldaa + i * lda + k] << " ";
-				}
-				DEBUG ("[" << id << "] " << debug.str ());
-				debug.str ("");
-			}
-		}
+		// for (int j = 0; j < nrhs; ++j) {
+		// 	for (int i = 0; i < n + ku + kl; ++i) {
+		// 		for (int k = 0; k < lda; ++k) {
+		// 			debug << matrix [j * lda * ldaa + i * lda + k] << " ";
+		// 		}
+		// 		DEBUG ("[" << id << "] " << debug.str ());
+		// 		debug.str ("");
+		// 	}
+		// }
 
-		for (int j = 0; j < nrhs; ++j) {
-			DEBUG ("Mid " << j);
-			for (int i = 0; i < n; ++i) {
-				for (int k = 0; k < 2 * kl + ku + 1; ++k) {
-					matrix_debug << matrixcopy [j * lda * ldaa + (i + kl) * lda + k] << " ";
-				}
-				debug << bcopy [j * ldb + i + kl] << " ";
-				DEBUG (matrix_debug.str () << " = " << debug.str ());
-				matrix_debug.str ("");
-				debug.str ("");
-			}
-		}
+		// for (int j = 0; j < nrhs; ++j) {
+		// 	DEBUG ("Mid " << j);
+		// 	for (int i = 0; i < n; ++i) {
+		// 		for (int k = 0; k < 2 * kl + ku + 1; ++k) {
+		// 			matrix_debug << matrixcopy [j * lda * ldaa + (i + kl) * lda + k] << " ";
+		// 		}
+		// 		debug << bcopy [j * ldb + i + kl] << " ";
+		// 		DEBUG (matrix_debug.str () << " = " << debug.str ());
+		// 		matrix_debug.str ("");
+		// 		debug.str ("");
+		// 	}
+		// }
 
 		std::vector <double> edge_0 (nrhs * ku), edge_n (nrhs * kl), redge_0 (nrhs * kl), redge_n (nrhs * ku);
 
-		for (int j = 0; j < nrhs; ++j) {
-			DEBUG ("BEFORE SEND " << j);
-			for (int i = 0; i < kl + ku + n; ++i) {
-				for (int k = 0; k < 2 * kl + ku + 1; ++k) {
-					matrix_debug << matrixcopy [j * lda * ldaa + (i) * lda + k] << " ";
-				}
-				debug << b [j * ldb + i] << " ";
-				DEBUG (matrix_debug.str () << " = " << debug.str ());
-				matrix_debug.str ("");
-				debug.str ("");
-			}
-		}
+		// for (int j = 0; j < nrhs; ++j) {
+		// 	DEBUG ("BEFORE SEND " << j);
+		// 	for (int i = 0; i < kl + ku + n; ++i) {
+		// 		for (int k = 0; k < 2 * kl + ku + 1; ++k) {
+		// 			matrix_debug << matrixcopy [j * lda * ldaa + (i) * lda + k] << " ";
+		// 		}
+		// 		debug << b [j * ldb + i] << " ";
+		// 		DEBUG (matrix_debug.str () << " = " << debug.str ());
+		// 		matrix_debug.str ("");
+		// 		debug.str ("");
+		// 	}
+		// }
 
 		for (int i = 0; i < nrhs; ++i) {
 			for (int j = 0; j < ku; ++j) {
@@ -203,45 +203,45 @@ int main (int argc, char *argv[])
 			}
 		}
 	
-		for (int j = 0; j < nrhs; ++j) {
-			DEBUG ("AFTER RECV " << j);
-			for (int i = 0; i < kl + ku + n; ++i) {
-				for (int k = 0; k < 2 * kl + ku + 1; ++k) {
-					matrix_debug << matrixcopy [j * lda * ldaa + (i) * lda + k] << " ";
-				}
-				debug << b [j * ldb + i] << " ";
-				DEBUG (matrix_debug.str () << " = " << debug.str () << "=> " << bcopy [j * ldb + i]);
-				matrix_debug.str ("");
-				debug.str ("");
-			}
-		}
+		// for (int j = 0; j < nrhs; ++j) {
+		// 	DEBUG ("AFTER RECV " << j);
+		// 	for (int i = 0; i < kl + ku + n; ++i) {
+		// 		for (int k = 0; k < 2 * kl + ku + 1; ++k) {
+		// 			matrix_debug << matrixcopy [j * lda * ldaa + (i) * lda + k] << " ";
+		// 		}
+		// 		debug << b [j * ldb + i] << " ";
+		// 		DEBUG (matrix_debug.str () << " = " << debug.str () << "=> " << bcopy [j * ldb + i]);
+		// 		matrix_debug.str ("");
+		// 		debug.str ("");
+		// 	}
+		// }
 
 		for (int j = 0; j < nrhs; ++j) {
 			for (int i = 0; i < n + kl + ku; ++i) {
 				for (int k = -ku; k < kl + 1; ++k) {
 					if (i + k >= 0 && i + k < n + kl + ku) {
-						DEBUG (k << " " << i << " " << j * ldb + k + i << " " << bcopy [j * ldb + i + k] << " " << matrixcopy [j * lda * ldaa + (i) * lda + k + kl + ku] << " " << b [j * ldb + i]);
+						// DEBUG (k << " " << i << " " << j * ldb + k + i << " " << bcopy [j * ldb + i + k] << " " << matrixcopy [j * lda * ldaa + (i) * lda + k + kl + ku] << " " << b [j * ldb + i]);
 						bcopy [j * ldb + k + i] -= matrixcopy [j * lda * ldaa + (i) * lda + k + kl + ku] * b [j * ldb + i];
 					}
 				}
 			}
 		}
 
-		for (int j = 0; j < nrhs; ++j) {
-			DEBUG ("END " << j);
-			for (int i = 0; i < kl + ku + n; ++i) {
-				for (int k = 0; k < 2 * kl + ku + 1; ++k) {
-					matrix_debug << matrix [j * lda * ldaa + (i) * lda + k] << " ";
-				}
-				debug << bcopy [j * ldb + i] << " ";
-				if (bcopy [j * ldb + i] > 1.0e-8) {
-					ERROR ("FAILED TO ACHIEVE TOLERANCE");
-				}
-				DEBUG (matrix_debug.str () << " = " << debug.str ());
-				matrix_debug.str ("");
-				debug.str ("");
-			}
-		}
+		// for (int j = 0; j < nrhs; ++j) {
+		// 	DEBUG ("END " << j);
+		// 	for (int i = 0; i < kl + ku + n; ++i) {
+		// 		for (int k = 0; k < 2 * kl + ku + 1; ++k) {
+		// 			matrix_debug << matrix [j * lda * ldaa + (i) * lda + k] << " ";
+		// 		}
+		// 		debug << bcopy [j * ldb + i] << " ";
+		// 		if (bcopy [j * ldb + i] > 1.0e-8) {
+		// 			ERROR ("FAILED TO ACHIEVE TOLERANCE");
+		// 		}
+		// 		DEBUG (matrix_debug.str () << " = " << debug.str ());
+		// 		matrix_debug.str ("");
+		// 		debug.str ("");
+		// 	}
+		// }
 	}
 
 	return 0;

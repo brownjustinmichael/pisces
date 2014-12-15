@@ -69,6 +69,7 @@ int main (int argc, char *argv[])
 		std::vector <double> temps (n * m, 0.0), tempt (n * m, 0.0);
 
 		double scale = config.get <double> ("init.scale");
+		#pragma omp parallel for
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
 				// temps [i * m + j] = scale * (vertical_grid [j]);
