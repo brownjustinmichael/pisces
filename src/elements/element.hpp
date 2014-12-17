@@ -287,7 +287,7 @@ namespace pisces
 			}
 			
 			int threads = params.get <int> ("parallel.solver.threads");
-#pragma omp parallel num_threads (threads)
+// #pragma omp parallel num_threads (threads)
 			{
 				bool completely_solved = false;
 				bool skip = false;

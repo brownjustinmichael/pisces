@@ -35,9 +35,9 @@ namespace plans
 			TODO Remove dimensionality from base class
 		*/
 		
-		virtual void send (datatype *data_temp, int lda) {}
+		virtual void send (datatype *data_temp, int lda, int n = -1) {}
 		
-		virtual void receive (datatype *data_temp, int lda) {}
+		virtual void receive (datatype *data_temp, int lda, int n = -1, datatype alpha = 1.0) {}
 		
 		virtual void calculate_rhs (datatype *data_in, datatype *interpolate_original, datatype *interpolate_data, datatype *data_out, int m, int lda, int flag) = 0;
 		

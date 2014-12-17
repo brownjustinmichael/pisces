@@ -35,7 +35,7 @@
 namespace plans
 {
 	template <class datatype>
-	incompressible_corrector <datatype>::incompressible_corrector (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, mpi::messenger* i_messenger_ptr, datatype *i_rhs, datatype* i_data, datatype *i_data_x, datatype *i_data_z, int *i_element_flags, int *i_component_flags, int * i_component_flags_x, int *i_component_flags_z) :
+	incompressible_corrector <datatype>::incompressible_corrector (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, mpi::messenger* i_messenger_ptr, std::shared_ptr <plans::boundary <datatype>> i_boundary_0, std::shared_ptr <plans::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, datatype *i_data_x, datatype *i_data_z, int *i_element_flags, int *i_component_flags, int * i_component_flags_x, int *i_component_flags_z) :
 	plans::solver <datatype> (i_element_flags, i_component_flags),
 	n (i_grid_n.get_n ()),
 	ldn (i_grid_n.get_ld ()),
@@ -53,6 +53,9 @@ namespace plans
 		rhs_ptr = i_rhs;
 		component_flags_x = i_component_flags_x;
 		component_flags_z = i_component_flags_z;
+		
+		boundary_0 = i_boundary_0;
+		boundary_n = i_boundary_n;
 
 		ipiv.resize (ldn * (m + 2));
 
@@ -102,6 +105,8 @@ namespace plans
 		bufferr.resize (np * (m + 2) * ku * ldn);
 
 		data_temp.resize ((m + 2) * ldn);
+		
+		count = 0;
 	}
 
 	template <class datatype>
@@ -109,66 +114,68 @@ namespace plans
 		std::stringstream debug;
 		int info;
 		TRACE ("Factorizing laplace solver...");
+		if (count == 0) {
 
-		double scalar = 4.0 * std::acos (-1.0) * std::acos (-1.0) / (pos_n [n - 1] - pos_n [0]) / (pos_n [n - 1] - pos_n [0]);
-		std::vector <datatype> positions (m + 2 + 6);
-		datatype *matrix_ptr, *new_pos = &positions [3], *npos_m = &pos_m [excess_0];
-		int kl = 2;
-		int ku = 1;
-		int lda = 2 * kl + ku + 1;
-
-		for (int j = -3; j < m + 3; ++j) {
-			new_pos [j] = (pos_m [j] + pos_m [j + 1]) / 2.0;
-		}
-		if (id == 0) {
-			new_pos [-1] = 2.0 * pos_m [0] - (pos_m [0] + pos_m [1]) / 2.0;
-		}
-		if (id == np - 1) {
-			new_pos [m - 1] = 2.0 * pos_m [m - 1] - (pos_m [m - 1] + pos_m [m - 2]) / 2.0;
-			new_pos [m] = pos_m [m - 1] + (pos_m [m - 1] - new_pos [m - 3]);
-		}
-		new_pos += excess_0;
-
-		for (int i = 0; i < ldn; ++i) {
-			matrix_ptr = &matrix [(i) * (m + 2 + kl + ku) * lda + kl + ku + (kl + ku + excess_0) * lda];
-			for (int j = 0; j < m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
-				// j is the gridpoint location of the solve on the velocity grid (I think)
-				matrix_ptr [(j - 2) * lda + 2] = 1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (npos_m [j + 1] - npos_m [j - 1]);
-				matrix_ptr [(j - 1) * lda + 1] = -1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (npos_m [j + 1] - npos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
-				matrix_ptr [(j) * lda] = -1.0 / (new_pos [j + 1] - new_pos [j]) / (npos_m [j + 1] - npos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
-				matrix_ptr [(j + 1) * lda - 1] = 1.0 / (new_pos [j + 1] - new_pos [j]) / (npos_m [j + 1] - npos_m [j - 1]);
+			double scalar = 4.0 * std::acos (-1.0) * std::acos (-1.0) / (pos_n [n - 1] - pos_n [0]) / (pos_n [n - 1] - pos_n [0]);
+			std::vector <datatype> positions (m + 2 + 6);
+			datatype *matrix_ptr, *new_pos = &positions [3], *npos_m = &pos_m [excess_0];
+			int kl = 2;
+			int ku = 1;
+			int lda = 2 * kl + ku + 1;
+			for (int j = -3; j < m + 3; ++j) {
+				new_pos [j] = (pos_m [j] + pos_m [j + 1]) / 2.0;
 			}
 			if (id == 0) {
-				matrix_ptr [-3 * lda + 2] = 0.0;
-				matrix_ptr [-2 * lda + 1] = 0.0;
-				matrix_ptr [-1 * lda] = 1.0;
-				matrix_ptr [-1] = -1.0;
-				// matrix_ptr [-15] = 0.0;
-				// matrix_ptr [10] = 1.0 / (new_pos [-1] - new_pos [-2]) / (npos_m [0] - npos_m [-1]);
-				// matrix_ptr [-5] = -1.0 / (new_pos [0] - new_pos [-1]) / (npos_m [0] - npos_m [-1]) - 1.0 / (new_pos [-1] - new_pos [-2]) / (npos_m [0] - npos_m [-1]) - scalar * (i / 2) * (i / 2);
-				// matrix_ptr [0] = 1.0 / (new_pos [0] - new_pos [-1]) / (npos_m [0] - npos_m [-1]);
-
-				matrix_ptr [-2 * lda + 2] = 0.0;
-				matrix_ptr [-1 * lda + 1] = 1.0 / (new_pos [0] - new_pos [-1]) / (npos_m [1] - npos_m [0]);
-				matrix_ptr [0] = -1.0 / (new_pos [1] - new_pos [0]) / (npos_m [1] - npos_m [0]) - 1.0 / (new_pos [0] - new_pos [-1]) / (npos_m [1] - npos_m [0]) - scalar * (i / 2) * (i / 2);
-				matrix_ptr [1 * lda - 1] = 1.0 / (new_pos [1] - new_pos [0]) / (npos_m [1] - npos_m [0]);
+				new_pos [-1] = 2.0 * pos_m [0] - (pos_m [0] + pos_m [1]) / 2.0;
 			}
 			if (id == np - 1) {
-				int j = m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0);
-				matrix_ptr [(j - 2) * lda + 2] = -1.0;
-				matrix_ptr [(j - 1) * lda + 1] = 1.0;
-				matrix_ptr [j * lda] = 1.0e-10;
-				matrix_ptr [(j + 1) * lda - 1] = 0.0;
-				// matrix_ptr [(j - 2) * 6 + 3] = 1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (npos_m [j + 1] - npos_m [j - 1]);
-				// matrix_ptr [(j - 1) * 6 + 2] = -1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (npos_m [j + 1] - npos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
-				// matrix_ptr [(j) * 6 + 1] = -1.0 / (new_pos [j + 1] - new_pos [j]) / (npos_m [j + 1] - npos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
-				// matrix_ptr [(j + 1) * 6] = 1.0 / (new_pos [j + 1] - new_pos [j]) / (npos_m [j + 1] - npos_m [j - 1]);
+				new_pos [m - 1] = 2.0 * pos_m [m - 1] - (pos_m [m - 1] + pos_m [m - 2]) / 2.0;
+				new_pos [m] = pos_m [m - 1] + (pos_m [m - 1] - new_pos [m - 3]);
 			}
+			new_pos += excess_0;
+
+			for (int i = 0; i < ldn; ++i) {
+				matrix_ptr = &matrix [(i) * (m + 2 + kl + ku) * lda + kl + ku + (kl + ku + excess_0) * lda];
+				for (int j = 0; j < m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
+					// j is the gridpoint location of the solve on the velocity grid (I think)
+					matrix_ptr [(j - 2) * lda + 2] = 1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (npos_m [j + 1] - npos_m [j - 1]);
+					matrix_ptr [(j - 1) * lda + 1] = -1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (npos_m [j + 1] - npos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
+					matrix_ptr [(j) * lda] = -1.0 / (new_pos [j + 1] - new_pos [j]) / (npos_m [j + 1] - npos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
+					matrix_ptr [(j + 1) * lda - 1] = 1.0 / (new_pos [j + 1] - new_pos [j]) / (npos_m [j + 1] - npos_m [j - 1]);
+				}
+				if (id == 0) {
+					matrix_ptr [-3 * lda + 2] = 0.0;
+					matrix_ptr [-2 * lda + 1] = 0.0;
+					matrix_ptr [-1 * lda] = 1.0;
+					matrix_ptr [-1] = -1.0;
+					// matrix_ptr [-15] = 0.0;
+					// matrix_ptr [10] = 1.0 / (new_pos [-1] - new_pos [-2]) / (npos_m [0] - npos_m [-1]);
+					// matrix_ptr [-5] = -1.0 / (new_pos [0] - new_pos [-1]) / (npos_m [0] - npos_m [-1]) - 1.0 / (new_pos [-1] - new_pos [-2]) / (npos_m [0] - npos_m [-1]) - scalar * (i / 2) * (i / 2);
+					// matrix_ptr [0] = 1.0 / (new_pos [0] - new_pos [-1]) / (npos_m [0] - npos_m [-1]);
+
+					matrix_ptr [-2 * lda + 2] = 0.0;
+					matrix_ptr [-1 * lda + 1] = 1.0 / (new_pos [0] - new_pos [-1]) / (npos_m [1] - npos_m [0]);
+					matrix_ptr [0] = -1.0 / (new_pos [1] - new_pos [0]) / (npos_m [1] - npos_m [0]) - 1.0 / (new_pos [0] - new_pos [-1]) / (npos_m [1] - npos_m [0]) - scalar * (i / 2) * (i / 2);
+					matrix_ptr [1 * lda - 1] = 1.0 / (new_pos [1] - new_pos [0]) / (npos_m [1] - npos_m [0]);
+				}
+				if (id == np - 1) {
+					int j = m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0);
+					matrix_ptr [(j - 2) * lda + 2] = -1.0;
+					matrix_ptr [(j - 1) * lda + 1] = 1.0;
+					matrix_ptr [j * lda] = 1.0e-10;
+					matrix_ptr [(j + 1) * lda - 1] = 0.0;
+					// matrix_ptr [(j - 2) * 6 + 3] = 1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (npos_m [j + 1] - npos_m [j - 1]);
+					// matrix_ptr [(j - 1) * 6 + 2] = -1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (npos_m [j + 1] - npos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
+					// matrix_ptr [(j) * 6 + 1] = -1.0 / (new_pos [j + 1] - new_pos [j]) / (npos_m [j + 1] - npos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
+					// matrix_ptr [(j + 1) * 6] = 1.0 / (new_pos [j + 1] - new_pos [j]) / (npos_m [j + 1] - npos_m [j - 1]);
+				}
+			}
+
+			// throw 0;
+			linalg::p_block_banded_factorize (id, np, m + (nbot == 0 ? 1 : -nbot - excess_n - 1) + (id == 0 ? 1: -excess_0 - ntop), kl, ku, &matrix [(id == 0 ? 0 : 1 + excess_0) * lda], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn, lda, m + 2 + kl + ku);
+			// throw 0;
 		}
 
-		// throw 0;
-		linalg::p_block_banded_factorize (id, np, m + (nbot == 0 ? 1 : -nbot - excess_n - 1) + (id == 0 ? 1: -excess_0 - ntop), kl, ku, &matrix [(id == 0 ? 0 : 1 + excess_0) * lda], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn, lda, m + 2 + kl + ku);
-		// throw 0;
 	}
 
 	template <class datatype>
@@ -181,17 +188,19 @@ namespace plans
 		int ku = 1;
 		int lda = 2 * kl + ku + 1;
 		
+		DEBUG ("HERE")
+		
 		linalg::scale ((m + 2) * ldn, 0.0, &data_temp [0]);
 		
 		std::shared_ptr <plans::plan <datatype> > transform_x = std::shared_ptr <plans::plan <datatype> > (new plans::vertical_transform <datatype> (n, m, data_x, NULL, 0x00, element_flags, component_flags_x));
 		std::shared_ptr <plans::plan <datatype> > transform_z = std::shared_ptr <plans::plan <datatype> > (new plans::vertical_transform <datatype> (n, m, data_z, NULL, 0x00, element_flags, component_flags_z));
 		
 		if (*component_flags_x & transformed_vertical) {
-			transform_x->execute ();
-			transform_z->execute ();
-			retransform = true;
+			// transform_x->execute ();
+			// transform_z->execute ();
+			// retransform = true;
 		}
-
+		count++;
 		if (!(*component_flags_x & transformed_vertical)) {
 			datatype scalar = acos (-1.0) * 2.0 / (pos_n [n - 1] - pos_n [0]);
 			datatype *data_ptr = &data_temp [1];
@@ -211,7 +220,8 @@ namespace plans
 			}
 			new_pos += excess_0;
 			data_ptr += excess_0;
-		
+			
+			linalg::scale (ldn * (m + 2), 0.0, &data_temp [0]);
 			
 			for (int i = 2; i < ldn; i += 2) {
 				for (int j = -1; j < m + 1 + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
@@ -232,19 +242,41 @@ namespace plans
 					data_ptr [i * (m + 2) + (m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0))] = 0.0;
 				}
 			}
+			
+			DEBUG ("N : "<< m + (nbot == 0 ? 1 : -nbot - excess_n - 1) + (id == 0 ? 1: -excess_0 - ntop));
+			
 			linalg::p_block_banded_solve (id, np, m + (nbot == 0 ? 1 : -nbot - excess_n - 1) + (id == 0 ? 1: -excess_0 - ntop), kl, ku, &matrix [(id == 0 ? 0 : 1 + excess_0) * 6], &ipiv [0], &data_temp [(id == 0 ? 0 : 1 + excess_0)], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn, lda, m + 2 + kl + ku, m + 2);
 			// throw 0;
 
 			linalg::scale (2 * (m + 2), 0.0, &data_temp [0]);
+
+			if (boundary_n) {
+				boundary_n->send (&data_temp [m - excess_n - 1], m + 2, 1);
+			}
+			if (boundary_0) {
+				boundary_0->receive (&data_ptr [-1], m + 2, 1, 0.0);
+				// boundary_0->send (&data_ptr [0], m + 2, 1);
+			}
+			if (boundary_n) {
+				// boundary_n->receive (&data_temp [m - excess_n], m + 2, 1, 0.0);
+			}
+
+			// for (int j = -1; j < m + 1; ++j) {
+			// 	debug << j << " ";
+			// 	for (int i = 0; i < ldn; ++i) {
+			// 		debug << data_ptr [i * (m + 2) + j] << " ";
+			// 	}
+			// 	DEBUG ("INC OUT: " << debug.str ());
+			// 	debug.str ("");
+			// }
 
 			for (int i = 2; i < ldn; ++i) {
 				for (int j = 0; j < m + 1 - (nbot == 0 ? 0 : excess_n + 1) - excess_0; ++j) {
 					data [i * m + j + excess_0] = (data_temp [i * (m + 2) + j + excess_0] + data_temp [i * (m + 2) + j + 1 + excess_0]) / 2.0;
 				}
 			}
-
 			for (int i = 2; i < ldn; ++i) {
-				for (int j = 1; j < m - 1 + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
+				for (int j = 0; j < m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
 					ndata_z [i * m + j] -= (data_ptr [i * (m + 2) + j] - data_ptr [i * (m + 2) + j - 1]) / (new_pos [j] - new_pos [j - 1]);
 				}
 			}
@@ -256,16 +288,41 @@ namespace plans
 				}
 			}
 			
-			for (int i = 0; i < n; ++i) {
-				for (int j = excess_0 - 1; j >= 0; --j) {
-					data_x [i * m + j] = data_x [i * m + j + 1] + (data_x [i * m + j + 2] - data_x [i * m + j + 1]) / (pos_m [j + 2] - pos_m [j + 1]) * (pos_m [j] - pos_m [j + 1]);
-					data_z [i * m + j] = data_z [i * m + j + 1] + (data_z [i * m + j + 2] - data_z [i * m + j + 1]) / (pos_m [j + 2] - pos_m [j + 1]) * (pos_m [j] - pos_m [j + 1]);
-				}
-				
-				for (int j = m - excess_n - 1; j < m; ++j) {
-					data_x [i * m + j] = data_x [i * m + j - 1] + (data_x [i * m + j - 2] - data_x [i * m + j - 1]) / (pos_m [j - 2] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]);
-					data_z [i * m + j] = data_z [i * m + j - 1] + (data_z [i * m + j - 2] - data_z [i * m + j + 1]) / (pos_m [j + 2] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]);
-				}
+			// for (int j = 0; j < excess_0; ++j) {
+			// 	linalg::scale (ldn, 0.0, &data_z [j], m);
+			// 	linalg::scale (ldn, 0.0, &data_x [j], m);
+			// }
+			//
+			// for (int j = m - 1 - excess_n; j < m; ++j) {
+			// 	linalg::scale (ldn, 0.0, &data_z [j], m);
+			// 	linalg::scale (ldn, 0.0, &data_x [j], m);
+			// }
+			
+			// Since only one boundary was solved, get the other and the overlap region from the adjacent element
+			if (boundary_0) {
+				// This should be 1 + ex_excess_0
+				boundary_0->send (&data_z [excess_0], m, 1 + excess_0);
+			}
+			if (boundary_n) {
+				boundary_n->receive (&data_z [m - 1 - excess_n], m, 1 + excess_n, 0.0);
+				// This should be m - 1 - excess_n - ex_excess_n and ex_excess_n
+				boundary_n->send (&data_z [m - 1 - excess_n - excess_n], m, excess_n);
+			}
+			if (boundary_0) {
+				boundary_0->receive (&data_z [0], m, excess_0, 0.0);
+			}
+
+			if (boundary_0) {
+				// This should be 1 + ex_excess_0
+				boundary_0->send (&data_x [excess_0], m, 1 + excess_0);
+			}
+			if (boundary_n) {
+				boundary_n->receive (&data_x [m - 1 - excess_n], m, 1 + excess_n, 0.0);
+				// This should be m - 1 - excess_n - ex_excess_n and ex_excess_n
+				boundary_n->send (&data_x [m - 1 - excess_n - excess_n], m, excess_n);
+			}
+			if (boundary_0) {
+				boundary_0->receive (&data_x [0], m, excess_0, 0.0);
 			}
 			
 			// for (int i = 0; i < n; ++i) {
@@ -292,7 +349,7 @@ namespace plans
 			}
 		} else {
 			FATAL ("SHOULDN'T BE HERE" << *component_flags_x);
-			throw 0;
+			// throw 0;
 		}
 		
 		if (retransform) {

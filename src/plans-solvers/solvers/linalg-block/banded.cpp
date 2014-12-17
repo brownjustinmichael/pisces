@@ -47,13 +47,13 @@ namespace linalg
 		linalg::scale (nrhs * ku * n, 0.0, bufferr);
 		
 		for (int i = 0; i < nrhs; ++i) {
-			// for (int j = kl + ntop; j < n + kl + ntop; ++j) {
-			// 	for (int k = 0; k < lda; ++k) {
-			// 		debug << matrix [i * lda * ldaa + j * lda + k] << " ";
-			// 	}
-			// 	DEBUG ("MAT " << debug.str ());
-			// 	debug.str ("");
-			// }
+			for (int j = kl + ntop; j < n + kl + ntop; ++j) {
+				for (int k = 0; k < lda; ++k) {
+					debug << matrix [i * lda * ldaa + j * lda + k] << " ";
+				}
+				DEBUG ("MAT " << debug.str ());
+				debug.str ("");
+			}
 			linalg::matrix_banded_factorize (n, n, kl, ku, matrix + (i) * lda * ldaa + (kl + ntop) * lda, ipiv + i * n, info, lda);
 		}
 
@@ -191,6 +191,14 @@ namespace linalg
 		if (ldaa == -1) {
 			ldaa = n + ku + kl + ntop + nbot;
 		}
+		
+		// for (int j = 0; j < ntop + n + nbot; ++j) {
+		// 	for (int i = 0; i < nrhs; ++i) {
+		// 		debug << b [i * ldb + j] << " ";
+		// 	}
+		// 	DEBUG ("BAND RHS: " << debug.str ());
+		// 	debug.str ("");
+		// }
 
 		linalg::matrix_add_scaled (ntop, nrhs, 1.0, b, &y [kl], ldb, ldy);
 		linalg::matrix_add_scaled (nbot, nrhs, 1.0, b + ntop + n, &y [kl + ku], ldb, ldy);
