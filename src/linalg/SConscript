@@ -6,10 +6,10 @@ conf = Configure (env)
 if include_cuda:
     conf.CheckLib ("cublas")
 
-conf.CheckLib ("atlas")
-
 conf.CheckLib ("lapack")
 conf.CheckLib ("cblas")
 conf.CheckLib ("f77blas")
+
+conf.CheckLib ("atlas")
 
 env = conf.Finish ()
