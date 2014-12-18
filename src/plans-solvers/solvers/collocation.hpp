@@ -91,7 +91,7 @@ namespace plans
 			std::shared_ptr <plans::boundary <datatype>> boundary_0, boundary_n;
 
 		public:
-			factory (mpi::messenger *i_messenger_ptr, datatype &i_timestep, std::shared_ptr <plans::boundary <datatype>> i_boundary_0 = NULL, std::shared_ptr <plans::boundary <datatype>> i_boundary_n = NULL) : messenger_ptr (i_messenger_ptr), timestep (i_timestep), boundary_0 (i_boundary_0), boundary_n (i_boundary_n) {}
+			factory (mpi::messenger *i_messenger_ptr, datatype &i_timestep, std::shared_ptr <plans::boundary <datatype>> i_boundary_0, std::shared_ptr <plans::boundary <datatype>> i_boundary_n) : messenger_ptr (i_messenger_ptr), timestep (i_timestep), boundary_0 (i_boundary_0), boundary_n (i_boundary_n) {}
 			virtual ~factory () {}
 			
 			virtual std::shared_ptr <plans::solver <datatype>> instance (plans::grid <datatype> **grids, datatype *i_data, datatype *i_rhs, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
