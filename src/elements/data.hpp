@@ -281,9 +281,9 @@ namespace data
 	protected:
 		std::shared_ptr <plans::grid <datatype>> grid_n, grid_m;
 		int n, m;
-		using data <datatype>::duration;
 		
 	public:
+		using data <datatype>::duration;
 		implemented_data (plans::axis *i_axis_n, plans::axis *i_axis_m) : grid_n (std::shared_ptr <plans::grid <datatype>> (new typename plans::horizontal::grid <datatype> (i_axis_n))), grid_m (std::shared_ptr <plans::grid <datatype>> (new typename plans::vertical::grid <datatype> (i_axis_m))), n (grid_n->get_n ()), m (grid_m->get_n ()) {
 			this->initialize (x_position, "x");
 			this->initialize (z_position, "z");

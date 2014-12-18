@@ -18,10 +18,6 @@
 
 #include "logger/logger.hpp"
 #include "io/parameters.hpp"
-#include "io/input.hpp"
-#include "io/output.hpp"
-// #include "io/formats/ascii.hpp"
-#include "io/formats/netcdf.hpp"
 #include "plans/plan.hpp"
 #include "elements/boussinesq.hpp"
 #include "elements/rezone.hpp"
