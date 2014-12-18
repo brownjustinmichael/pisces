@@ -30,6 +30,8 @@ namespace io
 					file_name = i_file_name;
 				}
 				
+				~file_exception () throw () {}
+				
 				/*!*******************************************************************
 				 * \brief Describe the nature of the exception
 				 *********************************************************************/
