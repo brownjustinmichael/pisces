@@ -106,10 +106,6 @@ int main (int argc, char *argv[])
 		}
 		io::parameters config (config_filename);
 
-		if (!config ["time.steps"].IsDefined ()) config ["time.steps"] = 1;
-		if (!config ["grid.x.points"].IsDefined ()) config ["grid.x.points"] = 64;
-		if (!config ["grid.z.points"].IsDefined ()) config ["grid.z.points"] = 64;
-
 		omp_set_num_threads (config.get <int> ("parallel.maxthreads"));
 
 		int m = config.get <int> ("grid.z.points") / n_elements + 1;

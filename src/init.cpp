@@ -39,8 +39,6 @@ int main (int argc, char *argv[])
 			config_filename = argv [1];
 		}
 		io::parameters config (config_filename);
-		if (!config ["grid.x.points"].IsDefined ()) config ["grid.x.points"] = 64;
-		if (!config ["grid.z.points"].IsDefined ()) config ["grid.z.points"] = 64;
 
 		int m = config.get <int> ("grid.z.points") / n_elements + 1;
 		m += m % 2;
@@ -96,7 +94,7 @@ int main (int argc, char *argv[])
 
 		output_stream.to_file ();
 	} catch (std::exception& except) {
-		std::cout << except.what () << '\n';
+		FATAL (except.what ());
 	}
 
 	

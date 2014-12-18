@@ -39,7 +39,7 @@ namespace data
 		
 		const io::data_grid i_grid = io::data_grid::two_d (n, m, 0, i_params.get <bool> ("input.full") ? n_elements * m : 0, 0, i_params.get <bool> ("input.full") ? id * m : 0);
 		
-		if (i_params ["input.file"].IsDefined ()) {
+		if (i_params.get <std::string> ("input.file", "") != "") {
 			std::string file_format = "input/" + i_params.get <std::string> ("input.file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
@@ -52,7 +52,7 @@ namespace data
 		
 		// Set up output
 		std::shared_ptr <io::output> normal_stream;
-		if (i_params ["output.file"].IsDefined ()) {
+		if (i_params.get <std::string> ("output.file", "") != "") {
 			std::string file_format = "output/" + i_params.get <std::string> ("output.file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
@@ -63,7 +63,7 @@ namespace data
 		}
 
 		std::shared_ptr <io::output> transform_stream;
-		if (i_params ["output.transform_file"].IsDefined ()) {
+		if (i_params.get <std::string> ("output.transform_file", "") != "") {
 			std::string file_format = "output/" + i_params.get <std::string> ("output.transform_file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
@@ -74,7 +74,7 @@ namespace data
 		}
 
 		std::shared_ptr <io::output> stat_stream;
-		if (i_params ["output.stat.file"].IsDefined ()) {
+		if (i_params.get <std::string> ("output.stat.file", "") != "") {
 			std::string file_format = "output/" + i_params.get <std::string> ("output.stat.file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
