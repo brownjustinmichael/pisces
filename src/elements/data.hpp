@@ -281,6 +281,7 @@ namespace data
 	protected:
 		std::shared_ptr <plans::grid <datatype>> grid_n, grid_m;
 		int n, m;
+		using data <datatype>::duration;
 		
 	public:
 		implemented_data (plans::axis *i_axis_n, plans::axis *i_axis_m) : grid_n (std::shared_ptr <plans::grid <datatype>> (new typename plans::horizontal::grid <datatype> (i_axis_n))), grid_m (std::shared_ptr <plans::grid <datatype>> (new typename plans::vertical::grid <datatype> (i_axis_m))), n (grid_n->get_n ()), m (grid_m->get_n ()) {
@@ -301,7 +302,7 @@ namespace data
 				output_ptr->template append <datatype> ("rms_" + data <datatype>::scalar_names [iter->first], new io::functors::root_mean_square_functor <datatype> ((*this) (iter->first), n, m));
 				output_ptr->template append <datatype> ("avg_" + data <datatype>::scalar_names [iter->first], new io::functors::average_functor <datatype> ((*this) (iter->first), n, m));
 			}
-			output_ptr->template append <datatype> ("t", &(data <datatype>::duration), io::scalar);
+			output_ptr->template append <datatype> ("t", &(duration), io::scalar);
 			output_ptr->template append <const int> ("mode", &(data <datatype>::get_mode ()), io::scalar);
 
 			data <datatype>::setup_profile (output_ptr, flags);
