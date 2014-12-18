@@ -30,8 +30,8 @@ namespace io
 			static std::map <std::string, std::shared_ptr <std::ofstream>> file_streams;
 			static std::map <std::string, int> count;
 			static std::map <std::string, int> file_types;
-			static std::map <std::string, std::stringstream> header;
-			static std::map <std::string, std::stringstream> body;
+			static std::map <std::string, std::shared_ptr <std::stringstream>> header;
+			static std::map <std::string, std::shared_ptr <std::stringstream>> body;
 			
 		public:
 			static bool uses_files;
@@ -63,25 +63,25 @@ namespace io
 					throw exceptions::file_exception (file_name);
 				}
 				
-				if (header [file_name].str () != "") {
-					*file_streams [file_name] << comment << " " << header [file_name].str () << "\n";
+				if (header [file_name]->str () != "") {
+					*file_streams [file_name] << comment << " " << header [file_name]->str () << "\n";
 				}
-				if (body [file_name].str () != "") {
-					*file_streams [file_name] << body [file_name].str () << "\n";
+				if (body [file_name]->str () != "") {
+					*file_streams [file_name] << body [file_name]->str () << "\n";
 				}
 				
 				count [file_name] += 1;
 				file_types [file_name] = file_type;
 				
-				header [file_name].str ("");
-				body [file_name].str ("");
+				header [file_name]->str ("");
+				body [file_name]->str ("");
 			}
 			
 			static void close_file (std::string file_name, int file_type) {
-				if (header [file_name].str () != "") {
-					*file_streams [file_name] << comment << " " << header [file_name].str () << "\n";
+				if (header [file_name]->str () != "") {
+					*file_streams [file_name] << comment << " " << header [file_name]->str () << "\n";
 				}
-				*file_streams [file_name] << body [file_name].str () << "\n";
+				*file_streams [file_name] << body [file_name]->str () << "\n";
 				file_streams [file_name]->close ();
 			}
 			
@@ -92,9 +92,9 @@ namespace io
 					throw 0;
 				}
 				if (file_types [file_name] != append_file || count [file_name] == 1) {
-					header [file_name] << name << " ";
+					*header [file_name] << name << " ";
 				}
-				body [file_name] << * (datatype *) data << " ";
+				*body [file_name] << * (datatype *) data << " ";
 			}
 			
 			template <class datatype>
