@@ -28,7 +28,7 @@
 namespace data
 {
 	template <class datatype>
-	thermo_compositional_data <datatype>::thermo_compositional_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int id, int n_elements, io::parameters& i_params) : implemented_data <datatype> (i_axis_n, i_axis_m) {
+	thermo_compositional_data <datatype>::thermo_compositional_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int id, int n_elements, io::parameters& i_params) : implemented_data <datatype> (i_axis_n, i_axis_m, id, i_params.get <std::string> ("dump.file", "dump_%02i"), i_params.get <int> ("dump.every", 1000)) {
 		initialize (x_velocity, "u");
 		initialize (z_velocity, "w");
 		initialize (temp, "T");
@@ -78,7 +78,7 @@ namespace data
 			std::string file_format = "output/" + i_params.get <std::string> ("output.stat.file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-			
+
 			area.resize (n * m);
 			for (int i = 1; i < n; ++i) {
 				for (int j = 1; j < m; ++j) {

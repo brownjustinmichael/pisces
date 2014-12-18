@@ -287,7 +287,7 @@ namespace pisces
 				element_flags [*iter] &= ~solved;
 			}
 			
-			int threads = params.get <int> ("parallel.solver.threads");
+			// int threads = params.get <int> ("parallel.solver.threads");
 // #pragma omp parallel num_threads (threads)
 			{
 				bool completely_solved = false;

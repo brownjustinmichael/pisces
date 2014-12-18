@@ -250,6 +250,37 @@ namespace io
 			++count;
 		}
 	};
+	
+	/*!**********************************************************************
+	 * \brief An output class that replaces the previous output
+	 ************************************************************************/
+	template <class format>
+	class replace_output : public formatted_output <format>
+	{
+	private:
+		int output_every; //!< The integer frequency of outputs
+		int count; //!< The current integer count of total outputs
+
+	public:
+		/*!**********************************************************************
+		 * \param i_output_every The integer frequency of outputs
+		 * \copydoc formatted_output::formatted_output
+		 ************************************************************************/
+		replace_output (data_grid i_grid, std::string i_file_name, int i_output_every = 1) : formatted_output <format> (i_grid, i_file_name, replace_file), output_every (i_output_every > 0 ? i_output_every : 1), count (0) {}
+
+		virtual ~replace_output () {}
+
+		/*!**********************************************************************
+		 * \copybrief formatted_output::to_file
+		 ************************************************************************/
+		void to_file (int record = -1) {
+			TRACE ("Sending to file...");
+			if (count % output_every == 0) {
+				formatted_output <format>::to_file ();
+			}
+			++count;
+		}
+	};
 } /* io */
 
 #endif /* end of include guard: OUTPUT_HPP_31603039 */

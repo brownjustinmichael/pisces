@@ -20,6 +20,7 @@
 #include "io/output.hpp"
 #include "io/functors/average.hpp"
 #include "io/formats/exceptions.hpp"
+#include "io/formats/netcdf.hpp"
 #include "plans/grid.hpp"
 #include "plans-transforms/implemented_transformer.hpp"
 
@@ -49,6 +50,10 @@ namespace data
 		std::vector <std::shared_ptr <io::output>> streams; //!< A vector of pointers to output streams
 		std::vector <int> stream_conditions; //!< A vector of flags to match to output
 		std::vector <bool> done; //!< A vector of booleans informing whether an output has been made this timestep
+		
+		std::shared_ptr <io::output> dump_stream;
+		int dump_condition;
+		bool dump_done;
 		
 	public:
 		datatype duration; //!< The total time elapsed in the simulation thus far
@@ -131,7 +136,9 @@ namespace data
 		virtual datatype *initialize (int i_name, std::string i_str, datatype* initial_conditions = NULL, int i_flags = 0x00) {
 			flags [i_name] = 0x00;
 			scalar_names [i_name] = i_str;
-			return _initialize (i_name, initial_conditions, i_flags);
+			datatype *ptr = _initialize (i_name, initial_conditions, i_flags);
+			dump_stream->template append <datatype> (i_str, ptr);
+			return ptr;
 		}
 		
 		/*!**********************************************************************
@@ -162,6 +169,28 @@ namespace data
 				streams [i]->to_file ();
 				done [i] = true;
 			}
+			if (!dump_done) {
+				if (dump_condition & transformed_vertical) {
+					if (!(i_flags & transformed_vertical)) {
+						return;
+					}
+				} else {
+					if ((i_flags & transformed_vertical)) {
+						return;
+					}
+				}
+				if (dump_condition & transformed_horizontal) {
+					if (!(i_flags & transformed_horizontal)) {
+						return;
+					}
+				} else {
+					if ((i_flags & transformed_horizontal)) {
+						return;
+					}
+				}
+				dump_stream->to_file ();
+				dump_done = true;
+			}
 		}
 		
 		/*!**********************************************************************
@@ -171,6 +200,7 @@ namespace data
 			for (int i = 0; i < (int) done.size (); ++i) {
 				done [i] = false;
 			}
+			dump_done = false;
 		}
 		
 		/*!**********************************************************************
@@ -232,6 +262,17 @@ namespace data
 			}
 		}
 		
+		virtual void setup_dump (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
+			// Iterate through the scalar fields and append them to the variables which the output will write to file
+			output_ptr->template append <datatype> ("t", &duration, io::scalar);
+			output_ptr->template append <const int> ("mode", &(get_mode ()), io::scalar);
+
+			// Check the desired output time and save the output object in the appropriate variable
+			dump_stream = output_ptr;
+			dump_done = false;
+			dump_condition = flags;
+		}
+		
 		/*!**********************************************************************
 		 * \brief Given an output stream, prepare the stat output
 		 * 
@@ -284,9 +325,26 @@ namespace data
 		
 	public:
 		using data <datatype>::duration;
-		implemented_data (plans::axis *i_axis_n, plans::axis *i_axis_m) : grid_n (std::shared_ptr <plans::grid <datatype>> (new typename plans::horizontal::grid <datatype> (i_axis_n))), grid_m (std::shared_ptr <plans::grid <datatype>> (new typename plans::vertical::grid <datatype> (i_axis_m))), n (grid_n->get_n ()), m (grid_m->get_n ()) {
+		implemented_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int name = 0, std::string dump_file = "", int dump_every = 1) : grid_n (std::shared_ptr <plans::grid <datatype>> (new typename plans::horizontal::grid <datatype> (i_axis_n))), grid_m (std::shared_ptr <plans::grid <datatype>> (new typename plans::vertical::grid <datatype> (i_axis_m))), n (grid_n->get_n ()), m (grid_m->get_n ()) {
+			// Set up output
+			const io::data_grid o_grid = io::data_grid::two_d (n, m, 0, 0, 0, 0);
+			
+			std::shared_ptr <io::output> dump_stream;
+			if (dump_file != "") {
+				std::string file_format = "input/" + dump_file;
+				char buffer [file_format.size () * 2];
+				snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
+
+				dump_stream.reset (new io::replace_output <io::formats::two_d::netcdf> (o_grid, buffer, dump_every));
+				this->setup_dump (dump_stream);
+			}
+			
 			this->initialize (x_position, "x");
 			this->initialize (z_position, "z");
+			
+			/*
+				TODO Clean dump file generation
+			*/
 		}
 		
 		virtual ~implemented_data () {}

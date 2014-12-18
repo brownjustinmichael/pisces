@@ -42,6 +42,7 @@ namespace io
 			static std::string extension () {return ".dat";}
 			
 			static void open_file (const data_grid &grid, std::string file_name, int file_type) {
+				TRACE ("Opening ASCII file");
 				if (!(file_streams [file_name])) {
 					file_streams [file_name] = std::shared_ptr <std::ofstream> (new std::ofstream);
 				}
@@ -63,8 +64,14 @@ namespace io
 					throw exceptions::file_exception (file_name);
 				}
 				
+				if (!header [file_name]) {
+					header [file_name] = std::shared_ptr <std::stringstream> (new std::stringstream);
+				}
 				if (header [file_name]->str () != "") {
 					*file_streams [file_name] << comment << " " << header [file_name]->str () << "\n";
+				}
+				if (!body [file_name]) {
+					body [file_name] = std::shared_ptr <std::stringstream> (new std::stringstream);
 				}
 				if (body [file_name]->str () != "") {
 					*file_streams [file_name] << body [file_name]->str () << "\n";
