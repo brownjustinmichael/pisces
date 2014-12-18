@@ -10,6 +10,7 @@
 #define DIV_HPP_A5256DE8
 
 #include <vector>
+#include <cmath>
 
 #include "functor.hpp"
 
