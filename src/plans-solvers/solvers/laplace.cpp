@@ -9,10 +9,10 @@
 #ifndef LAPLACE_CPP_3231A497
 #define LAPLACE_CPP_3231A497
 
+#include "laplace.hpp"
+
 #include "linalg/exceptions.hpp"
 #include "linalg-block/tridiagonal.hpp"
-
-#include "laplace.hpp"
 
 namespace plans
 {
