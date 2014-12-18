@@ -12,6 +12,8 @@
 #ifndef ELEMENT_HPP_IUTSU4TQ
 #define ELEMENT_HPP_IUTSU4TQ
 
+#include "mpi/messenger.hpp"
+
 #include <string>
 #include <cassert>
 #include <memory>
@@ -26,7 +28,6 @@
 #include "io/output.hpp"
 #include "io/parameters.hpp"
 #include "io/formats/virtual.hpp"
-#include "mpi/messenger.hpp"
 #include "plans/grid.hpp"
 #include "plans/plan.hpp"
 #include "plans-solvers/equation.hpp"
