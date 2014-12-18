@@ -9,6 +9,7 @@
 #ifndef ELEMENT_TWO_D_HPP_CJ68F4IB
 #define ELEMENT_TWO_D_HPP_CJ68F4IB
 
+#include "mpi/messenger.hpp"
 
 #include <cmath>
 #include <sstream>
