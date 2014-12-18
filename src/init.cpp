@@ -6,6 +6,8 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
+#include "mpi/messenger.hpp"
+
 #include <sstream>
 #include <iomanip>
 
@@ -13,7 +15,6 @@
 #include "io/output.hpp"
 #include "io/parameters.hpp"
 #include "io/formats/netcdf.hpp"
-#include "mpi/messenger.hpp"
 #include "plans/grid.hpp"
 
 using namespace plans;
