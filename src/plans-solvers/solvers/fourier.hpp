@@ -9,6 +9,8 @@
 #ifndef FOURIER_SOLVER_HPP_6DE77A57
 #define FOURIER_SOLVER_HPP_6DE77A57
 
+#include "mpi/messenger.hpp"
+
 #include "../solver.hpp"
 #include "../boundary.hpp"
 
