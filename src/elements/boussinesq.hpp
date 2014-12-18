@@ -9,6 +9,8 @@
 #ifndef BOUSSINESQ_TWO_D_HPP_OQ800X4X
 #define BOUSSINESQ_TWO_D_HPP_OQ800X4X
 
+#include "mpi/messenger.hpp"
+
 #include "io/functors/div.hpp"
 #include "io/functors/product.hpp"
 
