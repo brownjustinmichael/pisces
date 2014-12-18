@@ -12,6 +12,7 @@
 #include <map>
 #include <cstring>
 #include <typeinfo>
+#include <array>
 
 #include "logger/logger.hpp"
 
