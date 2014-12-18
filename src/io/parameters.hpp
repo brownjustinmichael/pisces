@@ -81,9 +81,9 @@ namespace io
 			try {
 				(*this) [key] >> value;
 			} catch (YAML::RepresentationException &e) {
-				return value;
+				return default_value;
 			}
-			return default_value;
+			return value;
 		}
 	};
 } /* io */
