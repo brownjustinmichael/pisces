@@ -9,6 +9,8 @@
 #ifndef PARAMETERS_HPP_A5EF2439
 #define PARAMETERS_HPP_A5EF2439
 
+#include <fstream>
+
 #include <yaml-cpp/yaml.h>
 
 #include "exceptions.hpp"
@@ -23,14 +25,15 @@ namespace io
 	class parameters : public YAML::Node
 	{
 	public:
-		using YAML::Node::operator=; //!< Use the assignment operator from the super class
-	
 		/*!**********************************************************************
 		 * \param file_name The parameter file from which the parameters should be loaded
 		 ************************************************************************/
 		parameters (std::string file_name = "") {
 			if (file_name != "") {
-				YAML::Node::operator= (YAML::LoadFile (file_name));
+			    std::ifstream fin (file_name);
+			    YAML::Parser parser(fin);
+				
+			    parser.GetNextDocument (*this);
 			}
 		}
 	
@@ -45,16 +48,15 @@ namespace io
 		 * 
 		 * \return A copy of the YAML::Node object at the given parameter.
 		 ************************************************************************/
-		YAML::Node operator [] (std::string key) {
+		const YAML::Node &operator [] (std::string key) {
 			std::istringstream ss (key);
 			std::string token;
 			std::getline (ss, token, '.');
-			std::vector <YAML::Node> nodes;
-			nodes.push_back (YAML::Node::operator [] (token));
+			const YAML::Node *node = &(YAML::Node::operator [] (token));
 			while (std::getline (ss, token, '.')) {
-				nodes.push_back (nodes [(int) nodes.size () - 1] [token]);
+				node = &((*node) [token]);
 			}
-			return nodes [(int) nodes.size () - 1];
+			return *node;
 		}
 			
 		/*!**********************************************************************
@@ -68,11 +70,20 @@ namespace io
 		 ************************************************************************/
 		template <typename datatype>
 		const datatype get (std::string key) {
-			if (operator[] (key).IsDefined ()) {
-				return operator[] (key).as <datatype> ();
-			} else {
-				throw exceptions::key_does_not_exist (key);
+			datatype value;
+			(*this) [key] >> value;
+			return value;
+		}
+		
+		template <typename datatype>
+		const datatype get (std::string key, datatype default_value) {
+			datatype value;
+			try {
+				(*this) [key] >> value;
+			} catch (YAML::RepresentationException &e) {
+				return value;
 			}
+			return default_value;
 		}
 	};
 } /* io */

@@ -6,6 +6,8 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
+#include "mpi/messenger.hpp"
+
 #include <memory>
 #include <omp.h>
 #include <ctime>
@@ -15,7 +17,6 @@
 #endif
 
 #include "logger/logger.hpp"
-#include "mpi/messenger.hpp"
 #include "io/parameters.hpp"
 #include "io/input.hpp"
 #include "io/output.hpp"
@@ -105,10 +106,6 @@ int main (int argc, char *argv[])
 			config_filename = argv [1];
 		}
 		io::parameters config (config_filename);
-
-		if (!config ["time.steps"].IsDefined ()) config ["time.steps"] = 1;
-		if (!config ["grid.x.points"].IsDefined ()) config ["grid.x.points"] = 64;
-		if (!config ["grid.z.points"].IsDefined ()) config ["grid.z.points"] = 64;
 
 		omp_set_num_threads (config.get <int> ("parallel.maxthreads"));
 
