@@ -8,11 +8,8 @@ if include_cuda:
 
 conf.CheckLib ("atlas")
 
-if not conf.CheckLib ("ptlapack"):
-    conf.CheckLib ("lapack")
-if not conf.CheckLib ("ptf77blas"):
-    conf.CheckLib ("blas")
-if not conf.CheckLib ("ptcblas"):
-    conf.CheckLib ("cblas")
+conf.CheckLib ("lapack")
+conf.CheckLib ("cblas")
+conf.CheckLib ("f77blas")
 
 env = conf.Finish ()
