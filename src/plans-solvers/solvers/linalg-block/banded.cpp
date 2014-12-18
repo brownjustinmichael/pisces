@@ -6,11 +6,13 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
-#include <vector>
-#include <sstream>
 #ifdef _MPI
 #include <mpi.h>
 #endif
+
+#include <vector>
+#include <sstream>
+
 #include "mpi/messenger.hpp"
 #include "linalg/utils.hpp"
 #include "linalg/linalg.hpp"
