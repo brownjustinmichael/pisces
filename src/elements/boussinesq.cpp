@@ -6,6 +6,8 @@
  * Copyright 2014 Justin Brown. All rights reserved.
  ************************************************************************/
 
+#include "boussinesq.hpp"
+
 #include <sstream>
 #include <iomanip>
 #include <stdlib.h>
@@ -22,8 +24,6 @@
 #include "plans-solvers/solvers/collocation.hpp"
 #include "plans-solvers/solvers/fourier.hpp"
 #include "plans-solvers/solvers/incompressible.hpp"
-
-#include "boussinesq.hpp"
 
 namespace data
 {
