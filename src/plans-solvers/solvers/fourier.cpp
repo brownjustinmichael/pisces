@@ -9,10 +9,10 @@
 #ifndef FOURIER_CPP_0B813976
 #define FOURIER_CPP_0B813976
 
+#include "fourier.hpp"
+
 #include "linalg/utils.hpp"
 #include "linalg/linalg.hpp"
-
-#include "fourier.hpp"
 
 namespace plans
 {

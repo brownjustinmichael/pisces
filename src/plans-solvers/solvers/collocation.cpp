@@ -9,9 +9,9 @@
 #ifndef COLLOCATION_CPP_655F168D
 #define COLLOCATION_CPP_655F168D
 
-#include "linalg/exceptions.hpp"
-
 #include "collocation.hpp"
+
+#include "linalg/exceptions.hpp"
 
 namespace plans
 {

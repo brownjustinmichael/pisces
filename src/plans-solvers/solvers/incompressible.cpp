@@ -6,6 +6,8 @@
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/
 
+#include "incompressible.hpp"
+
 #include <cmath>
 #include <sstream>
 
@@ -15,7 +17,6 @@
 #include "linalg/exceptions.hpp"
 #include "linalg-block/banded.hpp"
 
-#include "incompressible.hpp"
 #include "plans-transforms/transform.hpp"
 
 /*
