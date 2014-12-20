@@ -41,26 +41,49 @@ namespace plans
 		pos_n (&(grid_n [0])),
 		pos_m (&(grid_m [0])) {
 			TRACE ("Adding advection...");
+			x_vec.resize (n * m);
+			x_ptr = &x_vec [0];
+			z_vec.resize (n * m);
+			z_ptr = &z_vec [0];
+			oodx_vec.resize (n);
+			oodx_ptr = &oodx_vec [0];
+			oodz_vec.resize (m);
+			oodz_ptr = &oodz_vec [0];
+			
+			oodx_ptr [0] = 0.5 / (pos_n [1] - pos_n [0]);
+			for (int i = 1; i < n - 1; ++i) {
+				oodx_ptr [i] = 1.0 / (pos_n [i + 1] - pos_n [i - 1]);
+			}
+			oodx_ptr [n - 1] = 0.5 / (pos_n [n - 1] - pos_n [n - 2]);
+			
+			oodz_ptr [0] = 1.0 / (pos_m [1] - pos_m [0]);
+			for (int i = 1; i < m - 1; ++i) {
+				oodz_ptr [i] = 1.0 / (pos_m [i + 1] - pos_m [i - 1]);
+			}
+			oodz_ptr [m - 1] = 1.0 / (pos_m [m - 1] - pos_m [m - 2]);
 		}
 	
 		virtual ~advection () {}
 	
 		virtual void execute () {
+			linalg::matrix_copy (m, n - 1, data_in, x_ptr + m);
+			linalg::matrix_add_scaled (m, n - 1, -1.0, data_in + m, x_ptr);
+			linalg::add_scaled (m, -1.0, data_in + m * (n - 1), x_ptr);
+			linalg::add_scaled (m, 1.0, data_in, x_ptr + m * (n - 1));
+			
+			linalg::matrix_copy (m - 1, n, data_in, z_ptr + 1);
+			linalg::matrix_add_scaled (m - 1, n, -1.0, data_in + 1, z_ptr);
+			linalg::add_scaled (n, -1.0, data_in + m - 1, z_ptr, m, m);
+			linalg::add_scaled (n, 1.0, data_in, z_ptr + m - 1, m, m);
+			
 			#pragma omp parallel for
-			for (int j = 1; j < m - 1; ++j) {
-				data_out [j] += coeff * (vel_m [j] * (data_in [j + 1] - data_in [j - 1]) / (pos_m [j + 1] - pos_m [j - 1]));
-				if (n > 1) {
-					data_out [j] += coeff * vel_n [j] * (data_in [1 * m + j] - data_in [j]) / (pos_n [1] - pos_n [0]);
-				}
-				for (int i = 1; i < n - 1; ++i) {
-					advection_term_quadratic (i, j, n, m, coeff, pos_n, pos_m, vel_n, vel_m, data_in, data_out);
-					// data_out [i * m + j] += coeff * (vel_n [i * m + j] * (data_in [(i + 1) * m + j] - data_in [(i - 1) * m + j]) / (pos_n [i + 1] - pos_n [i - 1]) + vel_m [i * m + j] * (data_in [i * m + j + 1] - data_in [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]));
-				}
-				data_out [(n - 1) * m + j] += coeff * (vel_m [(n - 1) * m + j] * (data_in [(n - 1) * m + j + 1] - data_in [(n - 1) * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]));
-				if (n > 1) {
-					data_out [(n - 1) * m + j] += coeff * vel_n [(n - 1) * m + j] * (data_in [(n - 1) * m + j] - data_in [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]);
+			for (int j = 0; j < m; ++j) {
+				for (int i = 0; i < n; ++i) {
+					x_ptr [i * m + j] = x_ptr [i * m + j] * vel_n [i * m + j] * oodx_ptr [i] + z_ptr [i * m + j] * vel_m [i * m + j] * oodz_ptr [j];
 				}
 			}
+			
+			linalg::matrix_add_scaled (m, n, coeff, x_ptr, data_out);
 		}
 	
 		class factory : public real_plan <datatype>::factory
@@ -82,6 +105,8 @@ namespace plans
 		datatype coeff;
 		datatype *vel_n, *vel_m;
 		const datatype *pos_n, *pos_m;
+		std::vector <datatype> x_vec, z_vec, oodx_vec, oodz_vec;
+		datatype *x_ptr, *z_ptr, *oodx_ptr, *oodz_ptr;
 		using real_plan <datatype>::n;
 		using real_plan <datatype>::m;
 		using real_plan <datatype>::grid_n;

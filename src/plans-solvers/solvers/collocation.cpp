@@ -60,6 +60,7 @@ namespace plans
 
 		TRACE ("Factorizing...");
 
+		// linalg::matrix_scale (lda, lda, 0.0, &factorized_matrix [0]);
 		linalg::matrix_copy (m, m, &matrix [0], &factorized_matrix [(ex_overlap_0) * (lda + 1)], m, lda);
 
 		/*
@@ -74,11 +75,11 @@ namespace plans
 		if (boundary_n) {
 			boundary_n->calculate_matrix (timestep, default_matrix + m - 1 - excess_n, &matrix [m - 1 - excess_n], &matrix [0], &factorized_matrix [(ex_overlap_0) * (lda + 1) + m - 1 - excess_n], lda);
 		}
-
+		
 		linalg::matrix_scale (lda - 2 - excess_0 - ex_overlap_0 - excess_n - ex_overlap_n, lda, timestep, &factorized_matrix [ex_overlap_0 + 1 + excess_0], lda);
-
+		
 		linalg::matrix_add_scaled (m - 2 - excess_0 - excess_n, m, 1.0, default_matrix + excess_0 + 1, &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0 + 1], m, lda);
-
+		
 		// for (int j = 0; j < lda; ++j) {
 		// 	for (int i = 0; i < lda; ++i) {
 		// 		debug << factorized_matrix [i * lda + j] << " ";
@@ -163,6 +164,7 @@ namespace plans
 
 		TRACE ("Matrix solve complete.");
 
+#ifdef CHECKNAN
 		for (int i = 0; i < ldn; ++i) {
 			for (int j = 0; j < m; ++j) {
 				if (std::isnan (data_temp [ex_overlap_0 + i * m + j])) {
@@ -175,10 +177,19 @@ namespace plans
 				}
 			}
 		}
+#endif
 
 		TRACE ("Updating...");
 		linalg::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data, lda, m);
-
+		
+		// for (int j = 0; j < m; ++j) {
+		// 		for (int i = 0; i < ldn; ++i) {
+		// 			debug << data [i * m + j] << " ";
+		// 		}
+		// 		DEBUG ("DONE " << debug.str ());
+		// 		debug.str ("");
+		// }
+		
 		*component_flags |= transformed_vertical;
 
 		TRACE ("Solve complete.")

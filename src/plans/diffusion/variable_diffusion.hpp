@@ -36,7 +36,7 @@ namespace plans
 				data_out [j] += coeff * (data_source [j + 1] - data_source [j - 1]) / (grid_m [j + 1] - grid_m [j - 1]) * (data_in [j + 1] - data_in [j - 1]) / (grid_m [j + 1] - grid_m [j - 1]);
 				data_out [j] += coeff * (data_source [m + j] - data_source [(n - 1) * m + j]) / (grid_n [1] - grid_n [0]) * (data_in [m + j] - data_in [(n - 1) * m + j]) / (grid_n [1] - grid_n [0]);
 			}
-			#pragma omp parallel for
+			// #pragma omp parallel for
 			for (int i = 1; i < n - 1; ++i) {
 				for (int j = 1; j < m - 1; ++j) {
 					data_out [i * m + j] += coeff * data_source [i * m + j] * ((data_in [i * m + j + 1] - data_in [i * m + j]) / (grid_m [j + 1] - grid_m [j]) - (data_in [i * m + j] - data_in [i * m + j - 1]) / (grid_m [j] - grid_m [j - 1])) / (grid_m [j + 1] - grid_m [j - 1]) * 2.0;

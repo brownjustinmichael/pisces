@@ -114,6 +114,7 @@ namespace plans
 		}
 		
 		virtual void calculate_matrix (datatype timestep, datatype *default_matrix, datatype *matrix_in, datatype *interpolate_matrix, datatype *matrix_out, int lda, bool diverging = false) {
+			DEBUG ("Here" << default_matrix [0]);
 			linalg::scale (m, 0.0, matrix_out, lda);
 			linalg::add_scaled (m, 1.0, default_matrix, matrix_out, m, lda);
 		}
@@ -236,14 +237,14 @@ namespace plans
 			// Zero the external rows
 			linalg::matrix_scale (1 + n_boundary_out + n_boundary_in, ldn, 0.0, data_temp + (top ? 1 : -1 - n_boundary_out - n_boundary_in), lda);
 			// Setting the external overlapping boundary
-			linalg::interpolate (n_boundary_out, ldn, m, 1.0, 0.0, positions, interpolate_data, boundary_positions, data_temp + (top ? 1 + n_boundary_in : -n_boundary_in - n_boundary_out), lda, lda);
+			// linalg::interpolate (n_boundary_out, ldn, m, 1.0, 0.0, positions, interpolate_data, boundary_positions, data_temp + (top ? 1 + n_boundary_in : -n_boundary_in - n_boundary_out), lda, lda);
 			// Scale the internal boundary row
 			linalg::scale (ldn, alpha, data_temp, lda);
 			// Add the original data to the internal boundary row
 			if (data) {
 				linalg::add_scaled (ldn, alpha, data, data_temp, m, lda);
 				// linalg::add_scaled (ldn, 1.0, data - (top ? 1 : -1), data_temp + (top ? 1 + n_boundary_in : -n_boundary_in - n_boundary_out), m, lda);
-				linalg::interpolate (n_boundary_out, ldn, m, 1.0, 1.0, positions, interpolate_original, boundary_positions, data_temp + (top ? 1 + n_boundary_in : -n_boundary_in - n_boundary_out), m, lda);
+				// linalg::interpolate (n_boundary_out, ldn, m, 1.0, 1.0, positions, interpolate_original, boundary_positions, data_temp + (top ? 1 + n_boundary_in : -n_boundary_in - n_boundary_out), m, lda);
 			}
 			// Copy the internal boundary row to the external boundary row
 			linalg::copy (ldn, data_temp, data_temp + (top ? 1 : -1) * (1 + n_boundary_out + n_boundary_in), lda, lda);
@@ -255,11 +256,12 @@ namespace plans
 			// Setting the external boundary matrix row
 			linalg::matrix_add_scaled (1, m, alpha, matrix_in, matrix_out + (top ? 1 : -1) * (1 + n_boundary_out + n_boundary_in), m, lda);
 			// Setting the external overlapping boundary matrix row
-			linalg::interpolate (n_boundary_out, m, m, 1.0, 1.0, positions, interpolate_matrix, boundary_positions, matrix_out + (top ? 1 + n_boundary_in : -n_boundary_in - n_boundary_out), m, lda);
+			// linalg::interpolate (n_boundary_out, m, m, 1.0, 1.0, positions, interpolate_matrix, boundary_positions, matrix_out + (top ? 1 + n_boundary_in : -n_boundary_in - n_boundary_out), m, lda);
 			// Setting the internal boundary matrix row
-			linalg::matrix_add_scaled (1, m, alpha, matrix_in, matrix_out, m, lda);
+			// linalg::matrix_add_scaled (1, m, alpha, matrix_in, matrix_out, m, lda);
 			linalg::matrix_scale (1 + n_boundary_out + n_boundary_in + 1, m, timestep, matrix_out + (top ? 0 : -1 - n_boundary_out - n_boundary_in), lda);
 			linalg::matrix_add_scaled (1 + n_boundary_in, m, 1.0, default_matrix + (top ? 0 : -n_boundary_in), matrix_out + (top ? 0 : -n_boundary_in), m, lda);
+			linalg::matrix_add_scaled (n_boundary_out, m, -1.0, default_matrix + (top ? -1 : 1), matrix_out + (top ? 1 + n_boundary_in : -n_boundary_in - n_boundary_out), m, lda);
 			// linalg::interpolate (n_boundary_out, m, m, -1.0, 1.0, positions, interpolate_matrix, boundary_positions, matrix_out + (top ? 1 + n_boundary_in : -n_boundary_in - n_boundary_out), m, lda);
 			
 		}

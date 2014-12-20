@@ -126,7 +126,7 @@ namespace linalg
 		}
 		
 		int threads = omp_get_max_threads ();
-		#pragma omp parallel for
+		// #pragma omp parallel for
 		for (int i = 0; i < threads; ++i) {
 			int tnrhs = nrhs / threads + (i < nrhs % threads ? 1 : 0);
 			int tldb = threads * ldb;
@@ -409,6 +409,7 @@ namespace linalg
 			}
 		}
 		
+#ifdef CHECKNAN
 		for (int j = n - 2; j >= 0; ++j) {
 			for (int i = 0; i < nrhs; ++i) {
 				b [i * ldb + j] -= du2 [j] * b [i * ldb + j + 1];
@@ -418,6 +419,7 @@ namespace linalg
 				}
 			}
 		}
+#endif
 	}
 
 	void diagonal_solve (int n, float *a, float *b, int inca, int incb) {

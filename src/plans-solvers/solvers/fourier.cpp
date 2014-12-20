@@ -42,13 +42,16 @@ namespace plans
 	void fourier_solver <datatype>::factorize () {
 		
 		TRACE ("Factorizing...");
+		double *fact_matrix = &factorized_horizontal_matrix [0], *hor_matrix = &horizontal_matrix [0];
 		
 		for (int j = 0; j < m; ++j) {
 			for (int i = 0; i < ldn; ++i) {
-				factorized_horizontal_matrix [i * m + j] = 1.0 + timestep * horizontal_matrix [i * m + j];
+				fact_matrix [i * m + j] = 1.0;
 				// DEBUG ("FACT " << i << " " << j << " " << factorized_horizontal_matrix [i * m + j] << " " << horizontal_matrix [i * m + j]);
 			}
 		}
+		
+		linalg::add_scaled (m * ldn, timestep, hor_matrix, fact_matrix);
 		
 		TRACE ("Done.");
 	}

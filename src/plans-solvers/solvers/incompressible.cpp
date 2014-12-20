@@ -193,8 +193,8 @@ namespace plans
 		
 		linalg::scale ((m + 2) * ldn, 0.0, &data_temp [0]);
 		
-		std::shared_ptr <plans::plan <datatype> > transform_x = std::shared_ptr <plans::plan <datatype> > (new plans::vertical_transform <datatype> (n, m, data_x, NULL, 0x00, element_flags, component_flags_x));
-		std::shared_ptr <plans::plan <datatype> > transform_z = std::shared_ptr <plans::plan <datatype> > (new plans::vertical_transform <datatype> (n, m, data_z, NULL, 0x00, element_flags, component_flags_z));
+		// std::shared_ptr <plans::plan <datatype> > transform_x = std::shared_ptr <plans::plan <datatype> > (new plans::vertical_transform <datatype> (n, m, data_x, NULL, 0x00, element_flags, component_flags_x));
+		// std::shared_ptr <plans::plan <datatype> > transform_z = std::shared_ptr <plans::plan <datatype> > (new plans::vertical_transform <datatype> (n, m, data_z, NULL, 0x00, element_flags, component_flags_z));
 		
 		if (*component_flags_x & transformed_vertical) {
 			// transform_x->execute ();
@@ -340,6 +340,7 @@ namespace plans
 			linalg::scale (2 * m, 0.0, data_z);
 			linalg::scale (2 * m, 0.0, data_x);
 
+#ifdef CHECKNAN
 			for (int j = 0; j < m; ++j) {
 				for (int i = 0; i < ldn; ++i) {
 					if (std::isnan (data [i * m + j])) {
@@ -348,15 +349,16 @@ namespace plans
 					}
 				}
 			}
+#endif
 		} else {
-			FATAL ("SHOULDN'T BE HERE" << *component_flags_x);
+			// FATAL ("SHOULDN'T BE HERE" << *component_flags_x);
 			// throw 0;
 		}
 		
-		if (retransform) {
-			transform_x->execute ();
-			transform_z->execute ();
-		}
+		// if (retransform) {
+		// 	transform_x->execute ();
+		// 	transform_z->execute ();
+		// }
 
 		TRACE ("Solved");
 	}

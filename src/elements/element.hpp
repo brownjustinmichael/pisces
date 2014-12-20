@@ -205,9 +205,9 @@ namespace pisces
 		void transform (int i_flags) {
 			TRACE ("Transforming...");
 			int threads = transform_threads;
-#pragma omp parallel num_threads (threads)
+// #pragma omp parallel num_threads (threads)
 			{
-#pragma omp for
+// #pragma omp for
 				for (int i = 0; i < (int) transforms.size (); ++i) {
 					transformers [transforms [i]]->transform (i_flags);
 				}
@@ -281,51 +281,52 @@ namespace pisces
 		virtual void solve () {
 			TRACE ("Beginning solve...");
 			// Execute the solvers
-			std::map <int, omp_lock_t> locks;
+			// std::map <int, omp_lock_t> locks;
 			for (iterator iter = begin (); iter != end (); iter++) {
-				omp_init_lock (&locks [*iter]);
 				element_flags [*iter] &= ~solved;
 			}
+			bool completely_solved = false, skip;
+			std::vector <int> can_be_solved;
 			
-			// int threads = params.get <int> ("parallel.solver.threads");
-// #pragma omp parallel num_threads (threads)
-			{
-				bool completely_solved = false;
-				bool skip = false;
-				int i = -1;
-				int tid = omp_get_thread_num();
-				int name = 0;
-				while (!completely_solved) {
-					i += 1;
-					
-					name = solver_keys [(i + tid) % (int) solver_keys.size ()];
-					completely_solved = true;
-					for (iterator iter = begin (); iter != end (); iter++) {
-						completely_solved = completely_solved && (element_flags [*iter] & solved);
+			while (!completely_solved) {
+				can_be_solved.clear ();
+				for (iterator iter = begin (); iter != end (); iter++) {
+					if (element_flags [*iter] & solved) {
+						DEBUG (*iter << " already solved");
+						continue;
 					}
 					
-					if (element_flags [name] & solved) continue;
-						
-					for (int j = 0; j < solvers [name]->n_dependencies (); ++j) {
-						if (!(element_flags [solvers [name]->get_dependency (j)] & solved)) {
+					skip = false;
+					for (int j = 0; j < solvers [*iter]->n_dependencies (); ++j) {
+						if (!(element_flags [solvers [*iter]->get_dependency (j)] & solved)) {
 							skip = true;
 							break;
 						}
 					}
-					if (skip) continue;
 					
-					if (omp_test_lock (&locks [name])) {
-						// DEBUG ("Solving " << name << " with " << tid);
-						solvers [name]->solve ();
-						#pragma omp atomic
-						element_flags [name] |= solved;
-						omp_unset_lock (&locks [name]);
+					if (!skip) {
+						can_be_solved.push_back (*iter);
 					}
 				}
+				
+				int threads = std::min (params.get <int> ("parallel.solver.threads"), (int) can_be_solved.size ());
+				// #pragma omp parallel for num_threads (threads)
+				for (int i = 0; i < threads; ++i) {
+					int name = can_be_solved [i];
+					DEBUG ("Solving " << name << " with thread " << i);
+					solvers [name]->solve ();
+					// #pragma omp atomic
+					element_flags [name] |= solved;
+				}
+				
+				completely_solved = true;
+				for (iterator iter = begin (); iter != end (); iter++) {
+					completely_solved = completely_solved && (element_flags [*iter] & solved);
+				}
 			}
+			
 			for (iterator iter = begin (); iter != end (); iter++) {
 				solvers [*iter]->reset ();
-				omp_destroy_lock (&locks [*iter]);
 			}
 			
 			// Make certain everything is fully transformed

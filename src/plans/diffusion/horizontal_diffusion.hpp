@@ -43,13 +43,13 @@ namespace plans
 			TRACE ("Operating..." << element_flags);
 			if (*component_flags & x_solve) {
 				if (1.0 - alpha != 0.0) {
-					#pragma omp parallel for
+					// #pragma omp parallel for
 					for (int i = 2; i < ldn; ++i) {
 						linalg::add_scaled (m, -coeff * (1.0 - alpha) * pioL2 * (i / 2) * (i / 2), data_in + i * m, data_out + i * m);
 					}
 				}
 			} else {
-				#pragma omp parallel for
+				// #pragma omp parallel for
 				for (int i = 2; i < ldn; ++i) {
 					linalg::add_scaled (m, -coeff * pioL2 * (i / 2) * (i / 2), data_in + i * m, data_out + i * m);
 				}
@@ -115,7 +115,7 @@ namespace plans
 			TRACE ("Operating..." << element_flags);
 			if (*component_flags & x_solve) {
 				if (1.0 - alpha != 0.0) {
-					#pragma omp parallel for
+					// #pragma omp parallel for
 					for (int j = 0; j < m; ++j) {
 						for (int i = 2; i < ldn; ++i) {
 							data_out [i * m + j] -= diffusion [j] * (1.0 - alpha) * pioL2 * (i / 2) * (i / 2) * data_in [i * m + j];
@@ -123,7 +123,7 @@ namespace plans
 					}
 				}
 			} else {
-				#pragma omp parallel for
+				// #pragma omp parallel for
 				for (int j = 0; j < m; ++j) {
 					for (int i = 2; i < ldn; ++i) {
 						data_out [i * m + j] -= diffusion [j] * pioL2 * (i / 2) * (i / 2) * data_in [i * m + j];

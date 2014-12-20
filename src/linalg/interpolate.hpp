@@ -40,6 +40,7 @@ namespace linalg
 		if (alpha == 0.0) {
 			return;
 		}
+#ifdef CHECKNAN
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
 				if (std::isnan (y [i * m + j])) {
@@ -48,6 +49,7 @@ namespace linalg
 				}
 			}
 		}
+#endif
 		for (int k = 0; k < n; ++k) {
 			int i = 0;
 			/*
@@ -65,36 +67,11 @@ namespace linalg
 			}
 			if (in [k] == x [i]) {
 				for (int j = 0; j < m; ++j) {
-					if (std::isnan (y [j * ldy + i])) {
-						FATAL ("Nan in y " << i);
-						throw 0;
-					}
-					if (std::isnan (out [j * ldout + k])) {
-						FATAL ("Nan in out");
-						throw 0;
-					}
 					out [j * ldout + k] = alpha * y [j * ldy + i] + beta * out [j * ldout + k];
-					if (std::isnan (out [j * ldout + k])) {
-						FATAL ("Nan in output");
-						throw 0;
-					}
 				}
 			} else {
 				for (int j = 0; j < m; ++j) {
-					if (std::isnan (y [j * ldy + i]) || std::isnan (y [j * ldy + i] - 1)) {
-						FATAL ("Nan in y " << i);
-						FATAL ("Interpolating at " << in [k] << " using " << x [i] << " and " << x [i - 1]);
-						throw 0;
-					}
-					if (std::isnan (out [j * ldout + k])) {
-						FATAL ("Nan in out");
-						throw 0;
-					}
 					out [j * ldout + k] = alpha * ((y [j * ldy + i] - y [j * ldy + i - 1]) / (x [i] - x [i - 1]) * (in [k] - x [i]) + y [j * ldy + i]) + beta * out [j * ldout + k];
-					if (std::isnan (out [j * ldout + k])) {
-						FATAL ("Nan in output");
-						throw 0;
-					}
 				}
 			}
 		}

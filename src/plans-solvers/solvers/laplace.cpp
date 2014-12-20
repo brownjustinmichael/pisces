@@ -79,7 +79,7 @@ namespace plans
 		if (id != np - 1) {
 			mm -= excess_n + 1;
 		}
-#pragma omp parallel for
+// #pragma omp parallel for
 		for (int i = 0; i < ldn; ++i) {
 			if (id != 0) {
 				sub_ptr [i * m + nbegin] = 2.0 / (pos_m [nbegin + 1] - pos_m [nbegin]) / (pos_m [nbegin + 1] - ex_pos_0);
@@ -167,6 +167,7 @@ namespace plans
 			}
 		}
 
+#ifdef CHECKNAN
 		for (int j = 0; j < m; ++j) {
 			for (int i = 0; i < ldn; ++i) {
 				if (std::isnan (data [i * m + j])) {
@@ -175,6 +176,7 @@ namespace plans
 				}
 			}
 		}
+#endif
 
 		TRACE ("Solved.");
 	}

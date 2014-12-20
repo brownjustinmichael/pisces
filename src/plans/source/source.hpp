@@ -31,10 +31,7 @@ namespace plans
 	
 		virtual void execute () {
 			TRACE ("Executing source...");
-			for (int j = 0; j < m; ++j) {
-				linalg::add_scaled (ldn, coeff, data_source + j, data_out + j, m, m);
-			}
-	
+			linalg::matrix_add_scaled (m, ldn, coeff, data_source, data_out, m, m);	
 		}
 	
 		class factory : public explicit_plan <datatype>::factory

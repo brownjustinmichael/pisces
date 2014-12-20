@@ -65,7 +65,8 @@ int main (int argc, char *argv[])
 		horizontal::grid <double> horizontal_grid (new plans::axis (n, position_n0, position_nn));
 		vertical::grid <double> vertical_grid (new plans::axis (m, position_m0, position_mm, excess_0, excess_n));
 
-		std::vector <double> temps (n * m, 0.0), tempt (n * m, 0.0);
+		std::vector <double> temps_vec (n * m, 0.0), tempt_vec (n * m, 0.0);
+		double *temps = &temps_vec [0], *tempt = &tempt_vec [0];
 
 		double scale = config.get <double> ("init.scale");
 		#pragma omp parallel for
@@ -75,6 +76,7 @@ int main (int argc, char *argv[])
 				temps [i * m + j] += (double) (rand () % 1000 - 500) / 100000.0 * (-vertical_grid [j] * vertical_grid [j] + config.get <double> ("grid.z.width") * config.get <double> ("grid.z.width") / 4.0) / config.get <double> ("grid.z.width") / config.get <double> ("grid.z.width");
 				tempt [i * m + j] += (double) (rand () % 1000 - 500) / 100000.0 * (-vertical_grid [j] * vertical_grid [j] + config.get <double> ("grid.z.width") * config.get <double> ("grid.z.width") / 4.0) / config.get <double> ("grid.z.width") / config.get <double> ("grid.z.width");
 				tempt [i * m + j] += scale * sin (8 * 3.14159 / config.get <double> ("grid.z.width") * vertical_grid [j]) * sin (4 * 3.14159 / config.get <double> ("grid.x.width") * horizontal_grid [i]);
+				temps [i * m + j] += scale * sin (8 * 3.14159 / config.get <double> ("grid.z.width") * vertical_grid [j]) * sin (4 * 3.14159 / config.get <double> ("grid.x.width") * horizontal_grid [i]);
 				// temp [i * m + j] = 0.01 * std::cos (std::acos (-1.0) * vertical_grid [j]) * std::sin (8.0 * std::acos (-1.0) * horizontal_grid [i] / 3.0);
 			}
 		}

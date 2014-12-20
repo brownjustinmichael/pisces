@@ -52,6 +52,7 @@ namespace pisces
 				output_virtual_file->add_var <datatype> (iter->first, input_virtual_file->dims [iter->first] [0], input_grid->get_n ());
 
 				linalg::interpolate <datatype> (output_grid->get_n (), output_virtual_file->dims [iter->first] [0], nsum, 1.0, 0.0, &position_buffer [0], &value_buffer [0], &((*output_grid) [0]), &(output_virtual_file->index <datatype> (iter->first)));
+#ifdef CHECKNAN
 				for (int i = 0; i < output_virtual_file->dims [iter->first] [0]; ++i) {
 					for (int j = 0; j < output_virtual_file->dims [iter->first] [1]; ++j) {
 						if (std::isnan ((&(output_virtual_file->index <datatype> (iter->first))) [i * output_virtual_file->dims [iter->first] [1] + j])) {
@@ -60,6 +61,7 @@ namespace pisces
 						}
 					}
 				}
+#endif
 			}
 		}
 	}

@@ -220,10 +220,8 @@ namespace plans
 			// 	}
 			// }
 		}
-			
-		for (int i = 0; i < 2 * (n / 2 + 1) * m; ++i) {
-			data_out [i] *= scalar;
-		}
+		
+		linalg::scale (2 * (n / 2 + 1) * m, scalar, data_out);
 	}
 	
 	template <>
@@ -253,9 +251,8 @@ namespace plans
 			// }
 		}
 	
-		for (int i = 0; i < 2 * (n / 2 + 1) * m; ++i) {
-			data_out [i] *= scalar;
-		}
+		linalg::scale (2 * (n / 2 + 1) * m, scalar, data_out);
+
 		// for (int i = 0; i < 2 * (n / 2 + 1); ++i) {
 		// 	debug << data_out [i * m + m - 1] << " ";
 		// }
@@ -418,9 +415,7 @@ namespace plans
 			*component_flags |= transformed_vertical;
 		}
 						
-		for (int i = 0; i < 2 * (n / 2 + 1) * m; ++i) {
-			data_out [i] *= scalar;
-		}
+		linalg::scale (2 * (n / 2 + 1) * m, scalar, data_out);
 	}
 	
 	template <>
@@ -451,9 +446,7 @@ namespace plans
 			// DEBUG ("B");
 		}
 		
-		for (int i = 0; i < 2 * (n / 2 + 1) * m; ++i) {
-			data_out [i] *= scalar;
-		}
+		linalg::scale (2 * (n / 2 + 1) * m, scalar, data_out);
 		
 		// for (int j = 0; j < m; ++j) {
 		// 	for (int i = 0; i < 2 * (n / 2 + 1); ++i) {

@@ -279,8 +279,12 @@ namespace linalg
 		if (ldx == -1) {
 			ldx = n;
 		}
-		for (int i = 0; i < m; ++i) {
-			sscal_ (&n, &a, x + i * ldx, &ione);
+		if (ldx == n) {
+			scale (n * m, a, x);
+		} else {
+			for (int i = 0; i < m; ++i) {
+				sscal_ (&n, &a, x + i * ldx, &ione);
+			}
 		}
 	}
 
@@ -289,8 +293,12 @@ namespace linalg
 		if (ldx == -1) {
 			ldx = n;
 		}
-		for (int i = 0; i < m; ++i) {
-			dscal_ (&n, &a, x + i * ldx, &ione);
+		if (ldx == n) {
+			scale (n * m, a, x);
+		} else {
+			for (int i = 0; i < m; ++i) {
+				dscal_ (&n, &a, x + i * ldx, &ione);
+			}
 		}
 	}
 	
@@ -318,8 +326,12 @@ namespace linalg
 		if (ldy == -1) {
 			ldy = n;
 		}
-		for (int i = 0; i < m; ++i) {
-			saxpy_ (&n, &da, dx + i * ldx, &ione, dy + i * ldy, &ione);
+		if (ldx == n && ldy == n) {
+			add_scaled (n * m, da, dx, dy);
+		} else {
+			for (int i = 0; i < m; ++i) {
+				saxpy_ (&n, &da, dx + i * ldx, &ione, dy + i * ldy, &ione);
+			}
 		}
 	}
 	
@@ -331,8 +343,12 @@ namespace linalg
 		if (ldy == -1) {
 			ldy = n;
 		}
-		for (int i = 0; i < m; ++i) {
-			daxpy_ (&n, &da, dx + i * ldx, &ione, dy + i * ldy, &ione);
+		if (ldx == n && ldy == n) {
+			add_scaled (n * m, da, dx, dy);
+		} else {
+			for (int i = 0; i < m; ++i) {
+				daxpy_ (&n, &da, dx + i * ldx, &ione, dy + i * ldy, &ione);
+			}
 		}
 	}
 	

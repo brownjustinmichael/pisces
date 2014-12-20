@@ -299,10 +299,12 @@ namespace plans
 		mode_flag = 0x20
 	};
 	
+	
+	// A note: The cosine expansion doesn't work because it restricts the derivative at the inner boundaries, this would need to be fourier
 	namespace vertical
 	{
 		/*!*******************************************************************
-		 * \brief A collocation grid for Chebyshev polynomials
+		 * \brief A collocation grid for cosines
 		 *
 		 * This collocation grid stores the N collocation points for up to the Mth order cosine modes and their first and second derivatives
 		 *********************************************************************/
