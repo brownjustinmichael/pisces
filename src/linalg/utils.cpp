@@ -8,7 +8,12 @@
 
 #include <cassert>
 #include <stdio.h>
+#include <algorithm>
 #include "utils.hpp"
+
+#include <omp.h>
+
+#define MIN_PARALLEL 128*128
 
 /*!*******************************************************************
  * \brief Function from BLAS that calculates a dot product
@@ -181,8 +186,23 @@ namespace linalg
 		if (ldy == -1) {
 			ldy = n;
 		}
-		for (int i = 0; i < m; ++i) {
-			dcopy_ (&n, x + i * ldx, &ione, y + i * ldy, &ione);
+		
+		if (n * m > MIN_PARALLEL) {
+			int threads = omp_get_max_threads ();
+			#pragma omp parallel for
+			for (int i = 0; i < threads; ++i) {
+				int num = n / threads + (i < (n % threads) ? 1 : 0);
+				int dist = i * (n / threads) + std::min (n % threads, i);
+				dcopy_ (&num, x + dist * ldx, &ione, y + dist * ldy, &ione);
+			}
+		} else {
+			if (n == ldx && n == ldy) {
+				copy (n * m, x, y);
+			} else {
+				for (int i = 0; i < m; ++i) {
+					dcopy_ (&n, x + i * ldx, &ione, y + i * ldy, &ione);
+				}
+			}
 		}
 	}
 	
@@ -315,7 +335,17 @@ namespace linalg
 	}
 	
 	void add_scaled (int n, double da, double *dx, double *dy, int incx, int incy) {
-		daxpy_ (&n, &da, dx, &incx, dy, &incy);
+		if (n > MIN_PARALLEL) {
+			int threads = omp_get_max_threads ();
+			#pragma omp parallel for
+			for (int i = 0; i < threads; ++i) {
+				int num = n / threads + (i < (n % threads) ? 1 : 0);
+				int dist = i * (n / threads) + std::min (n % threads, i);
+				daxpy_ (&num, &da, dx + dist * incx, &incx, dy + dist * incy, &incy);
+			}
+		} else {
+			daxpy_ (&n, &da, dx, &incx, dy, &incy);
+		}
 	}
 	
 	void matrix_add_scaled (int n, int m, float da, float *dx, float *dy, int ldx, int ldy) {
@@ -415,7 +445,13 @@ namespace linalg
 			ldc = m;
 		}
 		
-		dgemm_ (&charN, &charN, &m, &n, &k, &alpha, a, &lda, b, &ldb, &beta, c, &ldc);
+		int threads = omp_get_max_threads ();
+		#pragma omp parallel for
+		for (int i = 0; i < threads; ++i) {
+			int num = m / threads + (i < (m % threads) ? 1 : 0);
+			int dist = i * (m / threads) + std::min (m % threads, i);
+			dgemm_ (&charN, &charN, &num, &n, &k, &alpha, a + dist, &lda, b, &ldb, &beta, c + dist, &ldc);
+		}
 	}
 	
 	void diagonal_multiply (int n, float alpha, float *a, float *x, float beta, float *y, int inca, int incx, int incy) {

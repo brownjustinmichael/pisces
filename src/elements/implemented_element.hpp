@@ -159,16 +159,16 @@ namespace pisces
 		
 		inline datatype calculate_min_timestep (io::formats::virtual_file *virtual_file = NULL, bool limiters = true) {
 			double shared_min = max_timestep / timestep_safety;
-			// #pragma omp parallel
+			#pragma omp parallel
 			{
 				double min = std::numeric_limits <double>::max ();
-				// #pragma omp for nowait
+				#pragma omp for nowait
 					for (int j = 1; j < (virtual_file ? virtual_file->dims ["z"] [1] : m) - 1; ++j) {
 						for (int i = 0; i < (virtual_file ? virtual_file->dims ["z"] [0] : n); ++i) {
 							min = std::min (calculate_timestep (i, j, virtual_file), min);
 						}
 					}
-				// #pragma omp critical
+				#pragma omp critical
 				{
 					shared_min = std::min (shared_min, min);
 				}

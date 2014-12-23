@@ -76,6 +76,10 @@ namespace plans
 			linalg::add_scaled (n, -1.0, data_in + m - 1, z_ptr, m, m);
 			linalg::add_scaled (n, 1.0, data_in, z_ptr + m - 1, m, m);
 			
+			for (int i = 0; i < n; ++i) {
+				DEBUG (oodx_ptr [i] << " " << x_ptr [i * m + m / 2] << " " << vel_n [i * m + m / 2] << " " << vel_m [i * m + m / 2]);
+			}
+			
 			#pragma omp parallel for
 			for (int j = 0; j < m; ++j) {
 				for (int i = 0; i < n; ++i) {

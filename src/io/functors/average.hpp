@@ -52,12 +52,7 @@ namespace io
 				if (func) {
 					func->calculate ();
 				}
-				inner_data = (datatype) 0;
-				for (int j = 0; j < m; ++j) {
-					for (int i = 0; i < n; ++i) {
-						inner_data += weight [i * m + j] * data [i * m + j];
-					}
-				}
+				inner_data = linalg::dot (m * n, weight, data);
 				return &inner_data;
 			}
 		};
