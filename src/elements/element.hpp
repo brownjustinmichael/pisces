@@ -289,7 +289,6 @@ namespace pisces
 				can_be_solved.clear ();
 				for (iterator iter = begin (); iter != end (); iter++) {
 					if (element_flags [*iter] & solved) {
-						DEBUG (*iter << " already solved");
 						continue;
 					}
 					
@@ -310,7 +309,6 @@ namespace pisces
 				// #pragma omp parallel for num_threads (threads)
 				for (int i = 0; i < threads; ++i) {
 					int name = can_be_solved [i];
-					DEBUG ("Solving " << name << " with thread " << i);
 					solvers [name]->solve ();
 					// #pragma omp atomic
 					element_flags [name] |= solved;
@@ -403,8 +401,6 @@ namespace pisces
 		    gsl_siman_solve(r, rezone_data, element <datatype>::rezone_calculate_ts, element <datatype>::rezone_generate_step, element <datatype>::rezone_step_size, NULL, NULL, NULL, NULL, sizeof(rezone_union <datatype>) * (messenger_ptr->get_np () + 5), params);
 
 		    gsl_rng_free (r);
-			
-			DEBUG (rezone_calculate_ts (rezone_data) << " " << timestep);
 			
 			if (rezone_calculate_ts (rezone_data) < -timestep) {
 				for (int i = 0; i < messenger_ptr->get_np () + 1; ++i) {

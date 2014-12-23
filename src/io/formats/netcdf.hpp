@@ -128,6 +128,7 @@ namespace io
 				static std::map <std::string, std::vector <netCDF::NcDim>> dims;
 				static std::map <std::string, std::vector <std::string>> failures;
 				static std::map <std::string, int> records;
+				static std::map <std::string, bool> first;
 			};
 		
 			/*

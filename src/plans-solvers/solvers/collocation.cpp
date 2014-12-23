@@ -139,8 +139,6 @@ namespace plans
 		}
 		
 		linalg::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
-
-		DEBUG ("Solving in m direction..." << &factorized_matrix [0] << " " << &data_temp [0] << " " << &boundary_matrix [0]);
 	
 		// for (int j = 0; j < lda; ++j) {
 		// 	for (int i = 0; i < ldn; ++i) {

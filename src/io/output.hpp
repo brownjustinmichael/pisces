@@ -170,9 +170,7 @@ namespace io
 				write_functions [i] (grid, file_name, names [i], data_ptrs [i], record, dims [i]);
 			}
 	
-			if (output::file_format != append_file) {
-				format::close_file (file_name.c_str (), output::file_format);
-			}
+			format::close_file (file_name.c_str (), output::file_format);
 	
 			/*
 				TODO This behavior means that in a crash, all output data are lost, appender files should be opened and closed like all others

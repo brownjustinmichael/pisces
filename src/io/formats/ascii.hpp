@@ -48,11 +48,11 @@ namespace io
 				}
 				if (file_type == read_file) {
 					file_streams [file_name]->open (file_name, std::ostream::in);
-				} else if (file_type == replace_file) {
+				} else if (file_type == replace_file || count [file_name] == 0) {
 					file_streams [file_name]->open (file_name, std::ostream::out | std::ostream::trunc);
 				} else if (file_type == append_file) {
 					if (!(file_streams [file_name]->is_open ())) {
-						file_streams [file_name]->open (file_name, std::ostream::out | std::ostream::trunc);
+						file_streams [file_name]->open (file_name, std::ostream::out | std::ostream::app);
 					}
 				} else {
 					ERROR ("Unknown file type");
