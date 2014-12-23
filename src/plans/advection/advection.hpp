@@ -70,23 +70,19 @@ namespace plans
 			linalg::matrix_add_scaled (m, n - 1, -1.0, data_in + m, x_ptr);
 			linalg::add_scaled (m, -1.0, data_in + m * (n - 1), x_ptr);
 			linalg::add_scaled (m, 1.0, data_in, x_ptr + m * (n - 1));
-			
+
 			linalg::matrix_copy (m - 1, n, data_in, z_ptr + 1);
 			linalg::matrix_add_scaled (m - 1, n, -1.0, data_in + 1, z_ptr);
 			linalg::add_scaled (n, -1.0, data_in + m - 1, z_ptr, m, m);
 			linalg::add_scaled (n, 1.0, data_in, z_ptr + m - 1, m, m);
 			
-			for (int i = 0; i < n; ++i) {
-				DEBUG (oodx_ptr [i] << " " << x_ptr [i * m + m / 2] << " " << vel_n [i * m + m / 2] << " " << vel_m [i * m + m / 2]);
-			}
-			
 			#pragma omp parallel for
 			for (int j = 0; j < m; ++j) {
 				for (int i = 0; i < n; ++i) {
-					x_ptr [i * m + j] = x_ptr [i * m + j] * vel_n [i * m + j] * oodx_ptr [i] + z_ptr [i * m + j] * vel_m [i * m + j] * oodz_ptr [j];
+					x_ptr [i * m + j] = (vel_n [i * m + j] * x_ptr [i * m + j] * oodx_ptr [i] + vel_m [i * m + j] * z_ptr [i * m + j] * oodz_ptr [j]);
 				}
 			}
-			
+
 			linalg::matrix_add_scaled (m, n, coeff, x_ptr, data_out);
 		}
 	

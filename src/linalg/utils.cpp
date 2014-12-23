@@ -9,9 +9,8 @@
 #include <cassert>
 #include <stdio.h>
 #include <algorithm>
-#include "utils.hpp"
-
 #include <omp.h>
+#include "utils.hpp"
 
 #define MIN_PARALLEL 128*128
 
@@ -174,7 +173,7 @@ namespace linalg
 			scopy_ (&n, x + i * ldx, &ione, y + i * ldy, &ione);
 		}
 	}
-
+	
 	void matrix_copy (int n, int m, double *x, double *y, int ldx, int ldy) {
 		if (x == y && ldx == ldy) {
 			return;
@@ -186,14 +185,11 @@ namespace linalg
 		if (ldy == -1) {
 			ldy = n;
 		}
-		
+
 		if (n * m > MIN_PARALLEL) {
-			int threads = omp_get_max_threads ();
 			#pragma omp parallel for
-			for (int i = 0; i < threads; ++i) {
-				int num = n / threads + (i < (n % threads) ? 1 : 0);
-				int dist = i * (n / threads) + std::min (n % threads, i);
-				dcopy_ (&num, x + dist * ldx, &ione, y + dist * ldy, &ione);
+			for (int i = 0; i < m; ++i) {
+				dcopy_ (&n, x + i * ldx, &ione, y + i * ldy, &ione);
 			}
 		} else {
 			if (n == ldx && n == ldy) {
@@ -321,6 +317,7 @@ namespace linalg
 			}
 		}
 	}
+
 	
 	float dot (int n, float* dx, float* dy, int incx, int incy) {
 		return sdot_ (&n, dx, &incx, dy, &incy);
@@ -432,9 +429,9 @@ namespace linalg
 		if (m == 0 || n == 0 || k == 0) {
 			return;
 		}
-		
+
 		assert (b != c);
-		
+
 		if (lda == -1) {
 			lda = m;
 		}
@@ -444,7 +441,7 @@ namespace linalg
 		if (ldc == -1) {
 			ldc = m;
 		}
-		
+
 		int threads = omp_get_max_threads ();
 		#pragma omp parallel for
 		for (int i = 0; i < threads; ++i) {
