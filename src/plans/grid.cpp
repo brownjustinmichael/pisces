@@ -16,6 +16,7 @@
 
 namespace plans
 {
+#ifndef _VCOS
 	namespace vertical
 	{
 		template <class datatype>
@@ -81,66 +82,6 @@ namespace plans
 			}
 		}
 		
-	template class grid <double>;
-	} /* vertical */
-	
-	// namespace cosine
-	// {
-	// 	template <class datatype>
-	// 	grid <datatype>::grid (axis *i_axis_ptr) :
-	// 	plans::grid <datatype> (i_axis_ptr, 3) {
-	// 		TRACE ("Instantiating...");
-	//
-	// 		scale = sqrt (2.0 / (n - 1));
-	// 		pioN = std::acos (-1.0) / (n - 1);
-	//
-	//
-	// 		if (n > 1) {
-	// 			for (int i = 0; i <= n; ++i) {
-	// 				positions [i] = (i - excess_0) * (position_n - position_0) / (n - 1 - excess_n - excess_0) + position_0;
-	// 			}
-	// 		} else {
-	// 			positions [0] = (position_0 + position_n) / 2.0;
-	// 		}
-	//
-	//
-	// 		// _calculate_matrix ();
-	//
-	// 		TRACE ("Instantiated...");
-	// 	}
-	//
-	// template class grid <double>;
-	// } /* cosine */
-
-	namespace horizontal
-	{
-		template <class datatype>
-		grid <datatype>::grid (axis *i_axis_ptr) : 
-		plans::grid <datatype> (i_axis_ptr, 3, 2 * (i_axis_ptr->get_n () / 2 + 1)) {
-			TRACE ("Instantiating...");
-
-			scale = 2.0 / sqrt (n);
-			pioN = -2.0 * std::acos (-1.0) / n;
-	
-			if (n > 1) {
-				for (int i = 0; i < n; ++i) {
-					positions [i] = (i - excess_0) * (position_n - position_0) / (n - 1 - excess_n - excess_0) + position_0;
-				}
-			} else {
-				positions [0] = (position_0 + position_n) / 2.0;
-			}
-		
-		
-			// _calculate_matrix ();
-	
-			TRACE ("Instantiated...");
-		}
-		
-	template class grid <double>;
-	} /* horizontal */
-	
-	namespace vertical
-	{
 		template <class datatype>
 		void grid <datatype>::_calculate_matrix () {
 			scale = sqrt (2.0 / (n - 1));
@@ -175,34 +116,84 @@ namespace plans
 			}
 		}
 		
+		template class grid <double>;
 	} /* vertical */
+#else
+	namespace vertical
+	{
+		template <class datatype>
+		grid <datatype>::grid (axis *i_axis_ptr) :
+		plans::grid <datatype> (i_axis_ptr, 3) {
+			TRACE ("Instantiating...");
+
+			scale = sqrt (2.0 / (n - 1));
+			pioN = std::acos (-1.0) / (n - 1);
+
+
+			if (n > 1) {
+				for (int i = 0; i <= n; ++i) {
+					positions [i] = (i - excess_0) * (position_n - position_0) / (n - 1 - excess_n - excess_0) + position_0;
+				}
+			} else {
+				positions [0] = (position_0 + position_n) / 2.0;
+			}
+
+
+			// _calculate_matrix ();
+
+			TRACE ("Instantiated...");
+		}
+		
+		template <class datatype>
+		void grid <datatype>::_calculate_matrix () {
+			scale = 1.0 / std::sqrt (n);
+			pioN = 2.0 * std::acos (-1.0) / n;
+
+			width = positions [n] - positions [0];
+			datatype pioL = 2.0 * std::acos (-1.0) / width;
+
+			for (int k = 0; k < n; ++k) {
+				for (int m = 0; m < n; m += 2) {
+					plans::grid <datatype>::index (0, m, k) = scale * std::cos (pioN * k * (m / 2)) + scale * std::cos (pioN * k * (n - m / 2));
+					plans::grid <datatype>::index (0, m + 1, k) = -scale * std::sin (pioN * k * (m / 2)) - scale * std::sin (pioN * k * (n - m / 2));
+					plans::grid <datatype>::index (1, m, k) = -scale * pioL * (m / 2) * (std::sin (pioN * k * (m / 2)) + std::sin (pioN * k * (n - m / 2)));
+					plans::grid <datatype>::index (1, m + 1, k) = -scale * pioL * (m / 2) * (std::cos (pioN * k * (m / 2)) + std::cos (pioN * k * (n - m / 2)));
+					plans::grid <datatype>::index (2, m, k) = -scale * pioL * (m / 2) * pioL * (m / 2) * (std::cos (pioN * k * (m / 2)) + std::cos (pioN * k * (n - m / 2)));
+					plans::grid <datatype>::index (2, m + 1, k) = scale * pioL * (m / 2) * pioL * (m / 2) * (std::sin (pioN * k * (m / 2) + std::sin (pioN * k * (n - m / 2)));
+				}
+			}
+		}
+
+	template class grid <double>;
+	} /* cosine */
+#endif
+
+	namespace horizontal
+	{
+		template <class datatype>
+		grid <datatype>::grid (axis *i_axis_ptr) : 
+		plans::grid <datatype> (i_axis_ptr, 3, 2 * (i_axis_ptr->get_n () / 2 + 1)) {
+			TRACE ("Instantiating...");
+
+			scale = 2.0 / sqrt (n);
+			pioN = -2.0 * std::acos (-1.0) / n;
 	
-	// namespace cosine
-	// {
-	// 	template <class datatype>
-	// 	void grid <datatype>::_calculate_matrix () {
-	// 		scale = sqrt (2.0 / (n - 1));
-	// 		pioN = std::acos (-1.0) / (n - 1);
-	//
-	// 		width = positions [n] - positions [0];
-	// 		datatype pioL = std::acos (-1.0) / width;
-	//
-	// 		for (int k = 0; k < n; ++k) {
-	// 			plans::grid <datatype>::index (0, 0, k) = scale / 2.0;
-	// 			plans::grid <datatype>::index (1, 0, k) = 0.0;
-	// 			plans::grid <datatype>::index (2, 0, k) = 0.0;
-	// 			for (int m = 1; m < n - 1; ++m) {
-	// 				plans::grid <datatype>::index (0, m, k) = scale * std::cos (pioN * k * m);
-	// 				plans::grid <datatype>::index (1, m, k) = (((datatype) -m) * pioL) * scale * std::sin (pioN * k * m);
-	// 				plans::grid <datatype>::index (2, m, k) = -((datatype) m * m * pioL * pioL) * scale * std::cos (pioN * k * m);
-	// 			}
-	// 			plans::grid <datatype>::index (0, n - 1, k) = scale / 2.0 * std::cos (pioN * k * (n - 1));
-	// 			plans::grid <datatype>::index (1, n - 1, k) = (((datatype) -(n - 1)) * pioL) * scale / 2.0 * std::sin (pioN * k * (n - 1));
-	// 			plans::grid <datatype>::index (2, n - 1, k) = -((datatype) (n - 1) * (n - 1) * pioL * pioL) * scale / 2.0 * std::cos (pioN * k * (n - 1));
-	// 		}
-	// 	}
-	//
-	// } /* cosine */
+			if (n > 1) {
+				for (int i = 0; i < n; ++i) {
+					positions [i] = (i - excess_0) * (position_n - position_0) / (n - 1 - excess_n - excess_0) + position_0;
+				}
+			} else {
+				positions [0] = (position_0 + position_n) / 2.0;
+			}
+		
+		
+			// _calculate_matrix ();
+	
+			TRACE ("Instantiated...");
+		}
+		
+	template class grid <double>;
+	} /* horizontal */
 
 	namespace horizontal
 	{

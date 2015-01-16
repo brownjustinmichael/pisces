@@ -175,6 +175,11 @@ namespace plans
 				}
 			}
 		}
+#else
+		if (std::isnan (data_temp [0])) {
+			FATAL ("Found nan.");
+			throw linalg::exceptions::nan ();
+		}
 #endif
 
 		TRACE ("Updating...");

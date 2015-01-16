@@ -50,11 +50,11 @@ namespace plans
 			oodz_vec.resize (m);
 			oodz_ptr = &oodz_vec [0];
 			
-			oodx_ptr [0] = 0.5 / (pos_n [1] - pos_n [0]);
+			oodx_ptr [0] = 1.0 / (pos_n [1] - pos_n [0]);
 			for (int i = 1; i < n - 1; ++i) {
 				oodx_ptr [i] = 1.0 / (pos_n [i + 1] - pos_n [i - 1]);
 			}
-			oodx_ptr [n - 1] = 0.5 / (pos_n [n - 1] - pos_n [n - 2]);
+			oodx_ptr [n - 1] = 1.0 / (pos_n [n - 1] - pos_n [n - 2]);
 			
 			oodz_ptr [0] = 1.0 / (pos_m [1] - pos_m [0]);
 			for (int i = 1; i < m - 1; ++i) {
@@ -68,8 +68,8 @@ namespace plans
 		virtual void execute () {
 			linalg::matrix_copy (m, n - 1, data_in, x_ptr + m);
 			linalg::matrix_add_scaled (m, n - 1, -1.0, data_in + m, x_ptr);
-			linalg::add_scaled (m, -1.0, data_in + m * (n - 1), x_ptr);
-			linalg::add_scaled (m, 1.0, data_in, x_ptr + m * (n - 1));
+			linalg::add_scaled (m, -1.0, data_in, x_ptr);
+			linalg::add_scaled (m, 1.0, data_in + m * (n - 1), x_ptr + m * (n - 1));
 
 			linalg::matrix_copy (m - 1, n, data_in, z_ptr + 1);
 			linalg::matrix_add_scaled (m - 1, n, -1.0, data_in + 1, z_ptr);
@@ -78,7 +78,9 @@ namespace plans
 			
 			#pragma omp parallel for
 			for (int j = 0; j < m; ++j) {
-				for (int i = 0; i < n; ++i) {
+				x_ptr [j] = 0.0;
+				x_ptr [(n - 1) * m + j] = 0.0;
+				for (int i = 1; i < n - 1; ++i) {
 					x_ptr [i * m + j] = (vel_n [i * m + j] * x_ptr [i * m + j] * oodx_ptr [i] + vel_m [i * m + j] * z_ptr [i * m + j] * oodz_ptr [j]);
 				}
 			}
