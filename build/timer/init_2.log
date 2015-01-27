@@ -1,0 +1,4 @@
+2015-01-21 07:12:18 INFO : (int main(int, char**) 57) - Reading from config file config.yaml
+2015-01-21 07:12:18 INFO : (int main(int, char**) 61) - Overwriting config variable parallel.maxthreads with 1
+2015-01-21 07:12:18 INFO : (int main(int, char**) 61) - Overwriting config variable parallel.transform.threads with 1
+2015-01-21 07:12:19 INFO : (void io::formatted_output<format>::to_file(int) [with format = io::formats::two_d::netcdf] 158) - Outputting to file input/input_02.cdf...
