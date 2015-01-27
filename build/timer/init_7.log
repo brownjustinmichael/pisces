@@ -1,0 +1,3 @@
+2015-01-16 21:22:49 INFO : (int main(int, char**) 60) - Overwriting config variable parallel.maxthreads with 4
+2015-01-16 21:22:49 INFO : (int main(int, char**) 60) - Overwriting config variable parallel.transform.threads with 4
+2015-01-16 21:22:49 INFO : (void io::formatted_output<format>::to_file(int) [with format = io::formats::two_d::netcdf] 158) - Outputting to file input/input_07.cdf...

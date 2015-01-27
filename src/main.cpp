@@ -116,6 +116,7 @@ int main (int argc, char *argv[])
 		} else {
 			config_filename = argv [1];
 		}
+		INFO ("Reading from config file " << config_filename);
 		io::parameters config (config_filename);
 		
 		for (int i = 0; i < (int) config_strs.size (); ++i) {
