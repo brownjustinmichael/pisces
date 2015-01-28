@@ -1,0 +1,65 @@
+init:
+    scale: 0.0
+    mean: 0.0
+    sigma: 10.
+grid:
+    x:
+        points: 256
+        width: 100.0
+    z:
+        points: 256
+        width: 100.0
+    rezone:
+        check_every: -500
+        min_size: 20.0
+        max_size: 70.0
+        n_tries: 1
+        iters_fixed_t: 1
+        step_size: 5.0
+        k: 1.0
+        t_initial: 8e-1
+        mu_t: 1.003
+        t_min: 2e-1
+time:
+    steps: 1000
+    init: 1.0e-5
+    max: 1.e-0
+    mult: 1.5
+    safety: 0.8
+    cfl: 0.3
+    alpha: 1.00
+    allow: 1000.0
+temperature:
+    diffusion: 1.0
+    bg_diffusion: 1.0
+    advection: 1.0
+    stratification: -1.0
+composition:
+    diffusion: 0.5
+    advection: 1.0
+    stratification: -0.5
+velocity:
+    diffusion: 0.5
+    advection: 1.0
+    buoyancy:
+        temperature: 0.5
+        composition: -0.5
+input:
+    file: input_%02i
+    full: true
+output:
+    file: sc_gwave_%02i
+    transform_file: sc_gwave_t_%02i
+    every: 10
+    stat:
+        file: sc_gwave_%02i
+        every: 50
+    merge_file: merge_%04i
+    full: true
+parallel:
+    maxthreads: 4
+    transform:
+        threads: 4
+        subthreads: 1
+    solver:
+        threads: 4

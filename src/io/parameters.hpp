@@ -23,6 +23,8 @@ namespace io
 	class parameters : public YAML::Node
 	{
 	public:
+		static parameters defaults;
+		
 		using YAML::Node::operator=; //!< Use the assignment operator from the super class
 	
 		/*!**********************************************************************
@@ -71,7 +73,11 @@ namespace io
 			if (operator[] (key).IsDefined ()) {
 				return operator[] (key).as <datatype> ();
 			} else {
-				throw exceptions::key_does_not_exist (key);
+				if (this != &defaults) {
+					return defaults.get <datatype> (key);
+				} else {
+					throw exceptions::key_does_not_exist (key);
+				}
 			}
 		}
 		

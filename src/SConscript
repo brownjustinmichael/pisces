@@ -6,6 +6,7 @@ Import ("include_mpi")
 Import ("include_vt")
 Import ("dimensions")
 Import ("vertical_grid")
+Import ("defaults")
 
 def directory (path, dirname):
     """
@@ -43,6 +44,9 @@ if include_cuda:
     env.Tool ('cuda')
     env.Append (NVCCFLAGS = ["-g", "-arch=sm_20"])
     env.Append (CPPFLAGS = ["-D_CUDA"])
+
+if defaults is not None:
+    env.Append (CPPFLAGS = ['-DDEFAULTS_FILE=\\"' + defaults + '\\"'])
 
 env.Append (CPPFLAGS = ["-Wall", "-g", "-std=c++0x"])
 env.Append (LINKFLAGS = ["-Wall", "-g", "-std=c++0x"])

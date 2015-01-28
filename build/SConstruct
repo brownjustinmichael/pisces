@@ -8,7 +8,10 @@ include_mp = True
 dimensions = 2
 vertical_grid = 'chebyshev'
 logger = "log4cplus"
+defaults = "../src/defaults.yaml"
+
+defaults = os.path.abspath (defaults)
 
 env = Environment (ENV = os.environ, tools = ["default", "cxxtest"])
 
-env.SConscript ("../src/SConscript", variant_dir = ".", duplicate = 0, exports = {"env": env, "include_cuda": include_cuda, "include_mp": include_mp, "include_vt":include_vt, "include_mpi":include_mpi, "logger": logger, "dimensions": dimensions, "vertical_grid": vertical_grid})
+env.SConscript ("../src/SConscript", variant_dir = ".", duplicate = 0, exports = {"env": env, "include_cuda": include_cuda, "include_mp": include_mp, "include_vt":include_vt, "include_mpi":include_mpi, "logger": logger, "dimensions": dimensions, "vertical_grid": vertical_grid, "defaults" : defaults})

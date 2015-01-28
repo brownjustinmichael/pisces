@@ -22,6 +22,7 @@
 #include "plans/plan.hpp"
 #include "elements/boussinesq.hpp"
 #include "elements/rezone.hpp"
+#include "config.hpp"
 
 /*!*******************************************************************
  * \mainpage
@@ -92,58 +93,27 @@ int main (int argc, char *argv[])
 	try {
 		id = process_messenger.get_id ();
 		n_elements = process_messenger.get_np ();
-
-		logger::log_config::configure (&argc, &argv, id, "process_%d.log");
-		std::string config_filename;
 		
-		std::vector <std::string> config_strs;
-		std::map <std::string, std::string> config_args;
+		io::parameters parameters = config (&argc, &argv, id);
 		
-		for (int i = 0; i < argc; ++i) {
-			if ((argv [i] [0] == '-') && (argv [i] [1] == 'V')) {
-				config_args [argv [i + 1]] = argv [i + 2];
-				config_strs.push_back (argv [i + 1]);
-				argc -= 3;
-				for (int j = i; j < argc; ++j) {
-					argv [j] = argv [j + 3];
-				}
-				i -= 1;
-			}
-		}
-
-		if (argc <= 1) {
-			config_filename = "config.yaml";
-		} else {
-			config_filename = argv [1];
-		}
-		INFO ("Reading from config file " << config_filename);
-		io::parameters config (config_filename);
-		
-		for (int i = 0; i < (int) config_strs.size (); ++i) {
-			INFO ("Overwriting config variable " << config_strs [i] << " with " << config_args [config_strs [i]]);
-			config [config_strs [i]] = config_args [config_strs [i]];
-		}
-
-		omp_set_num_threads (config.get <int> ("parallel.maxthreads"));
-
-		int m = config.get <int> ("grid.z.points") / n_elements + 1;
+		int m = parameters.get <int> ("grid.z.points") / n_elements + 1;
 		m += m % 2;
 
 		std::vector <double> positions (n_elements + 1);
 		for (int i = 0; i < n_elements + 1; ++i) {
-			positions [i] = -config.get <double> ("grid.z.width") / 2.0 + config.get <double> ("grid.z.width") / n_elements * i;
+			positions [i] = -parameters.get <double> ("grid.z.width") / 2.0 + parameters.get <double> ("grid.z.width") / n_elements * i;
 		}
 
 		int name = id;
 
-		int n = config.get <int> ("grid.x.points");
+		int n = parameters.get <int> ("grid.x.points");
 
-		plans::axis horizontal_axis (n, -config.get <double> ("grid.x.width") / 2.0, config.get <double> ("grid.x.width") / 2.0);
+		plans::axis horizontal_axis (n, -parameters.get <double> ("grid.x.width") / 2.0, parameters.get <double> ("grid.x.width") / 2.0);
 		plans::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
 
-		data::thermo_compositional_data <double> data (&horizontal_axis, &vertical_axis, id, n_elements, config);
+		data::thermo_compositional_data <double> data (&horizontal_axis, &vertical_axis, id, n_elements, parameters);
 		
-		std::shared_ptr <pisces::element <double>> element (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, data, &process_messenger, 0x00));
+		std::shared_ptr <pisces::element <double>> element (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
 		
 		if (pisces::element <double>::version < versions::version ("0.6.0.0")) {
 			INFO ("element.version < 0.6.0.0");
@@ -161,9 +131,9 @@ int main (int argc, char *argv[])
 		begin = std::chrono::system_clock::now ();
 
 		int n_steps = 0;
-		while (n_steps < config.get <int> ("time.steps")) {
-			if (config.get <int> ("grid.rezone.check_every") > 0) {
-				io::virtual_files ["main/virtual_file"] = *(element->rezone_minimize_ts (&positions [0], config.get <double> ("grid.rezone.min_size"), config.get <double> ("grid.rezone.max_size"), config.get <int> ("grid.rezone.n_tries"), config.get <int> ("grid.rezone.iters_fixed_t"), config.get <double> ("grid.rezone.step_size"), config.get <double> ("grid.rezone.k"), config.get <double> ("grid.rezone.t_initial"), config.get <double> ("grid.rezone.mu_t"), config.get <double> ("grid.rezone.t_min")));
+		while (n_steps < parameters.get <int> ("time.steps")) {
+			if (parameters.get <int> ("grid.rezone.check_every") > 0) {
+				io::virtual_files ["main/virtual_file"] = *(element->rezone_minimize_ts (&positions [0], parameters.get <double> ("grid.rezone.min_size"), parameters.get <double> ("grid.rezone.max_size"), parameters.get <int> ("grid.rezone.n_tries"), parameters.get <int> ("grid.rezone.iters_fixed_t"), parameters.get <double> ("grid.rezone.step_size"), parameters.get <double> ("grid.rezone.k"), parameters.get <double> ("grid.rezone.t_initial"), parameters.get <double> ("grid.rezone.mu_t"), parameters.get <double> ("grid.rezone.t_min")));
 
 				plans::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
 
@@ -186,7 +156,7 @@ int main (int argc, char *argv[])
 
 				DEBUG ("DONE THERE");
 
-				element.reset (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, config, data, &process_messenger, 0x00));
+				element.reset (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
 
 				for (int j = 0; j < m; ++j) {
 					for (int i = 0; i < n; ++i) {
@@ -200,7 +170,7 @@ int main (int argc, char *argv[])
 					TODO It would be nice to combine the above construction of element with this one
 				*/
 			}
-			element->run (n_steps, config.get <int> ("time.steps"), config.get <int> ("grid.rezone.check_every"));
+			element->run (n_steps, parameters.get <int> ("time.steps"), parameters.get <int> ("grid.rezone.check_every"));
 		}
 
 		cend = clock ();
