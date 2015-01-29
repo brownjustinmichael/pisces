@@ -29,7 +29,7 @@ public:
 		
 		parameters ["root"] = std::string (PISCES_ROOT) + "/test/elements/";
 		parameters ["output.file"] = "";
-		parameters ["output.stat.file"] = "";
+		// parameters ["output.stat.file"] = "";
 		parameters ["output.transform.file"] = "";
 		parameters ["dump.file"] = "";
 	

@@ -67,15 +67,15 @@ namespace io
 				if (!header [file_name]) {
 					header [file_name] = std::shared_ptr <std::stringstream> (new std::stringstream);
 				}
-				if (header [file_name]->str () != "") {
-					*file_streams [file_name] << comment << " " << header [file_name]->str () << "\n";
-				}
+				// if (header [file_name]->str () != "") {
+				// 	*file_streams [file_name] << comment << " " << header [file_name]->str () << "\n";
+				// }
 				if (!body [file_name]) {
 					body [file_name] = std::shared_ptr <std::stringstream> (new std::stringstream);
 				}
-				if (body [file_name]->str () != "") {
-					*file_streams [file_name] << body [file_name]->str () << "\n";
-				}
+				// if (body [file_name]->str () != "") {
+				// 	*file_streams [file_name] << body [file_name]->str () << "\n";
+				// }
 				
 				count [file_name] += 1;
 				file_types [file_name] = file_type;
