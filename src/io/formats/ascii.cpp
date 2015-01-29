@@ -13,6 +13,7 @@ namespace io
 	namespace formats
 	{
 		std::string ascii::comment = "#";
+		bool ascii::print_headers = true;
 		std::map <std::string, std::shared_ptr <std::ofstream>> ascii::file_streams;
 		std::map <std::string, int> ascii::count;
 		std::map <std::string, int> ascii::file_types;

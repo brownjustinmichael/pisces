@@ -34,6 +34,7 @@ namespace io
 			static std::map <std::string, std::shared_ptr <std::stringstream>> body;
 			
 		public:
+			static bool print_headers;
 			static bool uses_files;
 			ascii () {}
 			
@@ -85,7 +86,7 @@ namespace io
 			}
 			
 			static void close_file (std::string file_name, int file_type) {
-				if (header [file_name]->str () != "") {
+				if (print_headers && header [file_name]->str () != "") {
 					*file_streams [file_name] << comment << " " << header [file_name]->str () << "\n";
 				}
 				*file_streams [file_name] << body [file_name]->str () << "\n";
