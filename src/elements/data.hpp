@@ -325,13 +325,13 @@ namespace data
 		
 	public:
 		using data <datatype>::duration;
-		implemented_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int name = 0, std::string dump_file = "", int dump_every = 1) : grid_n (std::shared_ptr <plans::grid <datatype>> (new typename plans::horizontal::grid <datatype> (i_axis_n))), grid_m (std::shared_ptr <plans::grid <datatype>> (new typename plans::vertical::grid <datatype> (i_axis_m))), n (grid_n->get_n ()), m (grid_m->get_n ()) {
+		implemented_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int name = 0, std::string dump_file = "", std::string dump_directory = "./", int dump_every = 1) : grid_n (std::shared_ptr <plans::grid <datatype>> (new typename plans::horizontal::grid <datatype> (i_axis_n))), grid_m (std::shared_ptr <plans::grid <datatype>> (new typename plans::vertical::grid <datatype> (i_axis_m))), n (grid_n->get_n ()), m (grid_m->get_n ()) {
 			// Set up output
 			const io::data_grid o_grid = io::data_grid::two_d (n, m, 0, 0, 0, 0);
 			
 			std::shared_ptr <io::output> dump_stream;
 			if (dump_file != "") {
-				std::string file_format = dump_file;
+				std::string file_format = dump_directory + dump_file;
 				char buffer [file_format.size () * 2];
 				snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 
