@@ -64,8 +64,6 @@ namespace plans
 			TODO Add timestep check here?
 		*/
 		
-		// DEBUG ("Solving in n direction");
-		
 		linalg::scale ((ldn) * lda, 0.0, &data_temp [0]);
 		
 		if (rhs_ptr) {
@@ -85,6 +83,7 @@ namespace plans
 
 		linalg::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
 
+		// Send and receive the boundaries for multi-processing
 		if (boundary_0) {
 			boundary_0->send (&data_temp [0], lda);
 		}
@@ -96,28 +95,9 @@ namespace plans
 			boundary_0->receive (&data_temp [ex_overlap_0], lda);
 		}
 		
-		// DEBUG ("CHOICE RHS " << rhs_ptr [12 * m + 24] << " " << data [12 * m + 24]);
-		// std::stringstream debug;
-		// for (int j = 0; j < lda; ++j) {
-		// 	for (int i = 0; i < ldn; ++i) {
-		// 		debug << data_temp [i * lda + j] << " ";
-		// 	}
-		// 	DEBUG ("RHS " << debug.str ());
-		// 	debug.str ("");
-		// }
-		//
-		// for (int j = 0; j < m; ++j) {
-		// 	for (int i = 0; i < ldn; ++i) {
-		// 		debug << data [i * m + j] << " ";
-		// 	}
-		// 	DEBUG ("DATA " << debug.str ());
-		// 	debug.str ("");
-		// }
-		
+#pragma omp parallel for
 		for (int j = excess_0; j < m - excess_n; ++j) {
-			// DEBUG ("BEF " << data_temp [ex_overlap_0 + j] << " " << factorized_horizontal_matrix [0]);
 			linalg::diagonal_solve (ldn, &factorized_horizontal_matrix [j], &data_temp [ex_overlap_0 + j], m, lda);
-			// DEBUG ("AFT " << data_temp [ex_overlap_0 + j]);
 		}
 		linalg::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data, lda);
 		
@@ -129,14 +109,6 @@ namespace plans
 				data [i * m + j] = (data [i * m + j - 2] - data [i * m + j - 1]) / (pos_m [j - 2] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]) + data [i * m + j - 1];
 			}
 		}
-		
-		// for (int j = 0; j < m; ++j) {
-		// 	for (int i = 0; i < ldn; ++i) {
-		// 		debug << data [i * m + j] << " ";
-		// 	}
-		// 	DEBUG ("DATAOUT " << debug.str ());
-		// 	debug.str ("");
-		// }
 		
 		TRACE ("Execution complete.");
 	}

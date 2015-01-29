@@ -55,7 +55,7 @@ namespace plans
 		int m;
 		int count;
 		int ntop, nbot;
-		datatype *data, *data_x, *data_z;
+		datatype *data, *data_x, *data_z, *new_pos;
 		datatype ex_pos_0, ex_pos_m, exx_pos_0, exx_pos_m, exxx_pos_0, exxx_pos_m;
 		int flags;
 		int *component_flags_x, *component_flags_z;

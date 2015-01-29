@@ -61,7 +61,7 @@ namespace pisces
 			
 			element <datatype>::initialize (x_position, "x");
 			element <datatype>::initialize (z_position, "z");
-			transform_threads = i_params.get <int> ("parallel.transform.subthreads", 0);
+			transform_threads = i_params.get <int> ("parallel.transform.subthreads");
 			
 			grids [0] = std::shared_ptr <plans::grid <datatype>> (new typename plans::horizontal::grid <datatype> (&i_axis_n));
 			grids [1] = std::shared_ptr <plans::grid <datatype>> (new typename plans::vertical::grid <datatype> (&i_axis_m));

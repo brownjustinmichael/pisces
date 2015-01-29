@@ -137,10 +137,6 @@ int main (int argc, char *argv[])
 
 				plans::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
 
-				DEBUG (io::virtual_files ["main/virtual_file"].index <double> ("T", 16, 16));
-				DEBUG (data.duration);
-				DEBUG (io::virtual_files ["main/virtual_file"].index <double> ("t"));
-
 				io::input *virtual_input (new io::formatted_input <io::formats::two_d::virtual_format> (io::data_grid::two_d (n, m), "main/virtual_file"));
 				data.setup (&*virtual_input);
 				DEBUG (data.duration);
@@ -150,11 +146,8 @@ int main (int argc, char *argv[])
 					for (int j = 0; j < m; ++j) {
 						debug << *(data (temp, i, j)) << " ";
 					}
-					DEBUG ("OUT " << debug.str ());
 					debug.str ("");
 				}
-
-				DEBUG ("DONE THERE");
 
 				element.reset (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
 

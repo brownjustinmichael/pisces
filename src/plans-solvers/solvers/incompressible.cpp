@@ -118,11 +118,11 @@ namespace plans
 		if (count == 0) {
 
 			double scalar = 4.0 * std::acos (-1.0) * std::acos (-1.0) / (pos_n [n - 1] - pos_n [0]) / (pos_n [n - 1] - pos_n [0]);
-			std::vector <datatype> positions (m + 2 + 6);
-			datatype *matrix_ptr, *new_pos = &positions [3], *npos_m = &pos_m [excess_0];
+			datatype *matrix_ptr, *npos_m = &pos_m [excess_0];
 			int kl = 2;
 			int ku = 1;
 			int lda = 2 * kl + ku + 1;
+			new_pos = &positions [3];
 			for (int j = -3; j < m + 3; ++j) {
 				new_pos [j] = (pos_m [j] + pos_m [j + 1]) / 2.0;
 			}
@@ -149,10 +149,6 @@ namespace plans
 					matrix_ptr [-2 * lda + 1] = 0.0;
 					matrix_ptr [-1 * lda] = 1.0;
 					matrix_ptr [-1] = -1.0;
-					// matrix_ptr [-15] = 0.0;
-					// matrix_ptr [10] = 1.0 / (new_pos [-1] - new_pos [-2]) / (npos_m [0] - npos_m [-1]);
-					// matrix_ptr [-5] = -1.0 / (new_pos [0] - new_pos [-1]) / (npos_m [0] - npos_m [-1]) - 1.0 / (new_pos [-1] - new_pos [-2]) / (npos_m [0] - npos_m [-1]) - scalar * (i / 2) * (i / 2);
-					// matrix_ptr [0] = 1.0 / (new_pos [0] - new_pos [-1]) / (npos_m [0] - npos_m [-1]);
 
 					matrix_ptr [-2 * lda + 2] = 0.0;
 					matrix_ptr [-1 * lda + 1] = 1.0 / (new_pos [0] - new_pos [-1]) / (npos_m [1] - npos_m [0]);
@@ -165,16 +161,10 @@ namespace plans
 					matrix_ptr [(j - 1) * lda + 1] = 1.0;
 					matrix_ptr [j * lda] = 1.0e-10;
 					matrix_ptr [(j + 1) * lda - 1] = 0.0;
-					// matrix_ptr [(j - 2) * 6 + 3] = 1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (npos_m [j + 1] - npos_m [j - 1]);
-					// matrix_ptr [(j - 1) * 6 + 2] = -1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (npos_m [j + 1] - npos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
-					// matrix_ptr [(j) * 6 + 1] = -1.0 / (new_pos [j + 1] - new_pos [j]) / (npos_m [j + 1] - npos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
-					// matrix_ptr [(j + 1) * 6] = 1.0 / (new_pos [j + 1] - new_pos [j]) / (npos_m [j + 1] - npos_m [j - 1]);
 				}
 			}
 
-			// throw 0;
 			linalg::p_block_banded_factorize (id, np, m + (nbot == 0 ? 1 : -nbot - excess_n - 1) + (id == 0 ? 1: -excess_0 - ntop), kl, ku, &matrix [(id == 0 ? 0 : 1 + excess_0) * lda], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn, lda, m + 2 + kl + ku);
-			// throw 0;
 		}
 
 	}
@@ -201,25 +191,13 @@ namespace plans
 			// transform_z->execute ();
 			// retransform = true;
 		}
-		count++;
 		if (!(*component_flags_x & transformed_vertical)) {
 			datatype scalar = acos (-1.0) * 2.0 / (pos_n [n - 1] - pos_n [0]);
 			datatype *data_ptr = &data_temp [1];
 
 			std::vector <datatype> positions (m + 2 + 6);
-			datatype *new_pos = &positions [3], *npos_m = &pos_m [excess_0], *ndata_z = &data_z [excess_0], *ndata_x = &data_x [excess_0];
+			datatype *npos_m = &pos_m [excess_0], *ndata_z = &data_z [excess_0], *ndata_x = &data_x [excess_0];
 
-			for (int j = -3; j < m + 3; ++j) {
-				new_pos [j] = (pos_m [j] + pos_m [j + 1]) / 2.0;
-			}
-			if (id == 0) {
-				new_pos [-1] = 2.0 * pos_m [0] - (pos_m [0] + pos_m [1]) / 2.0;
-			}
-			if (id == np - 1) {
-				new_pos [m - 1] = 2.0 * pos_m [m - 1] - (pos_m [m - 1] + pos_m [m - 2]) / 2.0;
-				new_pos [m] = pos_m [m - 1] + (pos_m [m - 1] - new_pos [m - 3]);
-			}
-			new_pos += excess_0;
 			data_ptr += excess_0;
 			
 			linalg::scale (ldn * (m + 2), 0.0, &data_temp [0]);
@@ -244,10 +222,7 @@ namespace plans
 				}
 			}
 			
-			// DEBUG ("N : "<< m + (nbot == 0 ? 1 : -nbot - excess_n - 1) + (id == 0 ? 1: -excess_0 - ntop));
-			
 			linalg::p_block_banded_solve (id, np, m + (nbot == 0 ? 1 : -nbot - excess_n - 1) + (id == 0 ? 1: -excess_0 - ntop), kl, ku, &matrix [(id == 0 ? 0 : 1 + excess_0) * 6], &ipiv [0], &data_temp [(id == 0 ? 0 : 1 + excess_0)], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn, lda, m + 2 + kl + ku, m + 2);
-			// throw 0;
 
 			linalg::scale (2 * (m + 2), 0.0, &data_temp [0]);
 

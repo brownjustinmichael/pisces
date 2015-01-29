@@ -80,15 +80,6 @@ namespace io
 				}
 			}
 		}
-		
-		template <typename datatype>
-		const datatype get (std::string key, datatype value) {
-			if (operator[] (key).IsDefined ()) {
-				return operator[] (key).as <datatype> ();
-			} else {
-				return value;
-			}
-		}
 	};
 } /* io */
 

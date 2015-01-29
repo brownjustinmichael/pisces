@@ -26,7 +26,7 @@ time:
     max: 1.e-0
     mult: 1.5
     safety: 0.8
-    cfl: 0.3
+    cfl: 0.1
     alpha: 1.00
     allow: 1000.0
 temperature:
@@ -56,6 +56,9 @@ output:
         every: 50
     merge_file: merge_%04i
     full: true
+dump:
+    file: dump_%02i
+    every: 1000
 parallel:
     maxthreads: 4
     transform:
