@@ -194,6 +194,7 @@ namespace plans
 		if (!(*component_flags_x & transformed_vertical)) {
 			datatype scalar = acos (-1.0) * 2.0 / (pos_n [n - 1] - pos_n [0]);
 			datatype *data_ptr = &data_temp [1];
+			int mmax = m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0);
 
 			std::vector <datatype> positions (m + 2 + 6);
 			datatype *npos_m = &pos_m [excess_0], *ndata_z = &data_z [excess_0], *ndata_x = &data_x [excess_0];
@@ -203,76 +204,65 @@ namespace plans
 			linalg::scale (ldn * (m + 2), 0.0, &data_temp [0]);
 			
 			for (int i = 2; i < ldn; i += 2) {
-				for (int j = -1; j < m + 1 + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
+				for (int j = -1; j < mmax + 1; ++j) {
 					data_ptr [i * (m + 2) + j] = -scalar * (i / 2) * ndata_x [(i + 1) * m + j];
 					data_ptr [(i + 1) * (m + 2) + j] = scalar * (i / 2) * ndata_x [i * m + j];
 				}
 			}
 			
+			// For every point, we need to add the vertical derivative of the vertical component to the right hand side 
+			for (int j = (id == 0 ? 1 : 0); j < mmax; ++j) {
+				linalg::add_scaled (ldn, 1.0 / (npos_m [j + 1] - npos_m [j - 1]), ndata_z + j + 1, data_ptr + j, m, m + 2);
+				linalg::add_scaled (ldn, -1.0 / (npos_m [j + 1] - npos_m [j - 1]), ndata_z + j - 1, data_ptr + j, m, m + 2);
+			}
+			
+			// The vertical boundaries are special cases for the vertical derivatives
 			for (int i = 0; i < ldn; ++i) {
 				if (id == 0) {
 					data_ptr [i * (m + 2) - 1] = 0.0;
 					data_ptr [i * (m + 2)] += (ndata_z [i * m + 1] - ndata_z [i * m]) / (npos_m [1] - npos_m [0]);
-				}
-				for (int j = (id == 0 ? 1 : 0); j < m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
-					data_ptr [i * (m + 2) + j] += (ndata_z [i * m + j + 1] - ndata_z [i * m + j - 1]) / (npos_m [j + 1] - npos_m [j - 1]);
 				}
 				if (id == np - 1) {
 					data_ptr [i * (m + 2) + (m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0))] = 0.0;
 				}
 			}
 			
+			// Solve the matrix
 			linalg::p_block_banded_solve (id, np, m + (nbot == 0 ? 1 : -nbot - excess_n - 1) + (id == 0 ? 1: -excess_0 - ntop), kl, ku, &matrix [(id == 0 ? 0 : 1 + excess_0) * 6], &ipiv [0], &data_temp [(id == 0 ? 0 : 1 + excess_0)], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn, lda, m + 2 + kl + ku, m + 2);
-
+			
+			// We have chosen to be in the frame with no net vertical velocity (we can always choose this)
 			linalg::scale (2 * (m + 2), 0.0, &data_temp [0]);
-
+			
+			// Communicate the resulting boundary conditions
 			if (boundary_n) {
 				boundary_n->send (&data_temp [m - excess_n - 1], m + 2, 1);
 			}
 			if (boundary_0) {
 				boundary_0->receive (&data_ptr [-1], m + 2, 1, 0.0);
-				// boundary_0->send (&data_ptr [0], m + 2, 1);
+				boundary_0->send (&data_ptr [0], m + 2, 1);
 			}
 			if (boundary_n) {
-				// boundary_n->receive (&data_temp [m - excess_n], m + 2, 1, 0.0);
-			}
-
-			// for (int j = -1; j < m + 1; ++j) {
-			// 	debug << j << " ";
-			// 	for (int i = 0; i < ldn; ++i) {
-			// 		debug << data_ptr [i * (m + 2) + j] << " ";
-			// 	}
-			// 	DEBUG ("INC OUT: " << debug.str ());
-			// 	debug.str ("");
-			// }
-
-			for (int i = 2; i < ldn; ++i) {
-				for (int j = 0; j < m + 1 - (nbot == 0 ? 0 : excess_n + 1) - excess_0; ++j) {
-					data [i * m + j + excess_0] = (data_temp [i * (m + 2) + j + excess_0] + data_temp [i * (m + 2) + j + 1 + excess_0]) / 2.0;
-				}
-			}
-			for (int i = 2; i < ldn; ++i) {
-				for (int j = 0; j < m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
-					ndata_z [i * m + j] -= (data_ptr [i * (m + 2) + j] - data_ptr [i * (m + 2) + j - 1]) / (new_pos [j] - new_pos [j - 1]);
-				}
-			}
-
-			for (int i = 2; i < ldn; i += 2) {
-				for (int j = 0; j < m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
-					ndata_x [i * m + j] += scalar * (i / 2) * (data_ptr [(i + 1) * (m + 2) + j] + data_ptr [(i + 1) * (m + 2) + j - 1]) / 2.0;
-					ndata_x [(i + 1) * m + j] -= scalar * (i / 2) * (data_ptr [i * (m + 2) + j] + data_ptr [i * (m + 2) + j - 1]) / 2.0;
-				}
+				boundary_n->receive (&data_temp [m - excess_n], m + 2, 1, 0.0);
 			}
 			
-			// for (int j = 0; j < excess_0; ++j) {
-			// 	linalg::scale (ldn, 0.0, &data_z [j], m);
-			// 	linalg::scale (ldn, 0.0, &data_x [j], m);
-			// }
-			//
-			// for (int j = m - 1 - excess_n; j < m; ++j) {
-			// 	linalg::scale (ldn, 0.0, &data_z [j], m);
-			// 	linalg::scale (ldn, 0.0, &data_x [j], m);
-			// }
+			// For plotting purposes, we can calculate the resulting pressure
+			linalg::matrix_copy (m, ldn, data_ptr, data, m + 2);
+			linalg::matrix_add_scaled (m, ldn, 1.0, data_ptr + 1, data, m + 2);
+			linalg::scale (m * ldn, 0.5, data);
+			
+			// The vertical component incompressible correction
+			for (int j = 0; j < mmax; ++j) {
+				linalg::add_scaled (ldn - 2, -1.0 / (new_pos [j] - new_pos [j - 1]), data_ptr + 2 * (m + 2) + j, ndata_z + 2 * m + j, m + 2, m);
+				linalg::add_scaled (ldn - 2, 1.0 / (new_pos [j] - new_pos [j - 1]), data_ptr + 2 * (m + 2) + j - 1, ndata_z + 2 * m + j, m + 2, m);
+			}
+			
+			// The horizontal componenet incompressible correction
+			for (int i = 2; i < ldn; i += 2) {
+				linalg::add_scaled (mmax, scalar * (i / 2) / 2.0, data_ptr + (i + 1) * (m + 2) - 1, ndata_x + i * m);
+				linalg::add_scaled (mmax, scalar * (i / 2) / 2.0, data_ptr + (i + 1) * (m + 2), ndata_x + i * m);
+				linalg::add_scaled (mmax, -scalar * (i / 2) / 2.0, data_ptr + i * (m + 2) - 1, ndata_x + (i + 1) * m);
+				linalg::add_scaled (mmax, -scalar * (i / 2) / 2.0, data_ptr + i * (m + 2), ndata_x + (i + 1) * m);
+			}
 			
 			// Since only one boundary was solved, get the other and the overlap region from the adjacent element
 			if (boundary_0) {
@@ -301,17 +291,6 @@ namespace plans
 				boundary_0->receive (&data_x [0], m, excess_0, 0.0);
 			}
 			
-			// for (int i = 0; i < n; ++i) {
-			// 	data [i * m] = 0.0;
-			// 	data [i * m + m - 1] = 0.0;
-			// }
-			// for (int j = 1; j < m - 1; ++j) {
-			// 	for (int i = 0; i < n; i += 2) {
-			// 		data [i * m + j] = -scalar * (i / 2) * data_x [(i + 1) * m + j] + (data_z [i * m + j + 1] - data_z [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
-			// 		data [(i + 1) * m + j] = scalar * (i / 2) * data_x [i * m + j] + (data_z [(i + 1) * m + j + 1] - data_z [(i + 1) * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
-			// 	}
-			// }
-
 			linalg::scale (2 * m, 0.0, data_z);
 			linalg::scale (2 * m, 0.0, data_x);
 
