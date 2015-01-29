@@ -73,7 +73,7 @@ int main (int argc, char *argv[])
 			}
 		}
 
-		std::string file_format = "input/" + parameters.get <std::string> ("input.file");
+		std::string file_format = parameters.get <std::string> ("root") + parameters.get <std::string> ("input.directory") + parameters.get <std::string> ("input.file");
 		char buffer [file_format.size () * 2];
 		snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
 

@@ -331,7 +331,7 @@ namespace data
 			
 			std::shared_ptr <io::output> dump_stream;
 			if (dump_file != "") {
-				std::string file_format = "input/" + dump_file;
+				std::string file_format = dump_file;
 				char buffer [file_format.size () * 2];
 				snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 

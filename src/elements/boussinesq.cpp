@@ -28,7 +28,7 @@
 namespace data
 {
 	template <class datatype>
-	thermo_compositional_data <datatype>::thermo_compositional_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int id, int n_elements, io::parameters& i_params) : implemented_data <datatype> (i_axis_n, i_axis_m, id, i_params.get <std::string> ("dump.file"), i_params.get <int> ("dump.every")) {
+	thermo_compositional_data <datatype>::thermo_compositional_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int id, int n_elements, io::parameters& i_params) : implemented_data <datatype> (i_axis_n, i_axis_m, id, i_params.get <std::string> ("root") + i_params.get <std::string> ("dump.directory") + i_params.get <std::string> ("dump.file"), i_params.get <int> ("dump.every")) {
 		initialize (x_velocity, "u");
 		initialize (z_velocity, "w");
 		initialize (temp, "T");
@@ -40,7 +40,7 @@ namespace data
 		const io::data_grid i_grid = io::data_grid::two_d (n, m, 0, i_params.get <bool> ("input.full") ? n_elements * m : 0, 0, i_params.get <bool> ("input.full") ? id * m : 0);
 		
 		if (i_params.get <std::string> ("input.file") != "") {
-			std::string file_format = "input/" + i_params.get <std::string> ("input.file");
+			std::string file_format = i_params.get <std::string> ("root") + i_params.get <std::string> ("input.directory") + i_params.get <std::string> ("input.file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 			io::formatted_input <io::formats::two_d::netcdf> input_stream (i_grid, buffer);
@@ -53,7 +53,7 @@ namespace data
 		// Set up output
 		std::shared_ptr <io::output> normal_stream;
 		if (i_params.get <std::string> ("output.file") != "") {
-			std::string file_format = "output/" + i_params.get <std::string> ("output.file");
+			std::string file_format = i_params.get <std::string> ("root") + i_params.get <std::string> ("output.directory") + i_params.get <std::string> ("output.file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 
@@ -63,8 +63,8 @@ namespace data
 		}
 
 		std::shared_ptr <io::output> transform_stream;
-		if (i_params.get <std::string> ("output.transform_file") != "") {
-			std::string file_format = "output/" + i_params.get <std::string> ("output.transform_file");
+		if (i_params.get <std::string> ("output.transform.file") != "") {
+			std::string file_format = i_params.get <std::string> ("root") + i_params.get <std::string> ("output.directory") + i_params.get <std::string> ("output.transform.file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 
@@ -75,7 +75,7 @@ namespace data
 
 		std::shared_ptr <io::output> stat_stream;
 		if (i_params.get <std::string> ("output.stat.file") != "") {
-			std::string file_format = "output/" + i_params.get <std::string> ("output.stat.file");
+			std::string file_format = i_params.get <std::string> ("root") + i_params.get <std::string> ("output.directory") + i_params.get <std::string> ("output.stat.file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 

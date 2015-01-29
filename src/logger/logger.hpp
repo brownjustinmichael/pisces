@@ -118,6 +118,8 @@ namespace logger
 		}
 	
 		static void configure (int *argc, char ***argv, int id = 0, std::string log_file = "");
+		
+		static void set_severity (int severity = 2);
 	};
 } /* logger */
 

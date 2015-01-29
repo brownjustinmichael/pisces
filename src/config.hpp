@@ -17,7 +17,7 @@
 #include "io/parameters.hpp"
 #include "logger/logger.hpp"
 
-io::parameters config (int *argc, char ***argv, int id) {
+io::parameters config (int *argc, char ***argv, int id, std::string override_config_filename = "config.yaml") {
 	logger::log_config::configure (argc, argv, id, "process_%d.log");
 	std::string config_filename;
 	
@@ -35,9 +35,9 @@ io::parameters config (int *argc, char ***argv, int id) {
 			i -= 1;
 		}
 	}
-
+	
 	if ((*argc) <= 1) {
-		config_filename = "config.yaml";
+		config_filename = override_config_filename;
 	} else {
 		config_filename = (*argv) [1];
 	}

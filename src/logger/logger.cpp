@@ -81,6 +81,10 @@ namespace logger
 		append->setLayout (std::auto_ptr<log4cplus::Layout> (new log4cplus::PatternLayout ("%d %-5p: (%M %L) - %m%n")));
 		logger.addAppender (append);
 	}
+	
+	void log_config::set_severity (int severity) {
+	    logger.setLogLevel (int_to_severity (severity));
+	}
 } /* logger */
 
 #else
@@ -102,6 +106,10 @@ namespace logger
 				}
 			}
 		}
+	}
+	
+	void log_config::set_severity (i_severity) {
+		severity = i_severity;
 	}
 } /* logger */
 

@@ -50,7 +50,8 @@ input:
     full: true
 output:
     file: output_%02i
-    transform_file: output_t_%02i
+    transform:
+        file: output_t_%02i
     every: 1000
     stat:
         file: stat_%02i

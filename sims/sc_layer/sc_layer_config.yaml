@@ -50,7 +50,8 @@ input:
     full: true
 output:
     file: sc_layer_%02i
-    transform_file: sc_layer_t_%02i
+    transform:
+        file: sc_layer_t_%02i
     every: 1000
     stat:
         file: sc_layer_stat_%02i

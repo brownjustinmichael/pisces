@@ -44,13 +44,17 @@ velocity:
     buoyancy:
         temperature: 0.5
         composition: -0.5
+root: ./
 input:
+    directory: input/
     file: input_%02i
     full: true
 output:
+    directory: output/
     file: sc_gwave_%02i
-    transform_file: sc_gwave_t_%02i
     every: 10
+    transform:
+        file: sc_gwave_t_%02i
     stat:
         file: sc_gwave_%02i
         every: 50
@@ -58,6 +62,7 @@ output:
     full: true
 dump:
     file: dump_%02i
+    directory: input/
     every: 1000
 parallel:
     maxthreads: 4
