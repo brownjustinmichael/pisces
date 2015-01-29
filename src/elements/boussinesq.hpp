@@ -35,8 +35,8 @@ namespace pisces
 			if (flags & profile_only) {
 				virtual_output.reset (new io::formatted_output <io::formats::two_d::virtual_format> (io::data_grid::two_d (1, m), "two_d/boussinesq/virtual_file", io::replace_file));
 				if (flags & timestep_only) {
-					virtual_output->append <datatype> ("z", new io::functors::average_functor <datatype> (ptr (z_position), n, m));
-					virtual_output->append <datatype> ("w", new io::functors::root_mean_square_functor <datatype> (ptr (z_velocity), n, m));
+					virtual_output->append <datatype> ("z", std::shared_ptr <io::functors::functor> (new io::functors::average_functor <datatype> (ptr (z_position), n, m)));
+					virtual_output->append <datatype> ("w", std::shared_ptr <io::functors::functor> (new io::functors::root_mean_square_functor <datatype> (ptr (z_velocity), n, m)));
 				} else {
 					FATAL ("HAVEN'T GOT A TREATMENT FOR THIS YET");
 					throw 0;

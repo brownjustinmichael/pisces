@@ -26,7 +26,7 @@ namespace io
 		{
 		private:
 			datatype *weight, *data; //!< A datatype pointer to the input data
-			functor *func;
+			std::shared_ptr <functor> func;
 			int n; //!< The integer horizontal extent of the data
 			int m; //!< The integer vertical extent of the data
 			datatype inner_data; //!< A vector of processed data to output
@@ -37,10 +37,10 @@ namespace io
 			 * \param i_n The integer horizontal extent of the data
 			 * \param i_m The integer vertical extent of the data
 			 ************************************************************************/
-			weighted_average_functor (int i_n, int i_m, datatype *i_weight, datatype *i_data) : weight (i_weight), data (i_data), n (i_n), m (i_m) {
+			weighted_average_functor (int i_n, int i_m, datatype *i_weight, datatype *i_data) : weight (i_weight), data (i_data), func (NULL), n (i_n), m (i_m) {
 			}
 	
-			weighted_average_functor (int i_n, int i_m, datatype *i_weight, functor *i_func) : weight (i_weight), data ((datatype *) i_func->calculate ()), func (i_func), n (i_n), m (i_m) {
+			weighted_average_functor (int i_n, int i_m, datatype *i_weight, std::shared_ptr <functor> i_func) : weight (i_weight), data ((datatype *) i_func->calculate ()), func (i_func), n (i_n), m (i_m) {
 			}
 	
 			/*!**********************************************************************
@@ -49,10 +49,13 @@ namespace io
 			 * \return The first element of the averaged 1D array
 			 ************************************************************************/
 			void *calculate () {
+				DEBUG ("CALCULATING");
 				if (func) {
 					func->calculate ();
 				}
+				DEBUG ("weight " << weight << " data " << data);
 				inner_data = linalg::dot (m * n, weight, data);
+				DEBUG ("Inner " << &inner_data);
 				return &inner_data;
 			}
 		};

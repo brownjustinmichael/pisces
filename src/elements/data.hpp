@@ -17,6 +17,7 @@
 
 #include "io/input.hpp"
 #include "io/formats/format.hpp"
+#include "io/functors/functor.hpp"
 #include "io/output.hpp"
 #include "io/functors/average.hpp"
 #include "io/formats/exceptions.hpp"
@@ -137,7 +138,9 @@ namespace data
 			flags [i_name] = 0x00;
 			scalar_names [i_name] = i_str;
 			datatype *ptr = _initialize (i_name, initial_conditions, i_flags);
-			dump_stream->template append <datatype> (i_str, ptr);
+			if (dump_stream) {
+				dump_stream->template append <datatype> (i_str, ptr);
+			}
 			return ptr;
 		}
 		
@@ -169,7 +172,7 @@ namespace data
 				streams [i]->to_file ();
 				done [i] = true;
 			}
-			if (!dump_done) {
+			if (dump_stream && !dump_done) {
 				if (dump_condition & transformed_vertical) {
 					if (!(i_flags & transformed_vertical)) {
 						return;
@@ -357,8 +360,8 @@ namespace data
 			typedef typename std::map <int, std::vector <datatype> >::iterator iterator;
 			for (iterator iter = data <datatype>::scalars.begin (); iter != data <datatype>::scalars.end (); ++iter) {
 				output_ptr->template append <datatype> (data <datatype>::scalar_names [iter->first], (*this) (iter->first));
-				output_ptr->template append <datatype> ("rms_" + data <datatype>::scalar_names [iter->first], new io::functors::root_mean_square_functor <datatype> ((*this) (iter->first), n, m));
-				output_ptr->template append <datatype> ("avg_" + data <datatype>::scalar_names [iter->first], new io::functors::average_functor <datatype> ((*this) (iter->first), n, m));
+				output_ptr->template append <datatype> ("rms_" + data <datatype>::scalar_names [iter->first], std::shared_ptr <io::functors::functor> (new io::functors::root_mean_square_functor <datatype> ((*this) (iter->first), n, m)));
+				output_ptr->template append <datatype> ("avg_" + data <datatype>::scalar_names [iter->first], std::shared_ptr <io::functors::functor> (new io::functors::average_functor <datatype> ((*this) (iter->first), n, m)));
 			}
 			output_ptr->template append <datatype> ("t", &(duration), io::scalar);
 			output_ptr->template append <const int> ("mode", &(data <datatype>::get_mode ()), io::scalar);

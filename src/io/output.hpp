@@ -34,7 +34,7 @@ namespace io
 		std::vector <func_t *> write_functions;
 		std::vector <std::string> names; //!< A vector of the string representations of the variables
 		std::vector <void *> data_ptrs; //!< A vector of pointers to the arrays of data
-		std::vector <functors::functor *> functor_ptrs; //!< A vector of pointers to the functors
+		std::vector <std::shared_ptr <functors::functor>> functor_ptrs; //!< A vector of pointers to the functors
 		std::vector <int> dims;
 
 	public:
@@ -60,7 +60,7 @@ namespace io
 		 * WARNING: THIS WILL HAPPILY ACCEPT A FUNCTOR OF NON-DATATYPE TEMPLATE
 		 ************************************************************************/
 		template <class datatype>
-		void append (std::string name, functors::functor *functor_ptr, int flags = all_d) {
+		void append (std::string name, std::shared_ptr <functors::functor> functor_ptr, int flags = all_d) {
 			TRACE ("Appending " << name << " to output...");
 			for (int i = 0; i < (int) names.size (); ++i) {
 				if (names [i] == name) {
@@ -69,6 +69,7 @@ namespace io
 					return;
 				}
 			}
+			DEBUG ("Pointer " << &*functor_ptr);
 			functor_ptrs.push_back (functor_ptr);
 			append <datatype> (name, (datatype *) functor_ptr->calculate (), flags);
 			TRACE ("Functor appended.");
