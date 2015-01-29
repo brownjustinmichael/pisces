@@ -34,9 +34,10 @@ public:
 		parameters ["root"] = std::string (PISCES_ROOT) + "/test/elements/";
 		parameters ["output.file"] = "";
 		parameters ["output.stat.file"] = "compare_%02i";
+		parameters ["output.stat.every"] = 10;
 		parameters ["output.transform.file"] = "";
 		parameters ["dump.file"] = "";
-		parameters ["time.steps"] = 1000;
+		parameters ["time.steps"] = 100;
 	
 		int m = parameters.get <int> ("grid.z.points") / n_elements + 1;
 		m += m % 2;
