@@ -72,30 +72,51 @@ namespace plans
 		np = messenger_ptr->get_np ();
 		
 		positions.resize (m + 6);
-		pos_m = &positions [3];
+		mid_positions.resize (m + 6);
+		diff_pos = &positions [3];
 		
 		for (int j = 0; j < m - 0; ++j) {
-			pos_m [j] = grid_m [j];
+			diff_pos [j] = grid_m [j];
 		}
 		
 		ntop = 0;
 		nbot = 0;
 		if (id != 0) {
 			ntop = 1;
-			messenger_ptr->send (3, &pos_m [excess_0 + 1], id - 1, 0);
+			messenger_ptr->send (3, &diff_pos [excess_0 + 1], id - 1, 0);
 		}
 		if (id != np - 1) {
 			nbot = 2;
-			messenger_ptr->recv (3, &pos_m [m - excess_n], id + 1, 0);
-			messenger_ptr->send (3, &pos_m [m - 4 - excess_n], id + 1, 1);
+			messenger_ptr->recv (3, &diff_pos [m - excess_n], id + 1, 0);
+			messenger_ptr->send (3, &diff_pos [m - 4 - excess_n], id + 1, 1);
 		} else {
-			pos_m [m] = pos_m [m - 1] + (pos_m [m - 1] - pos_m [m - 2]);
+			diff_pos [m] = diff_pos [m - 1] + (diff_pos [m - 1] - diff_pos [m - 2]);
 		}
 		if (id != 0) {
-			messenger_ptr->recv (3, &pos_m [excess_0 - 3], id - 1, 1);
+			messenger_ptr->recv (3, &diff_pos [excess_0 - 3], id - 1, 1);
 		} else {
-			pos_m [-1] = pos_m [0] - (pos_m [1] - pos_m [0]);
+			diff_pos [-1] = diff_pos [0] - (diff_pos [1] - diff_pos [0]);
 		}
+		
+		diff_midpos = &mid_positions [3];
+		for (int j = -3; j < m + 3; ++j) {
+			diff_midpos [j] = (diff_pos [j] + diff_pos [j + 1]) / 2.0;
+		}
+		if (id == 0) {
+			diff_midpos [-1] = 2.0 * diff_pos [0] - (diff_pos [0] + diff_pos [1]) / 2.0;
+		}
+		if (id == np - 1) {
+			diff_midpos [m - 1] = 2.0 * diff_pos [m - 1] - (diff_pos [m - 1] + diff_pos [m - 2]) / 2.0;
+			diff_midpos [m] = diff_pos [m - 1] + (diff_pos [m - 1] - diff_midpos [m - 3]);
+		}
+		
+		for (int j = m + 2; j >= -3; --j) {
+			diff_midpos [j] -= diff_midpos [j - 1];
+			diff_pos [j] -= diff_pos [j - 1];
+		}
+		
+		diff_midpos += excess_0;
+		diff_pos += excess_0;
 		
 		int kl = 2;
 		int ku = 1;
@@ -118,31 +139,19 @@ namespace plans
 		if (count == 0) {
 
 			double scalar = 4.0 * std::acos (-1.0) * std::acos (-1.0) / (pos_n [n - 1] - pos_n [0]) / (pos_n [n - 1] - pos_n [0]);
-			datatype *matrix_ptr, *npos_m = &pos_m [excess_0];
+			datatype *matrix_ptr;
 			int kl = 2;
 			int ku = 1;
 			int lda = 2 * kl + ku + 1;
-			new_pos = &positions [3];
-			for (int j = -3; j < m + 3; ++j) {
-				new_pos [j] = (pos_m [j] + pos_m [j + 1]) / 2.0;
-			}
-			if (id == 0) {
-				new_pos [-1] = 2.0 * pos_m [0] - (pos_m [0] + pos_m [1]) / 2.0;
-			}
-			if (id == np - 1) {
-				new_pos [m - 1] = 2.0 * pos_m [m - 1] - (pos_m [m - 1] + pos_m [m - 2]) / 2.0;
-				new_pos [m] = pos_m [m - 1] + (pos_m [m - 1] - new_pos [m - 3]);
-			}
-			new_pos += excess_0;
-
+			
 			for (int i = 0; i < ldn; ++i) {
 				matrix_ptr = &matrix [(i) * (m + 2 + kl + ku) * lda + kl + ku + (kl + ku + excess_0) * lda];
 				for (int j = 0; j < m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
 					// j is the gridpoint location of the solve on the velocity grid (I think)
-					matrix_ptr [(j - 2) * lda + 2] = 1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (npos_m [j + 1] - npos_m [j - 1]);
-					matrix_ptr [(j - 1) * lda + 1] = -1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (npos_m [j + 1] - npos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
-					matrix_ptr [(j) * lda] = -1.0 / (new_pos [j + 1] - new_pos [j]) / (npos_m [j + 1] - npos_m [j - 1]) - scalar * (i / 2) * (i / 2) / 2.0;
-					matrix_ptr [(j + 1) * lda - 1] = 1.0 / (new_pos [j + 1] - new_pos [j]) / (npos_m [j + 1] - npos_m [j - 1]);
+					matrix_ptr [(j - 2) * lda + 2] = 1.0 / diff_midpos [j - 1] / diff_pos [j + 1];
+					matrix_ptr [(j - 1) * lda + 1] = -1.0 / diff_midpos [j - 1] / diff_pos [j + 1] - scalar * (i / 2) * (i / 2) / 2.0;
+					matrix_ptr [(j) * lda] = -1.0 / diff_midpos [j + 1] / diff_pos [j + 1] - scalar * (i / 2) * (i / 2) / 2.0;
+					matrix_ptr [(j + 1) * lda - 1] = 1.0 / diff_midpos [j + 1] / diff_pos [j + 1];
 				}
 				if (id == 0) {
 					matrix_ptr [-3 * lda + 2] = 0.0;
@@ -151,9 +160,9 @@ namespace plans
 					matrix_ptr [-1] = -1.0;
 
 					matrix_ptr [-2 * lda + 2] = 0.0;
-					matrix_ptr [-1 * lda + 1] = 1.0 / (new_pos [0] - new_pos [-1]) / (npos_m [1] - npos_m [0]);
-					matrix_ptr [0] = -1.0 / (new_pos [1] - new_pos [0]) / (npos_m [1] - npos_m [0]) - 1.0 / (new_pos [0] - new_pos [-1]) / (npos_m [1] - npos_m [0]) - scalar * (i / 2) * (i / 2);
-					matrix_ptr [1 * lda - 1] = 1.0 / (new_pos [1] - new_pos [0]) / (npos_m [1] - npos_m [0]);
+					matrix_ptr [-1 * lda + 1] = 1.0 / diff_midpos [0] / (diff_pos [1]);
+					matrix_ptr [0] = -1.0 / diff_midpos [1] / diff_pos [1] - 1.0 / diff_midpos [0] / diff_pos [1] - scalar * (i / 2) * (i / 2);
+					matrix_ptr [1 * lda - 1] = 1.0 / diff_midpos [1] / diff_pos [1];
 				}
 				if (id == np - 1) {
 					int j = m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0);
@@ -196,8 +205,7 @@ namespace plans
 			datatype *data_ptr = &data_temp [1];
 			int mmax = m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0);
 
-			std::vector <datatype> positions (m + 2 + 6);
-			datatype *npos_m = &pos_m [excess_0], *ndata_z = &data_z [excess_0], *ndata_x = &data_x [excess_0];
+			datatype *ndata_z = &data_z [excess_0], *ndata_x = &data_x [excess_0];
 
 			data_ptr += excess_0;
 			
@@ -212,15 +220,15 @@ namespace plans
 			
 			// For every point, we need to add the vertical derivative of the vertical component to the right hand side 
 			for (int j = (id == 0 ? 1 : 0); j < mmax; ++j) {
-				linalg::add_scaled (ldn, 1.0 / (npos_m [j + 1] - npos_m [j - 1]), ndata_z + j + 1, data_ptr + j, m, m + 2);
-				linalg::add_scaled (ldn, -1.0 / (npos_m [j + 1] - npos_m [j - 1]), ndata_z + j - 1, data_ptr + j, m, m + 2);
+				linalg::add_scaled (ldn, 1.0 / diff_pos [j + 1], ndata_z + j + 1, data_ptr + j, m, m + 2);
+				linalg::add_scaled (ldn, -1.0 / diff_pos [j + 1], ndata_z + j - 1, data_ptr + j, m, m + 2);
 			}
 			
 			// The vertical boundaries are special cases for the vertical derivatives
 			for (int i = 0; i < ldn; ++i) {
 				if (id == 0) {
 					data_ptr [i * (m + 2) - 1] = 0.0;
-					data_ptr [i * (m + 2)] += (ndata_z [i * m + 1] - ndata_z [i * m]) / (npos_m [1] - npos_m [0]);
+					data_ptr [i * (m + 2)] += (ndata_z [i * m + 1] - ndata_z [i * m]) / (diff_pos [1]);
 				}
 				if (id == np - 1) {
 					data_ptr [i * (m + 2) + (m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0))] = 0.0;
@@ -252,8 +260,8 @@ namespace plans
 			
 			// The vertical component incompressible correction
 			for (int j = 0; j < mmax; ++j) {
-				linalg::add_scaled (ldn - 2, -1.0 / (new_pos [j] - new_pos [j - 1]), data_ptr + 2 * (m + 2) + j, ndata_z + 2 * m + j, m + 2, m);
-				linalg::add_scaled (ldn - 2, 1.0 / (new_pos [j] - new_pos [j - 1]), data_ptr + 2 * (m + 2) + j - 1, ndata_z + 2 * m + j, m + 2, m);
+				linalg::add_scaled (ldn - 2, -1.0 / diff_midpos [j], data_ptr + 2 * (m + 2) + j, ndata_z + 2 * m + j, m + 2, m);
+				linalg::add_scaled (ldn - 2, 1.0 / diff_midpos [j], data_ptr + 2 * (m + 2) + j - 1, ndata_z + 2 * m + j, m + 2, m);
 			}
 			
 			// The horizontal componenet incompressible correction

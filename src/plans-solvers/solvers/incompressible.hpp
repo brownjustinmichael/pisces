@@ -55,7 +55,7 @@ namespace plans
 		int m;
 		int count;
 		int ntop, nbot;
-		datatype *data, *data_x, *data_z, *new_pos;
+		datatype *data, *data_x, *data_z, *diff_pos, *diff_midpos;
 		datatype ex_pos_0, ex_pos_m, exx_pos_0, exx_pos_m, exxx_pos_0, exxx_pos_m;
 		int flags;
 		int *component_flags_x, *component_flags_z;
@@ -73,7 +73,7 @@ namespace plans
 		std::shared_ptr <plans::boundary <datatype>> boundary_0, boundary_n;
 		
 		std::vector <datatype> x, bufferl, bufferr;
-		std::vector <datatype> data_temp, positions;
+		std::vector <datatype> data_temp, positions, mid_positions;
 		std::vector <datatype> sup, sub, diag, supsup, matrix; //!< A datatype vector to be used in lieu of data_out for non-updating steps
 		std::vector <int> ipiv, xipiv;
 		using plans::solver <datatype>::element_flags;
