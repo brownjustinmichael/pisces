@@ -1,0 +1,5 @@
+*.pyc
+*.log
+input/*.cdf
+output/*
+__pycache__/*
