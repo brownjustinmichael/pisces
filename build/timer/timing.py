@@ -31,6 +31,8 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
             guess += 1
             
     server_socket.listen (5)
+    
+    print (socket.gethostbyname(socket.gethostname()))
 
     print ("Sending to wrapper file...", wrapperFile)
 
