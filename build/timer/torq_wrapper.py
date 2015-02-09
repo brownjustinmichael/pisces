@@ -28,7 +28,7 @@ batch_file.write ("#PBS -l walltime=00:30:00\n")
 batch_file.write ("cd $PBS_O_WORKDIR\n")
 batch_file.write ("cp $PBS_NODEFILE .\n")
 
-batch_file.write (" ".join (inputs ["command"]))
+batch_file.write (" ".join (inputs ["command"]) + " > stdout1")
 batch_file.write ("\n")
 
 batch_file.close ()
