@@ -58,7 +58,7 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
         batch_file.write (" ".join (["python", wrapperFile, "-p", str (guess)]) + " > stdout1")
         batch_file.write ("\n")
         
-        Popen (["qsub", batch_file])
+        Popen (["qsub", "batch_%04d.pbs" % guess])
     else:
         Popen (["python", wrapperFile, "-p", str (guess)])
     
