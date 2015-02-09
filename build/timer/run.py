@@ -1,6 +1,6 @@
 from timing import Timer, Argument
 
-mpiProcs = Argument ("mpiexec -np %d", extent = [1,2], prepend = True, threaded = True)
+mpiProcs = Argument ("mpirun -np %d", extent = [1,2], prepend = True, threaded = True)
 maxThreads = Argument ("-V parallel.maxthreads %d", extent = [1, 2], threaded = True)
 
 timer = Timer ("pisces", 
@@ -13,3 +13,5 @@ timer = Timer ("pisces",
                uniques = [Argument ("-V input.file input_%03d_%%02i")])
 
 results = timer.calculateTimes (torque = True)
+
+print (results)

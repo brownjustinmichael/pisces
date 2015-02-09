@@ -53,7 +53,7 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
         batch_file.write ("cd $PBS_O_WORKDIR\n")
         batch_file.write ("cp $PBS_NODEFILE .\n")
 
-        batch_file.write (" ".join (["python", wrapperFile, "-a", str (socket.gethostbyname(socket.gethostname())), "-p", str (guess)]) + " > stdout1")
+        batch_file.write (" ".join (["python", wrapperFile, "-a", str (socket.gethostbyname(socket.gethostname())), "-p", str (guess)]))
         batch_file.write ("\n")
         batch_file.close ()
         
@@ -121,7 +121,7 @@ class Timer (object):
                     for arg in self.uniques:
                         arg.setRandom ()
                     Argument.setAll (self.variances, variances)
-                    times [variances] = timeCommand (command = self.getCommand (), setupCommand = self.getSetupCommand (), processors = processors, **kwargs)
+                    times [variances] = timeCommand.delay (command = self.getCommand (), setupCommand = self.getSetupCommand (), processors = processors, **kwargs)
                 except RuntimeError:
                     print ("Throwing out", variances)
                     pass
