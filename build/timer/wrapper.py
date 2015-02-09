@@ -5,6 +5,8 @@ import json
 from sys import argv
 import socket
 
+def get_total_seconds(td): return (td.microseconds + (td.seconds + td.days * 24 * 3600) * 1e6) / 1e6
+
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket.connect(("localhost", int (argv [2])))
 
@@ -16,7 +18,7 @@ for i in range (inputs ["iterations"]):
     startTime = datetime.now ()
     print ("Calling", inputs ["command"])
     call (inputs ["command"])
-    times.append ((datetime.now() - startTime).total_seconds ())
+    times.append (get_total_second ((datetime.now() - startTime)))
 
 results = {}
 results ["dt"] = sum (times) / len (times)
