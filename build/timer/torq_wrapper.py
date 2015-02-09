@@ -18,17 +18,17 @@ batch_file.write ("#PBS -S /bin/bash\n")
 batch_file.write ("#PBS -q normal\n")
 batch_file.write ("#PBS -N pisces\n")
 
-if (inputs ["processors"] > 16):
+if (inputs.get ("processors", 1) > 16):
     ppn = 16
 else:
-    ppn = inputs ["processors"]
+    ppn = inputs.get ("processors", 1)
     
-batch_file.write ("#PBS -l nodes=%d:ppn=%d\n" % (inputs ["processors"] / 16 + 1, ppn))
+batch_file.write ("#PBS -l nodes=%d:ppn=%d\n" % (inputs.get ("processors", 1) / 16 + 1, ppn))
 batch_file.write ("#PBS -l walltime=00:30:00\n")
 batch_file.write ("cd $PBS_O_WORKDIR\n")
 batch_file.write ("cp $PBS_NODEFILE .\n")
 
-batch_file.write (" ".join (inputs ["command"]))
+batch_file.write (" ".join (inputs ["command"]) + " > stdout1")
 batch_file.write ("\n")
 
 batch_file.close ()
