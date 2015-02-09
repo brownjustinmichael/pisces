@@ -39,7 +39,7 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
     if torque:
         print ("Writing to batch file")
 
-        batch_file = open ("batch_%04d.pbs" % int (argv [2]), "w")
+        batch_file = open ("batch_%04d.pbs" % guess, "w")
 
         batch_file.write ("#PBS -S /bin/bash\n")
         batch_file.write ("#PBS -q normal\n")
