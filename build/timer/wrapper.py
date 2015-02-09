@@ -25,8 +25,8 @@ inputs = json.loads (client_socket.recv (512).decode ())
 times = []
 
 for i in range (inputs ["iterations"]):
-    startTime = datetime.now ()
     print ("Calling", inputs ["command"])
+    startTime = datetime.now ()
     call (inputs ["command"])
     times.append (get_total_seconds ((datetime.now() - startTime)))
 
