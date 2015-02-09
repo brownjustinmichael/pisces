@@ -12,4 +12,4 @@ timer = Timer ("pisces",
                commandArgs = ["-D7"], 
                uniques = [Argument ("-V input.file input_%03d_%%02i")])
 
-results = timer.calculateTimes (wrapperFile = "wrapper.py",)
+results = timer.calculateTimes (torque = False)
