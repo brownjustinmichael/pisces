@@ -32,8 +32,6 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
             
     server_socket.listen (5)
     
-    print (socket.gethostbyname(socket.gethostname()))
-
     print ("Sending to wrapper file...", wrapperFile)
     
     if torque:
@@ -55,13 +53,13 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
         batch_file.write ("cd $PBS_O_WORKDIR\n")
         batch_file.write ("cp $PBS_NODEFILE .\n")
 
-        batch_file.write (" ".join (["python", wrapperFile, "-p", str (guess)]) + " > stdout1")
+        batch_file.write (" ".join (["python", wrapperFile, "-a", str (socket.gethostbyname(socket.gethostname())), "-p", str (guess)]) + " > stdout1")
         batch_file.write ("\n")
         batch_file.close ()
         
         Popen (["qsub", "batch_%04d.pbs" % guess])
     else:
-        Popen (["python", wrapperFile, "-p", str (guess)])
+        Popen (["python", wrapperFile, "-a", str (socket.gethostbyname(socket.gethostname())), wrapperFile, "-p", str (guess)])
     
     client_socket, address = server_socket.accept()
     
