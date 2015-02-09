@@ -125,7 +125,7 @@ class Timer (object):
                 except RuntimeError:
                     print ("Throwing out", variances)
                     pass
-        return {time: times [time].get () for time in times}
+        return dict ([(time, times [time].get ()) for time in times])
 
 class Argument (object):
     """
