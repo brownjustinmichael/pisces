@@ -13,7 +13,7 @@ app = Celery('pisces_timer', backend = 'amqp')
 app.config_from_object (celeryconfig)
 
 @app.task
-def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wrapper.py", processors = 1):
+def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wrapper.py", processors = 1, torque = False):
     if isinstance (command, str):
         command = [command]
     
@@ -35,8 +35,32 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
     print (socket.gethostbyname(socket.gethostname()))
 
     print ("Sending to wrapper file...", wrapperFile)
+    
+    if torque:
+        print ("Writing to batch file")
 
-    Popen (["python", wrapperFile, "-p", str (guess)])
+        batch_file = open ("batch_%04d.pbs" % int (argv [2]), "w")
+
+        batch_file.write ("#PBS -S /bin/bash\n")
+        batch_file.write ("#PBS -q normal\n")
+        batch_file.write ("#PBS -N pisces\n")
+
+        if (processors > 16):
+            ppn = 16
+        else:
+            ppn = processors
+    
+        batch_file.write ("#PBS -l nodes=%d:ppn=%d\n" % (processors / 16 + 1, ppn))
+        batch_file.write ("#PBS -l walltime=00:30:00\n")
+        batch_file.write ("cd $PBS_O_WORKDIR\n")
+        batch_file.write ("cp $PBS_NODEFILE .\n")
+
+        batch_file.write (" ".join (["python", wrapperFile, "-p", str (guess)]) + " > stdout1")
+        batch_file.write ("\n")
+        
+        Popen (["qsub", batch_file])
+    else:
+        Popen (["python", wrapperFile, "-p", str (guess)])
     
     client_socket, address = server_socket.accept()
     
