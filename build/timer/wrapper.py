@@ -18,7 +18,7 @@ for i in range (inputs ["iterations"]):
     startTime = datetime.now ()
     print ("Calling", inputs ["command"])
     call (inputs ["command"])
-    times.append (get_total_second ((datetime.now() - startTime)))
+    times.append (get_total_seconds ((datetime.now() - startTime)))
 
 results = {}
 results ["dt"] = sum (times) / len (times)
