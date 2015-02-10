@@ -116,7 +116,7 @@ class Timer (object):
         print (self.variances)
         for variances in Argument.generate (*self.variances):
             if variances not in times:
-                processors = 1
+                processes = 1
                 threads = 1
                 try:
                     Argument.setAll (self.variances, variances)
@@ -126,13 +126,13 @@ class Timer (object):
                     
                 for arg in self.variances:
                     if arg.processes:
-                        processors *= arg.value
+                        processes *= arg.value
                     if arg.threads:
                         threads *= arg.value
 
                 for arg in self.uniques:
                     arg.setRandom ()
-                times [variances] = timeCommand.delay (command = self.getCommand (), setupCommand = self.getSetupCommand (), processors = processors, commandRoot = self.commandRoot, **kwargs)
+                times [variances] = timeCommand.delay (command = self.getCommand (), setupCommand = self.getSetupCommand (), processes = processors, threads = threads, commandRoot = self.commandRoot, **kwargs)
 
         return times
 
