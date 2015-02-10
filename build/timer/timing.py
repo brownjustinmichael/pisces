@@ -149,7 +149,8 @@ class Argument (object):
         self.pastValues = []
         self.value = value
         self.kwargs = kwargs
-        self.threaded = kwargs.get ("threaded", False)
+        self.processes = kwargs.get ("processes", False)
+        self.threads = kwargs.get ("processes", False)
         
     def getValue (self):
         return self._value
