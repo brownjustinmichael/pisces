@@ -50,12 +50,12 @@ input:
     file: input_%02i
     full: true
 output:
-    file: sc_gwave_%02i
+    file: ""
     transform:
-        file: sc_gwave_t_%02i
+        file: ""
     every: 100
     stat:
-        file: sc_gwave_%02i
+        file: ""
         every: 50
     merge_file: merge_%04i
     full: true
