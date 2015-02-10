@@ -129,7 +129,6 @@ class Timer (object):
                         processes *= arg.value
                     if arg.threads:
                         threads *= arg.value
-
                 for arg in self.uniques:
                     arg.setRandom ()
                 times [variances] = timeCommand.delay (command = self.getCommand (), setupCommand = self.getSetupCommand (), processes = processes, threads = threads, commandRoot = self.commandRoot, **kwargs)
@@ -150,7 +149,7 @@ class Argument (object):
         self.value = value
         self.kwargs = kwargs
         self.processes = kwargs.get ("processes", False)
-        self.threads = kwargs.get ("processes", False)
+        self.threads = kwargs.get ("threads", False)
         
     def getValue (self):
         return self._value
