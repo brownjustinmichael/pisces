@@ -4,6 +4,7 @@ import json
 
 from sys import argv
 import socket
+import numpy as np
 
 from optparse import OptionParser
 
@@ -31,7 +32,8 @@ for i in range (inputs ["iterations"]):
     times.append (get_total_seconds ((datetime.now() - startTime)))
 
 results = {}
-results ["dt"] = sum (times) / len (times)
+results ["dt"] = np.mean (times)
+results ["std"] = np.std (times)
 
 client_socket.send(json.dumps (results).encode ())
 client_socket.close ()
