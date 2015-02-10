@@ -9,9 +9,9 @@ timer = Timer ("pisces",
                Argument ("-V parallel.transform.threads %d", extent = [1,2], upperBound = maxThreads), 
                setupCommandRoot = "pisces_init", 
                directory = "../../run", 
-               commandArgs = ["-D3"], 
+               commandArgs = ["-D2"], 
                uniques = [Argument ("-V input.file input_%03d_%%02i")])
 
-results = timer.calculateTimes (torque = True, iterations = 8)
+results = timer.calculateTimes (torque = True, iterations = 2)
 
 print (results)
