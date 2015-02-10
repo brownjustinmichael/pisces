@@ -13,7 +13,7 @@ app = Celery('pisces_timer', backend = 'amqp')
 app.config_from_object (celeryconfig)
 
 @app.task
-def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wrapper.py", processors = 1, torque = False, commandRoot = "job"):
+def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wrapper.py", processes = 1, threads = 1, torque = False, commandRoot = "job"):
     if isinstance (command, str):
         command = [command]
     
@@ -43,15 +43,13 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
         batch_file.write ("#PBS -q normal\n")
         batch_file.write ("#PBS -N %s\n" % commandRoot)
 
-        if (processors > 16):
-            ppn = 16
-        else:
-            ppn = processors
-        
-        batch_file.write ("#PBS -l nodes=%d:ppn=%d\n" % (processors / 16 + 1, ppn))
+        batch_file.write ("#PBS -l nodes=%d:ppn=%d\n" % (processes, threads))
         batch_file.write ("#PBS -l walltime=00:30:00\n")
         batch_file.write ("cd $PBS_O_WORKDIR\n")
         batch_file.write ("cp $PBS_NODEFILE .\n")
+        
+        batch_file.write ("OMP_NUM_THREADS=$PBS_NUM_PPN\n")
+        batch_file.write ("export OMP_NUM_THREADS\n")
 
         batch_file.write (" ".join (["python", wrapperFile, "-a", str (socket.gethostbyname(socket.gethostname())), "-p", str (guess)]))
         batch_file.write ("\n")
@@ -119,6 +117,7 @@ class Timer (object):
         for variances in Argument.generate (*self.variances):
             if variances not in times:
                 processors = 1
+                threads = 1
                 try:
                     Argument.setAll (self.variances, variances)
                 except RuntimeError:
@@ -126,8 +125,10 @@ class Timer (object):
                     continue
                     
                 for arg in self.variances:
-                    if arg.threaded:
+                    if arg.processes:
                         processors *= arg.value
+                    if arg.threads:
+                        threads *= arg.value
 
                 for arg in self.uniques:
                     arg.setRandom ()
