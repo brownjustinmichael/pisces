@@ -13,6 +13,7 @@
 #include <map>
 #include <vector>
 #include <omp.h>
+#include <algorithm>
 
 #include "io/parameters.hpp"
 #include "logger/logger.hpp"
@@ -49,7 +50,7 @@ io::parameters config (int *argc, char ***argv, int id, std::string override_con
 		config [config_strs [i]] = config_args [config_strs [i]];
 	}
 	
-	omp_set_num_threads (config.get <int> ("parallel.maxthreads"));
+	omp_set_num_threads (std::min (config.get <int> ("parallel.maxthreads"), omp_get_max_threads ()));
 	
 	return config;
 }

@@ -13,7 +13,7 @@ app = Celery('pisces_timer', backend = 'amqp')
 app.config_from_object (celeryconfig)
 
 @app.task
-def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wrapper.py", processors = 1, torque = False, commandRoot = "job"):
+def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wrapper.py", processes = 1, threads = 1, torque = False, commandRoot = "job"):
     if isinstance (command, str):
         command = [command]
     
@@ -43,15 +43,13 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
         batch_file.write ("#PBS -q normal\n")
         batch_file.write ("#PBS -N %s\n" % commandRoot)
 
-        if (processors > 16):
-            ppn = 16
-        else:
-            ppn = processors
-    
-        batch_file.write ("#PBS -l nodes=%d:ppn=%d\n" % (processors / 16 + 1, ppn))
+        batch_file.write ("#PBS -l nodes=%d:ppn=%d\n" % (processes, threads))
         batch_file.write ("#PBS -l walltime=00:30:00\n")
         batch_file.write ("cd $PBS_O_WORKDIR\n")
         batch_file.write ("cp $PBS_NODEFILE .\n")
+        
+        batch_file.write ("OMP_NUM_THREADS=%d\n" % threads)
+        batch_file.write ("export OMP_NUM_THREADS\n")
 
         batch_file.write (" ".join (["python", wrapperFile, "-a", str (socket.gethostbyname(socket.gethostname())), "-p", str (guess)]))
         batch_file.write ("\n")
@@ -63,12 +61,15 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
     
     client_socket, address = server_socket.accept()
     
-    client_socket.send (json.dumps ({"command": command, "iterations": iterations, "processors" : processors}).encode ())
+    client_socket.send (json.dumps ({"command": command, "iterations": iterations, "processes" : processes}).encode ())
     
-    data = json.loads (client_socket.recv (512).decode ())
+    try:
+        data = json.loads (client_socket.recv (512).decode ())
+    except Exception as e:
+        print (type (e), e)
     client_socket.close ()
     
-    return float (data ["dt"])
+    return float (data.get ("dt", None))
 
 class Timer (object):
     """
@@ -96,7 +97,9 @@ class Timer (object):
         
     def getCommand (self, *args, **kwargs):
         command = [join (self.directory, self.commandRoot)] + self.commandArgs
-        for arg in self.variances + self.uniques:
+        arguments = [variance.copy (value = arg) for arg, variance in zip (args, self.variances [:len (args)])]
+        arguments += self.variances [len (arguments):]
+        for arg in arguments + self.uniques:
             arg (command)
         return command
         
@@ -113,19 +116,25 @@ class Timer (object):
         print (self.variances)
         for variances in Argument.generate (*self.variances):
             if variances not in times:
-                processors = 1
-                for arg in self.variances:
-                    if arg.threaded:
-                        processors *= arg.value
+                processes = 1
+                threads = 1
                 try:
-                    for arg in self.uniques:
-                        arg.setRandom ()
                     Argument.setAll (self.variances, variances)
-                    times [variances] = timeCommand.delay (command = self.getCommand (), setupCommand = self.getSetupCommand (), processors = processors, commandRoot = self.commandRoot, **kwargs)
                 except RuntimeError:
                     print ("Throwing out", variances)
-                    pass
-        return dict ([(time, times [time].get ()) for time in times])
+                    continue
+                    
+                for arg in self.variances:
+                    if arg.processes:
+                        processes *= arg.value
+                    if arg.threads:
+                        threads *= arg.value
+
+                for arg in self.uniques:
+                    arg.setRandom ()
+                times [variances] = timeCommand.delay (command = self.getCommand (), setupCommand = self.getSetupCommand (), processes = processes, threads = threads, commandRoot = self.commandRoot, **kwargs)
+
+        return times
 
 class Argument (object):
     """
@@ -140,7 +149,8 @@ class Argument (object):
         self.pastValues = []
         self.value = value
         self.kwargs = kwargs
-        self.threaded = kwargs.get ("threaded", False)
+        self.processes = kwargs.get ("processes", False)
+        self.threads = kwargs.get ("processes", False)
         
     def getValue (self):
         return self._value
