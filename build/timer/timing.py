@@ -13,7 +13,7 @@ app = Celery('pisces_timer', backend = 'amqp')
 app.config_from_object (celeryconfig)
 
 @app.task
-def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wrapper.py", processes = 1, threads = 1, torque = False, commandRoot = "job"):
+def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wrapper.py", processes = 1, threads = 1, torque = False, commandRoot = "job", wallTime = 1):
     if isinstance (command, str):
         command = [command]
     
@@ -44,7 +44,7 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
         batch_file.write ("#PBS -N %s\n" % commandRoot)
 
         batch_file.write ("#PBS -l nodes=%d:ppn=%d\n" % (processes, threads))
-        batch_file.write ("#PBS -l walltime=00:30:00\n")
+        batch_file.write ("#PBS -l walltime=%02d:%02d:00\n" % (int (wallTime), int (wallTime % 1.0 * 60))
         batch_file.write ("cd $PBS_O_WORKDIR\n")
         batch_file.write ("cp $PBS_NODEFILE .\n")
         
