@@ -53,7 +53,7 @@ output:
     file: sc_gwave_%02i
     transform:
         file: sc_gwave_t_%02i
-    every: 10
+    every: 100
     stat:
         file: sc_gwave_%02i
         every: 50

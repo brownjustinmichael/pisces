@@ -99,7 +99,9 @@ class Timer (object):
         
     def getCommand (self, *args, **kwargs):
         command = [join (self.directory, self.commandRoot)] + self.commandArgs
-        for arg in self.variances + self.uniques:
+        arguments = [variance.copy (value = arg) for arg, variance in zip (args, self.variances [:len (args)])]
+        arguments += self.variances [len (arguments):]
+        for arg in arguments + self.uniques:
             arg (command)
         return command
         
@@ -128,7 +130,7 @@ class Timer (object):
                 except RuntimeError:
                     print ("Throwing out", variances)
                     pass
-        return dict ([(time, times [time].get ()) for time in times])
+        return times
 
 class Argument (object):
     """
