@@ -13,7 +13,7 @@ app = Celery('pisces_timer', backend = 'amqp')
 app.config_from_object (celeryconfig)
 
 @app.task
-def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wrapper.py", processors = 1, torque = False):
+def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wrapper.py", processors = 1, torque = False, commandRoot = "job"):
     if isinstance (command, str):
         command = [command]
     
@@ -41,7 +41,7 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
 
         batch_file.write ("#PBS -S /bin/bash\n")
         batch_file.write ("#PBS -q normal\n")
-        batch_file.write ("#PBS -N pisces\n")
+        batch_file.write ("#PBS -N %s\n" % commandRoot)
 
         if (processors > 16):
             ppn = 16
@@ -121,7 +121,7 @@ class Timer (object):
                     for arg in self.uniques:
                         arg.setRandom ()
                     Argument.setAll (self.variances, variances)
-                    times [variances] = timeCommand.delay (command = self.getCommand (), setupCommand = self.getSetupCommand (), processors = processors, **kwargs)
+                    times [variances] = timeCommand.delay (command = self.getCommand (), setupCommand = self.getSetupCommand (), processors = processors, commandRoot = self.commandRoot, **kwargs)
                 except RuntimeError:
                     print ("Throwing out", variances)
                     pass
