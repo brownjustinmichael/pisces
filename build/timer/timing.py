@@ -48,7 +48,7 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
         batch_file.write ("cd $PBS_O_WORKDIR\n")
         batch_file.write ("cp $PBS_NODEFILE .\n")
         
-        batch_file.write ("OMP_NUM_THREADS=$PBS_NUM_PPN\n")
+        batch_file.write ("OMP_NUM_THREADS=%d\n" % threads)
         batch_file.write ("export OMP_NUM_THREADS\n")
 
         batch_file.write (" ".join (["python", wrapperFile, "-a", str (socket.gethostbyname(socket.gethostname())), "-p", str (guess)]))
