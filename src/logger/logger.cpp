@@ -44,7 +44,7 @@ namespace logger
 
 	log_config::log_config () {
 		config.configure();
-	    logger.setLogLevel (int_to_severity (severity));
+		logger.setLogLevel (int_to_severity (severity));
 	}
 
 	void log_config::configure (int* argc, char*** argv, int id, std::string log_file) {
@@ -70,7 +70,7 @@ namespace logger
 
 		std::ostringstream convert;
 		convert << id;
-	    logger.setLogLevel (int_to_severity (severity));
+		logger.setLogLevel (int_to_severity (severity));
 		if (log_file != "") {
 			char buffer [log_file.size () * 2];
 			snprintf (buffer, log_file.size () * 2, log_file.c_str (), id);

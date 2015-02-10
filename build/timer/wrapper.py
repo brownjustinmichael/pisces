@@ -32,7 +32,8 @@ for i in range (inputs ["iterations"]):
     times.append (get_total_seconds ((datetime.now() - startTime)))
 
 results = {}
-results ["dt"] = np.mean (times)
+results ["med"] = np.median (times)
+results ["avg"] = np.mean (times)
 results ["std"] = np.std (times)
 
 client_socket.send(json.dumps (results).encode ())

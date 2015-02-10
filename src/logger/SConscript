@@ -1,8 +1,11 @@
 Import ("env")
+Import ("quiet")
 
 conf = Configure (env)
 
 if conf.CheckLib ("log4cplus"):
     env.Append (CPPFLAGS = ["-D_LOG4CPLUS"])
+
+env.Append (CPPFLAGS = ["-DQUIET=%d" % (quiet)])
 
 env = conf.Finish ()

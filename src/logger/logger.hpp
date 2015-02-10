@@ -9,52 +9,80 @@
 #ifndef CONFIG_H_95CWOMPS
 #define CONFIG_H_95CWOMPS
 
+#ifndef QUIET
+	#define QUIET -1
+#endif
+
+#include <string>
+
 #ifdef _LOG4CPLUS
 
-#include <string>
+	#include <log4cplus/logger.h>
+	#include <log4cplus/loggingmacros.h>
 
-#include <log4cplus/logger.h>
-#include <log4cplus/loggingmacros.h>
+	namespace logger
+	{
+		extern log4cplus::Logger logger;
+	} /* logger */
 
-namespace logger
-{
-	extern log4cplus::Logger logger;
-} /* logger */
-
-/*!*******************************************************************
- * \def TRACE(int,str)
- * Logs a trace-level logging statement
- *********************************************************************/
-#define TRACE(str) LOG4CPLUS_TRACE(logger::logger, str);
-/*!*******************************************************************
- * \def DEBUG(int,str)
- * Logs a debug-level logging statement
- *********************************************************************/
-#define DEBUG(str) LOG4CPLUS_DEBUG(logger::logger, str);
-/*!*******************************************************************
- * \def INFO(int,str)
- * Logs an info-level logging statement
- *********************************************************************/
-#define INFO(str) LOG4CPLUS_INFO(logger::logger, str);
-/*!*******************************************************************
- * \def WARN(int,str)
- * Logs a warning-level logging statement
- *********************************************************************/
-#define WARN(str) LOG4CPLUS_WARN(logger::logger, str);
-/*!*******************************************************************
- * \def ERROR(int,str)
- * Logs an error-level logging statement
- *********************************************************************/
-#define ERROR(str) LOG4CPLUS_ERROR(logger::logger, str);
-/*!*******************************************************************
- * \def FATAL(int,str)
- * Logs a fatal-level logging statement
- *********************************************************************/
-#define FATAL(str) LOG4CPLUS_FATAL(logger::logger, str);
+	/*!*******************************************************************
+	 * \def TRACE(int,str)
+	 * Logs a trace-level logging statement
+	 *********************************************************************/
+	#if QUIET >= 0
+		#define TRACE(str)
+	#else
+		#define TRACE(str) LOG4CPLUS_TRACE(logger::logger, str);
+	#endif
+	/*!*******************************************************************
+	 * \def DEBUG(int,str)
+	 * Logs a debug-level logging statement
+	 *********************************************************************/
+	#if QUIET >= 1
+		#define DEBUG(str)
+	#else
+		#define DEBUG(str) LOG4CPLUS_DEBUG(logger::logger, str);
+	#endif
+	/*!*******************************************************************
+	 * \def INFO(int,str)
+	 * Logs an info-level logging statement
+	 *********************************************************************/
+	#if QUIET >= 2
+		#define INFO(str)
+	#else
+		#define INFO(str) LOG4CPLUS_INFO(logger::logger, str);
+	#endif
+	/*!*******************************************************************
+	 * \def WARN(int,str)
+	 * Logs a warning-level logging statement
+	 *********************************************************************/
+	#if QUIET >= 3
+		#define WARN(str)
+	#else
+		#define WARN(str) LOG4CPLUS_WARN(logger::logger, str);
+	#endif
+	/*!*******************************************************************
+	 * \def ERROR(int,str)
+	 * Logs an error-level logging statement
+	 *********************************************************************/
+	#if QUIET >= 4
+		#define ERROR(str)
+	#else
+		#define ERROR(str) LOG4CPLUS_ERROR(logger::logger, str);
+	#endif
+	/*!*******************************************************************
+	 * \def FATAL(int,str)
+	 * Logs a fatal-level logging statement
+	 *********************************************************************/
+	#if QUIET >= 5
+		#define FATAL(str)
+	#else
+		#define FATAL(str) LOG4CPLUS_FATAL(logger::logger, str);
+	#endif
 
 #endif
+	
 #include <iostream>
-#include <string>
 
 namespace logger
 {
@@ -112,13 +140,13 @@ namespace logger
 	class log_config {
 	public:
 		log_config ();
-	
+
 		virtual ~log_config () {
 			// printf ("Destroying log config\n");
 		}
-	
+
 		static void configure (int *argc, char ***argv, int id = 0, std::string log_file = "");
-		
+
 		static void set_severity (int severity = 2);
 	};
 } /* logger */
