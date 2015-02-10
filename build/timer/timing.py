@@ -47,7 +47,7 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
             ppn = 16
         else:
             ppn = processors
-    
+        
         batch_file.write ("#PBS -l nodes=%d:ppn=%d\n" % (processors / 16 + 1, ppn))
         batch_file.write ("#PBS -l walltime=00:30:00\n")
         batch_file.write ("cd $PBS_O_WORKDIR\n")
@@ -119,17 +119,20 @@ class Timer (object):
         for variances in Argument.generate (*self.variances):
             if variances not in times:
                 processors = 1
+                try:
+                    Argument.setAll (self.variances, variances)
+                except RuntimeError:
+                    print ("Throwing out", variances)
+                    continue
+                    
                 for arg in self.variances:
                     if arg.threaded:
                         processors *= arg.value
-                try:
-                    for arg in self.uniques:
-                        arg.setRandom ()
-                    Argument.setAll (self.variances, variances)
-                    times [variances] = timeCommand.delay (command = self.getCommand (), setupCommand = self.getSetupCommand (), processors = processors, commandRoot = self.commandRoot, **kwargs)
-                except RuntimeError:
-                    print ("Throwing out", variances)
-                    pass
+
+                for arg in self.uniques:
+                    arg.setRandom ()
+                times [variances] = timeCommand.delay (command = self.getCommand (), setupCommand = self.getSetupCommand (), processors = processors, commandRoot = self.commandRoot, **kwargs)
+
         return times
 
 class Argument (object):
