@@ -132,7 +132,7 @@ class Timer (object):
 
                 for arg in self.uniques:
                     arg.setRandom ()
-                times [variances] = timeCommand.delay (command = self.getCommand (), setupCommand = self.getSetupCommand (), processes = processors, threads = threads, commandRoot = self.commandRoot, **kwargs)
+                times [variances] = timeCommand.delay (command = self.getCommand (), setupCommand = self.getSetupCommand (), processes = processes, threads = threads, commandRoot = self.commandRoot, **kwargs)
 
         return times
 
