@@ -37,7 +37,7 @@ namespace io
 			 * \param i_n The integer horizontal extent of the data
 			 * \param i_m The integer vertical extent of the data
 			 ************************************************************************/
-			weighted_average_functor (int i_n, int i_m, datatype *i_weight, datatype *i_data) : weight (i_weight), data (i_data), func (NULL), n (i_n), m (i_m) {
+			weighted_average_functor (int i_n, int i_m, datatype *i_weight, datatype *i_data) : weight (i_weight), data (i_data), n (i_n), m (i_m) {
 			}
 	
 			weighted_average_functor (int i_n, int i_m, datatype *i_weight, std::shared_ptr <functor> i_func) : weight (i_weight), data ((datatype *) i_func->calculate ()), func (i_func), n (i_n), m (i_m) {
