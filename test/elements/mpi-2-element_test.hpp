@@ -6,10 +6,11 @@
  * Copyright 2015 Justin Brown. All rights reserved.
  ************************************************************************/
 
+#include "mpi/messenger.hpp"
+
 #include <cxxtest/TestSuite.h>
 #include <fstream>
 
-#include "mpi/messenger.hpp"
 #include "io/input.hpp"
 #include "io/parameters.hpp"
 #include "plans/plan.hpp"
