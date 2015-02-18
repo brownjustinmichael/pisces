@@ -12,6 +12,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include "exceptions.hpp"
+#include "logger/logger.hpp"
 
 namespace io
 {
@@ -23,20 +24,27 @@ namespace io
 	class parameters : public YAML::Node
 	{
 	public:
-		static parameters defaults;
+		// static parameters defaults;
 		
 		using YAML::Node::operator=; //!< Use the assignment operator from the super class
 	
 		/*!**********************************************************************
 		 * \param file_name The parameter file from which the parameters should be loaded
 		 ************************************************************************/
-		parameters (std::string file_name = "") {
+		parameters (std::string file_name = "", std::string defaults_file = DEFAULTS_FILE) {
+			YAML::Node copy_node;
+			YAML::Node::operator= (YAML::LoadFile (defaults_file));
 			if (file_name != "") {
-				YAML::Node::operator= (YAML::LoadFile (file_name));
+				copy_node = (YAML::LoadFile (file_name));
 			}
+			DEBUG ("HERE IS THE DEFAULT:" << (*this) ["output"]);
+			YAML::Node::operator= (copy (copy_node, *this));
+			DEBUG ("HERE IS THE FINAL:" << (*this) ["output"]);
 		}
 	
 		virtual ~parameters () {}
+		
+		static YAML::Node copy (const YAML::Node &from, const YAML::Node to);
 	
 		/*!**********************************************************************
 		 * \brief Overload the index operator for the YAML::Node
@@ -47,17 +55,7 @@ namespace io
 		 * 
 		 * \return A copy of the YAML::Node object at the given parameter.
 		 ************************************************************************/
-		YAML::Node operator [] (std::string key) {
-			std::istringstream ss (key);
-			std::string token;
-			std::getline (ss, token, '.');
-			std::vector <YAML::Node> nodes;
-			nodes.push_back (YAML::Node::operator [] (token));
-			while (std::getline (ss, token, '.')) {
-				nodes.push_back (nodes [(int) nodes.size () - 1] [token]);
-			}
-			return nodes [(int) nodes.size () - 1];
-		}
+		YAML::Node operator[] (std::string key);
 			
 		/*!**********************************************************************
 		 * \brief Get the parameter associated with the given key
@@ -73,11 +71,7 @@ namespace io
 			if (operator[] (key).IsDefined ()) {
 				return operator[] (key).as <datatype> ();
 			} else {
-				if (this != &defaults) {
-					return defaults.get <datatype> (key);
-				} else {
-					throw exceptions::key_does_not_exist (key);
-				}
+				throw exceptions::key_does_not_exist (key);
 			}
 		}
 	};

@@ -14,6 +14,7 @@
 #include <omp.h>
 #include <yaml-cpp/yaml.h>
 #include "linalg/exceptions.hpp"
+#include "data.hpp"
 
 #include <ctime>
 #include <chrono>
@@ -143,7 +144,7 @@ namespace pisces
 			duration += timestep;
 			INFO ("TOTAL TIME: " << duration);
 			if (t_timestep != timestep) {
-				for (std::map <int, int>::iterator iter = element_flags.begin (); iter != element_flags.end (); iter++) {
+				for (std::map <std::string, int>::iterator iter = element_flags.begin (); iter != element_flags.end (); iter++) {
 					element_flags [iter->first] &= ~factorized;
 				}
 				INFO ("Updating timestep: " << t_timestep);

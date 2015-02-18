@@ -29,11 +29,11 @@ namespace data
 {
 	template <class datatype>
 	thermo_compositional_data <datatype>::thermo_compositional_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int id, int n_elements, io::parameters& i_params) : implemented_data <datatype> (i_axis_n, i_axis_m, id, i_params.get <std::string> ("dump.file"), i_params.get <std::string> ("root") + i_params.get <std::string> ("dump.directory"), i_params.get <int> ("dump.every")) {
-		initialize (x_velocity, "u");
-		initialize (z_velocity, "w");
-		initialize (temp, "T");
-		initialize (composition, "S");
-		initialize (pressure, "P");
+		initialize ("u");
+		initialize ("w");
+		initialize ("T");
+		initialize ("C");
+		initialize ("p");
 		
 		int name = id;
 		
@@ -59,7 +59,7 @@ namespace data
 
 			normal_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (o_grid, buffer, i_params.get <int> ("output.every")));
 			this->setup_output (normal_stream);
-			normal_stream->template append <double> ("div", std::shared_ptr <io::functors::functor> (new io::functors::div_functor <double> ((*this) (x_position), (*this) (z_position), (*this) (x_velocity), (*this) (z_velocity), n, m)));
+			normal_stream->template append <double> ("div", std::shared_ptr <io::functors::functor> (new io::functors::div_functor <double> ((*this) ("x"), (*this) ("z"), (*this) ("u"), (*this) ("w"), n, m)));
 		}
 
 		std::shared_ptr <io::output> transform_stream;
@@ -70,7 +70,7 @@ namespace data
 
 			transform_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (o_grid, buffer, i_params.get <int> ("output.every")));
 			this->setup_output (transform_stream, transformed_horizontal);
-			transform_stream->template append <double> ("div", std::shared_ptr <io::functors::functor> (new io::functors::transform_div_functor <double> ((*this) (x_position), (*this) (z_position), (*this) (x_velocity), (*this) (z_velocity), n, m)));
+			transform_stream->template append <double> ("div", std::shared_ptr <io::functors::functor> (new io::functors::transform_div_functor <double> ((*this) ("x"), (*this) ("z"), (*this) ("u"), (*this) ("w"), n, m)));
 		}
 
 		std::shared_ptr <io::output> stat_stream;
@@ -88,10 +88,10 @@ namespace data
 
 			stat_stream.reset (new io::appender_output <io::formats::ascii> (io::data_grid::two_d (n, m), buffer, i_params.get <int> ("output.stat.every")));
 			this->setup_stat (stat_stream);
-			stat_stream->template append <double> ("wT", std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], std::shared_ptr <io::functors::functor> (new io::functors::product_functor <double> (n, m, (*this) (z_velocity), (*this) (temperature))))), io::scalar);
-			stat_stream->template append <double> ("wS", std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], std::shared_ptr <io::functors::functor> (new io::functors::product_functor <double> (n, m, (*this) (z_velocity), (*this) (composition))))), io::scalar);
-			stat_stream->template append <double> ("Tavg", std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], (*this) (temperature))), io::scalar);
-			stat_stream->template append <double> ("Savg", std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], (*this) (composition))), io::scalar);
+			stat_stream->template append <double> ("wT", std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], std::shared_ptr <io::functors::functor> (new io::functors::product_functor <double> (n, m, (*this) ("w"), (*this) ("T"))))), io::scalar);
+			stat_stream->template append <double> ("wC", std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], std::shared_ptr <io::functors::functor> (new io::functors::product_functor <double> (n, m, (*this) ("w"), (*this) ("C"))))), io::scalar);
+			stat_stream->template append <double> ("Tavg", std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], (*this) ("T"))), io::scalar);
+			stat_stream->template append <double> ("Cavg", std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], (*this) ("C"))), io::scalar);
 		}
 
 		/*
@@ -110,14 +110,14 @@ namespace pisces
 	boussinesq_element <datatype>::boussinesq_element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
 	implemented_element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags) {
 		TRACE ("Initializing...");
-		x_ptr = data (x_position);
-		z_ptr = data (z_position);
-		x_vel_ptr = data (x_velocity);
-		z_vel_ptr = data (z_velocity);
+		x_ptr = data ("x");
+		z_ptr = data ("z");
+		x_vel_ptr = data ("u");
+		z_vel_ptr = data ("w");
 		
-		advection_coeff = i_params.get <datatype> ("temperature.advection");
-		advection_coeff = std::max (advection_coeff, i_params.get <datatype> ("velocity.advection"));
-		advection_coeff = std::max (advection_coeff, i_params.get <datatype> ("composition.advection"));
+		// advection_coeff = i_params.get <datatype> ("temperature.advection");
+		// advection_coeff = std::max (advection_coeff, i_params.get <datatype> ("velocity.advection"));
+		// advection_coeff = std::max (advection_coeff, i_params.get <datatype> ("composition.advection"));
 		cfl = i_params.get <datatype> ("time.cfl");
 
 		std::shared_ptr <plans::boundary <datatype>> boundary_0, boundary_n, deriv_boundary_0, deriv_boundary_n, thermal_boundary_0, thermal_boundary_n, compositional_boundary_0, compositional_boundary_n;
@@ -152,49 +152,78 @@ namespace pisces
 			TODO Figure out how to more conveniently determine whether an edge effect is needed.
 		*/
 		
+		DEBUG ("Checking equations")
+		for(YAML::const_iterator iter = i_params ["equations"].begin (); iter != i_params ["equations"].end (); ++iter) {
+			DEBUG (iter->first);
+			std::string variable = iter->first.as <std::string> ();
+			solvers [variable]->add_solver (typename collocation_solver <datatype>::factory (messenger_ptr, timestep, boundary_0, boundary_n), z_solver);
+			solvers [variable]->add_solver (typename fourier_solver <datatype>::factory (timestep, boundary_0, boundary_n), x_solver);
+			
+			if (iter->second ["diffusion"].IsDefined ()) {
+				double diffusion_coeff = iter->second ["diffusion"].as <double> ();
+				if (diffusion_coeff != 0.0) {
+					solvers [variable]->add_plan (typename vertical_diffusion <datatype>::factory (diffusion_coeff, i_params.get <datatype> ("time.alpha")), pre_plan);
+					solvers [variable]->add_plan (typename horizontal_diffusion <datatype>::factory (diffusion_coeff, i_params.get <datatype> ("time.alpha")), mid_plan);
+				}
+			}
+			if (iter->second ["advection"].IsDefined ()) {
+				double advection_coeff = iter->second ["advection"].as <double> ();
+				if (advection_coeff) {
+					solvers [variable]->add_plan (typename advection <datatype>::factory (advection_coeff, ptr ("u"), ptr ("w")), post_plan);
+				}
+			}
+			if (iter->second ["stratification"].IsDefined ()) {
+				double stratification_coeff = iter->second ["stratification"].as <double> ();
+				if (stratification_coeff) {
+					solvers [variable]->add_plan (typename source <datatype>::factory (-stratification_coeff, ptr ("w")), mid_plan);
+				}
+			}
+		}
+		assert (false);
+		
 		diffusion.resize (m);
 		for (int j = 0; j < m; ++j) {
 			diffusion [j] = (*grids [1]) [j] > 0.0 ? i_params.get <datatype> ("temperature.diffusion") : i_params.get <datatype> ("temperature.bg_diffusion");
 		}
 		
 		// // Solve temperature
-		solvers [temp]->add_solver (typename collocation_solver <datatype>::factory (messenger_ptr, timestep, thermal_boundary_0, thermal_boundary_n), z_solver);
-		solvers [temp]->add_solver (typename fourier_solver <datatype>::factory (timestep, thermal_boundary_0, thermal_boundary_n), x_solver);
+		solvers ["T"]->add_solver (typename collocation_solver <datatype>::factory (messenger_ptr, timestep, thermal_boundary_0, thermal_boundary_n), z_solver);
+		solvers ["T"]->add_solver (typename fourier_solver <datatype>::factory (timestep, thermal_boundary_0, thermal_boundary_n), x_solver);
 		//
-		solvers [temp]->add_plan (typename vertical_diffusion <datatype>::factory (i_params.get <datatype> ("temperature.diffusion"), i_params.get <datatype> ("time.alpha")), pre_plan);
-		solvers [temp]->add_plan (typename horizontal_diffusion <datatype>::factory (i_params.get <datatype> ("temperature.diffusion"), i_params.get <datatype> ("time.alpha")), mid_plan);
-		solvers [temp]->add_plan (typename advection <datatype>::factory (i_params.get <datatype> ("temperature.advection"), ptr (x_vel), ptr (z_vel)), post_plan);
-		solvers [temp]->add_plan (typename source <datatype>::factory (-i_params.get <datatype>("temperature.stratification"), ptr (z_velocity)), mid_plan);
+		solvers ["T"]->add_plan (typename vertical_diffusion <datatype>::factory (i_params.get <datatype> ("temperature.diffusion"), i_params.get <datatype> ("time.alpha")), pre_plan);
+		solvers ["T"]->add_plan (typename horizontal_diffusion <datatype>::factory (i_params.get <datatype> ("temperature.diffusion"), i_params.get <datatype> ("time.alpha")), mid_plan);
+		solvers ["T"]->add_plan (typename advection <datatype>::factory (i_params.get <datatype> ("temperature.advection"), ptr ("u"), ptr ("w")), post_plan);
+		solvers ["T"]->add_plan (typename source <datatype>::factory (-i_params.get <datatype>("temperature.stratification"), ptr ("w")), mid_plan);
 
 		// Solve composition
-		solvers [composition]->add_solver (typename collocation_solver <datatype>::factory (messenger_ptr, timestep, compositional_boundary_0, compositional_boundary_n), z_solver);
-		solvers [composition]->add_solver (typename fourier_solver <datatype>::factory (timestep, compositional_boundary_0, compositional_boundary_n), x_solver);
+		solvers ["C"]->add_solver (typename collocation_solver <datatype>::factory (messenger_ptr, timestep, compositional_boundary_0, compositional_boundary_n), z_solver);
+		solvers ["C"]->add_solver (typename fourier_solver <datatype>::factory (timestep, compositional_boundary_0, compositional_boundary_n), x_solver);
 
-		solvers [composition]->add_plan (typename vertical_diffusion <datatype>::factory (i_params.get <datatype> ("composition.diffusion"), i_params.get <datatype> ("time.alpha")), pre_plan);
-		solvers [composition]->add_plan (typename horizontal_diffusion <datatype>::factory (i_params.get <datatype> ("composition.diffusion"), i_params.get <datatype> ("time.alpha")), mid_plan);
-		solvers [composition]->add_plan (typename advection <datatype>::factory (i_params.get <datatype> ("composition.advection"), ptr (x_vel), ptr (z_vel)), post_plan);
-		solvers [composition]->add_plan (typename source <datatype>::factory (-i_params.get <datatype> ("composition.stratification"), ptr (z_velocity)), mid_plan);
+		solvers ["C"]->add_plan (typename vertical_diffusion <datatype>::factory (i_params.get <datatype> ("composition.diffusion"), i_params.get <datatype> ("time.alpha")), pre_plan);
+		solvers ["C"]->add_plan (typename horizontal_diffusion <datatype>::factory (i_params.get <datatype> ("composition.diffusion"), i_params.get <datatype> ("time.alpha")), mid_plan);
+		solvers ["C"]->add_plan (typename advection <datatype>::factory (i_params.get <datatype> ("composition.advection"), ptr ("u"), ptr ("w")), post_plan);
+		solvers ["C"]->add_plan (typename source <datatype>::factory (-i_params.get <datatype> ("composition.stratification"), ptr ("w")), mid_plan);
 
 		// Solve velocity
-		solvers [x_velocity]->add_solver (typename collocation_solver <datatype>::factory (messenger_ptr, timestep, deriv_boundary_0, deriv_boundary_n), z_solver);
-		solvers [x_velocity]->add_solver (typename fourier_solver <datatype>::factory (timestep, deriv_boundary_0, deriv_boundary_n), x_solver);
+		solvers ["u"]->add_solver (typename collocation_solver <datatype>::factory (messenger_ptr, timestep, deriv_boundary_0, deriv_boundary_n), z_solver);
+		solvers ["u"]->add_solver (typename fourier_solver <datatype>::factory (timestep, deriv_boundary_0, deriv_boundary_n), x_solver);
 
-		solvers [x_velocity]->add_plan (typename vertical_diffusion <datatype>::factory (i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha")), pre_plan);
-		solvers [x_velocity]->add_plan (typename horizontal_diffusion <datatype>::factory (i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha")), mid_plan);
-		solvers [x_velocity]->add_plan (typename advection <datatype>::factory (i_params.get <datatype> ("velocity.advection"), ptr (x_velocity), ptr (z_velocity)), post_plan);
+		solvers ["u"]->add_plan (typename vertical_diffusion <datatype>::factory (i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha")), pre_plan);
+		solvers ["u"]->add_plan (typename horizontal_diffusion <datatype>::factory (i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha")), mid_plan);
+		solvers ["u"]->add_plan (typename advection <datatype>::factory (i_params.get <datatype> ("velocity.advection"), ptr ("u"), ptr ("w")), post_plan);
 
-		solvers [z_velocity]->add_solver (typename collocation_solver <datatype>::factory (messenger_ptr, timestep, boundary_0, boundary_n), z_solver);
-		solvers [z_velocity]->add_solver (typename fourier_solver <datatype>::factory (timestep, boundary_0, boundary_n), x_solver);
+		solvers ["w"]->add_solver (typename collocation_solver <datatype>::factory (messenger_ptr, timestep, boundary_0, boundary_n), z_solver);
+		solvers ["w"]->add_solver (typename fourier_solver <datatype>::factory (timestep, boundary_0, boundary_n), x_solver);
 
-		solvers [z_velocity]->add_plan (typename vertical_diffusion <datatype>::factory (i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha")), pre_plan);
-		solvers [z_velocity]->add_plan (typename horizontal_diffusion <datatype>::factory (i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha")), mid_plan);
-		solvers [z_velocity]->add_plan (typename advection <datatype>::factory (i_params.get <datatype> ("velocity.advection"), ptr (x_velocity), ptr (z_velocity)), post_plan);
-		solvers [z_velocity]->add_plan (typename source <datatype>::factory (i_params.get <datatype> ("velocity.buoyancy.temperature"), ptr (temp)), mid_plan);
-		solvers [z_velocity]->add_plan (typename source <datatype>::factory (i_params.get <datatype> ("velocity.buoyancy.composition"), ptr (composition)), mid_plan);
+		solvers ["w"]->add_plan (typename vertical_diffusion <datatype>::factory (i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha")), pre_plan);
+		solvers ["w"]->add_plan (typename horizontal_diffusion <datatype>::factory (i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha")), mid_plan);
+		solvers ["w"]->add_plan (typename advection <datatype>::factory (i_params.get <datatype> ("velocity.advection"), ptr ("u"), ptr ("w")), post_plan);
+		solvers ["w"]->add_plan (typename source <datatype>::factory (i_params.get <datatype> ("velocity.buoyancy.temperature"), ptr ("T")), mid_plan);
+		solvers ["w"]->add_plan (typename source <datatype>::factory (i_params.get <datatype> ("velocity.buoyancy.composition"), ptr ("C")), mid_plan);
 
-		solvers [pressure]->add_solver (typename incompressible_corrector <datatype>::factory (messenger_ptr, boundary_0, boundary_n, *solvers [x_velocity], *solvers [z_velocity]));
-		solvers [pressure]->get_solver (x_solver)->add_dependency (z_velocity);
-		solvers [pressure]->get_solver (x_solver)->add_dependency (x_velocity);
+		solvers ["p"]->add_solver (typename incompressible_corrector <datatype>::factory (messenger_ptr, boundary_0, boundary_n, *solvers ["u"], *solvers ["w"]));
+		solvers ["p"]->get_solver (x_solver)->add_dependency ("w");
+		solvers ["p"]->get_solver (x_solver)->add_dependency ("u");
 
 		TRACE ("Initialized.");
 	}

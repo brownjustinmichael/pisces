@@ -57,7 +57,7 @@ namespace plans
 		using plans::plan <datatype>::element_flags;
 		using plans::plan <datatype>::component_flags;
 	private:
-		std::vector <int> deps;
+		std::vector <std::string> deps;
 	
 		std::vector <std::shared_ptr <plan <datatype> > > pre_transform_plans; //!< A vector of shared pointers of plans to be executed before the transforms
 		std::vector <std::shared_ptr <plan <datatype> > > mid_transform_plans; //!< A vector of shared pointers of plans to be executed after the vertical transform
@@ -77,11 +77,11 @@ namespace plans
 			return (int) deps.size ();
 		}
 
-		virtual int& get_dependency (int i) {
+		virtual const std::string& get_dependency (int i) {
 			return deps [i];
 		}
 
-		virtual void add_dependency (int name) {
+		virtual void add_dependency (std::string name) {
 			deps.push_back (name);
 		}
 	

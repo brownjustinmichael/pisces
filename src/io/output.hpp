@@ -69,7 +69,6 @@ namespace io
 					return;
 				}
 			}
-			DEBUG ("Pointer " << &*functor_ptr);
 			functor_ptrs.push_back (functor_ptr);
 			append <datatype> (name, (datatype *) functor_ptr->calculate (), flags);
 			TRACE ("Functor appended.");

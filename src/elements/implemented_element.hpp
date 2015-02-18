@@ -59,18 +59,18 @@ namespace pisces
 			count = 0;
 			previous = 0;
 			
-			element <datatype>::initialize (x_position, "x");
-			element <datatype>::initialize (z_position, "z");
+			element <datatype>::initialize ("x");
+			element <datatype>::initialize ("z");
 			transform_threads = i_params.get <int> ("parallel.transform.subthreads");
 			
 			grids [0] = std::shared_ptr <plans::grid <datatype>> (new typename plans::horizontal::grid <datatype> (&i_axis_n));
 			grids [1] = std::shared_ptr <plans::grid <datatype>> (new typename plans::vertical::grid <datatype> (&i_axis_m));
 			
 			for (typename data::data <datatype>::iterator iter = data.begin (); iter != data.end (); ++iter) {
-				if ((iter->first != x_position) && (iter->first != z_position)) {
-					element <datatype>::add_solver (iter->first, std::shared_ptr <plans::equation <datatype> > (new plans::implemented_equation <datatype> (*grids [0], *grids [1], ptr (iter->first), &element_flags [state], &element_flags [iter->first])));
+				if ((iter->first != "x") && (iter->first != "z")) {
+					element <datatype>::add_solver (iter->first, std::shared_ptr <plans::equation <datatype> > (new plans::implemented_equation <datatype> (*grids [0], *grids [1], ptr (iter->first), &element_flags ["element"], &element_flags [iter->first])));
 					element <datatype>::transforms.push_back (iter->first);
-					element <datatype>::transformers [iter->first] = std::shared_ptr <plans::transformer <datatype> > (new plans::implemented_transformer <datatype> (*grids [0], *grids [1], data (iter->first), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &(data.flags [state]), &(data.flags [iter->first]), element <datatype>::transform_threads));
+					element <datatype>::transformers [iter->first] = std::shared_ptr <plans::transformer <datatype> > (new plans::implemented_transformer <datatype> (*grids [0], *grids [1], data (iter->first), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &(data.flags ["element"]), &(data.flags [iter->first]), element <datatype>::transform_threads));
 				}
 			}
 			
@@ -94,65 +94,16 @@ namespace pisces
 		// 	return scalars [name] [0];
 		// }
 		
-		inline datatype& operator() (int name, int i = 0, int j = 0) {
+		inline datatype& operator() (std::string name, int i = 0, int j = 0) {
 			return element <datatype>::operator() (name, i * m + j);
 		}
 		
-		inline datatype* ptr (int name, int i = 0) {
+		inline datatype* ptr (std::string name, int i = 0) {
 			return element <datatype>::ptr (name, i);
 		}
 
-		inline datatype* ptr (int name, int i, int j) {
+		inline datatype* ptr (std::string name, int i, int j) {
 			return element <datatype>::ptr (name, i * m + j);
-		}
-	
-		/*!*******************************************************************
-		 * \copydoc element <datatype>::initialize ()
-		 *********************************************************************/
-		virtual datatype *_initialize (int name, datatype* initial_conditions = NULL, int i_flags = 0x00) {
-			TRACE ("Initializing " << name << "...");
-			// Size allowing for real FFT buffer
-			// scalars [name].resize (grids [0]->get_ld () * m, 0.0);
-			// if (name == x_position) {
-			// 	for (int j = 0; j < m; ++j) {
-			// 		linalg::copy (n, &((*grids [0]) [0]), ptr (name, 0, j), 1, m);
-			// 	}
-			// } else if (name == z_position) {
-			// 	for (int i = 0; i < n; ++i) {
-			// 		linalg::copy (m, &((*grids [1]) [0]), ptr (name, i, 0));
-			// 	}
-			// } else {
-			// 	if (initial_conditions) {
-			// 		if ((i_flags & uniform_m) && (i_flags & uniform_n)) {
-			// 			for (int i = 0; i < n; ++i) {
-			// 				for (int j = 0; j < m; ++j) {
-			// 					(*this) (name, i, j) = *initial_conditions;
-			// 				}
-			// 			}
-			// 		} else if (i_flags & uniform_m) {
-			// 			for (int j = 0; j < m; ++j) {
-			// 				linalg::copy (n, initial_conditions, ptr (name, 0, j), 1, m);
-			// 			}
-			// 		} else if (i_flags & uniform_n) {
-			// 			for (int i = 0; i < n; ++i) {
-			// 				linalg::copy (m, initial_conditions, ptr (name, i, 0));
-			// 			}
-			// 		} else {
-			// 			linalg::copy (n * m, initial_conditions, ptr (name));
-			// 		}
-			// 	}
-			// }
-			//
-			// if ((name != x_position) && (name != z_position)) {
-			// 	element <datatype>::add_transform (name, std::shared_ptr <plans::transformer <datatype> > (new plans::implemented_transformer <datatype> (*grids [0], *grids [1], ptr (name), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &element_flags [state], &element_flags [name], transform_threads)));
-			// }
-			// if ((name != x_position) && (name != z_position)) {
-			// 	DEBUG (ptr (name));
-			// 	element <datatype>::add_solver (name, std::shared_ptr <plans::equation <datatype> > (new plans::implemented_equation <datatype> (*grids [0], *grids [1], ptr (name), &element_flags [state], &element_flags [name])));
-			//
-			// }
-			TRACE ("Initialized.");
-			return this->ptr (name);
 		}
 		
 		virtual datatype calculate_timestep (int i, int j, io::formats::virtual_file *virtual_file = NULL) = 0;
@@ -255,14 +206,12 @@ namespace pisces
 		}
 	
 	protected:
-		using element <datatype>::scalars;
 		using element <datatype>::grids;
 		using element <datatype>::name;
 		using element <datatype>::messenger_ptr;
 		using element <datatype>::element_flags;
 		using element <datatype>::timestep;
 		using element <datatype>::axes;
-		using element <datatype>::scalar_names;
 		using element <datatype>::get_mode;
 		using element <datatype>::duration;
 		using element <datatype>::data;

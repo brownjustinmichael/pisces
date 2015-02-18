@@ -11,6 +11,7 @@
 
 #include <exception>
 #include <sstream>
+#include <iostream>
 
 namespace io
 {
@@ -20,7 +21,9 @@ namespace io
 		{
 		public:
 			key_does_not_exist (std::string i_key_name) :
-			key_name (i_key_name) {}
+			key_name (i_key_name) {
+				std::cout << i_key_name;
+			}
 
 			~key_does_not_exist () throw () {}
 
@@ -32,6 +35,10 @@ namespace io
 
 		// private:
 			std::string key_name;
+		};
+		
+		class mini_key_does_not_exist : public std::exception
+		{
 		};
 	} /* exceptions */
 } /* io */

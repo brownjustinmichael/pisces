@@ -66,7 +66,7 @@ namespace plans
 			}
 		}
 
-		virtual int& get_dependency (int i) {
+		virtual const std::string& get_dependency (int i) {
 			if (*component_flags & x_solve) {
 				return x_solver->get_dependency (i);
 			} else if (*component_flags & z_solve) {
@@ -77,7 +77,7 @@ namespace plans
 			}
 		}
 
-		virtual void add_dependency (int name, int flags = 0x00) {
+		virtual void add_dependency (std::string name, int flags = 0x00) {
 			if (!(flags & not_x_solver)) {
 				if (x_solver) {
 					x_solver->add_dependency (name);

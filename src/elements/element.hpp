@@ -70,17 +70,15 @@ namespace pisces
 		datatype &timestep; //!< The datatype timestep length
 
 		data::data <datatype> &data; //!< An object that contains all the data in the simulation
-		std::map <int, std::vector <datatype> > scalars; //!< A map of scalar vectors
-		std::map <int, std::string> scalar_names; //!< A map of string representations of the scalars
-		std::map <int, int> &element_flags; //!< A map of integer flags
+		std::map <std::string, int> &element_flags; //!< A map of integer flags
 		
-		std::map <int, std::shared_ptr <plans::equation <datatype>>> solvers; //!< A vector of shared pointers to the matrix solvers
-		std::map <int, std::shared_ptr <plans::transformer <datatype>>> transformers;
-		std::vector <int> transforms;
+		std::map <std::string, std::shared_ptr <plans::equation <datatype>>> solvers; //!< A vector of shared pointers to the matrix solvers
+		std::map <std::string, std::shared_ptr <plans::transformer <datatype>>> transformers;
+		std::vector <std::string> transforms;
 		int transform_threads;
 		
 	private:
-		std::vector <int> solver_keys; //!< A vector of integer keys to the solvers map
+		std::vector <std::string> solver_keys; //!< A vector of integer keys to the solvers map
 		io::formats::virtual_file *rezone_virtual_file; //!< A shared_ptr to a virtual file object, for rezoning
 		
 	public:
@@ -89,7 +87,7 @@ namespace pisces
 		/*!**********************************************************************
 		 * \brief Element iterator for iterating through the contained solvers
 		 ************************************************************************/
-		typedef typename std::vector <int>::iterator iterator;
+		typedef typename std::vector <std::string>::iterator iterator;
 		
 		/*!**********************************************************************
 		 * \brief Generate an iterator to iterate through the solvers
@@ -123,7 +121,7 @@ namespace pisces
 		timestep (i_data.timestep),
 		data (i_data),
 		element_flags (data.flags) {
-			element_flags [state] = i_element_flags;
+			element_flags ["element"] = i_element_flags;
 			name = i_name;
 			grids.resize (i_dimensions);
 			axes.resize (i_dimensions);
@@ -141,7 +139,7 @@ namespace pisces
 		 * 
 		 * \return A datatype reference to the first element of the named scalar
 		 *********************************************************************/
-		inline datatype& operator[] (int name) {
+		inline datatype& operator[] (std::string name) {
 			// if (scalars.find (name) == scalars.end ()) {
 			// 	FATAL ("Index " << name << " not found in element.");
 			// 	throw 0;
@@ -160,7 +158,7 @@ namespace pisces
 		 * 
 		 * \return A datatype reference to the given index of the named scalar
 		 *********************************************************************/
-		virtual datatype& operator() (int name, int index = 0) {
+		virtual datatype& operator() (std::string name, int index = 0) {
 			return (&((*this) [name])) [index];
 		}
 		
@@ -181,7 +179,7 @@ namespace pisces
 		 * 
 		 * \return A pointer to the given index of the named scalar
 		 ************************************************************************/
-		virtual datatype* ptr (int name, int index = 0) {
+		virtual datatype* ptr (std::string name, int index = 0) {
 			/*
 				TODO It would be nice to check if name exists in debug mode...
 			*/
@@ -195,7 +193,7 @@ namespace pisces
 		 * \param i_name The integer solver name to add
 		 * \param i_solver_ptr A pointer to a solver object
 		 *********************************************************************/
-		inline void add_solver (int i_name, std::shared_ptr <plans::equation <datatype> > i_solver_ptr) {
+		inline void add_solver (std::string i_name, std::shared_ptr <plans::equation <datatype> > i_solver_ptr) {
 			TRACE ("Adding solver...");
 			solvers [i_name] = i_solver_ptr;
 			solver_keys.push_back (i_name);
@@ -219,7 +217,7 @@ namespace pisces
 		 * 
 		 * \return A pointer to the given index of the named solver matrix
 		 ************************************************************************/
-		inline datatype *matrix_ptr (int i_name, int index = 0) {
+		inline datatype *matrix_ptr (std::string i_name, int index = 0) {
 			/*
 				TODO It would be nice to check if name exists in debug mode...
 			*/
@@ -234,21 +232,8 @@ namespace pisces
 		 * \param initial_conditions The datatype array of initial conditions
 		 * \param element_flags A set of binary element_flags for instantiation
 		 *********************************************************************/
-		virtual datatype *initialize (int i_name, std::string i_str, datatype* initial_conditions = NULL, int i_flags = 0x00) {
-			/*
-				TODO List possible flags in all documentation
-			*/
-			// element_flags [i_name] = 0x00;
-			// for (int i = 0; i < dimensions; ++i) {
-			// 	if (!grids [i]) {
-			// 		grids [i] = generate_grid (&axes [i], i);
-			// 	}
-			// }
-			// scalar_names [i_name] = i_str;
-			// datatype * value = data.initialize (i_name, i_str, initial_conditions, i_flags);
-			
-			return _initialize (i_name, initial_conditions, i_flags);
-			// return _initialize (i_name, initial_conditions, i_flags);
+		virtual datatype *initialize (std::string i_name) {
+			return this->ptr (i_name);
 		}
 		
 		/*!**********************************************************************
@@ -283,7 +268,7 @@ namespace pisces
 				element_flags [*iter] &= ~solved;
 			}
 			bool completely_solved = false, skip;
-			std::vector <int> can_be_solved;
+			std::vector <std::string> can_be_solved;
 			
 			while (!completely_solved) {
 				can_be_solved.clear ();
@@ -308,7 +293,7 @@ namespace pisces
 				int threads = std::min (params.get <int> ("parallel.solver.threads"), (int) can_be_solved.size ());
 				// #pragma omp parallel for num_threads (threads)
 				for (int i = 0; i < threads; ++i) {
-					int name = can_be_solved [i];
+					std::string name = can_be_solved [i];
 					solvers [name]->solve ();
 					// #pragma omp atomic
 					element_flags [name] |= solved;
@@ -331,7 +316,7 @@ namespace pisces
 			TRACE ("Solve complete.");
 		}
 		
-		virtual void solve_recursive (int name) {
+		virtual void solve_recursive (std::string name) {
 			if (!(element_flags [name] & solved)) {
 				int n_deps = solvers [name]->n_dependencies ();
 				for (int i = 0; i < n_deps; ++i) {
@@ -419,19 +404,6 @@ namespace pisces
 		virtual void run (int &n_steps, int max_steps, int check_every = -1);
 		
 	protected:
-		/*!**********************************************************************
-		 * \brief Protected method to initialize a scalar field and generate its transforms
-		 * 
-		 * \param i_name The integer reference to the scalar field
-		 * \param initial_conditions Any initial conditions to instantiate with, NULL to use default
-		 * \param i_flags Integer flags describing the instantiation (e.g. whether the field doesn't require transforms)
-		 * 
-		 * This method is to be overwritten in subclasses to initialize a scalar field in accordance with the geometry of the element.
-		 * 
-		 * \return Returns a datatype pointer to the initialized scalar
-		 ************************************************************************/
-		virtual datatype *_initialize (int i_name, datatype *initial_conditions = NULL, int i_flags = 0x00) = 0;
-		
 		/*!**********************************************************************
 		 * \brief Protected method to make a virtual file of the current state
 		 * 

@@ -45,7 +45,6 @@ namespace data
 	class data
 	{
 	protected:
-		std::map <int, std::string> scalar_names; //!< A map of the string names for each data component
 		static int mode; //!< The integer mode of the simulation (to prevent loading Chebyshev data into an even grid)
 		
 		std::vector <std::shared_ptr <io::output>> streams; //!< A vector of pointers to output streams
@@ -59,7 +58,7 @@ namespace data
 	public:
 		datatype duration; //!< The total time elapsed in the simulation thus far
 		datatype timestep; //!< The current timestep
-		std::map <int, int> flags; //!< A map of the simulation flags
+		std::map <std::string, int> flags; //!< A map of the simulation flags
 		data () {
 			flags [0] = 0x0;
 			duration = 0.0;
@@ -74,14 +73,14 @@ namespace data
 		 * 
 		 * \return A pointer to the indexed data
 		 ************************************************************************/
-		datatype *operator[] (const int name) {
+		datatype *operator[] (const std::string &name) {
 			return &(scalars [name] [0]);
 		}
 		
 		/*!**********************************************************************
 		 * \brief Element iterator for iterating through the contained data
 		 ************************************************************************/
-		typedef typename std::map <int, std::vector <datatype>>::iterator iterator;
+		typedef typename std::map <std::string, std::vector <datatype>>::iterator iterator;
 	
 		/*!**********************************************************************
 		 * \brief Generate an iterator to iterate through the data
@@ -109,7 +108,7 @@ namespace data
 		 * 
 		 * \return A pointer to the indexed data
 		 ************************************************************************/
-		datatype *operator() (const int name, const int index = 0) {
+		datatype *operator() (const std::string &name, const int index = 0) {
 			return &(scalars [name] [index]);
 		}
 		
@@ -134,12 +133,11 @@ namespace data
 		 * 
 		 * \return A pointer to the dataset
 		 ************************************************************************/
-		virtual datatype *initialize (int i_name, std::string i_str, datatype* initial_conditions = NULL, int i_flags = 0x00) {
+		virtual datatype *initialize (std::string i_name, datatype* initial_conditions = NULL, int i_flags = 0x00) {
 			flags [i_name] = 0x00;
-			scalar_names [i_name] = i_str;
 			datatype *ptr = _initialize (i_name, initial_conditions, i_flags);
 			if (dump_stream) {
-				dump_stream->template append <datatype> (i_str, ptr);
+				dump_stream->template append <datatype> (i_name, ptr);
 			}
 			return ptr;
 		}
@@ -213,16 +211,13 @@ namespace data
 		 ************************************************************************/
 		void setup (io::input *input_ptr) {
 			// Iterate through the scalar fields and append them to the variables for which the input will search
-			typedef typename std::map <int, std::vector <datatype> >::iterator iterator;
-			for (iterator iter = scalars.begin (); iter != scalars.end (); ++iter) {
-				input_ptr->template append <datatype> (scalar_names [iter->first], (*this) (iter->first));
+			for (data::iterator iter = begin (); iter != end (); ++iter) {
+				input_ptr->template append <datatype> (iter->first, (*this) (iter->first));
 			}
 			
 			input_ptr->template append <datatype> ("t", &duration, io::scalar);
 			int mode;
 			input_ptr->template append <int> ("mode", &mode, io::scalar);
-			
-			DEBUG ("READING");
 			
 			try {
 				// Read from the input into the element variables
@@ -249,9 +244,8 @@ namespace data
 		 ************************************************************************/
 		virtual void setup_output (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
 			// Iterate through the scalar fields and append them to the variables which the output will write to file
-			typedef typename std::map <int, std::vector <datatype> >::iterator iterator;
-			for (iterator iter = scalars.begin (); iter != scalars.end (); ++iter) {
-				output_ptr->template append <datatype> (scalar_names [iter->first], (*this) (iter->first));
+			for (data::iterator iter = begin (); iter != end (); ++iter) {
+				output_ptr->template append <datatype> (iter->first, (*this) (iter->first));
 			}
 			
 			output_ptr->template append <datatype> ("t", &duration, io::scalar);
@@ -311,12 +305,12 @@ namespace data
 		*/
 		
 	protected:
-		std::map <int, std::vector <datatype>> scalars;
+		std::map <std::string, std::vector <datatype>> scalars;
 		
 		/*!**********************************************************************
 		 * \brief Initialize a new dataset in the data object
 		 ************************************************************************/
-		virtual datatype *_initialize (int i_name, datatype* initial_conditions = NULL, int i_flags = 0x00) = 0;
+		virtual datatype *_initialize (std::string i_name, datatype* initial_conditions = NULL, int i_flags = 0x00) = 0;
 	};
 	
 	template <class datatype>
@@ -342,8 +336,8 @@ namespace data
 				this->setup_dump (dump_stream);
 			}
 			
-			this->initialize (x_position, "x");
-			this->initialize (z_position, "z");
+			this->initialize ("x");
+			this->initialize ("z");
 			
 			/*
 				TODO Clean dump file generation
@@ -352,16 +346,16 @@ namespace data
 		
 		virtual ~implemented_data () {}
 		
-		datatype *operator () (const int name, const int i = 0, const int j = 0) {
+		datatype *operator () (const std::string name, const int i = 0, const int j = 0) {
 			return data <datatype>::operator() (name, i * grid_m->get_ld () + j); 
 		}
 		
 		virtual void setup_profile (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
-			typedef typename std::map <int, std::vector <datatype> >::iterator iterator;
+			typedef typename std::map <std::string, std::vector <datatype> >::iterator iterator;
 			for (iterator iter = data <datatype>::scalars.begin (); iter != data <datatype>::scalars.end (); ++iter) {
-				output_ptr->template append <datatype> (data <datatype>::scalar_names [iter->first], (*this) (iter->first));
-				output_ptr->template append <datatype> ("rms_" + data <datatype>::scalar_names [iter->first], std::shared_ptr <io::functors::functor> (new io::functors::root_mean_square_functor <datatype> ((*this) (iter->first), n, m)));
-				output_ptr->template append <datatype> ("avg_" + data <datatype>::scalar_names [iter->first], std::shared_ptr <io::functors::functor> (new io::functors::average_functor <datatype> ((*this) (iter->first), n, m)));
+				output_ptr->template append <datatype> (iter->first, (*this) (iter->first));
+				output_ptr->template append <datatype> ("rms_" + iter->first, std::shared_ptr <io::functors::functor> (new io::functors::root_mean_square_functor <datatype> ((*this) (iter->first), n, m)));
+				output_ptr->template append <datatype> ("avg_" + iter->first, std::shared_ptr <io::functors::functor> (new io::functors::average_functor <datatype> ((*this) (iter->first), n, m)));
 			}
 			output_ptr->template append <datatype> ("t", &(duration), io::scalar);
 			output_ptr->template append <const int> ("mode", &(data <datatype>::get_mode ()), io::scalar);
@@ -370,15 +364,15 @@ namespace data
 		}
 	
 	protected:
-		virtual datatype *_initialize (int name, datatype* initial_conditions = NULL, int i_flags = 0x00) {
+		virtual datatype *_initialize (std::string name, datatype* initial_conditions = NULL, int i_flags = 0x00) {
 			TRACE ("Initializing " << name << "...");
 			// Size allowing for real FFT buffer
 			data <datatype>::scalars [name].resize (grid_n->get_ld () * m, 0.0);
-			if (name == x_position) {
+			if (name == "x") {
 				for (int j = 0; j < m; ++j) {
 					linalg::copy (n, &((*grid_n) [0]), (*this) (name, 0, j), 1, m);
 				}
-			} else if (name == z_position) {
+			} else if (name == "z") {
 				for (int i = 0; i < n; ++i) {
 					linalg::copy (m, &((*grid_m) [0]), (*this) (name, i));
 				}

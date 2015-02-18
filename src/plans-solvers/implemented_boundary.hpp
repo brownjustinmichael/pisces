@@ -114,7 +114,6 @@ namespace plans
 		}
 		
 		virtual void calculate_matrix (datatype timestep, datatype *default_matrix, datatype *matrix_in, datatype *interpolate_matrix, datatype *matrix_out, int lda, bool diverging = false) {
-			DEBUG ("Here" << default_matrix [0]);
 			linalg::scale (m, 0.0, matrix_out, lda);
 			linalg::add_scaled (m, 1.0, default_matrix, matrix_out, m, lda);
 		}

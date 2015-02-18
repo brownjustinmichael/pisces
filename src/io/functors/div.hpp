@@ -106,7 +106,6 @@ namespace io
 						inner_data [(i + 1) * m + j] += scalar * (i / 2) * data_x [i * m + j];
 					}
 				}
-				DEBUG (scalar << " " << pos_x [n - 1] << " " << pos_x [0] << " " << inner_data [n/2*m+m/2]);
 				return &inner_data [0];
 			}
 		};

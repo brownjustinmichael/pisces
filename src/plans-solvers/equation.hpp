@@ -50,9 +50,9 @@ namespace plans
 
 		virtual int n_dependencies () = 0;
 
-		virtual int& get_dependency (int i) = 0;
+		virtual const std::string& get_dependency (int i) = 0;
 
-		virtual void add_dependency (int name, int flags = 0x00) = 0;
+		virtual void add_dependency (std::string name, int flags = 0x00) = 0;
 
 		/*!**********************************************************************
 		 * \brief Return a pointer to the data associated with the solver

@@ -178,9 +178,7 @@ namespace plans
 		int kl = 2;
 		int ku = 1;
 		int lda = 2 * kl + ku + 1;
-		
-		DEBUG ("HERE")
-		
+				
 		linalg::scale ((m + 2) * ldn, 0.0, &data_temp [0]);
 		
 		// std::shared_ptr <plans::plan <datatype> > transform_x = std::shared_ptr <plans::plan <datatype> > (new plans::vertical_transform <datatype> (n, m, data_x, NULL, 0x00, element_flags, component_flags_x));

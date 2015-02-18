@@ -195,9 +195,7 @@ namespace io
 				TRACE ("Getting " << name << "...");
 				if (check_type <datatype> (name)) {
 					ldm = ldm == -1 ? m : ldm;
-					DEBUG ("STUFF " << data << " " << data_map [name]);
 					memcpy (data, data_map [name], sizeof (datatype) * n * ldm);
-					TRACE ("Done.");
 				} else {
 					ERROR ("Incorrect type");
 					throw exceptions::bad_type ();

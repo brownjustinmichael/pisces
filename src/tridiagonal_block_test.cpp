@@ -74,12 +74,6 @@ int main (int argc, char *argv[])
 			bcopy [i * nrhs + j] = b [i * nrhs + j];
 		}
 	}
-	
-	for (int i = 0; i < n; ++i) {
-		for (int j = 0; j < nrhs; ++j) {
-			DEBUG ("[" << id << "] " << subcopy [i] << " " << diagcopy [i] << " " << supcopy [i] << " = " << bcopy [i]);
-		}
-	}
 
 	try {
 		utils::p_block_tridiag_factorize (id, np, n - ntop - nbot, &sub [0], &diag [0], &sup [0], &supsup [0], &ipiv [0], &x [0], &xipiv [0], &info, nrhs);
@@ -90,12 +84,6 @@ int main (int argc, char *argv[])
 		// utils::p_block_direct_tridiag_solve (id, np, n - ntop - nbot,  &sub [0], &diag [0], &sup [0], &supsup [0], &b [0], nrhs, n);
 	} catch (std::exception& except) {
 		std::cout << except.what () << '\n';
-	}
-
-	for (int i = 0; i < n; ++i) {
-		for (int j = 0; j < nrhs; ++j) {
-			DEBUG ("[" << id << "] " << subcopy [i] << " " << diagcopy [i] << " " << supcopy [i] << " = " << bcopy [i] << " => " << sub [i] << " " << diag [i] << " " << sup [i] << " = " << b [i] << " | ");
-		}
 	}
 
 	for (int j = 0; j < nrhs; ++j) {
@@ -136,21 +124,6 @@ int main (int argc, char *argv[])
 		for (int i = 0; i < nrhs; ++i) {
 			bcopy [i * nrhs] -= subcopy [i * nrhs] * redge_0 [i];
 		}
-	}
-
-	std::stringstream sub_debug, diag_debug, sup_debug, debug;
-	for (int j = 0; j < nrhs; ++j) {
-		for (int i = 0; i < n; ++i) {
-			sub_debug << subcopy [i * nrhs + j] << " ";
-			diag_debug << diagcopy [i * nrhs + j] << " ";
-			sup_debug << supcopy [i * nrhs + j] << " ";
-			debug << bcopy [i * nrhs + j] << " ";
-		}
-		DEBUG (sub_debug.str () << " | " << diag_debug.str () << " | " << sup_debug.str () << " = " << debug.str ());
-		sub_debug.str ("");
-		diag_debug.str ("");
-		sup_debug.str ("");
-		debug.str ("");
 	}
 	return 0;
 }

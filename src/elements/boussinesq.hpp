@@ -35,8 +35,8 @@ namespace pisces
 			if (flags & profile_only) {
 				virtual_output.reset (new io::formatted_output <io::formats::two_d::virtual_format> (io::data_grid::two_d (1, m), "two_d/boussinesq/virtual_file", io::replace_file));
 				if (flags & timestep_only) {
-					virtual_output->append <datatype> ("z", std::shared_ptr <io::functors::functor> (new io::functors::average_functor <datatype> (ptr (z_position), n, m)));
-					virtual_output->append <datatype> ("w", std::shared_ptr <io::functors::functor> (new io::functors::root_mean_square_functor <datatype> (ptr (z_velocity), n, m)));
+					virtual_output->append <datatype> ("z", std::shared_ptr <io::functors::functor> (new io::functors::average_functor <datatype> (ptr ("z"), n, m)));
+					virtual_output->append <datatype> ("w", std::shared_ptr <io::functors::functor> (new io::functors::root_mean_square_functor <datatype> (ptr ("w"), n, m)));
 				} else {
 					FATAL ("HAVEN'T GOT A TREATMENT FOR THIS YET");
 					throw 0;
@@ -45,10 +45,10 @@ namespace pisces
 			} else {
 				virtual_output.reset (new io::formatted_output <io::formats::two_d::virtual_format> (io::data_grid::two_d (n, m), "two_d/boussinesq/virtual_file", io::replace_file));
 				if (flags & timestep_only) {
-					virtual_output->append <datatype> ("z", ptr (z_position));
-					virtual_output->append <datatype> ("x", ptr (x_position));
-					virtual_output->append <datatype> ("w", ptr (z_velocity));
-					virtual_output->append <datatype> ("u", ptr (x_velocity));
+					virtual_output->append <datatype> ("z", ptr ("z"));
+					virtual_output->append <datatype> ("x", ptr ("x"));
+					virtual_output->append <datatype> ("w", ptr ("w"));
+					virtual_output->append <datatype> ("u", ptr ("u"));
 				} else {
 					data.setup_output (virtual_output, data::no_save);
 				}
@@ -84,8 +84,6 @@ namespace pisces
 		using implemented_element <datatype>::alpha_0;
 		using implemented_element <datatype>::alpha_n;
 		using implemented_element <datatype>::solvers;
-		using implemented_element <datatype>::scalars;
-		using implemented_element <datatype>::scalar_names;
 		using implemented_element <datatype>::data;
 		
 		std::vector <datatype> area;
@@ -104,7 +102,6 @@ namespace data
 		using implemented_data <datatype>::n;
 		using implemented_data <datatype>::m;
 		std::vector <double> area;
-		
 		
 	public:
 		thermo_compositional_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int id, int n_elements, io::parameters& i_params);

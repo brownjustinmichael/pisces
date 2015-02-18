@@ -29,21 +29,29 @@ time:
     cfl: 0.1
     alpha: 1.00
     allow: 1000.0
-temperature:
-    diffusion: 1.0
-    bg_diffusion: 1.0
-    advection: 1.0
-    stratification: -1.0
-composition:
-    diffusion: 0.5
-    advection: 1.0
-    stratification: -0.5
-velocity:
-    diffusion: 0.5
-    advection: 1.0
-    buoyancy:
-        temperature: 0.5
-        composition: -0.5
+equations:
+    temperature:
+        diffusion: 1.0
+        bg_diffusion: 1.0
+        advection: 1.0
+        stratification: -1.0
+    composition:
+        diffusion: 0.5
+        advection: 1.0
+        stratification: -0.5
+    velocity:
+        ignore: True
+        diffusion: 0.5
+        advection: 1.0
+        buoyancy:
+            temperature: 0.5
+            composition: -0.5
+    x_velocity:
+        ignore: False
+        link: "equations.velocity"
+    z_velocity:
+        ignore: False
+        link: "equations.velocity"
 root: ./
 input:
     directory: input/

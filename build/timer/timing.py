@@ -1,7 +1,75 @@
 from os.path import join
 from datetime import datetime
-from subprocess import call
+from subprocess import Popen, call
 import copy
+from celery import Celery
+import celeryconfig
+import json
+import operator
+
+import socket
+
+app = Celery('pisces_timer', backend = 'amqp')
+app.config_from_object (celeryconfig)
+
+@app.task
+def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wrapper.py", processes = 1, threads = 1, torque = False, commandRoot = "job"):
+    if isinstance (command, str):
+        command = [command]
+    
+    if setupCommand is not None:
+        call (setupCommand)
+        
+    server_socket = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
+    guess = 5000 + abs (hash (timeCommand.request.id)) % 1000
+    
+    while True:
+        try:
+            server_socket.bind (("", guess))
+            break
+        except socket.error:
+            guess += 1
+            
+    server_socket.listen (5)
+    
+    print ("Sending to wrapper file...", wrapperFile)
+    
+    if torque:
+        print ("Writing to batch file")
+
+        batch_file = open ("batch_%04d.pbs" % guess, "w")
+
+        batch_file.write ("#PBS -S /bin/bash\n")
+        batch_file.write ("#PBS -q normal\n")
+        batch_file.write ("#PBS -N %s\n" % commandRoot)
+
+        batch_file.write ("#PBS -l nodes=%d:ppn=%d\n" % (processes, threads))
+        batch_file.write ("#PBS -l walltime=00:30:00\n")
+        batch_file.write ("cd $PBS_O_WORKDIR\n")
+        batch_file.write ("cp $PBS_NODEFILE .\n")
+        
+        batch_file.write ("OMP_NUM_THREADS=%d\n" % threads)
+        batch_file.write ("export OMP_NUM_THREADS\n")
+
+        batch_file.write (" ".join (["python", wrapperFile, "-a", str (socket.gethostbyname(socket.gethostname())), "-p", str (guess)]))
+        batch_file.write ("\n")
+        batch_file.close ()
+        
+        Popen (["qsub", "batch_%04d.pbs" % guess])
+    else:
+        Popen (["python", wrapperFile, "-a", str (socket.gethostbyname(socket.gethostname())), wrapperFile, "-p", str (guess)])
+    
+    client_socket, address = server_socket.accept()
+    
+    client_socket.send (json.dumps ({"command": command, "iterations": iterations, "processes" : processes}).encode ())
+    
+    try:
+        data = json.loads (client_socket.recv (512).decode ())
+    except Exception as e:
+        print (type (e), e)
+    client_socket.close ()
+    
+    return float (data.get ("dt", None))
 
 class Timer (object):
     """
@@ -15,105 +83,139 @@ class Timer (object):
         self.variances = []
         self.directory = kwargs.pop ("directory", None)
         for arg in args:
-            if not isinstance (arg, Variance):
-                arg = Variance (*arg)
+            if not isinstance (arg, Argument):
+                arg = Argument (*arg)
             self.variances.append (arg)
+        self.uniques = kwargs.pop ("uniques", [])
         self.current = self.variances [:]
             
     def getSetupCommand (self, *args, **kwargs):
         command = [join (self.directory, self.setupCommandRoot)] + self.commandArgs
-        for arg in args:
+        for arg in self.variances + self.uniques:
             arg (command)
-        for var in self.variances:
-            if var not in args:
-                var (command)
-        # print (command)
         return command
         
     def getCommand (self, *args, **kwargs):
         command = [join (self.directory, self.commandRoot)] + self.commandArgs
-        for arg in args:
+        arguments = [variance.copy (value = arg) for arg, variance in zip (args, self.variances [:len (args)])]
+        arguments += self.variances [len (arguments):]
+        for arg in arguments + self.uniques:
             arg (command)
-        for var in self.variances:
-            if var not in args:
-                var (command)
-        # print (command)
         return command
-                
-    def time (self, *args):
-        if self.setupCommandRoot is not None:
-            call (self.getSetupCommand (*args))
-        startTime = datetime.now()
-        call (self.getCommand (*args))
-        return datetime.now() - startTime
         
-    def calculateMinTime (self, *args):
-        baseTime = self.time ()
+    def getBaseTime (self):
+        return timeCommand.delay (command = self.getCommand (*variances), setupCommand = self.getSetupCommand (*variances))
         
-        times = {tuple (self.variances) : baseTime}
-        currentTime = baseTime
+    basetime = property (getBaseTime)
+        
+    def calculateTimes (self, *args, **kwargs):
+        times = {}
         if len (self.variances) == 0:
             return
-        tests = [(var,) for var in self.variances [0].generate ()]
-        for variance in self.variances [1:]:
-            tests = [i + (var,) for i in tests for var in variance.generate ()]
-        for variances in tests:
+            
+        print (self.variances)
+        for variances in Argument.generate (*self.variances):
             if variances not in times:
-                currentTime = self.time (*variances)
-                times [variances] = currentTime
-        best = min(times, key=times.get)
-        print (best, baseTime / times [best])
+                processes = 1
+                threads = 1
+                try:
+                    Argument.setAll (self.variances, variances)
+                except RuntimeError:
+                    print ("Throwing out", variances)
+                    continue
+                    
+                for arg in self.variances:
+                    if arg.processes:
+                        processes *= arg.value
+                    if arg.threads:
+                        threads *= arg.value
+
+                for arg in self.uniques:
+                    arg.setRandom ()
+                times [variances] = timeCommand.delay (command = self.getCommand (), setupCommand = self.getSetupCommand (), processes = processes, threads = threads, commandRoot = self.commandRoot, **kwargs)
+
         return times
 
-class Variance (object):
+class Argument (object):
     """
     An object that can return a part of a command associated with varying a particular parameter
     """
-    def __init__(self, command, extent = None, value = 1, lowerBound = 1, **kwargs):
-        super(Variance, self).__init__()
+    def __init__(self, command, extent = None, value = 1, **kwargs):
+        super(Argument, self).__init__()
         self.command = command
         self.extent = extent
-        if value < lowerBound:
-            raise RuntimeError ("Can't have a value below %s" % str (lowerBound))
+        self.lowerBound = kwargs.get ("lowerBound", 1)
+        self.upperBound = kwargs.get ("upperBound", None)
+        self.pastValues = []
         self.value = value
-        self.lowerBound = lowerBound
         self.kwargs = kwargs
+        self.processes = kwargs.get ("processes", False)
+        self.threads = kwargs.get ("processes", False)
+        
+    def getValue (self):
+        return self._value
+        
+    def setValue (self, value):
+        if (value < self.lowerBound) or (self.upperBound is not None and value > self.upperBound):
+            raise RuntimeError ("Can't have a value below %s or above %s" % (str (self.lowerBound), str (self.upperBound)))
+        if value not in self.pastValues:
+            self.pastValues.append (value)
+        self._value = value
+        
+    value = property (getValue, setValue)
         
     def copy (self, **kwargs):
         newkwargs = copy.copy (self.kwargs)
         newkwargs ["value"] = self.value
-        newkwargs ["lowerBound"] = self.lowerBound
         newkwargs ["extent"] = self.extent
         for arg in kwargs:
             newkwargs [arg] = kwargs [arg]
-        newObject = Variance (self.command, **newkwargs)
+        newObject = Argument (self.command, **newkwargs)
         return newObject
         
-    def __mul__ (self, scalar):
-        return Variance (self.command, self.value * scalar, self.lowerBound, **self.kwargs)
+    def setRandom (self):
+        self.value += 1
+        return self
         
+    def __lt__ (self, other):
+        return self - other < 0
+        
+    def __gt__ (self, other):
+        return self - other > 0
+        
+    def __eq__ (self, other):
+        return self - other == 0
+        
+    def __mul__ (self, scalar):
+        if isinstance (scalar, Argument):
+            scalar = scalar.value
+        return self.value * scalar
+                
     def __add__ (self, scalar):
-        return Variance (self.command, self.value + scalar, self.lowerBound, **self.kwargs)
+        if isinstance (scalar, Argument):
+            scalar = scalar.value
+        return self.value + scalar
         
     def __div__ (self, scalar):
-        return Variance (self.command, self.value / scalar, self.lowerBound, **self.kwargs)
-    
+        if isinstance (scalar, Argument):
+            scalar = scalar.value
+        return self.value / scalar
+            
     def __sub__ (self, scalar):
-        return Variance (self.command, self.value - scalar, self.lowerBound, **self.kwargs)
-        
+        if isinstance (scalar, Argument):
+            scalar = scalar.value
+        return self.value - scalar
+                
     def __call__ (self, fullCommand = None):
         if fullCommand is None:
             fullCommand = []
         if self.kwargs.get ("prepend", False):
-            for subcommand in (self.command + str (self.value)).split () [::-1]:
+            for subcommand in (self.command % self.value).split () [::-1]:
                 fullCommand.insert (0, subcommand)
         else:
-            for subcommand in (self.command + str (self.value)).split ():
+            for subcommand in (self.command % self.value).split ():
                 fullCommand.append (subcommand)
         return fullCommand
-        
-    def __eq__ (self, other):
-        return self.command == other.command
         
     def __hash__ (self):
         return hash (self.command) + hash (self.value)
@@ -124,13 +226,50 @@ class Variance (object):
     def __repr__ (self):
         return "<%s>" % str (self)
         
-    def generate (self):
-        if self.extent is None:
-            yield self.copy ()
+    @staticmethod
+    def generate (*args):
+        if len(args) > 1:
+            for i in args [0].extent:
+                for rest in Argument.generate (*args [1:]):
+                    yield (i,) + rest
         else:
-            for value in self.extent:
-                yield self.copy (value = value)
-        
-timer = Timer ("pisces", Variance ("mpiexec -np ", extent = [1,2], prepend = True), Variance ("-V parallel.maxthreads ", extent = [1]), Variance ("-V parallel.transform.threads ", extent = [1,2]), setupCommandRoot = "pisces_init", directory = "../../run", commandArgs = ["-D7"])
+            for i in args [0].extent: yield (i,)
+            
+    @staticmethod
+    def setAll (args, values):
+        for arg, value in zip (args, values):
+            arg.value = value
 
-results = timer.calculateMinTime ()
+class CompositeArgument (object):
+    def __init__ (self, argument1, argument2, operator = operator.add):
+        self.argument1 = argument1
+        self.argument2 = argument2
+        self.operator = operator
+        
+    def getValue (self):
+        return self.operator (self.argument1, self.argument2)
+        
+    value = property (getValue)
+        
+    def __add__ (self, other):
+        return self.value + other.value
+        
+    def __sub__ (self, other):
+        return self.value - other.value
+        
+    def __mul__ (self, other):
+        return self.value * other.value
+        
+    def __div__ (self, other):
+        return self.value / other.value
+        
+    def __gt__ (self, other):
+        return self - other > 0
+        
+    def __lt__ (self, other):
+        return self - other < 0
+        
+    def __eq__ (self, other):
+        return self - other == 0
+    
+    
