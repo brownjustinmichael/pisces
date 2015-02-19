@@ -162,17 +162,17 @@ namespace pisces
 				if (terms ["top"].IsDefined ()) {
 					if (terms ["top.type"].as <std::string> () == "fixed_value") {
 						DEBUG ("Fixed");
-						local_boundary_0 = std::shared_ptr <plans::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], terms ["top.value"].as <datatype> (), false));
+						local_boundary_n = std::shared_ptr <plans::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], terms ["top.value"].as <datatype> (), true));
 					} else if (terms ["top.type"].as <std::string> () == "fixed_derivative") {
 						DEBUG ("Fixed deriv");
-						local_boundary_0 = std::shared_ptr <plans::boundary <datatype>> (new fixed_deriv_boundary <datatype> (&*grids [0], &*grids [1], terms ["top.value"].as <datatype> (), false));
+						local_boundary_n = std::shared_ptr <plans::boundary <datatype>> (new fixed_deriv_boundary <datatype> (&*grids [0], &*grids [1], terms ["top.value"].as <datatype> (), true));
 					}
 				}
 			}
 			
 			// Add the split directional solvers
-			solvers [variable]->add_solver (typename collocation_solver <datatype>::factory (messenger_ptr, timestep, boundary_0, boundary_n), z_solver);
-			solvers [variable]->add_solver (typename fourier_solver <datatype>::factory (timestep, boundary_0, boundary_n), x_solver);
+			solvers [variable]->add_solver (typename collocation_solver <datatype>::factory (messenger_ptr, timestep, local_boundary_0, local_boundary_n), z_solver);
+			solvers [variable]->add_solver (typename fourier_solver <datatype>::factory (timestep, local_boundary_0, local_boundary_n), x_solver);
 
 			// If a diffusion value is specified, construct the diffusion plans
 			solvers [variable]->add_plan (typename vertical_diffusion <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")), pre_plan);
