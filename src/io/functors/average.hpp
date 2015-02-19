@@ -49,13 +49,14 @@ namespace io
 			 * \return The first element of the averaged 1D array
 			 ************************************************************************/
 			void *calculate () {
-				DEBUG ("CALCULATING");
 				if (func) {
 					func->calculate ();
 				}
-				DEBUG ("weight " << weight << " data " << data);
-				inner_data = linalg::dot (m * n, weight, data);
-				DEBUG ("Inner " << &inner_data);
+				datatype sum = 0.0;
+				for (int i = 0; i < m * n; ++i) {
+					sum += weight [i];
+				}
+				inner_data = linalg::dot (m * n, weight, data) / sum;
 				return &inner_data;
 			}
 		};

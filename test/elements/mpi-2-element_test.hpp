@@ -32,7 +32,7 @@ public:
 		io::parameters parameters;
 		
 		parameters ["root"] = std::string (PISCES_ROOT) + "/test/elements/";
-		// parameters ["output.file"] = "";
+		parameters ["output.file"] = "";
 		parameters ["output.stat.file"] = "compare_%02i";
 		parameters ["output.stat.every"] = 10;
 		parameters ["output.transform.file"] = "";
