@@ -68,6 +68,7 @@ namespace pisces
 			
 			for (typename data::data <datatype>::iterator iter = data.begin (); iter != data.end (); ++iter) {
 				if ((iter->first != "x") && (iter->first != "z")) {
+					DEBUG ("Adding " << iter->first);
 					element <datatype>::add_solver (iter->first, std::shared_ptr <plans::equation <datatype> > (new plans::implemented_equation <datatype> (*grids [0], *grids [1], ptr (iter->first), &element_flags ["element"], &element_flags [iter->first])));
 					element <datatype>::transforms.push_back (iter->first);
 					element <datatype>::transformers [iter->first] = std::shared_ptr <plans::transformer <datatype> > (new plans::implemented_transformer <datatype> (*grids [0], *grids [1], data (iter->first), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &(data.flags ["element"]), &(data.flags [iter->first]), element <datatype>::transform_threads));

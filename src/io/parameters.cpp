@@ -36,7 +36,8 @@ namespace io
 		return copyNode;
 	}
 	
-	YAML::Node parameters::operator[] (std::string key) {
+	YAML::Node parameters::operator[] (std::string key) const {
+		TRACE ("Checking for " << key);
 		std::istringstream ss (key);
 		std::string token;
 		std::getline (ss, token, '.');
@@ -51,13 +52,11 @@ namespace io
 		int i = (int) nodes.size () - 1;
 		std::string inner_tokens = "";
 		if (!nodes [i].IsDefined ()) {
-			YAML::Node current;
 			for (int j = i - 1; j >= 0; --j) {
 				inner_tokens = tokens [j + 1] + inner_tokens;
-				current = nodes [j];
-				if (current.IsDefined () && current ["link"].IsDefined ()) {
-					if (parameters::operator[] (current ["link"].as <std::string> () + "." + inner_tokens).IsDefined ()) {
-						return parameters::operator[] (current ["link"].as <std::string> () + "." + inner_tokens);
+				if (nodes [j].IsDefined () && nodes [j] ["link"].IsDefined ()) {
+					if (parameters::operator[] (nodes [j] ["link"].as <std::string> () + "." + inner_tokens).IsDefined ()) {
+						return parameters::operator [] (nodes [j] ["link"].as <std::string> () + "." + inner_tokens);
 					}
 				}
 				inner_tokens = "." + inner_tokens;

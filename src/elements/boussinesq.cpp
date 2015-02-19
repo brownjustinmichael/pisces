@@ -29,11 +29,10 @@ namespace data
 {
 	template <class datatype>
 	thermo_compositional_data <datatype>::thermo_compositional_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int id, int n_elements, io::parameters& i_params) : implemented_data <datatype> (i_axis_n, i_axis_m, id, i_params.get <std::string> ("dump.file"), i_params.get <std::string> ("root") + i_params.get <std::string> ("dump.directory"), i_params.get <int> ("dump.every")) {
-		initialize ("u");
-		initialize ("w");
-		initialize ("T");
-		initialize ("C");
-		initialize ("p");
+		for (YAML::const_iterator iter = i_params ["equations"].begin (); iter != i_params ["equations"].end (); ++iter) {
+			if (!(iter->second ["ignore"].IsDefined () && iter->second ["ignore"].as <bool> ())) initialize (iter->first.as <std::string> ());
+		}
+		initialize ("pressure");
 		
 		int name = id;
 		
@@ -59,7 +58,7 @@ namespace data
 
 			normal_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (o_grid, buffer, i_params.get <int> ("output.every")));
 			this->setup_output (normal_stream);
-			normal_stream->template append <double> ("div", std::shared_ptr <io::functors::functor> (new io::functors::div_functor <double> ((*this) ("x"), (*this) ("z"), (*this) ("u"), (*this) ("w"), n, m)));
+			normal_stream->template append <double> ("div", std::shared_ptr <io::functors::functor> (new io::functors::div_functor <double> ((*this) ("x"), (*this) ("z"), (*this) ("x_velocity"), (*this) ("z_velocity"), n, m)));
 		}
 
 		std::shared_ptr <io::output> transform_stream;
@@ -70,7 +69,7 @@ namespace data
 
 			transform_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (o_grid, buffer, i_params.get <int> ("output.every")));
 			this->setup_output (transform_stream, transformed_horizontal);
-			transform_stream->template append <double> ("div", std::shared_ptr <io::functors::functor> (new io::functors::transform_div_functor <double> ((*this) ("x"), (*this) ("z"), (*this) ("u"), (*this) ("w"), n, m)));
+			transform_stream->template append <double> ("div", std::shared_ptr <io::functors::functor> (new io::functors::transform_div_functor <double> ((*this) ("x"), (*this) ("z"), (*this) ("x_velocity"), (*this) ("z_velocity"), n, m)));
 		}
 
 		std::shared_ptr <io::output> stat_stream;
@@ -88,10 +87,10 @@ namespace data
 
 			stat_stream.reset (new io::appender_output <io::formats::ascii> (io::data_grid::two_d (n, m), buffer, i_params.get <int> ("output.stat.every")));
 			this->setup_stat (stat_stream);
-			stat_stream->template append <double> ("wT", std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], std::shared_ptr <io::functors::functor> (new io::functors::product_functor <double> (n, m, (*this) ("w"), (*this) ("T"))))), io::scalar);
-			stat_stream->template append <double> ("wC", std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], std::shared_ptr <io::functors::functor> (new io::functors::product_functor <double> (n, m, (*this) ("w"), (*this) ("C"))))), io::scalar);
-			stat_stream->template append <double> ("Tavg", std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], (*this) ("T"))), io::scalar);
-			stat_stream->template append <double> ("Cavg", std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], (*this) ("C"))), io::scalar);
+			stat_stream->template append <double> ("wT", std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], std::shared_ptr <io::functors::functor> (new io::functors::product_functor <double> (n, m, (*this) ("z_velocity"), (*this) ("temperature"))))), io::scalar);
+			stat_stream->template append <double> ("wC", std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], std::shared_ptr <io::functors::functor> (new io::functors::product_functor <double> (n, m, (*this) ("z_velocity"), (*this) ("composition"))))), io::scalar);
+			stat_stream->template append <double> ("Tavg", std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], (*this) ("temperature"))), io::scalar);
+			stat_stream->template append <double> ("Cavg", std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], (*this) ("composition"))), io::scalar);
 		}
 
 		/*
@@ -112,118 +111,89 @@ namespace pisces
 		TRACE ("Initializing...");
 		x_ptr = data ("x");
 		z_ptr = data ("z");
-		x_vel_ptr = data ("u");
-		z_vel_ptr = data ("w");
+		x_vel_ptr = data ("x_velocity");
+		z_vel_ptr = data ("z_velocity");
 		
-		// advection_coeff = i_params.get <datatype> ("temperature.advection");
-		// advection_coeff = std::max (advection_coeff, i_params.get <datatype> ("velocity.advection"));
-		// advection_coeff = std::max (advection_coeff, i_params.get <datatype> ("composition.advection"));
+		advection_coeff = 0.0;
 		cfl = i_params.get <datatype> ("time.cfl");
 
-		std::shared_ptr <plans::boundary <datatype>> boundary_0, boundary_n, deriv_boundary_0, deriv_boundary_n, thermal_boundary_0, thermal_boundary_n, compositional_boundary_0, compositional_boundary_n;
+		// If we aren't at an edge, add the appropriate communicating boundary
+		std::shared_ptr <plans::boundary <datatype>> boundary_0, boundary_n;
 		if (messenger_ptr->get_id () > 0) {
 			boundary_0 = std::shared_ptr <plans::boundary <datatype>> (new communicating_boundary <datatype> (messenger_ptr, grids [0]->get_ld (), m, grids [1]->get_excess_0 (), &((*grids [1]) [0]), 0, false));
-			deriv_boundary_0 = boundary_0;
-			thermal_boundary_0 = boundary_0;
-			compositional_boundary_0 = boundary_0;
-		} else {
-			boundary_0 = std::shared_ptr <plans::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], 0.0, false));
-			deriv_boundary_0 = std::shared_ptr <plans::boundary <datatype>> (new fixed_deriv_boundary <datatype> (&*grids [0], &*grids [1], 0.0, false));
-			// thermal_boundary_0 = deriv_boundary_0;
-			thermal_boundary_0 = boundary_0;
-			// compositional_boundary_0 = deriv_boundary_0;
-			compositional_boundary_0 = boundary_0;
 		}
 		if (messenger_ptr->get_id () + 1 < messenger_ptr->get_np ()) {
 			boundary_n = std::shared_ptr <plans::boundary <datatype>> (new communicating_boundary <datatype> (messenger_ptr, grids [0]->get_ld (), m, grids [1]->get_excess_n (), &((*grids [1]) [0]), m - grids [1]->get_excess_n (), true));
-			deriv_boundary_n = boundary_n;
-			thermal_boundary_n = boundary_n;
-			compositional_boundary_n = boundary_n;
-		} else {
-			boundary_n = std::shared_ptr <plans::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], 0.0, true));
-			deriv_boundary_n = std::shared_ptr <plans::boundary <datatype>> (new fixed_deriv_boundary <datatype> (&*grids [0], &*grids [1], 0.0, true));
-			// thermal_boundary_n = deriv_boundary_n;
-			thermal_boundary_n = boundary_n;
-			// compositional_boundary_n = deriv_boundary_n;
-			compositional_boundary_n = boundary_n;
 		}
 
-		/*
-			TODO Figure out how to more conveniently determine whether an edge effect is needed.
-		*/
-		
-		DEBUG ("Checking equations")
-		for(YAML::const_iterator iter = i_params ["equations"].begin (); iter != i_params ["equations"].end (); ++iter) {
-			DEBUG (iter->first);
-			std::string variable = iter->first.as <std::string> ();
+		std::shared_ptr <plans::boundary <datatype>> local_boundary_0, local_boundary_n;
+		std::string variable;
+		for (YAML::const_iterator iter = i_params ["equations"].begin (); iter != i_params ["equations"].end (); ++iter) {
+			variable = iter->first.as <std::string> ();
+			io::parameters::alias terms (i_params, "equations." + variable);
+			
+			DEBUG (variable);
+			
+			// If the equation is labeled as ignore, do not construct an equation
+			if (terms ["ignore"].IsDefined () && terms ["ignore"].as <bool> ()) {
+				continue;
+			}
+			
+			// Use any available communicating boundaries
+			local_boundary_0 = boundary_0;
+			local_boundary_n = boundary_n;
+			
+			// If no communicating boundary is available, we're on an edge, so use the appropriate edge case
+			if (!local_boundary_0) {
+				DEBUG ("Checking bottom");
+				if (terms ["bottom"].IsDefined ()) {
+					if (terms ["bottom.type"].as <std::string> () == "fixed_value") {
+						DEBUG ("Fixed");
+						local_boundary_0 = std::shared_ptr <plans::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], terms ["bottom.value"].as <datatype> (), false));
+					} else if (terms ["bottom.type"].as <std::string> () == "fixed_derivative") {
+						DEBUG ("Fixed deriv");
+						local_boundary_0 = std::shared_ptr <plans::boundary <datatype>> (new fixed_deriv_boundary <datatype> (&*grids [0], &*grids [1], terms ["bottom.value"].as <datatype> (), false));
+					}
+				}
+			}
+			if (!local_boundary_n) {
+				DEBUG ("Checking top");
+				
+				if (terms ["top"].IsDefined ()) {
+					if (terms ["top.type"].as <std::string> () == "fixed_value") {
+						DEBUG ("Fixed");
+						local_boundary_0 = std::shared_ptr <plans::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], terms ["top.value"].as <datatype> (), false));
+					} else if (terms ["top.type"].as <std::string> () == "fixed_derivative") {
+						DEBUG ("Fixed deriv");
+						local_boundary_0 = std::shared_ptr <plans::boundary <datatype>> (new fixed_deriv_boundary <datatype> (&*grids [0], &*grids [1], terms ["top.value"].as <datatype> (), false));
+					}
+				}
+			}
+			
+			// Add the split directional solvers
 			solvers [variable]->add_solver (typename collocation_solver <datatype>::factory (messenger_ptr, timestep, boundary_0, boundary_n), z_solver);
 			solvers [variable]->add_solver (typename fourier_solver <datatype>::factory (timestep, boundary_0, boundary_n), x_solver);
+
+			// If a diffusion value is specified, construct the diffusion plans
+			solvers [variable]->add_plan (typename vertical_diffusion <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")), pre_plan);
+			solvers [variable]->add_plan (typename horizontal_diffusion <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")), mid_plan);
 			
-			if (iter->second ["diffusion"].IsDefined ()) {
-				double diffusion_coeff = iter->second ["diffusion"].as <double> ();
-				if (diffusion_coeff != 0.0) {
-					solvers [variable]->add_plan (typename vertical_diffusion <datatype>::factory (diffusion_coeff, i_params.get <datatype> ("time.alpha")), pre_plan);
-					solvers [variable]->add_plan (typename horizontal_diffusion <datatype>::factory (diffusion_coeff, i_params.get <datatype> ("time.alpha")), mid_plan);
-				}
-			}
-			if (iter->second ["advection"].IsDefined ()) {
-				double advection_coeff = iter->second ["advection"].as <double> ();
-				if (advection_coeff) {
-					solvers [variable]->add_plan (typename advection <datatype>::factory (advection_coeff, ptr ("u"), ptr ("w")), post_plan);
-				}
-			}
-			if (iter->second ["stratification"].IsDefined ()) {
-				double stratification_coeff = iter->second ["stratification"].as <double> ();
-				if (stratification_coeff) {
-					solvers [variable]->add_plan (typename source <datatype>::factory (-stratification_coeff, ptr ("w")), mid_plan);
+			// If an advection value is specified, construct the advection plan
+			solvers [variable]->add_plan (typename advection <datatype>::factory (terms ["advection"], ptr ("x_velocity"), ptr ("z_velocity")), post_plan);
+			if (terms ["advection"].IsDefined ()) advection_coeff = std::max (advection_coeff, terms ["advection"].as <datatype> ());
+			
+			// If any source terms are specified, construct the appropriate source plans
+			if (terms ["sources"].IsDefined ()) {
+				for (YAML::const_iterator source_iter = terms ["sources"].begin (); source_iter != terms ["sources"].end (); ++source_iter) {
+					solvers [variable]->add_plan (typename source <datatype>::factory (source_iter->second.as <datatype> (), ptr (source_iter->first.as <std::string> ())), mid_plan);
 				}
 			}
 		}
-		assert (false);
 		
-		diffusion.resize (m);
-		for (int j = 0; j < m; ++j) {
-			diffusion [j] = (*grids [1]) [j] > 0.0 ? i_params.get <datatype> ("temperature.diffusion") : i_params.get <datatype> ("temperature.bg_diffusion");
-		}
-		
-		// // Solve temperature
-		solvers ["T"]->add_solver (typename collocation_solver <datatype>::factory (messenger_ptr, timestep, thermal_boundary_0, thermal_boundary_n), z_solver);
-		solvers ["T"]->add_solver (typename fourier_solver <datatype>::factory (timestep, thermal_boundary_0, thermal_boundary_n), x_solver);
-		//
-		solvers ["T"]->add_plan (typename vertical_diffusion <datatype>::factory (i_params.get <datatype> ("temperature.diffusion"), i_params.get <datatype> ("time.alpha")), pre_plan);
-		solvers ["T"]->add_plan (typename horizontal_diffusion <datatype>::factory (i_params.get <datatype> ("temperature.diffusion"), i_params.get <datatype> ("time.alpha")), mid_plan);
-		solvers ["T"]->add_plan (typename advection <datatype>::factory (i_params.get <datatype> ("temperature.advection"), ptr ("u"), ptr ("w")), post_plan);
-		solvers ["T"]->add_plan (typename source <datatype>::factory (-i_params.get <datatype>("temperature.stratification"), ptr ("w")), mid_plan);
-
-		// Solve composition
-		solvers ["C"]->add_solver (typename collocation_solver <datatype>::factory (messenger_ptr, timestep, compositional_boundary_0, compositional_boundary_n), z_solver);
-		solvers ["C"]->add_solver (typename fourier_solver <datatype>::factory (timestep, compositional_boundary_0, compositional_boundary_n), x_solver);
-
-		solvers ["C"]->add_plan (typename vertical_diffusion <datatype>::factory (i_params.get <datatype> ("composition.diffusion"), i_params.get <datatype> ("time.alpha")), pre_plan);
-		solvers ["C"]->add_plan (typename horizontal_diffusion <datatype>::factory (i_params.get <datatype> ("composition.diffusion"), i_params.get <datatype> ("time.alpha")), mid_plan);
-		solvers ["C"]->add_plan (typename advection <datatype>::factory (i_params.get <datatype> ("composition.advection"), ptr ("u"), ptr ("w")), post_plan);
-		solvers ["C"]->add_plan (typename source <datatype>::factory (-i_params.get <datatype> ("composition.stratification"), ptr ("w")), mid_plan);
-
-		// Solve velocity
-		solvers ["u"]->add_solver (typename collocation_solver <datatype>::factory (messenger_ptr, timestep, deriv_boundary_0, deriv_boundary_n), z_solver);
-		solvers ["u"]->add_solver (typename fourier_solver <datatype>::factory (timestep, deriv_boundary_0, deriv_boundary_n), x_solver);
-
-		solvers ["u"]->add_plan (typename vertical_diffusion <datatype>::factory (i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha")), pre_plan);
-		solvers ["u"]->add_plan (typename horizontal_diffusion <datatype>::factory (i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha")), mid_plan);
-		solvers ["u"]->add_plan (typename advection <datatype>::factory (i_params.get <datatype> ("velocity.advection"), ptr ("u"), ptr ("w")), post_plan);
-
-		solvers ["w"]->add_solver (typename collocation_solver <datatype>::factory (messenger_ptr, timestep, boundary_0, boundary_n), z_solver);
-		solvers ["w"]->add_solver (typename fourier_solver <datatype>::factory (timestep, boundary_0, boundary_n), x_solver);
-
-		solvers ["w"]->add_plan (typename vertical_diffusion <datatype>::factory (i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha")), pre_plan);
-		solvers ["w"]->add_plan (typename horizontal_diffusion <datatype>::factory (i_params.get <datatype> ("velocity.diffusion"), i_params.get <datatype> ("time.alpha")), mid_plan);
-		solvers ["w"]->add_plan (typename advection <datatype>::factory (i_params.get <datatype> ("velocity.advection"), ptr ("u"), ptr ("w")), post_plan);
-		solvers ["w"]->add_plan (typename source <datatype>::factory (i_params.get <datatype> ("velocity.buoyancy.temperature"), ptr ("T")), mid_plan);
-		solvers ["w"]->add_plan (typename source <datatype>::factory (i_params.get <datatype> ("velocity.buoyancy.composition"), ptr ("C")), mid_plan);
-
-		solvers ["p"]->add_solver (typename incompressible_corrector <datatype>::factory (messenger_ptr, boundary_0, boundary_n, *solvers ["u"], *solvers ["w"]));
-		solvers ["p"]->get_solver (x_solver)->add_dependency ("w");
-		solvers ["p"]->get_solver (x_solver)->add_dependency ("u");
+		// Since this is a Boussinesq problem, also include the pressure term
+		solvers ["pressure"]->add_solver (typename incompressible_corrector <datatype>::factory (messenger_ptr, boundary_0, boundary_n, *solvers ["x_velocity"], *solvers ["z_velocity"]));
+		solvers ["pressure"]->get_solver (x_solver)->add_dependency ("z_velocity");
+		solvers ["pressure"]->get_solver (x_solver)->add_dependency ("x_velocity");
 
 		TRACE ("Initialized.");
 	}
@@ -235,9 +205,9 @@ namespace pisces
 				return 1.0 / 0.0;
 			}
 			if (i == 0 || i == virtual_file->dims ["z"] [0] - 1) {
-				return std::abs ((virtual_file->index <datatype> ("z", i, j + 1) - virtual_file->index <datatype> ("z", i, j - 1)) / virtual_file->index <datatype> ("w", i, j) / advection_coeff) * cfl;
+				return std::abs ((virtual_file->index <datatype> ("z", i, j + 1) - virtual_file->index <datatype> ("z", i, j - 1)) / virtual_file->index <datatype> ("z_velocity", i, j) / advection_coeff) * cfl;
 			} else {
-				return std::min (std::abs ((virtual_file->index <datatype> ("x", i + 1, j) - virtual_file->index <datatype> ("x", i - 1, j)) / virtual_file->index <datatype> ("u", i, j) / advection_coeff), std::abs ((virtual_file->index <datatype> ("z", i, j + 1) - virtual_file->index <datatype> ("z", i, j - 1)) / virtual_file->index <datatype> ("w", i, j) / advection_coeff)) * cfl;
+				return std::min (std::abs ((virtual_file->index <datatype> ("x", i + 1, j) - virtual_file->index <datatype> ("x", i - 1, j)) / virtual_file->index <datatype> ("x_velocity", i, j) / advection_coeff), std::abs ((virtual_file->index <datatype> ("z", i, j + 1) - virtual_file->index <datatype> ("z", i, j - 1)) / virtual_file->index <datatype> ("z_velocity", i, j) / advection_coeff)) * cfl;
 			}
 		} else {
 			if (j == 0 || j == m - 1) {

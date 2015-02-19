@@ -34,24 +34,50 @@ equations:
         diffusion: 1.0
         bg_diffusion: 1.0
         advection: 1.0
-        stratification: -1.0
+        sources:
+            z_velocity: 1.0
+        top:
+            type: fixed_value
+            value: 0.0
+        bottom:
+            type: fixed_value
+            value: 0.0
     composition:
         diffusion: 0.5
         advection: 1.0
-        stratification: -0.5
+        sources:
+            z_velocity: 0.5
+        top:
+            type: fixed_value
+            value: 0.0
+        bottom:
+            type: fixed_value
+            value: 0.0
     velocity:
         ignore: True
         diffusion: 0.5
         advection: 1.0
-        buoyancy:
-            temperature: 0.5
-            composition: -0.5
     x_velocity:
         ignore: False
         link: "equations.velocity"
+        top:
+            type: fixed_derivative
+            value: 0.0
+        bottom:
+            type: fixed_derivative
+            value: 0.0
     z_velocity:
         ignore: False
         link: "equations.velocity"
+        sources:
+            temperature: 0.5
+            composition: -0.5
+        top:
+            type: fixed_value
+            value: 0.0
+        bottom:
+            type: fixed_value
+            value: 0.0
 root: ./
 input:
     directory: input/

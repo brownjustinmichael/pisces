@@ -10,6 +10,7 @@
 #define DIFFUSION_TWO_D_HPP_YHECX9VS
 
 #include "../implicit_plan.hpp"
+#include "io/parameters.hpp"
 
 namespace plans
 {
@@ -50,11 +51,22 @@ namespace plans
 			datatype coeff, alpha;
 		public:
 			factory (datatype i_coeff, datatype i_alpha) : coeff (i_coeff), alpha (i_alpha) {}
+			
+			factory (YAML::Node i_coeff, datatype i_alpha) : alpha (i_alpha) {
+				if (i_coeff.IsDefined ()) {
+					coeff = i_coeff.as <datatype> ();
+				} else {
+					coeff = 0.0;
+				}
+			}
 		
 			virtual ~factory () {}
 		
 			virtual std::shared_ptr <plans::plan <datatype> > instance (plans::grid <datatype> **grids, datatype **matrices, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
-				return std::shared_ptr <plans::plan <datatype> > (new vertical_diffusion <datatype> (*grids [0], *grids [1], coeff, alpha, matrices [0], matrices [1], i_data_in, i_data_out, i_element_flags, i_component_flags));
+				if (coeff) {
+					return std::shared_ptr <plans::plan <datatype> > (new vertical_diffusion <datatype> (*grids [0], *grids [1], coeff, alpha, matrices [0], matrices [1], i_data_in, i_data_out, i_element_flags, i_component_flags));
+				}
+				return NULL;
 			}
 		};
 

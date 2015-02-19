@@ -10,6 +10,7 @@
 #define ADVECTION_TWO_D_HPP_GGR0NN1Q
 
 #include "../real_plan.hpp"
+#include "io/parameters.hpp"
 
 namespace plans
 {
@@ -95,11 +96,22 @@ namespace plans
 			datatype *vel_n, *vel_m;
 		public:
 			factory (datatype i_coeff, datatype* i_vel_n, datatype* i_vel_m) : coeff (i_coeff), vel_n (i_vel_n), vel_m (i_vel_m) {}
+
+			factory (YAML::Node i_coeff, datatype* i_vel_n, datatype* i_vel_m) : vel_n (i_vel_n), vel_m (i_vel_m) {
+				if (i_coeff.IsDefined ()) {
+					coeff = i_coeff.as <datatype> ();
+				} else {
+					coeff = 0.0;
+				}
+			}
 		
 			virtual ~factory () {}
 		
 			virtual std::shared_ptr <plans::plan <datatype> > instance (plans::grid <datatype> **grids, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
-				return std::shared_ptr <plans::plan <datatype> > (new advection <datatype> (*grids [0], *grids [1], coeff, vel_n, vel_m, i_data_in, i_data_out, i_element_flags, i_component_flags));
+				if (coeff) {
+					return std::shared_ptr <plans::plan <datatype> > (new advection <datatype> (*grids [0], *grids [1], coeff, vel_n, vel_m, i_data_in, i_data_out, i_element_flags, i_component_flags));
+				}
+				return NULL;
 			}
 		};
 

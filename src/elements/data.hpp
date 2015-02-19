@@ -60,7 +60,7 @@ namespace data
 		datatype timestep; //!< The current timestep
 		std::map <std::string, int> flags; //!< A map of the simulation flags
 		data () {
-			flags [0] = 0x0;
+			flags ["state"] = 0x0;
 			duration = 0.0;
 		}
 		

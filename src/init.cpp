@@ -81,8 +81,8 @@ int main (int argc, char *argv[])
 
 		double duration = 0.0;
 		int mode = mode_flag;
-		output_stream.append <double> ("T", &tempt [0]);
-		output_stream.append <double> ("S", &temps [0]);
+		output_stream.append <double> ("temperature", &tempt [0]);
+		output_stream.append <double> ("composition", &temps [0]);
 
 		output_stream.append <double> ("t", &duration, io::scalar);
 		output_stream.append <int> ("mode", &mode, io::scalar);

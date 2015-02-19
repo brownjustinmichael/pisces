@@ -13,6 +13,7 @@
 #include "../real_plan.hpp"
 #include "linalg/exceptions.hpp"
 #include <omp.h>
+#include "io/parameters.hpp"
 
 namespace plans
 {
@@ -41,11 +42,23 @@ namespace plans
 			datatype *data_source;
 		public:
 			factory (datatype i_coeff, datatype *i_data_source) : coeff (i_coeff), data_source (i_data_source) {}
-
+			
+			factory (YAML::Node i_coeff, datatype *i_data_source) : data_source (i_data_source) {
+				if (i_coeff.IsDefined ()) {
+					coeff = i_coeff.as <datatype> ();
+				} else {
+					coeff = 0.0;
+				}
+			}
+			
 			virtual ~factory () {}
 
 			virtual std::shared_ptr <plans::plan <datatype> > instance (plans::grid <datatype> **grids, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
-				return std::shared_ptr <plans::plan <datatype> > (new source <datatype> (*grids [0], *grids [1], coeff, data_source, i_data_in, i_data_out, i_element_flags, i_component_flags));
+				if (coeff) {
+					return std::shared_ptr <plans::plan <datatype> > (new source <datatype> (*grids [0], *grids [1], coeff, data_source, i_data_in, i_data_out, i_element_flags, i_component_flags));
+				}
+				DEBUG ("NOPE");
+				return NULL;
 			}
 		};
 

@@ -28,18 +28,34 @@ namespace io
 		
 		using YAML::Node::operator=; //!< Use the assignment operator from the super class
 	
+		class alias
+		{
+		private:
+			parameters &params;
+			std::string key;
+			
+		public:
+			alias (parameters &i_params, std::string i_key) : params (i_params), key (i_key) {}
+			
+			virtual ~alias () {}
+			
+			YAML::Node operator [] (std::string i_key) {
+				return params [key + "." + i_key];
+			}
+		};
+	
 		/*!**********************************************************************
 		 * \param file_name The parameter file from which the parameters should be loaded
 		 ************************************************************************/
 		parameters (std::string file_name = "", std::string defaults_file = DEFAULTS_FILE) {
+			TRACE ("Constructing parameters");
 			YAML::Node copy_node;
 			YAML::Node::operator= (YAML::LoadFile (defaults_file));
 			if (file_name != "") {
 				copy_node = (YAML::LoadFile (file_name));
 			}
-			DEBUG ("HERE IS THE DEFAULT:" << (*this) ["output"]);
 			YAML::Node::operator= (copy (copy_node, *this));
-			DEBUG ("HERE IS THE FINAL:" << (*this) ["output"]);
+			TRACE ("Constructed");
 		}
 	
 		virtual ~parameters () {}
@@ -55,7 +71,7 @@ namespace io
 		 * 
 		 * \return A copy of the YAML::Node object at the given parameter.
 		 ************************************************************************/
-		YAML::Node operator[] (std::string key);
+		YAML::Node operator[] (std::string key) const;
 			
 		/*!**********************************************************************
 		 * \brief Get the parameter associated with the given key
@@ -68,9 +84,11 @@ namespace io
 		 ************************************************************************/
 		template <typename datatype>
 		const datatype get (std::string key) {
+			YAML::Node node = operator[] (key);
 			if (operator[] (key).IsDefined ()) {
 				return operator[] (key).as <datatype> ();
 			} else {
+				ERROR ("Key " << key << " does not exist.");
 				throw exceptions::key_does_not_exist (key);
 			}
 		}

@@ -136,6 +136,9 @@ namespace plans
 		 *********************************************************************/
 		inline void add_plan (std::shared_ptr <plan <datatype>> i_plan, int flags) {
 			TRACE ("Adding plan...");
+			if (!i_plan) {
+				return;
+			}
 			if (flags & pre_plan) {
 				pre_transform_plans.push_back (i_plan);
 			}
