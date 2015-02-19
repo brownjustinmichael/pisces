@@ -73,7 +73,7 @@ namespace plans
 		std::shared_ptr <plans::boundary <datatype>> boundary_0, boundary_n;
 		
 		std::vector <datatype> x, bufferl, bufferr;
-		std::vector <datatype> data_temp, positions;
+		std::vector <datatype> data_temp, positions, new_positions;
 		std::vector <datatype> sup, sub, diag, supsup, matrix; //!< A datatype vector to be used in lieu of data_out for non-updating steps
 		std::vector <int> ipiv, xipiv;
 		using plans::solver <datatype>::element_flags;

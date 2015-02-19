@@ -72,6 +72,7 @@ namespace plans
 		np = messenger_ptr->get_np ();
 		
 		positions.resize (m + 6);
+		new_positions.resize (m + 6);
 		pos_m = &positions [3];
 		
 		for (int j = 0; j < m - 0; ++j) {
@@ -122,7 +123,7 @@ namespace plans
 			int kl = 2;
 			int ku = 1;
 			int lda = 2 * kl + ku + 1;
-			new_pos = &positions [3];
+			new_pos = &new_positions [3];
 			for (int j = -3; j < m + 3; ++j) {
 				new_pos [j] = (pos_m [j] + pos_m [j + 1]) / 2.0;
 			}

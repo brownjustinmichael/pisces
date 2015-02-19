@@ -87,10 +87,13 @@ namespace data
 
 			stat_stream.reset (new io::appender_output <io::formats::ascii> (io::data_grid::two_d (n, m), buffer, i_params.get <int> ("output.stat.every")));
 			this->setup_stat (stat_stream);
-			stat_stream->template append <double> ("wT", std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], std::shared_ptr <io::functors::functor> (new io::functors::product_functor <double> (n, m, (*this) ("z_velocity"), (*this) ("temperature"))))), io::scalar);
-			stat_stream->template append <double> ("wC", std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], std::shared_ptr <io::functors::functor> (new io::functors::product_functor <double> (n, m, (*this) ("z_velocity"), (*this) ("composition"))))), io::scalar);
-			stat_stream->template append <double> ("Tavg", std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], (*this) ("temperature"))), io::scalar);
-			stat_stream->template append <double> ("Cavg", std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], (*this) ("composition"))), io::scalar);
+			for (YAML::const_iterator iter = i_params ["equations"].begin (); iter != i_params ["equations"].end (); ++iter) {
+				std::string variable = iter->first.as <std::string> ();
+				if (!(iter->second ["ignore"].IsDefined () && iter->second ["ignore"].as <bool> ())) {
+					stat_stream->template append <double> ("z_flux_" + variable, std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], std::shared_ptr <io::functors::functor> (new io::functors::product_functor <double> (n, m, (*this) ("z_velocity"), (*this) (variable))))), io::scalar);
+					stat_stream->template append <double> ("avg_" + variable, std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], (*this) (variable))), io::scalar);
+				}
+			}
 		}
 
 		/*
@@ -145,26 +148,19 @@ namespace pisces
 			
 			// If no communicating boundary is available, we're on an edge, so use the appropriate edge case
 			if (!local_boundary_0) {
-				DEBUG ("Checking bottom");
 				if (terms ["bottom"].IsDefined ()) {
 					if (terms ["bottom.type"].as <std::string> () == "fixed_value") {
-						DEBUG ("Fixed");
 						local_boundary_0 = std::shared_ptr <plans::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], terms ["bottom.value"].as <datatype> (), false));
 					} else if (terms ["bottom.type"].as <std::string> () == "fixed_derivative") {
-						DEBUG ("Fixed deriv");
 						local_boundary_0 = std::shared_ptr <plans::boundary <datatype>> (new fixed_deriv_boundary <datatype> (&*grids [0], &*grids [1], terms ["bottom.value"].as <datatype> (), false));
 					}
 				}
 			}
 			if (!local_boundary_n) {
-				DEBUG ("Checking top");
-				
 				if (terms ["top"].IsDefined ()) {
 					if (terms ["top.type"].as <std::string> () == "fixed_value") {
-						DEBUG ("Fixed");
 						local_boundary_n = std::shared_ptr <plans::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], terms ["top.value"].as <datatype> (), true));
 					} else if (terms ["top.type"].as <std::string> () == "fixed_derivative") {
-						DEBUG ("Fixed deriv");
 						local_boundary_n = std::shared_ptr <plans::boundary <datatype>> (new fixed_deriv_boundary <datatype> (&*grids [0], &*grids [1], terms ["top.value"].as <datatype> (), true));
 					}
 				}
@@ -185,7 +181,9 @@ namespace pisces
 			// If any source terms are specified, construct the appropriate source plans
 			if (terms ["sources"].IsDefined ()) {
 				for (YAML::const_iterator source_iter = terms ["sources"].begin (); source_iter != terms ["sources"].end (); ++source_iter) {
-					solvers [variable]->add_plan (typename source <datatype>::factory (source_iter->second.as <datatype> (), ptr (source_iter->first.as <std::string> ())), mid_plan);
+					if (ptr (source_iter->first.as <std::string> ())) {
+						solvers [variable]->add_plan (typename source <datatype>::factory (source_iter->second.as <datatype> (), ptr (source_iter->first.as <std::string> ())), mid_plan);
+					}
 				}
 			}
 		}

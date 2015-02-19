@@ -8,6 +8,7 @@ Import ("dimensions")
 Import ("vertical_grid")
 Import ("defaults")
 Import ("root")
+Import ("quiet")
 
 def directory (path, dirname):
     """
@@ -101,6 +102,8 @@ env.Append (CPPFLAGS = ["-DND=%d" % dimensions])
 # Add standard compiler flags and c++0x functionality
 env.Append (CPPFLAGS = ["-Wall", "-g", "-std=c++0x"])
 env.Append (LINKFLAGS = ["-Wall", "-g", "-std=c++0x"])
+
+env.Append (CPPFLAGS = ["-DQUIET=%d" % quiet])
 
 objects = []
 

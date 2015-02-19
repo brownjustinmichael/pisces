@@ -85,12 +85,12 @@ input:
     full: true
 output:
     directory: output/
-    file: sc_gwave_%02i
+    file: output_%02i
     every: 10
     transform:
-        file: sc_gwave_t_%02i
+        file: output_t_%02i
     stat:
-        file: sc_gwave_%02i
+        file: output_%02i
         every: 50
     merge_file: merge_%04i
     full: true
