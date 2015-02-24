@@ -84,7 +84,7 @@ namespace io
 				inner_data.resize (m);
 			}
 		
-			average_functor (functor *i_func, int i_n, int i_m) : data (i_func->calculate ()), func (std::shared_ptr <functor> (i_func)), n (i_n), m (i_m) {
+			average_functor (int i_n, int i_m, std::shared_ptr <functor> i_func) : data ((datatype *) i_func->calculate ()), func (i_func), n (i_n), m (i_m) {
 				inner_data.resize (m);
 			}
 		

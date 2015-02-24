@@ -15,6 +15,7 @@
 
 #include "io/formats/netcdf.hpp"
 #include "io/formats/ascii.hpp"
+#include "io/functors/slice.hpp"
 
 #include "plans/plan.hpp"
 #include "plans/advection.hpp"
@@ -90,7 +91,7 @@ namespace data
 			for (YAML::const_iterator iter = i_params ["equations"].begin (); iter != i_params ["equations"].end (); ++iter) {
 				std::string variable = iter->first.as <std::string> ();
 				if (!(iter->second ["ignore"].IsDefined () && iter->second ["ignore"].as <bool> ())) {
-					stat_stream->template append <double> ("z_flux_" + variable, std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], std::shared_ptr <io::functors::functor> (new io::functors::product_functor <double> (n, m, (*this) ("z_velocity"), (*this) (variable))))), io::scalar);
+					stat_stream->template append <double> ("z_flux_" + variable, std::shared_ptr <io::functors::functor> (new io::functors::average_functor <double> (n, 1, std::shared_ptr <io::functors::functor> (new io::functors::slice_functor <double> (n, m, m / 2, std::shared_ptr <io::functors::functor> (new io::functors::product_functor <double> (n, m, (*this) ("z_velocity"), (*this) (variable))))))), io::scalar);
 					stat_stream->template append <double> ("avg_" + variable, std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], (*this) (variable))), io::scalar);
 				}
 			}
