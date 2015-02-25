@@ -63,8 +63,8 @@ namespace pisces
 			element <datatype>::initialize ("z");
 			transform_threads = i_params.get <int> ("parallel.transform.subthreads");
 			
-			grids [0] = std::shared_ptr <plans::grid <datatype>> (new typename plans::horizontal::grid <datatype> (&i_axis_n));
-			grids [1] = std::shared_ptr <plans::grid <datatype>> (new typename plans::vertical::grid <datatype> (&i_axis_m));
+			grids [0] = std::shared_ptr <plans::grid <datatype>> (new typename plans::horizontal::grid <datatype> (i_axis_n));
+			grids [1] = std::shared_ptr <plans::grid <datatype>> (new typename plans::vertical::grid <datatype> (i_axis_m));
 			
 			for (typename data::data <datatype>::iterator iter = data.begin (); iter != data.end (); ++iter) {
 				if ((iter->first != "x") && (iter->first != "z")) {
@@ -165,7 +165,7 @@ namespace pisces
 			return mode;
 		}
 		
-		virtual std::shared_ptr <plans::grid <datatype>> generate_grid (plans::axis *axis, int index = -1) {
+		virtual std::shared_ptr <plans::grid <datatype>> generate_grid (plans::axis &axis, int index = -1) {
 			if (index == 0) {
 				return std::shared_ptr <plans::grid <datatype>> (new typename plans::horizontal::grid <datatype> (axis));
 			} else if (index == 1 || index == -1) {
@@ -177,7 +177,7 @@ namespace pisces
 		
 		virtual io::formats::virtual_file *make_rezoned_virtual_file (datatype *positions, io::formats::virtual_file *old_virtual_file, int flags = 0x00) {
 			plans::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
-			std::shared_ptr <plans::grid <datatype>> vertical_grid = generate_grid (&vertical_axis);
+			std::shared_ptr <plans::grid <datatype>> vertical_grid = generate_grid (vertical_axis);
 			
 			pisces::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_virtual_file, &io::virtual_files ["two_d/element/new_virtual_file"]);
 			

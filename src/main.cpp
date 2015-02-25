@@ -115,17 +115,17 @@ int main (int argc, char *argv[])
 		
 		DEBUG ("TEST " << parameters ["dump"]);
 
-		data::thermo_compositional_data <double> data (&horizontal_axis, &vertical_axis, id, n_elements, parameters);
+		data::thermo_compositional_data <double> data (horizontal_axis, vertical_axis, id, n_elements, parameters);
 		
 		TRACE ("Constructing element");
 		
 		std::shared_ptr <pisces::element <double>> element (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
-		
-		if (pisces::element <double>::version < versions::version ("0.6.0.0")) {
-			INFO ("element.version < 0.6.0.0");
+
+		if (pisces::element <double>::version < versions::version ("0.7.0.0")) {
+			INFO ("element.version < 0.7.0.0");
 		}
 		else {
-			INFO ("element.version not < 0.6.0.0");
+			INFO ("element.version not < 0.7.0.0");
 		}
 
 		TRACE ("Element constructed.");

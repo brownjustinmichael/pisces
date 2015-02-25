@@ -322,7 +322,7 @@ namespace data
 		
 	public:
 		using data <datatype>::duration;
-		implemented_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int name = 0, std::string dump_file = "", std::string dump_directory = "./", int dump_every = 1) : grid_n (std::shared_ptr <plans::grid <datatype>> (new typename plans::horizontal::grid <datatype> (i_axis_n))), grid_m (std::shared_ptr <plans::grid <datatype>> (new typename plans::vertical::grid <datatype> (i_axis_m))), n (grid_n->get_n ()), m (grid_m->get_n ()) {
+		implemented_data (plans::axis &i_axis_n, plans::axis &i_axis_m, int name = 0, std::string dump_file = "", std::string dump_directory = "./", int dump_every = 1) : grid_n (std::shared_ptr <plans::grid <datatype>> (new typename plans::horizontal::grid <datatype> (i_axis_n))), grid_m (std::shared_ptr <plans::grid <datatype>> (new typename plans::vertical::grid <datatype> (i_axis_m))), n (grid_n->get_n ()), m (grid_m->get_n ()) {
 			// Set up output
 			const io::data_grid o_grid = io::data_grid::two_d (n, m, 0, 0, 0, 0);
 			
@@ -338,6 +338,8 @@ namespace data
 			
 			this->initialize ("x");
 			this->initialize ("z");
+			
+			DEBUG ("GRID " << grid_n->get_n ());
 			
 			/*
 				TODO Clean dump file generation
@@ -367,6 +369,7 @@ namespace data
 		virtual datatype *_initialize (std::string name, datatype* initial_conditions = NULL, int i_flags = 0x00) {
 			TRACE ("Initializing " << name << "...");
 			// Size allowing for real FFT buffer
+			INFO ("LD " << grid_n->get_ld () << " " << m << " " << name << (*grid_n) [0]);
 			data <datatype>::scalars [name].resize (grid_n->get_ld () * m, 0.0);
 			if (name == "x") {
 				for (int j = 0; j < m; ++j) {

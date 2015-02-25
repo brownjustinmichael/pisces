@@ -29,14 +29,14 @@
 namespace data
 {
 	template <class datatype>
-	thermo_compositional_data <datatype>::thermo_compositional_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int id, int n_elements, io::parameters& i_params) : implemented_data <datatype> (i_axis_n, i_axis_m, id, i_params.get <std::string> ("dump.file"), i_params.get <std::string> ("root") + i_params.get <std::string> ("dump.directory"), i_params.get <int> ("dump.every")) {
+	thermo_compositional_data <datatype>::thermo_compositional_data (plans::axis &i_axis_n, plans::axis &i_axis_m, int id, int n_elements, io::parameters& i_params) : implemented_data <datatype> (i_axis_n, i_axis_m, id, i_params.get <std::string> ("dump.file"), i_params.get <std::string> ("root") + i_params.get <std::string> ("dump.directory"), i_params.get <int> ("dump.every")) {
 		for (YAML::const_iterator iter = i_params ["equations"].begin (); iter != i_params ["equations"].end (); ++iter) {
 			if (!(iter->second ["ignore"].IsDefined () && iter->second ["ignore"].as <bool> ())) initialize (iter->first.as <std::string> ());
 		}
 		initialize ("pressure");
-		
+
 		int name = id;
-		
+
 		const io::data_grid i_grid = io::data_grid::two_d (n, m, 0, i_params.get <bool> ("input.full") ? n_elements * m : 0, 0, i_params.get <bool> ("input.full") ? id * m : 0);
 
 		if (i_params.get <std::string> ("input.file") != "") {
@@ -49,7 +49,7 @@ namespace data
 		}
 
 		const io::data_grid o_grid = io::data_grid::two_d (n, m, 0, i_params.get <bool> ("output.full") ? n_elements * m : 0, 0, i_params.get <bool> ("output.full") ? id * m : 0);
-		
+
 		// Set up output
 		std::shared_ptr <io::output> normal_stream;
 		if (i_params.get <std::string> ("output.file") != "") {
@@ -85,6 +85,9 @@ namespace data
 					area [i * m + j] = ((*(this->grid_n)) [i] - (*(this->grid_n)) [i - 1]) * ((*(this->grid_m)) [j] - (*(this->grid_m)) [j - 1]);
 				}
 			}
+			
+			DEBUG ("GRID GRID " << implemented_data <datatype>::grid_n->get_n ());
+			DEBUG ("VALUE " << (*this) ("x") [0]);
 
 			stat_stream.reset (new io::appender_output <io::formats::ascii> (io::data_grid::two_d (n, m), buffer, i_params.get <int> ("output.stat.every")));
 			this->setup_stat (stat_stream);

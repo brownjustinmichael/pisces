@@ -97,21 +97,16 @@ namespace plans
 	
 	private:
 		std::vector<std::vector<datatype> > data; //!< A double vector containing the vectors of collocation data
-
-	public:
-		/*!*******************************************************************
-		 * \param i_axis_ptr A pointer to an axis object
-		 * \param i_derivs The integer number of derivatives in the grid
-		 * \param i_ld
-		 *********************************************************************/
-		grid (axis *i_axis_ptr, int i_derivs, int i_ld = 0) :
-		n (i_axis_ptr->get_n ()),
-		ld (i_ld),
-		excess_0 (i_axis_ptr->get_excess_0 ()),
-		excess_n (i_axis_ptr->get_excess_n ()),
-		position_0 (i_axis_ptr->get_position_0 ()),
-		position_n (i_axis_ptr->get_position_n ()),
-		derivs (i_derivs) {
+	
+		void _initialize (int i_derivs, int i_n = 0, double i_position_0 = 0.0, double i_position_n = 0.0, int i_excess_0 = 0, int i_excess_n = 0, int i_ld = 0) {
+			n = i_n;
+			ld = i_ld;
+			excess_0 = i_excess_0;
+			excess_n = i_excess_n;
+			position_0 = i_position_0;
+			position_n = i_position_n;
+			derivs = i_derivs;
+			
 			TRACE ("Instantiating...");
 			if (ld == 0) {
 				ld = n;
@@ -126,7 +121,21 @@ namespace plans
 
 			TRACE ("Instantiated...");
 		}
-	
+			
+	public:
+		/*!*******************************************************************
+		 * \param i_axis_ptr A pointer to an axis object
+		 * \param i_derivs The integer number of derivatives in the grid
+		 * \param i_ld
+		 *********************************************************************/
+		grid (axis &i_axis, int i_derivs, int i_ld = 0) {
+			_initialize (i_derivs, i_axis.get_n (), i_axis.get_position_0 (), i_axis.get_position_n (), i_axis.get_excess_0 (), i_axis.get_excess_n (), i_ld);
+		}
+		
+		grid (int i_derivs, int i_n = 0, double i_position_0 = 0.0, double i_position_n = 0.0, int i_excess_0 = 0, int i_excess_n = 0, int i_ld = 0) {
+			_initialize (i_derivs, i_n, i_position_0, i_position_n, i_excess_0, i_excess_n, i_ld);
+		}
+		
 		virtual ~grid () {}
 		
 		/*!**********************************************************************
@@ -222,7 +231,6 @@ namespace plans
 		}
 	};
 	
-#ifndef _VCOS
 	enum mode {
 		mode_flag = 0x10
 	};
@@ -256,8 +264,14 @@ namespace plans
 			/*!*******************************************************************
 			 * \param i_axis_ptr A pointer to an axis object
 			 *********************************************************************/
-			grid (axis *i_axis_ptr);
-	
+			grid (axis &i_axis) : plans::grid <datatype> (i_axis, 3, 2 * (i_axis.get_n () / 2 + 1)) {
+				_initialize ();
+			}
+			
+			grid (int i_n = 0, double i_position_0 = 0.0, double i_position_n = 0.0, int i_excess_0 = 0, int i_excess_n = 0) : plans::grid <datatype> (3, i_n, i_position_0, i_position_n, i_excess_0, i_excess_n, 2 * (n / 2 + 1)) {
+				_initialize ();
+			}
+				
 			virtual ~grid () {};
 			
 		protected:
@@ -267,6 +281,8 @@ namespace plans
 			void _calculate_matrix ();
 			
 		private:
+			void _initialize ();
+			
 			/*!*******************************************************************
 			* \brief A check to see whether an index exists, for recursion
 			* 
@@ -294,54 +310,7 @@ namespace plans
 			datatype recursion (int d, int m, int k);
 		};
 	} /* vertical */
-#else
-	enum mode {
-		mode_flag = 0x20
-	};
-	
-	
-	// A note: The cosine expansion doesn't work because it restricts the derivative at the inner boundaries, this would need to be fourier
-	namespace vertical
-	{
-		/*!*******************************************************************
-		 * \brief A collocation grid for cosines
-		 *
-		 * This collocation grid stores the N collocation points for up to the Mth order cosine modes and their first and second derivatives
-		 *********************************************************************/
-		template <class datatype>
-		class grid : public plans::grid <datatype>
-		{
-		private:
-			using plans::grid <datatype>::n;
-			using plans::grid <datatype>::ld;
-			using plans::grid <datatype>::excess_0;
-			using plans::grid <datatype>::excess_n;
-			using plans::grid <datatype>::position_0;
-			using plans::grid <datatype>::position_n;
-			using plans::grid <datatype>::derivs;
-			using plans::grid <datatype>::positions;
 
-			datatype scale; //!< A datatype by which the collocation grid should be scaled
-			datatype width; //!< The datatype width of the collocation region
-			datatype pioN; //!< The datatype 3.14159.../N, for use in calculations
-
-		public:
-			/*!*******************************************************************
-			 * \param i_axis_ptr A pointer to an axis object
-			 *********************************************************************/
-			grid (axis *i_axis_ptr);
-
-			virtual ~grid () {};
-
-		protected:
-			/*!**********************************************************************
-			 * \copydoc plans::grid::_calculate_matrix()
-			 ************************************************************************/
-			void _calculate_matrix ();
-		};
-	} /* vertical */
-#endif
-	
 	namespace horizontal
 	{
 		/*!*******************************************************************
@@ -366,11 +335,19 @@ namespace plans
 			datatype width; //!< The datatype width of the collocation region
 			datatype pioN; //!< The datatype 3.14159.../N, for use in calculations
 			
+			void _initialize ();
+			
 		public:
 			/*!*******************************************************************
 			 * \param i_axis_ptr A pointer to an axis object
 			 *********************************************************************/
-			grid (axis *i_axis_ptr);
+			grid (axis &i_axis) : plans::grid <datatype> (i_axis, 3) {
+				_initialize ();
+			}
+			
+			grid (int i_n = 0, double i_position_0 = 0.0, double i_position_n = 0.0, int i_excess_0 = 0, int i_excess_n = 0) : plans::grid <datatype> (3, i_n, i_position_0, i_position_n, i_excess_0, i_excess_n) {
+				_initialize ();
+			}
 				
 			virtual ~grid () {};
 			

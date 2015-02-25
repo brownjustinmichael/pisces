@@ -242,7 +242,7 @@ namespace pisces
 		 * \param axis_ptr A pointer to an axis object, which contains the extent of the grid and number of gridpoints
 		 * \param 
 		 ************************************************************************/
-		virtual std::shared_ptr <plans::grid <datatype>> generate_grid (plans::axis *axis_ptr, int index = -1) = 0;
+		virtual std::shared_ptr <plans::grid <datatype>> generate_grid (plans::axis &axis_ptr, int index = -1) = 0;
 		
 		/*!**********************************************************************
 		 * \brief Factorize all solvers

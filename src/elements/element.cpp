@@ -34,7 +34,7 @@
 namespace pisces
 {
 	template <class datatype>
-	const versions::version element <datatype>::version ("0.5.0.0");
+	const versions::version element <datatype>::version ("0.6.0.0");
 	
 	template <class datatype>
 	void element <datatype>::run (int &n_steps, int max_steps, int check_every) {
@@ -59,7 +59,7 @@ namespace pisces
 		while (n_steps < max_steps && check_every != 0) {
 			data.reset ();
 			INFO ("Timestep: " << n_steps);
-
+		
 			// Transform the vertical grid to Cartesian space in the background
 			TIME (
 			transform (inverse_vertical | no_write | no_read | read_before);
@@ -67,7 +67,7 @@ namespace pisces
 			TIME (
 			data.check_streams (transformed_horizontal | transformed_vertical);
 			, output_time, output_duration)
-			
+
 			// Factorize the matrices
 			TIME (
 			factorize ();
@@ -87,19 +87,19 @@ namespace pisces
 			TIME (
 			data.check_streams (transformed_horizontal);
 			, output_time, output_duration)
-			TIME (
-			for (iterator iter = begin (); iter != end (); iter++) {
-				solvers [*iter]->execute_plans (mid_plan);
-			}
-			, execution_time, execution_duration);
-			
+			// TIME (
+			// for (iterator iter = begin (); iter != end (); iter++) {
+			// 	solvers [*iter]->execute_plans (mid_plan);
+			// }
+			// , execution_time, execution_duration);
+
 			TIME (
 			transform (forward_horizontal | no_write | no_read | read_before);
 			, transform_time, transform_duration);
 			TIME (
 			data.check_streams ();
 			, output_time, output_duration)
-			
+
 			// #pragma omp parallel sections num_threads(2)
 				// {
 				// #pragma omp section
@@ -127,19 +127,19 @@ namespace pisces
 			TIME (
 			transform (do_not_transform | no_write);
 			, transform_time, transform_duration);
-
-			// Calculate the pre solver plans
-			TIME (
-			for (iterator iter = begin (); iter != end (); iter++) {
-				solvers [*iter]->execute_plans (pre_solve_plan);
-			}
-			, execution_time, execution_duration);
-
-			TIME (
-			solve ();
-			, solve_time, solve_duration);
-
-			// Check whether the timestep has changed. If it has, mark all solvers to be refactorized.
+		
+			// // Calculate the pre solver plans
+			// TIME (
+			// for (iterator iter = begin (); iter != end (); iter++) {
+			// 	solvers [*iter]->execute_plans (pre_solve_plan);
+			// }
+			// , execution_time, execution_duration);
+			//
+			// TIME (
+			// solve ();
+			// , solve_time, solve_duration);
+			//
+			// // Check whether the timestep has changed. If it has, mark all solvers to be refactorized.
 
 			duration += timestep;
 			INFO ("TOTAL TIME: " << duration);

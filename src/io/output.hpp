@@ -121,9 +121,7 @@ namespace io
 		 ************************************************************************/
 		formatted_output (data_grid i_grid, std::string i_file_name = "out", int i_file_format = replace_file) : output (i_grid, i_file_name + format::extension (), i_file_format) {}		
 
-		virtual ~formatted_output () {
-			format::close_file (file_name.c_str (), output::file_format);
-		}
+		virtual ~formatted_output () {}
 		
 		virtual func_t *get_function (const float *ptr) {
 			return &format::template write <float>;
