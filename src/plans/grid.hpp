@@ -126,6 +126,30 @@ namespace plans
 
 			TRACE ("Instantiated...");
 		}
+		
+		grid (int i_derivs, int i_n = 0, double i_position_0 = 0.0, double i_position_n = 0.0, int i_excess_0 = 0, int i_excess_n = 0, int i_ld = 0) {
+			n = i_n;
+			ld = i_ld;
+			excess_0 = i_excess_0;
+			excess_n = i_excess_n;
+			position_0 = i_position_0;
+			position_n = i_position_n;
+			derivs = i_derivs;
+			
+			TRACE ("Instantiating...");
+			if (ld == 0) {
+				ld = n;
+			}
+			calculated_matrix = false;
+
+			if (position_0 == position_n || n == 0) {
+				ERROR ("Grid has no physical extent.");
+				throw 0;
+			}
+			positions.resize (n + 1);
+
+			TRACE ("Instantiated...");
+		}
 	
 		virtual ~grid () {}
 		
@@ -257,6 +281,8 @@ namespace plans
 			 * \param i_axis_ptr A pointer to an axis object
 			 *********************************************************************/
 			grid (axis *i_axis_ptr);
+			
+			grid (int i_n = 0, double i_position_0 = 0.0, double i_position_n = 0.0, int i_excess_0 = 0, int i_excess_n = 0, int i_ld = 0);
 	
 			virtual ~grid () {};
 			
@@ -330,7 +356,7 @@ namespace plans
 			 * \param i_axis_ptr A pointer to an axis object
 			 *********************************************************************/
 			grid (axis *i_axis_ptr);
-
+			
 			virtual ~grid () {};
 
 		protected:
@@ -371,6 +397,8 @@ namespace plans
 			 * \param i_axis_ptr A pointer to an axis object
 			 *********************************************************************/
 			grid (axis *i_axis_ptr);
+			
+			grid (int i_n = 0, double i_position_0 = 0.0, double i_position_n = 0.0, int i_excess_0 = 0, int i_excess_n = 0, int i_ld = 0);
 				
 			virtual ~grid () {};
 			

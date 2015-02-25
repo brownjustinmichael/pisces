@@ -45,6 +45,33 @@ namespace plans
 	
 			TRACE ("Instantiated...");
 		}
+		
+		template <class datatype>
+		grid <datatype>::grid (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_ld) : 
+		plans::grid <datatype> (3, i_n, i_position_0, i_position_n, i_excess_0, i_excess_n, i_ld) {
+			TRACE ("Instantiating...");
+
+			scale = sqrt (2.0 / (n - 1));
+			pioN = std::acos (-1.0) / (n - 1);
+			exists_array.resize (n * n * 3, false);	
+		
+			if (n > 1) {
+				datatype scale = (position_0 - position_n) / (std::cos (excess_0 * pioN) - std::cos ((n - 1 - excess_n) * pioN));
+				datatype initial_position = position_0 - scale * std::cos (excess_0 * pioN);
+				for (int i = 0; i < n; ++i) {
+					positions [i] = scale * std::cos (i * pioN) + initial_position;
+				}
+			} else {
+				positions [0] = (position_0 + position_n) / 2.0;
+			}
+		
+		
+			width = positions [n - 1] - positions [0];
+
+			// _calculate_matrix ();
+	
+			TRACE ("Instantiated...");
+		}
 
 		template <class datatype>
 		datatype grid <datatype>::recursion (int d, int m, int k) {		
@@ -171,6 +198,28 @@ namespace plans
 	namespace horizontal
 	{
 		template <class datatype>
+		grid <datatype>::grid (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_ld) : 
+		plans::grid <datatype> (3, i_n, i_position_0, i_position_n, i_excess_0, i_excess_n, i_ld == 0 ? 2 * (n / 2 + 1) : i_ld) {
+			TRACE ("Instantiating...");
+
+			scale = 2.0 / sqrt (n);
+			pioN = -2.0 * std::acos (-1.0) / n;
+	
+			if (n > 1) {
+				for (int i = 0; i < n; ++i) {
+					positions [i] = (i - excess_0) * (position_n - position_0) / (n - 1 - excess_n - excess_0) + position_0;
+				}
+			} else {
+				positions [0] = (position_0 + position_n) / 2.0;
+			}
+		
+		
+			// _calculate_matrix ();
+	
+			TRACE ("Instantiated...");
+		}
+		
+		template <class datatype>
 		grid <datatype>::grid (axis *i_axis_ptr) : 
 		plans::grid <datatype> (i_axis_ptr, 3, 2 * (i_axis_ptr->get_n () / 2 + 1)) {
 			TRACE ("Instantiating...");
@@ -193,10 +242,7 @@ namespace plans
 		}
 		
 	template class grid <double>;
-	} /* horizontal */
 
-	namespace horizontal
-	{
 		template <class datatype>
 		void grid <datatype>::_calculate_matrix () {
 			width = positions [n - 1] - positions [0];
