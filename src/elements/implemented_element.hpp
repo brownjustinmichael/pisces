@@ -67,11 +67,11 @@ namespace pisces
 			grids [1] = std::shared_ptr <plans::grid <datatype>> (new typename plans::vertical::grid <datatype> (&i_axis_m));
 			
 			for (typename data::data <datatype>::iterator iter = data.begin (); iter != data.end (); ++iter) {
-				if ((iter->first != "x") && (iter->first != "z")) {
-					DEBUG ("Adding " << iter->first);
-					element <datatype>::add_solver (iter->first, std::shared_ptr <plans::equation <datatype> > (new plans::implemented_equation <datatype> (*grids [0], *grids [1], ptr (iter->first), &element_flags ["element"], &element_flags [iter->first])));
-					element <datatype>::transforms.push_back (iter->first);
-					element <datatype>::transformers [iter->first] = std::shared_ptr <plans::transformer <datatype> > (new plans::implemented_transformer <datatype> (*grids [0], *grids [1], data (iter->first), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &(data.flags ["element"]), &(data.flags [iter->first]), element <datatype>::transform_threads));
+				if ((*iter != "x") && (*iter != "z")) {
+					DEBUG ("Adding " << *iter);
+					element <datatype>::add_solver (*iter, std::shared_ptr <plans::equation <datatype> > (new plans::implemented_equation <datatype> (*grids [0], *grids [1], ptr (*iter), &element_flags ["element"], &element_flags [*iter])));
+					element <datatype>::transforms.push_back (*iter);
+					element <datatype>::transformers [*iter] = std::shared_ptr <plans::transformer <datatype> > (new plans::implemented_transformer <datatype> (*grids [0], *grids [1], data (*iter), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &(data.flags ["element"]), &(data.flags [*iter]), element <datatype>::transform_threads));
 				}
 			}
 			

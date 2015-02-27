@@ -12,6 +12,7 @@
 #include <string>
 #include <map>
 #include <memory>
+#include <algorithm>
 
 #include "linalg/utils.hpp"
 
@@ -80,7 +81,7 @@ namespace data
 		/*!**********************************************************************
 		 * \brief Element iterator for iterating through the contained data
 		 ************************************************************************/
-		typedef typename std::map <std::string, std::vector <datatype>>::iterator iterator;
+		typedef typename std::vector <std::string>::iterator iterator;
 	
 		/*!**********************************************************************
 		 * \brief Generate an iterator to iterate through the data
@@ -88,7 +89,7 @@ namespace data
 		 * \return Beginning iterator
 		 ************************************************************************/
 		iterator begin () {
-			return scalars.begin ();
+			return scalar_names.begin ();
 		}
 	
 		/*!**********************************************************************
@@ -97,7 +98,7 @@ namespace data
 		 * \return Ending iterator
 		 ************************************************************************/
 		iterator end () {
-			return scalars.end ();
+			return scalar_names.end ();
 		}
 		
 		/*!**********************************************************************
@@ -139,6 +140,8 @@ namespace data
 			if (dump_stream) {
 				dump_stream->template append <datatype> (i_name, ptr);
 			}
+			scalar_names.push_back (i_name);
+			std::sort (scalar_names.begin (), scalar_names.end ());
 			return ptr;
 		}
 		
@@ -212,7 +215,7 @@ namespace data
 		void setup (io::input *input_ptr) {
 			// Iterate through the scalar fields and append them to the variables for which the input will search
 			for (data::iterator iter = begin (); iter != end (); ++iter) {
-				input_ptr->template append <datatype> (iter->first, (*this) (iter->first));
+				input_ptr->template append <datatype> (*iter, (*this) (*iter));
 			}
 			
 			input_ptr->template append <datatype> ("t", &duration, io::scalar);
@@ -245,7 +248,7 @@ namespace data
 		virtual void setup_output (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
 			// Iterate through the scalar fields and append them to the variables which the output will write to file
 			for (data::iterator iter = begin (); iter != end (); ++iter) {
-				output_ptr->template append <datatype> (iter->first, (*this) (iter->first));
+				output_ptr->template append <datatype> (*iter, (*this) (*iter));
 			}
 			
 			output_ptr->template append <datatype> ("t", &duration, io::scalar);
@@ -305,6 +308,7 @@ namespace data
 		*/
 		
 	protected:
+		std::vector <std::string> scalar_names;
 		std::map <std::string, std::vector <datatype>> scalars;
 		
 		/*!**********************************************************************
