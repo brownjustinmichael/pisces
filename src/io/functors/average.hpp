@@ -146,6 +146,48 @@ namespace io
 				return &inner_data [0];
 			}
 		};
+		
+		/*!**********************************************************************
+		 * \brief Averages a two dimensional block of data
+		 ************************************************************************/
+		template <class datatype>
+		class max_functor : public functor
+		{
+		private:
+			datatype *data; //!< A datatype pointer to the input data
+			std::shared_ptr <functor> func;
+			int n; //!< The integer horizontal extent of the data
+			int m; //!< The integer vertical extent of the data
+			datatype inner_data; //!< A vector of processed data to output
+
+		public:
+			/*!**********************************************************************
+			 * \param i_data The datatype pointer to the data to average
+			 * \param i_n The integer horizontal extent of the data
+			 * \param i_m The integer vertical extent of the data
+			 ************************************************************************/
+			max_functor (int i_n, int i_m, datatype *i_data) : data (i_data), n (i_n), m (i_m) {
+			}
+
+			max_functor (int i_n, int i_m, std::shared_ptr <functor> i_func) : data ((datatype *) i_func->calculate ()), func (i_func), n (i_n), m (i_m) {
+			}
+
+			/*!**********************************************************************
+			 * \brief Average the data and return a pointer to the first element
+			 * 
+			 * \return The first element of the averaged 1D array
+			 ************************************************************************/
+			void *calculate () {
+				if (func) {
+					func->calculate ();
+				}
+				inner_data = 0.0;
+				for (int i = 0; i < m * n; ++i) {
+					if (data [i] > inner_data) inner_data = data [i];
+				}
+				return &inner_data;
+			}
+		};
 	} /* functors */
 } /* io */
 

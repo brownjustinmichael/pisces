@@ -27,7 +27,6 @@ public:
 		std::vector <double> x_velocity, z_velocity, data, rhs, rhs_compare;
 		int n = 200, m = 500;
 		
-		plans::vertical::grid ()
 	}
 };
 

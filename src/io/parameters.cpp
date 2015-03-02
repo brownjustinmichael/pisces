@@ -37,7 +37,6 @@ namespace io
 	}
 	
 	YAML::Node parameters::operator[] (std::string key) const {
-		TRACE ("Checking for " << key);
 		std::istringstream ss (key);
 		std::string token;
 		std::getline (ss, token, '.');

@@ -23,8 +23,8 @@ class element_test_suite : public CxxTest::TestSuite
 	
 public:
 	void test_elements () {
-		int id = process_messenger.get_id ();
-		int n_elements = process_messenger.get_np ();
+		int id = 0;
+		int n_elements = 1;
 		
 		logger::log_config::set_severity (3);
 		io::formats::ascii::print_headers = false;
@@ -32,12 +32,15 @@ public:
 		io::parameters parameters;
 		
 		parameters ["root"] = std::string (PISCES_ROOT) + "/test/elements/";
-		parameters ["output.file"] = "";
+		parameters ["output.file"] = "output_%02i";
+		parameters ["output.every"] = 10;
 		parameters ["output.stat.file"] = "compare_%02i";
 		parameters ["output.stat.every"] = 10;
 		parameters ["output.transform.file"] = "";
 		parameters ["dump.file"] = "";
 		parameters ["time.steps"] = 100;
+		parameters ["time.max"] = 0.1;
+		parameters ["time.init"] = 0.1;
 		
 		parameters ["input.file"] = "";
 		
@@ -46,44 +49,50 @@ public:
 		parameters ["equations.composition.ignore"] = true;
 		
 		parameters ["equations.temperature.advection"] = 0.0;
+		
+		parameters ["grid.x.width"] = 20.0;
+		parameters ["grid.z.width"] = 20.0;
 	
-		int m = parameters.get <int> ("grid.z.points") + 1;
-		m += m % 2;
-
+		int m = 200;
 		int name = id;
-
-		int n = parameters.get <int> ("grid.x.points");
+		int n = 300;
+		double scale = 1.0 / 2.0 / 3.14159;
+		double width = 1.0;
 
 		plans::axis horizontal_axis (n, -parameters.get <double> ("grid.x.width") / 2.0, parameters.get <double> ("grid.x.width") / 2.0);
-		plans::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
+		plans::axis vertical_axis (m, -parameters.get <double> ("grid.z.width") / 2.0, parameters.get <double> ("grid.z.width") / 2.0, id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
 
 		data::thermo_compositional_data <double> data (&horizontal_axis, &vertical_axis, id, n_elements, parameters);
-		
-		
-		
+
+		for (int i = 0; i < n; ++i) {
+			for (int j = 0; j < m; ++j) {
+				data ("temperature") [i * m + j] = scale * exp (-(data ("x") [i * m + j] * data ("x") [i * m + j] + data ("z") [i * m + j] * data ("z") [i * m + j]) / 2.0 / width / width);
+			}
+		}
+
 		std::shared_ptr <pisces::element <double>> element (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
-		
+
 		int n_steps = 0;
 		while (n_steps < parameters.get <int> ("time.steps")) {
 			element->run (n_steps, parameters.get <int> ("time.steps"), parameters.get <int> ("grid.rezone.check_every"));
 		}
-		
-		
-		std::string file_format = parameters.get <std::string> ("root") + parameters.get <std::string> ("input.directory") + std::string ("compare_%02i.dat");
+
+
+		std::string file_format = parameters.get <std::string> ("root") + parameters.get <std::string> ("input.directory") + std::string ("diffusion_%02i.dat");
 		char buffer [file_format.size () * 2];
 		snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
 		std::ifstream template_stream (buffer, std::ifstream::in);
-		
+
 		file_format = parameters.get <std::string> ("root") + parameters.get <std::string> ("output.directory") + std::string ("compare_%02i.dat");
 		snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
 		std::ifstream compare_stream (buffer, std::ifstream::in);
-		
+
 		double template_string, compare_string;
-		
+
 		while (!template_stream.eof ()) {
 			template_stream >> template_string;
 			compare_stream >> compare_string;
-			
+
 			TS_ASSERT_DELTA (template_string, compare_string, 5.0E-4);
 		}
 	}

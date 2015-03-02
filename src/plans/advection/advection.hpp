@@ -11,24 +11,25 @@
 
 #include "../real_plan.hpp"
 #include "io/parameters.hpp"
+#include "linalg/utils.hpp"
 
 namespace plans
 {
-	void advection_term (int i, int j, int n, int m, double coeff, const double *pos_n, const double *pos_m, const double *vel_n, const double *vel_m, const double *data_in, double *data_out) {
-		data_out [i * m + j] += coeff * (vel_n [i * m + j] * (data_in [((i + 1) % n) * m + j] - data_in [((i - 1) % n) * m + j]) / (pos_n [(i + 1) % n] - pos_n [(i - 1) % n]) + vel_m [i * m + j] * (data_in [i * m + j + 1] - data_in [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]));
-	}
-
-	void advection_term_quadratic (int i, int j, int n, int m, double coeff, const double *pos_n, const double *pos_m, const double *vel_n, const double *vel_m, const double *data_in, double *data_out) {
-		double denom = (pos_n [(i + 1) % n] - pos_n [i]) * (pos_n [(i + 1) % n] - pos_n [(i - 1) % n]) * (pos_n [i] - pos_n [(i - 1) % n]);
-		double A = (pos_n [(i - 1) % n] * (data_in [i * m + j] - data_in [((i + 1) % n) * m + j]) + pos_n [i] * (data_in [((i + 1) % n) * m + j] - data_in [((i - 1) % n) * m + j]) + pos_n [(i + 1) % n] * (data_in [((i - 1) % n) * m + j] - data_in [i * m + j])) / denom;
-		double B = (pos_n [(i - 1) % n] * pos_n [(i - 1) % n] * (data_in [((i + 1) % n) * m + j] - data_in [i * m + j]) + pos_n [i] * pos_n [i] * (data_in [((i - 1) % n) * m + j] - data_in [((i + 1) % n) * m + j]) + pos_n [(i + 1) % n] * pos_n [(i + 1) % n] * (data_in [i * m + j] - data_in [((i - 1) % n) * m + j])) / denom;
-		data_out [i * m + j] += coeff * vel_n [i * m + j] * (2.0 * A * pos_n [i] + B);
-		
-		denom = (pos_m [j + 1] - pos_m [j]) * (pos_m [j + 1] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]);
-		A = (pos_m [j - 1] * (data_in [i * m + j] - data_in [i * m + j + 1]) + pos_m [j] * (data_in [i * m + j + 1] - data_in [i * m + j - 1]) + pos_m [j + 1] * (data_in [i * m + j - 1] - data_in [i * m + j])) / denom;
-		B = (pos_m [j - 1] * pos_m [j - 1] * (data_in [i * m + j + 1] - data_in [i * m + j]) + pos_m [j] * pos_m [j] * (data_in [i * m + j - 1] - data_in [i * m + j + 1]) + pos_m [j + 1] * pos_m [j + 1] * (data_in [i * m + j] - data_in [i * m + j - 1])) / denom;
-		data_out [i * m + j] += coeff * vel_m [i * m + j] * (2.0 * A * pos_m [j] + B);
-	}
+	// void advection_term (int i, int j, int n, int m, double coeff, const double *pos_n, const double *pos_m, const double *vel_n, const double *vel_m, const double *data_in, double *data_out) {
+	// 	data_out [i * m + j] += coeff * (vel_n [i * m + j] * (data_in [((i + 1) % n) * m + j] - data_in [((i - 1) % n) * m + j]) / (pos_n [(i + 1) % n] - pos_n [(i - 1) % n]) + vel_m [i * m + j] * (data_in [i * m + j + 1] - data_in [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]));
+	// }
+	//
+	// void advection_term_quadratic (int i, int j, int n, int m, double coeff, const double *pos_n, const double *pos_m, const double *vel_n, const double *vel_m, const double *data_in, double *data_out) {
+	// 	double denom = (pos_n [(i + 1) % n] - pos_n [i]) * (pos_n [(i + 1) % n] - pos_n [(i - 1) % n]) * (pos_n [i] - pos_n [(i - 1) % n]);
+	// 	double A = (pos_n [(i - 1) % n] * (data_in [i * m + j] - data_in [((i + 1) % n) * m + j]) + pos_n [i] * (data_in [((i + 1) % n) * m + j] - data_in [((i - 1) % n) * m + j]) + pos_n [(i + 1) % n] * (data_in [((i - 1) % n) * m + j] - data_in [i * m + j])) / denom;
+	// 	double B = (pos_n [(i - 1) % n] * pos_n [(i - 1) % n] * (data_in [((i + 1) % n) * m + j] - data_in [i * m + j]) + pos_n [i] * pos_n [i] * (data_in [((i - 1) % n) * m + j] - data_in [((i + 1) % n) * m + j]) + pos_n [(i + 1) % n] * pos_n [(i + 1) % n] * (data_in [i * m + j] - data_in [((i - 1) % n) * m + j])) / denom;
+	// 	data_out [i * m + j] += coeff * vel_n [i * m + j] * (2.0 * A * pos_n [i] + B);
+	//
+	// 	denom = (pos_m [j + 1] - pos_m [j]) * (pos_m [j + 1] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]);
+	// 	A = (pos_m [j - 1] * (data_in [i * m + j] - data_in [i * m + j + 1]) + pos_m [j] * (data_in [i * m + j + 1] - data_in [i * m + j - 1]) + pos_m [j + 1] * (data_in [i * m + j - 1] - data_in [i * m + j])) / denom;
+	// 	B = (pos_m [j - 1] * pos_m [j - 1] * (data_in [i * m + j + 1] - data_in [i * m + j]) + pos_m [j] * pos_m [j] * (data_in [i * m + j - 1] - data_in [i * m + j + 1]) + pos_m [j + 1] * pos_m [j + 1] * (data_in [i * m + j] - data_in [i * m + j - 1])) / denom;
+	// 	data_out [i * m + j] += coeff * vel_m [i * m + j] * (2.0 * A * pos_m [j] + B);
+	// }
 
 	template <class datatype>
 	class advection : public real_plan <datatype>

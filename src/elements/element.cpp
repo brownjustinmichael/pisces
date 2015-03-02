@@ -73,7 +73,7 @@ namespace pisces
 			factorize ();
 			, factorize_time, factorize_duration);
 
-			TRACE ("Executing plans...");
+			TRACE ("Executing plans in spectral space...");
 
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
@@ -86,7 +86,10 @@ namespace pisces
 			, transform_time, transform_duration);
 			TIME (
 			data.check_streams (transformed_horizontal);
-			, output_time, output_duration)
+			, output_time, output_duration);
+				
+			TRACE ("Executing plans in half-space...");
+				
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
 				solvers [*iter]->execute_plans (mid_plan);
@@ -99,6 +102,8 @@ namespace pisces
 			TIME (
 			data.check_streams ();
 			, output_time, output_duration)
+				
+			TRACE ("Executing plans in real space...");
 			
 			// #pragma omp parallel sections num_threads(2)
 				// {

@@ -110,7 +110,10 @@ namespace data
 		 * \return A pointer to the indexed data
 		 ************************************************************************/
 		datatype *operator() (const std::string &name, const int index = 0) {
-			return &(scalars [name] [index]);
+			if (scalars.find (name) != scalars.end () && (int) scalars [name].size () != 0) {
+				return &(scalars [name] [index]);
+			}
+			return NULL;
 		}
 		
 		/*!**********************************************************************

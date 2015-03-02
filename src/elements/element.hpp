@@ -139,13 +139,14 @@ namespace pisces
 		 * 
 		 * \return A datatype reference to the first element of the named scalar
 		 *********************************************************************/
-		inline datatype& operator[] (std::string name) {
+		inline datatype *operator[] (std::string name) {
 			// if (scalars.find (name) == scalars.end ()) {
 			// 	FATAL ("Index " << name << " not found in element.");
 			// 	throw 0;
 			// }
 			// return scalars [name] [0];
-			return *data [name];
+			DEBUG (data [name]);
+			return data [name];
 		}
 		
 		/*!*******************************************************************
@@ -159,7 +160,7 @@ namespace pisces
 		 * \return A datatype reference to the given index of the named scalar
 		 *********************************************************************/
 		virtual datatype& operator() (std::string name, int index = 0) {
-			return (&((*this) [name])) [index];
+			return ((*this) [name]) [index];
 		}
 		
 		/*!**********************************************************************

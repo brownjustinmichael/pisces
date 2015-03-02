@@ -60,6 +60,8 @@ namespace io
 					throw 0;
 				}
 				
+				DEBUG ("HERE");
+				
 				if (!file_streams [file_name]->is_open ()) {
 					ERROR ("Failed to open file " << file_name);
 					throw exceptions::file_exception (file_name);
@@ -83,14 +85,18 @@ namespace io
 				
 				header [file_name]->str ("");
 				body [file_name]->str ("");
+				
+				DEBUG ("DONE");
 			}
 			
 			static void close_file (std::string file_name, int file_type) {
+				TRACE ("Closing file");
 				if (print_headers && header [file_name]->str () != "") {
 					*file_streams [file_name] << comment << " " << header [file_name]->str () << "\n";
 				}
 				*file_streams [file_name] << body [file_name]->str () << "\n";
 				file_streams [file_name]->close ();
+				TRACE ("Done");
 			}
 			
 			template <class datatype>

@@ -59,7 +59,9 @@ namespace data
 
 			normal_stream.reset (new io::appender_output <io::formats::two_d::netcdf> (o_grid, buffer, i_params.get <int> ("output.every")));
 			this->setup_output (normal_stream);
-			normal_stream->template append <double> ("div", std::shared_ptr <io::functors::functor> (new io::functors::div_functor <double> ((*this) ("x"), (*this) ("z"), (*this) ("x_velocity"), (*this) ("z_velocity"), n, m)));
+			if ((*this) ("x_velocity") && (*this) ("z_velocity")) {
+				normal_stream->template append <double> ("div", std::shared_ptr <io::functors::functor> (new io::functors::div_functor <double> ((*this) ("x"), (*this) ("z"), (*this) ("x_velocity"), (*this) ("z_velocity"), n, m)));
+			}
 		}
 
 		std::shared_ptr <io::output> transform_stream;
@@ -91,8 +93,11 @@ namespace data
 			for (YAML::const_iterator iter = i_params ["equations"].begin (); iter != i_params ["equations"].end (); ++iter) {
 				std::string variable = iter->first.as <std::string> ();
 				if (!(iter->second ["ignore"].IsDefined () && iter->second ["ignore"].as <bool> ())) {
-					stat_stream->template append <double> ("z_flux_" + variable, std::shared_ptr <io::functors::functor> (new io::functors::average_functor <double> (n, 1, std::shared_ptr <io::functors::functor> (new io::functors::slice_functor <double> (n, m, m / 2, std::shared_ptr <io::functors::functor> (new io::functors::product_functor <double> (n, m, (*this) ("z_velocity"), (*this) (variable))))))), io::scalar);
+					if ((*this) ("z_velocity")) {
+						stat_stream->template append <double> ("z_flux_" + variable, std::shared_ptr <io::functors::functor> (new io::functors::average_functor <double> (n, 1, std::shared_ptr <io::functors::functor> (new io::functors::slice_functor <double> (n, m, m / 2, std::shared_ptr <io::functors::functor> (new io::functors::product_functor <double> (n, m, (*this) ("z_velocity"), (*this) (variable))))))), io::scalar);
+					}
 					stat_stream->template append <double> ("avg_" + variable, std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], (*this) (variable))), io::scalar);
+					stat_stream->template append <double> ("max_" + variable, std::shared_ptr <io::functors::functor> (new io::functors::max_functor <double> (n, m, (*this) (variable))), io::scalar);
 				}
 			}
 		}
@@ -136,7 +141,6 @@ namespace pisces
 			variable = iter->first.as <std::string> ();
 			io::parameters::alias terms (i_params, "equations." + variable);
 			
-			DEBUG (variable);
 			
 			// If the equation is labeled as ignore, do not construct an equation
 			if (terms ["ignore"].IsDefined () && terms ["ignore"].as <bool> ()) {
@@ -172,10 +176,12 @@ namespace pisces
 			solvers [variable]->add_solver (typename fourier_solver <datatype>::factory (timestep, local_boundary_0, local_boundary_n), x_solver);
 
 			// If a diffusion value is specified, construct the diffusion plans
+			DEBUG ("Adding diff");
 			solvers [variable]->add_plan (typename vertical_diffusion <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")), pre_plan);
 			solvers [variable]->add_plan (typename horizontal_diffusion <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")), mid_plan);
 			
 			// If an advection value is specified, construct the advection plan
+			DEBUG ("Adding advec");
 			solvers [variable]->add_plan (typename advection <datatype>::factory (terms ["advection"], ptr ("x_velocity"), ptr ("z_velocity")), post_plan);
 			if (terms ["advection"].IsDefined ()) advection_coeff = std::max (advection_coeff, terms ["advection"].as <datatype> ());
 			
@@ -190,15 +196,20 @@ namespace pisces
 		}
 		
 		// Since this is a Boussinesq problem, also include the pressure term
-		solvers ["pressure"]->add_solver (typename incompressible_corrector <datatype>::factory (messenger_ptr, boundary_0, boundary_n, *solvers ["x_velocity"], *solvers ["z_velocity"]));
-		solvers ["pressure"]->get_solver (x_solver)->add_dependency ("z_velocity");
-		solvers ["pressure"]->get_solver (x_solver)->add_dependency ("x_velocity");
-
-		TRACE ("Initialized.");
+		if (ptr ("z_velocity") && ptr ("x_velocity")) {
+			solvers ["pressure"]->add_solver (typename incompressible_corrector <datatype>::factory (messenger_ptr, boundary_0, boundary_n, *solvers ["x_velocity"], *solvers ["z_velocity"]));
+			solvers ["pressure"]->get_solver (x_solver)->add_dependency ("z_velocity");
+			solvers ["pressure"]->get_solver (x_solver)->add_dependency ("x_velocity");
+		}
+		
+	TRACE ("Initialized.");
 	}
 	
 	template <class datatype>
 	datatype boussinesq_element <datatype>::calculate_timestep (int i, int j, io::formats::virtual_file *virtual_file) {
+		if (!x_vel_ptr || !z_vel_ptr) {
+			return 1.0 / 0.0;
+		}
 		if (virtual_file) {
 			if (j == 0 || j == virtual_file->dims ["z"] [1] - 1) {
 				return 1.0 / 0.0;
