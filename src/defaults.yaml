@@ -78,6 +78,11 @@ equations:
         bottom:
             type: fixed_value
             value: 0.0
+    pressure:
+        ignore: false
+        incompressible: true
+        x_velocity: x_velocity
+        z_velocity: z_velocity
 root: ./
 input:
     directory: input/

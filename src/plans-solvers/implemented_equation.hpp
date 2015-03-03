@@ -30,9 +30,10 @@ namespace plans
 		
 		std::vector <datatype> spectral_rhs_vec;
 		std::vector <datatype> real_rhs_vec;
+		std::vector <datatype> old_rhs_vec;
 		
 		datatype *spectral_rhs_ptr;
-		datatype *real_rhs_ptr;
+		datatype *real_rhs_ptr, *old_rhs_ptr;
 		
 		std::shared_ptr <plans::plan <datatype> > transform;
 		
@@ -44,6 +45,8 @@ namespace plans
 		implemented_equation (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, datatype *i_data, int *i_element_flags, int *i_component_flags) : plans::equation <datatype> (i_data, i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), grid_n (i_grid_n), grid_m (i_grid_m) {
 			spectral_rhs_ptr = NULL;
 			real_rhs_ptr = NULL;
+			old_rhs_vec.resize (ldn * m);
+			old_rhs_ptr = &old_rhs_vec [0];
 		}
 		
 		virtual ~implemented_equation () {}
@@ -163,7 +166,7 @@ namespace plans
 		
 		virtual void add_solver (const typename plans::solver <datatype>::factory &factory, int flags = 0x00) {
 			plans::grid <datatype>* grids [2] = {&grid_n, &grid_m};
-			plans::implemented_equation <datatype>::add_solver (factory.instance (grids, data, rhs_ptr (spectral_rhs), element_flags, component_flags), flags);
+			plans::implemented_equation <datatype>::add_solver (factory.instance (grids, data, old_rhs_ptr, element_flags, component_flags), flags);
 		}
 		
 		virtual std::shared_ptr <plans::solver <datatype>> get_solver (int flags = 0x00) {
@@ -212,11 +215,13 @@ namespace plans
 			
 			// De-alias the RHS
 			if (real_rhs_ptr) {
-				linalg::matrix_scale (m, n / 3, 0.0, real_rhs_ptr + m * (n - n / 3));
+				linalg::matrix_scale (m, ldn / 3, 0.0, real_rhs_ptr + m * (ldn - ldn / 3));
 			}
 			
 			if (spectral_rhs_ptr && real_rhs_ptr) {
 				linalg::matrix_add_scaled (m, ldn, 1.0, real_rhs_ptr, spectral_rhs_ptr);
+				linalg::matrix_scale (m, ldn, -0.5, old_rhs_ptr);
+				linalg::matrix_add_scaled (m, ldn, 1.5, spectral_rhs_ptr, old_rhs_ptr);
 			}
 			
 			if (*component_flags & x_solve) {

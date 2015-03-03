@@ -32,23 +32,27 @@ public:
 		io::parameters parameters;
 		
 		parameters ["root"] = std::string (PISCES_ROOT) + "/test/elements/";
-		parameters ["output.file"] = "";
+		parameters ["output.file"] = "output_%02i";
 		parameters ["output.every"] = 10;
 		parameters ["output.stat.file"] = "compare_%02i";
 		parameters ["output.stat.every"] = 10;
 		parameters ["output.transform.file"] = "";
 		parameters ["dump.file"] = "";
-		parameters ["time.steps"] = 100;
+		parameters ["time.steps"] = 1000;
 		parameters ["time.max"] = 0.1;
-		parameters ["time.init"] = 0.1;
 		
 		parameters ["input.file"] = "";
 		
 		parameters ["equations.x_velocity.ignore"] = true;
 		parameters ["equations.z_velocity.ignore"] = true;
+		parameters ["equations.pressure.ignore"] = true;
 		parameters ["equations.composition.ignore"] = true;
+		parameters ["equations.z_velocity.sources.temperature"] = 0.0;
+		// parameters ["equations.z_velocity.sources.composition"] = 0.0;
 		
-		parameters ["equations.temperature.advection"] = 0.0;
+		parameters ["equations.temperature.diffusion"] = 0.0;
+		parameters ["equations.composition.diffusion"] = 0.0;
+		parameters ["equations.composition.advection"] = 0.0;
 		
 		parameters ["grid.x.width"] = 20.0;
 		parameters ["grid.z.width"] = 20.0;
@@ -66,7 +70,8 @@ public:
 
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
-				data ("temperature") [i * m + j] = scale * exp (-(data ("x") [i * m + j] * data ("x") [i * m + j] + data ("z") [i * m + j] * data ("z") [i * m + j]) / 2.0 / width / width);
+				data ("temperature") [i * m + j] = data ("composition") [i * m + j] = scale * exp (-(data ("x") [i * m + j] * data ("x") [i * m + j] + data ("z") [i * m + j] * data ("z") [i * m + j]) / 2.0 / width / width);
+				data ("x_velocity") [i * m + j] = 1.0;
 			}
 		}
 

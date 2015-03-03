@@ -324,6 +324,7 @@ namespace data
 	class implemented_data : public data <datatype>
 	{
 	protected:
+		using data <datatype>::iterator;
 		std::shared_ptr <plans::grid <datatype>> grid_n, grid_m;
 		int n, m;
 		

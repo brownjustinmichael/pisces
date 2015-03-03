@@ -31,10 +31,9 @@ namespace data
 	template <class datatype>
 	thermo_compositional_data <datatype>::thermo_compositional_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int id, int n_elements, io::parameters& i_params) : implemented_data <datatype> (i_axis_n, i_axis_m, id, i_params.get <std::string> ("dump.file"), i_params.get <std::string> ("root") + i_params.get <std::string> ("dump.directory"), i_params.get <int> ("dump.every")) {
 		for (YAML::const_iterator iter = i_params ["equations"].begin (); iter != i_params ["equations"].end (); ++iter) {
-			if (!(iter->second ["ignore"].IsDefined () && iter->second ["ignore"].as <bool> ())) initialize (iter->first.as <std::string> ());
+			initialize (iter->first.as <std::string> ());
 		}
-		initialize ("pressure");
-		
+
 		int name = id;
 		
 		const io::data_grid i_grid = io::data_grid::two_d (n, m, 0, i_params.get <bool> ("input.full") ? n_elements * m : 0, 0, i_params.get <bool> ("input.full") ? id * m : 0);
@@ -90,15 +89,13 @@ namespace data
 
 			stat_stream.reset (new io::appender_output <io::formats::ascii> (io::data_grid::two_d (n, m), buffer, i_params.get <int> ("output.stat.every")));
 			this->setup_stat (stat_stream);
-			for (YAML::const_iterator iter = i_params ["equations"].begin (); iter != i_params ["equations"].end (); ++iter) {
-				std::string variable = iter->first.as <std::string> ();
-				if (!(iter->second ["ignore"].IsDefined () && iter->second ["ignore"].as <bool> ())) {
-					if ((*this) ("z_velocity")) {
-						stat_stream->template append <double> ("z_flux_" + variable, std::shared_ptr <io::functors::functor> (new io::functors::average_functor <double> (n, 1, std::shared_ptr <io::functors::functor> (new io::functors::slice_functor <double> (n, m, m / 2, std::shared_ptr <io::functors::functor> (new io::functors::product_functor <double> (n, m, (*this) ("z_velocity"), (*this) (variable))))))), io::scalar);
-					}
-					stat_stream->template append <double> ("avg_" + variable, std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], (*this) (variable))), io::scalar);
-					stat_stream->template append <double> ("max_" + variable, std::shared_ptr <io::functors::functor> (new io::functors::max_functor <double> (n, m, (*this) (variable))), io::scalar);
+			for (typename data <datatype>::iterator iter = this->begin (); iter != this->end (); ++iter) {
+				std::string variable = *iter;
+				if ((*this) ("z_velocity")) {
+					stat_stream->template append <double> ("z_flux_" + variable, std::shared_ptr <io::functors::functor> (new io::functors::average_functor <double> (n, 1, std::shared_ptr <io::functors::functor> (new io::functors::slice_functor <double> (n, m, m / 2, std::shared_ptr <io::functors::functor> (new io::functors::product_functor <double> (n, m, (*this) ("z_velocity"), (*this) (variable))))))), io::scalar);
 				}
+				stat_stream->template append <double> ("avg_" + variable, std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], (*this) (variable))), io::scalar);
+				stat_stream->template append <double> ("max_" + variable, std::shared_ptr <io::functors::functor> (new io::functors::max_functor <double> (n, m, (*this) (variable))), io::scalar);
 			}
 		}
 
@@ -143,7 +140,7 @@ namespace pisces
 			
 			
 			// If the equation is labeled as ignore, do not construct an equation
-			if (terms ["ignore"].IsDefined () && terms ["ignore"].as <bool> ()) {
+			if ((terms ["ignore"].IsDefined () && terms ["ignore"].as <bool> ()) || variable == "pressure") {
 				continue;
 			}
 			
@@ -176,12 +173,10 @@ namespace pisces
 			solvers [variable]->add_solver (typename fourier_solver <datatype>::factory (timestep, local_boundary_0, local_boundary_n), x_solver);
 
 			// If a diffusion value is specified, construct the diffusion plans
-			DEBUG ("Adding diff");
 			solvers [variable]->add_plan (typename vertical_diffusion <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")), pre_plan);
 			solvers [variable]->add_plan (typename horizontal_diffusion <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")), mid_plan);
 			
 			// If an advection value is specified, construct the advection plan
-			DEBUG ("Adding advec");
 			solvers [variable]->add_plan (typename advection <datatype>::factory (terms ["advection"], ptr ("x_velocity"), ptr ("z_velocity")), post_plan);
 			if (terms ["advection"].IsDefined ()) advection_coeff = std::max (advection_coeff, terms ["advection"].as <datatype> ());
 			
@@ -196,7 +191,10 @@ namespace pisces
 		}
 		
 		// Since this is a Boussinesq problem, also include the pressure term
-		if (ptr ("z_velocity") && ptr ("x_velocity")) {
+		if (!i_params ["equations.pressure.ignore"].as <bool> ()) {
+			if (!ptr (i_params ["equations.pressure.x_velocity"].as <std::string> ()) || !ptr (i_params ["equations.pressure.z_velocity"].as <std::string> ())) {
+				FATAL ("Uninitialized velocity specified in pressure solve");
+			}
 			solvers ["pressure"]->add_solver (typename incompressible_corrector <datatype>::factory (messenger_ptr, boundary_0, boundary_n, *solvers ["x_velocity"], *solvers ["z_velocity"]));
 			solvers ["pressure"]->get_solver (x_solver)->add_dependency ("z_velocity");
 			solvers ["pressure"]->get_solver (x_solver)->add_dependency ("x_velocity");
@@ -223,12 +221,13 @@ namespace pisces
 			if (j == 0 || j == m - 1) {
 				return 1.0 / 0.0;
 			}
-			if (i == 0 || i == n - 1) {
+			if ((i == 0 || i == n - 1)) {
 				return std::abs ((z_ptr [i * m + j + 1] - z_ptr [i * m + j - 1]) / z_vel_ptr [i * m + j] / advection_coeff) * cfl;
 			} else {
 				return std::min (std::abs ((x_ptr [(i + 1) * m + j] - x_ptr [(i - 1) * m + j]) / x_vel_ptr [i * m + j] / advection_coeff), std::abs ((z_ptr [i * m + j + 1] - z_ptr [i * m + j - 1]) / z_vel_ptr [i * m + j] / advection_coeff)) * cfl;
 			}
 		}
+		return 1.0 / 0.0;
 	}
 	
 	template class boussinesq_element <double>;
