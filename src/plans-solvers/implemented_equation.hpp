@@ -220,18 +220,17 @@ namespace plans
 			TRACE ("Solving...");
 			if (transform) transform->execute ();
 			
-			// linalg::matrix_scale (m, ldn, 0.0, cor_rhs_ptr);
+			// linalg::matrix_copy (m, ldn, new_rhs_ptr, cor_rhs_ptr);
 			//
 			// // De-alias the RHS
 			// if (real_rhs_ptr) {
 			// 	linalg::matrix_scale (m, ldn / 3, 0.0, real_rhs_ptr + m * (ldn - ldn / 3));
-			// 	linalg::matrix_copy (m, ldn, real_rhs_ptr, cor_rhs_ptr);
+			// 	linalg::matrix_add_scaled (m, ldn, 1.0, real_rhs_ptr, cor_rhs_ptr);
 			// }
 			//
 			// if (spectral_rhs_ptr) {
 			// 	linalg::matrix_add_scaled (m, ldn, 1.0, real_rhs_ptr, cor_rhs_ptr);
 			// 	linalg::matrix_scale (m, ldn, -0.0, old_rhs_ptr);
-			// 	linalg::matrix_add_scaled (m, ldn, 1.0, cor_rhs_ptr, cor_rhs_ptr);
 			// 	// linalg::matrix_copy (m, ldn, spectral_rhs_ptr, old_rhs_ptr);
 			// }
 			
@@ -243,7 +242,7 @@ namespace plans
 				linalg::matrix_scale (m, ldn / 3, 0.0, real_rhs_ptr + m * (ldn - ldn / 3));
 				linalg::matrix_add_scaled (m, ldn, 1.0, real_rhs_ptr, new_rhs_ptr);
 			}
-		
+
 			linalg::matrix_add_scaled (m, ldn, 1.5, new_rhs_ptr, cor_rhs_ptr); // Set to 1.5 for AB
 			linalg::matrix_copy (m, ldn, new_rhs_ptr, old_rhs_ptr);
 

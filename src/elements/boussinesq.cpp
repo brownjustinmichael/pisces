@@ -93,6 +93,7 @@ namespace data
 				std::string variable = *iter;
 				if ((*this) ("z_velocity")) {
 					stat_stream->template append <double> ("z_flux_" + variable, std::shared_ptr <io::functors::functor> (new io::functors::average_functor <double> (n, 1, std::shared_ptr <io::functors::functor> (new io::functors::slice_functor <double> (n, m, m / 2, std::shared_ptr <io::functors::functor> (new io::functors::product_functor <double> (n, m, (*this) ("z_velocity"), (*this) (variable))))))), io::scalar);
+					stat_stream->template append <double> ("deriv_" + variable, std::shared_ptr <io::functors::functor> (new io::functors::average_functor <double> (n, 1, std::shared_ptr <io::functors::functor> (new io::functors::slice_functor <double> (n, m, m / 2, std::shared_ptr <io::functors::functor> (new io::functors::deriv_functor <double> ((*this) (variable), n, m, &(*grid_m) [0])))))), io::scalar);
 				}
 				stat_stream->template append <double> ("avg_" + variable, std::shared_ptr <io::functors::functor> (new io::functors::weighted_average_functor <double> (n, m, &area [0], (*this) (variable))), io::scalar);
 				stat_stream->template append <double> ("max_" + variable, std::shared_ptr <io::functors::functor> (new io::functors::max_functor <double> (n, m, (*this) (variable))), io::scalar);

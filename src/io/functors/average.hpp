@@ -107,6 +107,41 @@ namespace io
 				return &inner_data [0];
 			}
 		};
+		
+		template <class datatype>
+		class deriv_functor : public functor
+		{
+		private:
+			datatype *data; //!< A datatype pointer to the input data
+			int n; //!< The integer horizontal extent of the data
+			int m; //!< The integer vertical extent of the data
+			const datatype *position_m;
+			std::vector <datatype> inner_data; //!< A vector of processed data to output
+		
+		public:
+			/*!**********************************************************************
+			 * \param i_data The datatype pointer to the data to average
+			 * \param i_n The integer horizontal extent of the data
+			 * \param i_m The integer vertical extent of the data
+			 ************************************************************************/
+			deriv_functor (datatype *i_data, int i_n, int i_m, const datatype *i_position_m) : data (i_data), n (i_n), m (i_m), position_m (i_position_m) {
+				inner_data.resize (m * n);
+			}
+		
+			/*!**********************************************************************
+			 * \brief Average the data and return a pointer to the first element
+			 * 
+			 * \return The first element of the averaged 1D array
+			 ************************************************************************/
+			void *calculate () {
+				for (int j = 1; j < m - 1; ++j) {
+					for (int i = 0; i < n; ++i) {
+						inner_data [i * m + j] = (data [i * m + j + 1] - data [i * m + j - 1]) / (position_m [j + 1] - position_m [j - 1]);
+					}
+				}
+				return &inner_data [0];
+			}
+		};
 	
 		/*!**********************************************************************
 		 * \brief Finds the root-mean-square of data in the horizontal direction

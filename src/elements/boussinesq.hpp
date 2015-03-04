@@ -101,6 +101,7 @@ namespace data
 		using implemented_data <datatype>::initialize;
 		using implemented_data <datatype>::n;
 		using implemented_data <datatype>::m;
+		using implemented_data <datatype>::grid_m;
 		using implemented_data <datatype>::iterator;
 		std::vector <double> area;
 		
