@@ -32,13 +32,12 @@ public:
 		io::parameters parameters;
 		
 		parameters ["root"] = std::string (PISCES_ROOT) + "/test/elements/";
-		parameters ["output.file"] = "";
 		parameters ["output.every"] = 10;
-		parameters ["output.stat.file"] = "compare_%02i";
+		parameters ["output.stat.file"] = "diffusion_%02i";
 		parameters ["output.stat.every"] = 10;
 		parameters ["output.transform.file"] = "";
 		parameters ["dump.file"] = "";
-		parameters ["time.steps"] = 100;
+		parameters ["time.steps"] = 200;
 		parameters ["time.max"] = 0.1;
 		parameters ["time.init"] = 0.1;
 		
@@ -83,7 +82,7 @@ public:
 		snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
 		std::ifstream template_stream (buffer, std::ifstream::in);
 
-		file_format = parameters.get <std::string> ("root") + parameters.get <std::string> ("output.directory") + std::string ("compare_%02i.dat");
+		file_format = parameters.get <std::string> ("root") + parameters.get <std::string> ("output.directory") + std::string ("diffusion_%02i.dat");
 		snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
 		std::ifstream compare_stream (buffer, std::ifstream::in);
 
@@ -93,7 +92,7 @@ public:
 			template_stream >> template_string;
 			compare_stream >> compare_string;
 
-			TS_ASSERT_DELTA (template_string, compare_string, 5.0E-4);
+			TS_ASSERT_DELTA (template_string, compare_string, 1.0E-4);
 		}
 	}
 };

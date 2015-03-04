@@ -106,9 +106,9 @@ namespace io
 					throw 0;
 				}
 				if (file_types [file_name] != append_file || count [file_name] == 1) {
-					*header [file_name] << name << " ";
+					*header [file_name] << name << "\t";
 				}
-				*body [file_name] << * (datatype *) data << " ";
+				*body [file_name] << * (datatype *) data << "\t";
 			}
 			
 			template <class datatype>
