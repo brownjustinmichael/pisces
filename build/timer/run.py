@@ -12,6 +12,6 @@ timer = Timer ("pisces",
                commandArgs = ["-D2"], 
                uniques = [Argument ("-V input.file input_%03d_%%02i")])
 
-results = timer.calculateTimes (torque = True, iterations = 2)
+results = timer.calculateTimes (torque = False, iterations = 2)
 
 print (results)
