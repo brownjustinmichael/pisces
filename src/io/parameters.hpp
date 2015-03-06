@@ -14,27 +14,38 @@
 #include "exceptions.hpp"
 #include "logger/logger.hpp"
 
+#ifndef DEFAULTS_FILE
+#define DEFAULTS_FILE ""
+#endif
+
 namespace io
 {
 	/*!**********************************************************************
 	 * \brief An extension of the YAML::Node class for convenience
 	 * 
-	 * This implementation uses the convenient shorthand of the '.' character delimiting nested YAML trees. This means that this character should be avoided in parameter names in your YAML file.
+	 * This implementation uses the convenient shorthand of the '.' character delimiting nested YAML trees. This means that this character should be avoided in parameter names in your YAML file. Note that these can be changed at any time.
 	 ************************************************************************/
 	class parameters : public YAML::Node
 	{
 	public:
-		// static parameters defaults;
-		
-		using YAML::Node::operator=; //!< Use the assignment operator from the super class
+		using YAML::Node::operator=; // Use the assignment operator from the super class
 	
+		/*!**********************************************************************
+		 * \brief An alias class designed to be a reference to a parameter node
+		 * 
+		 * The alias class is useful when iterating through keys in the parameter class. Since such iterations will store YAML::Node objects, you lose the ability to use '.' separated keys and any knowledge of the parameters on the whole.
+		 ************************************************************************/
 		class alias
 		{
 		private:
-			parameters &params;
-			std::string key;
+			parameters &params; //!< The parameters object to alias
+			std::string key; //!< The key of params at which the alias is placed
 			
 		public:
+			/*!**********************************************************************
+			 * \param i_params The parameters object to alias
+			 * \param i_key The key of the parameters object at which to make the alias
+			 ************************************************************************/
 			alias (parameters &i_params, std::string i_key) : params (i_params), key (i_key) {}
 			
 			virtual ~alias () {}
@@ -50,16 +61,34 @@ namespace io
 		parameters (std::string file_name = "", std::string defaults_file = DEFAULTS_FILE) {
 			TRACE ("Constructing parameters");
 			YAML::Node copy_node;
-			YAML::Node::operator= (YAML::LoadFile (defaults_file));
+			
+			// Load the defaults file (by default, the DEFAULTS_FILE macro)
+			if (defaults_file != "") {
+				YAML::Node::operator= (YAML::LoadFile (defaults_file));
+			}
+			
+			// If a file_name is specified, load it into copy
 			if (file_name != "") {
 				copy_node = (YAML::LoadFile (file_name));
 			}
+			
+			// Override anything specified in file_name
 			YAML::Node::operator= (copy (copy_node, *this));
 			TRACE ("Constructed");
 		}
 	
 		virtual ~parameters () {}
 		
+		/*!**********************************************************************
+		 * \brief A static method that overrides every value in to with those from from and returns a new node
+		 * 
+		 * \param from The YAML::Node object from which to copy the information
+		 * \param to The YAML::Node object to which to copy the information
+		 * 
+		 * For each variable present in from, that variable will be created or overwritten in to. This is done recursively in order to copy maps from node to node.
+		 * 
+		 * \return A new node that is a copy of to with overwritted components of from
+		 ************************************************************************/
 		static YAML::Node copy (const YAML::Node &from, const YAML::Node to);
 	
 		/*!**********************************************************************
@@ -67,7 +96,7 @@ namespace io
 		 * 
 		 * \param key The string representation of the parameter
 		 * 
-		 * Note that this returns a copy of a YAML::Node object, which can be used to check and set parameters, but these objects do not treat parameter delimiters like this class.
+		 * Note that this returns a copy of a YAML::Node object, which can be used to check and set parameters, but these objects do not treat parameter delimiters like this class. This operation will also search for linked keys. For example, "equations.x_velocity" has no "diffusion" key, but it does have a "link" key that points to "equations.velocity". That key does have a "diffusion" key, so "equations.x_velocity.diffusion" will return the value of "equations.velocity.diffusion".
 		 * 
 		 * \return A copy of the YAML::Node object at the given parameter.
 		 ************************************************************************/

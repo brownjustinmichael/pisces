@@ -28,27 +28,49 @@ namespace io
 	{
 	protected:
 		std::string file_name; //!< The string file name
-		int file_format;
-		const data_grid grid;
-		typedef void func_t (const data_grid &grid, std::string file_name, std::string name, void *data, int record, int dims);
-		std::vector <func_t *> write_functions;
+		int file_format; //!< The file format from io_flags: e.g. replace_file
+		const data_grid grid; //!< The data_grid object associated with the output
+		
+		typedef void func_t (const data_grid &grid, std::string file_name, std::string name, void *data, int record, int dims); //!< A prototype for write functions
+		std::vector <func_t *> write_functions; //!< A vector of pointers to the write functions
 		std::vector <std::string> names; //!< A vector of the string representations of the variables
 		std::vector <void *> data_ptrs; //!< A vector of pointers to the arrays of data
 		std::vector <std::shared_ptr <functors::functor>> functor_ptrs; //!< A vector of pointers to the functors
-		std::vector <int> dims;
+		std::vector <int> dims; //!< A vector of the integer number of dimensions for each output
 
 	public:
 		/*!*******************************************************************
+		 * \param i_grid The data_grid object representing the structure of the data
 		 * \param i_file_name The string representation of the output file; do not include the extension; it will be added later
-		 * 
-		 * This seems an extremely tedious way to do this. It might be superior to accept arrays or brace initialized lists
+		 * \param i_file_format The integer io_flag associated with the desired output type (e.g. replace_file)
 		 *********************************************************************/
 		output (data_grid i_grid, std::string i_file_name = "out", int i_file_format = replace_file) : file_name (i_file_name), file_format (i_file_format), grid (i_grid) {}
 
 		virtual ~output () {}
 		
+		/*
+			TODO The get_function formality is rather obnoxious; perhaps there's a better way
+		*/
+		
+		/*!**********************************************************************
+		 * \brief Given a float pointer, return the appropriate write_function
+		 * 
+		 * \return A pointer to the appropriate write function for float arrays
+		 ************************************************************************/
 		virtual func_t *get_function (const float *) = 0;
+
+		/*!**********************************************************************
+		 * \brief Given a double pointer, return the appropriate write_function
+		 * 
+		 * \return A pointer to the appropriate write function for double arrays
+		 ************************************************************************/
 		virtual func_t *get_function (const double *) = 0;
+		
+		/*!**********************************************************************
+		 * \brief Given an int pointer, return the appropriate write_function
+		 * 
+		 * \return A pointer to the appropriate write function for int arrays
+		 ************************************************************************/
 		virtual func_t *get_function (const int *) = 0;
 
 		/*!**********************************************************************
@@ -79,6 +101,7 @@ namespace io
 		 * 
 		 * \param name The string representation of the variable
 		 * \param data_ptr A datatype pointer to the data
+		 * \param flags A set of flags indicating what dimensions to output, defaults to all available dimensions
 		 * 
 		 * Since this is shared between input and output, we might give them a shared superclass in the future.
 		 *********************************************************************/
@@ -110,7 +133,9 @@ namespace io
 	/*!**********************************************************************
 	 * \brief An output class that takes a format object as a template argument
 	 * 
-	 * Note that the format object should be modeled after the ones in this file. They require the static methods extension, write, write_scalar, and write_functor.
+	 * Note that the format object should be modeled after the ones in the formats folder. They require the static template methods extension, open_file, write, and close_file. The choice of this somewhat circumlocuting format is to effectively allow the formats to be of the same abstract type but have different implementations of the same template functions. (Since abstract template functions don't make much sense in C++)
+	 * 
+	 * \copydoc output
 	 ************************************************************************/
 	template <class format>
 	class formatted_output : public output
@@ -123,16 +148,38 @@ namespace io
 
 		virtual ~formatted_output () {}
 		
+		/*!**********************************************************************
+		 * \copydoc output::get_function
+		 * 
+		 * This finds the appropriate write function in the format template argument and returns it.
+		 ************************************************************************/
 		virtual func_t *get_function (const float *ptr) {
 			return &format::template write <float>;
 		}
+		
+		/*!**********************************************************************
+		 * \copydoc output::get_function
+		 * 
+		 * This finds the appropriate write function in the format template argument and returns it.
+		 ************************************************************************/
 		virtual func_t *get_function (const double *ptr) {
 			return &format::template write <double>;
 		}
+		
+		/*!**********************************************************************
+		 * \copydoc output::get_function
+		 * 
+		 * This finds the appropriate write function in the format template argument and returns it.
+		 ************************************************************************/
 		virtual func_t *get_function (const int *ptr) {
 			return &format::template write <int>;
 		}
 		
+		/*!**********************************************************************
+		 * \brief Check it the file opens; otherwise, raise an exception
+		 * 
+		 * This is in the output class to avoid having to check if files open correctly in the format classes.
+		 ************************************************************************/
 		virtual void check_file (std::string file_name) {
 			std::ifstream filestr;
 			filestr.open (file_name);
@@ -158,7 +205,7 @@ namespace io
 			if (format::uses_files) check_file (file_name.c_str ());
 			format::open_file (grid, file_name.c_str (), output::file_format);
 	
-			// Output the scalar_functors
+			// Calculate the inner values of any relevant functors
 			for (int i = 0; i < (int) functor_ptrs.size (); ++i) {
 				functor_ptrs [i]->calculate ();
 			}
@@ -169,15 +216,13 @@ namespace io
 			}
 	
 			format::close_file (file_name.c_str (), output::file_format);
-	
-			/*
-				TODO This behavior means that in a crash, all output data are lost, appender files should be opened and closed like all others
-			*/
 		}
 	};
 
 	/*!**********************************************************************
 	 * \brief An output class that increments file names each output
+	 * 
+	 * \copydoc formatted_output
 	 ************************************************************************/
 	template <class format>
 	class incremental : public formatted_output <format>
@@ -203,6 +248,8 @@ namespace io
 
 		/*!**********************************************************************
 		 * \copybrief formatted_output::to_file
+		 * 
+		 * Also increments the file count and checks whether to output at all
 		 ************************************************************************/
 		void to_file (int record = -1) {
 			TRACE ("Sending to file...");
@@ -218,6 +265,8 @@ namespace io
 
 	/*!**********************************************************************
 	 * \brief An output class that appends each output to the same file
+	 * 
+	 * \copydoc formatted_output
 	 ************************************************************************/
 	template <class format>
 	class appender_output : public formatted_output <format>
@@ -237,6 +286,8 @@ namespace io
 
 		/*!**********************************************************************
 		 * \copybrief formatted_output::to_file
+		 * 
+		 * Also increments the file count and checks whether to output at all
 		 ************************************************************************/
 		void to_file (int record = -1) {
 			TRACE ("Sending to file...");
@@ -268,6 +319,8 @@ namespace io
 
 		/*!**********************************************************************
 		 * \copybrief formatted_output::to_file
+		 * 
+		 * Also increments the file count and checks whether to output at all
 		 ************************************************************************/
 		void to_file (int record = -1) {
 			TRACE ("Sending to file...");
