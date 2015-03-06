@@ -78,7 +78,7 @@ public:
 			template_stream >> template_string;
 			compare_stream >> compare_string;
 			
-			TS_ASSERT_DELTA (template_string, compare_string, 5.0E-4);
+			TS_ASSERT_DELTA (template_string, compare_string, 1.0E-8);
 		}
 	}
 };
