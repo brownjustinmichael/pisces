@@ -4,13 +4,13 @@ init:
     sigma: 10.
 grid:
     x:
-        points: 128
+        points: 256
         width: 100.0
     z:
-        points: 128
+        points: 512
         width: 100.0
 time:
-    steps: 1000
+    steps: 100
     init: 1.0e-5
     max: 1.e-0
 equations:

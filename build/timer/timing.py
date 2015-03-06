@@ -69,7 +69,7 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
         print (type (e), e)
     client_socket.close ()
     
-    return float (data.get ("dt", None))
+    return float (data.get ("avg"))
 
 class Timer (object):
     """

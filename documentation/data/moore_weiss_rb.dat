@@ -1,0 +1,10 @@
+# Rayleigh Benard Nusselt numbers from Moore & Weiss (1973) vs multiplier on critical Rayleigh number
+1.0 1.0
+1.1 1.18
+1.2 1.34
+1.4 1.61
+2.0 2.14
+3.0 2.68
+4.0 3.01
+6.0 3.52
+10.0 4.19
