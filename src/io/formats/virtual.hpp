@@ -27,14 +27,14 @@ namespace io
 	} /* formats */
 
 	/*!**********************************************************************
-	 * \brief A map of virtual iles to be used like disk output, i.e. every unique string input maps to exactly one virtual_file object
+	 * \brief A map of virtual files to be used like disk output, i.e. every unique string input maps to exactly one virtual_file object
 	 ************************************************************************/
 	extern std::map <std::string, formats::virtual_file> virtual_files;
 	
 	namespace formats
 	{
 		/*!**********************************************************************
-		 * \brief A class designed to act as a virtual file file
+		 * \brief A class designed to act as a virtual file
 		 ************************************************************************/
 		class virtual_file
 		{
@@ -228,17 +228,28 @@ namespace io
 		
 		namespace two_d
 		{
+			/*!**********************************************************************
+			 * \brief A format designed to hold data in memory
+			 * 
+			 * This class contains only static members, so an instantiation of this class is not necessary
+			 ************************************************************************/
 			class virtual_format
 			{
 			public:
 				static bool uses_files;
 				
 				virtual_format () {}
-	
+				
 				~virtual_format () {}
-	
+				
+				/*!**********************************************************************
+				 * \return The extension associated with virtual files ("")
+				 ************************************************************************/
 				static std::string extension () {return "";}
-		
+				
+				/*!**********************************************************************
+				 * \brief Open the virtual file for read/write
+				 ************************************************************************/
 				static void open_file (const data_grid &grid, std::string file_name, int file_type) {
 					// if (file_type == read_file && (!virtual_files [file_name])) {
 						// ERROR ("Virtual file doesn't exist.");
@@ -249,10 +260,27 @@ namespace io
 					*/
 					virtual_files [file_name];
 				}
-		
+				
+				/*!**********************************************************************
+				 * \brief Close the file
+				 * 
+				 * Nothing to do here.
+				 ************************************************************************/
 				static void close_file (std::string file_name, int file_type) {
 				}
-		
+				
+				/*!**********************************************************************
+				 * \brief Write to file
+				 * 
+				 * \param grid The data_grid object containing the information on how to output
+				 * \param file_name The file name to write to
+				 * \param name The name of the data object to write
+				 * \param data The pointer to the data to output
+				 * \param record The record stamp at which to output
+				 * \param flags An integer flag describing which dimensions to output
+				 * 
+				 * This is one of the main methods of the class, describing how to get the data into the output object
+				 ************************************************************************/
 				template <class datatype>
 				static void write (const data_grid &grid, std::string file_name, std::string name, void *data, int record = -1, int flags = all_d) {
 					int n = grid.get_n (0), m = grid.get_n (1);
@@ -266,6 +294,18 @@ namespace io
 					virtual_files [file_name].put <datatype> (name, (datatype *) data, n, m);
 				}
 	
+				/*!**********************************************************************
+				 * \brief Write to file
+				 * 
+				 * \param grid The data_grid object containing the information on how to input
+				 * \param file_name The file name to write to
+				 * \param name The name of the data object to write
+				 * \param data The pointer to the data to output
+				 * \param record The record stamp from which to input
+				 * \param flags An integer flag describing which dimensions to input
+				 * 
+				 * This is one of the main methods of the class, describing how to get the data from the input object
+				 ************************************************************************/
 				template <class datatype>
 				static void read (const data_grid &grid, std::string file_name, std::string name, void *data, int record = -1, int flags = all_d) {
 					int n = grid.get_n (0), m = grid.get_n (1);
@@ -276,11 +316,6 @@ namespace io
 						m = 1;
 					}
 					virtual_files [file_name].get <datatype> (name, (datatype *) data, n, m);
-				}
-	
-				template <class datatype>
-				static void read_scalar (std::string file_name, std::string name, datatype *data, int record = -1) {
-					virtual_files [file_name].get <datatype> (name, (datatype *) data);
 				}
 			};
 		} /* two_d */

@@ -44,21 +44,50 @@ namespace io
 		
 		namespace two_d
 		{
+			/*!**********************************************************************
+			 * \brief A file format object that manages io to netCDF files
+			 ************************************************************************/
 			class netcdf
 			{
+			protected:
+				static std::map <std::string, netCDF::NcFile *> files; //!< A map of netCDF file objects
+				static std::map <std::string, std::vector <netCDF::NcDim>> dims; //!< A map of dimension objects
+				static std::map <std::string, std::vector <std::string>> failures; //!< A map of failures for exception handling
+				static std::map <std::string, int> records; //!< A map of the current record of each file
+				static std::map <std::string, bool> first; //!< A map of booleans regarding whether a file has been output yet
+				
 			public:
+				static bool uses_files; //!< A boolean that contains whether this format uses file (true)
+				
+				/*
+					TODO Accept 1D outputs
+				*/
+				
 				netcdf () {}
-		
+				
 				virtual ~netcdf () {}
-		
+				
+				/*!**********************************************************************
+				 * \copydoc virtual_format::extension
+				 ************************************************************************/
 				static std::string extension () {return ".cdf";}
-			
+				
+				/*!**********************************************************************
+				 * \copydoc virtual_format::open_file
+				 ************************************************************************/
 				static void open_file (const data_grid &grid, std::string file_name, int file_type);
-		
+				
+				/*!**********************************************************************
+				 * \copydoc virtual_format::close_file
+				 ************************************************************************/
 				static void close_file (std::string file_name, int file_type);
-			
+				
+				/*!**********************************************************************
+				 * \copydoc virtual_format::write
+				 ************************************************************************/
 				template <class datatype>
 				static void write (const data_grid &grid, std::string file_name, std::string name, void *data, int record = -1, int flags = all_d) {
+					// Reconstruct the grid information in a way that the netCDF layer can read it
 					std::vector <netCDF::NcDim> scalar_dims;
 					std::vector <size_t> offsets = grid.offsets;
 					std::vector <size_t> sizes = grid.ns;
@@ -80,6 +109,7 @@ namespace io
 					
 					offsets [0] = record < 0 ? records [file_name] : record;
 					
+					// Output to file
 					netCDF::NcVar ncdata = files [file_name]->getVar (name.c_str ());
 					if (ncdata.isNull ()) {
 						ncdata = files [file_name]->addVar (name.c_str (), netcdf_type (&typeid (datatype)), scalar_dims);
@@ -87,9 +117,13 @@ namespace io
 					}
 					ncdata.putVar (offsets, sizes, data);
 				}
-		
+				
+				/*!**********************************************************************
+				 * \copydoc virtual_format::read
+				 ************************************************************************/
 				template <class datatype>
 				static void read (const data_grid &grid, std::string file_name, std::string name, void *data, int record = -1, int flags = all_d) {
+					// Reconstruct the grid information in a way that the netCDF layer can read it
 					std::vector <size_t> scalar_offsets;
 					std::vector <size_t> sizes = grid.ns;
 					if (flags < 0) {
@@ -105,6 +139,8 @@ namespace io
 							i++;
 						}
 					}
+					
+					// Input from file
 					try {
 						scalar_offsets [0] = record < 0 ? records [file_name] : record;
 						netCDF::NcVar ncdata = files [file_name]->getVar (name.c_str ());
@@ -121,19 +157,7 @@ namespace io
 					}
 					
 				}
-			
-				static bool uses_files;
-			protected:
-				static std::map <std::string, netCDF::NcFile *> files;
-				static std::map <std::string, std::vector <netCDF::NcDim>> dims;
-				static std::map <std::string, std::vector <std::string>> failures;
-				static std::map <std::string, int> records;
-				static std::map <std::string, bool> first;
 			};
-		
-			/*
-				TODO Accept 1D outputs
-			*/
 		} /* two_d */
 	} /* formats */
 } /* io */

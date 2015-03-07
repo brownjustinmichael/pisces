@@ -23,17 +23,20 @@ namespace io
 		
 			void netcdf::open_file (const data_grid &grid, std::string file_name, int file_type) {
 				TRACE ("Opening NetCDF file");
+				// Update records and first
 				if (!first [file_name]) {
 					records [file_name] = 0;
 					first [file_name] = true;
 				} else {
 					records [file_name] = -1;
 				}
+				
 				if (file_type == read_file) {
 					if (files [file_name]) {
 						FATAL ("File already open");
 						throw 0;
 					}
+					// Load information from file
 					files [file_name] = new netCDF::NcFile (file_name.c_str (), netCDF::NcFile::read);
 					if (files [file_name]->isNull () or files [file_name]->getDim ("record").isNull ()) {
 						records [file_name] = 0;
@@ -45,6 +48,7 @@ namespace io
 						FATAL ("File already open");
 						throw 0;
 					}
+					// Set up dimensions
 					files [file_name] = new netCDF::NcFile (file_name.c_str (), netCDF::NcFile::replace);
 					dims [file_name].resize (3);
 					dims [file_name] [0] = files [file_name]->addDim ("record");
@@ -52,6 +56,7 @@ namespace io
 					dims [file_name] [2] = files [file_name]->addDim ("z", grid.get_max (1));
 					records [file_name] = 0;
 				} else if (file_type == append_file) {
+					// Set up dimensions
 					files [file_name] = new netCDF::NcFile (file_name.c_str (), netCDF::NcFile::write);
 					dims [file_name] [0] = files [file_name]->getDim ("record");
 					dims [file_name] [1] = files [file_name]->getDim ("x");
@@ -79,12 +84,11 @@ namespace io
 					delete files [file_name];
 					files [file_name] = NULL;
 				}
-			
-			
+				
 				if (failures [file_name].size () > 0) {
 					// throw exceptions::io::bad_variables ();
 				}
-			
+				
 				/*
 					TODO Move exception to input class
 				*/

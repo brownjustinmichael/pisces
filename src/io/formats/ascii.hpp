@@ -23,25 +23,40 @@ namespace io
 {
 	namespace formats
 	{
+		/*!**********************************************************************
+		 * \brief A file format designed to interface with ASCII files
+		 * 
+		 * \copydoc virtual_format
+		 ************************************************************************/
 		class ascii
 		{
 		private:
-			static std::string comment;
-			static std::map <std::string, std::shared_ptr <std::ofstream>> file_streams;
-			static std::map <std::string, int> count;
-			static std::map <std::string, int> file_types;
-			static std::map <std::string, std::shared_ptr <std::stringstream>> header;
-			static std::map <std::string, std::shared_ptr <std::stringstream>> body;
+			/*
+				TODO Different files should have different comment strings
+			*/
+			static std::string comment; //!< The comment string for the file
+			static std::map <std::string, std::shared_ptr <std::ofstream>> file_streams; //!< A map of streams to convert from file name to file stream
+			static std::map <std::string, int> count; //!< A map of ints to count the number of times a file has been opened
+			static std::map <std::string, int> file_types; //!< A map of the io flags for each file
+			static std::map <std::string, std::shared_ptr <std::stringstream>> header; //!< The header for each file
+			static std::map <std::string, std::shared_ptr <std::stringstream>> body; //!< The current line of each file
 			
 		public:
-			static bool print_headers;
-			static bool uses_files;
+			static bool print_headers; //!< A boolean determining whether or not to print the headers of a file
+			static bool uses_files; //!< A boolean determining whether a format uses files (true)
+			
 			ascii () {}
 			
 			~ascii () {}
 			
+			/*!**********************************************************************
+			 * \copydoc virtual_format::extension
+			 ************************************************************************/
 			static std::string extension () {return ".dat";}
 			
+			/*!**********************************************************************
+			 * \copydoc virtual_format::open_file
+			 ************************************************************************/
 			static void open_file (const data_grid &grid, std::string file_name, int file_type) {
 				TRACE ("Opening ASCII file");
 				if (!(file_streams [file_name])) {
@@ -89,6 +104,9 @@ namespace io
 				DEBUG ("DONE");
 			}
 			
+			/*!**********************************************************************
+			 * \copydoc virtual_format::close_file
+			 ************************************************************************/
 			static void close_file (std::string file_name, int file_type) {
 				TRACE ("Closing file");
 				if (print_headers && header [file_name]->str () != "") {
@@ -99,6 +117,9 @@ namespace io
 				TRACE ("Done");
 			}
 			
+			/*!**********************************************************************
+			 * \copydoc virtual_format::write
+			 ************************************************************************/
 			template <class datatype>
 			static void write (const data_grid &grid, std::string file_name, std::string name, void *data, int record = -1, int flags = all_d) {
 				if (flags != scalar) {
@@ -111,15 +132,12 @@ namespace io
 				*body [file_name] << * (datatype *) data << "\t";
 			}
 			
+			/*!**********************************************************************
+			 * \copydoc virtual_format::read
+			 ************************************************************************/
 			template <class datatype>
 			static void read (const data_grid &grid, std::string file_name, std::string name, void *data, int record = -1, int flags = all_d) {
 				FATAL ("ASCII read not implemented");
-				throw 0;
-			}
-			
-			template <class datatype>
-			static void read_scalar (std::string file_name, std::string name, datatype *data, int record = -1) {
-				FATAL ("ASCII read scalar not implemented");
 				throw 0;
 			}
 		};

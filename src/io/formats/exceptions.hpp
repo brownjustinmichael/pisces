@@ -53,28 +53,16 @@ namespace io
 				 ************************************************************************/
 				inline const char *what () const throw () {return "Bad type passed";}
 			};
-
-			class key_does_not_exist : public std::exception
-			{
-			public:
-				key_does_not_exist (std::string i_key_name) :
-				key_name (i_key_name) {}
-
-				~key_does_not_exist () throw () {}
-
-				inline const char *what () const throw () {
-					std::stringstream message;
-					message << "Key " << key_name << " not found";
-					return message.str ().c_str ();
-				}
-
-			// private:
-				std::string key_name;
-			};
-	
+			
+			/*!**********************************************************************
+			 * \brief This exception occurs when a variable is missing from a file
+			 ************************************************************************/
 			class bad_variables : public std::exception
 			{
 			public:
+				/*!**********************************************************************
+				 * \brief Describe the nature of the exception
+				 ************************************************************************/
 				inline const char *what () const throw () {return "Bad variable(s)";}
 			};
 		} /* exceptions */
