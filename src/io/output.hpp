@@ -17,6 +17,14 @@
 #include "formats/exceptions.hpp"
 #include "functors/functor.hpp"
 
+#include "versions/version.hpp"
+
+/*!*******************************************************************
+ * \namespace io
+ * 
+ * \brief A namespace containing all the input and output classes of 
+ * the code
+ *********************************************************************/
 namespace io
 {
 	/*!*******************************************************************
@@ -47,6 +55,14 @@ namespace io
 		output (data_grid i_grid, std::string i_file_name = "out", int i_file_format = replace_file) : file_name (i_file_name), file_format (i_file_format), grid (i_grid) {}
 
 		virtual ~output () {}
+		
+		/*!**********************************************************************
+		 * \brief Get the version of the class
+		 ************************************************************************/
+		static versions::version& version () {
+			static versions::version version ("1.0.1.0");
+			return version;
+		}
 		
 		/*
 			TODO The get_function formality is rather obnoxious; perhaps there's a better way

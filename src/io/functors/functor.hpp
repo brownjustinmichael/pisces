@@ -9,6 +9,8 @@
 #ifndef FUNCTOR_HPP_DDCC8779
 #define FUNCTOR_HPP_DDCC8779
 
+#include "versions/version.hpp"
+
 namespace io
 {
 	namespace functors
@@ -25,6 +27,14 @@ namespace io
 		{
 		public:
 			virtual ~functor () {}
+			
+			/*!**********************************************************************
+			 * \brief Get the version of the class
+			 ************************************************************************/
+			static versions::version& version () {
+				static versions::version version ("1.0.1.0");
+				return version;
+			}
 		
 			/*!**********************************************************************
 			 * \brief The instruction to process on the data

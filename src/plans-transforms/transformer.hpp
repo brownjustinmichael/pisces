@@ -8,7 +8,8 @@
 
 #ifndef TRANSFORM_HPP_S8KRHTX3
 #define TRANSFORM_HPP_S8KRHTX3
-	
+
+#include "versions/version.hpp"
 #include "plans/grid.hpp"
 
 /*!**********************************************************************
@@ -54,6 +55,14 @@ namespace plans
 		}
 		
 		virtual ~transformer () {}
+		
+		/*!**********************************************************************
+		 * \brief Get the version of the class
+		 ************************************************************************/
+		static versions::version& version () {
+			static versions::version version ("1.0.1.0");
+			return version;
+		}
 		
 		/*!*******************************************************************
 		 * \brief Transform the dataset according to the given flags

@@ -11,6 +11,7 @@
 
 #include <yaml-cpp/yaml.h>
 
+#include "versions/version.hpp"
 #include "exceptions.hpp"
 #include "logger/logger.hpp"
 
@@ -78,6 +79,14 @@ namespace io
 		}
 	
 		virtual ~parameters () {}
+		
+		/*!**********************************************************************
+		 * \brief Get the version of the class
+		 ************************************************************************/
+		static versions::version& version () {
+			static versions::version version ("1.0.1.0");
+			return version;
+		}
 		
 		/*!**********************************************************************
 		 * \brief A static method that overrides every value in to with those from from and returns a new node

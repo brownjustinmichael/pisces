@@ -34,9 +34,6 @@
 namespace pisces
 {
 	template <class datatype>
-	const versions::version element <datatype>::version ("1.0.0.0");
-	
-	template <class datatype>
 	void element <datatype>::run (int &n_steps, int max_steps, int check_every) {
 		TRACE ("Running...");
 		datatype t_timestep;

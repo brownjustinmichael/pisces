@@ -12,6 +12,7 @@
 #ifndef PLAN_HPP_S9YPWHOM
 #define PLAN_HPP_S9YPWHOM
 
+#include "versions/version.hpp"
 #include "logger/logger.hpp"
 #include "grid.hpp"
 #include <map>
@@ -86,6 +87,14 @@ namespace plans
 		component_flags (i_component_flags)  {}
 		
 		virtual ~plan () {}
+		
+		/*!**********************************************************************
+		 * \brief Get the version of the class
+		 ************************************************************************/
+		static versions::version& version () {
+			static versions::version version ("1.0.1.0");
+			return version;
+		}
 		
 		/*!*******************************************************************
 		* \brief Operate the plan on the data arrays contained in the class

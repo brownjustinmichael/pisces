@@ -32,49 +32,11 @@
  * \section Introduction
  *
  * The goal of this project is to set up a code designed to do 2D 
- * Anelastic simulations using a spectral element scheme.
+ * Boussinesq simulations using a spectral element scheme.
  * 
  * WARNING: This code uses the C++ shared_ptr object. If you are unfamiliar with this object, this can lead to some problems. Always generate a shared_ptr either with the make_shared C++ standard library function or by setting the shared pointer to the result of the "new" operator. This will avoid many future headaches on your part. Never set a shared_ptr to a pointer of a previously existing object as the computer will attempt to call the destructor to the object twice. (This often appears as a segmentation fault after the code has finished while the computer cleans up.)
  *
  * Possible further reaching goals: 3D, pseudo-incompressible
- *********************************************************************/
-
-/*!*******************************************************************
- * \namespace bases
- * 
- * \brief A namespace containing the base classes of the code
- *********************************************************************/
-
-/*!*******************************************************************
- * \namespace io
- * 
- * \brief A namespace containing all the input and output classes of 
- * the code
- *********************************************************************/
-
-/*!*******************************************************************
- * \namespace utils
- * 
- * \brief A namespace containing the various utilities needed in the 
- * code, such as linear algebra
- *********************************************************************/
-
-/*!*******************************************************************
- * \namespace one_d
- * 
- * \brief A namespace containing all the 1D pieces of the code
- *********************************************************************/
-
-/*!*******************************************************************
- * \namespace one_d::chebyshev
- * 
- * \brief A namespace containing the 1D Chebyshev pieces of the code
- *********************************************************************/
-
-/*!*******************************************************************
- * \namespace two_d
- * 
- * \brief A namespace containing all the 2D pieces of the code
  *********************************************************************/
 
 /*!*******************************************************************

@@ -10,6 +10,8 @@
 #define SOLVER_HPP_BDH126SH
 	
 #include <memory>
+
+#include "versions/version.hpp"
 #include "plans/explicit_plan.hpp"
 #include "plans/implicit_plan.hpp"
 #include "plans/real_plan.hpp"
@@ -72,6 +74,14 @@ namespace plans
 		plan <datatype> (i_element_flags, i_component_flags) {}
 	
 		virtual ~solver () {}
+		
+		/*!**********************************************************************
+		 * \brief Get the version of the class
+		 ************************************************************************/
+		static versions::version& version () {
+			static versions::version version ("1.0.1.0");
+			return version;
+		}
 	
 		virtual int n_dependencies () {
 			return (int) deps.size ();

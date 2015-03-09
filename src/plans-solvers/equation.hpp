@@ -12,6 +12,7 @@
 #include <vector>
 #include <memory>
 
+#include "versions/version.hpp"
 #include "solver.hpp"
 
 namespace plans
@@ -47,6 +48,14 @@ namespace plans
 			TODO Have this take an array of grid pointers?
 		*/	
 		virtual ~equation () {}
+		
+		/*!**********************************************************************
+		 * \brief Get the version of the class
+		 ************************************************************************/
+		static versions::version& version () {
+			static versions::version version ("1.0.1.0");
+			return version;
+		}
 
 		virtual int n_dependencies () = 0;
 

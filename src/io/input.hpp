@@ -11,6 +11,7 @@
 
 #include "logger/logger.hpp"
 
+#include "versions/version.hpp"
 #include "formats/format.hpp"
 #include "functors/functor.hpp"
 
@@ -37,9 +38,17 @@ namespace io
 		 * /copydoc output::output
 		 ************************************************************************/
 		input (data_grid i_grid, std::string i_file_name = "in") : file_name (i_file_name), grid (i_grid) {}
-	
+		
 		virtual ~input () {}
-	
+		
+		/*!**********************************************************************
+		 * \brief Get the version of the class
+		 ************************************************************************/
+		static versions::version& version () {
+			static versions::version version ("1.0.1.0");
+			return version;
+		}
+		
 		/*!**********************************************************************
 		 * \brief Given a float pointer, return the appropriate read_function
 		 * 

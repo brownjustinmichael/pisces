@@ -11,6 +11,8 @@
 
 #include <vector>
 
+#include "versions/version.hpp"
+
 namespace io
 {
 	/*!**********************************************************************
@@ -66,6 +68,14 @@ namespace io
 		}
 		
 		virtual ~data_grid () {}
+		
+		/*!**********************************************************************
+		 * \brief Get the version of the class
+		 ************************************************************************/
+		static versions::version& version () {
+			static versions::version version ("1.0.1.0");
+			return version;
+		}
 		
 		/*!**********************************************************************
 		 * \return The number of dimensions

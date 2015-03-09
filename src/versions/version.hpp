@@ -11,14 +11,36 @@
 
 #include <string>
 
+/*!**********************************************************************
+ * \namespace versions
+ * 
+ * A namespace that contains the relevant information for any relevant versioning.
+ ************************************************************************/
 namespace versions
 {
 	struct version
 	{
+	private:
+		int major; //!< The integer major version: large API changes and major physics additions
+		int minor; //!< The integer minor version: small API changes, and large implementation changes
+		int revision; //!< The integer revision version: small implementation changes and bug fixes
+		int build; //!< The integer build: increment each time the code is built
+		
+	public:
+		/*!**********************************************************************
+		 * \brief Generate a version object from a string of the form "%d.%d.%d.%d"
+		 * 
+		 * \param versionStr A string of the form "%d.%d.%d.%d"
+		 * 
+		 * The string has the form major.minor.revision.build
+		 ************************************************************************/
 		version(std::string versionStr) {
 			sscanf(versionStr.c_str(), "%d.%d.%d.%d", &major, &minor, &revision, &build);
 		}
-
+		
+		/*!**********************************************************************
+		 * \brief Compare two versions to see which is newer
+		 ************************************************************************/
 		bool operator<(const version &otherVersion) const {
 			if (major < otherVersion.major)
 				return true;
@@ -37,11 +59,12 @@ namespace versions
 			return false;
 		}
 		
+		/*!**********************************************************************
+		 * \brief Compare two versions to see if they are the same
+		 ************************************************************************/
 		bool operator= (const version &otherVersion) const {
 			return major == otherVersion.major && minor == otherVersion.minor && revision == otherVersion.revision && build == otherVersion.build;
 		}
-
-		int major, minor, revision, build;
 	};
 } /* versions */
 

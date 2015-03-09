@@ -83,7 +83,6 @@ namespace pisces
 		
 	public:
 		std::vector <std::shared_ptr <plans::grid <datatype>>> grids; //!< A vector of shared pointers to the collocation grids
-		static const versions::version version;
 		/*!**********************************************************************
 		 * \brief Element iterator for iterating through the contained solvers
 		 ************************************************************************/
@@ -131,6 +130,14 @@ namespace pisces
 		}
 		
 		virtual ~element () {}
+		
+		/*!**********************************************************************
+		 * \brief Get the version of the class
+		 ************************************************************************/
+		static versions::version& version () {
+			static versions::version version ("1.0.1.0");
+			return version;
+		}
 		
 		/*!*******************************************************************
 		 * \brief Get the datatype reference to the named scalar

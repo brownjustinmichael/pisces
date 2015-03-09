@@ -16,6 +16,8 @@
 #include <algorithm>
 #include <vector>
 #include <typeinfo>
+
+#include "versions/version.hpp"
 #include "logger/logger.hpp"
 #include "linalg/utils.hpp"
 
@@ -100,6 +102,14 @@ namespace mpi
 		
 		virtual ~messenger () {
 			kill_all ();
+		}
+		
+		/*!**********************************************************************
+		 * \brief Get the version of the class
+		 ************************************************************************/
+		static versions::version& version () {
+			static versions::version version ("1.0.1.0");
+			return version;
 		}
 		
 		/*!**********************************************************************
