@@ -58,9 +58,7 @@ namespace mpi
 	/*!***********************************************************************
 	 * \brief A class to manage boundary communication
 	 * 
-	 * This class should provide implementation to send boundary information
-	 * to other elements. It may be dimension specific. There should only be 
-	 * one per thread.
+	 * This class should provide implementation to send boundary information to other elements. It may be dimension specific. There should only be one per thread.
 	 ************************************************************************/
 	class messenger
 	{
@@ -74,10 +72,12 @@ namespace mpi
 		{
 		public:
 			config (int *argc = NULL, char *** argv = NULL) {
+				// Initialize MPI
 				MPI::Init (*argc, *argv);
 			}
 			
 			virtual ~config () {
+				// Finalize MPI
 				MPI::Finalize ();
 			}
 		};
@@ -92,6 +92,8 @@ namespace mpi
 			static config config_instance (argc, argv);
 			np = MPI::COMM_WORLD.Get_size ();
 			id = MPI::COMM_WORLD.Get_rank ();
+			
+			// Enable the MPI error handler
 			MPI::COMM_WORLD.Set_errhandler(MPI::ERRORS_THROW_EXCEPTIONS);
 #else
 			np = 1;
@@ -108,7 +110,7 @@ namespace mpi
 		 * \brief Get the version of the class
 		 ************************************************************************/
 		static versions::version& version () {
-			static versions::version version ("1.0.1.0");
+			static versions::version version ("1.0.2.0");
 			return version;
 		}
 		
@@ -141,20 +143,28 @@ namespace mpi
 			TRACE ("Checking...");
 			int flags = mpi_all_clear;
 #ifdef _MPI
+			// Gather the status of each messenger across the processes
 			MPI::COMM_WORLD.Gather (&flags, 1, mpi_type (&typeid (int)), &stati [0], 1, mpi_type (&typeid (int)), 0);
 #endif // _MPI
+			// Combine all the statuses into one set of binary flags
+			/*
+				TODO Because this is small, it's probably cheaper to combine the flags on every processor
+			*/
 			if (id == 0) {
 				for (int i = 0; i < np; ++i) {
 					flags |= stati [i];
 				}
 			}
 #ifdef _MPI
+			// Broadcast the combined flags
 			MPI::COMM_WORLD.Bcast (&flags, 1, mpi_type (&typeid (int)), 0);
 #endif // _MPI
+			// If there's a fatal flag, kill all processes
 			if (flags & mpi_fatal) {
 				throw 0;
 			}
 			TRACE ("Check complete.");
+			// Return whether every processor is ready for instructions
 			if (flags != mpi_all_clear) {
 				return false;
 			} else {
@@ -227,6 +237,7 @@ namespace mpi
 			if (check_all ()) {
 #ifdef _MPI
 				if (id == 0 && data_out == data_in) {
+					// If the gathering is in place, you need a spectial flag
 					MPI::COMM_WORLD.Gather (MPI_IN_PLACE, n, mpi_type (&typeid (datatype)), data_out, n, mpi_type (&typeid (datatype)), 0);
 				} else {
 					MPI::COMM_WORLD.Gather (data_in, n, mpi_type (&typeid (datatype)), data_out, n, mpi_type (&typeid (datatype)), 0);
@@ -247,6 +258,7 @@ namespace mpi
 		void gatherv (int n, const datatype* data_in, int* ns, datatype* data_out) {
 			if (check_all ()) {
 #ifdef _MPI
+				// Create a displacement vector that tracks the starting position of each gathered array
 				std::vector <int> displs;
 				if (id == 0) {
 					displs.resize (np);
@@ -255,6 +267,7 @@ namespace mpi
 					}
 				}
 				if (id == 0 && data_out == data_in) {
+					// If the gathering is in place, you need a spectial flag
 					MPI::COMM_WORLD.Gatherv (MPI_IN_PLACE, n, mpi_type (&typeid (datatype)), data_in, ns, &displs [0], mpi_type (&typeid (datatype)), 0);
 				} else {
 					MPI::COMM_WORLD.Gatherv (data_in, n, mpi_type (&typeid (datatype)), data_out, ns, &displs [0], mpi_type (&typeid (datatype)), 0);
@@ -275,6 +288,7 @@ namespace mpi
 			if (check_all ()) {
 #ifdef _MPI
 				if (data_out == data_in) {
+					// If the gathering is in place, you need a spectial flag
 					MPI::COMM_WORLD.Allgather (MPI_IN_PLACE, n, mpi_type (&typeid (datatype)), data_out, n, mpi_type (&typeid (datatype)));
 				} else {
 					MPI::COMM_WORLD.Allgather (data_in, n, mpi_type (&typeid (datatype)), data_out, n, mpi_type (&typeid (datatype)));
@@ -295,12 +309,14 @@ namespace mpi
 		void allgatherv (int n, const datatype* data_in, int* ns, datatype* data_out) {
 			if (check_all ()) {
 #ifdef _MPI
+				// Create a displacement vector that tracks the starting position of each gathered array
 				std::vector <int> displs;
 				displs.resize (np);
 				for (int i = 1; i < np; ++i) {
 					displs [i] = displs [i - 1] + ns [i - 1];
 				}
 				if (data_out == data_in) {
+					// If the gathering is in place, you need a spectial flag
 					MPI::COMM_WORLD.Allgatherv (MPI_IN_PLACE, n, mpi_type (&typeid (datatype)), data_out, ns, &displs [0], mpi_type (&typeid (datatype)));
 				} else {
 					MPI::COMM_WORLD.Allgatherv ((const void *) data_in, n, mpi_type (&typeid (datatype)), (void *) data_out, ns, &displs [0], mpi_type (&typeid (datatype)));
