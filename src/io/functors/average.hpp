@@ -229,9 +229,9 @@ namespace io
 			}
 			
 			/*!**********************************************************************
-			 * \brief Average the data and return a pointer to the first element
+			 * \brief Find the maximum value of the data and return a pointer to it
 			 * 
-			 * \return The first element of the averaged 1D array
+			 * \return A pointer to the maximum value
 			 ************************************************************************/
 			void *calculate () {
 				if (func) {

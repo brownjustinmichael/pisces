@@ -47,9 +47,9 @@ namespace io
 			}
 	
 			/*!**********************************************************************
-			 * \brief Average the data and return a pointer to the first element
+			 * \brief Take the divergence of the data and return a pointer to the first element
 			 * 
-			 * \return The first element of the averaged 1D array
+			 * \return The first element of the 2D divergence array
 			 ************************************************************************/
 			void *calculate () {
 				// Calculate the vertical component of the divergence

@@ -40,9 +40,9 @@ namespace io
 			}
 
 			/*!**********************************************************************
-			 * \brief Average the data and return a pointer to the first element
+			 * \brief Take the product and return a pointer to the first element
 			 * 
-			 * \return The first element of the averaged 1D array
+			 * \return A pointer to the first element of the 2D product array
 			 ************************************************************************/
 			void *calculate () {
 				for (int i = 0; i < n; ++i) {
