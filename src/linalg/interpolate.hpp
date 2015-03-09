@@ -27,6 +27,8 @@ namespace linalg
 	 * \param y The double array of dependent variables to interpolate over
 	 * \param in The double array of independent variables to interpolate at
 	 * \param out The double array of output dependent variables
+	 * \param ldy The integer leading dimension of y
+	 * \param ldout The integer leading dimension of out
 	 ************************************************************************/
 	template <class datatype>
 	void interpolate (int n, int m, int l, datatype alpha, datatype beta, const datatype *x, const datatype *y, const datatype *in, datatype *out, int ldy = -1, int ldout = -1) {

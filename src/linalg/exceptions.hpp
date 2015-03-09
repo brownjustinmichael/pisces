@@ -16,40 +16,52 @@ namespace linalg
 {
 	namespace exceptions
 	{
+		/*!**********************************************************************
+		 * \brief An exception to be raised when attempting to refactorize something
+		 ************************************************************************/
 		class already_factorized : public std::exception
 		{
 		public:
+			/*!**********************************************************************
+			 * \brief Describe the exception
+			 ************************************************************************/
 			inline const char *what () const throw () {return "Matrix already factorized";}
 		};
-	
+		
+		/*!**********************************************************************
+		 * \brief An exception to be raised when a matrix connot be factorized
+		 ************************************************************************/
 		class cannot_factor : public std::exception
 		{
 		public:
-			virtual const char *what () const throw () {return "Unable to factor matrix";}
+			/*!**********************************************************************
+			 * \brief Describe the exception
+			 ************************************************************************/
+			virtual const char *what () const throw () {return "Unable to factorize matrix";}
 		};
-	
+		
+		/*!**********************************************************************
+		 * \brief An exception to be raised when a matrix equation cannot be solved
+		 ************************************************************************/
 		class cannot_solve : public std::exception
 		{
 		public:
+			/*!**********************************************************************
+			 * \brief Describe the exception
+			 ************************************************************************/			
 			inline const char *what () const throw () {return "Unable to solve matrix";}
 		};
-	
+		
+		/*!**********************************************************************
+		 * \brief An exception to be raised when a NaN is detected
+		 ************************************************************************/
 		class nan : public std::exception
 		{
 		public:
+			/*!**********************************************************************
+			 * \brief Describe the exception
+			 ************************************************************************/
 			inline const char *what () const throw () {return "Nan detected";}
-		};
-	
-		class mpi_fatal : public std::exception
-		{
-		public:
-			inline const char *what () const throw () {return "One or more MPI Processes failed";}
-		};
-	
-		class mesh_adapt : public std::exception
-		{
-		public:
-			inline const char *what () const throw () {return "Mesh adaptation needed";}
 		};
 	} /* exceptions */
 } /* linalg */
