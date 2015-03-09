@@ -16,22 +16,24 @@ namespace io
 	namespace functors
 	{
 		/*!**********************************************************************
-		 * \brief Averages a two dimensional block of data in the horizontal direction
+		 * \brief Takes the product of two two dimensional blocks of data
 		 ************************************************************************/
 		template <class datatype>
 		class product_functor : public functor
 		{
 		private:
-			datatype *data_1, *data_2; //!< A datatype pointer to the input data
+			datatype *data_1; //!< A datatype pointer to the left input data to multiply
+			datatype *data_2; //!< A datatype pointer to the right input data to multiply
 			int n; //!< The integer horizontal extent of the data
 			int m; //!< The integer vertical extent of the data
 			std::vector <datatype> inner_data; //!< A vector of processed data to output
 
 		public:
 			/*!**********************************************************************
-			 * \param i_data The datatype pointer to the data to average
 			 * \param i_n The integer horizontal extent of the data
 			 * \param i_m The integer vertical extent of the data
+			 * \param i_data_1 A datatype pointer to the left input data to multiply
+			 * \param i_data_2 A datatype pointer to the right input data to multiply
 			 ************************************************************************/
 			product_functor (int i_n, int i_m, datatype *i_data_1, datatype *i_data_2) : data_1 (i_data_1), data_2 (i_data_2), n (i_n), m (i_m) {
 				inner_data.resize (n * m);

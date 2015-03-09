@@ -16,29 +16,36 @@ namespace io
 	namespace functors
 	{
 		/*!**********************************************************************
-		 * \brief Averages a two dimensional block of data in the horizontal direction
+		 * \brief Slices a two dimensional block of data horizontally
 		 ************************************************************************/
 		template <class datatype>
 		class slice_functor : public functor
 		{
 		private:
 			datatype *data; //!< A datatype pointer to the input data
-			std::shared_ptr <functor> func;
+			std::shared_ptr <functor> func; //!< A shared pointer to another functor object, for nesting
 			int n; //!< The integer horizontal extent of the data
 			int m; //!< The integer vertical extent of the data
-			int i;
+			int i; //!< The integer location of the slice
 			std::vector <datatype> inner_data; //!< A vector of processed data to output
 
 		public:
 			/*!**********************************************************************
-			 * \param i_data The datatype pointer to the data to average
 			 * \param i_n The integer horizontal extent of the data
 			 * \param i_m The integer vertical extent of the data
+			 * \param i_i The integer location of the slice
+			 * \param i_data The datatype pointer to the data to average
 			 ************************************************************************/
 			slice_functor (int i_n, int i_m, int i_i, datatype *i_data) : data (i_data), n (i_n), m (i_m), i (i_i) {
 				inner_data.resize (n);
 			}
 			
+			/*!**********************************************************************
+			 * \param i_n The integer horizontal extent of the data
+			 * \param i_m The integer vertical extent of the data
+			 * \param i_i The integer location of the slice
+			 * \param i_func The shared pointer to the functor containing the processed data
+			 ************************************************************************/
 			slice_functor (int i_n, int i_m, int i_i, std::shared_ptr <functor> i_func) : data ((datatype *) i_func->calculate ()), func (i_func), n (i_n), m (i_m), i (i_i) {
 				inner_data.resize (n);
 			}

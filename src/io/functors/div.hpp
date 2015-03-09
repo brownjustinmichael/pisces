@@ -19,20 +19,26 @@ namespace io
 	namespace functors
 	{
 		/*!**********************************************************************
-		 * \brief Averages a two dimensional block of data in the horizontal direction
+		 * \brief Takes the divergence of a two dimensional vector field
 		 ************************************************************************/
 		template <class datatype>
 		class div_functor : public functor
 		{
 		private:
-			datatype *pos_x, *pos_z, *data_x, *data_z; //!< A datatype pointer to the input data
+			datatype *pos_x; //!< A datatype pointer to the horizontal position data
+			datatype *pos_z; //!< A datatype pointer to the vertical position data
+			datatype *data_x; //!< A datatype pointer to the x component of the vector data
+			datatype *data_z; //!< A datatype pointer to the z component of the vector data
 			int n; //!< The integer horizontal extent of the data
 			int m; //!< The integer vertical extent of the data
 			std::vector <datatype> inner_data; //!< A vector of processed data to output
 	
 		public:
 			/*!**********************************************************************
-			 * \param i_data The datatype pointer to the data to average
+			 * \param i_pos_x A datatype pointer to the horizontal position data
+			 * \param i_pos_z A datatype pointer to the vertical position data
+			 * \param i_data_x A datatype pointer to the x component of the vector data
+			 * \param i_data_x A datatype pointer to the z component of the vector data
 			 * \param i_n The integer horizontal extent of the data
 			 * \param i_m The integer vertical extent of the data
 			 ************************************************************************/
@@ -46,6 +52,7 @@ namespace io
 			 * \return The first element of the averaged 1D array
 			 ************************************************************************/
 			void *calculate () {
+				// Calculate the vertical component of the divergence
 				for (int i = 0; i < n; ++i) {
 					inner_data [i * m] = (data_z [i * m + 1] - data_z [i * m]) / (pos_z [i * m + 1] - pos_z [i * m]);
 					for (int j = 1; j < m - 1; ++j) {
@@ -53,6 +60,7 @@ namespace io
 					}
 					inner_data [i * m + m - 1] = (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / (pos_z [i * m + m - 1] - pos_z [i * m + m - 2]);
 				}
+				// Calculate the horizontal component of the divergence
 				for (int j = 0; j < m; ++j) {
 					inner_data [j] += (data_x [m + j] - data_x [(n - 1) * m + j]) / (pos_x [m + j] - pos_x [(n - 1) * m + j]);
 					for (int i = 1; i < n - 1; ++i) {

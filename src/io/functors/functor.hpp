@@ -13,10 +13,13 @@ namespace io
 {
 	namespace functors
 	{
+		/*
+			TODO Make nesting functors easier
+		*/
 		/*!**********************************************************************
 		 * \brief Abstract class for the functor object
 		 * 
-		 * The functor class is designed to take an instruction and apply it to some data for visualization and optimization purposes. For example, a functor could take a two dimensional grid of data and produce a one dimensional average or profile. This class serves as a wrapper for the calculate function, which returns a pointer to the processed data.
+		 * The functor class is designed to take an instruction and apply it to some data for visualization and optimization purposes. For example, a functor could take a two dimensional grid of data and produce a one dimensional average or profile. This class serves as a wrapper for the calculate function, which returns a pointer to the processed data. Many of these functors are built with the ability to take either an array to process or another functor to allow for nested calculations (e.g. max_functor (deriv_functor) calculates the maximum derivative)
 		 ************************************************************************/
 		class functor
 		{
