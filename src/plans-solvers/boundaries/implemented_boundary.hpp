@@ -44,7 +44,7 @@ namespace boundaries
     //         zvel = &zvel_vec [0] + (top ? m - 1 : 0);
     //         flags = 0x00;
     //         DEBUG (zvel << " " << zvel_ptr << " " << &zvel_vec [0] << " " << &flags);
-    //         transform = std::shared_ptr <plans::plan <datatype> > (new plans::vertical_transform <datatype> (n, m, zvel_ptr, &zvel_vec [0], inverse, &flags, &flags));
+    //         transform = std::shared_ptr <plans::plan <datatype> > (new plans::transforms::vertical <datatype> (n, m, zvel_ptr, &zvel_vec [0], inverse, &flags, &flags));
     //     }
     //
     //     virtual ~fixed_flux_boundary () {}

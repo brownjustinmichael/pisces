@@ -184,8 +184,8 @@ namespace plans
 				
 			linalg::scale ((m + 2) * ldn, 0.0, &data_temp [0]);
 		
-			// std::shared_ptr <plans::plan <datatype> > transform_x = std::shared_ptr <plans::plan <datatype> > (new plans::vertical_transform <datatype> (n, m, data_x, NULL, 0x00, element_flags, component_flags_x));
-			// std::shared_ptr <plans::plan <datatype> > transform_z = std::shared_ptr <plans::plan <datatype> > (new plans::vertical_transform <datatype> (n, m, data_z, NULL, 0x00, element_flags, component_flags_z));
+			// std::shared_ptr <plans::plan <datatype> > transform_x = std::shared_ptr <plans::plan <datatype> > (new plans::transforms::vertical <datatype> (n, m, data_x, NULL, 0x00, element_flags, component_flags_x));
+			// std::shared_ptr <plans::plan <datatype> > transform_z = std::shared_ptr <plans::plan <datatype> > (new plans::transforms::vertical <datatype> (n, m, data_z, NULL, 0x00, element_flags, component_flags_z));
 		
 			if (*component_flags_x & transformed_vertical) {
 				// transform_x->execute ();

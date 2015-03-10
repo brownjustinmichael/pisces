@@ -71,7 +71,7 @@ namespace pisces
 					DEBUG ("Adding " << *iter);
 					element <datatype>::add_solver (*iter, std::shared_ptr <plans::solvers::equation <datatype> > (new plans::solvers::implemented_equation <datatype> (*grids [0], *grids [1], ptr (*iter), &element_flags ["element"], &element_flags [*iter])));
 					element <datatype>::transforms.push_back (*iter);
-					element <datatype>::transformers [*iter] = std::shared_ptr <plans::transformer <datatype> > (new plans::implemented_transformer <datatype> (*grids [0], *grids [1], data (*iter), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &(data.flags ["element"]), &(data.flags [*iter]), element <datatype>::transform_threads));
+					element <datatype>::transformers [*iter] = std::shared_ptr <plans::transforms::transformer <datatype> > (new plans::transforms::implemented_transformer <datatype> (*grids [0], *grids [1], data (*iter), NULL, forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal , &(data.flags ["element"]), &(data.flags [*iter]), element <datatype>::transform_threads));
 				}
 			}
 			

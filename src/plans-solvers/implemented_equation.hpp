@@ -124,7 +124,7 @@ namespace plans
 						real_rhs_vec.resize (ldn * m);
 						real_rhs_ptr = &real_rhs_vec [0];
 						flags = 0x00;
-						transform = std::shared_ptr <plans::plan <datatype> > (new plans::horizontal_transform <datatype> (n, m, real_rhs_ptr, NULL, 0x00, element_flags, &flags));
+						transform = std::shared_ptr <plans::plan <datatype> > (new plans::transforms::horizontal <datatype> (n, m, real_rhs_ptr, NULL, 0x00, element_flags, &flags));
 					}
 					return real_rhs_ptr;
 				} else {

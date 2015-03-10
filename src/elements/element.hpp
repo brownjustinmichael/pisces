@@ -73,7 +73,7 @@ namespace pisces
 		std::map <std::string, int> &element_flags; //!< A map of integer flags
 		
 		std::map <std::string, std::shared_ptr <plans::solvers::equation <datatype>>> equations; //!< A vector of shared pointers to the matrix equations
-		std::map <std::string, std::shared_ptr <plans::transformer <datatype>>> transformers;
+		std::map <std::string, std::shared_ptr <plans::transforms::transformer <datatype>>> transformers;
 		std::vector <std::string> transforms;
 		int transform_threads;
 		

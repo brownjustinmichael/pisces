@@ -17,74 +17,77 @@
 
 namespace plans
 {
-	// class fftw_configure
-	// {
-	// public:
-	// 	fftw_configure ();
-	// 	
-	// 	virtual ~fftw_configure ();
-	// 	
-	// private:
-	// 	bool threads;
-	// };
-	
-	template <class datatype>
-	class horizontal_transform : public plans::plan <datatype>
+	namespace transforms
 	{
-	public:
-		/*!**********************************************************************
-		 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
-		 ************************************************************************/
-		horizontal_transform (int n, int m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0);
+		// class fftw_configure
+		// {
+		// public:
+		// 	fftw_configure ();
+		// 	
+		// 	virtual ~fftw_configure ();
+		// 	
+		// private:
+		// 	bool threads;
+		// };
+	
+		template <class datatype>
+		class horizontal : public plans::plan <datatype>
+		{
+		public:
+			/*!**********************************************************************
+			 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
+			 ************************************************************************/
+			horizontal (int n, int m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0);
 
-		horizontal_transform (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0);
+			horizontal (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0);
 		
-		virtual ~horizontal_transform () {}
+			virtual ~horizontal () {}
 		
-		virtual void execute ();
+			virtual void execute ();
 	
-	protected:
-		int n;
-		int m;
-		datatype *data_in;
-		datatype *data_out;
+		protected:
+			int n;
+			int m;
+			datatype *data_in;
+			datatype *data_out;
 		
-		int flags;
-		int threads;
-		datatype scalar;
-		std::vector <fftw_plan> plans;
-		std::vector <fftwf_plan> plans_float;
-		fftw_iodim major_iodim;
-		fftw_iodim iodim;
-	};
+			int flags;
+			int threads;
+			datatype scalar;
+			std::vector <fftw_plan> plans;
+			std::vector <fftwf_plan> plans_float;
+			fftw_iodim major_iodim;
+			fftw_iodim iodim;
+		};
 	
-	template <class datatype>
-	class vertical_transform : public plans::plan <datatype>
-	{
-	public:
-		/*!**********************************************************************
-		 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
-		 ************************************************************************/
-		vertical_transform (int n, int m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0);
+		template <class datatype>
+		class vertical : public plans::plan <datatype>
+		{
+		public:
+			/*!**********************************************************************
+			 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
+			 ************************************************************************/
+			vertical (int n, int m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0);
 
-		vertical_transform (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0);
+			vertical (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0);
 		
-		virtual ~vertical_transform () {}
+			virtual ~vertical () {}
 		
-		virtual void execute ();
+			virtual void execute ();
 	
-	protected:
-		int n;
-		int m;
-		datatype *data_in;
-		datatype *data_out;
+		protected:
+			int n;
+			int m;
+			datatype *data_in;
+			datatype *data_out;
 		
-		int flags;
-		int threads;
-		datatype scalar;
-		std::vector <fftw_plan> plans;
-		std::vector <fftwf_plan> plans_float;
-	};
+			int flags;
+			int threads;
+			datatype scalar;
+			std::vector <fftw_plan> plans;
+			std::vector <fftwf_plan> plans_float;
+		};
+	} /* transforms */
 } /* plans */
 
 #endif /* end of include guard: TRANSFORM_TWO_D_HPP_RAXYBFTC */
