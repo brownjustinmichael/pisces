@@ -111,6 +111,7 @@ namespace data
 namespace pisces
 {
 	using namespace plans;
+	using namespace plans::solvers;
 	using namespace boundaries;
 	
 	template <class datatype>
@@ -171,8 +172,8 @@ namespace pisces
 			}
 			
 			// Add the split directional solvers
-			equations [variable]->add_solver (typename collocation_solver <datatype>::factory (messenger_ptr, timestep, local_boundary_0, local_boundary_n), z_solver);
-			equations [variable]->add_solver (typename fourier_solver <datatype>::factory (timestep, local_boundary_0, local_boundary_n), x_solver);
+			equations [variable]->add_solver (typename collocation <datatype>::factory (messenger_ptr, timestep, local_boundary_0, local_boundary_n), z_solver);
+			equations [variable]->add_solver (typename fourier <datatype>::factory (timestep, local_boundary_0, local_boundary_n), x_solver);
 
 			// If a diffusion value is specified, construct the diffusion plans
 			equations [variable]->add_plan (typename vertical_diffusion <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")), pre_plan);
@@ -197,7 +198,7 @@ namespace pisces
 			if (!ptr (i_params ["equations.pressure.x_velocity"].as <std::string> ()) || !ptr (i_params ["equations.pressure.z_velocity"].as <std::string> ())) {
 				FATAL ("Uninitialized velocity specified in pressure solve");
 			}
-			equations ["pressure"]->add_solver (typename incompressible_corrector <datatype>::factory (messenger_ptr, boundary_0, boundary_n, *equations ["x_velocity"], *equations ["z_velocity"]));
+			equations ["pressure"]->add_solver (typename incompressible <datatype>::factory (messenger_ptr, boundary_0, boundary_n, *equations ["x_velocity"], *equations ["z_velocity"]));
 			equations ["pressure"]->get_solver (x_solver)->add_dependency ("z_velocity");
 			equations ["pressure"]->get_solver (x_solver)->add_dependency ("x_velocity");
 		}
