@@ -21,7 +21,7 @@ namespace plans
 	class laplace_solver : public plans::solver <datatype>
 	{
 	public:
-		laplace_solver (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, mpi::messenger* i_messenger_ptr, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
+		laplace_solver (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, mpi::messenger* i_messenger_ptr, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
 		
 		virtual ~laplace_solver () {}
 		
@@ -39,8 +39,8 @@ namespace plans
 		datatype *data;
 		datatype ex_pos_0, ex_pos_m;
 		int flags;
-		plans::grid <datatype> &grid_n;
-		plans::grid <datatype> &grid_m;
+		grids::grid <datatype> &grid_n;
+		grids::grid <datatype> &grid_m;
 		const datatype *pos_n, *pos_m;
 		datatype *sub_ptr, *diag_ptr, *sup_ptr;
 		int excess_0, excess_n, id, np;

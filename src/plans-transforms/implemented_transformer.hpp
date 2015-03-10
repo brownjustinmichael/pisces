@@ -20,7 +20,7 @@ namespace plans
 	class implemented_transformer : public plans::transformer <datatype>
 	{
 	public:
-		implemented_transformer (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *element_flags, int *component_flags, int i_threads) : 
+		implemented_transformer (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *element_flags, int *component_flags, int i_threads) : 
 		plans::transformer <datatype> (element_flags, component_flags),
 		ldn (i_grid_n.get_ld ()),
 		ldm (i_grid_m.get_ld ()),

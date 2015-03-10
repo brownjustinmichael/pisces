@@ -28,7 +28,7 @@ namespace two_d
 			 ************************************************************************/
 			horizontal_transform (int n, int m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags = 0);
 
-			horizontal_transform (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags = 0);
+			horizontal_transform (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags = 0);
 			
 			virtual ~horizontal_transform () {}
 			
@@ -55,7 +55,7 @@ namespace two_d
 			 ************************************************************************/
 			vertical_transform (int n, int m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags = 0);
 
-			vertical_transform (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags = 0);
+			vertical_transform (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags = 0);
 			
 			virtual ~vertical_transform () {}
 			
@@ -78,7 +78,7 @@ namespace two_d
 		class transformer : public plans::transformer <datatype>
 		{
 		public:
-			transformer (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *element_flags, int *component_flags) : 
+			transformer (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *element_flags, int *component_flags) : 
 			plans::transformer <datatype> (element_flags, component_flags),
 			ldn (i_grid_n.ld),
 			ldm (i_grid_m.ld),

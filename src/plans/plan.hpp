@@ -14,7 +14,7 @@
 
 #include "versions/version.hpp"
 #include "logger/logger.hpp"
-#include "grid.hpp"
+#include "grids/grid.hpp"
 #include <map>
 
 /*!*******************************************************************
@@ -75,7 +75,7 @@ namespace plans
 		 * \brief Get the version of the class
 		 ************************************************************************/
 		static versions::version& version () {
-			static versions::version version ("1.0.2.0");
+			static versions::version version ("1.1.0.0");
 			return version;
 		}
 		

@@ -12,13 +12,13 @@
 #include "io/output.hpp"
 #include "io/formats/virtual.hpp"
 #include "linalg/interpolate.hpp"
-#include "plans/grid.hpp"
+#include "plans/grids/grid.hpp"
 #include "linalg/utils.hpp"
 
 namespace pisces
 {
 	template <class datatype>
-	void rezone (mpi::messenger *inter_messenger, plans::grid <datatype> *input_grid, plans::grid <datatype> *output_grid, io::formats::virtual_file *input_virtual_file, io::formats::virtual_file *output_virtual_file) {
+	void rezone (mpi::messenger *inter_messenger, grids::grid <datatype> *input_grid, grids::grid <datatype> *output_grid, io::formats::virtual_file *input_virtual_file, io::formats::virtual_file *output_virtual_file) {
 		if (output_virtual_file != input_virtual_file) {
 			*output_virtual_file = *input_virtual_file;
 		}
@@ -76,8 +76,8 @@ namespace pisces
 		int id = messenger->get_id ();
 		int np = messenger->get_np ();
 		
-		plans::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == np - 1 ? 0 : 1);
-		std::shared_ptr <plans::grid <double>> vertical_grid = element->generate_grid (&vertical_axis);
+		grids::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == np - 1 ? 0 : 1);
+		std::shared_ptr <grids::grid <double>> vertical_grid = element->generate_grid (&vertical_axis);
 		
 		rezone <datatype> (messenger, &*(element->grids [1]), &*vertical_grid, &io::virtual_files ["rezone/virtual_file"], &io::virtual_files ["rezone/new_virtual_file"]);
 		

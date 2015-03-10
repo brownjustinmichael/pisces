@@ -12,7 +12,7 @@
 #include "mpi/messenger.hpp"
 #include "linalg/utils.hpp"
 #include "linalg/interpolate.hpp"
-#include "plans/grid.hpp"
+#include "plans/grids/grid.hpp"
 #include "plans-transforms/transform.hpp"
 #include "plans-transforms/transformer.hpp"
 
@@ -34,7 +34,7 @@ namespace plans
     //     std::shared_ptr <plans::plan <datatype>> transform;
     //
     // public:
-    //     fixed_flux_boundary (plans::grid <datatype> *i_grid_n, plans::grid <datatype> *i_grid_m, datatype i_coeff, datatype i_value, datatype* i_zvel, int* i_vel_flags, bool i_top) : coeff (i_coeff), value (i_value * std::sqrt (i_grid_n->get_n ())), top (i_top) {
+    //     fixed_flux_boundary (grids::grid <datatype> *i_grid_n, grids::grid <datatype> *i_grid_m, datatype i_coeff, datatype i_value, datatype* i_zvel, int* i_vel_flags, bool i_top) : coeff (i_coeff), value (i_value * std::sqrt (i_grid_n->get_n ())), top (i_top) {
     //         ldn = i_grid_n->get_ld ();
     //         m = i_grid_m->get_n ();
     //         n = i_grid_n->get_n ();
@@ -99,7 +99,7 @@ namespace plans
 		int ldn, m;
 		
 	public:
-		fixed_boundary (plans::grid <datatype> *i_grid_n, plans::grid <datatype> *i_grid_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n->get_n ())), top (i_top) {
+		fixed_boundary (grids::grid <datatype> *i_grid_n, grids::grid <datatype> *i_grid_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n->get_n ())), top (i_top) {
 			ldn = i_grid_n->get_ld ();
 			m = i_grid_m->get_n ();
 		}
@@ -129,7 +129,7 @@ namespace plans
 		datatype *deriv_matrix;
 		
 	public:
-		fixed_deriv_boundary (plans::grid <datatype> *i_grid_n, plans::grid <datatype> *i_grid_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n->get_n ())), top (i_top) {
+		fixed_deriv_boundary (grids::grid <datatype> *i_grid_n, grids::grid <datatype> *i_grid_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n->get_n ())), top (i_top) {
 			ldn = i_grid_n->get_ld ();
 			m = i_grid_m->get_n ();
 			deriv_matrix = i_grid_m->get_data (1) + (top ? m - 1 : 0);

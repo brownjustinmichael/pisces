@@ -28,7 +28,7 @@
 #include "io/output.hpp"
 #include "io/parameters.hpp"
 #include "io/formats/virtual.hpp"
-#include "plans/grid.hpp"
+#include "plans/grids/grid.hpp"
 #include "plans/plan.hpp"
 #include "plans-solvers/equation.hpp"
 #include "plans-transforms/transformer.hpp"
@@ -60,7 +60,7 @@ namespace pisces
 	class element
 	{
 	protected:
-		std::vector <plans::axis> axes; //!< A vector of axis objects, containing the basic grid information
+		std::vector <grids::axis> axes; //!< A vector of axis objects, containing the basic grid information
 		mpi::messenger* messenger_ptr; //!< A pointer to the messenger object
 		int name; //!< An integer representation of the element, to be used in file output
 		int dimensions; //!< The integer number of dimensions in the element
@@ -82,7 +82,7 @@ namespace pisces
 		io::formats::virtual_file *rezone_virtual_file; //!< A shared_ptr to a virtual file object, for rezoning
 		
 	public:
-		std::vector <std::shared_ptr <plans::grid <datatype>>> grids; //!< A vector of shared pointers to the collocation grids
+		std::vector <std::shared_ptr <grids::grid <datatype>>> grids; //!< A vector of shared pointers to the collocation grids
 		/*!**********************************************************************
 		 * \brief Element iterator for iterating through the contained solvers
 		 ************************************************************************/
@@ -250,7 +250,7 @@ namespace pisces
 		 * \param axis_ptr A pointer to an axis object, which contains the extent of the grid and number of gridpoints
 		 * \param 
 		 ************************************************************************/
-		virtual std::shared_ptr <plans::grid <datatype>> generate_grid (plans::axis *axis_ptr, int index = -1) = 0;
+		virtual std::shared_ptr <grids::grid <datatype>> generate_grid (grids::axis *axis_ptr, int index = -1) = 0;
 		
 		/*!**********************************************************************
 		 * \brief Factorize all solvers

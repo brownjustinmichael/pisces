@@ -17,7 +17,7 @@
 namespace plans
 {
 	template <class datatype>
-	laplace_solver <datatype>::laplace_solver (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, mpi::messenger* i_messenger_ptr, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
+	laplace_solver <datatype>::laplace_solver (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, mpi::messenger* i_messenger_ptr, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
 	plans::solver <datatype> (i_element_flags, i_component_flags),
 	n (i_grid_n.get_n ()), 
 	ldn (i_grid_n.get_ld ()), 

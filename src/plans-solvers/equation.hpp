@@ -77,7 +77,7 @@ namespace plans
 		 * 
 		 * \param index The index specifying from which dimension to grab the grid
 		 ************************************************************************/
-		virtual grid <datatype> *grid_ptr (int index = 0) = 0;
+		virtual grids::grid <datatype> *grid_ptr (int index = 0) = 0;
 
 
 		/*!**********************************************************************

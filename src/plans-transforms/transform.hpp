@@ -37,7 +37,7 @@ namespace plans
 		 ************************************************************************/
 		horizontal_transform (int n, int m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0);
 
-		horizontal_transform (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0);
+		horizontal_transform (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0);
 		
 		virtual ~horizontal_transform () {}
 		
@@ -67,7 +67,7 @@ namespace plans
 		 ************************************************************************/
 		vertical_transform (int n, int m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0);
 
-		vertical_transform (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0);
+		vertical_transform (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0);
 		
 		virtual ~vertical_transform () {}
 		

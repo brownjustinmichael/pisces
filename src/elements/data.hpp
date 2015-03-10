@@ -23,7 +23,7 @@
 #include "io/functors/average.hpp"
 #include "io/formats/exceptions.hpp"
 #include "io/formats/netcdf.hpp"
-#include "plans/grid.hpp"
+#include "plans/grids/grid.hpp"
 #include "plans-transforms/implemented_transformer.hpp"
 
 namespace data
@@ -325,12 +325,12 @@ namespace data
 	{
 	protected:
 		using data <datatype>::iterator;
-		std::shared_ptr <plans::grid <datatype>> grid_n, grid_m;
+		std::shared_ptr <grids::grid <datatype>> grid_n, grid_m;
 		int n, m;
 		
 	public:
 		using data <datatype>::duration;
-		implemented_data (plans::axis *i_axis_n, plans::axis *i_axis_m, int name = 0, std::string dump_file = "", std::string dump_directory = "./", int dump_every = 1) : grid_n (std::shared_ptr <plans::grid <datatype>> (new typename plans::horizontal::grid <datatype> (i_axis_n))), grid_m (std::shared_ptr <plans::grid <datatype>> (new typename plans::vertical::grid <datatype> (i_axis_m))), n (grid_n->get_n ()), m (grid_m->get_n ()) {
+		implemented_data (grids::axis *i_axis_n, grids::axis *i_axis_m, int name = 0, std::string dump_file = "", std::string dump_directory = "./", int dump_every = 1) : grid_n (std::shared_ptr <grids::grid <datatype>> (new typename grids::horizontal::grid <datatype> (i_axis_n))), grid_m (std::shared_ptr <grids::grid <datatype>> (new typename grids::vertical::grid <datatype> (i_axis_m))), n (grid_n->get_n ()), m (grid_m->get_n ()) {
 			// Set up output
 			const io::data_grid o_grid = io::data_grid::two_d (n, m, 0, 0, 0, 0);
 			

@@ -72,7 +72,7 @@ namespace plans
 		 * 0 0 interpolating row for below element  0 0
 		 * 0 0 boundary row for below element       0 0
 		 ************************************************************************/
-		collocation_solver (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, mpi::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <plans::boundary <datatype>> i_boundary_0, std::shared_ptr <plans::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
+		collocation_solver (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, mpi::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <plans::boundary <datatype>> i_boundary_0, std::shared_ptr <plans::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
 		
 		virtual ~collocation_solver () {}
 		
@@ -94,7 +94,7 @@ namespace plans
 			factory (mpi::messenger *i_messenger_ptr, datatype &i_timestep, std::shared_ptr <plans::boundary <datatype>> i_boundary_0, std::shared_ptr <plans::boundary <datatype>> i_boundary_n) : messenger_ptr (i_messenger_ptr), timestep (i_timestep), boundary_0 (i_boundary_0), boundary_n (i_boundary_n) {}
 			virtual ~factory () {}
 			
-			virtual std::shared_ptr <plans::solver <datatype>> instance (plans::grid <datatype> **grids, datatype *i_data, datatype *i_rhs, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+			virtual std::shared_ptr <plans::solver <datatype>> instance (grids::grid <datatype> **grids, datatype *i_data, datatype *i_rhs, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
 				return std::shared_ptr <plans::solver <datatype>> (new collocation_solver (*grids [0], *grids [1], messenger_ptr, timestep, boundary_0, boundary_n, i_rhs, i_data, i_element_flags, i_component_flags));
 			}
 		};

@@ -22,8 +22,8 @@ namespace plans
 		int ldn;
 		int m;
 		int flags;
-		plans::grid <datatype> &grid_n;
-		plans::grid <datatype> &grid_m;
+		grids::grid <datatype> &grid_n;
+		grids::grid <datatype> &grid_m;
 		
 		std::shared_ptr <plans::solver <datatype> > x_solver;
 		std::shared_ptr <plans::solver <datatype> > z_solver;
@@ -44,7 +44,7 @@ namespace plans
 		using plans::equation <datatype>::component_flags;
 		
 	public:
-		implemented_equation (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, datatype *i_data, int *i_element_flags, int *i_component_flags) : plans::equation <datatype> (i_data, i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), grid_n (i_grid_n), grid_m (i_grid_m) {
+		implemented_equation (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype *i_data, int *i_element_flags, int *i_component_flags) : plans::equation <datatype> (i_data, i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), grid_n (i_grid_n), grid_m (i_grid_m) {
 			spectral_rhs_ptr = NULL;
 			real_rhs_ptr = NULL;
 			old_rhs_vec.resize (ldn * m, 0.0);
@@ -102,7 +102,7 @@ namespace plans
 			}
 		}
 		
-		plans::grid <datatype> *grid_ptr (int index = 0) {
+		grids::grid <datatype> *grid_ptr (int index = 0) {
 			if (index == 0) {
 				return &grid_n;
 			} else {
@@ -176,7 +176,7 @@ namespace plans
 		}
 		
 		virtual void add_solver (const typename plans::solver <datatype>::factory &factory, int flags = 0x00) {
-			plans::grid <datatype>* grids [2] = {&grid_n, &grid_m};
+			grids::grid <datatype>* grids [2] = {&grid_n, &grid_m};
 			plans::implemented_equation <datatype>::add_solver (factory.instance (grids, data, cor_rhs_ptr, element_flags, component_flags), flags);
 		}
 		
@@ -193,19 +193,19 @@ namespace plans
 		
 		void add_plan (const typename plans::explicit_plan <datatype>::factory &factory, int flags) {
 			TRACE ("Adding plan...");
-			plans::grid <datatype>* grids [2] = {&grid_n, &grid_m};
+			grids::grid <datatype>* grids [2] = {&grid_n, &grid_m};
 			plans::equation <datatype>::add_plan (factory.instance (grids, data, new_rhs_ptr, element_flags, component_flags), flags);
 		}
 		
 		void add_plan (const typename plans::real_plan <datatype>::factory &factory, int flags) {
 			TRACE ("Adding plan...");
-			plans::grid <datatype>* grids [2] = {&grid_n, &grid_m};
+			grids::grid <datatype>* grids [2] = {&grid_n, &grid_m};
 			plans::equation <datatype>::add_plan (factory.instance (grids, data, rhs_ptr (real_rhs), element_flags, component_flags), flags);
 		}
 		
 		void add_plan (const typename plans::implicit_plan <datatype>::factory &factory, int flags) {
 			TRACE ("Adding plan...");
-			plans::grid <datatype>* grids [2] = {&grid_n, &grid_m};
+			grids::grid <datatype>* grids [2] = {&grid_n, &grid_m};
 			datatype* matrices [2] = {matrix_ptr (0), matrix_ptr (1)};
 			plans::equation <datatype>::add_plan (factory.instance (grids, matrices, data, rhs_ptr (spectral_rhs), element_flags, component_flags), flags);
 		}

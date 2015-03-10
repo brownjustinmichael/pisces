@@ -60,7 +60,7 @@ namespace plans
 	}
 	
 	template <>
-	horizontal_transform <float>::horizontal_transform (plans::grid <float> &i_grid_n, plans::grid <float> &i_grid_m, float* i_data_in, float* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads) :
+	horizontal_transform <float>::horizontal_transform (grids::grid <float> &i_grid_n, grids::grid <float> &i_grid_m, float* i_data_in, float* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads) :
 	plans::plan <float> (i_element_flags, i_component_flags),
 	n (i_grid_n.get_n ()), 
 	m (i_grid_m.get_n ()), 
@@ -153,7 +153,7 @@ namespace plans
 	}
 	
 	template <>
-	horizontal_transform <double>::horizontal_transform (plans::grid <double> &i_grid_n, plans::grid <double> &i_grid_m, double* i_data_in, double* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads) :
+	horizontal_transform <double>::horizontal_transform (grids::grid <double> &i_grid_n, grids::grid <double> &i_grid_m, double* i_data_in, double* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads) :
 	plans::plan <double> (i_element_flags, i_component_flags),
 	n (i_grid_n.get_n ()), 
 	m (i_grid_m.get_n ()), 
@@ -295,7 +295,7 @@ namespace plans
 	}
 	
 	template <>
-	vertical_transform <float>::vertical_transform (plans::grid <float> &i_grid_n, plans::grid <float> &i_grid_m, float* i_data_in, float* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads) :
+	vertical_transform <float>::vertical_transform (grids::grid <float> &i_grid_n, grids::grid <float> &i_grid_m, float* i_data_in, float* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads) :
 	plans::plan <float> (i_element_flags, i_component_flags),
 	n (i_grid_n.get_n ()), 
 	m (i_grid_m.get_n ()), 
@@ -362,7 +362,7 @@ namespace plans
 	}
 
 	template <>
-	vertical_transform <double>::vertical_transform (plans::grid <double> &i_grid_n, plans::grid <double> &i_grid_m, double* i_data_in, double* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads) :
+	vertical_transform <double>::vertical_transform (grids::grid <double> &i_grid_n, grids::grid <double> &i_grid_m, double* i_data_in, double* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads) :
 	plans::plan <double> (i_element_flags, i_component_flags),
 	n (i_grid_n.get_n ()), 
 	m (i_grid_m.get_n ()), 

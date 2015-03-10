@@ -14,7 +14,7 @@
 namespace data
 {
 	template <class datatype>
-	int data <datatype>::mode = plans::mode_flag;
+	int data <datatype>::mode = grids::mode_flag;
 	
 	template class data <double>;
 } /* data */

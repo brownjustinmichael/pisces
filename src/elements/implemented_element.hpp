@@ -33,7 +33,7 @@ namespace pisces
 	class implemented_element : public pisces::element <datatype>
 	{
 	public:
-		implemented_element (plans::axis i_axis_n, plans::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
+		implemented_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
 		element <datatype> (i_name, 2, i_params, i_data, i_messenger_ptr, i_element_flags),
 		n (i_axis_n.get_n ()), m (i_axis_m.get_n ()) {
 			TRACE ("Instantiating...");
@@ -63,8 +63,8 @@ namespace pisces
 			element <datatype>::initialize ("z");
 			transform_threads = i_params.get <int> ("parallel.transform.subthreads");
 			
-			grids [0] = std::shared_ptr <plans::grid <datatype>> (new typename plans::horizontal::grid <datatype> (&i_axis_n));
-			grids [1] = std::shared_ptr <plans::grid <datatype>> (new typename plans::vertical::grid <datatype> (&i_axis_m));
+			grids [0] = std::shared_ptr <grids::grid <datatype>> (new typename grids::horizontal::grid <datatype> (&i_axis_n));
+			grids [1] = std::shared_ptr <grids::grid <datatype>> (new typename grids::vertical::grid <datatype> (&i_axis_m));
 			
 			for (typename data::data <datatype>::iterator iter = data.begin (); iter != data.end (); ++iter) {
 				if ((*iter != "x") && (*iter != "z")) {
@@ -165,19 +165,19 @@ namespace pisces
 			return mode;
 		}
 		
-		virtual std::shared_ptr <plans::grid <datatype>> generate_grid (plans::axis *axis, int index = -1) {
+		virtual std::shared_ptr <grids::grid <datatype>> generate_grid (grids::axis *axis, int index = -1) {
 			if (index == 0) {
-				return std::shared_ptr <plans::grid <datatype>> (new typename plans::horizontal::grid <datatype> (axis));
+				return std::shared_ptr <grids::grid <datatype>> (new typename grids::horizontal::grid <datatype> (axis));
 			} else if (index == 1 || index == -1) {
-				return std::shared_ptr <plans::grid <datatype>> (new typename plans::vertical::grid <datatype> (axis));
+				return std::shared_ptr <grids::grid <datatype>> (new typename grids::vertical::grid <datatype> (axis));
 			} else {
 				throw 0;
 			}
 		}
 		
 		virtual io::formats::virtual_file *make_rezoned_virtual_file (datatype *positions, io::formats::virtual_file *old_virtual_file, int flags = 0x00) {
-			plans::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
-			std::shared_ptr <plans::grid <datatype>> vertical_grid = generate_grid (&vertical_axis);
+			grids::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
+			std::shared_ptr <grids::grid <datatype>> vertical_grid = generate_grid (&vertical_axis);
 			
 			pisces::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_virtual_file, &io::virtual_files ["two_d/element/new_virtual_file"]);
 			

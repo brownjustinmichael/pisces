@@ -12,9 +12,11 @@
 #include <vector>
 #include <memory>
 #include <cmath>
+
+#include "versions/version.hpp"
 #include "logger/logger.hpp"
 
-namespace plans
+namespace grids
 {
 	/*!**********************************************************************
 	 * \brief A class containing the basic dimension information
@@ -259,17 +261,17 @@ namespace plans
 		 * This collocation grid stores the N collocation points for up to the Mth order Chebyshev polynomial and their first and second derivatives
 		 *********************************************************************/
 		template <class datatype>
-		class grid : public plans::grid <datatype>
+		class grid : public grids::grid <datatype>
 		{
 		private:
-			using plans::grid <datatype>::n;
-			using plans::grid <datatype>::ld;
-			using plans::grid <datatype>::excess_0;
-			using plans::grid <datatype>::excess_n;
-			using plans::grid <datatype>::position_0;
-			using plans::grid <datatype>::position_n;
-			using plans::grid <datatype>::derivs;
-			using plans::grid <datatype>::positions;
+			using grids::grid <datatype>::n;
+			using grids::grid <datatype>::ld;
+			using grids::grid <datatype>::excess_0;
+			using grids::grid <datatype>::excess_n;
+			using grids::grid <datatype>::position_0;
+			using grids::grid <datatype>::position_n;
+			using grids::grid <datatype>::derivs;
+			using grids::grid <datatype>::positions;
 	
 			datatype scale; //!< A datatype by which the collocation grid should be scaled
 			datatype width; //!< The datatype width of the collocation region
@@ -288,7 +290,7 @@ namespace plans
 			
 		protected:
 			/*!**********************************************************************
-			 * \copydoc plans::grid::_calculate_matrix()
+			 * \copydoc grids::grid::_calculate_matrix()
 			 ************************************************************************/
 			void _calculate_matrix ();
 			
@@ -335,17 +337,17 @@ namespace plans
 		 * This collocation grid stores the N collocation points for up to the Mth order cosine modes and their first and second derivatives
 		 *********************************************************************/
 		template <class datatype>
-		class grid : public plans::grid <datatype>
+		class grid : public grids::grid <datatype>
 		{
 		private:
-			using plans::grid <datatype>::n;
-			using plans::grid <datatype>::ld;
-			using plans::grid <datatype>::excess_0;
-			using plans::grid <datatype>::excess_n;
-			using plans::grid <datatype>::position_0;
-			using plans::grid <datatype>::position_n;
-			using plans::grid <datatype>::derivs;
-			using plans::grid <datatype>::positions;
+			using grids::grid <datatype>::n;
+			using grids::grid <datatype>::ld;
+			using grids::grid <datatype>::excess_0;
+			using grids::grid <datatype>::excess_n;
+			using grids::grid <datatype>::position_0;
+			using grids::grid <datatype>::position_n;
+			using grids::grid <datatype>::derivs;
+			using grids::grid <datatype>::positions;
 
 			datatype scale; //!< A datatype by which the collocation grid should be scaled
 			datatype width; //!< The datatype width of the collocation region
@@ -361,7 +363,7 @@ namespace plans
 
 		protected:
 			/*!**********************************************************************
-			 * \copydoc plans::grid::_calculate_matrix()
+			 * \copydoc grids::grid::_calculate_matrix()
 			 ************************************************************************/
 			void _calculate_matrix ();
 		};
@@ -376,17 +378,17 @@ namespace plans
 		 * This collocation grid stores the N collocation points for up to the Mth order fourier mode and their first and second derivatives
 		 *********************************************************************/
 		template <class datatype>
-		class grid : public plans::grid <datatype>
+		class grid : public grids::grid <datatype>
 		{
 		private:
-			using plans::grid <datatype>::n;
-			using plans::grid <datatype>::ld;
-			using plans::grid <datatype>::excess_0;
-			using plans::grid <datatype>::excess_n;
-			using plans::grid <datatype>::position_0;
-			using plans::grid <datatype>::position_n;
-			using plans::grid <datatype>::derivs;
-			using plans::grid <datatype>::positions;
+			using grids::grid <datatype>::n;
+			using grids::grid <datatype>::ld;
+			using grids::grid <datatype>::excess_0;
+			using grids::grid <datatype>::excess_n;
+			using grids::grid <datatype>::position_0;
+			using grids::grid <datatype>::position_n;
+			using grids::grid <datatype>::derivs;
+			using grids::grid <datatype>::positions;
 	
 			datatype scale; //!< A datatype by which the collocation grid should be scaled
 			datatype width; //!< The datatype width of the collocation region
@@ -402,13 +404,21 @@ namespace plans
 				
 			virtual ~grid () {};
 			
+			/*!**********************************************************************
+			 * \brief Get the version of the class
+			 ************************************************************************/
+			static versions::version& version () {
+				static versions::version version ("1.1.0.0");
+				return version;
+			}
+			
 		protected:
 			/*!**********************************************************************
-			 * \copydoc plans::grid::_calculate_matrix()
+			 * \copydoc grids::grid::_calculate_matrix()
 			 ************************************************************************/
 			void _calculate_matrix ();
 		};
 	} /* fourier */
-} /* plans */
+} /* grids */
 
 #endif /* end of include guard: COLLOCATION_HPP_3FRTUK5Z */

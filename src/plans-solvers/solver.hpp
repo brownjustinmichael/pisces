@@ -17,7 +17,7 @@
 #include "plans/explicit_plan.hpp"
 #include "plans/implicit_plan.hpp"
 #include "plans/real_plan.hpp"
-#include "plans/grid.hpp"
+#include "plans/grids/grid.hpp"
 
 /*!*******************************************************************
  * \brief Execution flags used by the solver class
@@ -128,7 +128,7 @@ namespace plans
 		public:
 			virtual ~factory () {}
 		
-			virtual std::shared_ptr <plans::solver <datatype>> instance (plans::grid <datatype> **grids, datatype *i_data, datatype *i_rhs, int *i_element_flags = NULL, int *i_component_flags = NULL) const = 0;
+			virtual std::shared_ptr <plans::solver <datatype>> instance (grids::grid <datatype> **grids, datatype *i_data, datatype *i_rhs, int *i_element_flags = NULL, int *i_component_flags = NULL) const = 0;
 		};
 	};
 } /* plans */

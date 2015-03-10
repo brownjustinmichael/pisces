@@ -10,7 +10,7 @@
 #define TRANSFORM_HPP_S8KRHTX3
 
 #include "versions/version.hpp"
-#include "plans/grid.hpp"
+#include "plans/grids/grid.hpp"
 
 /*!**********************************************************************
  * \brief A set of flags to be used with setting up transforms

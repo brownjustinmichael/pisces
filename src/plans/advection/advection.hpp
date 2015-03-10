@@ -55,7 +55,7 @@ namespace plans
 		 * \param i_vel_n A pointer to the horizontal component of the velocity
 		 * \param i_vel_m A pointer to the vertical component of the velocity
 		 ************************************************************************/
-		advection (plans::grid <datatype> &i_grid_n, plans::grid <datatype> &i_grid_m, datatype i_coeff, datatype* i_vel_n, datatype *i_vel_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : real_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out, i_element_flags, i_component_flags), coeff (-i_coeff), vel_n (i_vel_n), vel_m (i_vel_m), pos_n (&(grid_n [0])), pos_m (&(grid_m [0])) {
+		advection (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_coeff, datatype* i_vel_n, datatype *i_vel_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : real_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out, i_element_flags, i_component_flags), coeff (-i_coeff), vel_n (i_vel_n), vel_m (i_vel_m), pos_n (&(grid_n [0])), pos_m (&(grid_m [0])) {
 			TRACE ("Adding advection...");
 			x_vec.resize (n * m);
 			x_ptr = &x_vec [0];
@@ -128,14 +128,14 @@ namespace plans
 			/*!**********************************************************************
 			 * \param i_coeff The coefficient of the plan to be created
 			 * \param i_vel_n A pointer to the horizontal component of the velocity
-			 * \param A pointer to the vertical component of the velocity
+			 * \param i_vel_m A pointer to the vertical component of the velocity
 			 ************************************************************************/
 			factory (datatype i_coeff, datatype* i_vel_n, datatype* i_vel_m) : coeff (i_coeff), vel_n (i_vel_n), vel_m (i_vel_m) {}
 			
 			/*!**********************************************************************
 			 * \param i_coeff A YAML::Node scalar to be read into the coefficient of the plan to construct
 			 * \param i_vel_n A pointer to the horizontal component of the velocity
-			 * \param A pointer to the vertical component of the velocity
+			 * \param i_vel_m A pointer to the vertical component of the velocity
 			 * 
 			 * If the YAML::Node is not defined, no plan will be constructed when instance is called.
 			 ************************************************************************/
@@ -152,7 +152,7 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc real_plan::factory::instance
 			 ************************************************************************/
-			virtual std::shared_ptr <plans::plan <datatype> > instance (plans::grid <datatype> **grids, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+			virtual std::shared_ptr <plans::plan <datatype> > instance (grids::grid <datatype> **grids, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
 				if (coeff) {
 					return std::shared_ptr <plans::plan <datatype> > (new advection <datatype> (*grids [0], *grids [1], coeff, vel_n, vel_m, i_data_in, i_data_out, i_element_flags, i_component_flags));
 				}
