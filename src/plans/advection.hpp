@@ -9,6 +9,6 @@
 #ifndef ADVECTION_HPP_5C2EB309
 #define ADVECTION_HPP_5C2EB309
 
-#include "advection/advection.hpp"
+#include "plans-advection/advection.hpp"
 
 #endif /* end of include guard: ADVECTION_HPP_5C2EB309 */

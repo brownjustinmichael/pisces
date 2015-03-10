@@ -9,8 +9,8 @@
 #ifndef DIFFUSION_HPP_C1935DDC
 #define DIFFUSION_HPP_C1935DDC
 
-#include "diffusion/horizontal_diffusion.hpp"
-#include "diffusion/vertical_diffusion.hpp"
-#include "diffusion/variable_diffusion.hpp"
+#include "plans-diffusion/horizontal_diffusion.hpp"
+#include "plans-diffusion/vertical_diffusion.hpp"
+#include "plans-diffusion/variable_diffusion.hpp"
 
 #endif /* end of include guard: DIFFUSION_HPP_C1935DDC */
