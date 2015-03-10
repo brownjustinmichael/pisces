@@ -18,7 +18,7 @@
 #include "plans/grids/grid.hpp"
 #include "config.hpp"
 
-using namespace plans;
+using namespace grids;
 
 int main (int argc, char *argv[])
 {
@@ -94,7 +94,7 @@ int main (int argc, char *argv[])
 		char buffer [file_format.size () * 2];
 		snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
 
-		io::formatted_output <formats::netcdf> output_stream (formats::data_grid::two_d (n, m, 0, parameters.get <bool> ("input.full") ? n_elements * m : 0, 0, parameters.get <bool> ("input.full") ? id * m : 0), buffer, io::replace_file);
+		io::formatted_output <formats::netcdf> output_stream (formats::data_grid::two_d (n, m, 0, parameters.get <bool> ("input.full") ? n_elements * m : 0, 0, parameters.get <bool> ("input.full") ? id * m : 0), buffer, formats::replace_file);
 
 		double duration = 0.0;
 		int mode = mode_flag;

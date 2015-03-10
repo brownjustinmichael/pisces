@@ -83,7 +83,7 @@ int main (int argc, char *argv[])
 		
 		std::shared_ptr <pisces::element <double>> element (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
 		
-		if (pisces::element <double>::version < versions::version ("0.6.0.0")) {
+		if (pisces::element <double>::version () < versions::version ("0.6.0.0")) {
 			INFO ("element.version < 0.6.0.0");
 		}
 		else {
