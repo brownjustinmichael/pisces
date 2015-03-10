@@ -18,6 +18,10 @@
  ************************************************************************/
 namespace boundaries
 {
+	/*
+		TODO Make non ASCII documentation for this class
+	*/
+	
 	/*!**********************************************************************
 	 * \brief A class used to calculate cross-boundary matrices
 	 * 

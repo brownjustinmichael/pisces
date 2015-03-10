@@ -12,6 +12,11 @@
 #include "../implicit_plan.hpp"
 #include "io/parameters.hpp"
 
+/*!**********************************************************************
+ * \namespace plans::diffusion
+ * 
+ * \brief A namespace containing the diffusion plan extension
+ ************************************************************************/
 namespace plans
 {
 	namespace diffusion

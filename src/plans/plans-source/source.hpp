@@ -16,6 +16,11 @@
 #include "linalg/exceptions.hpp"
 #include "io/parameters.hpp"
 
+/*!**********************************************************************
+ * \namespace plans::source
+ * 
+ * \brief A namespace containing the source plan extension
+ ************************************************************************/
 namespace plans
 {
 	namespace source

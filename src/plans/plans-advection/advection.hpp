@@ -13,6 +13,11 @@
 #include "io/parameters.hpp"
 #include "linalg/utils.hpp"
 
+/*!**********************************************************************
+ * \namespace plans::advection
+ * 
+ * \brief A namespace containing the advection plan extension
+ ************************************************************************/
 namespace plans
 {
 	namespace advection

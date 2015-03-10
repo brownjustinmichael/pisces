@@ -18,50 +18,65 @@ namespace plans
 {
 	namespace solvers
 	{
+		/*!**********************************************************************
+		 * \brief A solver class that solves by collocation in the vertical
+		 * 
+		 * This is the main solver of the code. It used both the messenger and boundary classes.
+		 ************************************************************************/
 		template <class datatype>
 		class collocation : public solver <datatype>
 		{
 		private:
-			int n;
-			int ldn;
-			int m;
-			datatype *data;
-			int flags;
+			using plans::solvers::solver <datatype>::element_flags;
+			using plans::solvers::solver <datatype>::component_flags;
+			
+			int n; //!< The horizontal extent of the data
+			int ldn; //!< The horizontal extent of the data array
+			int m; //!< The vertical extent of the data
+			datatype *data; //!< A pointer to the data
 
-			mpi::messenger* messenger_ptr;
+			mpi::messenger* messenger_ptr; //!< A pointer to the mpi messenger object
 
 			datatype& timestep; //!< A datatype reference to the current timestep
-			datatype *rhs_ptr;
+			datatype *rhs_ptr; //!< A pointer to the right hand side of the equation
 
-			const datatype* positions;
 			int excess_0; //!< The integer number of elements to recv from edge_0
 			int excess_n; //!< The integer number of elements to recv from edge_n
 
 			datatype* default_matrix; //!< The datatype array of the non-timestep dependent matrix component
 
 			std::vector <datatype> data_temp; //!< A datatype vector to be used in lieu of data_out for non-updating steps
+			std::vector <datatype> matrix; //!< The left hand side of the equation in matrix form excluding the original value and the timestep mutliplication
 			std::vector <datatype> factorized_matrix; //!< A datatype vector containing the factorized sum of default matrix and timestep * matrix
-			std::vector <datatype> boundary_matrix; //!< A datatype vector containing the factorized sum of default matrix and timestep * matrix
-			std::vector <datatype> previous_rhs;
-			std::vector <int> ns;
+			std::vector <datatype> boundary_matrix; //!< Some memory space needed for the matrix solve
+			
+			std::vector <int> ns; //!< A vector containing the extents of all the elements
 			std::vector <int> ipiv; //!< A vector of integers needed to calculate the factorization
 			std::vector <int> bipiv; //!< A vector of integers needed to calculate the factorization
-			std::vector <datatype> matrix;
 		
-			std::shared_ptr <boundaries::boundary <datatype>> boundary_0, boundary_n;
+			std::shared_ptr <boundaries::boundary <datatype>> boundary_0; //!< A shared pointer to the top boundary
+			std::shared_ptr <boundaries::boundary <datatype>> boundary_n; //!< A shared pointer to the bottom boundary
 		
-			int inner_m;
-			int ex_overlap_0;
-			int overlap_0;
-			int ex_overlap_n;
-			int overlap_n;
-			int lda;
-		
-			using plans::solvers::solver <datatype>::element_flags;
-			using plans::solvers::solver <datatype>::component_flags;
-		
+			int inner_m; //!< The number of non-overlapping grid points
+			int ex_overlap_0; //!< The external overlap region on the top
+			int overlap_0; //!< The total overlap region on the top
+			int ex_overlap_n; //!< The external overlap region on the bottom
+			int overlap_n; //!< The total overlap region on the bottom
+			int lda; //!< The leading dimension of the matrices
+			
 		public:
 			/*!**********************************************************************
+			 * \copydoc solver::solver
+			 * 
+			 * \param i_grid_n The horizontal grid object
+			 * \param i_grid_m The vertical grid object
+			 * \param i_messenger_ptr A pointer to the mpi messenger object
+			 * \param timestep A datatype reference to the current timestep
+			 * \param i_boundary_0 A shared pointer to the top boundary object
+			 * \param i_boundary_n A shared pointer to the bottom boundary object
+			 * \param i_rhs A pointer to the right hand side of the equation
+			 * \param i_data A pointer to the data
+			 * 
 			 * The collocation matrix is set up as 
 			 * 
 			 * 0 0 boundary row for above element       0 0
@@ -75,27 +90,51 @@ namespace plans
 			 * 0 0 boundary row for below element       0 0
 			 ************************************************************************/
 			collocation (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, mpi::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
-		
+			
 			virtual ~collocation () {}
-		
+			
+			/*!**********************************************************************
+			 * \copydoc solver::matrix_ptr
+			 ************************************************************************/
 			datatype *matrix_ptr () {
 				return &matrix [0];
 			}
-
+			
+			/*!**********************************************************************
+			 * \copydoc solver::factorize
+			 ************************************************************************/
 			void factorize ();
+			
+			/*!**********************************************************************
+			 * \copydoc solver::execute
+			 ************************************************************************/
 			void execute ();
-		
+			
+			/*!**********************************************************************
+			 * \copydoc solver::factory
+			 ************************************************************************/
 			class factory : public plans::solvers::solver <datatype>::factory
 			{
 			private:
-				mpi::messenger *messenger_ptr;
-				datatype &timestep;
-				std::shared_ptr <boundaries::boundary <datatype>> boundary_0, boundary_n;
-
+				mpi::messenger *messenger_ptr; //!< A pointer to the mpi messenger object for the solver to be constructed
+				datatype &timestep; //!< A reference to the timestep for the solver to be constructed
+				std::shared_ptr <boundaries::boundary <datatype>> boundary_0; //!< A shared pointer to the top boundary for the solver to be constructed
+				std::shared_ptr <boundaries::boundary <datatype>> boundary_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
+				
 			public:
+				/*!**********************************************************************
+				 * \param i_messenger_ptr A pointer to the mpi messenger object for the solver to be constructed
+				 * \param i_timestep A reference to the timestep for the solver to be constructed
+				 * \param i_boundary_0 A shared pointer to the top boundary for the solver to be constructed
+				 * \param i_boundary_n A shared pointer to the bottom boundary for the solver to be constructed
+				 ************************************************************************/
 				factory (mpi::messenger *i_messenger_ptr, datatype &i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n) : messenger_ptr (i_messenger_ptr), timestep (i_timestep), boundary_0 (i_boundary_0), boundary_n (i_boundary_n) {}
+				
 				virtual ~factory () {}
-			
+				
+				/*!**********************************************************************
+				 * \copydoc solver::factory::instance
+				 ************************************************************************/
 				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::grid <datatype> **grids, datatype *i_data, datatype *i_rhs, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
 					return std::shared_ptr <plans::solvers::solver <datatype>> (new collocation (*grids [0], *grids [1], messenger_ptr, timestep, boundary_0, boundary_n, i_rhs, i_data, i_element_flags, i_component_flags));
 				}
