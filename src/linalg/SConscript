@@ -1,10 +1,6 @@
 Import ("env")
-Import ("include_cuda")
 
 conf = Configure (env)
-
-if include_cuda:
-    conf.CheckLib ("cublas")
 
 conf.CheckLib ("lapack")
 conf.CheckLib ("cblas")

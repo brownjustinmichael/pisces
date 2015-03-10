@@ -1,6 +1,5 @@
 import os, inspect
 Import ("env")
-Import ("include_cuda")
 Import ("include_mp")
 Import ("include_mpi")
 Import ("include_vt")
@@ -25,8 +24,6 @@ if include_mpi:
     env ["CXX"] = "mpicxx"
 
     env.Append (CPPFLAGS = ["-D_MPI", "-fexceptions"])
-    if include_cuda:
-        env.Append (NVCCFLAGS = ["-D_MPI"])
         
 if include_vt:
     env ["CXX"] = "vtcxx"
@@ -41,11 +38,6 @@ if include_mp:
     env.Append (CPPFLAGS = ["-fopenmp"])
     env.Append (CPPFLAGS = ["-D_MP"])
 env.Append (LINKFLAGS = ["-fopenmp"])
-
-if include_cuda:
-    env.Tool ('cuda')
-    env.Append (NVCCFLAGS = ["-g", "-arch=sm_20"])
-    env.Append (CPPFLAGS = ["-D_CUDA"])
 
 if root is not None:
     env.Append (CPPFLAGS = ['-DPISCES_ROOT=\\"' + root + '\\"'])
@@ -64,8 +56,6 @@ if include_mpi:
     env ["CXX"] = "mpicxx"
 
     env.Append (CPPFLAGS = ["-D_MPI", "-fexceptions"])
-    if include_cuda:
-        env.Append (NVCCFLAGS = ["-D_MPI"])
 
 # If using vampirtrace, change the compiler, and add a compiler flag to let the code know to include vampirtrace and MPI functionality
 if include_vt:
@@ -84,12 +74,6 @@ if include_mp:
     env.Append (CPPFLAGS = ["-D_MP"])
     env.Append (LINKFLAGS = ["-fopenmp"])
 
-# If using CUDA, load the cuda scons tool and add some compiler flags
-if include_cuda:
-    env.Tool ('cuda')
-    env.Append (NVCCFLAGS = ["-g", "-arch=sm_20"])
-    env.Append (CPPFLAGS = ["-D_CUDA"])
-    
 if vertical_grid.lower () == 'cosine':
     env.Append (CPPFLAGS = ["-D_VCOS"])
 elif vertical_grid.lower () != 'chebyshev':
@@ -116,7 +100,7 @@ for dirname, dirnames, filenames in os.walk (path):
         for filename in filenames:
             if filename == "SConscript":
                 # Load any SConscript files found
-                env.SConscript(dirname + '/' + filename, variant_dir = os.path.join (".", directory (path, dirname)), duplicate = 0, exports = {'env': env, "objects": objects, "include_cuda" : include_cuda, "include_mp": include_mp})
+                env.SConscript(dirname + '/' + filename, variant_dir = os.path.join (".", directory (path, dirname)), duplicate = 0, exports = {'env': env, "objects": objects, "include_mp": include_mp})
                 
             if filename.split ('.') [-1] == 'cpp':
                 # Add any .cpp files found to the list of objects to compile
@@ -134,4 +118,4 @@ env.Default (env.Program(target = "../run/pisces", source = (["main.cpp"] + obje
 env.Default (env.Program(target = "../run/pisces_init", source = (["init.cpp"] + objects)))
 
 # Add the tests, which can be run with scons check
-env.SConscript('../test/SConscript', variant_dir = "./test", duplicate = 0, exports = {'env': env, "objects": objects, "include_cuda": include_cuda, "include_mp": include_mp})
+env.SConscript('../test/SConscript', variant_dir = "./test", duplicate = 0, exports = {'env': env, "objects": objects, "include_mp": include_mp})

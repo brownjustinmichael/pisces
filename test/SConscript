@@ -1,6 +1,5 @@
 import os, inspect
 Import ("env")
-Import ("include_cuda")
 Import ("include_mp")
 Import ("objects")
 

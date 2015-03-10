@@ -3,7 +3,6 @@ import SCons.Conftest
 
 exports = {}
 
-exports ["include_cuda"] = False
 exports ["include_mpi"] = True
 exports ["include_vt"] = False
 exports ["include_mp"] = True
