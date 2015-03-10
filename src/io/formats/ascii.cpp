@@ -1,5 +1,5 @@
 /*!**********************************************************************
- * \file formats.cpp
+ * \file ascii.cpp
  * /Users/justinbrown/Dropbox/pisces
  * 
  * Created by Justin Brown on 2014-06-18.

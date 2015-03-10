@@ -1,5 +1,5 @@
 /*!**********************************************************************
- * \file diffusion_two_d.hpp
+ * \file vertical_diffusion.hpp
  * /Users/justinbrown/Dropbox/pisces
  * 
  * Created by Justin Brown on 2013-10-09.

@@ -1,5 +1,5 @@
 /*!**********************************************************************
- * \file utils_solver.hpp
+ * \file linalg.hpp
  * /Users/justinbrown/Dropbox/pisces
  * 
  * Created by Justin Brown on 2013-08-07.

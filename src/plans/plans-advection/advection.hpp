@@ -1,5 +1,5 @@
 /*!**********************************************************************
- * \file advection_two_d.hpp
+ * \file plans-advection/advection.hpp
  * /Users/justinbrown/Dropbox/pisces/src/two_d
  * 
  * Created by Justin Brown on 2013-12-16.

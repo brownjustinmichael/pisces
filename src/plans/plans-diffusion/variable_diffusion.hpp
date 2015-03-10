@@ -1,5 +1,5 @@
 /*!**********************************************************************
- * \file horizontal_diffusion.hpp
+ * \file variable_diffusion.hpp
  * /Users/justinbrown/Dropbox/pisces
  * 
  * Created by Justin Brown on 2014-09-29.

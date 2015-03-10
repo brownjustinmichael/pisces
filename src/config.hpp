@@ -1,5 +1,5 @@
 /*!**********************************************************************
- * \file config.cpp
+ * \file config.hpp
  * /Users/justinbrown/Dropbox/pisces
  * 
  * Created by Justin Brown on 2015-01-27.

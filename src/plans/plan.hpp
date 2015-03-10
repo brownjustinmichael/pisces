@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file bases/plan.hpp
+ * \file plan.hpp
  * Spectral Element
  * 
  * This file provides the abstract base class plan, from which all code 

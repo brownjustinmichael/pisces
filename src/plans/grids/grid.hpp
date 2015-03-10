@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file bases/grid.hpp
+ * \file grid.hpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-19.

@@ -1,5 +1,5 @@
 /*!**********************************************************************
- * \file formats.hpp
+ * \file ascii.hpp
  * /Users/justinbrown/Dropbox/pisces
  * 
  * Created by Justin Brown on 2014-06-18.

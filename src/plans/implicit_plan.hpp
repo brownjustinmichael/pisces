@@ -1,5 +1,5 @@
 /*!**********************************************************************
- * \file plan_two_d.hpp
+ * \file implicit_plan.hpp
  * /Users/justinbrown/Dropbox/pisces
  * 
  * Created by Justin Brown on 2013-10-11.

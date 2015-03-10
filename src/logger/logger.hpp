@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file config.hpp
+ * \file logger.hpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-23.
