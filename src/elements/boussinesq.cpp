@@ -171,22 +171,22 @@ namespace pisces
 			}
 			
 			// Add the split directional solvers
-			solvers [variable]->add_solver (typename collocation_solver <datatype>::factory (messenger_ptr, timestep, local_boundary_0, local_boundary_n), z_solver);
-			solvers [variable]->add_solver (typename fourier_solver <datatype>::factory (timestep, local_boundary_0, local_boundary_n), x_solver);
+			equations [variable]->add_solver (typename collocation_solver <datatype>::factory (messenger_ptr, timestep, local_boundary_0, local_boundary_n), z_solver);
+			equations [variable]->add_solver (typename fourier_solver <datatype>::factory (timestep, local_boundary_0, local_boundary_n), x_solver);
 
 			// If a diffusion value is specified, construct the diffusion plans
-			solvers [variable]->add_plan (typename vertical_diffusion <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")), pre_plan);
-			solvers [variable]->add_plan (typename horizontal_diffusion <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")), mid_plan);
+			equations [variable]->add_plan (typename vertical_diffusion <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")), pre_plan);
+			equations [variable]->add_plan (typename horizontal_diffusion <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")), mid_plan);
 			
 			// If an advection value is specified, construct the advection plan
-			solvers [variable]->add_plan (typename advection <datatype>::factory (terms ["advection"], ptr ("x_velocity"), ptr ("z_velocity")), post_plan);
+			equations [variable]->add_plan (typename advection <datatype>::factory (terms ["advection"], ptr ("x_velocity"), ptr ("z_velocity")), post_plan);
 			if (terms ["advection"].IsDefined ()) advection_coeff = std::max (advection_coeff, terms ["advection"].as <datatype> ());
 			
 			// If any source terms are specified, construct the appropriate source plans
 			if (terms ["sources"].IsDefined ()) {
 				for (YAML::const_iterator source_iter = terms ["sources"].begin (); source_iter != terms ["sources"].end (); ++source_iter) {
 					if (ptr (source_iter->first.as <std::string> ())) {
-						solvers [variable]->add_plan (typename source <datatype>::factory (source_iter->second.as <datatype> (), ptr (source_iter->first.as <std::string> ())), mid_plan);
+						equations [variable]->add_plan (typename source <datatype>::factory (source_iter->second.as <datatype> (), ptr (source_iter->first.as <std::string> ())), mid_plan);
 					}
 				}
 			}
@@ -197,9 +197,9 @@ namespace pisces
 			if (!ptr (i_params ["equations.pressure.x_velocity"].as <std::string> ()) || !ptr (i_params ["equations.pressure.z_velocity"].as <std::string> ())) {
 				FATAL ("Uninitialized velocity specified in pressure solve");
 			}
-			solvers ["pressure"]->add_solver (typename incompressible_corrector <datatype>::factory (messenger_ptr, boundary_0, boundary_n, *solvers ["x_velocity"], *solvers ["z_velocity"]));
-			solvers ["pressure"]->get_solver (x_solver)->add_dependency ("z_velocity");
-			solvers ["pressure"]->get_solver (x_solver)->add_dependency ("x_velocity");
+			equations ["pressure"]->add_solver (typename incompressible_corrector <datatype>::factory (messenger_ptr, boundary_0, boundary_n, *equations ["x_velocity"], *equations ["z_velocity"]));
+			equations ["pressure"]->get_solver (x_solver)->add_dependency ("z_velocity");
+			equations ["pressure"]->get_solver (x_solver)->add_dependency ("x_velocity");
 		}
 		
 	TRACE ("Initialized.");

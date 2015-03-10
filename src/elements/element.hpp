@@ -72,29 +72,29 @@ namespace pisces
 		data::data <datatype> &data; //!< An object that contains all the data in the simulation
 		std::map <std::string, int> &element_flags; //!< A map of integer flags
 		
-		std::map <std::string, std::shared_ptr <plans::equation <datatype>>> solvers; //!< A vector of shared pointers to the matrix solvers
+		std::map <std::string, std::shared_ptr <plans::equation <datatype>>> equations; //!< A vector of shared pointers to the matrix equations
 		std::map <std::string, std::shared_ptr <plans::transformer <datatype>>> transformers;
 		std::vector <std::string> transforms;
 		int transform_threads;
 		
 	private:
-		std::vector <std::string> solver_keys; //!< A vector of integer keys to the solvers map
+		std::vector <std::string> equation_keys; //!< A vector of integer keys to the equations map
 		formats::virtual_file *rezone_virtual_file; //!< A shared_ptr to a virtual file object, for rezoning
 		
 	public:
 		std::vector <std::shared_ptr <grids::grid <datatype>>> grids; //!< A vector of shared pointers to the collocation grids
 		/*!**********************************************************************
-		 * \brief Element iterator for iterating through the contained solvers
+		 * \brief Element iterator for iterating through the contained equations
 		 ************************************************************************/
 		typedef typename std::vector <std::string>::iterator iterator;
 		
 		/*!**********************************************************************
-		 * \brief Generate an iterator to iterate through the solvers
+		 * \brief Generate an iterator to iterate through the equations
 		 * 
 		 * \return Beginning iterator
 		 ************************************************************************/
 		iterator begin () {
-			return solver_keys.begin ();
+			return equation_keys.begin ();
 		}
 		
 		/*!**********************************************************************
@@ -103,7 +103,7 @@ namespace pisces
 		 * \return Ending iterator
 		 ************************************************************************/
 		iterator end () {
-			return solver_keys.end ();
+			return equation_keys.end ();
 		}
 		
 		/*!*******************************************************************
@@ -132,10 +132,12 @@ namespace pisces
 		virtual ~element () {}
 		
 		/*!**********************************************************************
+		 * \brief Gets the version of the class
+		 * 
 		 * \return The version of the class
 		 ************************************************************************/
 		static versions::version& version () {
-			static versions::version version ("1.0.1.0");
+			static versions::version version ("1.1.0.0");
 			return version;
 		}
 		
@@ -203,8 +205,8 @@ namespace pisces
 		 *********************************************************************/
 		inline void add_solver (std::string i_name, std::shared_ptr <plans::equation <datatype> > i_solver_ptr) {
 			TRACE ("Adding solver...");
-			solvers [i_name] = i_solver_ptr;
-			solver_keys.push_back (i_name);
+			equations [i_name] = i_solver_ptr;
+			equation_keys.push_back (i_name);
 			TRACE ("Solver added.");
 		}
 		
@@ -229,7 +231,7 @@ namespace pisces
 			/*
 				TODO It would be nice to check if name exists in debug mode...
 			*/
-			return solvers [i_name]->matrix_ptr (index);
+			return equations [i_name]->matrix_ptr (index);
 		}
 		
 		/*!*******************************************************************
@@ -253,24 +255,24 @@ namespace pisces
 		virtual std::shared_ptr <grids::grid <datatype>> generate_grid (grids::axis *axis_ptr, int index = -1) = 0;
 		
 		/*!**********************************************************************
-		 * \brief Factorize all solvers
+		 * \brief Factorize all equations
 		 ************************************************************************/
 		virtual void factorize () {
 			TRACE ("Factorizing...");
 			for (iterator iter = begin (); iter != end (); iter++) {
 				if (!(element_flags [*iter] & factorized)) {
 					// DEBUG ("Factorizing " << *iter);
-					solvers [*iter]->factorize ();
+					equations [*iter]->factorize ();
 				}
 			}
 		}
 		
 		/*!**********************************************************************
-		 * \brief Transform to spectral space and execute all solvers
+		 * \brief Transform to spectral space and execute all equations
 		 ************************************************************************/
 		virtual void solve () {
 			TRACE ("Beginning solve...");
-			// Execute the solvers
+			// Execute the equations
 			// std::map <int, omp_lock_t> locks;
 			for (iterator iter = begin (); iter != end (); iter++) {
 				element_flags [*iter] &= ~solved;
@@ -286,8 +288,8 @@ namespace pisces
 					}
 					
 					skip = false;
-					for (int j = 0; j < solvers [*iter]->n_dependencies (); ++j) {
-						if (!(element_flags [solvers [*iter]->get_dependency (j)] & solved)) {
+					for (int j = 0; j < equations [*iter]->n_dependencies (); ++j) {
+						if (!(element_flags [equations [*iter]->get_dependency (j)] & solved)) {
 							skip = true;
 							break;
 						}
@@ -303,7 +305,7 @@ namespace pisces
 				for (int i = 0; i < threads; ++i) {
 					DEBUG ("Solving " << name);
 					std::string name = can_be_solved [i];
-					solvers [name]->solve ();
+					equations [name]->solve ();
 					// #pragma omp atomic
 					element_flags [name] |= solved;
 				}
@@ -315,7 +317,7 @@ namespace pisces
 			}
 			
 			for (iterator iter = begin (); iter != end (); iter++) {
-				solvers [*iter]->reset ();
+				equations [*iter]->reset ();
 			}
 			
 			// Make certain everything is fully transformed
@@ -327,11 +329,11 @@ namespace pisces
 		
 		virtual void solve_recursive (std::string name) {
 			if (!(element_flags [name] & solved)) {
-				int n_deps = solvers [name]->n_dependencies ();
+				int n_deps = equations [name]->n_dependencies ();
 				for (int i = 0; i < n_deps; ++i) {
-					solve_recursive (solvers [name]->get_dependency (i));
+					solve_recursive (equations [name]->get_dependency (i));
 				}
-				solvers [name]->solve ();
+				equations [name]->solve ();
 				element_flags [name] |= solved;
 			}
 		}

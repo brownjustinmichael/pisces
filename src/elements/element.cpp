@@ -74,7 +74,7 @@ namespace pisces
 
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
-				solvers [*iter]->execute_plans (pre_plan);
+				equations [*iter]->execute_plans (pre_plan);
 			}
 			, execution_time, execution_duration);
 
@@ -89,7 +89,7 @@ namespace pisces
 				
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
-				solvers [*iter]->execute_plans (mid_plan);
+				equations [*iter]->execute_plans (mid_plan);
 			}
 			, execution_time, execution_duration);
 			
@@ -119,7 +119,7 @@ namespace pisces
 						TIME (
 						for (iterator iter = begin (); iter != end (); iter++) {
 							DEBUG ("Executing");
-							solvers [*iter]->execute_plans (post_plan);
+							equations [*iter]->execute_plans (post_plan);
 						}
 						, execution_time, execution_duration);
 					// }
@@ -134,7 +134,7 @@ namespace pisces
 			// Calculate the pre solver plans
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
-				solvers [*iter]->execute_plans (pre_solve_plan);
+				equations [*iter]->execute_plans (pre_solve_plan);
 			}
 			, execution_time, execution_duration);
 
@@ -142,7 +142,7 @@ namespace pisces
 			solve ();
 			, solve_time, solve_duration);
 
-			// Check whether the timestep has changed. If it has, mark all solvers to be refactorized.
+			// Check whether the timestep has changed. If it has, mark all equations to be refactorized.
 
 			duration += timestep;
 			INFO ("TOTAL TIME: " << duration);

@@ -83,7 +83,7 @@ namespace pisces
 		using implemented_element <datatype>::duration;
 		using implemented_element <datatype>::alpha_0;
 		using implemented_element <datatype>::alpha_n;
-		using implemented_element <datatype>::solvers;
+		using implemented_element <datatype>::equations;
 		using implemented_element <datatype>::data;
 		
 		std::vector <datatype> area;
