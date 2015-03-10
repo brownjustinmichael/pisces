@@ -58,6 +58,7 @@ namespace io
 	
 		/*!**********************************************************************
 		 * \param file_name The parameter file from which the parameters should be loaded
+		 * \param defaults_file The default parameter file that should fill in any missing values
 		 ************************************************************************/
 		parameters (std::string file_name = "", std::string defaults_file = DEFAULTS_FILE) {
 			TRACE ("Constructing parameters");

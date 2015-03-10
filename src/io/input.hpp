@@ -75,6 +75,7 @@ namespace io
 		 * 
 		 * \param name The string representation of the variable to append
 		 * \param data_ptr A datatype pointer to the data array
+		 * \param flags A set of binary flags indicating which dimensions to output
 		 *********************************************************************/
 		template <class datatype>
 		void append (std::string name, datatype *data_ptr, int flags = formats::all_d) {

@@ -36,7 +36,7 @@ namespace functors
 		 * \param i_pos_x A datatype pointer to the horizontal position data
 		 * \param i_pos_z A datatype pointer to the vertical position data
 		 * \param i_data_x A datatype pointer to the x component of the vector data
-		 * \param i_data_x A datatype pointer to the z component of the vector data
+		 * \param i_data_z A datatype pointer to the z component of the vector data
 		 * \param i_n The integer horizontal extent of the data
 		 * \param i_m The integer vertical extent of the data
 		 ************************************************************************/
@@ -71,20 +71,26 @@ namespace functors
 	};
 	
 	/*!**********************************************************************
-	 * \brief Averages a two dimensional block of data in the horizontal direction
+	 * \brief Calculates the divergence in transformed space
 	 ************************************************************************/
 	template <class datatype>
 	class transform_div_functor : public functor
 	{
 	private:
-		datatype *pos_x, *pos_z, *data_x, *data_z; //!< A datatype pointer to the input data
+		datatype *pos_x; //!< A datatype pointer to the horizontal position data
+		datatype *pos_z; //!< A datatype pointer to the vertical position data
+		datatype *data_x; //!< A datatype pointer to the x component of the vector data
+		datatype *data_z; //!< A datatype pointer to the z component of the vector data
 		int n; //!< The integer horizontal extent of the data
 		int m; //!< The integer vertical extent of the data
 		std::vector <datatype> inner_data; //!< A vector of processed data to output
 
 	public:
 		/*!**********************************************************************
-		 * \param i_data The datatype pointer to the data to average
+		 * \param i_pos_x A datatype pointer to the horizontal position data
+		 * \param i_pos_z A datatype pointer to the vertical position data
+		 * \param i_data_x A datatype pointer to the x component of the vector data
+		 * \param i_data_z A datatype pointer to the z component of the vector data
 		 * \param i_n The integer horizontal extent of the data
 		 * \param i_m The integer vertical extent of the data
 		 ************************************************************************/
@@ -93,9 +99,9 @@ namespace functors
 		}
 
 		/*!**********************************************************************
-		 * \brief Average the data and return a pointer to the first element
+		 * \brief Take the divergence of the data and return a pointer to the first element
 		 * 
-		 * \return The first element of the averaged 1D array
+		 * \return The first element of the 2D divergence array
 		 ************************************************************************/
 		void *calculate () {
 			datatype scalar = acos (-1.0) * 2.0 / (pos_x [m * (n - 1)] - pos_x [0]);

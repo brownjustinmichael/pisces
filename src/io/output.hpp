@@ -94,6 +94,7 @@ namespace io
 		 * 
 		 * \param name The string representation of the quantity
 		 * \param functor_ptr A pointer to the functor that will calculate the resulting quantity
+		 * \param flags A set of binary flags indicating which dimensions to output
 		 * 
 		 * WARNING: THIS WILL HAPPILY ACCEPT A FUNCTOR OF NON-DATATYPE TEMPLATE
 		 ************************************************************************/
@@ -250,14 +251,11 @@ namespace io
 
 	public:
 		/*!**********************************************************************
+		 * \param i_grid The data_grid object representing the structure of the data
 		 * \param i_file_format A string file format, using standard string formatting for the increments (e.g. "output_%02d")
 		 * \param i_output_every The integer frequency of outputs
-		 * \copydoc formatted_output::formatted_output
 		 ************************************************************************/
-		incremental (formats::data_grid i_grid, std::string i_file_format, int i_output_every = 1) :
-		formatted_output <format> (i_grid, "", formats::replace_file),
-		file_format (i_file_format + format::extension ()),
-		output_every (i_output_every > 0 ? i_output_every : 1),
+		incremental (formats::data_grid i_grid, std::string i_file_format, int i_output_every = 1) : formatted_output <format> (i_grid, "", formats::replace_file), file_format (i_file_format + format::extension ()), output_every (i_output_every > 0 ? i_output_every : 1),
 		count (0) {}
 
 		virtual ~incremental () {}
@@ -326,8 +324,9 @@ namespace io
 
 	public:
 		/*!**********************************************************************
+		 * \param i_grid The data_grid object representing the structure of the data
+		 * \param i_file_name The string representation of the output file; do not include the extension; it will be added later
 		 * \param i_output_every The integer frequency of outputs
-		 * \copydoc formatted_output::formatted_output
 		 ************************************************************************/
 		replace_output (formats::data_grid i_grid, std::string i_file_name, int i_output_every = 1) : formatted_output <format> (i_grid, i_file_name, formats::replace_file), output_every (i_output_every > 0 ? i_output_every : 1), count (0) {}
 

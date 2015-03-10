@@ -22,8 +22,12 @@ namespace formats
 		class file_exception : public std::exception
 		{
 		private:
-			std::string file_name;
+			std::string file_name; //!< The file name that has the issue
+			
 		public:
+			/*!**********************************************************************
+			 * \param i_file_name The file name that has the issue
+			 ************************************************************************/
 			file_exception (std::string i_file_name) {
 				file_name = i_file_name;
 			}

@@ -133,8 +133,8 @@ namespace linalg
 	 * 
 	 * \param n An integer number of elements on the main axis
 	 * \param m An integer number of elements on the secondary axis
-	 * \param x A int array of values to be copied
-	 * \param y A int array to be copied to
+	 * \param a A float value to scale by
+	 * \param x A float array to be scaled
 	 * \param ldx The leading dimension of x
 	 * \param ldy The leading dimension of y
 	 ************************************************************************/
@@ -145,8 +145,8 @@ namespace linalg
 	 * 
 	 * \param n An integer number of elements on the main axis
 	 * \param m An integer number of elements on the secondary axis
-	 * \param x A int array of values to be copied
-	 * \param y A int array to be copied to
+	 * \param a A double value to scale by
+	 * \param x A double array to be scaled
 	 * \param ldx The leading dimension of x
 	 * \param ldy The leading dimension of y
 	 ************************************************************************/
@@ -263,13 +263,14 @@ namespace linalg
 	/*!*******************************************************************
 	 * \brief Perform the matrix-matrix multiplication y = alpha * a * b + beta * c
 	 * 
-	 * \param m An integer number of rows in a
-	 * \param n An integer number of columns in a
+	 * \param m An integer number of rows in c
+	 * \param n An integer number of columns in c
+	 * \param k An integer number of columns in a/rows in b
 	 * \param alpha The float alpha
 	 * \param a The float matrix a (Fortran format)
 	 * \param b The float matrix b
 	 * \param beta The float beta
-	 * \param y The float matrix c
+	 * \param c The float matrix c
 	 * \param lda The integer leading dimension of a
 	 * \param ldb The integer leading dimension of b
 	 * \param ldc The integer leading dimension of c
@@ -279,13 +280,14 @@ namespace linalg
 	/*!*******************************************************************
 	 * \brief Perform the matrix-matrix multiplication y = alpha * a * b + beta * c
 	 * 
-	 * \param m An integer number of rows in a
-	 * \param n An integer number of columns in a
+	 * \param m An integer number of rows in c
+	 * \param n An integer number of columns in c
+	 * \param k An integer number of columns in a/rows in b
 	 * \param alpha The double alpha
 	 * \param a The double matrix a (Fortran format)
 	 * \param b The double matrix b
 	 * \param beta The double beta
-	 * \param y The double matrix c
+	 * \param c The double matrix c
 	 * \param lda The integer leading dimension of a
 	 * \param ldb The integer leading dimension of b
 	 * \param ldc The integer leading dimension of c

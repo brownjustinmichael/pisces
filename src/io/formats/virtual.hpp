@@ -232,7 +232,7 @@ namespace formats
 	class virtual_format
 	{
 	public:
-		static bool uses_files;
+		static bool uses_files; //!< A boolean flag indicating whether this format uses files (false)
 		
 		virtual_format () {}
 		
