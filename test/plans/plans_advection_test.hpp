@@ -44,7 +44,7 @@ public:
 		grids::horizontal::grid <double> grid_n (n, -1.0, 1.0);
 		grids::vertical::grid <double> grid_m (m, -1.0, 1.0);
 		
-		plans::advection <double> plan (grid_n, grid_m, 1.0, &x_velocity [0], &z_velocity [0], &data [0], &rhs [0]);
+		plans::advection::uniform <double> plan (grid_n, grid_m, 1.0, &x_velocity [0], &z_velocity [0], &data [0], &rhs [0]);
 		
 		plan.execute ();
 		

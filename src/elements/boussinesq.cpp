@@ -176,18 +176,18 @@ namespace pisces
 			equations [variable]->add_solver (typename fourier <datatype>::factory (timestep, local_boundary_0, local_boundary_n), x_solver);
 
 			// If a diffusion value is specified, construct the diffusion plans
-			equations [variable]->add_plan (typename vertical_diffusion <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")), pre_plan);
-			equations [variable]->add_plan (typename horizontal_diffusion <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")), mid_plan);
+			equations [variable]->add_plan (typename diffusion::vertical <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")), pre_plan);
+			equations [variable]->add_plan (typename diffusion::horizontal <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")), mid_plan);
 			
 			// If an advection value is specified, construct the advection plan
-			equations [variable]->add_plan (typename advection <datatype>::factory (terms ["advection"], ptr ("x_velocity"), ptr ("z_velocity")), post_plan);
+			equations [variable]->add_plan (typename advection::uniform <datatype>::factory (terms ["advection"], ptr ("x_velocity"), ptr ("z_velocity")), post_plan);
 			if (terms ["advection"].IsDefined ()) advection_coeff = std::max (advection_coeff, terms ["advection"].as <datatype> ());
 			
 			// If any source terms are specified, construct the appropriate source plans
 			if (terms ["sources"].IsDefined ()) {
 				for (YAML::const_iterator source_iter = terms ["sources"].begin (); source_iter != terms ["sources"].end (); ++source_iter) {
 					if (ptr (source_iter->first.as <std::string> ())) {
-						equations [variable]->add_plan (typename source <datatype>::factory (source_iter->second.as <datatype> (), ptr (source_iter->first.as <std::string> ())), mid_plan);
+						equations [variable]->add_plan (typename source::uniform <datatype>::factory (source_iter->second.as <datatype> (), ptr (source_iter->first.as <std::string> ())), mid_plan);
 					}
 				}
 			}
