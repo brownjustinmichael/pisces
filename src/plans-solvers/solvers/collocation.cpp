@@ -72,10 +72,10 @@ namespace plans
 			// DEBUG ("ZERO POINT " << &factorized_matrix [0]);
 
 			if (boundary_0) {
-				boundary_0->calculate_matrix (timestep, default_matrix + excess_0, &matrix [excess_0], &matrix [0], &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0], lda);
+				boundary_0->calculate_matrix (timestep, default_matrix + excess_0, &matrix [excess_0], &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0], lda);
 			}
 			if (boundary_n) {
-				boundary_n->calculate_matrix (timestep, default_matrix + m - 1 - excess_n, &matrix [m - 1 - excess_n], &matrix [0], &factorized_matrix [(ex_overlap_0) * (lda + 1) + m - 1 - excess_n], lda);
+				boundary_n->calculate_matrix (timestep, default_matrix + m - 1 - excess_n, &matrix [m - 1 - excess_n], &factorized_matrix [(ex_overlap_0) * (lda + 1) + m - 1 - excess_n], lda);
 			}
 		
 			linalg::matrix_scale (lda - 2 - excess_0 - ex_overlap_0 - excess_n - ex_overlap_n, lda, timestep, &factorized_matrix [ex_overlap_0 + 1 + excess_0], lda);
@@ -130,12 +130,12 @@ namespace plans
 			// }
 
 			if (boundary_0) {
-				boundary_0->calculate_rhs (data + excess_0, data, &data_temp [ex_overlap_0], &data_temp [ex_overlap_0 + excess_0], m, lda, z_solve);
+				boundary_0->calculate_rhs (data + excess_0, &data_temp [ex_overlap_0 + excess_0], m, lda, z_solve);
 			} else {
 				linalg::matrix_add_scaled (1 + excess_0, ldn, 1.0, data, &data_temp [ex_overlap_0], m, lda);
 			}
 			if (boundary_n) {
-				boundary_n->calculate_rhs (data + m - 1 - excess_n, data, &data_temp [ex_overlap_0], &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda, z_solve);
+				boundary_n->calculate_rhs (data + m - 1 - excess_n, &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda, z_solve);
 			} else {
 				linalg::matrix_add_scaled (1 + excess_n, ldn, 1.0, data + m - 1 - excess_n, &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda);
 			}

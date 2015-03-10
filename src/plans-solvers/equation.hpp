@@ -97,14 +97,14 @@ namespace plans
 			virtual datatype *data_ptr () {
 				return data;
 			}
-		
+			
 			/*!**********************************************************************
 			 * \brief Return a pointer to the grid object for the index dimension
 			 * 
 			 * \param index The index specifying from which dimension to grab the grid
 			 ************************************************************************/
 			virtual grids::grid <datatype> *grid_ptr (int index = 0) = 0;
-		
+			
 			/*!**********************************************************************
 			 * \brief Return a pointer to the right hand side of the matrix equation
 			 * 

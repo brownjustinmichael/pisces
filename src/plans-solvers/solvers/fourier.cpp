@@ -73,12 +73,12 @@ namespace plans
 			}
 		
 			if (boundary_0) {
-				boundary_0->calculate_rhs (data + excess_0, data, &data_temp [ex_overlap_0], &data_temp [ex_overlap_0 + excess_0], m, lda, x_solve);
+				boundary_0->calculate_rhs (data + excess_0, &data_temp [ex_overlap_0 + excess_0], m, lda, x_solve);
 			} else {
 				linalg::matrix_add_scaled (1 + excess_0, ldn, 1.0, data, &data_temp [ex_overlap_0], m, lda);
 			}
 			if (boundary_n) {
-				boundary_n->calculate_rhs (data + m - 1 - excess_n, data, &data_temp [ex_overlap_0], &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda, x_solve);
+				boundary_n->calculate_rhs (data + m - 1 - excess_n, &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda, x_solve);
 			} else {
 				linalg::matrix_add_scaled (1 + excess_n, ldn, 1.0, data + m - 1 - excess_n, &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda);
 			}

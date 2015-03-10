@@ -129,10 +129,10 @@ namespace pisces
 		// If we aren't at an edge, add the appropriate communicating boundary
 		std::shared_ptr <boundaries::boundary <datatype>> boundary_0, boundary_n;
 		if (messenger_ptr->get_id () > 0) {
-			boundary_0 = std::shared_ptr <boundaries::boundary <datatype>> (new communicating_boundary <datatype> (messenger_ptr, grids [0]->get_ld (), m, grids [1]->get_excess_0 (), &((*grids [1]) [0]), 0, false));
+			boundary_0 = std::shared_ptr <boundaries::boundary <datatype>> (new communicating_boundary <datatype> (messenger_ptr, grids [0]->get_ld (), m, grids [1]->get_excess_0 (), false));
 		}
 		if (messenger_ptr->get_id () + 1 < messenger_ptr->get_np ()) {
-			boundary_n = std::shared_ptr <boundaries::boundary <datatype>> (new communicating_boundary <datatype> (messenger_ptr, grids [0]->get_ld (), m, grids [1]->get_excess_n (), &((*grids [1]) [0]), m - grids [1]->get_excess_n (), true));
+			boundary_n = std::shared_ptr <boundaries::boundary <datatype>> (new communicating_boundary <datatype> (messenger_ptr, grids [0]->get_ld (), m, grids [1]->get_excess_n (), true));
 		}
 
 		std::shared_ptr <boundaries::boundary <datatype>> local_boundary_0, local_boundary_n;
