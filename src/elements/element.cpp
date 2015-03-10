@@ -74,7 +74,7 @@ namespace pisces
 
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
-				equations [*iter]->execute_plans (pre_plan);
+				equations [*iter]->execute_plans (plans::solvers::pre_plan);
 			}
 			, execution_time, execution_duration);
 
@@ -89,7 +89,7 @@ namespace pisces
 				
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
-				equations [*iter]->execute_plans (mid_plan);
+				equations [*iter]->execute_plans (plans::solvers::mid_plan);
 			}
 			, execution_time, execution_duration);
 			
@@ -119,7 +119,7 @@ namespace pisces
 						TIME (
 						for (iterator iter = begin (); iter != end (); iter++) {
 							DEBUG ("Executing");
-							equations [*iter]->execute_plans (post_plan);
+							equations [*iter]->execute_plans (plans::solvers::post_plan);
 						}
 						, execution_time, execution_duration);
 					// }
@@ -134,7 +134,7 @@ namespace pisces
 			// Calculate the pre solver plans
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
-				equations [*iter]->execute_plans (pre_solve_plan);
+				equations [*iter]->execute_plans (plans::solvers::pre_solve_plan);
 			}
 			, execution_time, execution_duration);
 
@@ -148,7 +148,7 @@ namespace pisces
 			INFO ("TOTAL TIME: " << duration);
 			if (t_timestep != timestep) {
 				for (std::map <std::string, int>::iterator iter = element_flags.begin (); iter != element_flags.end (); iter++) {
-					element_flags [iter->first] &= ~factorized;
+					element_flags [iter->first] &= ~plans::solvers::factorized;
 				}
 				INFO ("Updating timestep: " << t_timestep);
 			}

@@ -260,7 +260,7 @@ namespace pisces
 		virtual void factorize () {
 			TRACE ("Factorizing...");
 			for (iterator iter = begin (); iter != end (); iter++) {
-				if (!(element_flags [*iter] & factorized)) {
+				if (!(element_flags [*iter] & plans::solvers::factorized)) {
 					// DEBUG ("Factorizing " << *iter);
 					equations [*iter]->factorize ();
 				}

@@ -19,38 +19,38 @@
 #include "plans/real_plan.hpp"
 #include "plans/grids/grid.hpp"
 
-/*!*******************************************************************
- * \brief Execution flags used by the solver class
- *********************************************************************/
-enum solver_flags {
-	not_x_solver = 0x01,
-	not_y_solver = 0x02,
-	not_z_solver = 0x04,
-	x_solver = not_y_solver | not_z_solver,
-	y_solver = not_x_solver | not_z_solver,
-	z_solver = not_x_solver | not_y_solver,
-	implicit_rhs = 0x00,
-	spectral_rhs = 0x00,
-	explicit_rhs = 0x01,
-	real_rhs = 0x02,
-	factorized = 0x08,
-	first_run = 0x100,
-};
-
-/*!**********************************************************************
- * \brief Flags specifying the time to execute a particular plan
- ************************************************************************/
-enum solver_plan_flags {
-	pre_plan = 0x01,
-	mid_plan = 0x02,
-	post_plan = 0x04,
-	pre_solve_plan = 0x08
-};
-
 namespace plans
 {
 	namespace solvers
 	{
+		/*!*******************************************************************
+		 * \brief Execution flags used by the solver class
+		 *********************************************************************/
+		enum solver_flags {
+			not_x_solver = 0x01,
+			not_y_solver = 0x02,
+			not_z_solver = 0x04,
+			x_solver = not_y_solver | not_z_solver,
+			y_solver = not_x_solver | not_z_solver,
+			z_solver = not_x_solver | not_y_solver,
+			implicit_rhs = 0x00,
+			spectral_rhs = 0x00,
+			explicit_rhs = 0x01,
+			real_rhs = 0x02,
+			factorized = 0x08,
+			first_run = 0x100,
+		};
+		
+		/*!**********************************************************************
+		 * \brief Flags specifying the time to execute a particular plan
+		 ************************************************************************/
+		enum solver_plan_flags {
+			pre_plan = 0x01,
+			mid_plan = 0x02,
+			post_plan = 0x04,
+			pre_solve_plan = 0x08
+		};
+		
 		/*!*******************************************************************
 		 * \brief A class designed to solve a matrix equation
 		 * 
