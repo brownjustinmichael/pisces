@@ -28,8 +28,10 @@ namespace plans
 	public:
 		int *element_flags; //!< A pointer to the flags describing the global state of the element
 		int *component_flags; //!< A pointer to the flags describing the state of the local variable
+		
 	protected:
-		datatype *data;
+		datatype *data; //!< A pointer to the data held by the equation object
+		
 	private:
 		std::vector <std::shared_ptr <plan <datatype> > > pre_transform_plans; //!< A vector of shared pointers of plans to be executed before the transforms
 		std::vector <std::shared_ptr <plan <datatype> > > mid_transform_plans; //!< A vector of shared pointers of plans to be executed after the vertical transform
@@ -38,6 +40,7 @@ namespace plans
 
 	public:
 		/*!**********************************************************************
+		 * \param i_data A pointer to the data associated with the equation
 		 * \param i_element_flags A pointer to the flags describing the global state of the element
 		 * \param i_component_flags A pointer to the flags describing the state of the local variable
 		 ************************************************************************/
@@ -46,23 +49,44 @@ namespace plans
 		}
 		/*
 			TODO Have this take an array of grid pointers?
-		*/	
+		*/
+		
 		virtual ~equation () {}
 		
 		/*!**********************************************************************
+		 * \brief Gets the version of the class
+		 * 
 		 * \return The version of the class
 		 ************************************************************************/
 		static versions::version& version () {
 			static versions::version version ("1.0.1.0");
 			return version;
 		}
-
+		
+		/*!**********************************************************************
+		 * \brief Get the number of dependencies in its current state
+		 * 
+		 * \return The number of dependencies of the equation
+		 ************************************************************************/
 		virtual int n_dependencies () = 0;
-
+		
+		/*!**********************************************************************
+		 * \brief Get the ith dependency of the equation in its current state
+		 * 
+		 * \param The index of the desired dependency
+		 * 
+		 * \return The ith dependency of the equation
+		 ************************************************************************/
 		virtual const std::string& get_dependency (int i) = 0;
-
+		
+		/*!**********************************************************************
+		 * \brief Add a dependency to one of the solvers in the equation
+		 * 
+		 * \param name The name of the dependency
+		 * \param flags The solver flag indicating with which direction the dependency is associated
+		 ************************************************************************/
 		virtual void add_dependency (std::string name, int flags = 0x00) = 0;
-
+		
 		/*!**********************************************************************
 		 * \brief Return a pointer to the data associated with the solver
 		 * 
@@ -71,15 +95,14 @@ namespace plans
 		virtual datatype *data_ptr () {
 			return data;
 		}
-
+		
 		/*!**********************************************************************
 		 * \brief Return a pointer to the grid object for the index dimension
 		 * 
 		 * \param index The index specifying from which dimension to grab the grid
 		 ************************************************************************/
 		virtual grids::grid <datatype> *grid_ptr (int index = 0) = 0;
-
-
+		
 		/*!**********************************************************************
 		 * \brief Return a pointer to the right hand side of the matrix equation
 		 * 
@@ -97,7 +120,99 @@ namespace plans
 		 * Note: these matrices are implementation dependent, so the implicit plans must be associated with particular matrix types.
 		 ************************************************************************/
 		virtual datatype *matrix_ptr (int index = 0) = 0;
+		
+		/*!**********************************************************************
+		 * \brief Get a solver from the equation object
+		 * 
+		 * \param flags A set of integer flags describing the direction of the solve to get (x_solver, z_solver)
+		 ************************************************************************/
+		virtual std::shared_ptr <plans::solver <datatype>> get_solver (int flags = 0x00) = 0;
+	
+		/*!**********************************************************************
+		 * \brief Add a solver to the equation
+		 * 
+		 * \param i_solver A shared pointer to the solver object to add
+		 * \param flags A set of integer flags describing the direction of the solve (x_solver, z_solver)
+		 ************************************************************************/
+		virtual void add_solver (std::shared_ptr <solver <datatype> > i_solver, int flags = 0x00) = 0;
+	
+		/*!**********************************************************************
+		 * \brief Add a solver to the equation
+		 * 
+		 * \param factory A solver factory to generate the solver object to add
+		 * \param flags A set of integer flags describing the direction of the solve (x_solver, z_solver)
+		 ************************************************************************/
+		virtual void add_solver (const typename plans::solver <datatype>::factory &factory, int flags = 0x00) = 0;
+	
+		/*!*******************************************************************
+		 * \brief Adds a plan to be executed
+		 * 
+		 * \param i_plan A shared pointer to the plan to add
+		 * \param flags Binary flags to specify the time to execute the flag, from solver_plan_flags
+		 *********************************************************************/
+		inline void add_plan (std::shared_ptr <plan <datatype>> i_plan, int flags) {
+			TRACE ("Adding plan...");
+			if (!i_plan) {
+				return;
+			}
+			if (flags & pre_plan) {
+				pre_transform_plans.push_back (i_plan);
+			}
+			if (flags & mid_plan) {
+				mid_transform_plans.push_back (i_plan);
+			}
+			if (flags & post_plan) {
+				post_transform_plans.push_back (i_plan);
+			}
+			if (flags & pre_solve_plan) {
+				pre_solve_plans.push_back (i_plan);
+			}
+			TRACE ("Added.");
+		}
+	
+		/*!**********************************************************************
+		 * \copydoc add_plan
+		 ************************************************************************/
+		virtual void add_plan (const typename explicit_plan <datatype>::factory &factory, int flags) = 0;
+	
+		/*!**********************************************************************
+		 * \copydoc add_plan
+		 ************************************************************************/
+		virtual void add_plan (const typename real_plan <datatype>::factory &factory, int flags) = 0;
+	
+		/*!**********************************************************************
+		 * \copydoc add_plan
+		 ************************************************************************/
+		virtual void add_plan (const typename implicit_plan <datatype>::factory &factory, int flags) = 0;
 
+		/*!**********************************************************************
+		 * \brief Execute the plans for the state given in flags
+		 * 
+		 * \param flags Binary flags specifying which flags should be executed, from solver_plan_flags
+		 ************************************************************************/
+		inline void execute_plans (int flags) {
+			if (flags & pre_plan) {
+				for (int i = 0; i < (int) pre_transform_plans.size (); ++i) {
+					pre_transform_plans [i]->execute ();
+				}
+			}
+			if (flags & mid_plan) {
+				for (int i = 0; i < (int) mid_transform_plans.size (); ++i) {
+					mid_transform_plans [i]->execute ();
+				}
+			}
+			if (flags & post_plan) {
+				for (int i = 0; i < (int) post_transform_plans.size (); ++i) {
+					post_transform_plans [i]->execute ();
+				}
+			}
+			if (flags & pre_solve_plan) {
+				for (int i = 0; i < (int) pre_solve_plans.size (); ++i) {
+					pre_solve_plans [i]->execute ();
+				}
+			}
+		}
+		
 		/*!**********************************************************************
 		 * \brief Reset anything in the solver class that needs to be reset after the equation is solved (e.g. zero arrays, switch directions)
 		 * 
@@ -131,83 +246,21 @@ namespace plans
 			_solve ();
 		}
 
-		virtual void add_solver (std::shared_ptr <solver <datatype> > i_solver, int flags = 0x00) = 0;
-		
-		virtual void add_solver (const typename plans::solver <datatype>::factory &factory, int flags = 0x00) = 0;
-
-		virtual std::shared_ptr <plans::solver <datatype>> get_solver (int flags = 0x00) = 0;
-
-		/*!*******************************************************************
-		 * \brief Adds a plan to be executed
-		 * 
-		 * \param i_plan A pointer to the plan to add
-		 * \param flags Binary flags to specify the time to execute the flag, from solver_plan_flags
-		 *********************************************************************/
-		inline void add_plan (std::shared_ptr <plan <datatype>> i_plan, int flags) {
-			TRACE ("Adding plan...");
-			if (!i_plan) {
-				return;
-			}
-			if (flags & pre_plan) {
-				pre_transform_plans.push_back (i_plan);
-			}
-			if (flags & mid_plan) {
-				mid_transform_plans.push_back (i_plan);
-			}
-			if (flags & post_plan) {
-				post_transform_plans.push_back (i_plan);
-			}
-			if (flags & pre_solve_plan) {
-				pre_solve_plans.push_back (i_plan);
-			}
-			TRACE ("Added.");
-		}
-
-		virtual void add_plan (const typename explicit_plan <datatype>::factory &factory, int flags) = 0;
-
-		virtual void add_plan (const typename real_plan <datatype>::factory &factory, int flags) = 0;
-
-		virtual void add_plan (const typename implicit_plan <datatype>::factory &factory, int flags) = 0;
-
-		/*!**********************************************************************
-		 * \brief Execute the plans for the state given in flags
-		 * 
-		 * \param flags Binary flags specifying which flags should be executed, from solver_plan_flags
-		 ************************************************************************/
-		inline void execute_plans (int flags) {
-			if (flags & pre_plan) {
-				for (int i = 0; i < (int) pre_transform_plans.size (); ++i) {
-					pre_transform_plans [i]->execute ();
-				}
-			}
-			if (flags & mid_plan) {
-				for (int i = 0; i < (int) mid_transform_plans.size (); ++i) {
-					mid_transform_plans [i]->execute ();
-				}
-			}
-			if (flags & post_plan) {
-				for (int i = 0; i < (int) post_transform_plans.size (); ++i) {
-					post_transform_plans [i]->execute ();
-				}
-			}
-			if (flags & pre_solve_plan) {
-				for (int i = 0; i < (int) pre_solve_plans.size (); ++i) {
-					pre_solve_plans [i]->execute ();
-				}
-			}
-		}
-
 	protected:
 		/*!**********************************************************************
-		 * \brief Transform the dataset
+		 * \brief Factorize the equation
 		 * 
-		 * \params flags Binary flags that determine the type of solve (forward_vertical, forward_horizontal, inverse_vertical, inverse_horizontal)
+		 * This method contains the implementation of the factorization, which must be overwritten in the subclasses.
+		 ************************************************************************/
+		virtual void _factorize () = 0;
+		
+		/*!**********************************************************************
+		 * \brief Transform the dataset
 		 * 
 		 * This method contains the implementation of the solve, which must be overwritten in the subclasses.
 		 ************************************************************************/
 		virtual void _solve () = 0;
 
-		virtual void _factorize () = 0;
 	};
 } /* plans */
 
