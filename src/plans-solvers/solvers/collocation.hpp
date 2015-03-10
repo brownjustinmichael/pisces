@@ -11,7 +11,7 @@
 
 #include "linalg-block/solver.hpp"
 
-#include "../boundary.hpp"
+#include "../boundaries/boundary.hpp"
 #include "../solver.hpp"
 
 namespace plans
@@ -46,7 +46,7 @@ namespace plans
 		std::vector <int> bipiv; //!< A vector of integers needed to calculate the factorization
 		std::vector <datatype> matrix;
 		
-		std::shared_ptr <plans::boundary <datatype>> boundary_0, boundary_n;
+		std::shared_ptr <boundaries::boundary <datatype>> boundary_0, boundary_n;
 		
 		int inner_m;
 		int ex_overlap_0;
@@ -72,7 +72,7 @@ namespace plans
 		 * 0 0 interpolating row for below element  0 0
 		 * 0 0 boundary row for below element       0 0
 		 ************************************************************************/
-		collocation_solver (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, mpi::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <plans::boundary <datatype>> i_boundary_0, std::shared_ptr <plans::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
+		collocation_solver (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, mpi::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
 		
 		virtual ~collocation_solver () {}
 		
@@ -88,10 +88,10 @@ namespace plans
 		private:
 			mpi::messenger *messenger_ptr;
 			datatype &timestep;
-			std::shared_ptr <plans::boundary <datatype>> boundary_0, boundary_n;
+			std::shared_ptr <boundaries::boundary <datatype>> boundary_0, boundary_n;
 
 		public:
-			factory (mpi::messenger *i_messenger_ptr, datatype &i_timestep, std::shared_ptr <plans::boundary <datatype>> i_boundary_0, std::shared_ptr <plans::boundary <datatype>> i_boundary_n) : messenger_ptr (i_messenger_ptr), timestep (i_timestep), boundary_0 (i_boundary_0), boundary_n (i_boundary_n) {}
+			factory (mpi::messenger *i_messenger_ptr, datatype &i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n) : messenger_ptr (i_messenger_ptr), timestep (i_timestep), boundary_0 (i_boundary_0), boundary_n (i_boundary_n) {}
 			virtual ~factory () {}
 			
 			virtual std::shared_ptr <plans::solver <datatype>> instance (grids::grid <datatype> **grids, datatype *i_data, datatype *i_rhs, int *i_element_flags = NULL, int *i_component_flags = NULL) const {

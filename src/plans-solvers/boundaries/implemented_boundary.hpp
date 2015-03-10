@@ -17,12 +17,11 @@
 #include "plans-transforms/transformer.hpp"
 
 #include "boundary.hpp"
-#include "solver.hpp"
 
-namespace plans
+namespace boundaries
 {
     // template <class datatype>
-    // class fixed_flux_boundary : public plans::boundary <datatype>
+    // class fixed_flux_boundary : public boundaries::boundary <datatype>
     // {
     // private:
     //     datatype coeff, value;
@@ -91,7 +90,7 @@ namespace plans
     // };
 
 	template <class datatype>
-	class fixed_boundary : public plans::boundary <datatype>
+	class fixed_boundary : public boundaries::boundary <datatype>
 	{
 	private:
 		datatype value;
@@ -120,7 +119,7 @@ namespace plans
 	};
 	
 	template <class datatype>
-	class fixed_deriv_boundary : public plans::boundary <datatype>
+	class fixed_deriv_boundary : public boundaries::boundary <datatype>
 	{
 	private:
 		datatype value;
@@ -158,7 +157,7 @@ namespace plans
 	};
 	
 	template <class datatype>
-	class communicating_boundary : public plans::boundary <datatype>
+	class communicating_boundary : public boundaries::boundary <datatype>
 	{
 	private:
 		datatype alpha;
@@ -265,6 +264,6 @@ namespace plans
 			
 		}
 	};
-} /* plans */
+} /* boundaries */
 
 #endif /* end of include guard: BOUNDARY_TWO_D_HPP_863EDB36 */

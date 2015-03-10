@@ -16,6 +16,9 @@
 
 namespace plans
 {
+	/*!**********************************************************************
+	 * \brief An implicit plan that calculates horizontal diffusion
+	 ************************************************************************/
 	template <class datatype>
 	class horizontal_diffusion : public implicit_plan <datatype>
 	{

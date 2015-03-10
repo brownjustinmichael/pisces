@@ -12,7 +12,7 @@
 #include "mpi/messenger.hpp"
 
 #include "../solver.hpp"
-#include "../boundary.hpp"
+#include "../boundaries/boundary.hpp"
 
 namespace plans
 {
@@ -37,7 +37,7 @@ namespace plans
 		std::vector <datatype> horizontal_matrix;
 		std::vector <datatype> factorized_horizontal_matrix;
 		
-		std::shared_ptr <plans::boundary <datatype>> boundary_0, boundary_n;
+		std::shared_ptr <boundaries::boundary <datatype>> boundary_0, boundary_n;
 		
 		int inner_m;
 		int ex_overlap_0;
@@ -64,7 +64,7 @@ namespace plans
 		 * 0 0 interpolating row for below element  0 0
 		 * 0 0 boundary row for below element       0 0
 		 ************************************************************************/
-		fourier_solver (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype& i_timestep, std::shared_ptr <plans::boundary <datatype>> i_boundary_0, std::shared_ptr <plans::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
+		fourier_solver (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
 				
 		virtual ~fourier_solver () {}
 		
@@ -79,10 +79,10 @@ namespace plans
 		{
 		private:
 			datatype &timestep;
-			std::shared_ptr <plans::boundary <datatype>> boundary_0, boundary_n;
+			std::shared_ptr <boundaries::boundary <datatype>> boundary_0, boundary_n;
 
 		public:
-			factory (datatype &i_timestep, std::shared_ptr <plans::boundary <datatype>> i_boundary_0, std::shared_ptr <plans::boundary <datatype>> i_boundary_n) : timestep (i_timestep), boundary_0 (i_boundary_0), boundary_n (i_boundary_n) {}
+			factory (datatype &i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n) : timestep (i_timestep), boundary_0 (i_boundary_0), boundary_n (i_boundary_n) {}
 			virtual ~factory () {}
 			
 			virtual std::shared_ptr <plans::solver <datatype>> instance (grids::grid <datatype> **grids, datatype *i_data, datatype *i_rhs, int *i_element_flags = NULL, int *i_component_flags = NULL) const {

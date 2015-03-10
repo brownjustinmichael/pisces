@@ -9,7 +9,7 @@
 #ifndef BOUNDARY_HPP_013D6464
 #define BOUNDARY_HPP_013D6464
 
-namespace plans
+namespace boundaries
 {
 	template <class datatype>
 	class boundary
@@ -43,7 +43,7 @@ namespace plans
 		
 		virtual void calculate_matrix (datatype timestep, datatype *default_matrix, datatype *matrix_in, datatype *interpolate_matrix, datatype *matrix_out, int lda, bool diverging = false) = 0;
 	};
-} /* plans */
+} /* boundaries */
 
 #endif /* end of include guard: BOUNDARY_HPP_013D6464 */
 

@@ -13,7 +13,7 @@
 #include "plans/plan.hpp"
 
 #include "../solver.hpp"
-#include "../boundary.hpp"
+#include "../boundaries/boundary.hpp"
 
 namespace plans
 {

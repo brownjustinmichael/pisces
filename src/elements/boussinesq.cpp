@@ -21,7 +21,7 @@
 #include "plans/advection.hpp"
 #include "plans/diffusion.hpp"
 #include "plans/source.hpp"
-#include "plans-solvers/implemented_boundary.hpp"
+#include "plans-solvers/boundaries/implemented_boundary.hpp"
 #include "plans-solvers/solvers/collocation.hpp"
 #include "plans-solvers/solvers/fourier.hpp"
 #include "plans-solvers/solvers/incompressible.hpp"
@@ -111,6 +111,7 @@ namespace data
 namespace pisces
 {
 	using namespace plans;
+	using namespace boundaries;
 	
 	template <class datatype>
 	boussinesq_element <datatype>::boussinesq_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
@@ -125,15 +126,15 @@ namespace pisces
 		cfl = i_params.get <datatype> ("time.cfl");
 
 		// If we aren't at an edge, add the appropriate communicating boundary
-		std::shared_ptr <plans::boundary <datatype>> boundary_0, boundary_n;
+		std::shared_ptr <boundaries::boundary <datatype>> boundary_0, boundary_n;
 		if (messenger_ptr->get_id () > 0) {
-			boundary_0 = std::shared_ptr <plans::boundary <datatype>> (new communicating_boundary <datatype> (messenger_ptr, grids [0]->get_ld (), m, grids [1]->get_excess_0 (), &((*grids [1]) [0]), 0, false));
+			boundary_0 = std::shared_ptr <boundaries::boundary <datatype>> (new communicating_boundary <datatype> (messenger_ptr, grids [0]->get_ld (), m, grids [1]->get_excess_0 (), &((*grids [1]) [0]), 0, false));
 		}
 		if (messenger_ptr->get_id () + 1 < messenger_ptr->get_np ()) {
-			boundary_n = std::shared_ptr <plans::boundary <datatype>> (new communicating_boundary <datatype> (messenger_ptr, grids [0]->get_ld (), m, grids [1]->get_excess_n (), &((*grids [1]) [0]), m - grids [1]->get_excess_n (), true));
+			boundary_n = std::shared_ptr <boundaries::boundary <datatype>> (new communicating_boundary <datatype> (messenger_ptr, grids [0]->get_ld (), m, grids [1]->get_excess_n (), &((*grids [1]) [0]), m - grids [1]->get_excess_n (), true));
 		}
 
-		std::shared_ptr <plans::boundary <datatype>> local_boundary_0, local_boundary_n;
+		std::shared_ptr <boundaries::boundary <datatype>> local_boundary_0, local_boundary_n;
 		std::string variable;
 		for (YAML::const_iterator iter = i_params ["equations"].begin (); iter != i_params ["equations"].end (); ++iter) {
 			variable = iter->first.as <std::string> ();
@@ -153,18 +154,18 @@ namespace pisces
 			if (!local_boundary_0) {
 				if (terms ["bottom"].IsDefined ()) {
 					if (terms ["bottom.type"].as <std::string> () == "fixed_value") {
-						local_boundary_0 = std::shared_ptr <plans::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], terms ["bottom.value"].as <datatype> (), false));
+						local_boundary_0 = std::shared_ptr <boundaries::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], terms ["bottom.value"].as <datatype> (), false));
 					} else if (terms ["bottom.type"].as <std::string> () == "fixed_derivative") {
-						local_boundary_0 = std::shared_ptr <plans::boundary <datatype>> (new fixed_deriv_boundary <datatype> (&*grids [0], &*grids [1], terms ["bottom.value"].as <datatype> (), false));
+						local_boundary_0 = std::shared_ptr <boundaries::boundary <datatype>> (new fixed_deriv_boundary <datatype> (&*grids [0], &*grids [1], terms ["bottom.value"].as <datatype> (), false));
 					}
 				}
 			}
 			if (!local_boundary_n) {
 				if (terms ["top"].IsDefined ()) {
 					if (terms ["top.type"].as <std::string> () == "fixed_value") {
-						local_boundary_n = std::shared_ptr <plans::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], terms ["top.value"].as <datatype> (), true));
+						local_boundary_n = std::shared_ptr <boundaries::boundary <datatype>> (new fixed_boundary <datatype> (&*grids [0], &*grids [1], terms ["top.value"].as <datatype> (), true));
 					} else if (terms ["top.type"].as <std::string> () == "fixed_derivative") {
-						local_boundary_n = std::shared_ptr <plans::boundary <datatype>> (new fixed_deriv_boundary <datatype> (&*grids [0], &*grids [1], terms ["top.value"].as <datatype> (), true));
+						local_boundary_n = std::shared_ptr <boundaries::boundary <datatype>> (new fixed_deriv_boundary <datatype> (&*grids [0], &*grids [1], terms ["top.value"].as <datatype> (), true));
 					}
 				}
 			}

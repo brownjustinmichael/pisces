@@ -12,7 +12,7 @@
 #include "mpi/messenger.hpp"
 #include "../equation.hpp"
 #include "../solver.hpp"
-#include "../boundary.hpp"
+#include "../boundaries/boundary.hpp"
 
 namespace plans
 {
@@ -20,7 +20,7 @@ namespace plans
 	class incompressible_corrector : public plans::solver <datatype>
 	{
 	public:
-		incompressible_corrector (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, mpi::messenger* i_messenger_ptr, std::shared_ptr <plans::boundary <datatype>> i_boundary_0, std::shared_ptr <plans::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, datatype *i_data_x, datatype *i_data_z, int *i_element_flags, int *i_component_flags, int *i_component_x, int *i_component_z);
+		incompressible_corrector (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, datatype *i_data_x, datatype *i_data_z, int *i_element_flags, int *i_component_flags, int *i_component_x, int *i_component_z);
 		
 		virtual ~incompressible_corrector () {}
 		
@@ -35,11 +35,11 @@ namespace plans
 		{
 		private:
 			mpi::messenger *messenger_ptr;
-			std::shared_ptr <plans::boundary <datatype>> boundary_0, boundary_n;
+			std::shared_ptr <boundaries::boundary <datatype>> boundary_0, boundary_n;
 			plans::equation <datatype> &equation_x, &equation_z;
 
 		public:
-			factory (mpi::messenger *i_messenger_ptr, std::shared_ptr <plans::boundary <datatype>> i_boundary_0, std::shared_ptr <plans::boundary <datatype>> i_boundary_n, plans::equation <datatype> &i_equation_x, plans::equation <datatype> &i_equation_z) : messenger_ptr (i_messenger_ptr), boundary_0 (i_boundary_0), boundary_n (i_boundary_n), equation_x (i_equation_x), equation_z (i_equation_z) {
+			factory (mpi::messenger *i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, plans::equation <datatype> &i_equation_x, plans::equation <datatype> &i_equation_z) : messenger_ptr (i_messenger_ptr), boundary_0 (i_boundary_0), boundary_n (i_boundary_n), equation_x (i_equation_x), equation_z (i_equation_z) {
 			}
 			
 			virtual ~factory () {}
@@ -70,7 +70,7 @@ namespace plans
 
 		mpi::messenger* messenger_ptr;
 		
-		std::shared_ptr <plans::boundary <datatype>> boundary_0, boundary_n;
+		std::shared_ptr <boundaries::boundary <datatype>> boundary_0, boundary_n;
 		
 		std::vector <datatype> x, bufferl, bufferr;
 		std::vector <datatype> data_temp, positions, new_positions;
