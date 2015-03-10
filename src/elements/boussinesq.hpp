@@ -28,22 +28,22 @@ namespace pisces
 		
 		virtual ~boussinesq_element () {}
 		
-		datatype calculate_timestep (int i, int j, io::formats::virtual_file *virtual_file = NULL);
+		datatype calculate_timestep (int i, int j, formats::virtual_file *virtual_file = NULL);
 		
-		virtual io::formats::virtual_file *make_virtual_file (int flags = 0x00) {
+		virtual formats::virtual_file *make_virtual_file (int flags = 0x00) {
 			std::shared_ptr <io::output> virtual_output;
 			if (flags & profile_only) {
-				virtual_output.reset (new io::formatted_output <io::formats::two_d::virtual_format> (io::data_grid::two_d (1, m), "two_d/boussinesq/virtual_file", io::replace_file));
+				virtual_output.reset (new io::formatted_output <formats::virtual_format> (formats::data_grid::two_d (1, m), "two_d/boussinesq/virtual_file", formats::replace_file));
 				if (flags & timestep_only) {
-					virtual_output->append <datatype> ("z", std::shared_ptr <io::functors::functor> (new io::functors::average_functor <datatype> (ptr ("z"), n, m)));
-					virtual_output->append <datatype> ("z_velocity", std::shared_ptr <io::functors::functor> (new io::functors::root_mean_square_functor <datatype> (ptr ("z_velocity"), n, m)));
+					virtual_output->append <datatype> ("z", std::shared_ptr <functors::functor> (new functors::average_functor <datatype> (ptr ("z"), n, m)));
+					virtual_output->append <datatype> ("z_velocity", std::shared_ptr <functors::functor> (new functors::root_mean_square_functor <datatype> (ptr ("z_velocity"), n, m)));
 				} else {
 					FATAL ("HAVEN'T GOT A TREATMENT FOR THIS YET");
 					throw 0;
 					data.setup_profile (virtual_output, data::no_save);
 				}
 			} else {
-				virtual_output.reset (new io::formatted_output <io::formats::two_d::virtual_format> (io::data_grid::two_d (n, m), "two_d/boussinesq/virtual_file", io::replace_file));
+				virtual_output.reset (new io::formatted_output <formats::virtual_format> (formats::data_grid::two_d (n, m), "two_d/boussinesq/virtual_file", formats::replace_file));
 				if (flags & timestep_only) {
 					virtual_output->append <datatype> ("z", ptr ("z"));
 					virtual_output->append <datatype> ("x", ptr ("x"));
@@ -54,16 +54,16 @@ namespace pisces
 				}
 			}
 			virtual_output->to_file ();
-			return &io::virtual_files ["two_d/boussinesq/virtual_file"];
+			return &formats::virtual_files ["two_d/boussinesq/virtual_file"];
 		}
 		
-		virtual io::formats::virtual_file *make_rezoned_virtual_file (datatype *positions, io::formats::virtual_file *old_virtual_file, int flags = 0x00) {
+		virtual formats::virtual_file *make_rezoned_virtual_file (datatype *positions, formats::virtual_file *old_virtual_file, int flags = 0x00) {
 			grids::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
 			std::shared_ptr <grids::grid <datatype>> vertical_grid = implemented_element <datatype>::generate_grid (&vertical_axis);
 			
-			pisces::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_virtual_file, &io::virtual_files ["two_d/boussinesq/new_virtual_file"]);
+			pisces::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_virtual_file, &formats::virtual_files ["two_d/boussinesq/new_virtual_file"]);
 			
-			return &io::virtual_files ["two_d/boussinesq/new_virtual_file"];
+			return &formats::virtual_files ["two_d/boussinesq/new_virtual_file"];
 		}
 		
 		using element <datatype>::ptr;

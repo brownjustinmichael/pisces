@@ -221,14 +221,14 @@ namespace data
 				input_ptr->template append <datatype> (*iter, (*this) (*iter));
 			}
 			
-			input_ptr->template append <datatype> ("t", &duration, io::scalar);
+			input_ptr->template append <datatype> ("t", &duration, formats::scalar);
 			int mode;
-			input_ptr->template append <int> ("mode", &mode, io::scalar);
+			input_ptr->template append <int> ("mode", &mode, formats::scalar);
 			
 			try {
 				// Read from the input into the element variables
 				input_ptr->from_file ();
-			} catch (io::formats::exceptions::bad_variables &except) {
+			} catch (formats::exceptions::bad_variables &except) {
 				// Send a warning if there are missing variables in the input
 				WARN (except.what ());
 			}
@@ -254,8 +254,8 @@ namespace data
 				output_ptr->template append <datatype> (*iter, (*this) (*iter));
 			}
 			
-			output_ptr->template append <datatype> ("t", &duration, io::scalar);
-			output_ptr->template append <const int> ("mode", &(get_mode ()), io::scalar);
+			output_ptr->template append <datatype> ("t", &duration, formats::scalar);
+			output_ptr->template append <const int> ("mode", &(get_mode ()), formats::scalar);
 
 			// Check the desired output time and save the output object in the appropriate variable
 			if (!(flags & no_save)) {
@@ -267,8 +267,8 @@ namespace data
 		
 		virtual void setup_dump (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
 			// Iterate through the scalar fields and append them to the variables which the output will write to file
-			output_ptr->template append <datatype> ("t", &duration, io::scalar);
-			output_ptr->template append <const int> ("mode", &(get_mode ()), io::scalar);
+			output_ptr->template append <datatype> ("t", &duration, formats::scalar);
+			output_ptr->template append <const int> ("mode", &(get_mode ()), formats::scalar);
 
 			// Check the desired output time and save the output object in the appropriate variable
 			dump_stream = output_ptr;
@@ -284,8 +284,8 @@ namespace data
 		 ************************************************************************/
 		virtual void setup_stat (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
 			// Also prepare to output the total simulated time and geometry mode
-			output_ptr->template append <datatype> ("t", &duration, io::scalar);
-			output_ptr->template append <datatype> ("dt", &timestep, io::scalar);
+			output_ptr->template append <datatype> ("t", &duration, formats::scalar);
+			output_ptr->template append <datatype> ("dt", &timestep, formats::scalar);
 			// Check the desired output time and save the output object in the appropriate variable
 			if (!(flags & no_save)){
 				streams.push_back (output_ptr);
@@ -332,7 +332,7 @@ namespace data
 		using data <datatype>::duration;
 		implemented_data (grids::axis *i_axis_n, grids::axis *i_axis_m, int name = 0, std::string dump_file = "", std::string dump_directory = "./", int dump_every = 1) : grid_n (std::shared_ptr <grids::grid <datatype>> (new typename grids::horizontal::grid <datatype> (i_axis_n))), grid_m (std::shared_ptr <grids::grid <datatype>> (new typename grids::vertical::grid <datatype> (i_axis_m))), n (grid_n->get_n ()), m (grid_m->get_n ()) {
 			// Set up output
-			const io::data_grid o_grid = io::data_grid::two_d (n, m, 0, 0, 0, 0);
+			const formats::data_grid o_grid = formats::data_grid::two_d (n, m, 0, 0, 0, 0);
 			
 			std::shared_ptr <io::output> dump_stream;
 			if (dump_file != "") {
@@ -340,7 +340,7 @@ namespace data
 				char buffer [file_format.size () * 2];
 				snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 
-				dump_stream.reset (new io::replace_output <io::formats::two_d::netcdf> (o_grid, buffer, dump_every));
+				dump_stream.reset (new io::replace_output <formats::netcdf> (o_grid, buffer, dump_every));
 				this->setup_dump (dump_stream);
 			}
 			
@@ -362,11 +362,11 @@ namespace data
 			typedef typename std::map <std::string, std::vector <datatype> >::iterator iterator;
 			for (iterator iter = data <datatype>::scalars.begin (); iter != data <datatype>::scalars.end (); ++iter) {
 				output_ptr->template append <datatype> (iter->first, (*this) (iter->first));
-				output_ptr->template append <datatype> ("rms_" + iter->first, std::shared_ptr <io::functors::functor> (new io::functors::root_mean_square_functor <datatype> ((*this) (iter->first), n, m)));
-				output_ptr->template append <datatype> ("avg_" + iter->first, std::shared_ptr <io::functors::functor> (new io::functors::average_functor <datatype> ((*this) (iter->first), n, m)));
+				output_ptr->template append <datatype> ("rms_" + iter->first, std::shared_ptr <functors::functor> (new functors::root_mean_square_functor <datatype> ((*this) (iter->first), n, m)));
+				output_ptr->template append <datatype> ("avg_" + iter->first, std::shared_ptr <functors::functor> (new functors::average_functor <datatype> ((*this) (iter->first), n, m)));
 			}
-			output_ptr->template append <datatype> ("t", &(duration), io::scalar);
-			output_ptr->template append <const int> ("mode", &(data <datatype>::get_mode ()), io::scalar);
+			output_ptr->template append <datatype> ("t", &(duration), formats::scalar);
+			output_ptr->template append <const int> ("mode", &(data <datatype>::get_mode ()), formats::scalar);
 
 			data <datatype>::setup_profile (output_ptr, flags);
 		}

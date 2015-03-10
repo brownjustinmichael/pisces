@@ -102,7 +102,7 @@ int main (int argc, char *argv[])
 		while (n_steps < parameters.get <int> ("time.steps")) {
 			if (parameters.get <int> ("grid.rezone.check_every") > 0) {
 				INFO ("Rezoning");
-				io::virtual_files ["main/virtual_file"] = *(element->rezone_minimize_ts (&positions [0], parameters.get <double> ("grid.rezone.min_size"), parameters.get <double> ("grid.rezone.max_size"), parameters.get <int> ("grid.rezone.n_tries"), parameters.get <int> ("grid.rezone.iters_fixed_t"), parameters.get <double> ("grid.rezone.step_size"), parameters.get <double> ("grid.rezone.k"), parameters.get <double> ("grid.rezone.t_initial"), parameters.get <double> ("grid.rezone.mu_t"), parameters.get <double> ("grid.rezone.t_min")));
+				formats::virtual_files ["main/virtual_file"] = *(element->rezone_minimize_ts (&positions [0], parameters.get <double> ("grid.rezone.min_size"), parameters.get <double> ("grid.rezone.max_size"), parameters.get <int> ("grid.rezone.n_tries"), parameters.get <int> ("grid.rezone.iters_fixed_t"), parameters.get <double> ("grid.rezone.step_size"), parameters.get <double> ("grid.rezone.k"), parameters.get <double> ("grid.rezone.t_initial"), parameters.get <double> ("grid.rezone.mu_t"), parameters.get <double> ("grid.rezone.t_min")));
 				
 				DEBUG ("1");
 
@@ -110,7 +110,7 @@ int main (int argc, char *argv[])
 
 				DEBUG ("2");
 
-				io::input *virtual_input (new io::formatted_input <io::formats::two_d::virtual_format> (io::data_grid::two_d (n, m), "main/virtual_file"));
+				io::input *virtual_input (new io::formatted_input <formats::virtual_format> (formats::data_grid::two_d (n, m), "main/virtual_file"));
 				data.setup (&*virtual_input);
 				
 				DEBUG ("3");

@@ -27,7 +27,7 @@ public:
 		int n_elements = process_messenger.get_np ();
 		
 		logger::log_config::set_severity (3);
-		io::formats::ascii::print_headers = false;
+		formats::ascii::print_headers = false;
 		
 		io::parameters parameters;
 		

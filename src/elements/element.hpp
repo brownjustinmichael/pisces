@@ -79,7 +79,7 @@ namespace pisces
 		
 	private:
 		std::vector <std::string> solver_keys; //!< A vector of integer keys to the solvers map
-		io::formats::virtual_file *rezone_virtual_file; //!< A shared_ptr to a virtual file object, for rezoning
+		formats::virtual_file *rezone_virtual_file; //!< A shared_ptr to a virtual file object, for rezoning
 		
 	public:
 		std::vector <std::shared_ptr <grids::grid <datatype>>> grids; //!< A vector of shared pointers to the collocation grids
@@ -344,7 +344,7 @@ namespace pisces
 		 * 
 		 * \return The datatype recommended timestep for the next timestep
 		 ************************************************************************/
-		virtual datatype calculate_min_timestep (io::formats::virtual_file *virtual_file = NULL, bool limiters = true) = 0;
+		virtual datatype calculate_min_timestep (formats::virtual_file *virtual_file = NULL, bool limiters = true) = 0;
 		
 		/*!**********************************************************************
 		 * \brief Caculate the zoning that minimizes the timestep according to size constraints
@@ -364,7 +364,7 @@ namespace pisces
 		 * 
 		 * \return A shared_ptr to a virtual_file object containing the chosen rezoning
 		 ************************************************************************/
-		virtual io::formats::virtual_file *rezone_minimize_ts (datatype * positions, datatype min_size, datatype max_size, int n_tries = 20, int iters_fixed_t = 1000, datatype step_size = 1.0, datatype k = 1.0, datatype t_initial = 0.008, datatype mu_t = 1.003, datatype t_min = 2.0e-6) {
+		virtual formats::virtual_file *rezone_minimize_ts (datatype * positions, datatype min_size, datatype max_size, int n_tries = 20, int iters_fixed_t = 1000, datatype step_size = 1.0, datatype k = 1.0, datatype t_initial = 0.008, datatype mu_t = 1.003, datatype t_min = 2.0e-6) {
 			TRACE ("Rezoning...");
 			transform (inverse_horizontal | inverse_vertical);
 
@@ -422,7 +422,7 @@ namespace pisces
 		 * 
 		 * \return A shared_ptr to the virtual_file of the current state
 		 ************************************************************************/
-		virtual io::formats::virtual_file *make_virtual_file (int flags = 0x00) = 0;
+		virtual formats::virtual_file *make_virtual_file (int flags = 0x00) = 0;
 		
 		/*!**********************************************************************
 		 * \brief Protected method to rezone the current state into a virtual file
@@ -435,7 +435,7 @@ namespace pisces
 		 * 
 		 * \return A shared_ptr to the rezoned virtual file
 		 ************************************************************************/
-		virtual io::formats::virtual_file *make_rezoned_virtual_file (datatype *positions, io::formats::virtual_file *virtual_file_ptr, int flags = 0x00) = 0;
+		virtual formats::virtual_file *make_rezoned_virtual_file (datatype *positions, formats::virtual_file *virtual_file_ptr, int flags = 0x00) = 0;
 		
 		/*!**********************************************************************
 		 * \brief Get the current zoning position array

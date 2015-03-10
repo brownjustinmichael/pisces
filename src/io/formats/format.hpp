@@ -13,7 +13,7 @@
 
 #include "versions/version.hpp"
 
-namespace io
+namespace formats
 {
 	/*!**********************************************************************
 	 * \brief A set of io flags to be used with the input/output classes specifying the file type
@@ -185,6 +185,6 @@ namespace io
 			offsets.push_back (offset);
 		}
 	};
-} /* io */
+} /* formats */
 
 #endif /* end of include guard: FORMAT_HPP_6ADF5F85 */

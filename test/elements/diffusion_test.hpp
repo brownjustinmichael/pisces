@@ -27,7 +27,7 @@ public:
 		int n_elements = 1;
 		
 		logger::log_config::set_severity (3);
-		io::formats::ascii::print_headers = false;
+		formats::ascii::print_headers = false;
 		
 		io::parameters parameters;
 		

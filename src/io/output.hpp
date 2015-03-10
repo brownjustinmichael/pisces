@@ -37,9 +37,9 @@ namespace io
 	protected:
 		std::string file_name; //!< The string file name
 		int file_format; //!< The file format from io_flags: e.g. replace_file
-		const data_grid grid; //!< The data_grid object associated with the output
+		const formats::data_grid grid; //!< The data_grid object associated with the output
 		
-		typedef void func_t (const data_grid &grid, std::string file_name, std::string name, void *data, int record, int dims); //!< A prototype for write functions
+		typedef void func_t (const formats::data_grid &grid, std::string file_name, std::string name, void *data, int record, int dims); //!< A prototype for write functions
 		std::vector <func_t *> write_functions; //!< A vector of pointers to the write functions
 		std::vector <std::string> names; //!< A vector of the string representations of the variables
 		std::vector <void *> data_ptrs; //!< A vector of pointers to the arrays of data
@@ -52,7 +52,7 @@ namespace io
 		 * \param i_file_name The string representation of the output file; do not include the extension; it will be added later
 		 * \param i_file_format The integer io_flag associated with the desired output type (e.g. replace_file)
 		 *********************************************************************/
-		output (data_grid i_grid, std::string i_file_name = "out", int i_file_format = replace_file) : file_name (i_file_name), file_format (i_file_format), grid (i_grid) {}
+		output (formats::data_grid i_grid, std::string i_file_name = "out", int i_file_format = formats::replace_file) : file_name (i_file_name), file_format (i_file_format), grid (i_grid) {}
 
 		virtual ~output () {}
 		
@@ -60,7 +60,7 @@ namespace io
 		 * \brief Get the version of the class
 		 ************************************************************************/
 		static versions::version& version () {
-			static versions::version version ("1.0.1.0");
+			static versions::version version ("1.1.0.0");
 			return version;
 		}
 		
@@ -98,7 +98,7 @@ namespace io
 		 * WARNING: THIS WILL HAPPILY ACCEPT A FUNCTOR OF NON-DATATYPE TEMPLATE
 		 ************************************************************************/
 		template <class datatype>
-		void append (std::string name, std::shared_ptr <functors::functor> functor_ptr, int flags = all_d) {
+		void append (std::string name, std::shared_ptr <functors::functor> functor_ptr, int flags = formats::all_d) {
 			TRACE ("Appending " << name << " to output...");
 			for (int i = 0; i < (int) names.size (); ++i) {
 				if (names [i] == name) {
@@ -122,7 +122,7 @@ namespace io
 		 * Since this is shared between input and output, we might give them a shared superclass in the future.
 		 *********************************************************************/
 		template <class datatype>
-		void append (std::string name, datatype *data_ptr, int flags = all_d) {
+		void append (std::string name, datatype *data_ptr, int flags = formats::all_d) {
 			TRACE ("Appending " << name << " to output..." << *data_ptr);
 			for (int i = 0; i < (int) names.size (); ++i) {
 				if (names [i] == name) {
@@ -160,7 +160,7 @@ namespace io
 		/*!**********************************************************************
 		 * \copydoc output::output
 		 ************************************************************************/
-		formatted_output (data_grid i_grid, std::string i_file_name = "out", int i_file_format = replace_file) : output (i_grid, i_file_name + format::extension (), i_file_format) {}		
+		formatted_output (formats::data_grid i_grid, std::string i_file_name = "out", int i_file_format = formats::replace_file) : output (i_grid, i_file_name + format::extension (), i_file_format) {}		
 
 		virtual ~formatted_output () {}
 		
@@ -254,8 +254,8 @@ namespace io
 		 * \param i_output_every The integer frequency of outputs
 		 * \copydoc formatted_output::formatted_output
 		 ************************************************************************/
-		incremental (data_grid i_grid, std::string i_file_format, int i_output_every = 1) :
-		formatted_output <format> (i_grid, "", replace_file),
+		incremental (formats::data_grid i_grid, std::string i_file_format, int i_output_every = 1) :
+		formatted_output <format> (i_grid, "", formats::replace_file),
 		file_format (i_file_format + format::extension ()),
 		output_every (i_output_every > 0 ? i_output_every : 1),
 		count (0) {}
@@ -296,7 +296,7 @@ namespace io
 		 * \param i_output_every The integer frequency of outputs
 		 * \copydoc formatted_output::formatted_output
 		 ************************************************************************/
-		appender_output (data_grid i_grid, std::string i_file_name, int i_output_every = 1) : formatted_output <format> (i_grid, i_file_name, append_file), output_every (i_output_every > 0 ? i_output_every : 1), count (0) {}
+		appender_output (formats::data_grid i_grid, std::string i_file_name, int i_output_every = 1) : formatted_output <format> (i_grid, i_file_name, formats::append_file), output_every (i_output_every > 0 ? i_output_every : 1), count (0) {}
 
 		virtual ~appender_output () {}
 
@@ -329,7 +329,7 @@ namespace io
 		 * \param i_output_every The integer frequency of outputs
 		 * \copydoc formatted_output::formatted_output
 		 ************************************************************************/
-		replace_output (data_grid i_grid, std::string i_file_name, int i_output_every = 1) : formatted_output <format> (i_grid, i_file_name, replace_file), output_every (i_output_every > 0 ? i_output_every : 1), count (0) {}
+		replace_output (formats::data_grid i_grid, std::string i_file_name, int i_output_every = 1) : formatted_output <format> (i_grid, i_file_name, formats::replace_file), output_every (i_output_every > 0 ? i_output_every : 1), count (0) {}
 
 		virtual ~replace_output () {}
 

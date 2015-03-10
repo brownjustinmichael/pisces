@@ -12,61 +12,58 @@
 #include <exception>
 #include <sstream>
 
-namespace io
+namespace formats
 {
-	namespace formats
+	namespace exceptions
 	{
-		namespace exceptions
+		/*!*******************************************************************
+		 * \brief This is an exception that can occur when opening files
+		 *********************************************************************/
+		class file_exception : public std::exception
 		{
-			/*!*******************************************************************
-			 * \brief This is an exception that can occur when opening files
-			 *********************************************************************/
-			class file_exception : public std::exception
-			{
-			private:
-				std::string file_name;
-			public:
-				file_exception (std::string i_file_name) {
-					file_name = i_file_name;
-				}
-				
-				~file_exception () throw () {}
-				
-				/*!*******************************************************************
-				 * \brief Describe the nature of the exception
-				 *********************************************************************/
-				inline const char *what () const throw () {
-					std::stringstream message;
-					message << "File " << file_name << " couldn't be opened";
-					return message.str ().c_str ();
-				}
-			};
-
-			/*!**********************************************************************
-			 * \brief This exception occurs when a function is called that can't handle the given type
-			 ************************************************************************/
-			class bad_type : public std::exception
-			{
-			public:
-				/*!**********************************************************************
-				 * \brief Describe the nature of the exception
-				 ************************************************************************/
-				inline const char *what () const throw () {return "Bad type passed";}
-			};
+		private:
+			std::string file_name;
+		public:
+			file_exception (std::string i_file_name) {
+				file_name = i_file_name;
+			}
 			
+			~file_exception () throw () {}
+			
+			/*!*******************************************************************
+			 * \brief Describe the nature of the exception
+			 *********************************************************************/
+			inline const char *what () const throw () {
+				std::stringstream message;
+				message << "File " << file_name << " couldn't be opened";
+				return message.str ().c_str ();
+			}
+		};
+
+		/*!**********************************************************************
+		 * \brief This exception occurs when a function is called that can't handle the given type
+		 ************************************************************************/
+		class bad_type : public std::exception
+		{
+		public:
 			/*!**********************************************************************
-			 * \brief This exception occurs when a variable is missing from a file
+			 * \brief Describe the nature of the exception
 			 ************************************************************************/
-			class bad_variables : public std::exception
-			{
-			public:
-				/*!**********************************************************************
-				 * \brief Describe the nature of the exception
-				 ************************************************************************/
-				inline const char *what () const throw () {return "Bad variable(s)";}
-			};
-		} /* exceptions */
-	} /* formats */
-} /* io */
+			inline const char *what () const throw () {return "Bad type passed";}
+		};
+		
+		/*!**********************************************************************
+		 * \brief This exception occurs when a variable is missing from a file
+		 ************************************************************************/
+		class bad_variables : public std::exception
+		{
+		public:
+			/*!**********************************************************************
+			 * \brief Describe the nature of the exception
+			 ************************************************************************/
+			inline const char *what () const throw () {return "Bad variable(s)";}
+		};
+	} /* exceptions */
+} /* formats */
 
 #endif /* end of include guard: EXCEPTIONS_HPP_82T7S9HQ */

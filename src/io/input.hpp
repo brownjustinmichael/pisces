@@ -26,9 +26,9 @@ namespace io
 	{
 	protected:
 		std::string file_name; //!< The string representation of the file
-		data_grid grid; //!< The data_grid object that keeps track of the numerical structure of the data
+		formats::data_grid grid; //!< The data_grid object that keeps track of the numerical structure of the data
 		std::vector <std::string> names; //!< A vector of the string representations of the variables
-		typedef void func_t (const data_grid &grid, std::string file_name, std::string name, void *data, int record, int dims); //!< A typedef of the read_function prototype
+		typedef void func_t (const formats::data_grid &grid, std::string file_name, std::string name, void *data, int record, int dims); //!< A typedef of the read_function prototype
 		std::vector <func_t *> read_functions; //!< A vector containing all the functions to execute upon read
 		std::vector <int> dims; //!< A vector containing the relevant dimensions of the read evaluations
 		std::vector <void *> data_ptrs; //!< A vector of pointers to the arrays of data
@@ -37,7 +37,7 @@ namespace io
 		/*!**********************************************************************
 		 * /copydoc output::output
 		 ************************************************************************/
-		input (data_grid i_grid, std::string i_file_name = "in") : file_name (i_file_name), grid (i_grid) {}
+		input (formats::data_grid i_grid, std::string i_file_name = "in") : file_name (i_file_name), grid (i_grid) {}
 		
 		virtual ~input () {}
 		
@@ -45,7 +45,7 @@ namespace io
 		 * \brief Get the version of the class
 		 ************************************************************************/
 		static versions::version& version () {
-			static versions::version version ("1.0.1.0");
+			static versions::version version ("1.1.0.0");
 			return version;
 		}
 		
@@ -77,7 +77,7 @@ namespace io
 		 * \param data_ptr A datatype pointer to the data array
 		 *********************************************************************/
 		template <class datatype>
-		void append (std::string name, datatype *data_ptr, int flags = all_d) {
+		void append (std::string name, datatype *data_ptr, int flags = formats::all_d) {
 			TRACE ("Appending " << name << " to input...");
 			for (int i = 0; i < (int) names.size (); ++i) {
 				if (names [i] == name) {
@@ -112,7 +112,7 @@ namespace io
 		/*!**********************************************************************
 		 * \copydoc input::input
 		 ************************************************************************/
-		formatted_input (data_grid i_grid, std::string i_file_name = "in") :
+		formatted_input (formats::data_grid i_grid, std::string i_file_name = "in") :
 		input (i_grid, i_file_name + format::extension ()) {}
 	
 		virtual ~formatted_input () {}
@@ -150,13 +150,13 @@ namespace io
 		virtual void from_file (int record = -1) {
 			INFO ("Inputting from file " << file_name << "...");
 		
-			format::open_file (grid, file_name.c_str (), read_file);
+			format::open_file (grid, file_name.c_str (), formats::read_file);
 			
 			for (int i = 0; i < (int) read_functions.size (); ++i) {
 				read_functions [i] (grid, file_name, names [i], data_ptrs [i], record, dims [i]);
 			}
 		
-			format::close_file (file_name.c_str (), read_file);
+			format::close_file (file_name.c_str (), formats::read_file);
 		}
 	};
 } /* io */

@@ -18,7 +18,7 @@
 namespace pisces
 {
 	template <class datatype>
-	void rezone (mpi::messenger *inter_messenger, grids::grid <datatype> *input_grid, grids::grid <datatype> *output_grid, io::formats::virtual_file *input_virtual_file, io::formats::virtual_file *output_virtual_file) {
+	void rezone (mpi::messenger *inter_messenger, grids::grid <datatype> *input_grid, grids::grid <datatype> *output_grid, formats::virtual_file *input_virtual_file, formats::virtual_file *output_virtual_file) {
 		if (output_virtual_file != input_virtual_file) {
 			*output_virtual_file = *input_virtual_file;
 		}
@@ -68,7 +68,7 @@ namespace pisces
 	
 	template <class datatype>
 	datatype minimum_timestep (int n, int m, pisces::element <datatype> *element, mpi::messenger *messenger, datatype *positions) {
-		std::shared_ptr <io::output> virtual_output (new io::formatted_output <io::formats::two_d::virtual_format> (io::data_grid::two_d (n, m), "rezone/virtual_file", io::replace_file));
+		std::shared_ptr <io::output> virtual_output (new io::formatted_output <formats::virtual_format> (formats::data_grid::two_d (n, m), "rezone/virtual_file", formats::replace_file));
 		element->setup_output (virtual_output);
 		
 		virtual_output->to_file ();
@@ -79,9 +79,9 @@ namespace pisces
 		grids::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == np - 1 ? 0 : 1);
 		std::shared_ptr <grids::grid <double>> vertical_grid = element->generate_grid (&vertical_axis);
 		
-		rezone <datatype> (messenger, &*(element->grids [1]), &*vertical_grid, &io::virtual_files ["rezone/virtual_file"], &io::virtual_files ["rezone/new_virtual_file"]);
+		rezone <datatype> (messenger, &*(element->grids [1]), &*vertical_grid, &formats::virtual_files ["rezone/virtual_file"], &formats::virtual_files ["rezone/new_virtual_file"]);
 		
-		return element->calculate_min_timestep (&io::virtual_files ["rezone/new_virtual_file"]);
+		return element->calculate_min_timestep (&formats::virtual_files ["rezone/new_virtual_file"]);
 	}
 } /* pisces */
 

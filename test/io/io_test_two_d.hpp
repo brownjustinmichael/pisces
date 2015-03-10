@@ -23,7 +23,7 @@ public:
 		double scalar, scalar_copy;
 		std::string file_name = "output";
 		{
-			io::formatted_output <io::formats::two_d::netcdf> output_stream (io::data_grid::two_d (n, m), file_name, io::replace_file);
+			io::formatted_output <formats::netcdf> output_stream (formats::data_grid::two_d (n, m), file_name, formats::replace_file);
 			
 			srand (1);
 			for (int i = 0; i < n; ++i) {
@@ -36,9 +36,9 @@ public:
 			scalar_copy = scalar;
 	
 			output_stream.append <double> ("test", &init [0]);
-			output_stream.append <double> ("profile", &init [0], io::one_d);
-			output_stream.append <double> ("profile2", &init [0], io::m_profile);
-			output_stream.append <double> ("scale", &scalar, io::scalar);
+			output_stream.append <double> ("profile", &init [0], formats::one_d);
+			output_stream.append <double> ("profile2", &init [0], formats::m_profile);
+			output_stream.append <double> ("scale", &scalar, formats::scalar);
 			output_stream.to_file ();
 		}
 
@@ -47,12 +47,12 @@ public:
 		}
 		scalar = 0.0;
 	
-		io::formatted_input <io::formats::two_d::netcdf> input_stream (io::data_grid::two_d (n, m), file_name);
+		io::formatted_input <formats::netcdf> input_stream (formats::data_grid::two_d (n, m), file_name);
 	
 		input_stream.append <double> ("test", &init [0]);
-		input_stream.append <double> ("profile2", &profile2 [0], io::m_profile);
-		input_stream.append <double> ("profile", &profile [0], io::one_d);
-		input_stream.append <double> ("scale", &scalar, io::scalar);
+		input_stream.append <double> ("profile2", &profile2 [0], formats::m_profile);
+		input_stream.append <double> ("profile", &profile [0], formats::one_d);
+		input_stream.append <double> ("scale", &scalar, formats::scalar);
 		input_stream.from_file ();
 	
 		for (int i = 0; i < n; ++i) {
@@ -82,12 +82,12 @@ public:
 	
 		srand (1);
 		{
-			io::data_grid io_grid = io::data_grid::two_d (n, m);
+			formats::data_grid io_grid = formats::data_grid::two_d (n, m);
 			std::cout << io_grid.get_n_dims ();
-			io::appender_output <io::formats::two_d::netcdf> output_stream (io::data_grid::two_d (n, m), file_name, 1);
+			io::appender_output <formats::netcdf> output_stream (formats::data_grid::two_d (n, m), file_name, 1);
 			for (int k = 0; k < records; ++k) {
 				output_stream.append <double> ("test", &init [k * n * m]);
-				output_stream.append <double> ("scale", &scalar [k], io::scalar);
+				output_stream.append <double> ("scale", &scalar [k], formats::scalar);
 				for (int i = 0; i < n; ++i) {
 					for (int j = 0; j < m; ++j) {
 						init [k * n * m + i * m + j] = rand () % 100;
@@ -106,11 +106,11 @@ public:
 			}
 		}
 		
-		io::formatted_input <io::formats::two_d::netcdf> input_stream (io::data_grid::two_d (n, m), file_name);
+		io::formatted_input <formats::netcdf> input_stream (formats::data_grid::two_d (n, m), file_name);
 		
 		for (int k = 0; k < records; ++k) {
 			input_stream.append <double> ("test", &init [k * n * m]);
-			input_stream.append <double> ("scale", &scalar [k], io::scalar);
+			input_stream.append <double> ("scale", &scalar [k], formats::scalar);
 			input_stream.from_file (k);
 				
 			for (int i = 0; i < n; ++i) {
@@ -132,7 +132,7 @@ public:
 	
 		srand (1);
 	
-		io::appender_output <io::formats::two_d::virtual_format> output_stream (io::data_grid::two_d (n, m), file_name, 1);
+		io::appender_output <formats::virtual_format> output_stream (formats::data_grid::two_d (n, m), file_name, 1);
 		output_stream.append <double> ("test", &init [0]);
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
@@ -145,7 +145,7 @@ public:
 		
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
-				TSM_ASSERT_DELTA ("IO failure in virtual format output", io::virtual_files [file_name].index <double> ("test", i, j), init_copy [i * m + j], TEST_TINY);
+				TSM_ASSERT_DELTA ("IO failure in virtual format output", formats::virtual_files [file_name].index <double> ("test", i, j), init_copy [i * m + j], TEST_TINY);
 			}
 		}
 	
@@ -153,7 +153,7 @@ public:
 			init [i] = 0.0;
 		}
 		
-		io::formatted_input <io::formats::two_d::virtual_format> input_stream (io::data_grid::two_d (n, m), file_name);
+		io::formatted_input <formats::virtual_format> input_stream (formats::data_grid::two_d (n, m), file_name);
 		
 		input_stream.append <double> ("test", &init [0]);
 		input_stream.from_file ();
