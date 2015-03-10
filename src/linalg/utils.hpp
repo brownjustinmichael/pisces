@@ -9,6 +9,11 @@
 #ifndef UTILS_HPP_OOQZAQJE
 #define UTILS_HPP_OOQZAQJE
 
+/*!**********************************************************************
+ * \namespace linalg
+ * 
+ * A namespace containing a set of useful linear algebra functions from BLAS and LAPACK.
+ ************************************************************************/
 namespace linalg
 {
 	/*!*******************************************************************

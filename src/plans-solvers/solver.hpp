@@ -2,6 +2,8 @@
  * \file bases/solver.hpp
  * Spectral Element
  * 
+ * This extension extends the capacities of the plans module by adding equations and solvers.
+ * 
  * Created by Justin Brown on 2013-04-19.
  * Copyright 2013 Justin Brown. All rights reserved.
  ************************************************************************/

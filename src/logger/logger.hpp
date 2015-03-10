@@ -172,7 +172,9 @@ namespace logger
 #endif
 
 /*!*******************************************************************
- * \brief A class containing the relevant configuration details, such as logging severity
+ * \namespace logger
+ * 
+ * A namespace containing classes and objects relevant to log messages.
  *********************************************************************/
 namespace logger
 {

@@ -18,28 +18,6 @@
 #include <map>
 
 /*!*******************************************************************
- * \brief A set of indices to be used with the element scalars for convenience
- * 
- * Indices less than zero are "resettable." The null index is equivalent to a NULL pointer.
- *********************************************************************/
-enum index {
-	null = 0x0,
-	state = 0x0,
-	
-	x_position = 01, x_pos = 01,
-	y_position = 02, y_pos = 02, 
-	position = 03, z_position = 03, z_pos = 03,
-	vel = 11, x_velocity = 11, x_vel = 11,
-	y_velocity = 12, y_vel = 12,
-	velocity = 13, z_velocity = 13, z_vel = 13,
-	stream = 14, streamfunction = 14,
-	pressure = 20, pres = 20,
-	temperature = 21, temp = 21,
-	composition = 22, comp = 22,
-	test = 100, test_x = 101, text_z = 103
-};
-
-/*!*******************************************************************
  * \brief A set of flags to be used with the plan class
  *********************************************************************/
 enum plan_flags {
@@ -63,6 +41,11 @@ enum solve_element_flags {
 	z_solve = 0x80
 };
 
+/*!**********************************************************************
+ * \namespace plans
+ * 
+ * A namespace containing the plans that do the actual operations on data.
+ ************************************************************************/
 namespace plans
 {
 	/*!*******************************************************************
@@ -92,7 +75,7 @@ namespace plans
 		 * \brief Get the version of the class
 		 ************************************************************************/
 		static versions::version& version () {
-			static versions::version version ("1.0.1.0");
+			static versions::version version ("1.0.2.0");
 			return version;
 		}
 		

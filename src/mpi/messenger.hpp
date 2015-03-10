@@ -30,6 +30,11 @@ enum mpi_flags {
 	mpi_skip = 0x02
 };
 
+/*!**********************************************************************
+ * \namespace mpi
+ * 
+ * This namespace contains classes and functions relevant to MPI communication, such as the messenger class.
+ ************************************************************************/
 namespace mpi
 {	
 #ifdef _MPI
