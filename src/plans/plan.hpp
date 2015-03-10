@@ -44,7 +44,7 @@ enum solve_element_flags {
 /*!**********************************************************************
  * \namespace plans
  * 
- * A namespace containing the plans that do the actual operations on data.
+ * \brief A namespace containing the plans that do the actual operations on data.
  ************************************************************************/
 namespace plans
 {

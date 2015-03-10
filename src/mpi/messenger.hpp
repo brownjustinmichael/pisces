@@ -33,7 +33,7 @@ enum mpi_flags {
 /*!**********************************************************************
  * \namespace mpi
  * 
- * This namespace contains classes and functions relevant to MPI communication, such as the messenger class.
+ * \brief This namespace contains classes and functions relevant to MPI communication, such as the messenger class.
  ************************************************************************/
 namespace mpi
 {	

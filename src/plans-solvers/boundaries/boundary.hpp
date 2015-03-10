@@ -14,7 +14,7 @@
 /*!**********************************************************************
  * \namespace boundaries
  * 
- * A namespace that contains boundary objects used to calculate matrices and right hand sides across boundaries
+ * \brief A namespace that contains boundary objects used to calculate matrices and right hand sides across boundaries
  ************************************************************************/
 namespace boundaries
 {

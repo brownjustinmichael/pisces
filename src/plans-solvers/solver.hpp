@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file bases/solver.hpp
+ * \file solver.hpp
  * Spectral Element
  * 
  * This extension extends the capacities of the plans module by adding equations and solvers.
@@ -19,6 +19,11 @@
 #include "plans/real_plan.hpp"
 #include "plans/grids/grid.hpp"
 
+/*!**********************************************************************
+ * \namespace plans::solvers
+ * 
+ * \brief An extension of plans that contains the solver information, including the equation and solver classes.
+ ************************************************************************/
 namespace plans
 {
 	namespace solvers

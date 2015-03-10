@@ -14,7 +14,7 @@
 /*!**********************************************************************
  * \namespace versions
  * 
- * A namespace that contains the relevant information for any relevant versioning.
+ * \brief A namespace that contains the relevant information for any relevant versioning.
  ************************************************************************/
 namespace versions
 {

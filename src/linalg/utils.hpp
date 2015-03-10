@@ -12,7 +12,7 @@
 /*!**********************************************************************
  * \namespace linalg
  * 
- * A namespace containing a set of useful linear algebra functions from BLAS and LAPACK.
+ * \brief A namespace containing a set of useful linear algebra functions from BLAS and LAPACK.
  ************************************************************************/
 namespace linalg
 {

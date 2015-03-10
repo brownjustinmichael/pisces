@@ -174,7 +174,7 @@ namespace logger
 /*!*******************************************************************
  * \namespace logger
  * 
- * A namespace containing classes and objects relevant to log messages.
+ * \brief A namespace containing classes and objects relevant to log messages.
  *********************************************************************/
 namespace logger
 {
