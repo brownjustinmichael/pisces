@@ -72,7 +72,7 @@ namespace plans
 		virtual ~plan () {}
 		
 		/*!**********************************************************************
-		 * \brief Get the version of the class
+		 * \return The version of the class
 		 ************************************************************************/
 		static versions::version& version () {
 			static versions::version version ("1.1.0.0");

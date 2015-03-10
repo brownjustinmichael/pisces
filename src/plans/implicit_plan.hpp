@@ -74,7 +74,7 @@ namespace plans
 			 * \param i_element_flags A pointer to the integer flags associated with the element on the whole
 			 * \param i_component_flags A pointer to the integer flags associated with the variable associated with the plan
 			 * 
-			 * This method creates a shared_ptr to an explicit plan instance. The benefit to this inclusion is that the instance method can be called in a uniform way and hide communication of grid and matrix information from the user. If a plan would be created that would not do anything (e.g. something with a coefficient of 0.0), this will return a NULL shared pointer.
+			 * This method creates a shared_ptr to an implicit plan instance. The benefit to this inclusion is that the instance method can be called in a uniform way and hide communication of grid and matrix information from the user. If a plan would be created that would not do anything (e.g. something with a coefficient of 0.0), this will return a NULL shared pointer.
 			 ************************************************************************/
 			virtual std::shared_ptr <plans::plan <datatype>> instance (grids::grid <datatype> **grids, datatype **matrices, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const = 0;
 		};

@@ -70,7 +70,7 @@ namespace formats
 		virtual ~data_grid () {}
 		
 		/*!**********************************************************************
-		 * \brief Get the version of the class
+		 * \return The version of the class
 		 ************************************************************************/
 		static versions::version& version () {
 			static versions::version version ("1.0.1.0");
