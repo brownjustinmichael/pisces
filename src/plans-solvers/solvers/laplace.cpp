@@ -118,7 +118,7 @@ namespace plans
 
 			int info;
 		
-			linalg::p_block_tridiag_factorize (id, np, mm, &sub [nbegin], &diag [nbegin], &sup [nbegin], &supsup [nbegin], &ipiv [nbegin], &x [0], &xipiv [0], &info, ldn, m);
+			linalg::block::tridiag_factorize (id, np, mm, &sub [nbegin], &diag [nbegin], &sup [nbegin], &supsup [nbegin], &ipiv [nbegin], &x [0], &xipiv [0], &info, ldn, m);
 		}
 	
 		template <class datatype>
@@ -157,7 +157,7 @@ namespace plans
 			// DEBUG (&x [0]);
 			// DEBUG (&xipiv [0]);
 			// DEBUG (" " << id << " " << np << " " << mm << " " << nbegin);
-			linalg::p_block_tridiag_solve (id, np, mm, &sub [nbegin], &diag [nbegin], &sup [nbegin], &supsup [nbegin], &ipiv [nbegin], data + nbegin, &x [0], &xipiv [0], &info, ldn, m, m);
+			linalg::block::tridiag_solve (id, np, mm, &sub [nbegin], &diag [nbegin], &sup [nbegin], &supsup [nbegin], &ipiv [nbegin], data + nbegin, &x [0], &xipiv [0], &info, ldn, m, m);
 
 			// DEBUG ("DONE");
 			for (int i = 0; i < ldn; ++i) {

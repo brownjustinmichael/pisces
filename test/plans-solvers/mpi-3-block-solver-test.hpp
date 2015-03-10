@@ -112,7 +112,7 @@ public:
 			// cbegin = clock ();
 			// begin = std::chrono::system_clock::now ();
 		
-			linalg::p_block_matrix_factorize (mess.get_id (), mess.get_np (), n, ntop, nbot, &a [0], &ipiv [0], &x [0], &xipiv [0], &ns [0], &info, lda, ldx);
+			linalg::block::matrix_factorize (mess.get_id (), mess.get_np (), n, ntop, nbot, &a [0], &ipiv [0], &x [0], &xipiv [0], &ns [0], &info, lda, ldx);
 	
 			// cmid = clock ();
 			// mid = std::chrono::system_clock::now ();
@@ -120,7 +120,7 @@ public:
 			// mb += mid - begin;
 			// cmb += cmid - cbegin;
 		
-			linalg::p_block_matrix_solve (mess.get_id (), mess.get_np (), n, ntop, nbot, &a [0], &ipiv [0], &b [0], &x [0], &xipiv [0], &ns [0], &info, nrhs, lda, ldx, ldb);
+			linalg::block::matrix_solve (mess.get_id (), mess.get_np (), n, ntop, nbot, &a [0], &ipiv [0], &b [0], &x [0], &xipiv [0], &ns [0], &info, nrhs, lda, ldx, ldb);
 	
 			// cend = clock ();
 			// end = std::chrono::system_clock::now ();
@@ -204,9 +204,9 @@ public:
 		}
 		
 		try {
-			linalg::p_block_tridiag_factorize (id, np, n - ntop - nbot, &sub [0], &diag [0], &sup [0], &supsup [0], &ipiv [0], &x [0], &xipiv [0], &info, nrhs);
+			linalg::block::tridiag_factorize (id, np, n - ntop - nbot, &sub [0], &diag [0], &sup [0], &supsup [0], &ipiv [0], &x [0], &xipiv [0], &info, nrhs);
 
-			linalg::p_block_tridiag_solve (id, np, n - ntop - nbot,  &sub [0], &diag [0], &sup [0], &supsup [0], &ipiv [0], &b [0], &x [0], &xipiv [0], &info, nrhs);
+			linalg::block::tridiag_solve (id, np, n - ntop - nbot,  &sub [0], &diag [0], &sup [0], &supsup [0], &ipiv [0], &b [0], &x [0], &xipiv [0], &info, nrhs);
 		} catch (std::exception& except) {
 			std::cout << except.what () << '\n';
 		}
@@ -333,9 +333,9 @@ public:
 			}
 
 			try {
-				linalg::p_block_banded_factorize (id, np, n - ntop - nbot, kl, ku, &matrix [0], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, nrhs, lda, ldaa);
+				linalg::block::banded_factorize (id, np, n - ntop - nbot, kl, ku, &matrix [0], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, nrhs, lda, ldaa);
 
-				linalg::p_block_banded_solve (id, np, n - ntop - nbot, kl, ku, &matrix [0], &ipiv [0], &b [kl], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, nrhs, lda, ldaa, ldb);
+				linalg::block::banded_solve (id, np, n - ntop - nbot, kl, ku, &matrix [0], &ipiv [0], &b [kl], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, nrhs, lda, ldaa, ldb);
 			} catch (std::exception& except) {
 				std::cout << except.what () << '\n';
 			}
