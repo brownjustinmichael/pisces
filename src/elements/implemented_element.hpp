@@ -24,15 +24,30 @@
 
 namespace pisces
 {
+	/*!**********************************************************************
+	 * \brief A set of flags to be used when initializing element data
+	 ************************************************************************/
 	enum initialize_element_flags {
 		uniform_n = 0x01,
 		uniform_m = 0x02
 	};
 	
+	/*!**********************************************************************
+	 * \brief An implementation of the element class in 2D
+	 ************************************************************************/
 	template <class datatype>
 	class implemented_element : public pisces::element <datatype>
 	{
 	public:
+		/*!*******************************************************************
+		* \param i_axis_n The axis for the horizontal direction
+		* \param i_axis_m The axis for the vertical direction
+		* \param i_name The string representation of the element
+		* \param i_dimensions The integer number of dimensions
+		* \param i_params The parameter object that contains the input parameters of the run
+		* \param i_messenger_ptr A pointer to a messenger object for inter-element communication
+		* \param i_element_flags An integer set of global flags for the element
+		*********************************************************************/
 		implemented_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
 		element <datatype> (i_name, 2, i_params, i_data, i_messenger_ptr, i_element_flags),
 		n (i_axis_n.get_n ()), m (i_axis_m.get_n ()) {
@@ -40,17 +55,7 @@ namespace pisces
 			axes [0] = i_axis_n;
 			axes [1] = i_axis_m;
 			
-			if (i_messenger_ptr->get_id () == 0) {
-				alpha_0 = 0.0;
-			} else {
-				alpha_0 = 0.5;
-			}
-			if (i_messenger_ptr->get_id () == i_messenger_ptr->get_np () - 1) {
-				alpha_n = 0.0;
-			} else {
-				alpha_n = 0.5;
-			}
-			
+			// Initialize the timestep
 			max_timestep = i_params.get <datatype> ("time.max");
 			init_timestep = i_params.get <datatype> ("time.init");
 			mult_timestep = i_params.get <datatype> ("time.mult");
@@ -59,17 +64,20 @@ namespace pisces
 			count = 0;
 			previous = 0;
 			
+			// Initialize x and z
 			element <datatype>::initialize ("x");
 			element <datatype>::initialize ("z");
 			transform_threads = i_params.get <int> ("parallel.transform.subthreads");
 			
+			// Set up the grids
 			grids [0] = std::shared_ptr <grids::grid <datatype>> (new typename grids::horizontal::grid <datatype> (&i_axis_n));
 			grids [1] = std::shared_ptr <grids::grid <datatype>> (new typename grids::vertical::grid <datatype> (&i_axis_m));
 			
+			// For every variable in the data object, add a corresponding equation and transformer
 			for (typename data::data <datatype>::iterator iter = data.begin (); iter != data.end (); ++iter) {
 				if ((*iter != "x") && (*iter != "z")) {
 					DEBUG ("Adding " << *iter);
-					element <datatype>::add_solver (*iter, std::shared_ptr <plans::solvers::equation <datatype> > (new plans::solvers::implemented_equation <datatype> (*grids [0], *grids [1], ptr (*iter), &element_flags ["element"], &element_flags [*iter])));
+					element <datatype>::add_equation (*iter, std::shared_ptr <plans::solvers::equation <datatype> > (new plans::solvers::implemented_equation <datatype> (*grids [0], *grids [1], ptr (*iter), &element_flags ["element"], &element_flags [*iter])));
 					element <datatype>::transforms.push_back (*iter);
 					element <datatype>::transformers [*iter] = std::shared_ptr <plans::transforms::transformer <datatype> > (new plans::transforms::implemented_transformer <datatype> (*grids [0], *grids [1], data (*iter), NULL, plans::transforms::forward_vertical | plans::transforms::forward_horizontal | plans::transforms::inverse_vertical | plans::transforms::inverse_horizontal , &(data.flags ["element"]), &(data.flags [*iter]), element <datatype>::transform_threads));
 				}
@@ -219,7 +227,6 @@ namespace pisces
 		
 		int n; //!< The number of elements in each 1D array
 		int m;
-		datatype alpha_0, alpha_n;
 		std::map <int, datatype> positions; //!< A vector of the edge positions
 		std::map <int, int> excesses; //!< A vector of the edge positions
 		std::vector<int> cell_n; //!< An integer array for tracking each cell number for output

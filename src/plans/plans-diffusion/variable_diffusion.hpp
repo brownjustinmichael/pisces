@@ -17,6 +17,9 @@ namespace plans
 {
 	namespace diffusion
 	{
+		/*!**********************************************************************
+		 * \brief A plan to enact a diffusion coefficient linearly dependent on a variable
+		 ************************************************************************/
 		template <class datatype>
 		class linear : public real_plan <datatype>
 		{

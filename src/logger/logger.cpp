@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file config.cpp
+ * \file logger.cpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-23.

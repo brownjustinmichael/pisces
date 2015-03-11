@@ -198,18 +198,23 @@ namespace pisces
 		}
 		
 		/*!*******************************************************************
-		 * \brief Add a matrix solver.
+		 * \brief Add a matrix equation.
 		 * 
 		 * \param i_name The integer solver name to add
 		 * \param i_solver_ptr A pointer to a solver object
 		 *********************************************************************/
-		inline void add_solver (std::string i_name, std::shared_ptr <plans::solvers::equation <datatype> > i_solver_ptr) {
+		inline void add_equation (std::string i_name, std::shared_ptr <plans::solvers::equation <datatype> > i_solver_ptr) {
 			TRACE ("Adding solver...");
 			equations [i_name] = i_solver_ptr;
 			equation_keys.push_back (i_name);
 			TRACE ("Solver added.");
 		}
 		
+		/*!**********************************************************************
+		 * \brief Transform the element according to the flags
+		 * 
+		 * \param i_flags The flags to pass to the transformer transform member (e.g. forward_horizontal, read_before)
+		 ************************************************************************/
 		void transform (int i_flags) {
 			TRACE ("Transforming...");
 			int threads = transform_threads;
