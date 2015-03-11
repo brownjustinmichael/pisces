@@ -48,25 +48,26 @@ namespace plans
 			 * \param i_data_in A pointer to the data to input
 			 * \param i_data_out A pointer to the data to output
 			 * \param i_flags Integer flags to describe the setup (e.g. forward_vertical, inverse_horizontal, etc.)
+			 * \param i_threads The number of threads to use in the transform
 			 ************************************************************************/
-			implemented_transformer (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *element_flags, int *component_flags, int i_threads) : plans::transforms::transformer <datatype> (element_flags, component_flags), ldn (i_grid_n.get_ld ()), ldm (i_grid_m.get_ld ()), data_in (i_data_in), data_out (i_data_out ? i_data_out : i_data_in) {
+			implemented_transformer (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads) : plans::transforms::transformer <datatype> (i_element_flags, i_component_flags), ldn (i_grid_n.get_ld ()), ldm (i_grid_m.get_ld ()), data_in (i_data_in), data_out (i_data_out ? i_data_out : i_data_in) {
 				data.resize (ldn * ldm, 0.0);
 				// For each direction, check the flags to see which transforms to add and do so
 				if (i_flags & forward_vertical) {
-					forward_vertical_transform = std::shared_ptr <plans::plan <datatype>> (new plans::transforms::vertical <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], 0x00, element_flags, &internal_state, i_threads));
+					forward_vertical_transform = std::shared_ptr <plans::plan <datatype>> (new plans::transforms::vertical <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], 0x00, i_element_flags, &internal_state, i_threads));
 				}
 				if (i_flags & inverse_vertical) {
 					if (forward_vertical_transform) {
 						inverse_vertical_transform = forward_vertical_transform;
 					} else {
-						inverse_vertical_transform = std::shared_ptr <plans::plan <datatype>> (new plans::transforms::vertical <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], inverse, element_flags, &internal_state, i_threads));
+						inverse_vertical_transform = std::shared_ptr <plans::plan <datatype>> (new plans::transforms::vertical <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], inverse, i_element_flags, &internal_state, i_threads));
 					}
 				}
 				if (i_flags & forward_horizontal) {
-					forward_horizontal_transform = std::shared_ptr <plans::plan <datatype>> (new plans::transforms::horizontal <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], 0x00, element_flags, &internal_state, i_threads));
+					forward_horizontal_transform = std::shared_ptr <plans::plan <datatype>> (new plans::transforms::horizontal <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], 0x00, i_element_flags, &internal_state, i_threads));
 				}
 				if (i_flags & inverse_horizontal) {
-					inverse_horizontal_transform = std::shared_ptr <plans::plan <datatype>> (new plans::transforms::horizontal <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], inverse, element_flags, &internal_state, i_threads));
+					inverse_horizontal_transform = std::shared_ptr <plans::plan <datatype>> (new plans::transforms::horizontal <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], inverse, i_element_flags, &internal_state, i_threads));
 				}
 			}
 			

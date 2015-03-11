@@ -33,8 +33,13 @@
 #include "plans-solvers/equation.hpp"
 #include "plans-transforms/transformer.hpp"
 
-#include "data.hpp"
+#include "data/data.hpp"
 
+/*!**********************************************************************
+ * \namespace pisces
+ * 
+ * \brief A namespace containing the element class, the main class of the code
+ ************************************************************************/
 namespace pisces
 {
 	template <class datatype>
@@ -45,9 +50,9 @@ namespace pisces
 	 ************************************************************************/
 	template <class datatype>
 	union rezone_union {
-		element <datatype> *element_ptr; //! A pointer to an element
-		int np; //! The integer number of elements
-		datatype position; //! A real zoning position
+		element <datatype> *element_ptr; //!< A pointer to an element
+		int np; //!< The integer number of elements
+		datatype position; //!< A real zoning position
 	};
 	
 	/*!*******************************************************************
@@ -73,9 +78,9 @@ namespace pisces
 		std::map <std::string, int> &element_flags; //!< A map of integer flags
 		
 		std::map <std::string, std::shared_ptr <plans::solvers::equation <datatype>>> equations; //!< A vector of shared pointers to the matrix equations
-		std::map <std::string, std::shared_ptr <plans::transforms::transformer <datatype>>> transformers;
-		std::vector <std::string> transforms;
-		int transform_threads;
+		std::map <std::string, std::shared_ptr <plans::transforms::transformer <datatype>>> transformers; //!< A map containing the transformer objects for each variable
+		std::vector <std::string> transforms; //!< A vector containing the variables with transforms
+		int transform_threads; //!< The number of transform threads available
 		
 	private:
 		std::vector <std::string> equation_keys; //!< A vector of integer keys to the equations map
@@ -110,6 +115,7 @@ namespace pisces
 		* \param i_name The string representation of the element
 		* \param i_dimensions The integer number of dimensions
 		* \param i_params The parameter object that contains the input parameters of the run
+		* \param i_data An object that contains all the data in the simulation
 		* \param i_messenger_ptr A pointer to a messenger object for inter-element communication
 		* \param i_element_flags An integer set of global flags for the element
 		*********************************************************************/
@@ -227,7 +233,7 @@ namespace pisces
 		/*!**********************************************************************
 		 * \brief Get the pointer to a matrix from a particular solver
 		 * 
-		 * \param name The integer solver name from the index enumeration
+		 * \param i_name The integer solver name from the index enumeration
 		 * \param index The integer index of interest in the matrix
 		 * 
 		 * \return A pointer to the given index of the named solver matrix
@@ -242,10 +248,7 @@ namespace pisces
 		/*!*******************************************************************
 		 * \brief Initialize the scalar name and generate its transforms
 		 * 
-		 * \param name The integer index to be initialized from the index enumeration
-		 * \param i_str The string representation of the scalar field, for output
-		 * \param initial_conditions The datatype array of initial conditions
-		 * \param element_flags A set of binary element_flags for instantiation
+		 * \param i_name The integer index to be initialized from the index enumeration
 		 *********************************************************************/
 		virtual datatype *initialize (std::string i_name) {
 			return this->ptr (i_name);
@@ -255,7 +258,7 @@ namespace pisces
 		 * \brief Generate a shared_ptr to a grid for a specified dimension (use last dimension if unspecified)
 		 * 
 		 * \param axis_ptr A pointer to an axis object, which contains the extent of the grid and number of gridpoints
-		 * \param 
+		 * \param index The index of the grid to add (defaults to the next available)
 		 ************************************************************************/
 		virtual std::shared_ptr <grids::grid <datatype>> generate_grid (grids::axis *axis_ptr, int index = -1) = 0;
 		
@@ -330,17 +333,6 @@ namespace pisces
 			
 			transform (plans::transforms::forward_vertical | plans::transforms::no_read);
 			TRACE ("Solve complete.");
-		}
-		
-		virtual void solve_recursive (std::string name) {
-			if (!(element_flags [name] & solved)) {
-				int n_deps = equations [name]->n_dependencies ();
-				for (int i = 0; i < n_deps; ++i) {
-					solve_recursive (equations [name]->get_dependency (i));
-				}
-				equations [name]->solve ();
-				element_flags [name] |= solved;
-			}
 		}
 		
 		/*!**********************************************************************

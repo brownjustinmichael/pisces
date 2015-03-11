@@ -13,6 +13,11 @@
 
 #include "versions/version.hpp"
 
+/*!**********************************************************************
+ * \namespace formats
+ * 
+ * \brief A namespace containing several static file format classes
+ ************************************************************************/
 namespace formats
 {
 	/*!**********************************************************************

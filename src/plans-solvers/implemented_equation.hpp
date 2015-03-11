@@ -17,6 +17,8 @@ namespace plans
 	namespace solvers
 	{
 		/*!**********************************************************************
+		 * \brief An implementation of the equation class in 2D
+		 * 
 		 * \copydoc equation
 		 * 
 		 * This implements the equation class into a two-dimensional object. It should be possible to remove this class by making equation more general.
@@ -238,39 +240,39 @@ namespace plans
 			}
 			
 			/*!**********************************************************************
-			 * \copydoc equation::add_solver
+			 * \copydoc equation::add_solver(const typename solver<datatype>::factory&,int)
 			 ************************************************************************/
-			virtual void add_solver (const typename plans::solvers::solver <datatype>::factory &factory, int flags = 0x00) {
+			virtual void add_solver (const typename plans::solvers::solver <datatype>::factory &i_factory, int flags = 0x00) {
 				grids::grid <datatype>* grids [2] = {&grid_n, &grid_m};
-				plans::solvers::implemented_equation <datatype>::add_solver (factory.instance (grids, data, cor_rhs_ptr, element_flags, component_flags), flags);
+				plans::solvers::implemented_equation <datatype>::add_solver (i_factory.instance (grids, data, cor_rhs_ptr, element_flags, component_flags), flags);
 			}
 			
 			/*!**********************************************************************
-			 * \copydoc equation::add_plan
+			 * \copydoc equation::add_plan(const typename explicit_plan<datatype>::factory&,int)
 			 ************************************************************************/
-			void add_plan (const typename plans::explicit_plan <datatype>::factory &factory, int flags) {
+			void add_plan (const typename plans::explicit_plan <datatype>::factory &i_factory, int flags) {
 				TRACE ("Adding plan...");
 				grids::grid <datatype>* grids [2] = {&grid_n, &grid_m};
-				plans::solvers::equation <datatype>::add_plan (factory.instance (grids, data, new_rhs_ptr, element_flags, component_flags), flags);
+				plans::solvers::equation <datatype>::add_plan (i_factory.instance (grids, data, new_rhs_ptr, element_flags, component_flags), flags);
 			}
 			
 			/*!**********************************************************************
-			 * \copydoc equation::add_plan
+			 * \copydoc equation::add_plan(const typename explicit_plan<datatype>::factory&,int)
 			 ************************************************************************/
-			void add_plan (const typename plans::real_plan <datatype>::factory &factory, int flags) {
+			void add_plan (const typename plans::real_plan <datatype>::factory &i_factory, int flags) {
 				TRACE ("Adding plan...");
 				grids::grid <datatype>* grids [2] = {&grid_n, &grid_m};
-				plans::solvers::equation <datatype>::add_plan (factory.instance (grids, data, rhs_ptr (real_rhs), element_flags, component_flags), flags);
+				plans::solvers::equation <datatype>::add_plan (i_factory.instance (grids, data, rhs_ptr (real_rhs), element_flags, component_flags), flags);
 			}
 			
 			/*!**********************************************************************
-			 * \copydoc equation::add_plan
+			 * \copydoc equation::add_plan(const typename explicit_plan<datatype>::factory&,int)
 			 ************************************************************************/
-			void add_plan (const typename plans::implicit_plan <datatype>::factory &factory, int flags) {
+			void add_plan (const typename plans::implicit_plan <datatype>::factory &i_factory, int flags) {
 				TRACE ("Adding plan...");
 				grids::grid <datatype>* grids [2] = {&grid_n, &grid_m};
 				datatype* matrices [2] = {matrix_ptr (0), matrix_ptr (1)};
-				plans::solvers::equation <datatype>::add_plan (factory.instance (grids, matrices, data, rhs_ptr (spectral_rhs), element_flags, component_flags), flags);
+				plans::solvers::equation <datatype>::add_plan (i_factory.instance (grids, matrices, data, rhs_ptr (spectral_rhs), element_flags, component_flags), flags);
 			}
 		
 		protected:

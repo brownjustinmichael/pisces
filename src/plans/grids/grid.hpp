@@ -16,6 +16,11 @@
 #include "versions/version.hpp"
 #include "logger/logger.hpp"
 
+/*!**********************************************************************
+ * \namespace grids
+ * 
+ * \brief A namespace containing grid objects with knowledge of the physical grid setup
+ ************************************************************************/
 namespace grids
 {
 	/*!**********************************************************************
@@ -261,7 +266,12 @@ namespace grids
 	enum mode {
 		mode_flag = 0x10
 	};
-
+	
+	/*!**********************************************************************
+	 * \namespace grids::vertical
+	 * 
+	 * \brief A namespace containing grids in the vertical dimension
+	 ************************************************************************/
 	namespace vertical
 	{
 		/*!*******************************************************************
@@ -387,6 +397,11 @@ namespace grids
 	} /* vertical */
 #endif
 	
+	/*!**********************************************************************
+	 * \namespace grids::horizontal
+	 * 
+	 * \brief A namespace containing grids in the horizontal dimension
+	 ************************************************************************/
 	namespace horizontal
 	{
 		/*!*******************************************************************

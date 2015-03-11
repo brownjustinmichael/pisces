@@ -77,7 +77,7 @@ namespace plans
 			using plans::plan <datatype>::component_flags;
 		
 			/*!*******************************************************************
-			 * \copydoc explicit_plan::explicit_plan ()
+			 * \copydoc plan::plan ()
 			 *********************************************************************/
 			solver (int *i_element_flags, int *i_component_flags) : 
 			plan <datatype> (i_element_flags, i_component_flags) {}
@@ -124,9 +124,7 @@ namespace plans
 			}
 	
 			/*!**********************************************************************
-			 * \brief Return a pointer to the solver's matrix for the index dimension
-			 * 
-			 * \param index The index specifying from which dimension to grab the matrix
+			 * \brief Return a pointer to the solver's matrix
 			 * 
 			 * Note: these matrices are implementation dependent, so the implicit plans must be associated with particular matrix types.
 			 ************************************************************************/

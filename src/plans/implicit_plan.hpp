@@ -55,7 +55,7 @@ namespace plans
 		virtual void execute () = 0;
 		
 		/*!**********************************************************************
-		 * \brief An abstract factory class designed to produce an explicit_plan instance
+		 * \brief An abstract factory class designed to produce an implicit_plan instance
 		 * 
 		 * This factory class is implemented to make the creation of plan objects more intuitive. A factory can be given to an equation object, and the equation will know about the grids, data, and flags, so these need not be specified by the user.
 		 ************************************************************************/

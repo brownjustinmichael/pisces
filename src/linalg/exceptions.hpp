@@ -12,6 +12,11 @@
 #include <exception>
 #include <sstream>
 
+/*!**********************************************************************
+ * \namespace linalg::exceptions
+ * 
+ * \brief A namespace containing the exceptions for the linear algebra module
+ ************************************************************************/
 namespace linalg
 {
 	namespace exceptions

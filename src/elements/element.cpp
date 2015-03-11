@@ -14,7 +14,7 @@
 #include <omp.h>
 #include <yaml-cpp/yaml.h>
 #include "linalg/exceptions.hpp"
-#include "data.hpp"
+#include "data/data.hpp"
 
 #include <ctime>
 #include <chrono>

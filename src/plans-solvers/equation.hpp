@@ -75,7 +75,7 @@ namespace plans
 			/*!**********************************************************************
 			 * \brief Get the ith dependency of the equation in its current state
 			 * 
-			 * \param The index of the desired dependency
+			 * \param i The index of the desired dependency
 			 * 
 			 * \return The ith dependency of the equation
 			 ************************************************************************/
@@ -141,10 +141,10 @@ namespace plans
 			/*!**********************************************************************
 			 * \brief Add a solver to the equation
 			 * 
-			 * \param factory A solver factory to generate the solver object to add
+			 * \param i_factory A solver factory to generate the solver object to add
 			 * \param flags A set of integer flags describing the direction of the solve (x_solver, z_solver)
 			 ************************************************************************/
-			virtual void add_solver (const typename plans::solvers::solver <datatype>::factory &factory, int flags = 0x00) = 0;
+			virtual void add_solver (const typename plans::solvers::solver <datatype>::factory &i_factory, int flags = 0x00) = 0;
 	
 			/*!*******************************************************************
 			 * \brief Adds a plan to be executed
@@ -173,24 +173,27 @@ namespace plans
 			}
 	
 			/*!**********************************************************************
-			 * \copydoc add_plan
+			 * \brief Adds a plan to be executed
+			 * 
+			 * \param i_factory A reference to the factory from which to construct the plan
+			 * \param flags Binary flags to specify the time to execute the flag, from solver_plan_flags
 			 ************************************************************************/
-			virtual void add_plan (const typename explicit_plan <datatype>::factory &factory, int flags) = 0;
+			virtual void add_plan (const typename explicit_plan <datatype>::factory &i_factory, int flags) = 0;
 	
 			/*!**********************************************************************
-			 * \copydoc add_plan
+			 * \copydoc add_plan(const typename explicit_plan<datatype>::factory&,int)
 			 ************************************************************************/
-			virtual void add_plan (const typename real_plan <datatype>::factory &factory, int flags) = 0;
+			virtual void add_plan (const typename real_plan <datatype>::factory &i_factory, int flags) = 0;
 	
 			/*!**********************************************************************
-			 * \copydoc add_plan
+			 * \copydoc add_plan(const typename explicit_plan<datatype>::factory&,int)
 			 ************************************************************************/
-			virtual void add_plan (const typename implicit_plan <datatype>::factory &factory, int flags) = 0;
+			virtual void add_plan (const typename implicit_plan <datatype>::factory &i_factory, int flags) = 0;
 
 			/*!**********************************************************************
-			 * \brief Execute the plans for the state given in flags
+			 * \brief Execute the plans associated with the given flags
 			 * 
-			 * \param flags Binary flags specifying which flags should be executed, from solver_plan_flags
+			 * \param flags The flags of the plans to executed (e.g. pre_solve)
 			 ************************************************************************/
 			inline void execute_plans (int flags) {
 				if (flags & pre_plan) {
@@ -235,8 +238,6 @@ namespace plans
 
 			/*!*******************************************************************
 			 * \brief Transform the dataset according to the given flags
-			 * 
-			 * \param flags Binary flags describing the solve, from solve_flags
 			 * 
 			 * By default, this method will write the data into the solve class, perform the solve, and read the data back out into the element. This is chosen in order to allow for GPU usage in the future.
 			 *********************************************************************/

@@ -11,6 +11,11 @@
 
 #include "versions/version.hpp"
 
+/*!**********************************************************************
+ * \namespace functors
+ * 
+ * \brief A namespace consisting of functor objects that map one set of data to a related set
+ ************************************************************************/
 namespace functors
 {
 	/*

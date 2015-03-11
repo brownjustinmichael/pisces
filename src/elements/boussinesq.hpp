@@ -16,7 +16,7 @@
 
 #include "implemented_element.hpp"
 
-#include "data.hpp"
+#include "data/data.hpp"
 
 namespace pisces
 {
@@ -103,11 +103,11 @@ namespace pisces
 		/*!**********************************************************************
 		 * \copydoc implemented_element::make_rezoned_virtual_file
 		 ************************************************************************/
-		virtual formats::virtual_file *make_rezoned_virtual_file (datatype *positions, formats::virtual_file *old_virtual_file, int flags = 0x00) {
+		virtual formats::virtual_file *make_rezoned_virtual_file (datatype *positions, formats::virtual_file *virtual_file_ptr, int flags = 0x00) {
 			grids::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
 			std::shared_ptr <grids::grid <datatype>> vertical_grid = implemented_element <datatype>::generate_grid (&vertical_axis);
 			
-			pisces::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_virtual_file, &formats::virtual_files ["two_d/boussinesq/new_virtual_file"]);
+			pisces::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, virtual_file_ptr, &formats::virtual_files ["two_d/boussinesq/new_virtual_file"]);
 			
 			return &formats::virtual_files ["two_d/boussinesq/new_virtual_file"];
 		}

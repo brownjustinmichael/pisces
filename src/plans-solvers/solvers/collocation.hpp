@@ -71,7 +71,7 @@ namespace plans
 			 * \param i_grid_n The horizontal grid object
 			 * \param i_grid_m The vertical grid object
 			 * \param i_messenger_ptr A pointer to the mpi messenger object
-			 * \param timestep A datatype reference to the current timestep
+			 * \param i_timestep A datatype reference to the current timestep
 			 * \param i_boundary_0 A shared pointer to the top boundary object
 			 * \param i_boundary_n A shared pointer to the bottom boundary object
 			 * \param i_rhs A pointer to the right hand side of the equation

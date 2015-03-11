@@ -59,7 +59,6 @@ namespace pisces
 		datatype max_timestep; //!< The maximum timestep value
 		datatype init_timestep; //!< The starting timestep value
 		datatype mult_timestep; //!< The value by which to multiply or divide the timestep upon update
-		datatype timestep_safety; //!< A safety multiplier on the timestep (probably unneccessary)
 		datatype next_timestep; //!< The value of the next timestep
 		int transform_threads; //!< The integer number of transform threads
 		static int mode; //!< The mode of the simulation (from grids)
@@ -69,8 +68,8 @@ namespace pisces
 		* \param i_axis_n The axis for the horizontal direction
 		* \param i_axis_m The axis for the vertical direction
 		* \param i_name The string representation of the element
-		* \param i_dimensions The integer number of dimensions
 		* \param i_params The parameter object that contains the input parameters of the run
+		* \param i_data An object that contains all the data in the simulation
 		* \param i_messenger_ptr A pointer to a messenger object for inter-element communication
 		* \param i_element_flags An integer set of global flags for the element
 		*********************************************************************/
@@ -85,7 +84,6 @@ namespace pisces
 			max_timestep = i_params.get <datatype> ("time.max");
 			init_timestep = i_params.get <datatype> ("time.init");
 			mult_timestep = i_params.get <datatype> ("time.mult");
-			timestep_safety = i_params.get <datatype> ("time.safety");
 			next_timestep = 0.0;
 			
 			// Initialize x and z
@@ -129,6 +127,8 @@ namespace pisces
 		
 		/*!**********************************************************************
 		 * \copydoc implemented_element::ptr
+		 * 
+		 * \param j The vertical index of the variable to get
 		 ************************************************************************/
 		inline datatype& operator() (std::string name, int i = 0, int j = 0) {
 			return element <datatype>::operator() (name, i * m + j);
@@ -151,7 +151,7 @@ namespace pisces
 		 * 
 		 * \param name The name of the variable to get
 		 * \param i The horizontal index of the variable to get
-		 * \param j The horizontal index of the variable to get
+		 * \param j The vertical index of the variable to get
 		 * 
 		 * \return The pointer to the index of the specified variable
 		 ************************************************************************/
@@ -168,7 +168,7 @@ namespace pisces
 		 * \copydoc element::calculate_min_timestep
 		 ************************************************************************/
 		inline datatype calculate_min_timestep (formats::virtual_file *virtual_file = NULL, bool limiters = true) {
-			double shared_min = max_timestep / timestep_safety;
+			double shared_min = max_timestep;
 			
 			// Calculate the minimum timestep in parallel
 			#pragma omp parallel
@@ -188,13 +188,13 @@ namespace pisces
 			
 			// Using the minimum timestep, check whether the code should increase or reduce the timestep
 			if (limiters) {
-				shared_min *= timestep_safety;
 				if (timestep == 0.0) {
 					return init_timestep;
 				}
 				if (shared_min > mult_timestep * timestep) {
 					// If the minimum is larger than the current, increase the timestep
 					if (next_timestep != 0.0 && std::min (next_timestep, shared_min) > mult_timestep * timestep) {
+						// Prevent increasing the timestep and decreasing the timestep every other step
 						next_timestep = 0.0;
 						return std::min (mult_timestep * timestep, max_timestep);
 					} else {
@@ -237,11 +237,11 @@ namespace pisces
 		/*!**********************************************************************
 		 * \copydoc element::generate_grid
 		 ************************************************************************/
-		virtual std::shared_ptr <grids::grid <datatype>> generate_grid (grids::axis *axis, int index = -1) {
+		virtual std::shared_ptr <grids::grid <datatype>> generate_grid (grids::axis *axis_ptr, int index = -1) {
 			if (index == 0) {
-				return std::shared_ptr <grids::grid <datatype>> (new typename grids::horizontal::grid <datatype> (axis));
+				return std::shared_ptr <grids::grid <datatype>> (new typename grids::horizontal::grid <datatype> (axis_ptr));
 			} else if (index == 1 || index == -1) {
-				return std::shared_ptr <grids::grid <datatype>> (new typename grids::vertical::grid <datatype> (axis));
+				return std::shared_ptr <grids::grid <datatype>> (new typename grids::vertical::grid <datatype> (axis_ptr));
 			} else {
 				throw 0;
 			}
@@ -250,11 +250,11 @@ namespace pisces
 		/*!**********************************************************************
 		 * \copydoc element::make_rezoned_virtual_file
 		 ************************************************************************/
-		virtual formats::virtual_file *make_rezoned_virtual_file (datatype *positions, formats::virtual_file *old_virtual_file, int flags = 0x00) {
+		virtual formats::virtual_file *make_rezoned_virtual_file (datatype *positions, formats::virtual_file *virtual_file_ptr, int flags = 0x00) {
 			grids::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
 			std::shared_ptr <grids::grid <datatype>> vertical_grid = generate_grid (&vertical_axis);
 			
-			pisces::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, old_virtual_file, &formats::virtual_files ["two_d/element/new_virtual_file"]);
+			pisces::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, virtual_file_ptr, &formats::virtual_files ["two_d/element/new_virtual_file"]);
 			
 			return &formats::virtual_files ["two_d/element/new_virtual_file"];
 		}

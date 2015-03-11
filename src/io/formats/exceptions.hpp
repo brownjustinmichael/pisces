@@ -12,6 +12,11 @@
 #include <exception>
 #include <sstream>
 
+/*!**********************************************************************
+ * \namespace formats::exceptions
+ * 
+ * \brief A namespace containing the exceptions for the format classes
+ ************************************************************************/
 namespace formats
 {
 	namespace exceptions

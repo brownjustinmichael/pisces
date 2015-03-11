@@ -26,6 +26,11 @@
 #include "plans/grids/grid.hpp"
 #include "plans-transforms/implemented_transformer.hpp"
 
+/*!**********************************************************************
+ * \namespace data
+ * 
+ * \brief A namespace containing the data objects, which hold and output data
+ ************************************************************************/
 namespace data
 {
 	/*!**********************************************************************

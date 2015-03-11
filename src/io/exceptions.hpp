@@ -13,6 +13,11 @@
 #include <sstream>
 #include <iostream>
 
+/*!**********************************************************************
+ * \namespace io::exceptions
+ * 
+ * \brief A namespace containing the exceptions for the io module
+ ************************************************************************/
 namespace io
 {
 	namespace exceptions

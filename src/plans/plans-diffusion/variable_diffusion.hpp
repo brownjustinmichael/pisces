@@ -96,7 +96,7 @@ namespace plans
 			public:
 				/*!**********************************************************************
 				 * \param i_coeff The base coefficient for the plan to be constructed
-				 * \param data_source The source data pointer for the plan to be constructed
+				 * \param i_data_source The source data pointer for the plan to be constructed
 				 ************************************************************************/
 				factory (datatype i_coeff, datatype *i_data_source) : coeff (i_coeff), data_source (i_data_source) {}
 				

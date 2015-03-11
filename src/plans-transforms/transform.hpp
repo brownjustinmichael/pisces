@@ -39,7 +39,7 @@ namespace plans
 			int flags; //!< A set of flags for setting up the transform
 			int threads; //!< The integer number of threads to use
 			
-			datatype scalar; //<! The scalar by which to scale the data after transform
+			datatype scalar; //!< The scalar by which to scale the data after transform
 			std::vector <fftw_plan> plans; //!< A vector of fftw_plan objects
 			std::vector <fftwf_plan> plans_float; //!< A vector of fftwf_plan objects (for single precision)
 			fftw_iodim major_iodim; //!< A dimensional object needed by fftw
@@ -104,7 +104,7 @@ namespace plans
 			int flags; //!< A set of flags for setting up the transform
 			int threads; //!< The integer number of threads to use
 			
-			datatype scalar; //<! The scalar by which to scale the data after transform
+			datatype scalar; //!< The scalar by which to scale the data after transform
 			std::vector <fftw_plan> plans; //!< A vector of fftw_plan objects
 			std::vector <fftwf_plan> plans_float; //!< A vector of fftwf_plan objects (for single precision)
 			
