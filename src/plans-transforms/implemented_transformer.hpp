@@ -18,17 +18,40 @@ namespace plans
 {
 	namespace transforms
 	{
+		/*!**********************************************************************
+		 * \brief An implemented transformer object in 2D
+		 ************************************************************************/
 		template <class datatype>
 		class implemented_transformer : public plans::transforms::transformer <datatype>
 		{
+		private:
+			using plans::transforms::transformer <datatype>::internal_state;
+			using plans::transforms::transformer <datatype>::component_flags;
+			
+			int ldn; //!< The horizontal extent of the data array
+			int ldm; //!< The vertical extent of the data array
+			datatype *data_in; //!< A pointer to the data to input
+			datatype *data_out; //!< A pointer to the data to output
+			std::vector <datatype> data; //!< A vector containing the inner data
+			
+			std::shared_ptr <plans::plan <datatype>> forward_horizontal_transform; //!< A shared pointer to the forward horizontal transform
+			std::shared_ptr <plans::plan <datatype>> forward_vertical_transform; //!< A shared pointer to the forward vertical transform
+			std::shared_ptr <plans::plan <datatype>> inverse_horizontal_transform; //!< A shared pointer to the inverse horizontal transform
+			std::shared_ptr <plans::plan <datatype>> inverse_vertical_transform; //!< A shared pointer to the inverse vertical transform
+			
 		public:
-			implemented_transformer (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *element_flags, int *component_flags, int i_threads) : 
-			plans::transforms::transformer <datatype> (element_flags, component_flags),
-			ldn (i_grid_n.get_ld ()),
-			ldm (i_grid_m.get_ld ()),
-			data_in (i_data_in),
-			data_out (i_data_out ? i_data_out : i_data_in) {
+			/*!**********************************************************************
+			 * \copydoc transformer::transformer
+			 * 
+			 * \param i_grid_n The horizontal grid object
+			 * \param i_grid_m The vertical grid object
+			 * \param i_data_in A pointer to the data to input
+			 * \param i_data_out A pointer to the data to output
+			 * \param i_flags Integer flags to describe the setup (e.g. forward_vertical, inverse_horizontal, etc.)
+			 ************************************************************************/
+			implemented_transformer (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *element_flags, int *component_flags, int i_threads) : plans::transforms::transformer <datatype> (element_flags, component_flags), ldn (i_grid_n.get_ld ()), ldm (i_grid_m.get_ld ()), data_in (i_data_in), data_out (i_data_out ? i_data_out : i_data_in) {
 				data.resize (ldn * ldm, 0.0);
+				// For each direction, check the flags to see which transforms to add and do so
 				if (i_flags & forward_vertical) {
 					forward_vertical_transform = std::shared_ptr <plans::plan <datatype>> (new plans::transforms::vertical <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], 0x00, element_flags, &internal_state, i_threads));
 				}
@@ -46,9 +69,20 @@ namespace plans
 					inverse_horizontal_transform = std::shared_ptr <plans::plan <datatype>> (new plans::transforms::horizontal <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], inverse, element_flags, &internal_state, i_threads));
 				}
 			}
-		
+			
 			virtual ~implemented_transformer () {}
-	
+			
+			/*!**********************************************************************
+			 * \copydoc transformer::get_data
+			 ************************************************************************/
+			virtual datatype *get_data () {
+				return &data [0];
+			}
+			
+		protected:
+			/*!**********************************************************************
+			 * \copydoc transformer::_transform
+			 ************************************************************************/
 			void _transform (int flags) {
 				if (flags & forward_horizontal) {
 					if (!(internal_state & transformed_horizontal) && forward_horizontal_transform) {
@@ -71,31 +105,20 @@ namespace plans
 					}
 				}
 			}
-	
+			
+			/*!**********************************************************************
+			 * \copydoc transformer::write
+			 ************************************************************************/
 			void write () {
 				linalg::matrix_copy (ldm, ldn, data_in, &data [0]);
 			}
-
+			
+			/*!**********************************************************************
+			 * \copydoc transformer::read
+			 ************************************************************************/
 			void read () {
 				linalg::matrix_copy (ldm, ldn, &data [0], data_out);
 			}
-		
-			virtual datatype *get_data () {
-				return &data [0];
-			}
-	
-		private:
-			int ldn, ldm;
-			datatype *data_in, *data_out;
-			std::vector <datatype> data;
-		
-			std::shared_ptr <plans::plan <datatype>> forward_horizontal_transform;
-			std::shared_ptr <plans::plan <datatype>> forward_vertical_transform;
-			std::shared_ptr <plans::plan <datatype>> inverse_horizontal_transform;
-			std::shared_ptr <plans::plan <datatype>> inverse_vertical_transform;
-		
-			using plans::transforms::transformer <datatype>::internal_state;
-			using plans::transforms::transformer <datatype>::component_flags;
 		};
 	} /* transforms */
 } /* plans */

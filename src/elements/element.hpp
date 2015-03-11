@@ -323,7 +323,7 @@ namespace pisces
 			// Make certain everything is fully transformed
 			
 			
-			transform (forward_vertical | no_read);
+			transform (plans::transforms::forward_vertical | plans::transforms::no_read);
 			TRACE ("Solve complete.");
 		}
 		
@@ -368,7 +368,7 @@ namespace pisces
 		 ************************************************************************/
 		virtual formats::virtual_file *rezone_minimize_ts (datatype * positions, datatype min_size, datatype max_size, int n_tries = 20, int iters_fixed_t = 1000, datatype step_size = 1.0, datatype k = 1.0, datatype t_initial = 0.008, datatype mu_t = 1.003, datatype t_min = 2.0e-6) {
 			TRACE ("Rezoning...");
-			transform (inverse_horizontal | inverse_vertical);
+			transform (plans::transforms::inverse_horizontal | plans::transforms::inverse_vertical);
 
 			rezone_virtual_file = make_virtual_file (profile_only | timestep_only);
 			

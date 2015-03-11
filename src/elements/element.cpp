@@ -46,7 +46,7 @@ namespace pisces
 		std::chrono::duration <double> transform_duration = std::chrono::duration <double>::zero (), execution_duration = std::chrono::duration <double>::zero (), solve_duration = std::chrono::duration <double>::zero (), factorize_duration = std::chrono::duration <double>::zero (), output_duration = std::chrono::duration <double>::zero (), timestep_duration = std::chrono::duration <double>::zero ();
 
 		// If the element is in Cartesian space, transform to modal space and copy from the transform buffer
-		transform (forward_horizontal | forward_vertical | no_read);
+		transform (plans::transforms::forward_horizontal | plans::transforms::forward_vertical | plans::transforms::no_read);
 
 		// Set up openmp to run multiple plans simultaneously
 		omp_set_nested (true);
@@ -59,7 +59,7 @@ namespace pisces
 
 			// Transform the vertical grid to Cartesian space in the background
 			TIME (
-			transform (inverse_vertical | no_write | no_read | read_before);
+			transform (plans::transforms::inverse_vertical | plans::transforms::no_write | plans::transforms::no_read | plans::transforms::read_before);
 			, transform_time, transform_duration);
 			TIME (
 			data.check_streams (transformed_horizontal | transformed_vertical);
@@ -79,7 +79,7 @@ namespace pisces
 			, execution_time, execution_duration);
 
 			TIME (
-			transform (inverse_horizontal | no_write | no_read | read_before);
+			transform (plans::transforms::inverse_horizontal | plans::transforms::no_write | plans::transforms::no_read | plans::transforms::read_before);
 			, transform_time, transform_duration);
 			TIME (
 			data.check_streams (transformed_horizontal);
@@ -94,7 +94,7 @@ namespace pisces
 			, execution_time, execution_duration);
 			
 			TIME (
-			transform (forward_horizontal | no_write | no_read | read_before);
+			transform (plans::transforms::forward_horizontal | plans::transforms::no_write | plans::transforms::no_read | plans::transforms::read_before);
 			, transform_time, transform_duration);
 			TIME (
 			data.check_streams ();
@@ -128,7 +128,7 @@ namespace pisces
 
 			// Transform forward in the horizontal direction
 			TIME (
-			transform (do_not_transform | no_write);
+			transform (plans::transforms::do_not_transform | plans::transforms::no_write);
 			, transform_time, transform_duration);
 
 			// Calculate the pre solver plans
@@ -159,7 +159,7 @@ namespace pisces
 			++n_steps;
 			--check_every;
 		}
-		transform (do_not_transform | no_write);
+		transform (plans::transforms::do_not_transform | plans::transforms::no_write);
 		
 		INFO ("Profiling Factorize: CPU Time: " << factorize_time << " Wall Time: " << (double) factorize_duration.count () << " Efficiency: " << factorize_time / (double) factorize_duration.count () / omp_get_max_threads () * 100. << "%");
 		INFO ("Profiling Transform: CPU Time: " << transform_time << " Wall Time: " << (double) transform_duration.count () << " Efficiency: " << transform_time / (double) transform_duration.count () / omp_get_max_threads () * 100. << "%");
