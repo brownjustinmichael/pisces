@@ -104,7 +104,7 @@ namespace grids
 		/*!*******************************************************************
 		 * \param i_axis_ptr A pointer to an axis object
 		 * \param i_derivs The integer number of derivatives in the grid
-		 * \param i_ld
+		 * \param i_ld The extent of the data array
 		 *********************************************************************/
 		grid (axis *i_axis_ptr, int i_derivs, int i_ld = 0) :
 		n (i_axis_ptr->get_n ()),
@@ -129,6 +129,12 @@ namespace grids
 			TRACE ("Instantiated...");
 		}
 		
+		/*!**********************************************************************
+		 * \copydoc axis::axis
+		 * 
+		 * \param i_derivs The integer number of derivatives in the grid
+		 * \param i_ld The extent of the data array
+		 ************************************************************************/
 		grid (int i_derivs, int i_n = 0, double i_position_0 = 0.0, double i_position_n = 0.0, int i_excess_0 = 0, int i_excess_n = 0, int i_ld = 0) {
 			n = i_n;
 			ld = i_ld;
@@ -284,8 +290,14 @@ namespace grids
 			 *********************************************************************/
 			grid (axis *i_axis_ptr);
 			
+			/*!**********************************************************************
+			 * \copydoc axis::axis
+			 * 
+			 * \param i_derivs The integer number of derivatives in the grid
+			 * \param i_ld The extent of the data array
+			 ************************************************************************/
 			grid (int i_n = 0, double i_position_0 = 0.0, double i_position_n = 0.0, int i_excess_0 = 0, int i_excess_n = 0, int i_ld = 0);
-	
+			
 			virtual ~grid () {};
 			
 		protected:
@@ -400,6 +412,12 @@ namespace grids
 			 *********************************************************************/
 			grid (axis *i_axis_ptr);
 			
+			/*!**********************************************************************
+			 * \copydoc axis::axis
+			 * 
+			 * \param i_derivs The integer number of derivatives in the grid
+			 * \param i_ld The extent of the data array
+			 ************************************************************************/
 			grid (int i_n = 0, double i_position_0 = 0.0, double i_position_n = 0.0, int i_excess_0 = 0, int i_excess_n = 0, int i_ld = 0);
 				
 			virtual ~grid () {};
