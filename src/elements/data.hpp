@@ -52,9 +52,13 @@ namespace data
 		std::vector <int> stream_conditions; //!< A vector of flags to match to output
 		std::vector <bool> done; //!< A vector of booleans informing whether an output has been made this timestep
 		
-		std::shared_ptr <io::output> dump_stream;
-		int dump_condition;
-		bool dump_done;
+		std::shared_ptr <io::output> dump_stream; //!< A shared pointer to the dump output stream
+		int dump_condition; //!< The flag condition of the data to be checked for dump
+		bool dump_done; //!< A boolean stating whether the dump has happened
+		
+	protected:
+		std::vector <std::string> scalar_names; //!< The vector of variable names
+		std::map <std::string, std::vector <datatype>> scalars; //!< The string map of vectors containing the variable data
 		
 	public:
 		datatype duration; //!< The total time elapsed in the simulation thus far
@@ -265,6 +269,12 @@ namespace data
 			}
 		}
 		
+		/*!**********************************************************************
+		 * \brief Set up the dump stream
+		 * 
+		 * \param output_ptr The shared pointer to the output stream to use as the dump
+		 * \param flags The conditions to be met for dump (e.g. transformed_vertical | transformed_horizontal)
+		 ************************************************************************/
 		virtual void setup_dump (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
 			// Iterate through the scalar fields and append them to the variables which the output will write to file
 			output_ptr->template append <datatype> ("t", &duration, formats::scalar);
@@ -311,25 +321,36 @@ namespace data
 		*/
 		
 	protected:
-		std::vector <std::string> scalar_names;
-		std::map <std::string, std::vector <datatype>> scalars;
-		
 		/*!**********************************************************************
 		 * \brief Initialize a new dataset in the data object
 		 ************************************************************************/
 		virtual datatype *_initialize (std::string i_name, datatype* initial_conditions = NULL, int i_flags = 0x00) = 0;
 	};
 	
+	/*!**********************************************************************
+	 * \brief An implemeted form of data in 2D
+	 ************************************************************************/
 	template <class datatype>
 	class implemented_data : public data <datatype>
 	{
 	protected:
 		using data <datatype>::iterator;
-		std::shared_ptr <grids::grid <datatype>> grid_n, grid_m;
+		
+		std::shared_ptr <grids::grid <datatype>> grid_n; //!< The horizontal grid object
+		std::shared_ptr <grids::grid <datatype>> grid_m; //!< The vertical grid object
 		int n, m;
 		
 	public:
 		using data <datatype>::duration;
+		
+		/*!**********************************************************************
+		 * \param i_axis_n The horizontal axis object
+		 * \param i_axis_m The vertical axis object
+		 * \param name The integer name of the element
+		 * \param dump_file The string name of the dump file (no extension)
+		 * \param dump_directory The string directory to store the dump
+		 * \param dump_every The frequency to dump to file
+		 ************************************************************************/
 		implemented_data (grids::axis *i_axis_n, grids::axis *i_axis_m, int name = 0, std::string dump_file = "", std::string dump_directory = "./", int dump_every = 1) : grid_n (std::shared_ptr <grids::grid <datatype>> (new typename grids::horizontal::grid <datatype> (i_axis_n))), grid_m (std::shared_ptr <grids::grid <datatype>> (new typename grids::vertical::grid <datatype> (i_axis_m))), n (grid_n->get_n ()), m (grid_m->get_n ()) {
 			// Set up output
 			const formats::data_grid o_grid = formats::data_grid::two_d (n, m, 0, 0, 0, 0);
@@ -354,10 +375,20 @@ namespace data
 		
 		virtual ~implemented_data () {}
 		
+		/*!**********************************************************************
+		 * \brief Gets the pointer to the variable at the given index
+		 * 
+		 * \param name The name of the variable
+		 * \param i The horizontal index
+		 * \param j The vertical index
+		 ************************************************************************/
 		datatype *operator () (const std::string name, const int i = 0, const int j = 0) {
 			return data <datatype>::operator() (name, i * grid_m->get_ld () + j); 
 		}
 		
+		/*!**********************************************************************
+		 * \copydoc data::setup_profile
+		 ************************************************************************/
 		virtual void setup_profile (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
 			typedef typename std::map <std::string, std::vector <datatype> >::iterator iterator;
 			for (iterator iter = data <datatype>::scalars.begin (); iter != data <datatype>::scalars.end (); ++iter) {
@@ -372,6 +403,9 @@ namespace data
 		}
 	
 	protected:
+		/*!**********************************************************************
+		 * \copydoc data::_initialize
+		 ************************************************************************/
 		virtual datatype *_initialize (std::string name, datatype* initial_conditions = NULL, int i_flags = 0x00) {
 			TRACE ("Initializing " << name << "...");
 			// Size allowing for real FFT buffer

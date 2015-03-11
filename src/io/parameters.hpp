@@ -15,6 +15,13 @@
 #include "exceptions.hpp"
 #include "logger/logger.hpp"
 
+/*!**********************************************************************
+ * \def DEFAULTS_FILE
+ * 
+ * \brief The full path to the default YAML parameter file.
+ * 
+ * By default, this will not specify a file name, which would yield no defaults, but SConstruct adds it as a command line variable, pointing to defaults.yaml
+ ************************************************************************/
 #ifndef DEFAULTS_FILE
 #define DEFAULTS_FILE ""
 #endif

@@ -23,16 +23,41 @@ namespace plans
 		template <class datatype>
 		class linear : public real_plan <datatype>
 		{
+		private:
+			using real_plan <datatype>::n;
+			using real_plan <datatype>::ldn;
+			using real_plan <datatype>::m;
+			using real_plan <datatype>::grid_n;
+			using real_plan <datatype>::grid_m;
+			using real_plan <datatype>::data_in;
+			using real_plan <datatype>::data_out;
+			
+			using real_plan <datatype>::element_flags;
+			using real_plan <datatype>::component_flags;
+			
+			datatype coeff; //!< The base coefficient to multiply the source
+			datatype *data_source; //!< A pointer to the source data
+			datatype pioL2; //!< The value pi / L^2 for speed
+			
 		public:
+			/*!**********************************************************************
+			 * \copydoc real_plan::real_plan
+			 * 
+			 * \param i_coeff The base coefficient to multiply the source
+			 * \param i_data_source A pointer to the source data
+			 ************************************************************************/
 			linear (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_coeff, datatype *i_data_source, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : 
 			real_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out, i_element_flags, i_component_flags),
 			coeff (i_coeff),
 			data_source (i_data_source) {
 				TRACE ("Instantiating...");
 			}
-	
+			
 			virtual ~linear () {}
-
+			
+			/*!**********************************************************************
+			 * \copydoc real_plan::execute
+			 ************************************************************************/
 			void execute () {	
 				TRACE ("Operating...");
 				for (int j = 1; j < m - 1; ++j) {
@@ -58,36 +83,32 @@ namespace plans
 				}
 				TRACE ("Operation complete.");
 			}
-	
-			using real_plan <datatype>::element_flags;
-			using real_plan <datatype>::component_flags;
-
+			
+			/*!**********************************************************************
+			 * \copydoc real_plan::factory
+			 ************************************************************************/
 			class factory : public real_plan <datatype>::factory
 			{
 			private:
-				datatype coeff;
-				datatype *data_source;
+				datatype coeff; //!< The base coefficient for the plan to be constructed
+				datatype *data_source; //!< The source data pointer for the plan to be constructed
+				
 			public:
+				/*!**********************************************************************
+				 * \param i_coeff The base coefficient for the plan to be constructed
+				 * \param data_source The source data pointer for the plan to be constructed
+				 ************************************************************************/
 				factory (datatype i_coeff, datatype *i_data_source) : coeff (i_coeff), data_source (i_data_source) {}
-		
+				
 				virtual ~factory () {}
-		
+				
+				/*!**********************************************************************
+				 * \copydoc real_plan::factory::instance
+				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > instance (grids::grid <datatype> **grids, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
 					return std::shared_ptr <plans::plan <datatype> > (new linear <datatype> (*grids [0], *grids [1], coeff, data_source, i_data_in, i_data_out, i_element_flags, i_component_flags));
 				}
 			};
-
-		private:
-			datatype coeff;
-			datatype *data_source;
-			datatype pioL2;
-			using real_plan <datatype>::n;
-			using real_plan <datatype>::ldn;
-			using real_plan <datatype>::m;
-			using real_plan <datatype>::grid_n;
-			using real_plan <datatype>::grid_m;
-			using real_plan <datatype>::data_in;
-			using real_plan <datatype>::data_out;
 		};
 	} /* diffusion */
 } /* plans */

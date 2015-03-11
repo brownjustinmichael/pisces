@@ -25,6 +25,9 @@ namespace plans
 {
 	namespace source
 	{
+		/*!**********************************************************************
+		 * \brief A plan to add a source term to an equation
+		 ************************************************************************/
 		template <class datatype>
 		class uniform : public explicit_plan <datatype>
 		{

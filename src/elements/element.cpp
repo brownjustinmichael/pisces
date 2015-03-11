@@ -19,13 +19,6 @@
 #include <ctime>
 #include <chrono>
 
-#ifndef VTRACE
-#define VT_MARKER(x,y)
-#define VT_MARKER_DEF(x,y) 0
-#else
-#include <vt_user.h>
-#endif
-
 /*!**********************************************************************
  * \brief Time a function call
  ************************************************************************/
