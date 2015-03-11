@@ -9,7 +9,7 @@
 #ifndef COLLOCATION_SOLVER_HPP_76DA75C5
 #define COLLOCATION_SOLVER_HPP_76DA75C5
 
-#include "linalg-block/solver.hpp"
+#include "linalg-block/block_solver.hpp"
 
 #include "../boundaries/boundary.hpp"
 #include "../solver.hpp"

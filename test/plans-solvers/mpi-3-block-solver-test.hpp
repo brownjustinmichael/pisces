@@ -17,7 +17,7 @@
 #include "linalg/linalg.hpp"
 #include "plans-solvers/solvers/linalg-block/tridiagonal.hpp"
 #include "plans-solvers/solvers/linalg-block/banded.hpp"
-#include "plans-solvers/solvers/linalg-block/solver.hpp"
+#include "plans-solvers/solvers/linalg-block/block_solver.hpp"
 #include <iostream>
 
 #define TEST_TINY 1.e-6
