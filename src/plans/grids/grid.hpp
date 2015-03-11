@@ -296,7 +296,6 @@ namespace grids
 			/*!**********************************************************************
 			 * \copydoc axis::axis
 			 * 
-			 * \param i_derivs The integer number of derivatives in the grid
 			 * \param i_ld The extent of the data array
 			 ************************************************************************/
 			grid (int i_n = 0, double i_position_0 = 0.0, double i_position_n = 0.0, int i_excess_0 = 0, int i_excess_n = 0, int i_ld = 0);
@@ -421,7 +420,6 @@ namespace grids
 			/*!**********************************************************************
 			 * \copydoc axis::axis
 			 * 
-			 * \param i_derivs The integer number of derivatives in the grid
 			 * \param i_ld The extent of the data array
 			 ************************************************************************/
 			grid (int i_n = 0, double i_position_0 = 0.0, double i_position_n = 0.0, int i_excess_0 = 0, int i_excess_n = 0, int i_ld = 0);

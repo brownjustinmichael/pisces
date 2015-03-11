@@ -133,7 +133,11 @@ namespace data
 		
 	public:
 		/*!**********************************************************************
-		 * \copydoc implemented_data::implemented_data
+		 * \param i_axis_n The horizontal axis object
+		 * \param i_axis_m The vertical axis object
+		 * \param i_name The integer name of the element
+		 * \param n_elements The total number of elements
+		 * \param i_params The parameters object associated with the run
 		 ************************************************************************/
 		thermo_compositional_data (grids::axis *i_axis_n, grids::axis *i_axis_m, int i_name, int n_elements, io::parameters& i_params);
 		

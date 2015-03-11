@@ -291,8 +291,9 @@ namespace io
 
 	public:
 		/*!**********************************************************************
+		 * \param i_grid The data_grid object representing the structure of the data
+		 * \param i_file_name A string file name
 		 * \param i_output_every The integer frequency of outputs
-		 * \copydoc formatted_output::formatted_output
 		 ************************************************************************/
 		appender_output (formats::data_grid i_grid, std::string i_file_name, int i_output_every = 1) : formatted_output <format> (i_grid, i_file_name, formats::append_file), output_every (i_output_every > 0 ? i_output_every : 1), count (0) {}
 

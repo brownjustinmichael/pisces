@@ -148,7 +148,7 @@ namespace plans
 			/*!**********************************************************************
 			 * \brief Transform the dataset
 			 * 
-			 * \params flags Binary flags that determine the type of transform (forward_vertical, forward_horizontal, inverse_vertical, inverse_horizontal)
+			 * \param flags Binary flags that determine the type of transform (forward_vertical, forward_horizontal, inverse_vertical, inverse_horizontal)
 			 * 
 			 * This method contains the implementation of the transform, which must be overwritten in the subclasses.
 			 ************************************************************************/

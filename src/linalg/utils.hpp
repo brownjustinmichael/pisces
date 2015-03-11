@@ -136,7 +136,6 @@ namespace linalg
 	 * \param a A float value to scale by
 	 * \param x A float array to be scaled
 	 * \param ldx The leading dimension of x
-	 * \param ldy The leading dimension of y
 	 ************************************************************************/
 	void matrix_scale (int n, int m, float a, float *x, int ldx = -1);
 	
@@ -148,7 +147,6 @@ namespace linalg
 	 * \param a A double value to scale by
 	 * \param x A double array to be scaled
 	 * \param ldx The leading dimension of x
-	 * \param ldy The leading dimension of y
 	 ************************************************************************/
 	void matrix_scale (int n, int m, double a, double *x, int ldx = -1);
 	
@@ -297,7 +295,6 @@ namespace linalg
 	/*!*******************************************************************
 	 * \brief Perform the diagonal matrix-vector multiplication y = alpha * a * x + beta * y
 	 * 
-	 * \param m An integer number of rows in a
 	 * \param n An integer number of columns in a
 	 * \param alpha The float alpha
 	 * \param a The float matrix a (Fortran format)
@@ -313,7 +310,6 @@ namespace linalg
 	/*!*******************************************************************
 	 * \brief Perform the diagonal matrix-vector multiplication y = alpha * a * x + beta * y
 	 * 
-	 * \param m An integer number of rows in a
 	 * \param n An integer number of columns in a
 	 * \param alpha The double alpha
 	 * \param a The double matrix a (Fortran format)

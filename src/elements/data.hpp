@@ -346,12 +346,12 @@ namespace data
 		/*!**********************************************************************
 		 * \param i_axis_n The horizontal axis object
 		 * \param i_axis_m The vertical axis object
-		 * \param name The integer name of the element
+		 * \param i_name The integer name of the element
 		 * \param dump_file The string name of the dump file (no extension)
 		 * \param dump_directory The string directory to store the dump
 		 * \param dump_every The frequency to dump to file
 		 ************************************************************************/
-		implemented_data (grids::axis *i_axis_n, grids::axis *i_axis_m, int name = 0, std::string dump_file = "", std::string dump_directory = "./", int dump_every = 1) : grid_n (std::shared_ptr <grids::grid <datatype>> (new typename grids::horizontal::grid <datatype> (i_axis_n))), grid_m (std::shared_ptr <grids::grid <datatype>> (new typename grids::vertical::grid <datatype> (i_axis_m))), n (grid_n->get_n ()), m (grid_m->get_n ()) {
+		implemented_data (grids::axis *i_axis_n, grids::axis *i_axis_m, int i_name = 0, std::string dump_file = "", std::string dump_directory = "./", int dump_every = 1) : grid_n (std::shared_ptr <grids::grid <datatype>> (new typename grids::horizontal::grid <datatype> (i_axis_n))), grid_m (std::shared_ptr <grids::grid <datatype>> (new typename grids::vertical::grid <datatype> (i_axis_m))), n (grid_n->get_n ()), m (grid_m->get_n ()) {
 			// Set up output
 			const formats::data_grid o_grid = formats::data_grid::two_d (n, m, 0, 0, 0, 0);
 			
@@ -359,7 +359,7 @@ namespace data
 			if (dump_file != "") {
 				std::string file_format = dump_directory + dump_file;
 				char buffer [file_format.size () * 2];
-				snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
+				snprintf (buffer, file_format.size () * 2, file_format.c_str (), i_name);
 
 				dump_stream.reset (new io::replace_output <formats::netcdf> (o_grid, buffer, dump_every));
 				this->setup_dump (dump_stream);

@@ -190,7 +190,6 @@ namespace linalg
 	 * \param b The float right hand side array/output on result
 	 * \param info An integer pointer that points to 0 on success, something else on failure
 	 * \param nrhs The integer number of right hand sides in b
-	 * \param lda The integer leading dimension of a
 	 * \param ldb The integer leading dimension of b
 	 * 
 	 * Warning: this function overwrites the original matrices and can't be used again until the matrices are reset
@@ -207,7 +206,6 @@ namespace linalg
 	 * \param b The double right hand side array/output on result
 	 * \param info An integer pointer that points to 0 on success, something else on failure
 	 * \param nrhs The integer number of right hand sides in b
-	 * \param lda The integer leading dimension of a
 	 * \param ldb The integer leading dimension of b
 	 * 
 	 * Warning: this function overwrites the original matrices and can't be used again until the matrices are reset

@@ -58,6 +58,13 @@ namespace io
 			
 			virtual ~alias () {}
 			
+			/*!**********************************************************************
+			 * \brief Index into the parameters alias
+			 * 
+			 * \param i_key The key to get from the alias
+			 * 
+			 * The alias class is designed to allow for indexing relative to the location of the alias, so the key here should assume starting from the associated node
+			 ************************************************************************/
 			YAML::Node operator [] (std::string i_key) {
 				return params [key + "." + i_key];
 			}

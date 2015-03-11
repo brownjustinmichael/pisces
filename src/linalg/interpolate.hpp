@@ -28,6 +28,7 @@ namespace linalg
 	 * \param m The integer number of elements perpendicular to the interpolation direction in in, out, x, y
 	 * \param l The integer number of elements in the interpolation direction in x, y
 	 * \param alpha The real multiplier on the resulting array
+	 * \param beta The real multiplier on the original array (0.0 for a clean copy)
 	 * \param x The double array of independent variables to interpolate over
 	 * \param y The double array of dependent variables to interpolate over
 	 * \param in The double array of independent variables to interpolate at
