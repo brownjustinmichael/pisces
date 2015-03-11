@@ -9,6 +9,11 @@
 #ifndef INTERPOLATE_HPP_IZNK7T4T
 #define INTERPOLATE_HPP_IZNK7T4T
 
+/*!**********************************************************************
+ * \def TINY
+ * 
+ * \brief A small number used by interpolated to avoid roundoff error
+ ************************************************************************/
 #define TINY 1.0e-6
 
 #include "logger/logger.hpp"

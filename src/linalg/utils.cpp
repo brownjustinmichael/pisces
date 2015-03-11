@@ -12,6 +12,11 @@
 #include <omp.h>
 #include "utils.hpp"
 
+/*!**********************************************************************
+ * \def MIN_PARALLEL
+ * 
+ * \brief The minimum number of elements for automatic OpenMP parallelization in utils
+ ************************************************************************/
 #define MIN_PARALLEL 128*128
 
 /*!*******************************************************************

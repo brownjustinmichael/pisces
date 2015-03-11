@@ -135,7 +135,7 @@ namespace data
 		/*!**********************************************************************
 		 * \copydoc implemented_data::implemented_data
 		 ************************************************************************/
-		thermo_compositional_data (grids::axis *i_axis_n, grids::axis *i_axis_m, int id, int n_elements, io::parameters& i_params);
+		thermo_compositional_data (grids::axis *i_axis_n, grids::axis *i_axis_m, int i_name, int n_elements, io::parameters& i_params);
 		
 		virtual ~thermo_compositional_data () {}
 	};

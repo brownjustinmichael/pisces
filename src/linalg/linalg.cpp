@@ -124,6 +124,7 @@ extern "C" void dgttrf_ (int *n, double *dl, double *d, double *du, double *du2,
 /*!**********************************************************************
  * \brief Function from LAPACK that solves a tridiagonal matrix
  * 
+ * \param trans A pointer to transposition character ("N" for not transposed, "T" for transposed)
  * \param n A pointer to the number of columns in the matrix
  * \param nrhs A pointer to the integer number of right hand sides in b
  * \param dl A pointer to the float subdiagonal elements of the matrix
@@ -140,6 +141,7 @@ extern "C" void sgttrs_ (char *trans, int *n, int *nrhs, float *dl, float *d, fl
 /*!**********************************************************************
  * \brief Function from LAPACK that solves a tridiagonal matrix
  * 
+ * \param trans A pointer to transposition character ("N" for not transposed, "T" for transposed)
  * \param n A pointer to the number of columns in the matrix
  * \param nrhs A pointer to the integer number of right hand sides in b
  * \param dl A pointer to the double subdiagonal elements of the matrix

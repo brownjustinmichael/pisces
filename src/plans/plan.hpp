@@ -36,6 +36,9 @@ enum plan_flags {
 	solved = 0x4000000
 };
 
+/*!**********************************************************************
+ * \brief A set of flags to determine the direction of the solve
+ ************************************************************************/
 enum solve_element_flags {
 	x_solve = 0x20,
 	z_solve = 0x80

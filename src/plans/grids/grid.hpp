@@ -255,6 +255,9 @@ namespace grids
 	};
 	
 #ifndef _VCOS
+	/*!**********************************************************************
+	 * \brief The mode of the simulation (vertical Chebyshev), to be used in output
+	 ************************************************************************/
 	enum mode {
 		mode_flag = 0x10
 	};
@@ -335,6 +338,9 @@ namespace grids
 		};
 	} /* vertical */
 #else
+	/*!**********************************************************************
+	 * \brief The mode of the simulation (vertical cosine), to be used in output
+	 ************************************************************************/
 	enum mode {
 		mode_flag = 0x20
 	};

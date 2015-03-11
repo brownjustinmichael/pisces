@@ -133,7 +133,6 @@ namespace data
 		 * \brief Initialize a dataset for the simulation
 		 * 
 		 * \param i_name The integer name to give the new dataset
-		 * \param i_str The string name of the new dataset
 		 * \param initial_conditions The initial values of the dataset
 		 * \param i_flags The flags indicating how to apply the initial conditions (uniform_n, uniform_m, or NULL)
 		 * 
@@ -217,7 +216,7 @@ namespace data
 		/*!**********************************************************************
 		 * \brief Given an input stream, load all the relevant data into the data object
 		 * 
-		 * \param input_stream_ptr A pointer to an input object
+		 * \param input_ptr A pointer to an input object
 		 ************************************************************************/
 		void setup (io::input *input_ptr) {
 			// Iterate through the scalar fields and append them to the variables for which the input will search
@@ -338,7 +337,8 @@ namespace data
 		
 		std::shared_ptr <grids::grid <datatype>> grid_n; //!< The horizontal grid object
 		std::shared_ptr <grids::grid <datatype>> grid_m; //!< The vertical grid object
-		int n, m;
+		int n; //!< The horizontal extent of the data
+		int m; //!< The vertical extent of the data
 		
 	public:
 		using data <datatype>::duration;

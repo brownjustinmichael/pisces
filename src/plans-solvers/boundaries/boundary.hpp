@@ -117,6 +117,7 @@ namespace boundaries
 		 * \param data_temp The datatype pointer to the data to receive
 		 * \param lda The leading dimension of the data to receive
 		 * \param n The depth of the data to receive, if negative, receive the overlap region
+		 * \param alpha Scale data_temp by alpha before adding in the received data (0.0 for a clean copy)
 		 * 
 		 * This receives data_temp to the adjacent element if it exists. This will automatically receive the full width of the boundary and will receive the first n rows of data_temp.
 		 ************************************************************************/
@@ -125,12 +126,13 @@ namespace boundaries
 		/*!**********************************************************************
 		 * \brief Calculate the right hand side of the matrix equation
 		 * 
-		 * \param data_in The pointer to the previous timestep data at the boundary
+		 * \param data The pointer to the previous timestep data at the boundary
+		 * \param data_temp The pointer to the right hand side data at the boundary
 		 * \param m The leading dimension of data
 		 * \param lda The leading dimension of data_temp
 		 * \param flag A flag indicating whether this is an x_solve or z_solve
 		 ************************************************************************/
-		virtual void calculate_rhs (datatype *data_in, datatype *data_out, int m, int lda, int flag) = 0;
+		virtual void calculate_rhs (datatype *data, datatype *data_temp, int m, int lda, int flag) = 0;
 		
 		/*!**********************************************************************
 		 * \brief Calculate the matrix for the matrix equation
