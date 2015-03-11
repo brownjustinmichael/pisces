@@ -18,6 +18,11 @@
  ************************************************************************/
 namespace versions
 {
+	/*!**********************************************************************
+	 * \brief A struct that represents the version of a class
+	 * 
+	 * This class is designed to be used primarily through its inequality operator
+	 ************************************************************************/
 	struct version
 	{
 	private:
@@ -42,6 +47,28 @@ namespace versions
 		 * \brief Compare two versions to see which is newer
 		 ************************************************************************/
 		bool operator<(const version &otherVersion) const {
+			if (major < otherVersion.major)
+				return true;
+			if (major > otherVersion.major)
+				return false;
+			if (minor < otherVersion.minor)
+				return true;
+			if (minor > otherVersion.minor)
+				return false;
+			if (revision < otherVersion.revision)
+				return true;
+			if (revision > otherVersion.revision)
+				return false;
+			if (build < otherVersion.build)
+				return true;
+			return false;
+		}
+		
+		/*!**********************************************************************
+		 * \brief Compare two versions to see which is newer
+		 ************************************************************************/
+		bool operator<(const std::string &otherVersionString) const {
+			version otherVersion (otherVersionString);
 			if (major < otherVersion.major)
 				return true;
 			if (major > otherVersion.major)

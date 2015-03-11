@@ -37,7 +37,8 @@ namespace data
 		int name = id;
 		
 		const formats::data_grid i_grid = formats::data_grid::two_d (n, m, 0, i_params.get <bool> ("input.full") ? n_elements * m : 0, 0, i_params.get <bool> ("input.full") ? id * m : 0);
-
+		
+		// Set up the data from the input file in params
 		if (i_params.get <std::string> ("input.file") != "") {
 			std::string file_format = i_params.get <std::string> ("root") + i_params.get <std::string> ("input.directory") + i_params.get <std::string> ("input.file");
 			char buffer [file_format.size () * 2];
@@ -46,10 +47,10 @@ namespace data
 
 			(*this).setup (&input_stream);
 		}
-
+		
 		const formats::data_grid o_grid = formats::data_grid::two_d (n, m, 0, i_params.get <bool> ("output.full") ? n_elements * m : 0, 0, i_params.get <bool> ("output.full") ? id * m : 0);
 		
-		// Set up output
+		// Set up the real output
 		std::shared_ptr <io::output> normal_stream;
 		if (i_params.get <std::string> ("output.file") != "") {
 			std::string file_format = i_params.get <std::string> ("root") + i_params.get <std::string> ("output.directory") + i_params.get <std::string> ("output.file");
@@ -62,7 +63,8 @@ namespace data
 				normal_stream->template append <double> ("div", std::shared_ptr <functors::functor> (new functors::div_functor <double> ((*this) ("x"), (*this) ("z"), (*this) ("x_velocity"), (*this) ("z_velocity"), n, m)));
 			}
 		}
-
+		
+		// Set up the transform output
 		std::shared_ptr <io::output> transform_stream;
 		if (i_params.get <std::string> ("output.transform.file") != "") {
 			std::string file_format = i_params.get <std::string> ("root") + i_params.get <std::string> ("output.directory") + i_params.get <std::string> ("output.transform.file");
@@ -73,13 +75,15 @@ namespace data
 			this->setup_output (transform_stream, transformed_horizontal);
 			transform_stream->template append <double> ("div", std::shared_ptr <functors::functor> (new functors::transform_div_functor <double> ((*this) ("x"), (*this) ("z"), (*this) ("x_velocity"), (*this) ("z_velocity"), n, m)));
 		}
-
+		
+		// Set up the stat output
 		std::shared_ptr <io::output> stat_stream;
 		if (i_params.get <std::string> ("output.stat.file") != "") {
 			std::string file_format = i_params.get <std::string> ("root") + i_params.get <std::string> ("output.directory") + i_params.get <std::string> ("output.stat.file");
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-
+			
+			// For weighted averages, calculate area
 			area.resize (n * m);
 			for (int i = 1; i < n; ++i) {
 				for (int j = 1; j < m; ++j) {
@@ -90,6 +94,7 @@ namespace data
 			stat_stream.reset (new io::appender_output <formats::ascii> (formats::data_grid::two_d (n, m), buffer, i_params.get <int> ("output.stat.every")));
 			this->setup_stat (stat_stream);
 			for (typename data <datatype>::iterator iter = this->begin (); iter != this->end (); ++iter) {
+				// For each data variable, output z_flux, average derivative across the center, average and max
 				std::string variable = *iter;
 				if ((*this) ("z_velocity")) {
 					stat_stream->template append <double> ("z_flux_" + variable, std::shared_ptr <functors::functor> (new functors::average_functor <double> (n, 1, std::shared_ptr <functors::functor> (new functors::slice_functor <double> (n, m, m / 2, std::shared_ptr <functors::functor> (new functors::product_functor <double> (n, m, (*this) ("z_velocity"), (*this) (variable))))))), formats::scalar);
