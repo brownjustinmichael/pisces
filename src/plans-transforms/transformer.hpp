@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file bases/transform.hpp
+ * \file transformer.hpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2014-02-13.

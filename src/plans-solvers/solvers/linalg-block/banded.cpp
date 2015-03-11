@@ -1,5 +1,5 @@
 /*!**********************************************************************
- * \file block_solver.cpp
+ * \file banded.cpp
  * /Users/justinbrown/Dropbox/pisces/src/utils
  * 
  * Created by Justin Brown on 2013-11-17.

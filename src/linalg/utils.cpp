@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file utils_lapack.cpp
+ * \file utils.cpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-29.

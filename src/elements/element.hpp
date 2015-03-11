@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file bases/element.hpp
+ * \file element.hpp
  * Spectral Element
  * 
  * This file contains the element class, the basic functional unit of the

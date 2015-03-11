@@ -1,5 +1,5 @@
 /*!**********************************************************************
- * \file solver_two_d.hpp
+ * \file incompressible.hpp
  * /Users/justinbrown/Dropbox/pisces
  * 
  * Created by Justin Brown on 2013-10-11.

@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file bases/collocation.cpp
+ * \file grid.cpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-19.

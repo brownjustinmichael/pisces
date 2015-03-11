@@ -1,5 +1,5 @@
 /*!**********************************************************************
- * \file boussinesq_two_d.hpp
+ * \file boussinesq.hpp
  * /Users/justinbrown/Dropbox/pisces
  * 
  * Created by Justin Brown on 2014-02-03.

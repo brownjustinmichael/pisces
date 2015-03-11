@@ -18,13 +18,26 @@
 #include "io/parameters.hpp"
 #include "logger/logger.hpp"
 
-io::parameters config (int *argc, char ***argv, int id, std::string override_config_filename = "config.yaml") {
+/*!**********************************************************************
+ * \brief Configure the run and return a parameters object
+ * 
+ * \param argc A pointer to the number of command line arguments
+ * \param argv A pointer to the array of character arrays of command line arguments
+ * \param id The integer mpi id of this run (to prevent multiple processes from writing to the same files)
+ * \param default_config_filename If no config name is given, use this as the default config name
+ * 
+ * This function sets up the log and parameters object. It also looks for command line arguments like -V "variable.name" value
+ * 
+ * \return The parameters object associated with the run
+ ************************************************************************/
+io::parameters config (int *argc, char ***argv, int id, std::string default_config_filename = "config.yaml") {
 	logger::log_config::configure (argc, argv, id, "process_%d.log");
 	std::string config_filename;
 	
 	std::vector <std::string> config_strs;
 	std::map <std::string, std::string> config_args;
 	
+	// Look for command line arguments specifying variables
 	for (int i = 0; i < *argc; ++i) {
 		if (((*argv) [i] [0] == '-') && ((*argv) [i] [1] == 'V')) {
 			config_args [(*argv) [i + 1]] = (*argv) [i + 2];
@@ -38,7 +51,7 @@ io::parameters config (int *argc, char ***argv, int id, std::string override_con
 	}
 	
 	if ((*argc) <= 1) {
-		config_filename = override_config_filename;
+		config_filename = default_config_filename;
 	} else {
 		config_filename = (*argv) [1];
 	}

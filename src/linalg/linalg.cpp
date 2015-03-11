@@ -1,5 +1,5 @@
 /*!**********************************************************************
- * \file solver_lapack.cpp
+ * \file linalg.cpp
  * /Users/justinbrown/Dropbox/pisces
  * 
  * Created by Justin Brown on 2013-08-07.

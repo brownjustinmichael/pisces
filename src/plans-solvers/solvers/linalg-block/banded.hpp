@@ -1,5 +1,5 @@
 /*!**********************************************************************
- * \file block_solver.hpp
+ * \file banded.hpp
  * /Users/justinbrown/Dropbox/pisces/src/utils
  * 
  * Created by Justin Brown on 2013-11-17.

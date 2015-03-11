@@ -1,5 +1,5 @@
 /*!**********************************************************************
- * \file boundary_two_d.hpp
+ * \file implemented_boundary.hpp
  * /Users/justinbrown/Dropbox/pisces
  * 
  * Created by Justin Brown on 2014-07-14.
