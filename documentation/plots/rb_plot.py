@@ -2,12 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-plt.style.use ("presentation")
+# plt.style.use ("presentation")
 
 directory = os.path.dirname(os.path.realpath(__file__))
 
-mw = np.genfromtxt (os.path.join (directory, "moore_weiss_rb.dat"))
-p = np.genfromtxt (os.path.join (directory, "pisces_rb.dat"))
+mw = np.genfromtxt (os.path.join (directory, "../data/moore_weiss_rb.dat"))
+p = np.genfromtxt (os.path.join (directory, "../data/pisces_rb.dat"))
 
 fig, ax = plt.subplots (1, 1)
 

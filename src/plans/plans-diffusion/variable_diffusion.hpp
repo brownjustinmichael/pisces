@@ -36,8 +36,13 @@ namespace plans
 			using real_plan <datatype>::component_flags;
 			
 			datatype coeff; //!< The base coefficient to multiply the source
+			datatype min; //!< The minimum value of the coefficient
 			datatype *data_source; //!< A pointer to the source data
 			datatype pioL2; //!< The value pi / L^2 for speed
+			
+			std::vector <datatype> x1_vec, x2_vec, z1_vec, z2_vec, oodx_vec, oodz_vec, oodx2_vec, oodz2_vec;
+			datatype *x1_ptr, *x2_ptr, *z1_ptr, *z2_ptr, *oodx_ptr, *oodz_ptr, *oodx2_ptr, *oodz2_ptr;
+			const datatype *pos_n, *pos_m;
 			
 		public:
 			/*!**********************************************************************
@@ -46,11 +51,59 @@ namespace plans
 			 * \param i_coeff The base coefficient to multiply the source
 			 * \param i_data_source A pointer to the source data
 			 ************************************************************************/
-			linear (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_coeff, datatype *i_data_source, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : 
+			linear (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_coeff, datatype i_min, datatype *i_data_source, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : 
 			real_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out, i_element_flags, i_component_flags),
 			coeff (i_coeff),
+			min (i_min),
 			data_source (i_data_source) {
 				TRACE ("Instantiating...");
+				pos_n = &(i_grid_n [0]);
+				pos_m = &(i_grid_m [0]);
+				
+				x1_vec.resize (n * m);
+				x1_ptr = &x1_vec [0];
+				x2_vec.resize (n * m);
+				x2_ptr = &x2_vec [0];
+				z1_vec.resize (n * m);
+				z1_ptr = &z1_vec [0];
+				z2_vec.resize (n * m);
+				z2_ptr = &z2_vec [0];
+			
+				// Calculate some derivative contributions that will be used frequently
+				oodx_vec.resize (n);
+				oodx_ptr = &oodx_vec [0];
+				oodx2_vec.resize (n);
+				oodx2_ptr = &oodx2_vec [0];
+				oodz_vec.resize (m);
+				oodz_ptr = &oodz_vec [0];
+				oodz2_vec.resize (m);
+				oodz2_ptr = &oodz2_vec [0];
+				
+				// Calculate 1/dx
+				oodx_ptr [0] = 0.5 / (pos_n [1] - pos_n [0]);
+				for (int i = 1; i < n - 1; ++i) {
+					oodx_ptr [i] = 1.0 / (pos_n [i + 1] - pos_n [i - 1]);
+				}
+				oodx_ptr [n - 1] = 0.5 / (pos_n [n - 1] - pos_n [n - 2]);
+			
+				// Calculate 1/dz
+				oodz_ptr [0] = 1.0 / (pos_m [1] - pos_m [0]);
+				for (int i = 1; i < m - 1; ++i) {
+					oodz_ptr [i] = 1.0 / (pos_m [i + 1] - pos_m [i - 1]);
+				}
+				oodz_ptr [m - 1] = 1.0 / (pos_m [m - 1] - pos_m [m - 2]);
+				
+				// Calculate 1/dx^2
+				for (int i = 0; i < n - 1; ++i) {
+					oodx2_ptr [i] = 1.0 / (pos_n [i + 1] - pos_n [i]);
+				}
+				oodx2_ptr [n - 1] = 1.0 / (pos_n [n - 1] - pos_n [n - 2]);
+			
+				// Calculate 1/dz&2
+				for (int i = 0; i < m - 1; ++i) {
+					oodz2_ptr [i] = 1.0 / (pos_m [i + 1] - pos_m [i]);
+				}
+				oodz2_ptr [m - 1] = 1.0 / (pos_m [m - 1] - pos_m [m - 2]);
 			}
 			
 			virtual ~linear () {}
@@ -58,29 +111,58 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc real_plan::execute
 			 ************************************************************************/
-			void execute () {	
+			void execute () {
+				// The full term is kappa * T * grad^2 f + kappa grad T grad f
+				// div T grad f = ddx (T) ddx f + ddz (T) ddz f
 				TRACE ("Operating...");
-				for (int j = 1; j < m - 1; ++j) {
-					data_out [j] += coeff * data_source [j] * ((data_in [j + 1] - data_in [j]) / (grid_m [j + 1] - grid_m [j]) - (data_in [j] - data_in [j - 1]) / (grid_m [j] - grid_m [j - 1])) / (grid_m [j + 1] - grid_m [j - 1]) * 2.0;
-					data_out [j] += coeff * data_source [j] * ((data_in [m + j] - data_in [j]) / (grid_n [1] - grid_n [0]) - (data_in [j] - data_in [(n - 1) * m + j]) / (grid_n [1] - grid_n [0])) / (grid_n [1] - grid_n [0]);
-					data_out [j] += coeff * (data_source [j + 1] - data_source [j - 1]) / (grid_m [j + 1] - grid_m [j - 1]) * (data_in [j + 1] - data_in [j - 1]) / (grid_m [j + 1] - grid_m [j - 1]);
-					data_out [j] += coeff * (data_source [m + j] - data_source [(n - 1) * m + j]) / (grid_n [1] - grid_n [0]) * (data_in [m + j] - data_in [(n - 1) * m + j]) / (grid_n [1] - grid_n [0]);
-				}
-				// #pragma omp parallel for
-				for (int i = 1; i < n - 1; ++i) {
+				
+				// Take the second derivative of data_in in both directions
+				linalg::scale (m, 0.0, x1_ptr + m - 1);
+				linalg::matrix_copy (m, n - 1, data_in + m, x1_ptr);
+				linalg::matrix_add_scaled (m, n, -1.0, data_in, x1_ptr);
+				linalg::add_scaled (m, -1.0, data_in, x1_ptr + m * (n - 1));
+
+				linalg::copy (m, data_in + m * (n - 1), x2_ptr);
+				linalg::matrix_copy (m, n - 1, data_in, x2_ptr + m);
+				linalg::matrix_add_scaled (m, n, -1.0, data_in, x2_ptr);
+
+				linalg::scale (n, 0.0, z1_ptr + m - 1, m);
+				linalg::matrix_copy (m - 1, n, data_in + 1, z1_ptr, m, m);
+				linalg::matrix_add_scaled (m, n, -1.0, data_in, z1_ptr, m, m);
+
+				linalg::matrix_copy (m, n, data_in, z2_ptr, m, m);
+				linalg::matrix_add_scaled (m - 1, n, -1.0, data_in, z2_ptr + 1, m, m);
+				
+				for (int i = 0; i < n; ++i) {
 					for (int j = 1; j < m - 1; ++j) {
-						data_out [i * m + j] += coeff * data_source [i * m + j] * ((data_in [i * m + j + 1] - data_in [i * m + j]) / (grid_m [j + 1] - grid_m [j]) - (data_in [i * m + j] - data_in [i * m + j - 1]) / (grid_m [j] - grid_m [j - 1])) / (grid_m [j + 1] - grid_m [j - 1]) * 2.0;
-						data_out [i * m + j] += coeff * data_source [i * m + j] * ((data_in [(i + 1) * m + j] - data_in [i * m + j]) / (grid_n [i + 1] - grid_n [i]) - (data_in [i * m + j] - data_in [(i - 1) * m + j]) / (grid_n [i] - grid_n [i - 1])) / (grid_n [i + 1] - grid_n [i - 1]) * 2.0;
-						data_out [i * m + j] += coeff * (data_source [i * m + j + 1] - data_source [i * m + j - 1]) / (grid_m [j + 1] - grid_m [j - 1]) * (data_in [i * m + j + 1] - data_in [i * m + j - 1]) / (grid_m [j + 1] - grid_m [j - 1]);
-						data_out [i * m + j] += coeff * (data_source [(i + 1) * m + j] - data_source [(i - 1) * m + j]) / (grid_n [i + 1] - grid_n [i - 1]) * (data_in [(i + 1) * m + j] - data_in [(i - 1) * m + j]) / (grid_n [i + 1] - grid_n [i - 1]);
+						DEBUG (std::max (coeff * data_source [i * m + j], min + 1.0e-4));
+						data_out [i * m + j] += std::max (coeff * data_source [i * m + j], min + 1.0e-4) * ((x1_ptr [i * m + j] * oodx2_ptr [i] - x2_ptr [i * m + j] * oodx2_ptr [(i - 1) % n]) * oodx_ptr [i] * 2.0 + (z1_ptr [i * m + j] * oodz2_ptr [j] - z2_ptr [i * m + j] * oodz2_ptr [j - 1]) * oodz_ptr [j] * 2.0);
 					}
 				}
-				for (int j = 1; j < m - 1; ++j) {
-					data_out [(n - 1) * m + j] += coeff * data_source [(n - 1) * m + j] * ((data_in [(n - 1) * m + j + 1] - data_in [(n - 1) * m + j]) / (grid_m [j + 1] - grid_m [j]) - (data_in [(n - 1) * m + j] - data_in [(n - 1) * m + j - 1]) / (grid_m [j] - grid_m [j - 1])) / (grid_m [j + 1] - grid_m [j - 1]) * 2.0;
-					data_out [(n - 1) * m + j] += coeff * data_source [(n - 1) * m + j] * ((data_in [j] - data_in [(n - 1) * m + j]) / (grid_n [n - 1] - grid_n [n - 2]) - (data_in [(n - 1) * m + j] - data_in [(n - 2) * m + j]) / (grid_n [n - 1] - grid_n [n - 2])) / (grid_n [n - 1] - grid_n [n - 2]);
-					data_out [(n - 1) * m + j] += coeff * (data_source [(n - 1) * m + j + 1] - data_source [(n - 1) * m + j - 1]) / (grid_m [j + 1] - grid_m [j - 1]) * (data_in [(n - 1) * m + j + 1] - data_in [(n - 1) * m + j - 1]) / (grid_m [j + 1] - grid_m [j - 1]);
-					data_out [(n - 1) * m + j] += coeff * (data_source [j] - data_source [(n - 2) * m + j]) / (grid_n [n - 1] - grid_n [n - 2]) * (data_in [j] - data_in [(n - 2) * m + j]) / (grid_n [n - 1] - grid_n [n - 2]);
-				}
+				
+				// Take the horizontal derivative of the source and data_in
+				linalg::copy (m, data_source, x1_ptr + m * (n - 1));
+				linalg::matrix_copy (m, n - 1, data_source + m, x1_ptr);
+				linalg::matrix_add_scaled (m, n - 1, -1.0, data_source, x1_ptr + m);
+
+				linalg::copy (m, data_in, x2_ptr + m * (n - 1));
+				linalg::matrix_copy (m, n - 1, data_in + m, x2_ptr);
+				linalg::matrix_add_scaled (m, n - 1, -1.0, data_in, x2_ptr + m);
+
+				// Take the vertical derivative of the source and data_in
+				linalg::scale (n, 0.0, z1_ptr + m - 1, m);
+				linalg::matrix_copy (m - 1, n, data_source + 1, z1_ptr, m, m);
+				linalg::matrix_add_scaled (m - 1, n, -1.0, data_source, z1_ptr + 1, m, m);
+
+				linalg::scale (n, 0.0, z2_ptr, m);
+				linalg::matrix_copy (m - 1, n, data_in + 1, z2_ptr, m, m);
+				linalg::matrix_add_scaled (m - 1, n, -1.0, data_in, z2_ptr + 1, m, m);
+
+				// for (int i = 0; i < n; ++i) {
+				// 	for (int j = 1; j < m - 1; ++j) {
+				// 		data_out [i * m + j] += coeff * (x1_ptr [i * m + j] * oodx_ptr [i] * x2_ptr [i * m + j] * oodx_ptr [i] + z1_ptr [i * m + j] * oodz_ptr [j] * z2_ptr [i * m + j] * oodz_ptr [j]);
+				// 	}
+				// }
 				TRACE ("Operation complete.");
 			}
 			
@@ -91,6 +173,7 @@ namespace plans
 			{
 			private:
 				datatype coeff; //!< The base coefficient for the plan to be constructed
+				datatype min; //!< The value for the coefficient
 				datatype *data_source; //!< The source data pointer for the plan to be constructed
 				
 			public:
@@ -98,7 +181,7 @@ namespace plans
 				 * \param i_coeff The base coefficient for the plan to be constructed
 				 * \param i_data_source The source data pointer for the plan to be constructed
 				 ************************************************************************/
-				factory (datatype i_coeff, datatype *i_data_source) : coeff (i_coeff), data_source (i_data_source) {}
+				factory (datatype i_coeff, datatype i_min, datatype *i_data_source) : coeff (i_coeff), min (i_min), data_source (i_data_source) {}
 				
 				virtual ~factory () {}
 				
@@ -106,7 +189,7 @@ namespace plans
 				 * \copydoc real_plan::factory::instance
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > instance (grids::grid <datatype> **grids, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
-					return std::shared_ptr <plans::plan <datatype> > (new linear <datatype> (*grids [0], *grids [1], coeff, data_source, i_data_in, i_data_out, i_element_flags, i_component_flags));
+					return std::shared_ptr <plans::plan <datatype> > (new linear <datatype> (*grids [0], *grids [1], coeff, min, data_source, i_data_in, i_data_out, i_element_flags, i_component_flags));
 				}
 			};
 		};

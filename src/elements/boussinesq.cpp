@@ -196,6 +196,11 @@ namespace pisces
 					}
 				}
 			}
+			
+			if (terms ["variable_diffusion"].IsDefined ()) {
+				DEBUG ("Implementing...");
+				equations [variable]->add_plan (typename diffusion::linear <datatype>::factory (terms ["variable_diffusion.coefficient"].as <datatype> (), terms ["variable_diffusion.min"].IsDefined () ? terms ["variable_diffusion.min"].as <datatype> () : -(terms ["diffusion"].as <datatype> ()), ptr (terms ["variable_diffusion.source"].as <std::string> ())), post_plan);
+			}
 		}
 		
 		// Since this is a Boussinesq problem, also include the pressure term
