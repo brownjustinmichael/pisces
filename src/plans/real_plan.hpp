@@ -43,7 +43,9 @@ namespace plans
 		real_plan (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : plans::plan <datatype> (i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), grid_n (i_grid_n), grid_m (i_grid_m), data_in (i_data_in), data_out (i_data_out ? i_data_out : i_data_in) {}
 
 		virtual ~real_plan () {}
-
+		
+		virtual void setup () {}
+		
 		/*!*******************************************************************
 		 * \copydoc plans::plan::execute ()
 		 *********************************************************************/

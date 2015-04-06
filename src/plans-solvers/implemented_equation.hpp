@@ -274,6 +274,12 @@ namespace plans
 				datatype* matrices [2] = {matrix_ptr (0), matrix_ptr (1)};
 				plans::solvers::equation <datatype>::add_plan (i_factory.instance (grids, matrices, data, rhs_ptr (spectral_rhs), element_flags, component_flags), flags);
 			}
+			
+			void setup_plans () {
+				if (x_solver) x_solver->setup ();
+				if (z_solver) z_solver->setup ();
+				equation <datatype>::setup_plans ();
+			}
 		
 		protected:
 			/*!**********************************************************************

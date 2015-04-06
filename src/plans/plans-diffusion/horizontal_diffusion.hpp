@@ -51,6 +51,12 @@ namespace plans
 			horizontal (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_coeff, datatype i_alpha, datatype *i_matrix_n, datatype *i_matrix_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : implicit_plan <datatype> (i_grid_n, i_grid_m, i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_element_flags, i_component_flags), coeff (i_coeff), alpha (i_alpha) {
 				TRACE ("Instantiating...");
 				pioL2 = 4.0 * (std::acos (-1.0) * std::acos (-1.0) / (grid_n [n - 1] - grid_n [0]) / (grid_n [n - 1] - grid_n [0]));
+				setup ();
+			}
+			
+			virtual ~horizontal () {}
+			
+			void setup () {
 				if (matrix_n) {
 					// For Fourier modes, the matrix is diagonal and not particularly complicated
 					// We set up m of these matrices in case there is some z-dependence added in later
@@ -64,9 +70,7 @@ namespace plans
 					WARN ("No matrix");
 				}
 			}
-	
-			virtual ~horizontal () {}
-		
+			
 			/*!**********************************************************************
 			 * \copydoc implicit_plan::execute
 			 ************************************************************************/
@@ -165,6 +169,12 @@ namespace plans
 			background_horizontal (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_alpha, datatype *i_diffusion, datatype *i_matrix_n, datatype *i_matrix_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : implicit_plan <datatype> (i_grid_n, i_grid_m, i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_element_flags, i_component_flags), alpha (i_alpha), diffusion (i_diffusion) {
 				TRACE ("Instantiating...");
 				pioL2 = 4.0 * (std::acos (-1.0) * std::acos (-1.0) / (grid_n [n - 1] - grid_n [0]) / (grid_n [n - 1] - grid_n [0]));
+				setup ();
+			}
+			
+			virtual ~background_horizontal () {}
+			
+			void setup () {
 				// For Fourier modes, the matrix is diagonal and not particularly complicated
 				if (matrix_n) {
 					for (int j = 0; j < m; ++j) {
@@ -177,9 +187,7 @@ namespace plans
 					WARN ("No matrix");
 				}
 			}
-		
-			virtual ~background_horizontal () {}
-		
+			
 			/*!**********************************************************************
 			 * \copydoc implicit_plan::execute
 			 ************************************************************************/

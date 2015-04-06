@@ -139,7 +139,9 @@ namespace plans
 			 * This method does not check first whether the matrix has been factorized, according to the execution flags. It also does not contain the actual implementation of the factorization, which should be handled in _factorize.
 			 *********************************************************************/
 			virtual void factorize () = 0;
-	
+			
+			virtual void setup () {}
+			
 			/*!*******************************************************************
 			 * \brief Solve the matrix equation
 			 * 

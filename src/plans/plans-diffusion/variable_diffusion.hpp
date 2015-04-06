@@ -135,7 +135,7 @@ namespace plans
 				
 				for (int i = 0; i < n; ++i) {
 					for (int j = 1; j < m - 1; ++j) {
-						DEBUG (std::max (coeff * data_source [i * m + j], min + 1.0e-4));
+						// DEBUG (std::max (coeff * data_source [i * m + j], min + 1.0e-4));
 						data_out [i * m + j] += std::max (coeff * data_source [i * m + j], min + 1.0e-4) * ((x1_ptr [i * m + j] * oodx2_ptr [i] - x2_ptr [i * m + j] * oodx2_ptr [(i - 1) % n]) * oodx_ptr [i] * 2.0 + (z1_ptr [i * m + j] * oodz2_ptr [j] - z2_ptr [i * m + j] * oodz2_ptr [j - 1]) * oodz_ptr [j] * 2.0);
 					}
 				}

@@ -33,7 +33,8 @@ enum plan_flags {
 	profile_only = 0x80000,
 	timestep_only = 0x100000,
 	no_solve = 0x200000,
-	solved = 0x4000000
+	solved = 0x4000000,
+	plans_setup = 0x8000000
 };
 
 /*!**********************************************************************
@@ -81,6 +82,8 @@ namespace plans
 			static versions::version version ("1.1.1.0");
 			return version;
 		}
+		
+		virtual void setup () = 0;
 		
 		/*!*******************************************************************
 		* \brief Operate the plan on the data arrays contained in the class

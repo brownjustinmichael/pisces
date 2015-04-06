@@ -52,6 +52,12 @@ namespace plans
 			 * \param i_alpha The implicit fraction of the plan (1.0 for purely implicit, 0.0 for purely explicit)
 			 ************************************************************************/
 			vertical (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_coeff, datatype i_alpha, datatype *i_matrix_n, datatype *i_matrix_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : implicit_plan <datatype> (i_grid_n, i_grid_m, i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_element_flags, i_component_flags), coeff (i_coeff), alpha (i_alpha) {
+				setup ();
+			}
+		
+			virtual ~vertical () {}
+			
+			void setup () {
 				if (matrix_m) {
 					for (int j = 0; j < m; ++j) {
 						linalg::add_scaled (m, -coeff * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
@@ -60,9 +66,7 @@ namespace plans
 					WARN ("No matrix");
 				}
 			}
-		
-			virtual ~vertical () {}
-		
+			
 			/*!**********************************************************************
 			 * \copydoc implicit_plan::execute
 			 ************************************************************************/
@@ -154,6 +158,12 @@ namespace plans
 			 * \param i_diffusion A pointer to a vector of diffusion coefficients
 			 ************************************************************************/
 			background_vertical (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_alpha, datatype *i_diffusion, datatype *i_matrix_n, datatype *i_matrix_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : implicit_plan <datatype> (i_grid_n, i_grid_m, i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_element_flags, i_component_flags), alpha (i_alpha), diffusion (i_diffusion) {
+				setup ();
+			}
+		
+			virtual ~background_vertical () {}
+			
+			void setup () {
 				if (matrix_m) {
 					for (int j = 0; j < m; ++j) {
 						linalg::add_scaled (m, -diffusion [j] * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
@@ -162,9 +172,7 @@ namespace plans
 					WARN ("No matrix");
 				}
 			}
-		
-			virtual ~background_vertical () {}
-		
+			
 			/*!**********************************************************************
 			 * \copydoc implicit_plan::execute
 			 ************************************************************************/

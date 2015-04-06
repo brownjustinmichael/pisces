@@ -189,7 +189,23 @@ namespace plans
 			 * \copydoc add_plan(const typename explicit_plan<datatype>::factory&,int)
 			 ************************************************************************/
 			virtual void add_plan (const typename implicit_plan <datatype>::factory &i_factory, int flags) = 0;
-
+			
+			virtual void setup_plans () {
+				for (int i = 0; i < (int) pre_transform_plans.size (); ++i) {
+					pre_transform_plans [i]->setup ();
+				}
+				for (int i = 0; i < (int) mid_transform_plans.size (); ++i) {
+					mid_transform_plans [i]->setup ();
+				}
+				for (int i = 0; i < (int) post_transform_plans.size (); ++i) {
+					post_transform_plans [i]->setup ();
+				}
+				for (int i = 0; i < (int) pre_solve_plans.size (); ++i) {
+					pre_solve_plans [i]->setup ();
+				}
+				*component_flags |= plans_setup;
+			}
+			
 			/*!**********************************************************************
 			 * \brief Execute the plans associated with the given flags
 			 * 
@@ -243,6 +259,10 @@ namespace plans
 			 *********************************************************************/
 			virtual void solve () {
 				TRACE ("Executing...");
+				if (!(*component_flags & plans_setup)) {
+					setup_plans ();
+					factorize ();
+				}
 				if (!(*component_flags & factorized)) {
 					factorize ();
 				}
