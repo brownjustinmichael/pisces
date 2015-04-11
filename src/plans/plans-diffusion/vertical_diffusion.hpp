@@ -146,6 +146,10 @@ namespace plans
 		
 			datatype alpha; //!< The implicit fraction of the plan (1.0 for purely implicit, 0.0 for purely explicit)
 			datatype *diffusion; //!< A pointer to a vector of diffusion coefficients
+			
+			std::vector <datatype> oodz_vec;
+			std::vector <datatype> coeff_dz_vec;
+			datatype *oodz, *coeff_dz;
 		
 		public:
 			using implicit_plan <datatype>::element_flags;
@@ -158,12 +162,29 @@ namespace plans
 			 * \param i_diffusion A pointer to a vector of diffusion coefficients
 			 ************************************************************************/
 			background_vertical (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_alpha, datatype *i_diffusion, datatype *i_matrix_n, datatype *i_matrix_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : implicit_plan <datatype> (i_grid_n, i_grid_m, i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_element_flags, i_component_flags), alpha (i_alpha), diffusion (i_diffusion) {
+				oodz_vec.resize (m);
+				oodz = &oodz_vec [0];
+				coeff_dz_vec.resize (m);
+				coeff_dz = &coeff_dz_vec [0];
+				
+				oodz [0] = 1.0 / (i_grid_m [1] - i_grid_m [0]);
+				for (int i = 1; i < m-1; ++i) {
+					oodz [i] = 1.0 / (i_grid_m [i + 1] - i_grid_m [i - 1]);
+				}
+				oodz [m - 1] = 1.0 / (i_grid_m [m - 1] - i_grid_m [m - 2]);
+				
 				setup ();
 			}
 		
 			virtual ~background_vertical () {}
 			
 			void setup () {
+				coeff_dz [0] = (diffusion [1] - diffusion [0]) * oodz [0];
+				for (int i = 1; i < m - 1; ++i) {
+					coeff_dz [i] = (diffusion [i + 1] - diffusion [i - 1]) * oodz [i];
+				}
+				coeff_dz [m - 1] = (diffusion [m - 1] - diffusion [m - 2]) * oodz [m - 1];
+				
 				if (matrix_m) {
 					for (int j = 0; j < m; ++j) {
 						linalg::add_scaled (m, -diffusion [j] * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
@@ -190,6 +211,14 @@ namespace plans
 						linalg::matrix_matrix_multiply (1, ldn, m, diffusion [j], grid_m.get_data (2) + j, data_in, 1.0, data_out + j, m, m, m);
 					}
 				}
+				for (int i = 0; i < n; ++i) {
+					data_out [i * m] += coeff_dz [0] + oodz [0] * (data_in [i * m + 1] - data_in [i * m]);
+					for (int j = 1; j < m - 1; ++j) {
+						data_out [i * m + j] += coeff_dz [j] + oodz [j] * (data_in [i * m + j + 1] - data_in [i * m + j - 1]);
+					}
+					data_out [i * m + m - 1] += coeff_dz [m - 1] + oodz [m - 1] * (data_in [i * m + m - 1] - data_in [i * m + m - 2]);
+				}
+
 				TRACE ("Operation complete.");
 			}
 		

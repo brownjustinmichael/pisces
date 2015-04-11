@@ -120,7 +120,7 @@ namespace pisces
 	using namespace boundaries;
 	
 	template <class datatype>
-	boussinesq_element <datatype>::boussinesq_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
+	boussinesq_element <datatype>::boussinesq_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags, bool load_diffusion) : 
 	implemented_element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags) {
 		TRACE ("Initializing...");
 		x_ptr = data ("x");
@@ -145,7 +145,6 @@ namespace pisces
 		for (YAML::const_iterator iter = i_params ["equations"].begin (); iter != i_params ["equations"].end (); ++iter) {
 			variable = iter->first.as <std::string> ();
 			io::parameters::alias terms (i_params, "equations." + variable);
-			
 			
 			// If the equation is labeled as ignore, do not construct an equation
 			if ((terms ["ignore"].IsDefined () && terms ["ignore"].as <bool> ()) || variable == "pressure") {
@@ -179,10 +178,12 @@ namespace pisces
 			// Add the split directional solvers
 			equations [variable]->add_solver (typename collocation <datatype>::factory (messenger_ptr, timestep, local_boundary_0, local_boundary_n), z_solver);
 			equations [variable]->add_solver (typename fourier <datatype>::factory (timestep, local_boundary_0, local_boundary_n), x_solver);
-
-			// If a diffusion value is specified, construct the diffusion plans
-			equations [variable]->add_plan (typename diffusion::vertical <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")), pre_plan);
-			equations [variable]->add_plan (typename diffusion::horizontal <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")), mid_plan);
+			
+			if (load_diffusion) {
+				// If a diffusion value is specified, construct the diffusion plans
+				equations [variable]->add_plan (typename diffusion::vertical <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")), pre_plan);
+				equations [variable]->add_plan (typename diffusion::horizontal <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")), mid_plan);
+			}
 			
 			// If an advection value is specified, construct the advection plan
 			equations [variable]->add_plan (typename advection::uniform <datatype>::factory (terms ["advection"], ptr ("x_velocity"), ptr ("z_velocity")), post_plan);
@@ -195,11 +196,6 @@ namespace pisces
 						equations [variable]->add_plan (typename source::uniform <datatype>::factory (source_iter->second.as <datatype> (), ptr (source_iter->first.as <std::string> ())), mid_plan);
 					}
 				}
-			}
-			
-			if (terms ["variable_diffusion"].IsDefined ()) {
-				DEBUG ("Implementing...");
-				equations [variable]->add_plan (typename diffusion::linear <datatype>::factory (terms ["variable_diffusion.coefficient"].as <datatype> (), terms ["variable_diffusion.min"].IsDefined () ? terms ["variable_diffusion.min"].as <datatype> () : -(terms ["diffusion"].as <datatype> ()), ptr (terms ["variable_diffusion.source"].as <std::string> ())), post_plan);
 			}
 		}
 		

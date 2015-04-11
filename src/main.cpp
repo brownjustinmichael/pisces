@@ -20,7 +20,7 @@
 #include "logger/logger.hpp"
 #include "io/parameters.hpp"
 #include "plans/plan.hpp"
-#include "elements/boussinesq.hpp"
+#include "elements/vardiff.hpp"
 #include "elements/rezone.hpp"
 #include "config.hpp"
 
@@ -81,7 +81,7 @@ int main (int argc, char *argv[])
 		
 		TRACE ("Constructing element");
 		
-		std::shared_ptr <pisces::element <double>> element (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
+		std::shared_ptr <pisces::element <double>> element (new pisces::vardiff_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
 		
 		if (pisces::element <double>::version () < versions::version ("0.6.0.0")) {
 			INFO ("element.version < 0.6.0.0");

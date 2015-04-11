@@ -40,7 +40,6 @@ namespace pisces
 		using implemented_element <datatype>::messenger_ptr;
 		using implemented_element <datatype>::timestep;
 		using implemented_element <datatype>::duration;
-		using implemented_element <datatype>::equations;
 		using implemented_element <datatype>::data;
 		
 		std::vector <datatype> diffusion; //!< A vector of diffusion data, for background diffusion
@@ -51,13 +50,16 @@ namespace pisces
 		datatype *x_vel_ptr; //!< The pointer to the x velocity data, for speed
 		datatype *z_vel_ptr; //!< The pointer to the z velocity data, for speed
 		
+	protected:
+		using implemented_element <datatype>::equations;
+		
 	public:
 		using element <datatype>::ptr;
 		
 		/*!**********************************************************************
 		 * \copydoc implemented_element::implemented_element
 		 ************************************************************************/
-		boussinesq_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags);
+		boussinesq_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags, bool load_diffusion = true);
 		
 		virtual ~boussinesq_element () {}
 		
