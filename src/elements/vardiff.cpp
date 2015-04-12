@@ -30,7 +30,7 @@ namespace pisces
 			diffusion [variable].resize (m);
 			
 			for (int i = 0; i < m; ++i) {
-				diffusion [variable] [i] = 1.0 + ((datatype) i) / m;
+				diffusion [variable] [i] = 1.0 + ptr ("z") [i] / (ptr ("z") [m - 1] - ptr ("z") [0]);
 			}
 			
 			// If a diffusion value is specified, construct the diffusion plans

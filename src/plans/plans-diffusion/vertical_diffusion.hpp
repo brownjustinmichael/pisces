@@ -188,6 +188,7 @@ namespace plans
 				if (matrix_m) {
 					for (int j = 0; j < m; ++j) {
 						linalg::add_scaled (m, -diffusion [j] * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
+						linalg::add_scaled (m, -coeff_dz [j] * alpha, grid_m.get_data (1) + j, matrix_m + j, m, m);
 					}
 				} else {
 					WARN ("No matrix");
@@ -204,19 +205,14 @@ namespace plans
 					if (1.0 - alpha != 0.0) {
 						for (int j = 0; j < m; ++j) {
 							linalg::matrix_matrix_multiply (1, ldn, m, diffusion [j] * (1.0 - alpha), grid_m.get_data (2) + j, data_in, 1.0, data_out + j, m, m, m);
+							linalg::matrix_matrix_multiply (1, ldn, m, coeff_dz [j] * (1.0 - alpha), grid_m.get_data (1) + j, data_in, 1.0, data_out + j, m, m, m);
 						}
 					}
 				} else {
 					for (int j = 0; j < m; ++j) {
 						linalg::matrix_matrix_multiply (1, ldn, m, diffusion [j], grid_m.get_data (2) + j, data_in, 1.0, data_out + j, m, m, m);
+						linalg::matrix_matrix_multiply (1, ldn, m, coeff_dz [j], grid_m.get_data (1) + j, data_in, 1.0, data_out + j, m, m, m);
 					}
-				}
-				for (int i = 0; i < n; ++i) {
-					data_out [i * m] += coeff_dz [0] + oodz [0] * (data_in [i * m + 1] - data_in [i * m]);
-					for (int j = 1; j < m - 1; ++j) {
-						data_out [i * m + j] += coeff_dz [j] + oodz [j] * (data_in [i * m + j + 1] - data_in [i * m + j - 1]);
-					}
-					data_out [i * m + m - 1] += coeff_dz [m - 1] + oodz [m - 1] * (data_in [i * m + m - 1] - data_in [i * m + m - 2]);
 				}
 
 				TRACE ("Operation complete.");
