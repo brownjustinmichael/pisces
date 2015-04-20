@@ -36,10 +36,12 @@ namespace pisces
 		
 		int nn = input_grid->get_n ();
 		std::vector <int> ns (inter_messenger->get_np (), nn);
+		std::vector <int> nns (inter_messenger->get_np (), nn);
 		inter_messenger->allgather <int> (1, &ns [0], &ns [0]);
 		int nsum = 0;
 		int nhere = 0;
 		for (int i = 0; i < inter_messenger->get_np (); ++i) {
+			nns [i] = ns [i];
 			nsum += ns [i];
 		}
 		std::vector <datatype> position_buffer (nsum, 0.0);
@@ -49,10 +51,6 @@ namespace pisces
 			TODO Move this outside of the loop
 		*/
 		inter_messenger->allgatherv <datatype> (nn, &((*input_grid) [0]), &ns [0], &position_buffer [0]);
-
-		for (typename std::map <std::string, void *>::iterator iter = input_virtual_file->begin (); iter != input_virtual_file->end (); iter++) {
-			DEBUG ("Start " << iter->first);
-		}
 		
 		// Iterate through the data
 		for (typename std::map <std::string, void *>::iterator iter = input_virtual_file->begin (); iter != input_virtual_file->end (); iter++) {
@@ -60,23 +58,24 @@ namespace pisces
 			if (input_virtual_file->dims [iter->first] [1] != 1 && input_virtual_file->check_type <datatype> (iter->first)) {
 				TRACE ("Rezoning " << iter->first << "...");
 				
+				nhere = 0;
 				for (int i = 0; i < inter_messenger->get_np (); ++i) {
-					ns [i] *= input_virtual_file->dims [iter->first] [0];
+					nns [i] = ns [i] * input_virtual_file->dims [iter->first] [0];
 					if (i < inter_messenger->get_id ()) {
-						nhere += ns [i];
+						DEBUG (i << " " << nns [i]);
+						nhere += nns [i];
 					}
 				}
 				
-				
-				DEBUG ("Define buffers");
+				DEBUG ("Define buffers" << nsum * input_virtual_file->dims [iter->first] [0]);
 				std::vector <datatype> value_buffer (nsum * input_virtual_file->dims [iter->first] [0], 0.0);
 				std::vector <datatype> inter_buffer (nsum * input_virtual_file->dims [iter->first] [0], 0.0);
 				
 				// Gather the entirety of the values for the data in every element; need to switch to row-major order first
-				DEBUG ("Here");
+				DEBUG ("Here " << nn << " " << input_virtual_file->dims [iter->first] [0] << " " << iter->first << " " << &(input_virtual_file->index <datatype> (iter->first)) << " " << &inter_buffer [nhere] << " " << nhere);
 				linalg::matrix_switch (nn, input_virtual_file->dims [iter->first] [0], &(input_virtual_file->index <datatype> (iter->first)), &inter_buffer [nhere]);
 				DEBUG ("There");
-				inter_messenger->allgatherv <datatype> (nn * input_virtual_file->dims [iter->first] [0], &inter_buffer [0], &ns [0], &inter_buffer [0]);
+				inter_messenger->allgatherv <datatype> (nn * input_virtual_file->dims [iter->first] [0], &inter_buffer [0], &nns [0], &inter_buffer [0]);
 				DEBUG ("Everywhere");
 				linalg::matrix_switch (input_virtual_file->dims [iter->first] [0], nsum, &inter_buffer [0], &value_buffer [0]);
 				DEBUG ("More");
@@ -87,6 +86,7 @@ namespace pisces
 				linalg::interpolate <datatype> (output_grid->get_n (), output_virtual_file->dims [iter->first] [0], nsum, 1.0, 0.0, &position_buffer [0], &value_buffer [0], &((*output_grid) [0]), &(output_virtual_file->index <datatype> (iter->first)));
 				DEBUG ("End");
 			}
+			DEBUG ("OUT");
 		}
 		DEBUG ("Finished");
 	}

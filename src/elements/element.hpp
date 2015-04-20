@@ -379,21 +379,21 @@ namespace pisces
 			for (int i = 0; i < messenger_ptr->get_np () + 1; ++i) {
 				rezone_data [i + 4].position = positions [i];
 			}
-			
+
 			gsl_siman_params_t params = {n_tries, iters_fixed_t, step_size, k, t_initial, mu_t, t_min};
 
-		    const gsl_rng_type * T;
-		    gsl_rng * r;
+					    const gsl_rng_type * T;
+					    gsl_rng * r;
 
-		    gsl_rng_env_setup();
+					    gsl_rng_env_setup();
 
-		    T = gsl_rng_default;
-		    r = gsl_rng_alloc(T);
-			
-		    gsl_siman_solve(r, rezone_data, element <datatype>::rezone_calculate_ts, element <datatype>::rezone_generate_step, element <datatype>::rezone_step_size, NULL, NULL, NULL, NULL, sizeof(rezone_union <datatype>) * (messenger_ptr->get_np () + 5), params);
+					    T = gsl_rng_default;
+					    r = gsl_rng_alloc(T);
 
-		    gsl_rng_free (r);
-			
+					    gsl_siman_solve(r, rezone_data, element <datatype>::rezone_calculate_ts, element <datatype>::rezone_generate_step, element <datatype>::rezone_step_size, NULL, NULL, NULL, NULL, sizeof(rezone_union <datatype>) * (messenger_ptr->get_np () + 5), params);
+
+					    gsl_rng_free (r);
+
 			if (rezone_calculate_ts (rezone_data) < -timestep) {
 				for (int i = 0; i < messenger_ptr->get_np () + 1; ++i) {
 					positions [i] = rezone_data [i + 4].position;
