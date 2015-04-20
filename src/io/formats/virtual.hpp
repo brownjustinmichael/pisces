@@ -215,6 +215,7 @@ namespace formats
 			if (data_map [name]) {
 				free (data_map [name]);
 			}
+			DEBUG (n << " " << m);
 			data_map [name] = malloc (size * n * m);
 			types [name] = type;
 			sizes [name] = size;

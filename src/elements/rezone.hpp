@@ -49,9 +49,14 @@ namespace pisces
 			TODO Move this outside of the loop
 		*/
 		inter_messenger->allgatherv <datatype> (nn, &((*input_grid) [0]), &ns [0], &position_buffer [0]);
+
+		for (typename std::map <std::string, void *>::iterator iter = input_virtual_file->begin (); iter != input_virtual_file->end (); iter++) {
+			DEBUG ("Start " << iter->first);
+		}
 		
 		// Iterate through the data
 		for (typename std::map <std::string, void *>::iterator iter = input_virtual_file->begin (); iter != input_virtual_file->end (); iter++) {
+			DEBUG ("This");
 			if (input_virtual_file->dims [iter->first] [1] != 1 && input_virtual_file->check_type <datatype> (iter->first)) {
 				TRACE ("Rezoning " << iter->first << "...");
 				
@@ -62,19 +67,28 @@ namespace pisces
 					}
 				}
 				
+				
+				DEBUG ("Define buffers");
 				std::vector <datatype> value_buffer (nsum * input_virtual_file->dims [iter->first] [0], 0.0);
 				std::vector <datatype> inter_buffer (nsum * input_virtual_file->dims [iter->first] [0], 0.0);
 				
 				// Gather the entirety of the values for the data in every element; need to switch to row-major order first
+				DEBUG ("Here");
 				linalg::matrix_switch (nn, input_virtual_file->dims [iter->first] [0], &(input_virtual_file->index <datatype> (iter->first)), &inter_buffer [nhere]);
+				DEBUG ("There");
 				inter_messenger->allgatherv <datatype> (nn * input_virtual_file->dims [iter->first] [0], &inter_buffer [0], &ns [0], &inter_buffer [0]);
+				DEBUG ("Everywhere");
 				linalg::matrix_switch (input_virtual_file->dims [iter->first] [0], nsum, &inter_buffer [0], &value_buffer [0]);
+				DEBUG ("More");
 				output_virtual_file->add_var <datatype> (iter->first, input_virtual_file->dims [iter->first] [0], input_grid->get_n ());
 				
 				// Interpolate the new values from the global positions and values
+				DEBUG ("Last");
 				linalg::interpolate <datatype> (output_grid->get_n (), output_virtual_file->dims [iter->first] [0], nsum, 1.0, 0.0, &position_buffer [0], &value_buffer [0], &((*output_grid) [0]), &(output_virtual_file->index <datatype> (iter->first)));
+				DEBUG ("End");
 			}
 		}
+		DEBUG ("Finished");
 	}
 } /* pisces */
 
