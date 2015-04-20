@@ -98,8 +98,9 @@ namespace logger
 		logger.addAppender (append);
 	}
 	
-	void log_config::set_severity (int severity) {
-	    logger.setLogLevel (int_to_severity (severity));
+	void log_config::set_severity (int i_severity) {
+		severity = i_severity;
+	    logger.setLogLevel (int_to_severity (i_severity));
 	}
 } /* logger */
 

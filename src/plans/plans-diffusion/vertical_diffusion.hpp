@@ -58,6 +58,7 @@ namespace plans
 			virtual ~vertical () {}
 			
 			void setup () {
+				TRACE ("Setting up");
 				if (matrix_m) {
 					for (int j = 0; j < m; ++j) {
 						linalg::add_scaled (m, -coeff * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
@@ -179,6 +180,7 @@ namespace plans
 			virtual ~background_vertical () {}
 			
 			void setup () {
+				TRACE ("Setting up");
 				coeff_dz [0] = (diffusion [1] - diffusion [0]) * oodz [0];
 				for (int i = 1; i < m - 1; ++i) {
 					coeff_dz [i] = (diffusion [i + 1] - diffusion [i - 1]) * oodz [i];
@@ -187,6 +189,7 @@ namespace plans
 				
 				if (matrix_m) {
 					for (int j = 0; j < m; ++j) {
+						// DEBUG ("Updating diff " << diffusion [j]);
 						linalg::add_scaled (m, -diffusion [j] * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
 						linalg::add_scaled (m, -coeff_dz [j] * alpha, grid_m.get_data (1) + j, matrix_m + j, m, m);
 					}

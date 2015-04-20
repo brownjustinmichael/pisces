@@ -35,13 +35,15 @@ namespace plans
 			using real_plan <datatype>::element_flags;
 			using real_plan <datatype>::component_flags;
 			
+			int bg_every, count;
+			
 			datatype coeff; //!< The base coefficient to multiply the source
 			datatype min; //!< The minimum value of the coefficient
 			datatype *data_source; //!< A pointer to the source data
 			datatype pioL2; //!< The value pi / L^2 for speed
 			
-			std::vector <datatype> x1_vec, x2_vec, z1_vec, z2_vec, oodx_vec, oodz_vec, oodx2_vec, oodz2_vec;
-			datatype *x1_ptr, *x2_ptr, *z1_ptr, *z2_ptr, *oodx_ptr, *oodz_ptr, *oodx2_ptr, *oodz2_ptr;
+			std::vector <datatype> x1_vec, x2_vec, z1_vec, z2_vec, oodx_vec, oodz_vec, oodx2_vec, oodz2_vec, bg_state_vec, bg_deriv_vec;
+			datatype *x1_ptr, *x2_ptr, *z1_ptr, *z2_ptr, *oodx_ptr, *oodz_ptr, *oodx2_ptr, *oodz2_ptr, *bg_state, *bg_diff, *bg_deriv;
 			const datatype *pos_n, *pos_m;
 			
 		public:
@@ -51,11 +53,13 @@ namespace plans
 			 * \param i_coeff The base coefficient to multiply the source
 			 * \param i_data_source A pointer to the source data
 			 ************************************************************************/
-			linear (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_coeff, datatype i_min, datatype *i_data_source, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : 
+			linear (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_coeff, datatype i_min, datatype *i_data_source, datatype *i_bg_diff, int i_bg_every, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : 
 			real_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out, i_element_flags, i_component_flags),
+			bg_every (i_bg_every),
 			coeff (i_coeff),
 			min (i_min),
-			data_source (i_data_source) {
+			data_source (i_data_source),
+			bg_diff (i_bg_diff) {
 				TRACE ("Instantiating...");
 				pos_n = &(i_grid_n [0]);
 				pos_m = &(i_grid_m [0]);
@@ -78,6 +82,11 @@ namespace plans
 				oodz_ptr = &oodz_vec [0];
 				oodz2_vec.resize (m);
 				oodz2_ptr = &oodz2_vec [0];
+				
+				bg_state_vec.resize (m, 0.0);
+				bg_state = &bg_state_vec [0];
+				bg_deriv_vec.resize (m, 0.0);
+				bg_deriv = &bg_deriv_vec [0];
 				
 				// Calculate 1/dx
 				oodx_ptr [0] = 0.5 / (pos_n [1] - pos_n [0]);
@@ -104,6 +113,8 @@ namespace plans
 					oodz2_ptr [i] = 1.0 / (pos_m [i + 1] - pos_m [i]);
 				}
 				oodz2_ptr [m - 1] = 1.0 / (pos_m [m - 1] - pos_m [m - 2]);
+				
+				count = 0;
 			}
 			
 			virtual ~linear () {}
@@ -135,8 +146,7 @@ namespace plans
 				
 				for (int i = 0; i < n; ++i) {
 					for (int j = 1; j < m - 1; ++j) {
-						// DEBUG (std::max (coeff * data_source [i * m + j], min + 1.0e-4));
-						data_out [i * m + j] += std::max (coeff * data_source [i * m + j], min + 1.0e-4) * ((x1_ptr [i * m + j] * oodx2_ptr [i] - x2_ptr [i * m + j] * oodx2_ptr [(i - 1) % n]) * oodx_ptr [i] * 2.0 + (z1_ptr [i * m + j] * oodz2_ptr [j] - z2_ptr [i * m + j] * oodz2_ptr [j - 1]) * oodz_ptr [j] * 2.0);
+						data_out [i * m + j] += std::max (coeff * (data_source [i * m + j] - bg_state [j]), min + 1.0e-4) * ((x1_ptr [i * m + j] * oodx2_ptr [i] - x2_ptr [i * m + j] * oodx2_ptr [(i - 1) % n]) * oodx_ptr [i] * 2.0 + (z1_ptr [i * m + j] * oodz2_ptr [j] - z2_ptr [i * m + j] * oodz2_ptr [j - 1]) * oodz_ptr [j] * 2.0);
 					}
 				}
 				
@@ -158,11 +168,33 @@ namespace plans
 				linalg::matrix_copy (m - 1, n, data_in + 1, z2_ptr, m, m);
 				linalg::matrix_add_scaled (m - 1, n, -1.0, data_in, z2_ptr + 1, m, m);
 
-				// for (int i = 0; i < n; ++i) {
-				// 	for (int j = 1; j < m - 1; ++j) {
-				// 		data_out [i * m + j] += coeff * (x1_ptr [i * m + j] * oodx_ptr [i] * x2_ptr [i * m + j] * oodx_ptr [i] + z1_ptr [i * m + j] * oodz_ptr [j] * z2_ptr [i * m + j] * oodz_ptr [j]);
-				// 	}
-				// }
+				for (int i = 0; i < n; ++i) {
+					for (int j = 1; j < m - 1; ++j) {
+						data_out [i * m + j] += coeff * (x1_ptr [i * m + j] * oodx_ptr [i] * x2_ptr [i * m + j] * oodx_ptr [i] + (z1_ptr [i * m + j] - bg_deriv [j]) * oodz_ptr [j] * z2_ptr [i * m + j] * oodz_ptr [j]);
+					}
+				}
+				
+				if (count % bg_every == 0) {
+					datatype old_bg;
+					for (int j = 0; j < m; ++j) {
+						old_bg = bg_state [j];
+						bg_state [j] = 0.0;
+						for (int i = 0; i < n; ++i) {
+							bg_state [j] += data_source [i * m + j];
+						}
+						bg_state [j] /= n;
+						bg_diff [j] += coeff * (bg_state [j] - old_bg);
+					}
+					bg_deriv [0] = (bg_state [1] - bg_state [0]);
+					for (int j = 0; j < m; ++j) {
+						bg_deriv [j] = (bg_state [j + 1] - bg_state [j - 1]);
+					}
+					bg_deriv [m - 1] = (bg_state [m - 1] - bg_state [m - 2]);
+					*component_flags &= ~plans_setup;
+				}
+				
+				count++;
+				
 				TRACE ("Operation complete.");
 			}
 			
@@ -175,13 +207,15 @@ namespace plans
 				datatype coeff; //!< The base coefficient for the plan to be constructed
 				datatype min; //!< The value for the coefficient
 				datatype *data_source; //!< The source data pointer for the plan to be constructed
+				datatype *bg_diff;
+				int bg_every;
 				
 			public:
 				/*!**********************************************************************
 				 * \param i_coeff The base coefficient for the plan to be constructed
 				 * \param i_data_source The source data pointer for the plan to be constructed
 				 ************************************************************************/
-				factory (datatype i_coeff, datatype i_min, datatype *i_data_source) : coeff (i_coeff), min (i_min), data_source (i_data_source) {}
+				factory (datatype i_coeff, datatype i_min, datatype *i_data_source, datatype *i_bg_diff, int i_bg_every) : coeff (i_coeff), min (i_min), data_source (i_data_source), bg_diff (i_bg_diff), bg_every (i_bg_every) {}
 				
 				virtual ~factory () {}
 				
@@ -189,7 +223,7 @@ namespace plans
 				 * \copydoc real_plan::factory::instance
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > instance (grids::grid <datatype> **grids, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
-					return std::shared_ptr <plans::plan <datatype> > (new linear <datatype> (*grids [0], *grids [1], coeff, min, data_source, i_data_in, i_data_out, i_element_flags, i_component_flags));
+					return std::shared_ptr <plans::plan <datatype> > (new linear <datatype> (*grids [0], *grids [1], coeff, min, data_source, bg_diff, bg_every, i_data_in, i_data_out, i_element_flags, i_component_flags));
 				}
 			};
 		};

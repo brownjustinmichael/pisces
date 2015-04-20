@@ -111,7 +111,7 @@ namespace pisces
 						// omp_set_num_threads (threads);
 						TIME (
 						for (iterator iter = begin (); iter != end (); iter++) {
-							DEBUG ("Executing");
+							// DEBUG ("Executing");
 							equations [*iter]->execute_plans (plans::solvers::post_plan);
 						}
 						, execution_time, execution_duration);

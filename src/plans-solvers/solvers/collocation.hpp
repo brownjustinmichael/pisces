@@ -107,7 +107,7 @@ namespace plans
 			
 			void setup () {
 				DEBUG ("FIXING");
-				linalg::scale (m * ldn, 0.0, &matrix [0]);
+				linalg::scale (m * m, 0.0, &matrix [0]);
 			}
 			
 			/*!**********************************************************************

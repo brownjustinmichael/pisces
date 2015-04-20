@@ -26,7 +26,9 @@ public:
 		int id = process_messenger.get_id ();
 		int n_elements = process_messenger.get_np ();
 		
-		logger::log_config::set_severity (3);
+		logger::log_config::set_severity (1);
+		int num = 0;
+		logger::log_config::configure (&num, NULL, id, "process_%d.log");
 		formats::ascii::print_headers = false;
 		
 		io::parameters parameters;
@@ -35,7 +37,7 @@ public:
 		parameters ["output.stat.file"] = "compare_%02i";
 		parameters ["output.stat.every"] = 10;
 		parameters ["output.transform.file"] = "";
-		parameters ["dump.file"] = "";
+		// parameters ["dump.file"] = "";
 		parameters ["time.steps"] = 100;
 	
 		int m = parameters.get <int> ("grid.z.points") / n_elements + 1;

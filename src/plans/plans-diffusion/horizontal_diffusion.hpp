@@ -57,6 +57,7 @@ namespace plans
 			virtual ~horizontal () {}
 			
 			void setup () {
+				TRACE ("Setting up");
 				if (matrix_n) {
 					// For Fourier modes, the matrix is diagonal and not particularly complicated
 					// We set up m of these matrices in case there is some z-dependence added in later
@@ -176,6 +177,7 @@ namespace plans
 			
 			void setup () {
 				// For Fourier modes, the matrix is diagonal and not particularly complicated
+				TRACE ("Setting up");
 				if (matrix_n) {
 					for (int j = 0; j < m; ++j) {
 						matrix_n [j] = matrix_n [m + j] = 0.0;
