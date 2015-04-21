@@ -20,6 +20,7 @@ grid:
         t_initial: 8e-1
         mu_t: 1.003
         t_min: 2e-1
+        mult: 1.0
 time:
     steps: 1000
     init: 1.0e-5

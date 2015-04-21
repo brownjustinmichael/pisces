@@ -55,6 +55,10 @@ namespace pisces
 		std::map <int, int> excesses; //!< A vector of the edge positions
 		std::vector<int> cell_n; //!< An integer array for tracking each cell number for output
 		std::vector<int> cell_m; //!< An integer array for tracking each cell number for output
+		std::vector <datatype> value_buffer_vec;
+		datatype* value_buffer;
+		std::vector <datatype> inter_buffer_vec;
+		datatype* inter_buffer;
 		
 		datatype max_timestep; //!< The maximum timestep value
 		datatype init_timestep; //!< The starting timestep value
@@ -94,6 +98,11 @@ namespace pisces
 			// Set up the grids
 			grids [0] = std::shared_ptr <grids::grid <datatype>> (new typename grids::horizontal::grid <datatype> (&i_axis_n));
 			grids [1] = std::shared_ptr <grids::grid <datatype>> (new typename grids::vertical::grid <datatype> (&i_axis_m));
+			
+			value_buffer_vec.resize (i_messenger_ptr->get_np () * m * n);
+			value_buffer = &value_buffer_vec [0];
+			inter_buffer_vec.resize (i_messenger_ptr->get_np () * m * n);
+			inter_buffer = &inter_buffer_vec [0];
 			
 			// For every variable in the data object, add a corresponding equation and transformer
 			for (typename data::data <datatype>::iterator iter = data.begin (); iter != data.end (); ++iter) {
@@ -254,7 +263,7 @@ namespace pisces
 			grids::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
 			std::shared_ptr <grids::grid <datatype>> vertical_grid = generate_grid (&vertical_axis);
 			
-			pisces::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, virtual_file_ptr, &formats::virtual_files ["two_d/element/new_virtual_file"]);
+			pisces::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, virtual_file_ptr, &formats::virtual_files ["two_d/element/new_virtual_file"], value_buffer, inter_buffer);
 			
 			return &formats::virtual_files ["two_d/element/new_virtual_file"];
 		}

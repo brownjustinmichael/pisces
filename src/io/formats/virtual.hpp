@@ -130,9 +130,10 @@ namespace formats
 		template <class datatype>
 		void add_var (std::string name, int n = 1, int m = 1) {
 			_add_var (name, &typeid (datatype), sizeof (datatype), n, m);
+			datatype *temp = (datatype *) (data_map [name]);
 			for (int i = 0; i < n; ++i) {
 				for (int j = 0; j < m; ++j) {
-					((datatype *) (data_map [name])) [i * m + j] = 0.0;
+					temp [i * m + j] = 0.0;
 				}
 			}
 		}
@@ -215,7 +216,6 @@ namespace formats
 			if (data_map [name]) {
 				free (data_map [name]);
 			}
-			DEBUG (n << " " << m);
 			data_map [name] = malloc (size * n * m);
 			types [name] = type;
 			sizes [name] = size;

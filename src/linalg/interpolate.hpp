@@ -17,6 +17,7 @@
 #define TINY 1.0e-6
 
 #include "logger/logger.hpp"
+#include "linalg/utils.hpp"
 #include <cmath>
 
 namespace linalg
@@ -58,6 +59,7 @@ namespace linalg
 			}
 		}
 #endif
+		linalg::matrix_scale (n, m, beta, out, ldout);
 		for (int k = 0; k < n; ++k) {
 			int i = 0;
 			/*
@@ -74,13 +76,16 @@ namespace linalg
 				++i;
 			}
 			if (in [k] == x [i]) {
-				for (int j = 0; j < m; ++j) {
-					out [j * ldout + k] = alpha * y [j * ldy + i] + beta * out [j * ldout + k];
-				}
+				linalg::add_scaled (m, alpha, y + i, out + k, ldy, ldout);
+				// for (int j = 0; j < m; ++j) {
+				// 	out [j * ldout + k] += alpha * y [j * ldy + i];
+				// }
 			} else {
-				for (int j = 0; j < m; ++j) {
-					out [j * ldout + k] = alpha * ((y [j * ldy + i] - y [j * ldy + i - 1]) / (x [i] - x [i - 1]) * (in [k] - x [i]) + y [j * ldy + i]) + beta * out [j * ldout + k];
-				}
+				linalg::add_scaled (m, alpha * (in [k] - x [i]) / (x [i] - x [i - 1]) + alpha, y + i, out + k, ldy, ldout);
+				linalg::add_scaled (m, -alpha * (in [k] - x [i]) / (x [i] - x [i - 1]), y + i - 1, out + k, ldy, ldout);
+				// for (int j = 0; j < m; ++j) {
+				// 	out [j * ldout + k] += alpha * ((y [j * ldy + i] - y [j * ldy + i - 1]) * (in [k] - x [i]) / (x [i] - x [i - 1]) + y [j * ldy + i]);
+				// }
 			}
 		}
 		TRACE ("Done.");

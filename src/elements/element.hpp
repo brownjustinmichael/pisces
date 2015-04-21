@@ -83,6 +83,7 @@ namespace pisces
 		int transform_threads; //!< The number of transform threads available
 		
 	private:
+		datatype rezone_mult; //!< To merit rezoning, the new timestep must be at least this factor larger than the current one
 		std::vector <std::string> equation_keys; //!< A vector of integer keys to the equations map
 		formats::virtual_file *rezone_virtual_file; //!< A shared_ptr to a virtual file object, for rezoning
 		
@@ -133,6 +134,7 @@ namespace pisces
 			messenger_ptr = i_messenger_ptr;
 			timestep = 0.0;
 			transform_threads = params.get <int> ("parallel.transform.threads");
+			rezone_mult = params.get <datatype> ("grid.rezone.mult");
 		}
 		
 		virtual ~element () {}
@@ -368,6 +370,9 @@ namespace pisces
 
 			rezone_virtual_file = make_virtual_file (profile_only | timestep_only);
 			
+			datatype timestep = calculate_min_timestep (rezone_virtual_file, false);
+			messenger_ptr->min (&timestep);
+			
 			rezone_union <datatype> rezone_data [(messenger_ptr->get_np () + 5)];
 			rezone_data [0].element_ptr = this;
 			rezone_data [1].np = messenger_ptr->get_np ();
@@ -382,25 +387,31 @@ namespace pisces
 
 			gsl_siman_params_t params = {n_tries, iters_fixed_t, step_size, k, t_initial, mu_t, t_min};
 
-					    const gsl_rng_type * T;
-					    gsl_rng * r;
+			const gsl_rng_type * T;
+			gsl_rng * r;
+			
+			gsl_rng_env_setup();
+			
+			T = gsl_rng_default;
+			r = gsl_rng_alloc(T);
 
-					    gsl_rng_env_setup();
+			gsl_siman_solve(r, rezone_data, element <datatype>::rezone_calculate_ts, element <datatype>::rezone_generate_step, element <datatype>::rezone_step_size, NULL, NULL, NULL, NULL, sizeof(rezone_union <datatype>) * (messenger_ptr->get_np () + 5), params);
 
-					    T = gsl_rng_default;
-					    r = gsl_rng_alloc(T);
-
-					    gsl_siman_solve(r, rezone_data, element <datatype>::rezone_calculate_ts, element <datatype>::rezone_generate_step, element <datatype>::rezone_step_size, NULL, NULL, NULL, NULL, sizeof(rezone_union <datatype>) * (messenger_ptr->get_np () + 5), params);
-
-					    gsl_rng_free (r);
-
-			if (rezone_calculate_ts (rezone_data) < -timestep) {
+			gsl_rng_free (r);
+			
+			datatype value = rezone_calculate_ts (rezone_data);
+			
+			DEBUG ("Old: " << timestep << " New: " << value);
+			
+			if (-value > timestep * rezone_mult) {
 				for (int i = 0; i < messenger_ptr->get_np () + 1; ++i) {
 					positions [i] = rezone_data [i + 4].position;
+					DEBUG ("Position " << positions [i]);
 				}
+				return make_rezoned_virtual_file (positions, make_virtual_file ());
 			}
 			
-			return make_rezoned_virtual_file (positions, make_virtual_file ());
+			return NULL;
 		}
 		
 		/*!**********************************************************************

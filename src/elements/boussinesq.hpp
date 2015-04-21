@@ -41,6 +41,8 @@ namespace pisces
 		using implemented_element <datatype>::timestep;
 		using implemented_element <datatype>::duration;
 		using implemented_element <datatype>::data;
+		using implemented_element <datatype>::value_buffer;
+		using implemented_element <datatype>::inter_buffer;
 		
 		std::vector <datatype> diffusion; //!< A vector of diffusion data, for background diffusion
 		datatype advection_coeff; //!< The advection coefficient, for speed
@@ -109,7 +111,7 @@ namespace pisces
 			grids::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
 			std::shared_ptr <grids::grid <datatype>> vertical_grid = implemented_element <datatype>::generate_grid (&vertical_axis);
 			
-			pisces::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, virtual_file_ptr, &formats::virtual_files ["two_d/boussinesq/new_virtual_file"]);
+			pisces::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, virtual_file_ptr, &formats::virtual_files ["two_d/boussinesq/new_virtual_file"], value_buffer, inter_buffer);
 			
 			return &formats::virtual_files ["two_d/boussinesq/new_virtual_file"];
 		}

@@ -29,7 +29,7 @@ namespace pisces
 	 * This method takes an input_virtual_file and input_grid and rezones them according to the extent of output_grid. It will do so by communicating with the other elements to collect the data necessary for the rezone.
 	 ************************************************************************/
 	template <class datatype>
-	void rezone (mpi::messenger *inter_messenger, grids::grid <datatype> *input_grid, grids::grid <datatype> *output_grid, formats::virtual_file *input_virtual_file, formats::virtual_file *output_virtual_file) {
+	void rezone (mpi::messenger *inter_messenger, grids::grid <datatype> *input_grid, grids::grid <datatype> *output_grid, formats::virtual_file *input_virtual_file, formats::virtual_file *output_virtual_file, datatype *value_buffer, datatype *inter_buffer) {
 		if (output_virtual_file != input_virtual_file) {
 			*output_virtual_file = *input_virtual_file;
 		}
@@ -54,7 +54,6 @@ namespace pisces
 		
 		// Iterate through the data
 		for (typename std::map <std::string, void *>::iterator iter = input_virtual_file->begin (); iter != input_virtual_file->end (); iter++) {
-			DEBUG ("This");
 			if (input_virtual_file->dims [iter->first] [1] != 1 && input_virtual_file->check_type <datatype> (iter->first)) {
 				TRACE ("Rezoning " << iter->first << "...");
 				
@@ -62,33 +61,20 @@ namespace pisces
 				for (int i = 0; i < inter_messenger->get_np (); ++i) {
 					nns [i] = ns [i] * input_virtual_file->dims [iter->first] [0];
 					if (i < inter_messenger->get_id ()) {
-						DEBUG (i << " " << nns [i]);
 						nhere += nns [i];
 					}
 				}
 				
-				DEBUG ("Define buffers" << nsum * input_virtual_file->dims [iter->first] [0]);
-				std::vector <datatype> value_buffer (nsum * input_virtual_file->dims [iter->first] [0], 0.0);
-				std::vector <datatype> inter_buffer (nsum * input_virtual_file->dims [iter->first] [0], 0.0);
-				
 				// Gather the entirety of the values for the data in every element; need to switch to row-major order first
-				DEBUG ("Here " << nn << " " << input_virtual_file->dims [iter->first] [0] << " " << iter->first << " " << &(input_virtual_file->index <datatype> (iter->first)) << " " << &inter_buffer [nhere] << " " << nhere);
 				linalg::matrix_switch (nn, input_virtual_file->dims [iter->first] [0], &(input_virtual_file->index <datatype> (iter->first)), &inter_buffer [nhere]);
-				DEBUG ("There");
-				inter_messenger->allgatherv <datatype> (nn * input_virtual_file->dims [iter->first] [0], &inter_buffer [0], &nns [0], &inter_buffer [0]);
-				DEBUG ("Everywhere");
-				linalg::matrix_switch (input_virtual_file->dims [iter->first] [0], nsum, &inter_buffer [0], &value_buffer [0]);
-				DEBUG ("More");
+				inter_messenger->allgatherv <datatype> (nn * input_virtual_file->dims [iter->first] [0], inter_buffer, &nns [0], inter_buffer);
+				linalg::matrix_switch (input_virtual_file->dims [iter->first] [0], nsum, inter_buffer, value_buffer);
 				output_virtual_file->add_var <datatype> (iter->first, input_virtual_file->dims [iter->first] [0], input_grid->get_n ());
 				
 				// Interpolate the new values from the global positions and values
-				DEBUG ("Last");
-				linalg::interpolate <datatype> (output_grid->get_n (), output_virtual_file->dims [iter->first] [0], nsum, 1.0, 0.0, &position_buffer [0], &value_buffer [0], &((*output_grid) [0]), &(output_virtual_file->index <datatype> (iter->first)));
-				DEBUG ("End");
+				linalg::interpolate <datatype> (output_grid->get_n (), output_virtual_file->dims [iter->first] [0], nsum, 1.0, 0.0, &position_buffer [0], value_buffer, &((*output_grid) [0]), &(output_virtual_file->index <datatype> (iter->first)));
 			}
-			DEBUG ("OUT");
 		}
-		DEBUG ("Finished");
 	}
 } /* pisces */
 

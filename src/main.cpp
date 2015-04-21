@@ -100,28 +100,20 @@ int main (int argc, char *argv[])
 
 		int n_steps = 0;
 		while (n_steps < parameters.get <int> ("time.steps")) {
-			if (parameters.get <int> ("grid.rezone.check_every") > 0) {
+			if (parameters.get <int> ("grid.rezone.check_every") > 0 && n_steps != 0) {
 				INFO ("Rezoning");
-				formats::virtual_files ["main/virtual_file"] = *(element->rezone_minimize_ts (&positions [0], parameters.get <double> ("grid.rezone.min_size"), parameters.get <double> ("grid.rezone.max_size"), parameters.get <int> ("grid.rezone.n_tries"), parameters.get <int> ("grid.rezone.iters_fixed_t"), parameters.get <double> ("grid.rezone.step_size"), parameters.get <double> ("grid.rezone.k"), parameters.get <double> ("grid.rezone.t_initial"), parameters.get <double> ("grid.rezone.mu_t"), parameters.get <double> ("grid.rezone.t_min")));
+				formats::virtual_file *virt = element->rezone_minimize_ts (&positions [0], parameters.get <double> ("grid.rezone.min_size"), parameters.get <double> ("grid.rezone.max_size"), parameters.get <int> ("grid.rezone.n_tries"), parameters.get <int> ("grid.rezone.iters_fixed_t"), parameters.get <double> ("grid.rezone.step_size"), parameters.get <double> ("grid.rezone.k"), parameters.get <double> ("grid.rezone.t_initial"), parameters.get <double> ("grid.rezone.mu_t"), parameters.get <double> ("grid.rezone.t_min"));
 				
-				DEBUG ("1");
-
-				grids::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
-
-				DEBUG ("2");
-
-				io::input *virtual_input (new io::formatted_input <formats::virtual_format> (formats::data_grid::two_d (n, m), "main/virtual_file"));
-				data.setup (&*virtual_input);
+				if (virt) {
+					formats::virtual_files ["main/virtual_file"] = *virt;
 				
-				DEBUG ("3");
-
-				element.reset (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
+					grids::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
 				
-				DEBUG ("4");
-
-				/*
-					TODO It would be nice to combine the above construction of element with this one
-				*/
+					io::input *virtual_input (new io::formatted_input <formats::virtual_format> (formats::data_grid::two_d (n, m), "main/virtual_file"));
+					data.setup (&*virtual_input);
+				
+					element.reset (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
+				}
 			}
 			element->run (n_steps, parameters.get <int> ("time.steps"), parameters.get <int> ("grid.rezone.check_every"));
 		}

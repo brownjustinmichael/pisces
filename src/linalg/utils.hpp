@@ -186,7 +186,7 @@ namespace linalg
 	 * \param incx The integer spacing of elements in dx
 	 * \param incy The integer spacing of elements in dy
 	 *********************************************************************/
-	void add_scaled (int n, float da, float *x, float *y, int incx = 1, int incy = 1);
+	void add_scaled (int n, float da, const float *x, float *y, int incx = 1, int incy = 1);
 
 	/*!*******************************************************************
 	 * \brief Perform the operation dy = da * dx + dy
@@ -198,7 +198,7 @@ namespace linalg
 	 * \param incx The integer spacing of elements in dx
 	 * \param incy The integer spacing of elements in dy
 	 *********************************************************************/
-	void add_scaled (int n, double da, double *x, double *y, int incx = 1, int incy = 1);
+	void add_scaled (int n, double da, const double *x, double *y, int incx = 1, int incy = 1);
 	
 	/*!**********************************************************************
 	 * \brief Add a scaled matrix to another float matrix

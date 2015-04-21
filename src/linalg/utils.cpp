@@ -93,7 +93,7 @@ extern "C" void dscal_ (int *n, double *a, double *x, int *incx);
  * \param y The float vector dy
  * \param incy A pointer to the integer spacing of elements in dy
  *********************************************************************/
-extern "C" void saxpy_ (int *n, float *a, float *x, int *incx, float *y, int *incy);
+extern "C" void saxpy_ (int *n, float *a, const float *x, int *incx, float *y, int *incy);
 
 /*!*******************************************************************
  * \brief Function from BLAS for vector-vector addition (y = a * x + y)
@@ -105,7 +105,7 @@ extern "C" void saxpy_ (int *n, float *a, float *x, int *incx, float *y, int *in
  * \param y The double vector dy
  * \param incy A pointer to the integer spacing of elements in dy
  *********************************************************************/
-extern "C" void daxpy_ (int *n, double *a, double *x, int *incx, double *y, int *incy);
+extern "C" void daxpy_ (int *n, double *a, const double *x, int *incx, double *y, int *incy);
 
 /*!*******************************************************************
  * \brief Function from BLAS for matrix-vector multiplication (y = alpha * a * x + beta * y)
@@ -330,11 +330,11 @@ namespace linalg
 		return ddot_ (&n, dx, &incx, dy, &incy);
 	}	
 	
-	void add_scaled (int n, float da, float *dx, float *dy, int incx, int incy) {
+	void add_scaled (int n, float da, const float *dx, float *dy, int incx, int incy) {
 		saxpy_ (&n, &da, dx, &incx, dy, &incy);
 	}
 	
-	void add_scaled (int n, double da, double *dx, double *dy, int incx, int incy) {
+	void add_scaled (int n, double da, const double *dx, double *dy, int incx, int incy) {
 		if (n > MIN_PARALLEL) {
 			int threads = omp_get_max_threads ();
 			#pragma omp parallel for
