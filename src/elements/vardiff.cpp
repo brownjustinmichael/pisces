@@ -37,9 +37,21 @@ namespace pisces
 				for (int i = 0; i < m; ++i) {
 					diffusion [variable] [i] = terms ["diffusion"].as <datatype> ();
 				}
+				
 				if (terms ["bg_diffusion"].IsDefined ()) {
+					datatype diff_width = 0.2;
+					if (terms ["diff_width"].IsDefined ()) {
+						diff_width = terms ["diff_width"].as <datatype> ();
+					}
 					for (int i = 0; i < m; ++i) {
-						if (ptr ("z") [i] > -0.1) diffusion [variable] [i] = terms ["bg_diffusion"].as <datatype> ();
+						if (ptr ("z") [i] > diff_width) {
+							diffusion [variable] [i] = diff_width;
+						} else if (ptr ("z") [i] < -diff_width) {
+							continue;
+						} else {
+							diffusion [variable] [i] += (terms ["bg_diffusion"].as <datatype> () - terms ["diffusion"].as <datatype> ()) * (ptr ("z") [i] + diff_width) / (2.0 * diff_width);
+						}
+						DEBUG ("DIFF = " << diffusion [variable] [i]);
 					}
 				}
 			

@@ -66,6 +66,7 @@ namespace io
 			 * The alias class is designed to allow for indexing relative to the location of the alias, so the key here should assume starting from the associated node
 			 ************************************************************************/
 			YAML::Node operator [] (std::string i_key) {
+				DEBUG ("Looking for " << i_key);
 				return params [key + "." + i_key];
 			}
 		};

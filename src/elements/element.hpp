@@ -33,6 +33,7 @@
 #include "plans-solvers/equation.hpp"
 #include "plans-transforms/transformer.hpp"
 
+#include "rezone.hpp"
 #include "data/data.hpp"
 
 /*!**********************************************************************
@@ -42,19 +43,6 @@
  ************************************************************************/
 namespace pisces
 {
-	template <class datatype>
-	class element;
-	
-	/*!**********************************************************************
-	 * \brief This is a simple union for the zoning minimization
-	 ************************************************************************/
-	template <class datatype>
-	union rezone_union {
-		element <datatype> *element_ptr; //!< A pointer to an element
-		int np; //!< The integer number of elements
-		datatype position; //!< A real zoning position
-	};
-	
 	/*!*******************************************************************
 	 * \brief This is the basic class of the code
 	 * 
@@ -66,7 +54,6 @@ namespace pisces
 	{
 	protected:
 		std::vector <grids::axis> axes; //!< A vector of axis objects, containing the basic grid information
-		mpi::messenger* messenger_ptr; //!< A pointer to the messenger object
 		int name; //!< An integer representation of the element, to be used in file output
 		int dimensions; //!< The integer number of dimensions in the element
 		io::parameters& params; //!< The map that contains the input parameters
@@ -85,10 +72,11 @@ namespace pisces
 	private:
 		datatype rezone_mult; //!< To merit rezoning, the new timestep must be at least this factor larger than the current one
 		std::vector <std::string> equation_keys; //!< A vector of integer keys to the equations map
-		formats::virtual_file *rezone_virtual_file; //!< A shared_ptr to a virtual file object, for rezoning
 		
 	public:
 		std::vector <std::shared_ptr <grids::grid <datatype>>> grids; //!< A vector of shared pointers to the collocation grids
+		mpi::messenger* messenger_ptr; //!< A pointer to the messenger object
+		formats::virtual_file *rezone_virtual_file; //!< A shared_ptr to a virtual file object, for rezoning
 		/*!**********************************************************************
 		 * \brief Element iterator for iterating through the contained equations
 		 ************************************************************************/
@@ -364,27 +352,24 @@ namespace pisces
 		 * 
 		 * \return A shared_ptr to a virtual_file object containing the chosen rezoning
 		 ************************************************************************/
-		virtual formats::virtual_file *rezone_minimize_ts (datatype * positions, datatype min_size, datatype max_size, int n_tries = 20, int iters_fixed_t = 1000, datatype step_size = 1.0, datatype k = 1.0, datatype t_initial = 0.008, datatype mu_t = 1.003, datatype t_min = 2.0e-6) {
+		virtual formats::virtual_file *rezone_minimize_ts (datatype * positions, datatype min_size, datatype max_size, int n_tries = 20, int iters_fixed_t = 1000, datatype step_size = 1.0, datatype k = 1.0, datatype t_initial = 0.008, datatype mu_t = 1.003, datatype t_min = 2.0e-6, double (*function) (element <datatype> *, formats::virtual_file *) = element <datatype>::rezone_calculate_ts) {
 			TRACE ("Rezoning...");
 			transform (plans::transforms::inverse_horizontal | plans::transforms::inverse_vertical);
 
 			rezone_virtual_file = make_virtual_file (profile_only | timestep_only);
 			
-			datatype timestep = calculate_min_timestep (rezone_virtual_file, false);
-			messenger_ptr->min (&timestep);
+			rezone_data <datatype> data;
+			data.element_ptr = this;
+			data.id = messenger_ptr->get_id ();
+			data.np = messenger_ptr->get_np ();
+			data.merit_func = function;
+			data.min_size = min_size;
+			data.max_size = max_size;
 			
-			rezone_union <datatype> rezone_data [(messenger_ptr->get_np () + 5)];
-			rezone_data [0].element_ptr = this;
-			rezone_data [1].np = messenger_ptr->get_np ();
-			rezone_data [2].position = min_size;
-			rezone_data [3].position = max_size;
+			get_zoning_positions (data.positions);
 			
-			get_zoning_positions (positions);
+			datatype original = rezone_data <datatype>::func (&data);
 			
-			for (int i = 0; i < messenger_ptr->get_np () + 1; ++i) {
-				rezone_data [i + 4].position = positions [i];
-			}
-
 			gsl_siman_params_t params = {n_tries, iters_fixed_t, step_size, k, t_initial, mu_t, t_min};
 
 			const gsl_rng_type * T;
@@ -395,20 +380,16 @@ namespace pisces
 			T = gsl_rng_default;
 			r = gsl_rng_alloc(T);
 
-			gsl_siman_solve(r, rezone_data, element <datatype>::rezone_calculate_ts, element <datatype>::rezone_generate_step, element <datatype>::rezone_step_size, NULL, NULL, NULL, NULL, sizeof(rezone_union <datatype>) * (messenger_ptr->get_np () + 5), params);
+			gsl_siman_solve(r, &data, rezone_data <datatype>::func, rezone_data <datatype>::rezone_generate_step, rezone_data <datatype>::rezone_step_size, NULL, NULL, NULL, NULL, sizeof (rezone_data <datatype>), params);
 
 			gsl_rng_free (r);
 			
-			datatype value = rezone_calculate_ts (rezone_data);
+			datatype value = rezone_data <datatype>::func (&data);
 			
-			DEBUG ("Old: " << timestep << " New: " << value);
+			DEBUG ("Old: " << original << " New: " << value);
 			
-			if (-value > timestep * rezone_mult) {
-				for (int i = 0; i < messenger_ptr->get_np () + 1; ++i) {
-					positions [i] = rezone_data [i + 4].position;
-					DEBUG ("Position " << positions [i]);
-				}
-				return make_rezoned_virtual_file (positions, make_virtual_file ());
+			if (value < original * rezone_mult) {
+				return make_rezoned_virtual_file (data.positions, make_virtual_file ());
 			}
 			
 			return NULL;
@@ -421,7 +402,6 @@ namespace pisces
 		 ************************************************************************/
 		virtual void run (int &n_steps, int max_steps, int check_every = -1);
 		
-	protected:
 		/*!**********************************************************************
 		 * \brief Protected method to make a virtual file of the current state
 		 * 
@@ -432,7 +412,7 @@ namespace pisces
 		 * \return A shared_ptr to the virtual_file of the current state
 		 ************************************************************************/
 		virtual formats::virtual_file *make_virtual_file (int flags = 0x00) = 0;
-		
+	
 		/*!**********************************************************************
 		 * \brief Protected method to rezone the current state into a virtual file
 		 * 
@@ -446,6 +426,7 @@ namespace pisces
 		 ************************************************************************/
 		virtual formats::virtual_file *make_rezoned_virtual_file (datatype *positions, formats::virtual_file *virtual_file_ptr, int flags = 0x00) = 0;
 		
+	protected:
 		/*!**********************************************************************
 		 * \brief Get the current zoning position array
 		 * 
@@ -463,138 +444,11 @@ namespace pisces
 		 * 
 		 * In order, the rezone_union objects must contain 1) a pointer to the element, 2) the total number of elements in the system, 3) min_size argument from rezone_minimize_ts, 4) max_size argument from rezone_minimize_ts, 5-n) positions of the zonal boundaries. This method is to be called by the GSL simulated annealing routine.
 		 ************************************************************************/
-		static double rezone_calculate_ts (void *i_rezone_data) {
-			element <datatype> *element_ptr = ((rezone_union <datatype> *) i_rezone_data)->element_ptr;
-			datatype positions [((rezone_union <datatype> *) i_rezone_data) [1].np + 1];
-			mpi::messenger *messenger_ptr = element_ptr->messenger_ptr;
-			for (int i = 0; i < ((rezone_union <datatype> *) i_rezone_data) [1].np + 1; ++i) {
-				positions [i] = ((rezone_union <datatype> *) i_rezone_data) [i + 4].position;
-			}
-			double timestep = element_ptr->calculate_min_timestep (element_ptr->make_rezoned_virtual_file (positions, &*(element_ptr->rezone_virtual_file), profile_only), false);
-			messenger_ptr->min (&timestep);
+		static double rezone_calculate_ts (element <datatype> *element_ptr, formats::virtual_file *virt) {
+			double timestep = element_ptr->calculate_min_timestep (virt, false);
 			return -timestep;
 		}
-	
-		/*!**********************************************************************
-		 * \brief Given a set of zoning data, print the state, for debugging
-		 * 
-		 * \param i_rezone_data A pointer to an array of rezone_union objects
-		 * 
-		 * In order, the rezone_union objects must contain 1) a pointer to the element, 2) the total number of elements in the system, 3) min_size argument from rezone_minimize_ts, 4) max_size argument from rezone_minimize_ts, 5-n) positions of the zonal boundaries. This method is to be called by the GSL simulated annealing routine.
-		 ************************************************************************/
-		static void print_rezone (void *i_rezone_data) {
-			for (int i = 0; i < ((rezone_union <datatype> *) i_rezone_data) [1].np + 1; ++i) {
-				printf (" %f ", ((rezone_union <datatype> *) i_rezone_data) [i + 4].position);
-			}
-		}
-	
-		/*!**********************************************************************
-		 * \brief Given two sets of zoning data, calculate the distance in parameter space
-		 * 
-		 * \param i_new_rezone_data A pointer to an array of new rezone_union objects
-		 * \param i_old_rezone_data A pointer to an array of old rezone_union objects
-		 * 
-		 * In order, the rezone_union objects must contain 1) a pointer to the element, 2) the total number of elements in the system, 3) min_size argument from rezone_minimize_ts, 4) max_size argument from rezone_minimize_ts, 5-n) positions of the zonal boundaries. This method is to be called by the GSL simulated annealing routine.
-		 ************************************************************************/
-		static double rezone_step_size (void *i_new_rezone_data, void *i_old_rezone_data) {
-			datatype total = 0;
-			element <datatype> *element_ptr = ((rezone_union <datatype> *) i_new_rezone_data)->element_ptr;
-			datatype new_positions [((rezone_union <datatype> *) i_new_rezone_data) [1].np + 1];
-			for (int i = 0; i < ((rezone_union <datatype> *) i_new_rezone_data) [1].np + 1; ++i) {
-				new_positions [i] = ((rezone_union <datatype> *) i_new_rezone_data) [i + 4].position;
-			}
-			datatype old_positions [((rezone_union <datatype> *) i_old_rezone_data) [1].np + 1];
-			for (int i = 0; i < ((rezone_union <datatype> *) i_old_rezone_data) [1].np + 1; ++i) {
-				old_positions [i] = ((rezone_union <datatype> *) i_old_rezone_data) [i + 4].position;
-			}
-			mpi::messenger *messenger_ptr = element_ptr->messenger_ptr;
-			for (int i = 1; i < messenger_ptr->get_np (); ++i) {
-				total += (new_positions [i] - old_positions [i]) * (new_positions [i] - old_positions [i]);
-			}
-			return sqrt (total);
-		}
-	
-		/*!**********************************************************************
-		 * \brief Generate a new set of parameters from the old ones with a random number generator
-		 * 
-		 * \param r A pointer to a gnu scientific library random number generator
-		 * \param i_rezone_data A pointer to an array of rezone_union objects
-		 * \param step_size The datatype step_size in parameter space
-		 * 
-		 * In order, the rezone_union objects must contain 1) a pointer to the element, 2) the total number of elements in the system, 3) min_size argument from rezone_minimize_ts, 4) max_size argument from rezone_minimize_ts, 5-n) positions of the zonal boundaries. This method is to be called by the GSL simulated annealing routine.
-		 ************************************************************************/
-		static void rezone_generate_step (const gsl_rng *r, void *i_rezone_data, datatype step_size) {
-			rezone_union <datatype> *rezone_data = (rezone_union <datatype> *) i_rezone_data;
-			element <datatype> *element_ptr = rezone_data->element_ptr;
-			datatype positions [rezone_data [1].np + 1];
-			for (int i = 0; i < rezone_data [1].np + 1; ++i) {
-				positions [i] = rezone_data [i + 4].position;
-			}
-			mpi::messenger *messenger_ptr = element_ptr->messenger_ptr;
-			if (messenger_ptr->get_id () == 0) {
-				// Generate a random radius that is less than or equal to the step size
-				datatype radius = gsl_rng_uniform (r) * step_size;
-				if (radius == 0.0) {
-					messenger_ptr->skip_all ();
-					return;
-				}
-				// Generate a random step for every zonal position and sum the total step size
-				datatype xs [messenger_ptr->get_np () + 1];
-				datatype total = 0.0;
-				for (int i = 1; i < messenger_ptr->get_np (); ++i) {
-					xs [i] = gsl_rng_uniform (r) * 2.0 - 1.0;
-					total += xs [i] * xs [i];
-				}
-				// If possible, rescale the total step to be equal to the radius; otherwise, change nothing
-				if (total == 0.0) {
-					messenger_ptr->skip_all ();
-					return;
-				}
-				total = sqrt (total);
-				total /= radius;
-				for (int i = 1; i < messenger_ptr->get_np (); ++i) {
-					positions [i] = xs [i] / total + positions [i];
-				}
-				// Broadcast the new positions
-				messenger_ptr->template bcast <datatype> (messenger_ptr->get_np () + 1, positions);
-			} else {
-				// Receive the new positions
-				messenger_ptr->template bcast <datatype> (messenger_ptr->get_np () + 1, positions);
-			}
-			// Iterate forward through the data, checking that the mininum and maximum sizes are obeyed
-			for (int i = 1; i < rezone_data [1].np; ++i) {
-				// Check minimum size
-				if (positions [i] < positions [i - 1] + rezone_data [2].position) {
-					positions [i] = positions [i - 1] + rezone_data [2].position;
-				}
-				// Check maximum size
-				if (positions [i] > positions [i - 1] + rezone_data [3].position) {
-					positions [i] = positions [i - 1] + rezone_data [3].position;
-				}
-				rezone_data [i + 4].position = positions [i];
-			}
-			// Iterate backward through the positions, checking that the minimum and maximum sizes are obeyed
-			for (int i = rezone_data [1].np - 1; i >= 1; --i) {
-				// Check minimum size
-				if (rezone_data [i + 4].position > rezone_data [i + 5].position - rezone_data [2].position) {
-					rezone_data [i + 4].position = rezone_data [i + 5].position - rezone_data [2].position;
-				}
-				// Check maximum size
-				if (rezone_data [i + 4].position < rezone_data [i + 5].position - rezone_data [3].position) {
-					rezone_data [i + 4].position = rezone_data [i + 5].position - rezone_data [3].position;
-				}
-			}
-			// Make sure we didn't accidentally run off the end of the position array
-			if (rezone_data [4].position < rezone_data [5].position - rezone_data [3].position) {
-				FATAL ("Unrealistic size constraints in rezone: max_size too small");
-				throw 0;
-			}
-			if (rezone_data [4].position > rezone_data [5].position - rezone_data [2].position) {
-				FATAL ("Unrealistic size constraints in rezone: min_size too large");
-				throw 0;
-			}
-		}
-	
+		
 		/*
 			TODO Allow for upside-down elements
 		*/

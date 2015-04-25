@@ -369,6 +369,33 @@ namespace mpi
 				}
 			}
 		}
+		
+		/*!**********************************************************************
+		 * \brief Sum across elements
+		 * 
+		 * This uses a messenger buffer.
+		 * 
+		 * \param data The datatype pointer to the datatype to sum
+		 ************************************************************************/	
+		template <class datatype>	
+		void sum (datatype* data) {
+			if (check_all ()) {
+				if (np != 1) {
+					std::vector <datatype> buffer (np);
+#ifdef _MPI
+					MPI::COMM_WORLD.Gather (data, 1, mpi_type (&typeid (datatype)), &buffer [0], 1, mpi_type (&typeid (datatype)), 0);
+#endif // _MPI
+					if (id == 0) {
+						for (int i = 0; i < (int) buffer.size (); ++i) {
+							*data += buffer [i];
+						}
+					}
+#ifdef _MPI
+					MPI::COMM_WORLD.Bcast (data, 1, mpi_type (&typeid (datatype)), 0);
+#endif // _MPI
+				}
+			}
+		}
 	};
 } /* mpi */
 

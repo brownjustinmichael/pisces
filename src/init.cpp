@@ -82,8 +82,8 @@ int main (int argc, char *argv[])
 			for (int j = 0; j < m; ++j) {
 				temps [i * m + j] = (stop - sbot) / (parameters.get <double> ("grid.z.width")) * (vertical_grid [j] + parameters.get <double> ("grid.z.width") / 2.0) + sbot;
 				tempt [i * m + j] = (ttop - tbot) / (parameters.get <double> ("grid.z.width")) * (vertical_grid [j] + parameters.get <double> ("grid.z.width") / 2.0) + tbot;
-				temps [i * m + j] += (double) (rand () % 1000 - 500) / 1.0e5;// * (-vertical_grid [j] * vertical_grid [j] + parameters.get <double> ("grid.z.width") * parameters.get <double> ("grid.z.width") / 4.0) / parameters.get <double> ("grid.z.width") / parameters.get <double> ("grid.z.width");
-				tempt [i * m + j] += (double) (rand () % 1000 - 500) / 1.0e5;// * (-vertical_grid [j] * vertical_grid [j] + parameters.get <double> ("grid.z.width") * parameters.get <double> ("grid.z.width") / 4.0) / parameters.get <double> ("grid.z.width") / parameters.get <double> ("grid.z.width");
+				temps [i * m + j] += (double) (rand () % 1000 - 500) * scale / 1.0e5;// * (-vertical_grid [j] * vertical_grid [j] + parameters.get <double> ("grid.z.width") * parameters.get <double> ("grid.z.width") / 4.0) / parameters.get <double> ("grid.z.width") / parameters.get <double> ("grid.z.width");
+				tempt [i * m + j] += (double) (rand () % 1000 - 500) * scale / 1.0e5;// * (-vertical_grid [j] * vertical_grid [j] + parameters.get <double> ("grid.z.width") * parameters.get <double> ("grid.z.width") / 4.0) / parameters.get <double> ("grid.z.width") / parameters.get <double> ("grid.z.width");
 				// tempt [i * m + j] += scale * sin (2 * 3.14159 / parameters.get <double> ("grid.z.width") * vertical_grid [j]) * sin (4 * 3.14159 / parameters.get <double> ("grid.x.width") * horizontal_grid [i]);
 				// temps [i * m + j] += scale * sin (2 * 3.14159 / parameters.get <double> ("grid.z.width") * vertical_grid [j]) * sin (4 * 3.14159 / parameters.get <double> ("grid.x.width") * horizontal_grid [i]);
 				// temp [i * m + j] = 0.01 * std::cos (std::acos (-1.0) * vertical_grid [j]) * std::sin (8.0 * std::acos (-1.0) * horizontal_grid [i] / 3.0);

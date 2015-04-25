@@ -1,5 +1,5 @@
 init:
-    scale: 0.0
+    scale: 0.001
     mean: 0.0
     sigma: 10.
 grid:
@@ -32,7 +32,6 @@ time:
 equations:
     temperature:
         diffusion: 1.0
-        bg_diffusion: 1.0
         advection: 1.0
         sources:
             z_velocity: 1.0
@@ -90,12 +89,12 @@ input:
     full: true
 output:
     directory: output/
-    file: output_%02i
+    file: output_%02i_00
     every: 10
     transform:
-        file: output_t_%02i
+        file: output_t_%02i_00
     stat:
-        file: output_%02i
+        file: output_%02i_00
         every: 50
     merge_file: merge_%04i
     full: true
