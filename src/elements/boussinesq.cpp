@@ -48,6 +48,10 @@ namespace data
 			(*this).setup (&input_stream);
 		}
 		
+		if (i_params ["output.output"].IsDefined () && i_params ["output.output"].as <bool> ()) {
+			return;
+		}
+		
 		// For weighted averages, calculate area
 		area.resize (n * m);
 		for (int i = 1; i < n; ++i) {

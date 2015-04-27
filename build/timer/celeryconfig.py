@@ -13,7 +13,7 @@ CELERYD_CONCURRENCY = 1
 
 CELERYD_PREFETCH_MULTIPLIER = 1
 
-CELERY_DEFAULT_QUEUE = 'pisces_timer'
+CELERY_DEFAULT_QUEUE = 'timing'
 CELERY_QUEUES = (
-    Queue ('pisces_timer', Exchange ('pisces_timer'), routing_key = 'pisces_timer'),
+    Queue ('timing', Exchange ('timing'), routing_key = 'timing'),
 )

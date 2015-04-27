@@ -94,17 +94,18 @@ output:
     directory: output/
     files:
         cart_%02i_%%02i:
-            every: 10
+            every: 1000
             full: true
         timed_%02i_%%02i:
             every: 0.1
             timed: true
             full: true
         trans_%02i_%%02i:
+            every: 1000
             transform: true
             full: true
         stat_%02i_%%02i:
-            every: 50
+            every: 100
             stat: true
 dump:
     file: dump_%02i

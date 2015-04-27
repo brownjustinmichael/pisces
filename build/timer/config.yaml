@@ -10,7 +10,8 @@ grid:
         points: 512
         width: 100.0
 time:
-    steps: 100
+    steps: 10000
+    stop: 1.0
     init: 1.0e-5
     max: 1.e-0
 equations:
@@ -34,9 +35,4 @@ input:
     file: input_%02i
     full: true
 output:
-    file: ""
-    transform:
-        file: ""
-    stat:
-        file: ""
-        
+    output: false
