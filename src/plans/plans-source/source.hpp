@@ -102,7 +102,7 @@ namespace plans
 					if (coeff) {
 						return std::shared_ptr <plans::plan <datatype> > (new uniform <datatype> (*grids [0], *grids [1], coeff, data_source, i_data_in, i_data_out, i_element_flags, i_component_flags));
 					}
-					return std::shared_ptr <plans::plan <datatype> > (NULL);
+					return std::shared_ptr <plans::plan <datatype> > ();
 				}
 			};
 		};
