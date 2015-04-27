@@ -38,6 +38,7 @@ namespace pisces
 			mpi::messenger *messenger_ptr = element_ptr->messenger_ptr;
 			double value = ((rezone_data <datatype> *)i_rezone_data)->merit_func (element_ptr, element_ptr->make_rezoned_virtual_file (((rezone_data <datatype> *)i_rezone_data)->positions, &*(element_ptr->rezone_virtual_file), profile_only));
 			messenger_ptr->sum (&value);
+			DEBUG ("SUM: " << value);
 			return value;
 		}
 		
@@ -99,10 +100,11 @@ namespace pisces
 				}
 				total = sqrt (total);
 				total /= radius;
+				positions [0] = old_positions [0];
 				for (int i = 1; i < np; ++i) {
 					positions [i] = xs [i] / total + old_positions [i];
-					DEBUG ("TRY: " << positions [i]);
 				}
+				positions [np] = old_positions [np];
 				// Broadcast the new positions
 				messenger_ptr->template bcast <datatype> (np + 1, positions);
 			} else {
@@ -110,15 +112,14 @@ namespace pisces
 				messenger_ptr->template bcast <datatype> (np + 1, positions);
 			}
 			// Iterate forward through the data, checking that the mininum and maximum sizes are obeyed
+			old_positions [0] = positions [0];
 			for (int i = 1; i < np; ++i) {
 				// Check minimum size
 				if (positions [i] < old_positions [i - 1] + min_size) {
-					DEBUG ("3");
 					positions [i] = old_positions [i - 1] + min_size;
 				}
 				// Check maximum size
 				if (positions [i] > old_positions [i - 1] + max_size) {
-					DEBUG ("4");
 					positions [i] = old_positions [i - 1] + max_size;
 				}
 				old_positions [i] = positions [i];
@@ -127,22 +128,26 @@ namespace pisces
 			for (int i = np - 1; i >= 1; --i) {
 				// Check minimum size
 				if (old_positions [i] > old_positions [i + 1] - min_size) {
-					DEBUG ("1");
 					old_positions [i] = old_positions [i + 1] - min_size;
 				}
 				// Check maximum size
 				if (old_positions [i] < old_positions [i + 1] - max_size) {
-					DEBUG ("2");
 					old_positions [i] = old_positions [i + 1] - max_size;
 				}
 				DEBUG ("POS: " << old_positions [i]);
 			}
 			// Make sure we didn't accidentally run off the end of the position array
 			if (old_positions [0] < old_positions [1] - max_size) {
+				for (int i = 0; i < np; ++i) {
+					FATAL (old_positions [i] << " " << max_size);
+				}
 				FATAL ("Unrealistic size constraints in rezone: max_size too small");
 				throw 0;
 			}
 			if (old_positions [0] > old_positions [1] - min_size) {
+				for (int i = 0; i < np; ++i) {
+					FATAL (old_positions [i] << " " << min_size);
+				}
 				FATAL ("Unrealistic size constraints in rezone: min_size too large");
 				throw 0;
 			}

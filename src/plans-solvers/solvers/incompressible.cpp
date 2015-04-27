@@ -325,7 +325,7 @@ namespace plans
 			
 			// No net vertical flux
 			linalg::scale (2 * m, 0.0, data_z);
-			linalg::scale (2 * m, 0.0, data_x);
+			// linalg::scale (2 * m, 0.0, data_x);
 			linalg::scale (m, 0.0, data_x + (ldn - 1) * m);
 			linalg::scale (m, 0.0, data_z + (ldn - 1) * m);
 

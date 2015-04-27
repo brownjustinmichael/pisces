@@ -42,7 +42,7 @@ namespace pisces
 			datatype *pos = &(virt->index <datatype> ("z"));
 			datatype value = 0.0;
 			for (int j = 0; j < virt->dims ["z"] [1] - 1; ++j) {
-				value += -(vel [j] - vel [j + 1]) * (vel [j] - vel [j + 1]) / ((pos [j] - pos [j + 1]) * (pos [j] - pos [j + 1])) + 1.0e-8 / ((pos [j] - pos [j + 1]) * (pos [j] - pos [j + 1]));
+				value += -(vel [j] - vel [j + 1]) * (vel [j] - vel [j + 1]) + 1.0e-5 / ((pos [j] - pos [j + 1]) * (pos [j] - pos [j + 1]));
 			}
 			DEBUG (value);
 			return value;

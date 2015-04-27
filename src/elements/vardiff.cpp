@@ -45,7 +45,7 @@ namespace pisces
 					}
 					for (int i = 0; i < m; ++i) {
 						if (ptr ("z") [i] > diff_width) {
-							diffusion [variable] [i] = diff_width;
+							diffusion [variable] [i] = terms ["bg_diffusion"].as <datatype> ();
 						} else if (ptr ("z") [i] < -diff_width) {
 							continue;
 						} else {

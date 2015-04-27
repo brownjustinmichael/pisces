@@ -352,7 +352,7 @@ namespace pisces
 		 * 
 		 * \return A shared_ptr to a virtual_file object containing the chosen rezoning
 		 ************************************************************************/
-		virtual formats::virtual_file *rezone_minimize_ts (datatype * positions, datatype min_size, datatype max_size, int n_tries = 20, int iters_fixed_t = 1000, datatype step_size = 1.0, datatype k = 1.0, datatype t_initial = 0.008, datatype mu_t = 1.003, datatype t_min = 2.0e-6, double (*function) (element <datatype> *, formats::virtual_file *) = element <datatype>::rezone_calculate_ts) {
+		virtual formats::virtual_file *rezone_minimize_ts (datatype *positions, datatype min_size, datatype max_size, int n_tries = 20, int iters_fixed_t = 1000, datatype step_size = 1.0, datatype k = 1.0, datatype t_initial = 0.008, datatype mu_t = 1.003, datatype t_min = 2.0e-6, double (*function) (element <datatype> *, formats::virtual_file *) = element <datatype>::rezone_calculate_ts) {
 			TRACE ("Rezoning...");
 			transform (plans::transforms::inverse_horizontal | plans::transforms::inverse_vertical);
 
@@ -389,6 +389,9 @@ namespace pisces
 			DEBUG ("Old: " << original << " New: " << value);
 			
 			if (value < original * rezone_mult) {
+				for (int i = 0; i < data.np + 1; ++i) {
+					positions [i] = data.positions [i];
+				}
 				return make_rezoned_virtual_file (data.positions, make_virtual_file ());
 			}
 			

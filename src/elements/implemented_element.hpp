@@ -283,8 +283,10 @@ namespace pisces
 				messenger_ptr->template gather <datatype> (2, temp, temp);
 				for (int i = 0; i < messenger_ptr->get_np (); ++i) {
 					positions [i] = temp [2 * i];
+					DEBUG ("REZONING " << positions [i]);
 				}
 				positions [messenger_ptr->get_np ()] = temp [messenger_ptr->get_np () * 2 - 1];
+				DEBUG ("REZONING " << positions [messenger_ptr->get_np ()]);
 				messenger_ptr->template bcast <datatype> (messenger_ptr->get_np () + 1, positions);
 			} else {
 				datatype temp [2] = {axes [1].get_position_0 (), axes [1].get_position_n ()};
