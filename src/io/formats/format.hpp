@@ -117,6 +117,16 @@ namespace formats
 		}
 		
 		/*!**********************************************************************
+		 * \brief A static constructor to create a 0D grid
+		 * 
+		 * \return The constructed 0D grid
+		 ************************************************************************/
+		static data_grid zero_d () {
+			data_grid out;
+			return out;
+		}
+		
+		/*!**********************************************************************
 		 * \brief A static constructor to create a 1D grid
 		 * 
 		 * \param n The extent of the data

@@ -56,8 +56,6 @@ namespace data
 			}
 		}
 		
-		DEBUG (i_params ["output"]);
-		
 		for (YAML::const_iterator iter = i_params ["output.files"].begin (); iter != i_params ["output.files"].end (); ++iter) {
 			std::string file = iter->first.as <std::string> ();
 			io::parameters::alias specs (i_params, "output.files." + file);
@@ -85,7 +83,6 @@ namespace data
 			}
 			
 			if (specs ["stat"].IsDefined () and specs ["stat"].as <bool> ()) {
-				this->setup_stat (stream);
 				for (typename data <datatype>::iterator iter = this->begin (); iter != this->end (); ++iter) {
 					// For each data variable, output z_flux, average derivative across the center, average and max
 					std::string variable = *iter;
@@ -97,11 +94,8 @@ namespace data
 					stream->template append <double> ("max_" + variable, std::shared_ptr <functors::functor> (new functors::max_functor <double> (n, m, (*this) (variable))), formats::scalar);
 				}
 			}
-			if (specs ["transform"].IsDefined () and specs ["transform"].as <bool> ()) {
-				this->setup_output (stream, transformed_horizontal);
-			} else {
-				this->setup_output (stream);
-			}
+			
+			this->setup_output (stream, (specs ["transform"].IsDefined () and specs ["transform"].as <bool> ()) ? transformed_horizontal : 0x0);
 			// if ((*this) ("x_velocity") && (*this) ("z_velocity")) {
 			// 	normal_stream->template append <double> ("div", std::shared_ptr <functors::functor> (new functors::div_functor <double> ((*this) ("x"), (*this) ("z"), (*this) ("x_velocity"), (*this) ("z_velocity"), n, m)));
 			// }
