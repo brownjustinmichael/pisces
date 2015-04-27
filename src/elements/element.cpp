@@ -27,7 +27,7 @@
 namespace pisces
 {
 	template <class datatype>
-	void element <datatype>::run (int &n_steps, int max_steps, int check_every) {
+	void element <datatype>::run (int &n_steps, int max_steps, int check_every, datatype stop) {
 		TRACE ("Running...");
 		datatype t_timestep;
 
@@ -46,7 +46,7 @@ namespace pisces
 		int threads = params.get <int> ("parallel.maxthreads");
 		std::stringstream debug;
 		// Iterate through the total number of timesteps
-		while (n_steps < max_steps && check_every != 0) {
+		while (n_steps < max_steps && check_every != 0 && duration < stop) {
 			data.reset ();
 			INFO ("Timestep: " << n_steps);
 

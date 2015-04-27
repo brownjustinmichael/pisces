@@ -132,6 +132,7 @@ namespace data
 		using implemented_data <datatype>::m;
 		using implemented_data <datatype>::grid_m;
 		using implemented_data <datatype>::iterator;
+		using implemented_data <datatype>::duration;
 		
 		std::vector <datatype> area; //!< A vector containing the area of each cell, for weighted averages
 		

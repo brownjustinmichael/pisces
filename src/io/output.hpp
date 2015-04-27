@@ -314,6 +314,43 @@ namespace io
 	};
 	
 	/*!**********************************************************************
+	 * \brief An output class that appends each output to the same file
+	 * 
+	 * \copydoc formatted_output
+	 ************************************************************************/
+	template <class datatype, class format>
+	class timed_appender_output : public formatted_output <format>
+	{
+	private:
+		datatype &duration;
+		datatype output_every; //!< The integer frequency of outputs
+		datatype previous;
+
+	public:
+		/*!**********************************************************************
+		 * \param i_grid The data_grid object representing the structure of the data
+		 * \param i_file_name A string file name
+		 * \param i_output_every The integer frequency of outputs
+		 ************************************************************************/
+		timed_appender_output (formats::data_grid i_grid, std::string i_file_name, datatype &i_duration, datatype i_output_every = 1.0) : formatted_output <format> (i_grid, i_file_name, formats::append_file), duration (i_duration), output_every (i_output_every > 0.0 ? i_output_every : 1.0), previous (-output_every) {}
+
+		virtual ~timed_appender_output () {}
+
+		/*!**********************************************************************
+		 * \copybrief formatted_output::to_file
+		 * 
+		 * Also increments the file count and checks whether to output at all
+		 ************************************************************************/
+		void to_file (int record = -1) {
+			TRACE ("Sending to file...");
+			while (duration - previous >= output_every) {
+				formatted_output <format>::to_file (record);
+				previous += output_every;
+			}
+		}
+	};
+	
+	/*!**********************************************************************
 	 * \brief An output class that replaces the previous output
 	 ************************************************************************/
 	template <class format>

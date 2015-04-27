@@ -23,6 +23,7 @@ grid:
         mult: 1.0
 time:
     steps: 1000
+    stop: 100.0
     init: 1.0e-5
     max: 4.e-3
     mult: 1.5
@@ -88,16 +89,23 @@ input:
     file: input_%02i
     full: true
 output:
+    count: 0
+    name: output
     directory: output/
-    file: output_%02i_00
-    every: 10
-    transform:
-        file: output_t_%02i_00
-    stat:
-        file: output_%02i_00
-        every: 50
-    merge_file: merge_%04i
-    full: true
+    files:
+        cart_%02i_%%02i:
+            every: 10
+            full: true
+        timed_%02i_%%02i:
+            every: 0.1
+            timed: true
+            full: true
+        trans_%02i_%%02i:
+            transform: true
+            full: true
+        stat_%02i_%%02i:
+            every: 50
+            stat: true
 dump:
     file: dump_%02i
     directory: input/

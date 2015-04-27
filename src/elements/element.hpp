@@ -58,7 +58,6 @@ namespace pisces
 		int dimensions; //!< The integer number of dimensions in the element
 		io::parameters& params; //!< The map that contains the input parameters
 		
-		datatype &duration; //!< The datatype total simulated time
 		datatype &timestep; //!< The datatype timestep length
 
 		data::data <datatype> &data; //!< An object that contains all the data in the simulation
@@ -74,6 +73,7 @@ namespace pisces
 		std::vector <std::string> equation_keys; //!< A vector of integer keys to the equations map
 		
 	public:
+		datatype &duration; //!< The datatype total simulated time
 		std::vector <std::shared_ptr <grids::grid <datatype>>> grids; //!< A vector of shared pointers to the collocation grids
 		mpi::messenger* messenger_ptr; //!< A pointer to the messenger object
 		formats::virtual_file *rezone_virtual_file; //!< A shared_ptr to a virtual file object, for rezoning
@@ -111,10 +111,10 @@ namespace pisces
 		element (int i_name, int i_dimensions, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
 		dimensions (i_dimensions),
 		params (i_params),
-		duration (i_data.duration),
 		timestep (i_data.timestep),
 		data (i_data),
-		element_flags (data.flags) {
+		element_flags (data.flags),
+		duration (i_data.duration) {
 			element_flags ["element"] = i_element_flags;
 			name = i_name;
 			grids.resize (i_dimensions);
@@ -403,7 +403,7 @@ namespace pisces
 		 * 
 		 * This method tells the element to begin the main run of the simulation. It runs through all the specified plans in the appropriate order, and updates the values as necessary. Output, if desired, is specified by the output streams.
 		 ************************************************************************/
-		virtual void run (int &n_steps, int max_steps, int check_every = -1);
+		virtual void run (int &n_steps, int max_steps, int check_every = -1, datatype stop = 100.0);
 		
 		/*!**********************************************************************
 		 * \brief Protected method to make a virtual file of the current state
