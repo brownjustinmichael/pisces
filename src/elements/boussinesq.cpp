@@ -95,7 +95,7 @@ namespace data
 				}
 			}
 			
-			this->setup_output (stream, (specs ["transform"].IsDefined () and specs ["transform"].as <bool> ()) ? transformed_horizontal : 0x0);
+			this->setup_output (stream, ((specs ["transform"].IsDefined () and specs ["transform"].as <bool> ()) ? transformed_horizontal : 0x0) | ((specs ["stat"].IsDefined () and specs ["stat"].as <bool> ()) ? no_variables : 0x0));
 			// if ((*this) ("x_velocity") && (*this) ("z_velocity")) {
 			// 	normal_stream->template append <double> ("div", std::shared_ptr <functors::functor> (new functors::div_functor <double> ((*this) ("x"), (*this) ("z"), (*this) ("x_velocity"), (*this) ("z_velocity"), n, m)));
 			// }

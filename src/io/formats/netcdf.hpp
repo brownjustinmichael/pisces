@@ -84,6 +84,7 @@ namespace formats
 		template <class datatype>
 		static void write (const data_grid &grid, std::string file_name, std::string name, void *data, int record = -1, int flags = all_d) {
 			// Reconstruct the grid information in a way that the netCDF layer can read it
+			DEBUG ("Writing " << name << " " << *((datatype *) data));
 			std::vector <netCDF::NcDim> scalar_dims;
 			std::vector <size_t> offsets = grid.offsets;
 			std::vector <size_t> sizes = grid.ns;

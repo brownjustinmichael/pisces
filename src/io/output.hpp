@@ -124,7 +124,7 @@ namespace io
 		 *********************************************************************/
 		template <class datatype>
 		void append (std::string name, datatype *data_ptr, int flags = formats::all_d) {
-			TRACE ("Appending " << name << " to output..." << *data_ptr << " " << flags);
+			TRACE ("Appending " << name << " to output..." << *data_ptr);
 			for (int i = 0; i < (int) names.size (); ++i) {
 				if (names [i] == name) {
 					WARN ("Reuse of name " << name);

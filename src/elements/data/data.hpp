@@ -40,6 +40,7 @@ namespace data
 		uniform_n = 0x01, //!< Copy the input array across the data in the n direction
 		uniform_m = 0x02, //!< Copy the input array across the data in the m direction
 		no_save = 0x04,
+		no_variables = 0x08
 	};
 	
 	/*!**********************************************************************
@@ -258,8 +259,10 @@ namespace data
 		 ************************************************************************/
 		virtual void setup_output (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
 			// Iterate through the scalar fields and append them to the variables which the output will write to file
-			for (data::iterator iter = begin (); iter != end (); ++iter) {
-				output_ptr->template append <datatype> (*iter, (*this) (*iter));
+			if (!(flags & no_variables)) {
+				for (data::iterator iter = begin (); iter != end (); ++iter) {
+					output_ptr->template append <datatype> (*iter, (*this) (*iter));
+				}
 			}
 			
 			output_ptr->template append <datatype> ("t", &duration, formats::scalar);
