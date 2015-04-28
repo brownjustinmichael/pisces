@@ -48,10 +48,6 @@ namespace data
 			(*this).setup (&input_stream);
 		}
 		
-		if (i_params ["output.output"].IsDefined () && i_params ["output.output"].as <bool> ()) {
-			return;
-		}
-		
 		// For weighted averages, calculate area
 		area.resize (n * m);
 		for (int i = 1; i < n; ++i) {
@@ -65,6 +61,23 @@ namespace data
 			io::parameters::alias specs (i_params, "output.files." + file);
 			DEBUG ("Reading specs for " << file);
 			
+			DEBUG ("Checking");
+			if (specs ["output"].IsDefined ()) {
+				DEBUG ("Output is defined for " << file);
+				if (!(specs ["output"].as <bool> ())) {
+					DEBUG ("Output is false for " << file);
+					continue;
+				}
+			} else {
+				DEBUG ("Output is not defined for " << file);
+				
+				if (i_params ["output.output"].IsDefined () && !(i_params ["output.output"].as <bool> ())) {
+					DEBUG ("Global output is defined and false for " << file);
+					
+					continue;
+				}
+			}
+			
 			std::shared_ptr <io::output> stream;
 			std::string file_format = i_params.get <std::string> ("root");
 			if (specs ["directory"].IsDefined ()) {
@@ -72,7 +85,11 @@ namespace data
 			} else {
 				file_format += i_params ["output.directory"].as <std::string> ();
 			}
-			file_format += i_params ["output.name"].as <std::string> () + "_" + file;
+			if (i_params ["output.name"].as <std::string> () != "") {
+				file_format += i_params ["output.name"].as <std::string> () + "_";
+			}
+			file_format += file;
+			
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 			snprintf (buffer, file_format.size () * 2, buffer, i_params ["output.count"].IsDefined () ? i_params ["output.count"].as <int> () : 0);

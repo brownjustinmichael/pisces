@@ -26,18 +26,19 @@ public:
 		int id = process_messenger.get_id ();
 		int n_elements = process_messenger.get_np ();
 		
-		logger::log_config::set_severity (1);
+		logger::log_config::set_severity (3);
 		int num = 0;
-		logger::log_config::configure (&num, NULL, id, "process_%d.log");
+		// logger::log_config::configure (&num, NULL, id, "process_%d.log");
 		formats::ascii::print_headers = false;
 		
 		io::parameters parameters;
 		
 		parameters ["root"] = std::string (PISCES_ROOT) + "/test/elements/";
-		parameters ["output.stat.file"] = "compare_%02i";
-		parameters ["output.stat.every"] = 10;
-		parameters ["output.transform.file"] = "";
-		// parameters ["dump.file"] = "";
+		parameters ["output.files.compare_%02i.output"] = true;
+		parameters ["output.files.compare_%02i.stat"] = true;
+		parameters ["output.files.compare_%02i.every"] = 10;
+		parameters ["dump.file"] = "";
+		parameters ["output.output"] = false;
 		parameters ["time.steps"] = 100;
 	
 		int m = parameters.get <int> ("grid.z.points") / n_elements + 1;
@@ -64,23 +65,22 @@ public:
 			element->run (n_steps, parameters.get <int> ("time.steps"), parameters.get <int> ("grid.rezone.check_every"));
 		}
 		
+		std::string command = "./compare_cdf.py ";
 		
-		std::string file_format = parameters.get <std::string> ("root") + parameters.get <std::string> ("input.directory") + std::string ("compare_%02i.dat");
+		std::string file_format = parameters.get <std::string> ("root") + parameters.get <std::string> ("input.directory") + std::string ("compare_%02i.cdf");
 		char buffer [file_format.size () * 2];
 		snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
-		std::ifstream template_stream (buffer, std::ifstream::in);
+		command += buffer;
 		
-		file_format = parameters.get <std::string> ("root") + parameters.get <std::string> ("output.directory") + std::string ("compare_%02i.dat");
+		file_format = parameters.get <std::string> ("root") + parameters.get <std::string> ("output.directory") + std::string ("compare_%02i.cdf");
 		snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
-		std::ifstream compare_stream (buffer, std::ifstream::in);
+		command += " ";
+		command += buffer;
 		
-		double template_string, compare_string;
+		int exit_status = system (command.c_str ());
 		
-		while (!template_stream.eof ()) {
-			template_stream >> template_string;
-			compare_stream >> compare_string;
-			
-			TS_ASSERT_DELTA (template_string, compare_string, 1.0E-8);
+		if (exit_status != 0) {
+			TS_ASSERT (false);
 		}
 	}
 };

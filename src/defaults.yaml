@@ -90,7 +90,7 @@ input:
     full: true
 output:
     count: 0
-    name: output
+    name: ""
     directory: output/
     files:
         cart_%02i_%%02i:

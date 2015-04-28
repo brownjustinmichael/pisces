@@ -32,10 +32,10 @@ public:
 		io::parameters parameters;
 		
 		parameters ["root"] = std::string (PISCES_ROOT) + "/test/elements/";
-		parameters ["output.every"] = 10;
-		parameters ["output.stat.file"] = "advection_%02i";
-		parameters ["output.stat.every"] = 10;
-		parameters ["output.transform.file"] = "";
+		parameters ["output.files.advection_%02i.output"] = true;
+		parameters ["output.files.advection_%02i.every"] = 10;
+		parameters ["output.files.advection_%02i.stat"] = true;
+		parameters ["output.output"] = false;
 		parameters ["dump.file"] = "";
 		parameters ["time.steps"] = 200;
 		parameters ["time.max"] = 0.1;
@@ -81,23 +81,22 @@ public:
 			element->run (n_steps, parameters.get <int> ("time.steps"), parameters.get <int> ("grid.rezone.check_every"));
 		}
 
-
-		std::string file_format = parameters.get <std::string> ("root") + parameters.get <std::string> ("input.directory") + std::string ("advection_%02i.dat");
+		std::string command = "./compare_cdf.py ";
+		
+		std::string file_format = parameters.get <std::string> ("root") + parameters.get <std::string> ("input.directory") + std::string ("advection_%02i.cdf");
 		char buffer [file_format.size () * 2];
 		snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
-		std::ifstream template_stream (buffer, std::ifstream::in);
-
-		file_format = parameters.get <std::string> ("root") + parameters.get <std::string> ("output.directory") + std::string ("advection_%02i.dat");
+		command += buffer;
+		
+		file_format = parameters.get <std::string> ("root") + parameters.get <std::string> ("output.directory") + std::string ("advection_%02i.cdf");
 		snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
-		std::ifstream compare_stream (buffer, std::ifstream::in);
-
-		double template_string, compare_string;
-
-		while (!template_stream.eof ()) {
-			template_stream >> template_string;
-			compare_stream >> compare_string;
-
-			TS_ASSERT_DELTA (template_string, compare_string, 1.0E-4);
+		command += " ";
+		command += buffer;
+		
+		int exit_status = system (command.c_str ());
+		
+		if (exit_status != 0) {
+			TS_ASSERT (false);
 		}
 	}
 };
