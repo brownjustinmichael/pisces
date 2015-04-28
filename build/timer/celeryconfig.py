@@ -1,6 +1,6 @@
 from kombu import Exchange, Queue
 
-BROKER_URL = 'amqp://guest@localhost//'
+BROKER_URL = 'amqp://guest@loki.ucsc.edu//'
 CELERY_RESULT_BACKEND = 'amqp://'
 
 CELERY_TASK_SERIALIZER = 'json'

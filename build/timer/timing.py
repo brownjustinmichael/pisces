@@ -44,7 +44,7 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
         batch_file.write ("#PBS -N %s\n" % commandRoot)
 
         batch_file.write ("#PBS -l nodes=%d:ppn=%d\n" % (processes, threads))
-        batch_file.write ("#PBS -l walltime=00:30:00\n")
+        batch_file.write ("#PBS -l walltime=01:00:00\n")
         batch_file.write ("cd $PBS_O_WORKDIR\n")
         batch_file.write ("cp $PBS_NODEFILE .\n")
         
