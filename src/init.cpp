@@ -59,6 +59,7 @@ int main (int argc, char *argv[])
 
 		std::vector <double> temps_vec (n * m, 0.0), tempt_vec (n * m, 0.0);
 		double *temps = &temps_vec [0], *tempt = &tempt_vec [0];
+		const double *pos_z = &vertical_grid [0];
 		
 		double stop = 0.0, sbot = 0.0;
 		if (parameters ["equations.composition.top.type"].as <std::string> () == "fixed_value") {
@@ -76,17 +77,27 @@ int main (int argc, char *argv[])
 			tbot = parameters ["equations.temperature.bottom.value"].as <double> ();
 		}
 		
+		double height = parameters.get <double> ("grid.z.width");
+		double diff_bottom = parameters.get <double> ("equations.temperature.diffusion");
+		double diff_top = parameters.get <double> ("equations.temperature.bg_diffusion");
+		double diff_width = parameters.get <double> ("equations.temperature.diff_width");
+		double bg_scale = -(tbot - ttop) / ((height / 2. - diff_width) * (1. / diff_top + 1. / diff_bottom) + 2. * diff_width / (diff_top - diff_bottom) * log (diff_top / diff_bottom));
+		
 		double scale = parameters.get <double> ("init.scale");
 		#pragma omp parallel for
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
-				temps [i * m + j] = (stop - sbot) / (parameters.get <double> ("grid.z.width")) * (vertical_grid [j] + parameters.get <double> ("grid.z.width") / 2.0) + sbot;
-				tempt [i * m + j] = (ttop - tbot) / (parameters.get <double> ("grid.z.width")) * (vertical_grid [j] + parameters.get <double> ("grid.z.width") / 2.0) + tbot;
-				temps [i * m + j] += (double) (rand () % 1000 - 500) * scale / 1.0e5;// * (-vertical_grid [j] * vertical_grid [j] + parameters.get <double> ("grid.z.width") * parameters.get <double> ("grid.z.width") / 4.0) / parameters.get <double> ("grid.z.width") / parameters.get <double> ("grid.z.width");
-				tempt [i * m + j] += (double) (rand () % 1000 - 500) * scale / 1.0e5;// * (-vertical_grid [j] * vertical_grid [j] + parameters.get <double> ("grid.z.width") * parameters.get <double> ("grid.z.width") / 4.0) / parameters.get <double> ("grid.z.width") / parameters.get <double> ("grid.z.width");
-				// tempt [i * m + j] += scale * sin (2 * 3.14159 / parameters.get <double> ("grid.z.width") * vertical_grid [j]) * sin (4 * 3.14159 / parameters.get <double> ("grid.x.width") * horizontal_grid [i]);
-				// temps [i * m + j] += scale * sin (2 * 3.14159 / parameters.get <double> ("grid.z.width") * vertical_grid [j]) * sin (4 * 3.14159 / parameters.get <double> ("grid.x.width") * horizontal_grid [i]);
-				// temp [i * m + j] = 0.01 * std::cos (std::acos (-1.0) * vertical_grid [j]) * std::sin (8.0 * std::acos (-1.0) * horizontal_grid [i] / 3.0);
+				temps [i * m + j] = (stop - sbot) / (height) * (pos_z [j] + height / 2.0) + sbot;
+				// tempt [i * m + j] = (ttop - tbot) / (height) * (pos_z [j] + height / 2.0) + tbot;
+				tempt [i * m + j] = tbot + bg_scale * (std::min (pos_z [j], -diff_width) + height / 2.) / diff_bottom;
+				if (pos_z [j] > -diff_width) {
+					tempt [i * m + j] += bg_scale * 2. * diff_width / (diff_top - diff_bottom) * log ((diff_top - diff_bottom) / 2. / diff_width / diff_bottom * std::min (pos_z [j], diff_width) + (diff_top + diff_bottom) / 2. / diff_bottom);
+					if (pos_z [j] > diff_width) {
+						tempt [i * m + j] += bg_scale * (pos_z [j] - diff_width) / diff_top;
+					}
+				}
+				temps [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3;
+				tempt [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3;
 			}
 		}
 
