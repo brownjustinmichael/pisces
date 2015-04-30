@@ -117,5 +117,7 @@ env.Default (env.Program(target = "../run/pisces", source = (["main.cpp"] + obje
 # Compile the code initializer
 env.Default (env.Program(target = "../run/pisces_init", source = (["init.cpp"] + objects)))
 
+env.Default (env.Program(target = "../run/pisces_varinit", source = (["varinit.cpp"] + objects)))
+
 # Add the tests, which can be run with scons check
 env.SConscript('../test/SConscript', variant_dir = "./test", duplicate = 0, exports = {'env': env, "objects": objects, "include_mp": include_mp})
