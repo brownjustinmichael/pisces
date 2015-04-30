@@ -49,7 +49,8 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
         batch_file.write ("cd $PBS_O_WORKDIR\n")
         batch_file.write ("cp $PBS_NODEFILE .\n")
         
-        batch_file.write ("python host_rewrite.py $PBS_NODEFILE --ppn %d\n" % threads)
+        batch_file.write ("module switch python python/3.4.1\n")
+        batch_file.write ("python3 host_rewrite.py $PBS_NODEFILE --ppn %d\n" % threads)
         batch_file.write ("OMP_NUM_THREADS=%d\n" % threads)
         batch_file.write ("export OMP_NUM_THREADS\n")
 
@@ -59,7 +60,7 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
         
         Popen (["qsub", "batch_%04d.pbs" % guess])
     else:
-        Popen (["python", wrapperFile, "-a", str (socket.gethostbyname(socket.gethostname())), wrapperFile, "-p", str (guess)])
+        Popen (["python3", wrapperFile, "-a", str (socket.gethostbyname(socket.gethostname())), wrapperFile, "-p", str (guess)])
     
     client_socket, address = server_socket.accept()
     
