@@ -86,7 +86,8 @@ namespace data
 			
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-			snprintf (buffer, file_format.size () * 2, buffer, i_params ["output.count"].IsDefined () ? i_params ["output.count"].as <int> () : 0);
+			file_format = buffer;
+			snprintf (buffer, file_format.size () * 2, file_format.c_str (), i_params ["output.count"].IsDefined () ? i_params ["output.count"].as <int> () : 0);
 			
 			bool full = (specs ["full"].IsDefined () && specs ["full"].as <bool> ());
 			const formats::data_grid o_grid = formats::data_grid::two_d (n, m, 0, full ? n_elements * m : 0, 0, full ? id * m : 0);
