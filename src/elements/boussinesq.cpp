@@ -82,6 +82,8 @@ namespace data
 			}
 			file_format += file;
 			
+			DEBUG ("File is " << file_format << " from " << file << " " << i_params ["output.name"] << " " << specs ["directory"] << " " << i_params.get <std::string> ("root"));
+			
 			char buffer [file_format.size () * 2];
 			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
 			snprintf (buffer, file_format.size () * 2, buffer, i_params ["output.count"].IsDefined () ? i_params ["output.count"].as <int> () : 0);
