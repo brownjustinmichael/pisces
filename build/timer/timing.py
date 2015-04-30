@@ -105,7 +105,7 @@ class Timer (object):
         arguments = [variance.copy (value = arg) for arg, variance in zip (args, self.variances [:len (args)])]
         arguments += self.variances [len (arguments):]
         for arg in arguments + self.uniques:
-            arg (command)
+            arg (command, run = True)
         return command
         
     def getBaseTime (self):
@@ -156,6 +156,7 @@ class Argument (object):
         self.kwargs = kwargs
         self.processes = kwargs.get ("processes", False)
         self.threads = kwargs.get ("processes", False)
+        self.runOnly = kwargs.get ("runOnly", False)
         
     def getValue (self):
         return self._value
@@ -211,15 +212,21 @@ class Argument (object):
             scalar = scalar.value
         return self.value - scalar
                 
-    def __call__ (self, fullCommand = None):
+    def __call__ (self, fullCommand = None, run = False):
         if fullCommand is None:
             fullCommand = []
         if self.kwargs.get ("prepend", False):
             for subcommand in (self.command % self.value).split () [::-1]:
                 fullCommand.insert (0, subcommand)
+            if run:
+                for subcommand in (self.runOnly % self.value).split () [::-1]:
+                    fullCommand.insert (0, subcommand)
         else:
             for subcommand in (self.command % self.value).split ():
                 fullCommand.append (subcommand)
+            if run:
+                for subcommand in (self.runOnly % self.value).split ():
+                    fullCommand.append (subcommand)
         return fullCommand
         
     def __hash__ (self):
