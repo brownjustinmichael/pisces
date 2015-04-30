@@ -3,7 +3,7 @@ import argparse
 
 parser = argparse.ArgumentParser ()
 parser.add_argument ('pbs_file')
-parser.add_argument ('--ppn', default = None)
+parser.add_argument ('--ppn', default = None, type = int)
 
 namespace = parser.parse_args ()
 
