@@ -59,21 +59,13 @@ namespace data
 		for (YAML::const_iterator iter = i_params ["output.files"].begin (); iter != i_params ["output.files"].end (); ++iter) {
 			std::string file = iter->first.as <std::string> ();
 			io::parameters::alias specs (i_params, "output.files." + file);
-			DEBUG ("Reading specs for " << file);
 			
-			DEBUG ("Checking");
 			if (specs ["output"].IsDefined ()) {
-				DEBUG ("Output is defined for " << file);
 				if (!(specs ["output"].as <bool> ())) {
-					DEBUG ("Output is false for " << file);
 					continue;
 				}
 			} else {
-				DEBUG ("Output is not defined for " << file);
-				
 				if (i_params ["output.output"].IsDefined () && !(i_params ["output.output"].as <bool> ())) {
-					DEBUG ("Global output is defined and false for " << file);
-					
 					continue;
 				}
 			}
