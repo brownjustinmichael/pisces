@@ -216,11 +216,11 @@ class Argument (object):
         if fullCommand is None:
             fullCommand = []
         if self.kwargs.get ("prepend", False):
-            for subcommand in (self.command % self.value).split () [::-1]:
-                fullCommand.insert (0, subcommand)
             if run:
                 for subcommand in (self.runOnly).split () [::-1]:
                     fullCommand.insert (0, subcommand)
+            for subcommand in (self.command % self.value).split () [::-1]:
+                fullCommand.insert (0, subcommand)
         else:
             for subcommand in (self.command % self.value).split ():
                 fullCommand.append (subcommand)
