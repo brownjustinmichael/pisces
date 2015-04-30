@@ -82,6 +82,8 @@ namespace pisces
 					// If only the timestep is needed, only load z and x_velocity
 					virtual_output->append <datatype> ("z", std::shared_ptr <functors::functor> (new functors::average_functor <datatype> (ptr ("z"), n, m)));
 					virtual_output->append <datatype> ("z_velocity", std::shared_ptr <functors::functor> (new functors::root_mean_square_functor <datatype> (ptr ("z_velocity"), n, m)));
+					virtual_output->append <datatype> ("temperature", std::shared_ptr <functors::functor> (new functors::root_mean_square_functor <datatype> (ptr ("temperature"), n, m)));
+					virtual_output->append <datatype> ("composition", std::shared_ptr <functors::functor> (new functors::root_mean_square_functor <datatype> (ptr ("composition"), n, m)));
 				} else {
 					FATAL ("HAVEN'T GOT A TREATMENT FOR THIS YET");
 					throw 0;
@@ -95,6 +97,8 @@ namespace pisces
 					virtual_output->append <datatype> ("x", ptr ("x"));
 					virtual_output->append <datatype> ("z_velocity", ptr ("z_velocity"));
 					virtual_output->append <datatype> ("x_velocity", ptr ("x_velocity"));
+					virtual_output->append <datatype> ("temperature", ptr ("temperature"));
+					virtual_output->append <datatype> ("composition", ptr ("composition"));
 				} else {
 					// Load the whole dataset
 					data.setup_output (virtual_output, data::no_save);

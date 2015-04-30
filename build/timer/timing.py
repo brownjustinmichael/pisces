@@ -44,10 +44,12 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
         batch_file.write ("#PBS -N %s\n" % commandRoot)
 
         batch_file.write ("#PBS -l nodes=%d:ppn=%d\n" % (processes, threads))
+        batch_file.write ("#PBS -l naccesspolicy=SINGLEJOB")
         batch_file.write ("#PBS -l walltime=01:00:00\n")
         batch_file.write ("cd $PBS_O_WORKDIR\n")
         batch_file.write ("cp $PBS_NODEFILE .\n")
         
+        batch_file.write ("python host_rewrite.py $PBS_NODEFILE --ppn %d\n" % threads)
         batch_file.write ("OMP_NUM_THREADS=%d\n" % threads)
         batch_file.write ("export OMP_NUM_THREADS\n")
 
