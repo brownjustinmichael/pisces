@@ -65,7 +65,7 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
     
     client_socket, address = server_socket.accept()
     
-    client_socket.send (json.dumps ({"command": command, "iterations": iterations, "processes" : processes}).encode ())
+    client_socket.send (json.dumps ({"command": command, "iterations": iterations, "processes" : processes, "env": {"HOSTFILE": "hostfile_%04d" % guess }}).encode ())
     
     try:
         data = json.loads (client_socket.recv (512).decode ())

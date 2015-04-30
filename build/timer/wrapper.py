@@ -24,6 +24,10 @@ client_socket.connect((options.address, int (options.port)))
 
 inputs = json.loads (client_socket.recv (512).decode ())
 
+for i in range (len (inputs ["command"])):
+    for env in inputs ["env"]:
+        inputs ["command"] = inputs ["command"].replace ("$" + env, inputs ["env"])
+
 times = []
 
 for i in range (inputs ["iterations"]):
