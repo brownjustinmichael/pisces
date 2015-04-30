@@ -155,8 +155,8 @@ class Argument (object):
         self.value = value
         self.kwargs = kwargs
         self.processes = kwargs.get ("processes", False)
-        self.threads = kwargs.get ("processes", False)
-        self.runOnly = kwargs.get ("runOnly", False)
+        self.threads = kwargs.get ("threads", False)
+        self.runOnly = kwargs.get ("runOnly", "")
         
     def getValue (self):
         return self._value
@@ -219,13 +219,13 @@ class Argument (object):
             for subcommand in (self.command % self.value).split () [::-1]:
                 fullCommand.insert (0, subcommand)
             if run:
-                for subcommand in (self.runOnly % self.value).split () [::-1]:
+                for subcommand in (self.runOnly).split () [::-1]:
                     fullCommand.insert (0, subcommand)
         else:
             for subcommand in (self.command % self.value).split ():
                 fullCommand.append (subcommand)
             if run:
-                for subcommand in (self.runOnly % self.value).split ():
+                for subcommand in (self.runOnly).split ():
                     fullCommand.append (subcommand)
         return fullCommand
         
