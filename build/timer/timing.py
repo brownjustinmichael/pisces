@@ -74,7 +74,7 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
         print (type (e), e)
     client_socket.close ()
     
-    return float (data.get ("avg"))
+    return data
 
 class Timer (object):
     """
@@ -170,15 +170,6 @@ class Argument (object):
         
     value = property (getValue, setValue)
         
-    def copy (self, **kwargs):
-        newkwargs = copy.copy (self.kwargs)
-        newkwargs ["value"] = self.value
-        newkwargs ["extent"] = self.extent
-        for arg in kwargs:
-            newkwargs [arg] = kwargs [arg]
-        newObject = Argument (self.command, **newkwargs)
-        return newObject
-        
     def setRandom (self):
         self.value += 1
         return self
@@ -194,23 +185,31 @@ class Argument (object):
         
     def __mul__ (self, scalar):
         if isinstance (scalar, Argument):
-            scalar = scalar.value
-        return self.value * scalar
+            return CompositeArgument (self, scalar, operator.mul)
+        x = copy.deepcopy (self)
+        x.value = self.value * scalar
+        return x
                 
     def __add__ (self, scalar):
         if isinstance (scalar, Argument):
-            scalar = scalar.value
-        return self.value + scalar
+            return CompositeArgument (self, scalar, operator.add)
+        x = copy.deepcopy (self)
+        x.value = self.value + scalar
+        return x
         
     def __div__ (self, scalar):
         if isinstance (scalar, Argument):
-            scalar = scalar.value
-        return self.value / scalar
+            return CompositeArgument (self, scalar, operator.div)
+        x = copy.deepcopy (self)
+        x.value = self.value / scalar
+        return x
             
     def __sub__ (self, scalar):
         if isinstance (scalar, Argument):
-            scalar = scalar.value
-        return self.value - scalar
+            return CompositeArgument (self, scalar, operator.sub)
+        x = copy.deepcopy (self)
+        x.value = self.value - scalar
+        return x
                 
     def __call__ (self, fullCommand = None, run = False):
         if fullCommand is None:
@@ -252,36 +251,14 @@ class Argument (object):
         for arg, value in zip (args, values):
             arg.value = value
 
-class CompositeArgument (object):
+class CompositeArgument (Argument):
     def __init__ (self, argument1, argument2, operator = operator.add):
+        self.__dict__ = copy.deepcopy (argument1.__dict__)
         self.argument1 = argument1
         self.argument2 = argument2
         self.operator = operator
         
-    def getValue (self):
-        return self.operator (self.argument1, self.argument2)
-        
-    value = property (getValue)
-        
-    def __add__ (self, other):
-        return self.value + other.value
-        
-    def __sub__ (self, other):
-        return self.value - other.value
-        
-    def __mul__ (self, other):
-        return self.value * other.value
-        
-    def __div__ (self, other):
-        return self.value / other.value
-        
-    def __gt__ (self, other):
-        return self - other > 0
-        
-    def __lt__ (self, other):
-        return self - other < 0
-        
-    def __eq__ (self, other):
-        return self - other == 0
-    
+    @property
+    def value (self):
+        return self.operator (self.argument1.value, self.argument2.value)
     

@@ -87,13 +87,15 @@ int main (int argc, char *argv[])
 		#pragma omp parallel for
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
-				temps [i * m + j] = (stop - sbot) / (height) * (pos_z [j] + height / 2.0) + sbot;
+				temps [i * m + j] = sbot;
 				// tempt [i * m + j] = (ttop - tbot) / (height) * (pos_z [j] + height / 2.0) + tbot;
 				tempt [i * m + j] = tbot + bg_scale * (std::min (pos_z [j], -diff_width) + height / 2.) / diff_bottom;
 				if (pos_z [j] > -diff_width) {
 					tempt [i * m + j] += bg_scale * 2. * diff_width / (diff_top - diff_bottom) * log ((diff_top - diff_bottom) / 2. / diff_width / diff_bottom * std::min (pos_z [j], diff_width) + (diff_top + diff_bottom) / 2. / diff_bottom);
+					temps [i * m + j] = (stop - sbot) / (diff_width) * (pos_z [j]) / 2.0;
 					if (pos_z [j] > diff_width) {
 						tempt [i * m + j] += bg_scale * (pos_z [j] - diff_width) / diff_top;
+						temps [i * m + j] = stop;
 					}
 				}
 				temps [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3;
