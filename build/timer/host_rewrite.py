@@ -20,9 +20,5 @@ else:
         if i % namespace.ppn == 0:
             hosts.append (line [:-1])
 
-file = open ("hostfile", "w")
-
 for host in hosts:
-    file.write ("%s:1\n" % host)
-
-file.close ()
+    print ("%s:1" % host)
