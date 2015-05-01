@@ -44,7 +44,6 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
         batch_file.write ("#PBS -N %s\n" % commandRoot)
 
         batch_file.write ("#PBS -l nodes=%d:ppn=%d\n" % (processes, threads))
-        batch_file.write ("#PBS -l naccesspolicy=SINGLEJOB")
         batch_file.write ("#PBS -l walltime=%02i:00:00\n" % hours)
         batch_file.write ("cd $PBS_O_WORKDIR\n")
         batch_file.write ("cp $PBS_NODEFILE .\n")
@@ -118,7 +117,6 @@ class Timer (object):
         if len (self.variances) == 0:
             return
             
-        print (self.variances)
         for variances in Argument.generate (*self.variances):
             if variances not in times:
                 processes = 1
@@ -175,13 +173,19 @@ class Argument (object):
         return self
         
     def __lt__ (self, other):
-        return self - other < 0
+        if isinstance (other, Argument):
+            return self.value - other.value < 0
+        else: return self.value - other < 0
         
     def __gt__ (self, other):
-        return self - other > 0
+        if isinstance (other, Argument):
+            return self.value - other.value > 0
+        else: return self.value - other > 0
         
     def __eq__ (self, other):
-        return self - other == 0
+        if isinstance (other, Argument):
+            return self.value == other.value
+        else: return self.value == other
         
     def __mul__ (self, scalar):
         if isinstance (scalar, Argument):
