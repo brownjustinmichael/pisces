@@ -388,7 +388,7 @@ namespace pisces
 			
 			DEBUG ("Old: " << original << " New: " << value);
 			
-			if (value < original * rezone_mult) {
+			if (value < original * (original < 0. ? 1. / rezone_mult : rezone_mult)) {
 				for (int i = 0; i < data.np + 1; ++i) {
 					positions [i] = data.positions [i];
 				}
