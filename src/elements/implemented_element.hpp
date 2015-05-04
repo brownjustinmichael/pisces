@@ -63,6 +63,7 @@ namespace pisces
 		datatype max_timestep; //!< The maximum timestep value
 		datatype init_timestep; //!< The starting timestep value
 		datatype mult_timestep; //!< The value by which to multiply or divide the timestep upon update
+		datatype down_mult_timestep; //!< The value by which to multiply or divide the timestep upon update
 		datatype next_timestep; //!< The value of the next timestep
 		int transform_threads; //!< The integer number of transform threads
 		static int mode; //!< The mode of the simulation (from grids)
@@ -88,6 +89,7 @@ namespace pisces
 			max_timestep = i_params.get <datatype> ("time.max");
 			init_timestep = i_params.get <datatype> ("time.init");
 			mult_timestep = i_params.get <datatype> ("time.mult");
+			down_mult_timestep = i_params.get <datatype> ("time.down_mult");
 			next_timestep = 0.0;
 			
 			// Initialize x and z
@@ -214,7 +216,7 @@ namespace pisces
 				next_timestep = 0.0;
 				if (shared_min < timestep) {
 					// If the minimum is lower than the current, decrease the timestep
-					return shared_min / mult_timestep;
+					return shared_min * down_mult_timestep;
 				} else {
 					return timestep;
 				}
