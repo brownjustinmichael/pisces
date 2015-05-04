@@ -102,7 +102,7 @@ output:
             full: true
         trans_%02i_%%02i:
             every: 0.1
-            timed:true
+            timed: true
             transform: true
             full: true
         stat_%02i_%%02i:

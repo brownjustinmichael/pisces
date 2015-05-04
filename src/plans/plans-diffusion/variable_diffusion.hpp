@@ -128,10 +128,9 @@ namespace plans
 				TRACE ("Operating...");
 				
 				// Take the second derivative of data_in in both directions
-				linalg::scale (m, 0.0, x1_ptr + m - 1);
 				linalg::matrix_copy (m, n - 1, data_in + m, x1_ptr);
+				linalg::copy (m, data_in, x1_ptr + m * (n - 1));
 				linalg::matrix_add_scaled (m, n, -1.0, data_in, x1_ptr);
-				linalg::add_scaled (m, -1.0, data_in, x1_ptr + m * (n - 1));
 
 				linalg::copy (m, data_in + m * (n - 1), x2_ptr);
 				linalg::matrix_copy (m, n - 1, data_in, x2_ptr + m);
@@ -143,21 +142,23 @@ namespace plans
 
 				linalg::matrix_copy (m, n, data_in, z2_ptr, m, m);
 				linalg::matrix_add_scaled (m - 1, n, -1.0, data_in, z2_ptr + 1, m, m);
-				
+
 				for (int i = 0; i < n; ++i) {
 					for (int j = 1; j < m - 1; ++j) {
 						data_out [i * m + j] += std::max (coeff * (data_source [i * m + j] - bg_state [j]), min + 1.0e-4) * ((x1_ptr [i * m + j] * oodx2_ptr [i] - x2_ptr [i * m + j] * oodx2_ptr [(i - 1) % n]) * oodx_ptr [i] * 2.0 + (z1_ptr [i * m + j] * oodz2_ptr [j] - z2_ptr [i * m + j] * oodz2_ptr [j - 1]) * oodz_ptr [j] * 2.0);
 					}
 				}
-				
+
 				// Take the horizontal derivative of the source and data_in
 				linalg::copy (m, data_source, x1_ptr + m * (n - 1));
 				linalg::matrix_copy (m, n - 1, data_source + m, x1_ptr);
 				linalg::matrix_add_scaled (m, n - 1, -1.0, data_source, x1_ptr + m);
+				linalg::add_scaled (m, -1.0, data_source + m * (n - 1), x1_ptr);
 
 				linalg::copy (m, data_in, x2_ptr + m * (n - 1));
 				linalg::matrix_copy (m, n - 1, data_in + m, x2_ptr);
 				linalg::matrix_add_scaled (m, n - 1, -1.0, data_in, x2_ptr + m);
+				linalg::add_scaled (m, -1.0, data_in + m * (n - 1), x2_ptr);
 
 				// Take the vertical derivative of the source and data_in
 				linalg::scale (n, 0.0, z1_ptr + m - 1, m);
@@ -173,7 +174,7 @@ namespace plans
 						data_out [i * m + j] += coeff * (x1_ptr [i * m + j] * oodx_ptr [i] * x2_ptr [i * m + j] * oodx_ptr [i] + (z1_ptr [i * m + j] - bg_deriv [j]) * oodz_ptr [j] * z2_ptr [i * m + j] * oodz_ptr [j]);
 					}
 				}
-				
+
 				if (count % bg_every == 0) {
 					datatype old_bg;
 					for (int j = 0; j < m; ++j) {
@@ -192,7 +193,7 @@ namespace plans
 					bg_deriv [m - 1] = (bg_state [m - 1] - bg_state [m - 2]);
 					*component_flags &= ~plans_setup;
 				}
-				
+
 				count++;
 				
 				TRACE ("Operation complete.");

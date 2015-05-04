@@ -266,6 +266,7 @@ namespace data
 			}
 			
 			output_ptr->template append <datatype> ("t", &duration, formats::scalar);
+			output_ptr->template append <datatype> ("dt", &timestep, formats::scalar);
 			output_ptr->template append <const int> ("mode", &(get_mode ()), formats::scalar);
 
 			// Check the desired output time and save the output object in the appropriate variable
@@ -285,6 +286,7 @@ namespace data
 		virtual void setup_dump (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
 			// Iterate through the scalar fields and append them to the variables which the output will write to file
 			output_ptr->template append <datatype> ("t", &duration, formats::scalar);
+			output_ptr->template append <datatype> ("dt", &timestep, formats::scalar);
 			output_ptr->template append <const int> ("mode", &(get_mode ()), formats::scalar);
 
 			// Check the desired output time and save the output object in the appropriate variable

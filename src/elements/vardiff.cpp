@@ -51,7 +51,6 @@ namespace pisces
 						} else {
 							diffusion [variable] [i] += (terms ["bg_diffusion"].as <datatype> () - terms ["diffusion"].as <datatype> ()) * (ptr ("z") [i] + diff_width) / (2.0 * diff_width);
 						}
-						DEBUG ("DIFF = " << diffusion [variable] [i]);
 					}
 				}
 			
