@@ -172,10 +172,24 @@ All terms of order $p_{1}$ must be solved through nonlinear means.
 % subsection perfect (end)
 
 \begin{align}
-	\frac{\partial \vect{u}}{\partial t}+\vect{u}\cdot\nabla\vect{u}=-\nabla{p}+\frac{\mathrm{Ra}_{T}}{\mathrm{Pr}}\hat{z}-\frac{\tau\mathrm{Ra}_{\mu}}{\mathrm{Pr}}\hat{z}+\nabla^{2}\vect{u}\\
+	\frac{\partial \vect{u}}{\partial t}+\vect{u}\cdot\nabla\vect{u}=-\nabla{p}+\frac{\mathrm{Ra}_{T}}{\mathrm{Pr}}\hat{z}-\frac{\mathrm{Ra}_{\mu}}{\mathrm{Pr}}\hat{z}+\nabla^{2}\vect{u}\\
 	\frac{\partial T}{\partial t}+\vect{u}\cdot\nabla{T}=\nabla\cdot\left(\frac{1}{\mathrm{Pr}+\gamma\mu}\right)\nabla{T}\\
 	\frac{\partial \mu}{\partial t}+\vect{u}\cdot\nabla{\mu}=\tau\nabla^{2}\mu\\
 	T\left(-1\right)=1,\mu\left(-1\right)=1,T\left(1\right)=-1,\mu\left(1\right)=-1
 \end{align}
+
+For the overshoot problem, we get that the background temperature derivative must be
+
+\begin{equation}
+	\overline{T}'\left(z\right)=\frac{2\gamma\mathrm{Pr}}{\log{\frac{1-\gamma\mathrm{Pr}}{1+\gamma\mathrm{Pr}}}}
+\end{equation}
+
+To be unstable to semi-convection at some point $z$, the following must hold:
+
+\begin{equation}
+	\frac{\mathrm{Ra}_{\mu}}{\mathrm{Ra}_{T}}<-\overline{T}'\left(z\right)\frac{\mathrm{Pr}\left(1+z\gamma\right)+1}{\mathrm{Pr}+\tau},
+\end{equation}
+
+note the similarity to the traditional semi-convective case, where $\gamma=0$, $\overline{T}'(z)=-1$.
 
 % section model (end)
