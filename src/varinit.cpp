@@ -80,7 +80,7 @@ int main (int argc, char *argv[])
 		double height = parameters.get <double> ("grid.z.width");
 		double diff_bottom = parameters.get <double> ("equations.temperature.diffusion");
 		double diff_top = parameters ["equations.temperature.bg_diffusion"].IsDefined () ? parameters.get <double> ("equations.temperature.bg_diffusion") : diff_bottom;
-		double diff_width = parameters.get <double> ("equations.temperature.diff_width").IsDefined () ? parameters.get <double> ("equations.temperature.bg_diffusion") : parameters.get <double> ("equations.composition.bg_diffusion");
+		double diff_width = parameters ["equations.temperature.diff_width"].IsDefined () ? parameters.get <double> ("equations.temperature.bg_diffusion") : parameters.get <double> ("equations.composition.bg_diffusion");
 		double bg_scale = -(tbot - ttop) / ((height / 2. - diff_width) * (1. / diff_top + 1. / diff_bottom) + 2. * diff_width / (diff_top - diff_bottom) * log (diff_top / diff_bottom));
 		
 		double scale = parameters.get <double> ("init.scale");
