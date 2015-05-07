@@ -17,7 +17,7 @@
  * 
  * \brief The minimum number of elements for automatic OpenMP parallelization in utils
  ************************************************************************/
-#define MIN_PARALLEL 128*128
+#define MIN_PARALLEL 1024 * 1024 * 1024
 
 /*!*******************************************************************
  * \brief Function from BLAS that calculates a dot product
@@ -444,13 +444,17 @@ namespace linalg
 		if (ldc == -1) {
 			ldc = m;
 		}
-
-		int threads = omp_get_max_threads ();
-		#pragma omp parallel for
-		for (int i = 0; i < threads; ++i) {
-			int num = m / threads + (i < (m % threads) ? 1 : 0);
-			int dist = i * (m / threads) + std::min (m % threads, i);
-			dgemm_ (&charN, &charN, &num, &n, &k, &alpha, a + dist, &lda, b, &ldb, &beta, c + dist, &ldc);
+		
+		if (m * n > MIN_PARALLEL) {
+			int threads = omp_get_max_threads ();
+			#pragma omp parallel for
+			for (int i = 0; i < threads; ++i) {
+				int num = m / threads + (i < (m % threads) ? 1 : 0);
+				int dist = i * (m / threads) + std::min (m % threads, i);
+				dgemm_ (&charN, &charN, &num, &n, &k, &alpha, a + dist, &lda, b, &ldb, &beta, c + dist, &ldc);
+			}
+		} else {
+			dgemm_ (&charN, &charN, &m, &n, &k, &alpha, a, &lda, b, &ldb, &beta, c, &ldc);
 		}
 	}
 	

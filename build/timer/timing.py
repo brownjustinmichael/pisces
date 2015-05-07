@@ -248,12 +248,16 @@ class Argument (object):
                 for rest in Argument.generate (*args [1:]):
                     yield (i,) + rest
         else:
-            for i in args [0].extent: yield (i,)
+            if args [0].extent is None:
+                yield (args [0].value,)
+            else:
+                for i in args [0].extent: yield (i,)
             
     @staticmethod
     def setAll (args, values):
         for arg, value in zip (args, values):
-            arg.value = value
+            if arg.extent is not None:
+                arg.value = value
 
 class CompositeArgument (Argument):
     def __init__ (self, argument1, argument2, operator = operator.add):
