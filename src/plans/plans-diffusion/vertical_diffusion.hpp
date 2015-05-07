@@ -247,6 +247,15 @@ namespace plans
 				}
 			};
 		};
+
+		template <class datatype>
+		class real_diffusion : public real_plan <datatype>
+		{
+		public:
+			real_diffusion(int value, );
+			~real_diffusion();
+			
+		};
 	} /* diffusion */
 } /* plans */
 
