@@ -147,7 +147,8 @@ namespace plans
 		
 			datatype alpha; //!< The implicit fraction of the plan (1.0 for purely implicit, 0.0 for purely explicit)
 			datatype *diffusion; //!< A pointer to a vector of diffusion coefficients
-			
+			bool explicit_calculate;
+
 			std::vector <datatype> oodz_vec;
 			std::vector <datatype> coeff_dz_vec;
 			datatype *oodz, *coeff_dz;
@@ -162,7 +163,7 @@ namespace plans
 			 * \param i_alpha The implicit fraction of the plan (1.0 for purely implicit, 0.0 for purely explicit)
 			 * \param i_diffusion A pointer to a vector of diffusion coefficients
 			 ************************************************************************/
-			background_vertical (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_alpha, datatype *i_diffusion, datatype *i_matrix_n, datatype *i_matrix_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : implicit_plan <datatype> (i_grid_n, i_grid_m, i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_element_flags, i_component_flags), alpha (i_alpha), diffusion (i_diffusion) {
+			background_vertical (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_alpha, datatype *i_diffusion, bool i_explicit_calculate, datatype *i_matrix_n, datatype *i_matrix_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : implicit_plan <datatype> (i_grid_n, i_grid_m, i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_element_flags, i_component_flags), alpha (i_alpha), diffusion (i_diffusion), explicit_calculate (i_explicit_calculate) {
 				oodz_vec.resize (m);
 				oodz = &oodz_vec [0];
 				coeff_dz_vec.resize (m);
@@ -212,10 +213,13 @@ namespace plans
 						}
 					}
 				} else {
-					for (int j = 0; j < m; ++j) {
-						linalg::matrix_matrix_multiply (1, ldn, m, diffusion [j], grid_m.get_data (2) + j, data_in, 1.0, data_out + j, m, m, m);
-						linalg::matrix_matrix_multiply (1, ldn, m, coeff_dz [j], grid_m.get_data (1) + j, data_in, 1.0, data_out + j, m, m, m);
-					}
+					if (explicit_calculate)
+					{
+						for (int j = 0; j < m; ++j) {
+							linalg::matrix_matrix_multiply (1, ldn, m, diffusion [j], grid_m.get_data (2) + j, data_in, 1.0, data_out + j, m, m, m);
+							linalg::matrix_matrix_multiply (1, ldn, m, coeff_dz [j], grid_m.get_data (1) + j, data_in, 1.0, data_out + j, m, m, m);
+						}
+					}				
 				}
 
 				TRACE ("Operation complete.");
@@ -229,13 +233,14 @@ namespace plans
 			private:
 				datatype alpha; //!< The implicit fraction for the plan to be constructed
 				datatype *diffusion; //!< A pointer to the vector of diffusion coefficients
+				bool explicit_calculate; //!< A pointer to the vector of diffusion coefficients
 			
 			public:
 				/*!**********************************************************************
 				 * \param i_alpha The implicit fraction for the plan to be constructed
 				 * \param i_diffusion A pointer to the vector of diffusion coefficients
 				 ************************************************************************/
-				factory (datatype i_alpha, datatype *i_diffusion) : alpha (i_alpha), diffusion (i_diffusion) {}
+				factory (datatype i_alpha, datatype *i_diffusion, bool i_explicit_calculate = true) : alpha (i_alpha), diffusion (i_diffusion), explicit_calculate (i_explicit_calculate) {}
 			
 				virtual ~factory () {}
 			
@@ -243,13 +248,13 @@ namespace plans
 				 * \copydoc implicit_plan::factory::instance
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > instance (grids::grid <datatype> **grids, datatype **matrices, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
-					return std::shared_ptr <plans::plan <datatype> > (new background_vertical <datatype> (*grids [0], *grids [1], alpha, diffusion, matrices [0], matrices [1], i_data_in, i_data_out, i_element_flags, i_component_flags));
+					return std::shared_ptr <plans::plan <datatype> > (new background_vertical <datatype> (*grids [0], *grids [1], alpha, diffusion, explicit_calculate, matrices [0], matrices [1], i_data_in, i_data_out, i_element_flags, i_component_flags));
 				}
 			};
 		};
 
 		template <class datatype>
-		class real_diffusion : public explicit_plan <datatype>
+		class explicit_background_diffusion : public explicit_plan <datatype>
 		{
 		private:
 			using explicit_plan <datatype>::n;
@@ -261,6 +266,7 @@ namespace plans
 			using explicit_plan <datatype>::matrix_m;
 			using explicit_plan <datatype>::grid_n;
 			using explicit_plan <datatype>::grid_m;
+			using explicit_plan <datatype>::component_flags;
 		
 			datatype alpha; //!< The implicit fraction of the plan (1.0 for purely implicit, 0.0 for purely explicit)
 			datatype *diffusion; //!< A pointer to a vector of diffusion coefficients
@@ -271,9 +277,9 @@ namespace plans
 			datatype *oodz_ptr, *oodz2_ptr, *coeff_dz, z_ptr;
 
 		public:
-			real_diffusion (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_alpha, datatype *i_diffusion, datatype *i_matrix_n, datatype *i_matrix_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : explicit_plan <datatype> (i_grid_n, i_grid_m, i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_element_flags, i_component_flags), alpha (i_alpha), diffusion (i_diffusion) {
+			explicit_background_diffusion (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_alpha, datatype *i_diffusion, datatype *i_matrix_n, datatype *i_matrix_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : explicit_plan <datatype> (i_grid_n, i_grid_m, i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_element_flags, i_component_flags), alpha (i_alpha), diffusion (i_diffusion) {
 
-				datatpe *pos_m = &(i_grid_m [0]);
+				datatype *pos_m = &(i_grid_m [0]);
 
 				oodz_vec.resize (m);
 				oodz_ptr = &oodz_vec [0];
@@ -286,7 +292,7 @@ namespace plans
 
 				oodz_ptr [0] = 1.0 / (pos_m [1] - pos_m [0]);
 				for (int i = 1; i < m - 1; ++i) {
-					oodz [i] = 1.0 / (pos_m [i + 1] - pos_m [i - 1]);
+					oodz_ptr [i] = 1.0 / (pos_m [i + 1] - pos_m [i - 1]);
 				}
 				oodz_ptr [m - 1] = 1.0 / (pos_m [m - 1] - pos_m [m - 2]);
 
@@ -299,22 +305,22 @@ namespace plans
 				setup ();
 			}
 
-			virtual ~real_diffusion () {}
+			virtual ~explicit_background_diffusion () {}
 
-			virtual setup () {
-				coeff_dz [0] = (diffusion [1] - diffusion [0]) * oodz [0];
+			virtual void setup () {
+				coeff_dz [0] = (diffusion [1] - diffusion [0]) * oodz_ptr [0];
 				for (int i = 1; i < m - 1; ++i) {
-					coeff_dz [i] = (diffusion [i + 1] - diffusion [i - 1]) * oodz [i];
+					coeff_dz [i] = (diffusion [i + 1] - diffusion [i - 1]) * oodz_ptr [i];
 				}
-				coeff_dz [m - 1] = (diffusion [m - 1] - diffusion [m - 2]) * oodz [m - 1];
+				coeff_dz [m - 1] = (diffusion [m - 1] - diffusion [m - 2]) * oodz_ptr [m - 1];
 				
 			}
 
 			/*!**********************************************************************
-			 * \copydoc explicit_plan::execute change
+			 * \copydoc explicit_plan::execute
 			 ************************************************************************/
 			void execute () {	
-				TRACE ("Operating..." << element_flags << " " << component_flags<< " " << data_in << " " << data_out);
+				TRACE ("Operating...");
 				// Depending on the direction of the solve, treat this term as either partially or fully explicit
 				if (!(*component_flags & z_solve)) {
 					linalg::scale (n, 0.0, z_ptr, m);
@@ -325,9 +331,6 @@ namespace plans
 					{
 						for (int j = 1; j < m - 1; ++j) {
 							data_out [i * m + j] += (z_ptr [i * m + j] * oodz2_ptr [j] - z_ptr [i * m + j - 1] * oodz2_ptr [j - 1]) * oodz_ptr [j] * 2.0;
-
-							// linalg::matrix_matrix_multiply (1, ldn, m, diffusion [j], grid_m.get_data (2) + j, data_in, 1.0, data_out + j, m, m, m);
-							// linalg::matrix_matrix_multiply (1, ldn, m, coeff_dz [j], grid_m.get_data (1) + j, data_in, 1.0, data_out + j, m, m, m);
 						}
 					}
 				}

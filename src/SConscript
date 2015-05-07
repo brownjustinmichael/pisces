@@ -117,6 +117,8 @@ env.Default (env.Program(target = "../run/isces", source = (["main.cpp"] + objec
 # Compile the code initializer
 env.Default (env.Program(target = "../run/isces_init", source = (["init.cpp"] + objects)))
 
+env.Default (env.Program(target = "../run/isces_var", source = (["varmain.cpp"] + objects)))
+
 env.Default (env.Program(target = "../run/isces_varinit", source = (["varinit.cpp"] + objects)))
 
 # Add the tests, which can be run with scons check
