@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <omp.h>
 #include "utils.hpp"
+#include "logger/logger.hpp"
 
 /*!**********************************************************************
  * \def MIN_PARALLEL

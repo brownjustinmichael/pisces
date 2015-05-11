@@ -97,6 +97,8 @@ namespace pisces
 			element <datatype>::initialize ("z");
 			transform_threads = i_params.get <int> ("parallel.transform.subthreads");
 			
+			DEBUG ("Threads from file " << transform_threads);
+
 			// Set up the grids
 			grids [0] = std::shared_ptr <grids::grid <datatype>> (new typename grids::horizontal::grid <datatype> (&i_axis_n));
 			grids [1] = std::shared_ptr <grids::grid <datatype>> (new typename grids::vertical::grid <datatype> (&i_axis_m));
@@ -112,7 +114,7 @@ namespace pisces
 					DEBUG ("Adding " << *iter);
 					element <datatype>::add_equation (*iter, std::shared_ptr <plans::solvers::equation <datatype> > (new plans::solvers::implemented_equation <datatype> (*grids [0], *grids [1], ptr (*iter), &element_flags ["element"], &element_flags [*iter])));
 					element <datatype>::transforms.push_back (*iter);
-					element <datatype>::transformers [*iter] = std::shared_ptr <plans::transforms::transformer <datatype> > (new plans::transforms::implemented_transformer <datatype> (*grids [0], *grids [1], data (*iter), NULL, plans::transforms::forward_vertical | plans::transforms::forward_horizontal | plans::transforms::inverse_vertical | plans::transforms::inverse_horizontal , &(data.flags ["element"]), &(data.flags [*iter]), element <datatype>::transform_threads));
+					element <datatype>::transformers [*iter] = std::shared_ptr <plans::transforms::transformer <datatype> > (new plans::transforms::implemented_transformer <datatype> (*grids [0], *grids [1], data (*iter), NULL, plans::transforms::forward_vertical | plans::transforms::forward_horizontal | plans::transforms::inverse_vertical | plans::transforms::inverse_horizontal , &(data.flags ["element"]), &(data.flags [*iter]), transform_threads));
 				}
 			}
 			
@@ -202,7 +204,7 @@ namespace pisces
 				if (timestep == 0.0) {
 					return init_timestep;
 				}
-				if (shared_min > mult_timestep * timestep) {
+				if (shared_min > timestep / down_mult_timestep) {
 					// If the minimum is larger than the current, increase the timestep
 					if (next_timestep != 0.0 && std::min (next_timestep, shared_min) > mult_timestep * timestep) {
 						// Prevent increasing the timestep and decreasing the timestep every other step

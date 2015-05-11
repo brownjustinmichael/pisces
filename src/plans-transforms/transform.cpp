@@ -79,6 +79,7 @@ namespace plans
 			flags = i_flags;
 		#ifdef _MP
 			threads = (i_threads ? i_threads : omp_get_max_threads ());
+			DEBUG ("Looking for "<< threads);
 		#else
 			threads = (i_threads ? i_threads : 1);
 		#endif
