@@ -48,12 +48,6 @@ env.Append (LINKFLAGS = ["-Wall", "-g", "-std=c++0x"])
 # Add the source directory to the include path for better package importing
 env.Append (CPPPATH = os.getcwd ())
 
-# If using MPI, change the compiler and add a compiler flag to let the code know to include MPI functionality
-if include_mpi:
-    env ["CXX"] = "mpicxx"
-
-    env.Append (CPPFLAGS = ["-D_MPI", "-fexceptions"])
-
 # If using openmp, add compiler and link flags to let the code know to include openmp functionality
 if include_mp:
     env.Append (CPPFLAGS = ["-fopenmp"])
