@@ -52,7 +52,6 @@ namespace plans
 			 ************************************************************************/
 			implemented_transformer (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads) : plans::transforms::transformer <datatype> (i_element_flags, i_component_flags), ldn (i_grid_n.get_ld ()), ldm (i_grid_m.get_ld ()), data_in (i_data_in), data_out (i_data_out ? i_data_out : i_data_in) {
 				data.resize (ldn * ldm, 0.0);
-				DEBUG ("Getting thread number " << i_threads);
 				// For each direction, check the flags to see which transforms to add and do so
 				if (i_flags & forward_vertical) {
 					forward_vertical_transform = std::shared_ptr <plans::plan <datatype>> (new plans::transforms::vertical <datatype> (i_grid_n, i_grid_m, &data [0], &data [0], 0x00, i_element_flags, &internal_state, i_threads));

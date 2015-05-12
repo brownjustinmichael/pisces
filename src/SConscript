@@ -2,8 +2,9 @@ import os, inspect
 Import ("env")
 Import ("include_mp")
 Import ("include_mpi")
-Import ("include_vt")
 Import ("dimensions")
+Import ("compiler")
+Import ("compiler_flags")
 Import ("vertical_grid")
 Import ("defaults")
 Import ("root")
@@ -25,15 +26,11 @@ if include_mpi:
 
     env.Append (CPPFLAGS = ["-D_MPI", "-fexceptions"])
         
-if include_vt:
-    env ["CXX"] = "vtcxx"
-    env.Append (CPPFLAGS = ["-DVTRACE"])
-    env.Append (VTFLAGS = ["-vt:cxx", "mpicxx"])
-    conf = Configure (env)
-    conf.CheckLib ("mpi")
-    conf.CheckLib ("mpi_cxx")
-    env = conf.Finish ()
-        
+if compiler is not None:
+    env ["CXX"] = compiler
+
+env.Append (CPPFLAGS = compiler_flags)
+
 if include_mp:
     env.Append (CPPFLAGS = ["-fopenmp"])
     env.Append (CPPFLAGS = ["-D_MP"])
@@ -56,17 +53,6 @@ if include_mpi:
     env ["CXX"] = "mpicxx"
 
     env.Append (CPPFLAGS = ["-D_MPI", "-fexceptions"])
-
-# If using vampirtrace, change the compiler, and add a compiler flag to let the code know to include vampirtrace and MPI functionality
-if include_vt:
-    env ["CXX"] = "vtcxx"
-    env.Append (CPPFLAGS = ["-DVTRACE"])
-    env.Append (VTFLAGS = ["-vt:cxx", "mpicxx"])
-    env.Append (CPPFLAGS = env ["VTFLAGS"])
-    conf = Configure (env)
-    conf.CheckLib ("mpi")
-    conf.CheckLib ("mpi_cxx")
-    env = conf.Finish ()
 
 # If using openmp, add compiler and link flags to let the code know to include openmp functionality
 if include_mp:

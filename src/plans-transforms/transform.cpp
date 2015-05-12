@@ -79,7 +79,6 @@ namespace plans
 			flags = i_flags;
 		#ifdef _MP
 			threads = (i_threads ? i_threads : omp_get_max_threads ());
-			DEBUG ("Looking for "<< threads);
 		#else
 			threads = (i_threads ? i_threads : 1);
 		#endif
@@ -126,7 +125,7 @@ namespace plans
 		template <>
 		void horizontal <float>::execute () {
 			TRACE ("Executing...");
-	// #pragma omp parallel for num_threads (threads)
+	#pragma omp parallel for num_threads (threads)
 			for (int i = 0; i < threads; ++i) {
 				fftwf_execute (plans_float [i]);
 			}
@@ -145,7 +144,7 @@ namespace plans
 		void horizontal <double>::execute () {
 			TRACE ("Executing...");
 		
-	// #pragma omp parallel for num_threads (threads)
+	#pragma omp parallel for num_threads (threads)
 			for (int i = 0; i < threads; ++i) {
 				fftw_execute (plans [i]);
 			}		
@@ -241,7 +240,7 @@ namespace plans
 			TRACE ("Executing...");
 
 			if (m > 1 && !(flags & ignore_m)) {
-	// #pragma omp parallel for num_threads (threads)
+	#pragma omp parallel for num_threads (threads)
 				for (int i = 0; i < threads; ++i) {
 					fftwf_execute (plans_float [i]);
 				}
@@ -262,7 +261,7 @@ namespace plans
 			TRACE ("Executing...");
 			
 			if (m > 1 && !(flags & ignore_m)) {
-	// #pragma omp parallel for num_threads (threads)
+	#pragma omp parallel for num_threads (threads)
 				for (int i = 0; i < threads; ++i) {
 					fftw_execute (plans [i]);
 				}

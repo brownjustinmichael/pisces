@@ -48,6 +48,8 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
         batch_file.write ("cd $PBS_O_WORKDIR\n")
         batch_file.write ("cp $PBS_NODEFILE .\n")
         batch_file.write ("export HOSTFILE=hostfile_%04d\n" % guess)
+        batch_file.write ("export I_MPI_PIN_DOMAIN=omp")
+        batch_file.write ("export KMP_AFFINITY=compact")
         
         batch_file.write ("module load python\n")
         batch_file.write ("module switch python python/3.4.1\n")

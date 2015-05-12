@@ -12,6 +12,11 @@ exports ["vertical_grid"] = 'chebyshev'
 exports ["logger"] = "log4cplus"
 exports ["defaults"] = "src/defaults.yaml"
 
+exports ["compiler"] = "mpicxx"
+# exports ["compiler"] = "mpiicpc"
+exports ["compiler_flags"] = []
+# exports ["compiler_flags"] = ["-mt_mpi"]
+
 exports ["root"] = os.path.abspath ("..") + "/"
 exports ["defaults"] = os.path.join (exports ["root"], exports ["defaults"])
 
