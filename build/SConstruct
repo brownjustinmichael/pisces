@@ -12,8 +12,10 @@ exports ["vertical_grid"] = 'chebyshev'
 exports ["logger"] = "log4cplus"
 exports ["defaults"] = "src/defaults.yaml"
 
-exports ["compiler"] = "mpicxx"
-# exports ["compiler"] = "mpiicpc"
+exports ["cppcompiler"] = "mpicxx"
+exports ["ccompiler"] = "mpicc"
+# exports ["cppompiler"] = "mpiicpc"
+# exports ["ccompiler"] = "mpiicc"
 exports ["compiler_flags"] = []
 # exports ["compiler_flags"] = ["-mt_mpi"]
 

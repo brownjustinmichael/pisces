@@ -3,7 +3,8 @@ Import ("env")
 Import ("include_mp")
 Import ("include_mpi")
 Import ("dimensions")
-Import ("compiler")
+Import ("cppcompiler")
+Import ("ccompiler")
 Import ("compiler_flags")
 Import ("vertical_grid")
 Import ("defaults")
@@ -22,12 +23,16 @@ def directory (path, dirname):
         return dirname [len (path) + 1:] + "/"
         
 if include_mpi:
+    env ["CC"] = "mpicc"
     env ["CXX"] = "mpicxx"
 
     env.Append (CPPFLAGS = ["-D_MPI", "-fexceptions"])
         
-if compiler is not None:
-    env ["CXX"] = compiler
+if cppcompiler is not None:
+    env ["CXX"] = cppcompiler
+
+if ccompiler is not None:
+    env ["CC"] = ccompiler
 
 env.Append (CPPFLAGS = compiler_flags)
 
