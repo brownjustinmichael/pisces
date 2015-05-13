@@ -54,7 +54,6 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
         batch_file.write ("module load python\n")
         batch_file.write ("module switch python python/3.4.1\n")
         batch_file.write ("python3 host_rewrite.py $PBS_NODEFILE --ppn %d > $HOSTFILE\n" % (threads))
-        # batch_file.write ("OMP_NUM_THREADS=%d\n" % threads)
         batch_file.write ("export OMP_NUM_THREADS=%d\n" % threads)
 
         batch_file.write (" ".join (["python", wrapperFile, "-a", str (socket.gethostbyname(socket.gethostname())), "-p", str (guess)]))

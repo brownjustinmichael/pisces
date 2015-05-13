@@ -202,18 +202,11 @@ namespace pisces
 				if (timestep == 0.0) {
 					return init_timestep;
 				}
-				if (shared_min > timestep / down_mult_timestep) {
+				if (shared_min * down_mult_timestep > timestep) {
 					// If the minimum is larger than the current, increase the timestep
-					if (next_timestep != 0.0 && std::min (next_timestep, shared_min) > mult_timestep * timestep) {
-						// Prevent increasing the timestep and decreasing the timestep every other step
-						next_timestep = 0.0;
-						return std::min (mult_timestep * timestep, max_timestep);
-					} else {
-						next_timestep = shared_min;
-						return timestep;
-					}
+					next_timestep = 0.0;
+					return std::min (mult_timestep * timestep, max_timestep);
 				}
-				next_timestep = 0.0;
 				if (shared_min < timestep) {
 					// If the minimum is lower than the current, decrease the timestep
 					return shared_min * down_mult_timestep;

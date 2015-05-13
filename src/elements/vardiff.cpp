@@ -56,7 +56,6 @@ namespace pisces
 			
 				// If a diffusion value is specified, construct the diffusion plans
 				equations [variable]->add_plan (typename diffusion::background_vertical <datatype>::factory (i_params.get <datatype> ("time.alpha"), &diffusion [variable] [0]), pre_plan);
-				// equations [variable]->add_plan (typename diffusion::explicit_background_vertical <datatype>::factory (&diffusion [variable] [0]), mid_plan);
 				equations [variable]->add_plan (typename diffusion::background_horizontal <datatype>::factory (i_params.get <datatype> ("time.alpha"), &diffusion [variable] [0]), mid_plan);
 			
 				if (terms ["variable_diffusion"].IsDefined ()) {

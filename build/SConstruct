@@ -14,7 +14,7 @@ exports ["defaults"] = "src/defaults.yaml"
 
 exports ["cppcompiler"] = "mpicxx"
 exports ["ccompiler"] = "mpicc"
-# exports ["cppompiler"] = "mpiicpc"
+# exports ["cppcompiler"] = "mpiicpc"
 # exports ["ccompiler"] = "mpiicc"
 exports ["compiler_flags"] = []
 # exports ["compiler_flags"] = ["-mt_mpi"]

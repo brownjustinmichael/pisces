@@ -1,6 +1,6 @@
 from timing import Timer, Argument
 
-mpiProcs = Argument ("mpirun -np %d", extent = [1, 2, 4, 8], prepend = True, processes = True, runOnly = "-machinefile $HOSTFILE")
+mpiProcs = Argument ("mpirun -np %d", extent = [1, 2, 4, 8], prepend = True, processes = True, runOnly = "-machinefile $HOSTFILE -genv I_MPI_FABRICS shm:ofa")
 maxThreads = Argument ("-V parallel.maxthreads %d", extent = [1, 4, 8], threads = True)
 
 timer = Timer ("isces", 
@@ -13,4 +13,4 @@ timer = Timer ("isces",
                commandArgs = ["-D2"],
                uniques = [Argument ("-V input.file input_%03d_%%02i")])
 
-results = timer.calculateTimes (torque = True, iterations = 8, hours = 4)
+results = timer.calculateTimes (torque = True, iterations = 8, hours = 24)
