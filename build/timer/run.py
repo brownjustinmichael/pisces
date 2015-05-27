@@ -13,4 +13,4 @@ timer = Timer ("isces",
                commandArgs = ["-D2"],
                uniques = [Argument ("-V input.file input_%03d_%%02i")])
 
-results = timer.calculateTimes (torque = True, iterations = 8, hours = 24)
+results = timer.calculateTimes (torque = True, iterations = 8, hours = 4)

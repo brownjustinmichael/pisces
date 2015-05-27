@@ -39,18 +39,14 @@ namespace pisces
 				}
 				
 				if (terms ["bg_diffusion"].IsDefined ()) {
+					datatype lo_diffusion = terms ["diffusion"].as <datatype> ();
+					datatype hi_diffusion = terms ["bg_diffusion"].as <datatype> ();
 					datatype diff_width = 0.2;
 					if (terms ["diff_width"].IsDefined ()) {
 						diff_width = terms ["diff_width"].as <datatype> ();
 					}
 					for (int i = 0; i < m; ++i) {
-						if (ptr ("z") [i] > diff_width) {
-							diffusion [variable] [i] = terms ["bg_diffusion"].as <datatype> ();
-						} else if (ptr ("z") [i] < -diff_width) {
-							continue;
-						} else {
-							diffusion [variable] [i] += (terms ["bg_diffusion"].as <datatype> () - terms ["diffusion"].as <datatype> ()) * (ptr ("z") [i] + diff_width) / (2.0 * diff_width);
-						}
+						diffusion [variable] [i] = exp (atan (ptr ("z") [i] / diff_width) * (log (hi_diffusion) - log(lo_diffusion) / 3.14159 + log (lo_diffusion) + (log (hi_diffusion) - log (lo_diffusion)) / 2.0));
 					}
 				}
 			

@@ -114,9 +114,9 @@ dump:
     directory: input/
     every: 1000
 parallel:
-    maxthreads: 8
+    maxthreads: 4
     transform:
-        threads: 1
-        subthreads: 8
+        threads: 4
+        subthreads: 1
     solver:
-        threads: 1
+        threads: 4
