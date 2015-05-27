@@ -46,7 +46,8 @@ namespace pisces
 						diff_width = terms ["diff_width"].as <datatype> ();
 					}
 					for (int i = 0; i < m; ++i) {
-						diffusion [variable] [i] = exp (atan (ptr ("z") [i] / diff_width) * (log (hi_diffusion) - log(lo_diffusion) / 3.14159 + log (lo_diffusion) + (log (hi_diffusion) - log (lo_diffusion)) / 2.0));
+						diffusion [variable] [i] = exp (atan (ptr ("z") [i] / diff_width) * (log (hi_diffusion) - log(lo_diffusion)) / 3.14159 + log (lo_diffusion) + (log (hi_diffusion) - log (lo_diffusion)) / 2.0);
+						DEBUG ("Diffusion: " << diffusion [variable] [i];
 					}
 				}
 			
