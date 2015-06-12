@@ -54,6 +54,10 @@ namespace plans
 			}
 		
 			virtual ~uniform () {}
+
+			virtual int type () {
+				return plan <datatype>::mid;
+			}
 		
 			/*!**********************************************************************
 			 * \copydoc explicit_plan::execute

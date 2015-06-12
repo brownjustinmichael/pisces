@@ -91,6 +91,10 @@ namespace plans
 			}
 	
 			virtual ~uniform () {}
+
+			virtual int type () {
+				return plan <datatype>::post;
+			}
 		
 			/*!**********************************************************************
 			 * \copydoc real_plan::execute

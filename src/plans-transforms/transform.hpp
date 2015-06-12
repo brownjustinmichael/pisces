@@ -84,6 +84,10 @@ namespace plans
 			virtual ~horizontal () {}
 			
 			void setup () {}
+
+			virtual int type () {
+				return 0;
+			}
 			
 			/*!**********************************************************************
 			 * \copydoc plan::execute
@@ -149,6 +153,10 @@ namespace plans
 			virtual ~vertical () {}
 			
 			void setup () {}
+
+			virtual int type () {
+				return 0;
+			}
 			
 			/*!**********************************************************************
 			 * \copydoc plan::execute

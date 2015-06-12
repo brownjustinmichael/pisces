@@ -56,6 +56,10 @@ namespace plans
 			
 			virtual ~horizontal () {}
 			
+			virtual int type () {
+				return plan <datatype>::mid;
+			}
+
 			void setup () {
 				TRACE ("Setting up");
 				if (matrix_n) {
@@ -188,6 +192,10 @@ namespace plans
 				} else {
 					WARN ("No matrix");
 				}
+			}
+
+			virtual int type () {
+				return plan <datatype>::mid;
 			}
 			
 			/*!**********************************************************************

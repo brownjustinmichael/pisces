@@ -59,6 +59,10 @@ namespace plans
 			}
 		
 			virtual ~vertical () {}
+
+			virtual int type () {
+				return plan <datatype>::pre;
+			}
 			
 			void setup () {
 				TRACE ("Setting up");
@@ -186,6 +190,10 @@ namespace plans
 			}
 		
 			virtual ~background_vertical () {}
+
+			virtual int type () {
+				return plan <datatype>::pre;
+			}
 			
 			void setup () {
 				TRACE ("Setting up");

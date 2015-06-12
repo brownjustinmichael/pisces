@@ -250,29 +250,29 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc equation::add_plan(const typename explicit_plan<datatype>::factory&,int)
 			 ************************************************************************/
-			void add_plan (const typename plans::explicit_plan <datatype>::factory &i_factory, int flags) {
+			void add_plan (const typename plans::explicit_plan <datatype>::factory &i_factory) {
 				TRACE ("Adding plan...");
 				grids::grid <datatype>* grids [2] = {&grid_n, &grid_m};
-				plans::solvers::equation <datatype>::add_plan (i_factory.instance (grids, data, new_rhs_ptr, element_flags, component_flags), flags);
+				plans::solvers::equation <datatype>::add_plan (i_factory.instance (grids, data, new_rhs_ptr, element_flags, component_flags));
 			}
 			
 			/*!**********************************************************************
 			 * \copydoc equation::add_plan(const typename explicit_plan<datatype>::factory&,int)
 			 ************************************************************************/
-			void add_plan (const typename plans::real_plan <datatype>::factory &i_factory, int flags) {
+			void add_plan (const typename plans::real_plan <datatype>::factory &i_factory) {
 				TRACE ("Adding plan...");
 				grids::grid <datatype>* grids [2] = {&grid_n, &grid_m};
-				plans::solvers::equation <datatype>::add_plan (i_factory.instance (grids, data, rhs_ptr (real_rhs), element_flags, component_flags), flags);
+				plans::solvers::equation <datatype>::add_plan (i_factory.instance (grids, data, rhs_ptr (real_rhs), element_flags, component_flags));
 			}
 			
 			/*!**********************************************************************
 			 * \copydoc equation::add_plan(const typename explicit_plan<datatype>::factory&,int)
 			 ************************************************************************/
-			void add_plan (const typename plans::implicit_plan <datatype>::factory &i_factory, int flags) {
+			void add_plan (const typename plans::implicit_plan <datatype>::factory &i_factory) {
 				TRACE ("Adding plan...");
 				grids::grid <datatype>* grids [2] = {&grid_n, &grid_m};
 				datatype* matrices [2] = {matrix_ptr (0), matrix_ptr (1)};
-				plans::solvers::equation <datatype>::add_plan (i_factory.instance (grids, matrices, data, rhs_ptr (spectral_rhs), element_flags, component_flags), flags);
+				plans::solvers::equation <datatype>::add_plan (i_factory.instance (grids, matrices, data, rhs_ptr (spectral_rhs), element_flags, component_flags));
 			}
 			
 			void setup_plans () {

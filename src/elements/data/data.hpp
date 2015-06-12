@@ -42,7 +42,7 @@ namespace data
 		no_save = 0x04,
 		no_variables = 0x08
 	};
-	
+
 	/*!**********************************************************************
 	 * \brief A container object for the scalar data in the simulation
 	 * 

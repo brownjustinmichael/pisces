@@ -83,6 +83,10 @@ namespace plans
 			plan <datatype> (i_element_flags, i_component_flags) {}
 	
 			virtual ~solver () {}
+
+			virtual int type () {
+				return 0;
+			}
 		
 			/*!**********************************************************************
 			 * \brief Get the version of the class

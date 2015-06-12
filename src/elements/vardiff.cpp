@@ -52,12 +52,12 @@ namespace pisces
 				}
 			
 				// If a diffusion value is specified, construct the diffusion plans
-				equations [variable]->add_plan (typename diffusion::background_vertical <datatype>::factory (i_params.get <datatype> ("time.alpha"), &diffusion [variable] [0]), pre_plan);
-				equations [variable]->add_plan (typename diffusion::background_horizontal <datatype>::factory (i_params.get <datatype> ("time.alpha"), &diffusion [variable] [0]), mid_plan);
+				equations [variable]->add_plan (typename diffusion::background_vertical <datatype>::factory (i_params.get <datatype> ("time.alpha"), &diffusion [variable] [0]));
+				equations [variable]->add_plan (typename diffusion::background_horizontal <datatype>::factory (i_params.get <datatype> ("time.alpha"), &diffusion [variable] [0]));
 			
 				if (terms ["variable_diffusion"].IsDefined ()) {
 					DEBUG ("Implementing...");
-					equations [variable]->add_plan (typename diffusion::linear <datatype>::factory (terms ["variable_diffusion.coefficient"].as <datatype> (), terms ["variable_diffusion.min"].IsDefined () ? terms ["variable_diffusion.min"].as <datatype> () : -(terms ["diffusion"].as <datatype> ()), ptr (terms ["variable_diffusion.source"].as <std::string> ()), &diffusion [variable] [0], 100), post_plan);
+					equations [variable]->add_plan (typename diffusion::linear <datatype>::factory (terms ["variable_diffusion.coefficient"].as <datatype> (), terms ["variable_diffusion.min"].IsDefined () ? terms ["variable_diffusion.min"].as <datatype> () : -(terms ["diffusion"].as <datatype> ()), ptr (terms ["variable_diffusion.source"].as <std::string> ()), &diffusion [variable] [0], 100));
 				}
 			} else if (terms ["variable_diffusion"].IsDefined ()) {
 				FATAL ("Can't use variable diffusion without base diffusion yet.");

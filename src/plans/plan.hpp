@@ -52,6 +52,14 @@ enum solve_element_flags {
  ************************************************************************/
 namespace plans
 {
+	template <class datatype>
+	struct variable	{
+		std::string name;
+		int *element_flags;
+		int *component_flags;
+		std::vector <grids::grid <datatype> *> grid_ptrs;	
+	};	
+
 	/*!*******************************************************************
 	* \brief The basic functional unit, containing a recipe for execution
 	* 
@@ -63,8 +71,15 @@ namespace plans
 	protected:
 		int *element_flags; //!< A pointer to the integer global flags
 		int *component_flags; //!< A pointer to the integer local flags
-		
+
 	public:
+		enum types {
+			pre = 0x01,
+			mid = 0x02,
+			post = 0x04,
+			pre_solve = 0x08
+		};
+
 		/*!**********************************************************************
 		* \param i_element_flags A pointer to the integer global flags
 		* \param i_component_flags A pointer to the integer local flags
@@ -91,6 +106,8 @@ namespace plans
 		* The plan class serves as a wrapper for this function.
 		*********************************************************************/
 		virtual void execute () = 0;
+
+		virtual int type () = 0;
 	};
 } /* plans */
 #endif /* end of include guard: PLAN_HPP_S9YPWHOM */

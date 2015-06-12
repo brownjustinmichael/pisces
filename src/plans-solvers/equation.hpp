@@ -152,21 +152,22 @@ namespace plans
 			 * \param i_plan A shared pointer to the plan to add
 			 * \param flags Binary flags to specify the time to execute the flag, from solver_plan_flags
 			 *********************************************************************/
-			inline void add_plan (std::shared_ptr <plan <datatype>> i_plan, int flags) {
+			inline void add_plan (std::shared_ptr <plan <datatype>> i_plan) {
 				TRACE ("Adding plan...");
 				if (!i_plan) {
 					return;
 				}
-				if (flags & pre_plan) {
+				int flags = i_plan->type ();
+				if (flags & plan <datatype>::pre) {
 					pre_transform_plans.push_back (i_plan);
 				}
-				if (flags & mid_plan) {
+				if (flags & plan <datatype>::pre) {
 					mid_transform_plans.push_back (i_plan);
 				}
-				if (flags & post_plan) {
+				if (flags & plan <datatype>::pre) {
 					post_transform_plans.push_back (i_plan);
 				}
-				if (flags & pre_solve_plan) {
+				if (flags & plan <datatype>::pre_solve) {
 					pre_solve_plans.push_back (i_plan);
 				}
 				TRACE ("Added.");
@@ -178,17 +179,17 @@ namespace plans
 			 * \param i_factory A reference to the factory from which to construct the plan
 			 * \param flags Binary flags to specify the time to execute the flag, from solver_plan_flags
 			 ************************************************************************/
-			virtual void add_plan (const typename explicit_plan <datatype>::factory &i_factory, int flags) = 0;
+			virtual void add_plan (const typename explicit_plan <datatype>::factory &i_factory) = 0;
 	
 			/*!**********************************************************************
 			 * \copydoc add_plan(const typename explicit_plan<datatype>::factory&,int)
 			 ************************************************************************/
-			virtual void add_plan (const typename real_plan <datatype>::factory &i_factory, int flags) = 0;
+			virtual void add_plan (const typename real_plan <datatype>::factory &i_factory) = 0;
 	
 			/*!**********************************************************************
 			 * \copydoc add_plan(const typename explicit_plan<datatype>::factory&,int)
 			 ************************************************************************/
-			virtual void add_plan (const typename implicit_plan <datatype>::factory &i_factory, int flags) = 0;
+			virtual void add_plan (const typename implicit_plan <datatype>::factory &i_factory) = 0;
 			
 			virtual void setup_plans () {
 				for (int i = 0; i < (int) pre_transform_plans.size (); ++i) {
