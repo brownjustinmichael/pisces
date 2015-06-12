@@ -112,7 +112,7 @@ namespace pisces
 					DEBUG ("Adding " << *iter);
 					element <datatype>::add_equation (*iter, std::shared_ptr <plans::solvers::equation <datatype> > (new plans::solvers::implemented_equation <datatype> (*grids [0], *grids [1], ptr (*iter), &element_flags ["element"], &element_flags [*iter])));
 					element <datatype>::transforms.push_back (*iter);
-					element <datatype>::transformers [*iter] = std::shared_ptr <plans::transforms::transformer <datatype> > (new plans::transforms::implemented_transformer <datatype> (*grids [0], *grids [1], data (*iter), NULL, plans::transforms::forward_vertical | plans::transforms::forward_horizontal | plans::transforms::inverse_vertical | plans::transforms::inverse_horizontal , &(data.flags ["element"]), &(data.flags [*iter]), element <datatype>::transform_threads));
+					element <datatype>::transformers [*iter] = std::shared_ptr <plans::transforms::transformer <datatype> > (new plans::transforms::implemented_transformer <datatype> (*grids [0], *grids [1], data (*iter), NULL, plans::transforms::forward_vertical | plans::transforms::forward_horizontal | plans::transforms::inverse_vertical | plans::transforms::inverse_horizontal , &(data.flags ["element"]), &(data.flags [*iter]), transform_threads));
 				}
 			}
 			
@@ -202,18 +202,11 @@ namespace pisces
 				if (timestep == 0.0) {
 					return init_timestep;
 				}
-				if (shared_min > mult_timestep * timestep) {
+				if (shared_min * down_mult_timestep > timestep) {
 					// If the minimum is larger than the current, increase the timestep
-					if (next_timestep != 0.0 && std::min (next_timestep, shared_min) > mult_timestep * timestep) {
-						// Prevent increasing the timestep and decreasing the timestep every other step
-						next_timestep = 0.0;
-						return std::min (mult_timestep * timestep, max_timestep);
-					} else {
-						next_timestep = shared_min;
-						return timestep;
-					}
+					next_timestep = 0.0;
+					return std::min (mult_timestep * timestep, max_timestep);
 				}
-				next_timestep = 0.0;
 				if (shared_min < timestep) {
 					// If the minimum is lower than the current, decrease the timestep
 					return shared_min * down_mult_timestep;
