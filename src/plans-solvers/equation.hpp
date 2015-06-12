@@ -161,10 +161,10 @@ namespace plans
 				if (flags & plan <datatype>::pre) {
 					pre_transform_plans.push_back (i_plan);
 				}
-				if (flags & plan <datatype>::pre) {
+				if (flags & plan <datatype>::mid) {
 					mid_transform_plans.push_back (i_plan);
 				}
-				if (flags & plan <datatype>::pre) {
+				if (flags & plan <datatype>::post) {
 					post_transform_plans.push_back (i_plan);
 				}
 				if (flags & plan <datatype>::pre_solve) {

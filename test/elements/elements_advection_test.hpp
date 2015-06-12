@@ -55,7 +55,9 @@ public:
 		
 		parameters ["grid.x.width"] = 20.0;
 		parameters ["grid.z.width"] = 20.0;
-	
+
+		parameters ["time.mult"] = 1.02;
+
 		int m = 200;
 		int name = id;
 		int n = 300;
