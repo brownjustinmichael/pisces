@@ -12,5 +12,6 @@
 #include "plans-diffusion/horizontal_diffusion.hpp"
 #include "plans-diffusion/vertical_diffusion.hpp"
 #include "plans-diffusion/variable_diffusion.hpp"
+#include "plans-diffusion/uniform_diffusion.hpp"
 
 #endif /* end of include guard: DIFFUSION_HPP_C1935DDC */

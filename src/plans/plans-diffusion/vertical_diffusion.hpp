@@ -31,6 +31,7 @@ namespace plans
 		class vertical : public implicit_plan <datatype>
 		{
 		private:
+			using implicit_plan <datatype>::coeff;
 			using implicit_plan <datatype>::n;
 			using implicit_plan <datatype>::ldn;
 			using implicit_plan <datatype>::m;
@@ -41,7 +42,6 @@ namespace plans
 			using implicit_plan <datatype>::grid_n;
 			using implicit_plan <datatype>::grid_m;
 		
-			datatype coeff; //!< The datatype diffusion coefficient
 			datatype alpha; //!< The implicit fraction of the plan (1.0 for purely implicit, 0.0 for purely explicit)
 		
 		public:
@@ -54,7 +54,7 @@ namespace plans
 			 * \param i_coeff The datatype diffusion coefficient
 			 * \param i_alpha The implicit fraction of the plan (1.0 for purely implicit, 0.0 for purely explicit)
 			 ************************************************************************/
-			vertical (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_coeff, datatype i_alpha, datatype *i_matrix_n, datatype *i_matrix_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : implicit_plan <datatype> (i_grid_n, i_grid_m, i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_element_flags, i_component_flags), coeff (i_coeff), alpha (i_alpha) {
+			vertical (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_coeff, datatype i_alpha, datatype *i_matrix_n, datatype *i_matrix_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : implicit_plan <datatype> (i_coeff, i_grid_n, i_grid_m, i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_element_flags, i_component_flags), alpha (i_alpha) {
 				setup ();
 			}
 		
@@ -100,13 +100,14 @@ namespace plans
 			private:
 				datatype coeff; //!< The diffusion coefficient of the plan to be constructed
 				datatype alpha; //!< The implicit fraction of the plan to be constructed
+				datatype *data_in;
 			
 			public:
 				/*!**********************************************************************
 				 * \param i_coeff The diffusion coefficient of the plan to be constructed
 				 * \param i_alpha The implicit fraction of the plan to be constructed
 				 ************************************************************************/
-				factory (datatype i_coeff, datatype i_alpha) : coeff (i_coeff), alpha (i_alpha) {}
+				factory (datatype *i_data_in, datatype i_coeff = 1.0, datatype i_alpha = 1.0) : coeff (i_coeff), alpha (i_alpha), data_in (i_data_in) {}
 			
 				/*!**********************************************************************
 				 * \param i_coeff A YAML::Node to be read into the diffusion coefficient
@@ -114,7 +115,7 @@ namespace plans
 				 * 
 				 * If the YAML::Node is not defined, no plan will be created in the instance method
 				 ************************************************************************/
-				factory (YAML::Node i_coeff, datatype i_alpha) : alpha (i_alpha) {
+				factory (datatype *i_data_in, YAML::Node i_coeff, datatype i_alpha = 1.0) : alpha (i_alpha), data_in (i_data_in) {
 					if (i_coeff.IsDefined ()) {
 						coeff = i_coeff.as <datatype> ();
 					} else {
@@ -127,11 +128,13 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc implicit_plan::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > instance (grids::grid <datatype> **grids, datatype **matrices, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+				virtual std::shared_ptr <plans::implicit_plan <datatype> > instance (grids::grid <datatype> **grids, datatype **matrices, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+					DEBUG ("Newer data, " << data_in);
+
 					if (coeff) {
-						return std::shared_ptr <plans::plan <datatype> > (new vertical <datatype> (*grids [0], *grids [1], coeff, alpha, matrices [0], matrices [1], i_data_in, i_data_out, i_element_flags, i_component_flags));
+						return std::shared_ptr <plans::implicit_plan <datatype> > (new vertical <datatype> (*grids [0], *grids [1], coeff, alpha, matrices [0], matrices [1], data_in, i_data_out, i_element_flags, i_component_flags));
 					}
-					return std::shared_ptr <plans::plan <datatype> > ();
+					return std::shared_ptr <plans::implicit_plan <datatype> > ();
 				}
 			};
 		};
@@ -143,6 +146,7 @@ namespace plans
 		class background_vertical : public implicit_plan <datatype>
 		{
 		private:
+			using implicit_plan <datatype>::coeff;
 			using implicit_plan <datatype>::n;
 			using implicit_plan <datatype>::ldn;
 			using implicit_plan <datatype>::m;
@@ -172,7 +176,7 @@ namespace plans
 			 * \param i_alpha The implicit fraction of the plan (1.0 for purely implicit, 0.0 for purely explicit)
 			 * \param i_diffusion A pointer to a vector of diffusion coefficients
 			 ************************************************************************/
-			background_vertical (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_alpha, datatype *i_diffusion, bool i_explicit_calculate, datatype *i_matrix_n, datatype *i_matrix_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : implicit_plan <datatype> (i_grid_n, i_grid_m, i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_element_flags, i_component_flags), alpha (i_alpha), diffusion (i_diffusion), explicit_calculate (i_explicit_calculate) {
+			background_vertical (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_alpha, datatype *i_diffusion, bool i_explicit_calculate, datatype *i_matrix_n, datatype *i_matrix_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : implicit_plan <datatype> (1.0, i_grid_n, i_grid_m, i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_element_flags, i_component_flags), alpha (i_alpha), diffusion (i_diffusion), explicit_calculate (i_explicit_calculate) {
 				oodz_vec.resize (m);
 				oodz = &oodz_vec [0];
 				coeff_dz_vec.resize (m);
@@ -197,16 +201,16 @@ namespace plans
 			
 			void setup () {
 				TRACE ("Setting up");
-				coeff_dz [0] = (diffusion [1] - diffusion [0]) * oodz [0];
+				coeff_dz [0] = coeff * (diffusion [1] - diffusion [0]) * oodz [0];
 				for (int i = 1; i < m - 1; ++i) {
-					coeff_dz [i] = (diffusion [i + 1] - diffusion [i - 1]) * oodz [i];
+					coeff_dz [i] = coeff * (diffusion [i + 1] - diffusion [i - 1]) * oodz [i];
 				}
-				coeff_dz [m - 1] = (diffusion [m - 1] - diffusion [m - 2]) * oodz [m - 1];
+				coeff_dz [m - 1] = coeff * (diffusion [m - 1] - diffusion [m - 2]) * oodz [m - 1];
 				
 				if (matrix_m) {
 					for (int j = 0; j < m; ++j) {
 						// DEBUG ("Updating diff " << diffusion [j]);
-						linalg::add_scaled (m, diffusion [j], grid_m.get_data (2) + j, new_matrix + j, m, m);
+						linalg::add_scaled (m, coeff * diffusion [j], grid_m.get_data (2) + j, new_matrix + j, m, m);
 						linalg::add_scaled (m, coeff_dz [j], grid_m.get_data (1) + j, new_matrix + j, m, m);
 					}
 					linalg::add_scaled (m * m, -1.0 * alpha, new_matrix, matrix_m);
@@ -254,8 +258,8 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc implicit_plan::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > instance (grids::grid <datatype> **grids, datatype **matrices, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
-					return std::shared_ptr <plans::plan <datatype> > (new background_vertical <datatype> (*grids [0], *grids [1], alpha, diffusion, explicit_calculate, matrices [0], matrices [1], i_data_in, i_data_out, i_element_flags, i_component_flags));
+				virtual std::shared_ptr <plans::implicit_plan <datatype> > instance (grids::grid <datatype> **grids, datatype **matrices, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+					return std::shared_ptr <plans::implicit_plan <datatype> > (new background_vertical <datatype> (*grids [0], *grids [1], alpha, diffusion, explicit_calculate, matrices [0], matrices [1], i_data_in, i_data_out, i_element_flags, i_component_flags));
 				}
 			};
 		};

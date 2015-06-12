@@ -190,6 +190,8 @@ namespace plans
 			 * \copydoc add_plan(const typename explicit_plan<datatype>::factory&,int)
 			 ************************************************************************/
 			virtual void add_plan (const typename implicit_plan <datatype>::factory &i_factory) = 0;
+
+			virtual void add_plan (const typename implicit_plan <datatype>::factory_container &i_container) = 0;
 			
 			virtual void setup_plans () {
 				for (int i = 0; i < (int) pre_transform_plans.size (); ++i) {

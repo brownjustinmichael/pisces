@@ -275,6 +275,21 @@ namespace plans
 				plans::solvers::equation <datatype>::add_plan (i_factory.instance (grids, matrices, data, rhs_ptr (spectral_rhs), element_flags, component_flags));
 			}
 			
+			/*!**********************************************************************
+			 * \copydoc equation::add_plan(const typename explicit_plan<datatype>::factory&,int)
+			 ************************************************************************/
+			void add_plan (const typename plans::implicit_plan <datatype>::factory_container &i_factory) {
+				TRACE ("Adding plan...");
+				grids::grid <datatype>* grids [2] = {&grid_n, &grid_m};
+				datatype* matrices [2] = {matrix_ptr (0), matrix_ptr (1)};
+
+				std::vector <std::shared_ptr <plans::implicit_plan <datatype>>> instances = i_factory.instances (grids, matrices, data, rhs_ptr (spectral_rhs), element_flags, component_flags);
+				for (int i = 0; i < (int) instances.size (); ++i)
+				{
+					plans::solvers::equation <datatype>::add_plan (instances [i]);
+				}
+			}
+
 			void setup_plans () {
 				if (x_solver) x_solver->setup ();
 				if (z_solver) z_solver->setup ();

@@ -192,9 +192,11 @@ namespace pisces
 			
 			if (load_diffusion) {
 				// If a diffusion value is specified, construct the diffusion plans
-				// equations [variable] += diffusion::uniform <datatype> (terms ["diffusion"], variable);
-				equations [variable]->add_plan (typename diffusion::vertical <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")));
-				equations [variable]->add_plan (typename diffusion::horizontal <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")));
+				if (terms ["diffusion"].IsDefined ()) {
+					equations [variable]->add_plan (terms ["diffusion"].as <datatype> () * diffusion::uniform <datatype> (ptr (variable)));
+				}
+				// equations [variable]->add_plan (typename diffusion::vertical <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")));
+				// equations [variable]->add_plan (typename diffusion::horizontal <datatype>::factory (terms ["diffusion"], i_params.get <datatype> ("time.alpha")));
 			}
 			
 			// If an advection value is specified, construct the advection plan
