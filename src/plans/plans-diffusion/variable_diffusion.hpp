@@ -53,8 +53,8 @@ namespace plans
 			 * \param i_coeff The base coefficient to multiply the source
 			 * \param i_data_source A pointer to the source data
 			 ************************************************************************/
-			linear (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_coeff, datatype i_min, datatype *i_data_source, datatype *i_bg_diff, int i_bg_every, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : 
-			real_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out, i_element_flags, i_component_flags),
+			linear (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_min, datatype *i_data_source, datatype *i_bg_diff, int i_bg_every, datatype *i_data_in, datatype *i_data_out = NULL, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : 
+			real_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out, i_coeff, i_element_flags, i_component_flags),
 			bg_every (i_bg_every),
 			coeff (i_coeff),
 			min (i_min),
@@ -209,7 +209,6 @@ namespace plans
 			class factory : public real_plan <datatype>::factory
 			{
 			private:
-				datatype coeff; //!< The base coefficient for the plan to be constructed
 				datatype min; //!< The value for the coefficient
 				datatype *data_source; //!< The source data pointer for the plan to be constructed
 				datatype *bg_diff;
@@ -220,15 +219,15 @@ namespace plans
 				 * \param i_coeff The base coefficient for the plan to be constructed
 				 * \param i_data_source The source data pointer for the plan to be constructed
 				 ************************************************************************/
-				factory (datatype i_coeff, datatype i_min, datatype *i_data_source, datatype *i_bg_diff, int i_bg_every) : coeff (i_coeff), min (i_min), data_source (i_data_source), bg_diff (i_bg_diff), bg_every (i_bg_every) {}
+				factory (datatype i_coeff, datatype i_min, datatype *i_data_source, datatype *i_bg_diff, int i_bg_every) : real_plan <datatype>::factory (i_coeff), min (i_min), data_source (i_data_source), bg_diff (i_bg_diff), bg_every (i_bg_every) {}
 				
 				virtual ~factory () {}
 				
 				/*!**********************************************************************
 				 * \copydoc real_plan::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > instance (grids::grid <datatype> **grids, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
-					return std::shared_ptr <plans::plan <datatype> > (new linear <datatype> (*grids [0], *grids [1], coeff, min, data_source, bg_diff, bg_every, i_data_in, i_data_out, i_element_flags, i_component_flags));
+				virtual std::shared_ptr <plans::plan <datatype> > _instance (grids::grid <datatype> **grids, datatype **matrices, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+					return std::shared_ptr <plans::plan <datatype> > (new linear <datatype> (*grids [0], *grids [1], min, data_source, bg_diff, bg_every, i_data_in, i_data_out, 1.0, i_element_flags, i_component_flags));
 				}
 			};
 		};

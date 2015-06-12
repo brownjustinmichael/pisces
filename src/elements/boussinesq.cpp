@@ -200,7 +200,7 @@ namespace pisces
 			}
 			
 			// If an advection value is specified, construct the advection plan
-			equations [variable]->add_plan (typename advection::uniform <datatype>::factory (terms ["advection"], ptr ("x_velocity"), ptr ("z_velocity")));
+			if (terms ["advection"].IsDefined ()) equations [variable]->add_plan (typename advection::uniform <datatype>::factory (terms ["advection"].as <datatype> (), ptr ("x_velocity"), ptr ("z_velocity")));
 			if (terms ["advection"].IsDefined ()) advection_coeff = std::max (advection_coeff, terms ["advection"].as <datatype> ());
 			
 			// If any source terms are specified, construct the appropriate source plans
@@ -212,7 +212,7 @@ namespace pisces
 				}
 			}
 		}
-		
+		DEBUG ("BOTTOM");
 		// Since this is a Boussinesq problem, also include the pressure term
 		if (!i_params ["equations.pressure.ignore"].as <bool> ()) {
 			if (!ptr (i_params ["equations.pressure.x_velocity"].as <std::string> ()) || !ptr (i_params ["equations.pressure.z_velocity"].as <std::string> ())) {

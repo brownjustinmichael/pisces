@@ -34,11 +34,12 @@ public:
 		parameters ["root"] = std::string (PISCES_ROOT) + "/test/elements/";
 		parameters ["output.files.advection_%02i.output"] = true;
 		parameters ["output.files.advection_%02i.every"] = 10;
-		parameters ["output.files.advection_%02i.stat"] = true;
+		parameters ["output.files.advection_%02i.stat"] = false;
 		parameters ["output.output"] = false;
 		parameters ["dump.file"] = "";
 		parameters ["time.steps"] = 200;
 		parameters ["time.max"] = 0.1;
+		parameters ["time.init"] = 0.01;
 		
 		parameters ["input.file"] = "";
 		

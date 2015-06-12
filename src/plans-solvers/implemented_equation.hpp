@@ -250,43 +250,32 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc equation::add_plan(const typename explicit_plan<datatype>::factory&,int)
 			 ************************************************************************/
-			void add_plan (const typename plans::explicit_plan <datatype>::factory &i_factory) {
+			void add_plan (const typename plans::plan <datatype>::factory &i_factory) {
 				TRACE ("Adding plan...");
-				grids::grid <datatype>* grids [2] = {&grid_n, &grid_m};
-				plans::solvers::equation <datatype>::add_plan (i_factory.instance (grids, data, new_rhs_ptr, element_flags, component_flags));
-			}
-			
-			/*!**********************************************************************
-			 * \copydoc equation::add_plan(const typename explicit_plan<datatype>::factory&,int)
-			 ************************************************************************/
-			void add_plan (const typename plans::real_plan <datatype>::factory &i_factory) {
-				TRACE ("Adding plan...");
-				grids::grid <datatype>* grids [2] = {&grid_n, &grid_m};
-				plans::solvers::equation <datatype>::add_plan (i_factory.instance (grids, data, rhs_ptr (real_rhs), element_flags, component_flags));
-			}
-			
-			/*!**********************************************************************
-			 * \copydoc equation::add_plan(const typename explicit_plan<datatype>::factory&,int)
-			 ************************************************************************/
-			void add_plan (const typename plans::implicit_plan <datatype>::factory &i_factory) {
-				TRACE ("Adding plan...");
+				datatype *rhs;
+				if (i_factory.type () == plans::plan <datatype>::factory::impl) {
+					DEBUG ("SPECTRAL")
+					rhs = rhs_ptr (spectral_rhs);
+				} else if (i_factory.type () == plans::plan <datatype>::factory::real) {
+					DEBUG ("REAL");
+					rhs = rhs_ptr (real_rhs);
+				} else {
+					DEBUG ("NEW");
+					rhs = new_rhs_ptr;
+				}
 				grids::grid <datatype>* grids [2] = {&grid_n, &grid_m};
 				datatype* matrices [2] = {matrix_ptr (0), matrix_ptr (1)};
-				plans::solvers::equation <datatype>::add_plan (i_factory.instance (grids, matrices, data, rhs_ptr (spectral_rhs), element_flags, component_flags));
+				plans::solvers::equation <datatype>::add_plan (i_factory.instance (grids, matrices, data, rhs, element_flags, component_flags));
 			}
 			
 			/*!**********************************************************************
 			 * \copydoc equation::add_plan(const typename explicit_plan<datatype>::factory&,int)
 			 ************************************************************************/
-			void add_plan (const typename plans::implicit_plan <datatype>::factory_container &i_factory) {
+			void add_plan (const typename plans::plan <datatype>::factory_container &i_factory) {
 				TRACE ("Adding plan...");
-				grids::grid <datatype>* grids [2] = {&grid_n, &grid_m};
-				datatype* matrices [2] = {matrix_ptr (0), matrix_ptr (1)};
-
-				std::vector <std::shared_ptr <plans::implicit_plan <datatype>>> instances = i_factory.instances (grids, matrices, data, rhs_ptr (spectral_rhs), element_flags, component_flags);
-				for (int i = 0; i < (int) instances.size (); ++i)
+				for (int i = 0; i < (int) i_factory.facts.size (); ++i)
 				{
-					plans::solvers::equation <datatype>::add_plan (instances [i]);
+					if (i_factory.facts [i]) add_plan (*(i_factory.facts [i]));
 				}
 			}
 

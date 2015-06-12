@@ -113,6 +113,8 @@ namespace plans
 					index += major_iodim.n;
 				}
 			}
+						DEBUG ("DONE");
+
 		}
 		
 		template <>

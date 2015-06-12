@@ -32,12 +32,12 @@ namespace plans
 		class uniform : public explicit_plan <datatype>
 		{
 		private:
+			using explicit_plan <datatype>::coeff;
 			using explicit_plan <datatype>::n;
 			using explicit_plan <datatype>::ldn;
 			using explicit_plan <datatype>::m;
 			using explicit_plan <datatype>::data_out;
 		
-			datatype coeff; //!< The coefficient of the source term
 			datatype *data_source; //!< The data pointer for the source data
 		
 		public:
@@ -49,8 +49,9 @@ namespace plans
 			 * 
 			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
 			 ************************************************************************/
-			uniform (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_coeff, datatype* i_data_source, datatype *i_data_in, datatype *i_data_out, int *i_element_flags, int *i_component_flags) : explicit_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out, i_element_flags, i_component_flags), coeff (i_coeff), data_source (i_data_source) {
+			uniform (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_source, datatype *i_data_in, datatype *i_data_out, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : explicit_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out, i_coeff, i_element_flags, i_component_flags), data_source (i_data_source) {
 				TRACE ("Adding source...");
+				DEBUG (" " << coeff);
 			}
 		
 			virtual ~uniform () {}
@@ -73,7 +74,6 @@ namespace plans
 			class factory : public explicit_plan <datatype>::factory
 			{
 			private:
-				datatype coeff; //!< The coefficient to be used when constructing the plan
 				datatype *data_source; //!< The data source to be used when constructing the plan
 			
 			public:
@@ -81,30 +81,17 @@ namespace plans
 				 * \param i_coeff The coefficient to be used when constructing the plan
 				 * \param i_data_source The data source to be used when constructing the plan
 				 ************************************************************************/
-				factory (datatype i_coeff, datatype *i_data_source) : coeff (i_coeff), data_source (i_data_source) {}
-			
-				/*!**********************************************************************
-				 * \param i_coeff A YAML::Node scalar object from which the coefficient for the plan should be read
-				 * \param i_data_source The data source to be used when constructing the plan
-				 * 
-				 * If the YAML::Node is not defined, no instance will be created
-				 ************************************************************************/
-				factory (YAML::Node i_coeff, datatype *i_data_source) : data_source (i_data_source) {
-					if (i_coeff.IsDefined ()) {
-						coeff = i_coeff.as <datatype> ();
-					} else {
-						coeff = 0.0;
-					}
-				}
+				factory (datatype i_coeff, datatype *i_data_source) : explicit_plan <datatype>::factory (i_coeff), data_source (i_data_source) {}
 			
 				virtual ~factory () {}
 			
 				/*!**********************************************************************
-				 * \copydoc explicit_plan::factory::instance
+				 * \copydoc explicit_plan::factory::_instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > instance (grids::grid <datatype> **grids, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+				virtual std::shared_ptr <plans::plan <datatype> > _instance (grids::grid <datatype> **grids, datatype **matrices, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan <datatype> > (new uniform <datatype> (*grids [0], *grids [1], coeff, data_source, i_data_in, i_data_out, i_element_flags, i_component_flags));
+						DEBUG (data_source << " " << i_data_in << " " << i_data_out);
+						return std::shared_ptr <plans::plan <datatype> > (new uniform <datatype> (*grids [0], *grids [1], data_source, i_data_in, i_data_out, 1.0, i_element_flags, i_component_flags));
 					}
 					return std::shared_ptr <plans::plan <datatype> > ();
 				}

@@ -14,6 +14,7 @@
 
 #include "versions/version.hpp"
 #include "logger/logger.hpp"
+#include "io/parameters.hpp"
 #include "grids/grid.hpp"
 #include <map>
 
@@ -69,6 +70,7 @@ namespace plans
 	class plan
 	{
 	protected:
+		datatype coeff;
 		int *element_flags; //!< A pointer to the integer global flags
 		int *component_flags; //!< A pointer to the integer local flags
 
@@ -84,9 +86,10 @@ namespace plans
 		* \param i_element_flags A pointer to the integer global flags
 		* \param i_component_flags A pointer to the integer local flags
 		 ************************************************************************/
-		plan <datatype> (int *i_element_flags = NULL, int *i_component_flags = NULL) :
+		plan <datatype> (int *i_element_flags = NULL, int *i_component_flags = NULL, datatype i_coeff = 1.0) :
+		coeff (i_coeff), 
 		element_flags (i_element_flags),
-		component_flags (i_component_flags)  {}
+		component_flags (i_component_flags) {}
 		
 		virtual ~plan () {}
 		
@@ -108,6 +111,106 @@ namespace plans
 		virtual void execute () = 0;
 
 		virtual int type () = 0;
+
+		/*!**********************************************************************
+		 * \brief An abstract factory class designed to produce a plan instance
+		 * 
+		 * This factory class is implemented to make the creation of plan objects more intuitive. A factory can be given to an equation object, and the equation will know about the grids, data, and flags, so these need not be specified by the user.
+		 ************************************************************************/
+		class factory
+		{
+		public:
+			datatype coeff;
+
+			enum type {
+				impl = 0x01,
+				expl = 0x02,
+				real = 0x04,
+				solv = 0x08
+			};
+
+			factory (datatype i_coeff = 0.0) : coeff (i_coeff) {}
+
+			virtual ~factory () {}
+
+			virtual const int type () const {
+				return 0x00;
+			}
+			
+			/*!**********************************************************************
+			 * \brief The abstract instance creating class
+			 * 
+			 * \param grids An array of grid objects that define the data grid
+			 * \param matrices An array of the solver datatype matrices
+			 * \param i_data_in The datatype array of the input data
+			 * \param i_data_out The datatype array of the output data
+			 * \param i_element_flags A pointer to the integer flags associated with the element on the whole
+			 * \param i_component_flags A pointer to the integer flags associated with the variable associated with the plan
+			 * 
+			 * This method creates a shared_ptr to an implicit plan instance. The benefit to this inclusion is that the instance method can be called in a uniform way and hide communication of grid and matrix information from the user. If a plan would be created that would not do anything (e.g. something with a coefficient of 0.0), this will return a NULL shared pointer.
+			 ************************************************************************/
+			virtual std::shared_ptr <plan <datatype>> instance (grids::grid <datatype> **grids, datatype **matrices, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+					std::shared_ptr <plan <datatype>> result = _instance (grids, matrices, i_data_in, i_data_out, i_element_flags, i_component_flags);
+					if (result) result->coeff *= coeff;
+					return result;
+				}
+
+		protected:
+			virtual std::shared_ptr <plan <datatype>> _instance (grids::grid <datatype> **grids, datatype **matrices, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const = 0;
+		};
+
+		class factory_container
+		{
+		private:
+
+		public:
+			std::vector <std::shared_ptr <factory>> facts;
+
+			factory_container (std::shared_ptr <factory> i_fact = NULL) {
+				facts.push_back (i_fact);
+			}
+
+			virtual ~factory_container () {}
+
+			factory_container operator+ (factory_container j_container) {
+				factory_container container (*this);
+				for (int i = 0; i < (int) j_container.facts.size (); ++i)
+				{
+					container.facts.push_back (j_container.facts [i]);
+				}
+				return container;
+			}
+
+			factory_container operator* (YAML::Node &node) {
+				if (node.IsDefined ()) {
+					return *this * node.as <datatype> ();
+				}
+				return factory_container ();
+			}
+
+			
+		};
 	};
+
+	template <class datatype>
+	typename plan <datatype>::factory_container operator* (typename plan <datatype>::factory_container i_container, datatype scalar) {
+		typename plan <datatype>::factory_container container (i_container);
+		for (int i = 0; i < (int) i_container.facts.size (); ++i)
+		{
+			container.facts [i]->coeff *= scalar;
+		}
+		return container;
+	}
+
+	template <class datatype>
+	typename plan <datatype>::factory_container operator* (datatype scalar, typename plan <datatype>::factory_container i_container) {
+		return i_container * scalar;
+	}
+
+	template <class datatype>
+	datatype operator* (YAML::Node &node, datatype other) {
+		return other * node;
+	}
+
 } /* plans */
 #endif /* end of include guard: PLAN_HPP_S9YPWHOM */
