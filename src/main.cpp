@@ -97,6 +97,7 @@ int main (int argc, char *argv[])
 		begin = std::chrono::system_clock::now ();
 
 		int n_steps = 0;
+		std::shared_ptr <io::input> virtual_input;
 		while (n_steps < parameters.get <int> ("time.steps") && element->duration < parameters.get <double> ("time.stop")) {
 			if (parameters.get <int> ("grid.rezone.check_every") > 0 && n_steps != 0 && n_elements > 1) {
 				INFO ("Rezoning");
@@ -106,8 +107,8 @@ int main (int argc, char *argv[])
 					formats::virtual_files ["main/virtual_file"] = *virt;
 					grids::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
 				
-					io::input *virtual_input (new io::formatted_input <formats::virtual_format> (formats::data_grid::two_d (n, m), "main/virtual_file"));
-					data.setup (&*virtual_input);
+					virtual_input.reset (new io::formatted_input <formats::virtual_format> (formats::data_grid::two_d (n, m), "main/virtual_file"));
+					data.setup (virtual_input);
 				
 					element.reset (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
 				}

@@ -16,6 +16,8 @@
 
 #include "linalg/utils.hpp"
 
+#include "io/functors/slice.hpp"
+#include "io/functors/product.hpp"
 #include "io/input.hpp"
 #include "io/formats/format.hpp"
 #include "io/functors/functor.hpp"
@@ -52,6 +54,8 @@ namespace data
 	class data
 	{
 	protected:
+		int id;
+		io::parameters &params;
 		static int mode; //!< The integer mode of the simulation (to prevent loading Chebyshev data into an even grid)
 		
 		std::vector <std::shared_ptr <io::output>> streams; //!< A vector of pointers to output streams
@@ -65,12 +69,13 @@ namespace data
 	protected:
 		std::vector <std::string> scalar_names; //!< The vector of variable names
 		std::map <std::string, std::vector <datatype>> scalars; //!< The string map of vectors containing the variable data
+		datatype *weights;
 		
 	public:
 		datatype duration; //!< The total time elapsed in the simulation thus far
 		datatype timestep; //!< The current timestep
 		std::map <std::string, int> flags; //!< A map of the simulation flags
-		data () {
+		data (io::parameters &i_params, int i_id = 0) : id (i_id), params (i_params) {
 			flags ["state"] = 0x0;
 			duration = 0.0;
 		}
@@ -219,34 +224,55 @@ namespace data
 			dump_done = false;
 		}
 		
-		/*!**********************************************************************
-		 * \brief Given an input stream, load all the relevant data into the data object
-		 * 
-		 * \param input_ptr A pointer to an input object
-		 ************************************************************************/
-		void setup (io::input *input_ptr) {
-			// Iterate through the scalar fields and append them to the variables for which the input will search
+		virtual std::shared_ptr <io::input> setup (std::shared_ptr <io::input> input_stream) {
 			for (data::iterator iter = begin (); iter != end (); ++iter) {
-				input_ptr->template append <datatype> (*iter, (*this) (*iter));
+				input_stream->append (*iter, (*this) (*iter));
 			}
 			
-			input_ptr->template append <datatype> ("t", &duration, formats::scalar);
-			int mode;
-			input_ptr->template append <int> ("mode", &mode, formats::scalar);
-			
+			input_stream->append ("t", &duration, formats::scalar);
+
 			try {
 				// Read from the input into the element variables
-				input_ptr->from_file ();
+				input_stream->from_file ();
 			} catch (formats::exceptions::bad_variables &except) {
 				// Send a warning if there are missing variables in the input
 				WARN (except.what ());
 			}
 
-			// Make sure that the mode matched the mode of the element
-			if (mode != get_mode ()) {
-				FATAL ("Loading simulation in different mode: " << mode << " instead of " << get_mode ());
-				throw 0;
+			return input_stream;
+		}
+
+		std::string file_from (YAML::Node i_params) {
+			if (!(i_params.IsDefined ())) return "";
+
+			std::string file_format = "";
+			if (i_params ["file"].IsDefined ()) file_format = i_params ["file"].as <std::string> ();
+
+			if (file_format == "") return "";
+
+			if (i_params ["directory"].IsDefined ()) {
+				file_format = i_params ["directory"].as <std::string> () + file_format;
+			} else if (params ["output.directory"].IsDefined ()) {
+				file_format = params ["output.directory"].as <std::string> () + file_format;
 			}
+
+			char buffer [file_format.size () * 2];
+			snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
+
+			file_format = buffer;
+
+			snprintf (buffer, file_format.size () * 2, file_format.c_str (), params ["output.number"].as <int> ());
+
+			return buffer;
+		}
+
+		template <class format>
+		std::shared_ptr <io::input> setup_from (YAML::Node input_params, const formats::data_grid &grid) {
+			if (file_from (input_params) == "") return NULL;
+
+			std::shared_ptr <io::input> input_stream (new io::formatted_input <format> (grid, file_from (input_params)));
+
+			return setup (input_stream);
 		}
 	
 		/*!**********************************************************************
@@ -257,24 +283,39 @@ namespace data
 		 * 
 		 * Given an output object, prepare it to output all the scalar fields tracked directly by the element. Make it one of the output streams called during output. If flags is normal_stream, output the variables when in Cartesian space, else if flags is transform_stream, output with horizontal grid in Fourier space, but vertical grid in Cartesian space.
 		 ************************************************************************/
-		virtual void setup_output (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
+		std::shared_ptr <io::output> setup_output (std::shared_ptr <io::output> output, int flags = 0x00) {
 			// Iterate through the scalar fields and append them to the variables which the output will write to file
+			if (!(params ["output.output"].as <bool> ())) return NULL;
+
 			if (!(flags & no_variables)) {
 				for (data::iterator iter = begin (); iter != end (); ++iter) {
-					output_ptr->template append <datatype> (*iter, (*this) (*iter));
+					output->append (*iter, (*this) (*iter));
 				}
 			}
 			
-			output_ptr->template append <datatype> ("t", &duration, formats::scalar);
-			output_ptr->template append <datatype> ("dt", &timestep, formats::scalar);
-			output_ptr->template append <const int> ("mode", &(get_mode ()), formats::scalar);
+			output->append ("t", &duration, formats::scalar);
+			output->append ("dt", &timestep, formats::scalar);
 
 			// Check the desired output time and save the output object in the appropriate variable
-			if (!(flags & no_save)) {
-				streams.push_back (output_ptr);
-				done.push_back (false);
-				stream_conditions.push_back (flags);
+			streams.push_back (output);
+			done.push_back (false);
+			stream_conditions.push_back (flags);
+
+			return output;
+		}
+
+		template <class format>
+		std::shared_ptr <io::output> setup_output_from (YAML::Node output_params, const formats::data_grid &grid, int flags) {
+			// Iterate through the scalar fields and append them to the variables for which the input will search
+			if (file_from (output_params) == "") return NULL;
+
+			std::shared_ptr <io::output> output_stream;
+			if (output_params ["timed"].IsDefined () && output_params ["timed"].as <bool> ()) {
+				output_stream.reset (new io::timed_appender_output <datatype, formats::netcdf> (grid, file_from (output_params), timestep, output_params ["every"].as <datatype> ()));
+			} else {
+				output_stream.reset (new io::appender_output <formats::netcdf> (grid, file_from (output_params), output_params ["every"].as <int> ()));
 			}
+			return setup_output (output_stream, flags);
 		}
 		
 		/*!**********************************************************************
@@ -293,24 +334,6 @@ namespace data
 			dump_stream = output_ptr;
 			dump_done = false;
 			dump_condition = flags;
-		}
-		
-		/*!**********************************************************************
-		 * \brief Given an output stream, prepare the stat output
-		 * 
-		 * \param output_ptr A shared_ptr to the output object
-		 * \param flags The integer flags to specify the time of output
-		 ************************************************************************/
-		virtual void setup_stat (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
-			// Also prepare to output the total simulated time and geometry mode
-			output_ptr->template append <datatype> ("t", &duration, formats::scalar);
-			output_ptr->template append <datatype> ("dt", &timestep, formats::scalar);
-			// Check the desired output time and save the output object in the appropriate variable
-			if (!(flags & no_save)){
-				streams.push_back (output_ptr);
-				stream_conditions.push_back (0x00);
-				done.push_back (false);
-			}
 		}
 		
 		/*!**********************************************************************
@@ -344,11 +367,14 @@ namespace data
 	{
 	protected:
 		using data <datatype>::iterator;
+		using data <datatype>::weights;
 		
 		std::shared_ptr <grids::grid <datatype>> grid_n; //!< The horizontal grid object
 		std::shared_ptr <grids::grid <datatype>> grid_m; //!< The vertical grid object
 		int n; //!< The horizontal extent of the data
 		int m; //!< The vertical extent of the data
+
+		std::vector <datatype> area;
 		
 	public:
 		using data <datatype>::duration;
@@ -361,7 +387,7 @@ namespace data
 		 * \param dump_directory The string directory to store the dump
 		 * \param dump_every The frequency to dump to file
 		 ************************************************************************/
-		implemented_data (grids::axis *i_axis_n, grids::axis *i_axis_m, int i_name = 0, std::string dump_file = "", std::string dump_directory = "./", int dump_every = 1) : grid_n (std::shared_ptr <grids::grid <datatype>> (new typename grids::horizontal::grid <datatype> (i_axis_n))), grid_m (std::shared_ptr <grids::grid <datatype>> (new typename grids::vertical::grid <datatype> (i_axis_m))), n (grid_n->get_n ()), m (grid_m->get_n ()) {
+		implemented_data (grids::axis *i_axis_n, grids::axis *i_axis_m, io::parameters &i_params, int i_name = 0, std::string dump_file = "", std::string dump_directory = "./", int dump_every = 1) : data <datatype> (i_params, i_name), grid_n (std::shared_ptr <grids::grid <datatype>> (new typename grids::horizontal::grid <datatype> (i_axis_n))), grid_m (std::shared_ptr <grids::grid <datatype>> (new typename grids::vertical::grid <datatype> (i_axis_m))), n (grid_n->get_n ()), m (grid_m->get_n ()) {
 			// Set up output
 			const formats::data_grid o_grid = formats::data_grid::two_d (n, m, 0, 0, 0, 0);
 			
@@ -377,6 +403,16 @@ namespace data
 			
 			this->initialize ("x");
 			this->initialize ("z");
+
+			// For weighted averages, calculate area
+			area.resize (n * m);
+			for (int i = 1; i < n; ++i) {
+				for (int j = 1; j < m; ++j) {
+					area [i * m + j] = ((*(this->grid_n)) [i] - (*(this->grid_n)) [i - 1]) * ((*(this->grid_m)) [j] - (*(this->grid_m)) [j - 1]);
+				}
+			}
+
+			weights = &area [0];
 			
 			/*
 				TODO Clean dump file generation
@@ -410,6 +446,36 @@ namespace data
 			output_ptr->template append <const int> ("mode", &(data <datatype>::get_mode ()), formats::scalar);
 
 			data <datatype>::setup_profile (output_ptr, flags);
+		}
+
+		template <class format>
+		std::shared_ptr <io::input> setup_from (YAML::Node input_params) {
+			const formats::data_grid grid = formats::data_grid::two_d (n, m);
+
+			return data <datatype>::template setup_from <format> (input_params, grid);
+		}
+
+		template <class format>
+		std::shared_ptr <io::output> setup_output_from (YAML::Node output_params, int flags = 0x00) {
+			const formats::data_grid grid = formats::data_grid::two_d (n, m);
+
+			return data <datatype>::template setup_output_from <format> (output_params, grid, flags);
+		}
+
+		std::shared_ptr <functors::functor> output_max (std::string variable) {
+			return std::shared_ptr <functors::functor> (new functors::max_functor <double> (n, m, (*this) (variable)));
+		}
+
+		std::shared_ptr <functors::functor> output_avg (std::string variable) {
+			return std::shared_ptr <functors::functor> (new functors::weighted_average_functor <double> (n, m, this->weights, (*this) (variable)));
+		}
+
+		std::shared_ptr <functors::functor> output_deriv (std::string variable) {
+			return typename std::shared_ptr <functors::functor> (new functors::average_functor <double> (n, 1, typename std::shared_ptr <functors::functor> (new typename functors::slice_functor <double> (n, m, m / 2, typename std::shared_ptr <functors::functor> (new functors::deriv_functor <double> ((*this) (variable), n, m, &(*grid_m) [0]))))));
+		}
+
+		std::shared_ptr <functors::functor> output_flux (std::string variable, std::string velocity) {
+			return typename std::shared_ptr <functors::functor> (new functors::average_functor <double> (n, 1, typename std::shared_ptr <functors::functor> (new typename functors::slice_functor <double> (n, m, m / 2, typename std::shared_ptr <functors::functor> (new typename functors::product_functor <double> (n, m, (*this) (velocity), (*this) (variable)))))));
 		}
 	
 	protected:

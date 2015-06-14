@@ -15,7 +15,6 @@
 
 #include "io/formats/netcdf.hpp"
 #include "io/formats/ascii.hpp"
-#include "io/functors/slice.hpp"
 
 #include "plans/plan.hpp"
 #include "plans/advection.hpp"
@@ -27,96 +26,32 @@
 namespace data
 {
 	template <class datatype>
-	thermo_compositional_data <datatype>::thermo_compositional_data (grids::axis *i_axis_n, grids::axis *i_axis_m, int id, int n_elements, io::parameters& i_params) : implemented_data <datatype> (i_axis_n, i_axis_m, id, i_params.get <std::string> ("dump.file"), i_params.get <std::string> ("root") + i_params.get <std::string> ("dump.directory"), i_params.get <int> ("dump.every")) {
-		for (YAML::const_iterator iter = i_params ["equations"].begin (); iter != i_params ["equations"].end (); ++iter) {
-			initialize (iter->first.as <std::string> ());
-		}
+	thermo_compositional_data <datatype>::thermo_compositional_data (grids::axis *i_axis_n, grids::axis *i_axis_m, int id, int n_elements, io::parameters& i_params) : implemented_data <datatype> (i_axis_n, i_axis_m, i_params, id, i_params.get <std::string> ("dump.file"), i_params.get <std::string> ("root") + i_params.get <std::string> ("dump.directory"), i_params.get <int> ("dump.every")) {
 
-		int name = id;
-		
-		const formats::data_grid i_grid = formats::data_grid::two_d (n, m, 0, i_params.get <bool> ("input.full") ? n_elements * m : 0, 0, i_params.get <bool> ("input.full") ? id * m : 0);
-		
+		initialize ("pressure");
+		initialize ("composition");
+		initialize ("temperature");
+		initialize ("x_velocity");
+		initialize ("z_velocity");
+
 		// Set up the data from the input file in params
-		if (i_params.get <std::string> ("input.file") != "") {
-			std::string file_format = i_params.get <std::string> ("root") + i_params.get <std::string> ("input.directory") + i_params.get <std::string> ("input.file");
-			char buffer [file_format.size () * 2];
-			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-			io::formatted_input <formats::netcdf> input_stream (i_grid, buffer);
+		this->template setup_from <formats::netcdf> (i_params ["input"]);
+		
+		this->template setup_output_from <formats::netcdf> (i_params ["output.cart"]);
 
-			(*this).setup (&input_stream);
+		this->template setup_output_from <formats::netcdf> (i_params ["output.trans"], transformed_horizontal);
+
+		std::shared_ptr <io::output> stat_stream =
+		this->template setup_output_from <formats::netcdf> (i_params ["output.stat"], no_variables);
+
+		for (typename data <datatype>::iterator iter = this->begin (); iter != this->end (); ++iter) {
+			// For each data variable, output z_flux, average derivative across the center, average and max
+			std::string variable = *iter;
+			stat_stream->template append <datatype> ("max_" + variable, this->output_max (variable), formats::scalar);
+			stat_stream->template append <datatype> ("avg_" + variable, this->output_avg (variable), formats::scalar);
+			stat_stream->template append <datatype> ("deriv_" + variable, this->output_deriv (variable), formats::scalar);
+			stat_stream->template append <datatype> ("flux_" + variable, this->output_flux (variable, "z_velocity"), formats::scalar);
 		}
-		
-		// For weighted averages, calculate area
-		area.resize (n * m);
-		for (int i = 1; i < n; ++i) {
-			for (int j = 1; j < m; ++j) {
-				area [i * m + j] = ((*(this->grid_n)) [i] - (*(this->grid_n)) [i - 1]) * ((*(this->grid_m)) [j] - (*(this->grid_m)) [j - 1]);
-			}
-		}
-		
-		for (YAML::const_iterator iter = i_params ["output.files"].begin (); iter != i_params ["output.files"].end (); ++iter) {
-			std::string file = iter->first.as <std::string> ();
-			io::parameters::alias specs (i_params, "output.files." + file);
-			
-			if (specs ["output"].IsDefined ()) {
-				if (!(specs ["output"].as <bool> ())) {
-					continue;
-				}
-			} else {
-				if (i_params ["output.output"].IsDefined () && !(i_params ["output.output"].as <bool> ())) {
-					continue;
-				}
-			}
-			
-			std::shared_ptr <io::output> stream;
-			std::string file_format = i_params.get <std::string> ("root");
-			if (specs ["directory"].IsDefined ()) {
-				file_format += specs ["directory"].as <std::string> ();
-			} else {
-				file_format += i_params ["output.directory"].as <std::string> ();
-			}
-			if (i_params ["output.name"].as <std::string> () != "") {
-				file_format += i_params ["output.name"].as <std::string> () + "_";
-			}
-			file_format += file;
-			
-			DEBUG ("File is " << file_format << " from " << file << " " << i_params ["output.name"] << " " << specs ["directory"] << " " << i_params.get <std::string> ("root"));
-			
-			char buffer [file_format.size () * 2];
-			snprintf (buffer, file_format.size () * 2, file_format.c_str (), name);
-			file_format = buffer;
-			snprintf (buffer, file_format.size () * 2, file_format.c_str (), i_params ["output.count"].IsDefined () ? i_params ["output.count"].as <int> () : 0);
-			
-			bool full = (specs ["full"].IsDefined () && specs ["full"].as <bool> ());
-			const formats::data_grid o_grid = formats::data_grid::two_d (n, m, 0, full ? n_elements * m : 0, 0, full ? id * m : 0);
-			
-			if (specs ["timed"].IsDefined () && specs ["timed"].as <bool> ()) {
-				stream.reset (new io::timed_appender_output <datatype, formats::netcdf> (o_grid, buffer, duration, specs ["every"].IsDefined () ? specs ["every"].as <datatype> () : 1.0));
-			} else {
-				stream.reset (new io::appender_output <formats::netcdf> (o_grid, buffer, specs ["every"].IsDefined () ? specs ["every"].as <int> () : 1));
-			}
-			
-			if (specs ["stat"].IsDefined () and specs ["stat"].as <bool> ()) {
-				for (typename data <datatype>::iterator iter = this->begin (); iter != this->end (); ++iter) {
-					// For each data variable, output z_flux, average derivative across the center, average and max
-					std::string variable = *iter;
-					if ((*this) ("z_velocity")) {
-						stream->template append <double> ("z_flux_" + variable, std::shared_ptr <functors::functor> (new functors::average_functor <double> (n, 1, std::shared_ptr <functors::functor> (new functors::slice_functor <double> (n, m, m / 2, std::shared_ptr <functors::functor> (new functors::product_functor <double> (n, m, (*this) ("z_velocity"), (*this) (variable))))))), formats::scalar);
-						stream->template append <double> ("deriv_" + variable, std::shared_ptr <functors::functor> (new functors::average_functor <double> (n, 1, std::shared_ptr <functors::functor> (new functors::slice_functor <double> (n, m, m / 2, std::shared_ptr <functors::functor> (new functors::deriv_functor <double> ((*this) (variable), n, m, &(*grid_m) [0])))))), formats::scalar);
-					}
-					stream->template append <double> ("avg_" + variable, std::shared_ptr <functors::functor> (new functors::weighted_average_functor <double> (n, m, &area [0], (*this) (variable))), formats::scalar);
-					stream->template append <double> ("max_" + variable, std::shared_ptr <functors::functor> (new functors::max_functor <double> (n, m, (*this) (variable))), formats::scalar);
-				}
-			}
-			
-			this->setup_output (stream, ((specs ["transform"].IsDefined () and specs ["transform"].as <bool> ()) ? transformed_horizontal : 0x0) | ((specs ["stat"].IsDefined () and specs ["stat"].as <bool> ()) ? no_variables : 0x0));
-			// if ((*this) ("x_velocity") && (*this) ("z_velocity")) {
-			// 	normal_stream->template append <double> ("div", std::shared_ptr <functors::functor> (new functors::div_functor <double> ((*this) ("x"), (*this) ("z"), (*this) ("x_velocity"), (*this) ("z_velocity"), n, m)));
-			// }
-		}
-		/*
-			TODO Setting up the streams should be more convenient
-		*/
 	}
 	
 	template class thermo_compositional_data <double>;
@@ -137,18 +72,38 @@ namespace pisces
 		x_vel_ptr = data ("x_velocity");
 		z_vel_ptr = data ("z_velocity");
 		
-		advection_coeff = 0.0;
 		cfl = i_params ["time.cfl"].as <datatype> ();
 
-		*split_solver <datatype> (equations ["temperature"], timestep, dirichlet (1.0), dirichlet (0.0)) + advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) == params ["equations.temperature.diffusion"] * diff <datatype> ();
+		// Set up the temperature equation
+		*split_solver <datatype> (equations ["temperature"], timestep, dirichlet (1.0), dirichlet (0.0)) 
+		+ advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) 
+		== 
+		params ["equations.temperature.diffusion"] * diff <datatype> ();
 
-		*split_solver <datatype> (equations ["composition"], timestep, dirichlet (1.0), dirichlet (0.0)) + advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) == params ["equations.composition.diffusion"] * diff <datatype> ();
+		// Set up the composition equation
+		*split_solver <datatype> (equations ["composition"], timestep, dirichlet (1.0), dirichlet (0.0)) 
+		+ advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) 
+		== 
+		params ["equations.composition.diffusion"] * diff <datatype> ();
 
-		*split_solver <datatype> (equations ["x_velocity"], timestep, neumann (0.0), neumann (0.0)) + advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) == params ["equations.velocity.diffusion"] * diff <datatype> ();
+		// Set up the x_velocity equation, note the missing pressure term, which is handled in div
+		*split_solver <datatype> (equations ["x_velocity"], timestep, neumann (0.0), neumann (0.0)) 
+		+ advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) 
+		== 
+		params ["equations.velocity.diffusion"] * diff <datatype> ();
 
-		*split_solver <datatype> (equations ["z_velocity"], timestep, dirichlet (0.0), dirichlet (0.0)) + advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) == params ["equations.z_velocity.sources.temperature"] * src <datatype> (ptr ("temperature")) + params ["equations.z_velocity.sources.composition"] * src <datatype> (ptr ("composition")) + params ["equations.velocity.diffusion"] * diff <datatype> ();
+		// Set up the z_velocity equation, note the missing pressure term, which is handled in div
+		*split_solver <datatype> (equations ["z_velocity"], timestep, dirichlet (0.0), dirichlet (0.0)) 
+		+ advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) 
+		== 
+		params ["equations.z_velocity.sources.temperature"] * src <datatype> (ptr ("temperature")) 
+		+ params ["equations.z_velocity.sources.composition"] * src <datatype> (ptr ("composition")) 
+		+ params ["equations.velocity.diffusion"] * diff <datatype> ();
 
-		div <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"]);
+		// Set up the velocity constraint
+		*div <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"])
+		==
+		0.0;
 		
 	TRACE ("Initialized.");
 	}

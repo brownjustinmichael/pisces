@@ -15,6 +15,7 @@
 #include "versions/version.hpp"
 #include "solver.hpp"
 #include "mpi/messenger.hpp"
+#include "plans/source.hpp"
 
 namespace plans
 {
@@ -190,8 +191,18 @@ namespace plans
 				return *this;
 			}
 
+			equation <datatype> &operator+ (const datatype scalar) {
+				add_plan (constant (-scalar));
+				return *this;
+			}
+
 			equation <datatype> &operator== (const typename plan <datatype>::factory_container &i_container) {
 				add_plan (i_container);
+				return *this;
+			}
+
+			equation <datatype> &operator== (const datatype scalar) {
+				add_plan (constant (scalar));
 				return *this;
 			}
 

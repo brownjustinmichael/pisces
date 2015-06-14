@@ -97,6 +97,78 @@ namespace plans
 				}
 			};
 		};
+
+		/*!**********************************************************************
+		 * \brief A plan to add a constant term to an equation
+		 ************************************************************************/
+		template <class datatype>
+		class constant : public explicit_plan <datatype>
+		{
+		private:
+			using explicit_plan <datatype>::coeff;
+			using explicit_plan <datatype>::n;
+			using explicit_plan <datatype>::ldn;
+			using explicit_plan <datatype>::m;
+			using explicit_plan <datatype>::data_out;
+				
+		public:
+			/*!**********************************************************************
+			 * \copydoc explicit_plan::explicit_plan
+			 * 
+			 * \param i_coeff The coefficient for the source term
+			 * \param i_data_source The data pointer for the source data
+			 * 
+			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
+			 ************************************************************************/
+			constant (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype *i_data_in, datatype *i_data_out, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : explicit_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out, i_coeff, i_element_flags, i_component_flags) {
+				TRACE ("Adding constant...");
+			}
+		
+			virtual ~constant () {}
+
+			virtual int type () {
+				return plan <datatype>::mid;
+			}
+		
+			/*!**********************************************************************
+			 * \copydoc explicit_plan::execute
+			 ************************************************************************/
+			virtual void execute () {
+				TRACE ("Executing source...");
+				for (int i = 0; i < ldn; ++i)
+				{
+					for (int j = 0; j < m; ++j)
+					{
+						data_out [i * m + j] += coeff;
+					}
+				}
+			}
+		
+			/*!**********************************************************************
+			 * \copydoc explicit_plan::factory
+			 ************************************************************************/
+			class factory : public explicit_plan <datatype>::factory
+			{
+			public:
+				/*!**********************************************************************
+				 * \param i_coeff The coefficient to be used when constructing the plan
+				 * \param i_data_source The data source to be used when constructing the plan
+				 ************************************************************************/
+				factory (datatype i_coeff = 1.0) : explicit_plan <datatype>::factory (i_coeff) {}
+			
+				virtual ~factory () {}
+			
+				/*!**********************************************************************
+				 * \copydoc explicit_plan::factory::_instance
+				 ************************************************************************/
+				virtual std::shared_ptr <plans::plan <datatype> > _instance (grids::grid <datatype> **grids, datatype **matrices, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+					if (coeff) {
+						return std::shared_ptr <plans::plan <datatype> > (new constant <datatype> (*grids [0], *grids [1], i_data_in, i_data_out, 1.0, i_element_flags, i_component_flags));
+					}
+					return std::shared_ptr <plans::plan <datatype> > ();
+				}
+			};
+		};
 	} /* source */
 } /* plans */
 

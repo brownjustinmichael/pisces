@@ -181,6 +181,10 @@ namespace plans
 				return container;
 			}
 
+			factory_container operator+ (datatype scalar) {
+				return *this + constant (scalar);
+			}
+
 			factory_container operator* (YAML::Node &node) {
 				// if (node.IsDefined ()) {
 					return *this * node.as <datatype> ();
