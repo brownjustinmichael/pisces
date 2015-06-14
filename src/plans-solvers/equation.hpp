@@ -14,6 +14,7 @@
 
 #include "versions/version.hpp"
 #include "solver.hpp"
+#include "mpi/messenger.hpp"
 
 namespace plans
 {
@@ -30,6 +31,7 @@ namespace plans
 		public:
 			int *element_flags; //!< A pointer to the flags describing the global state of the element
 			int *component_flags; //!< A pointer to the flags describing the state of the local variable
+			mpi::messenger *messenger_ptr;
 		
 		protected:
 			datatype *data; //!< A pointer to the data held by the equation object
@@ -46,7 +48,7 @@ namespace plans
 			 * \param i_element_flags A pointer to the flags describing the global state of the element
 			 * \param i_component_flags A pointer to the flags describing the state of the local variable
 			 ************************************************************************/
-			equation (datatype *i_data, int *i_element_flags, int *i_component_flags) : element_flags (i_element_flags), component_flags (i_component_flags), data (i_data) {
+			equation (datatype *i_data, int *i_element_flags, int *i_component_flags, mpi::messenger *i_messenger_ptr = NULL) : element_flags (i_element_flags), component_flags (i_component_flags), messenger_ptr (i_messenger_ptr), data (i_data) {
 				*component_flags &= ~factorized;
 			}
 			/*
@@ -79,7 +81,7 @@ namespace plans
 			 * 
 			 * \return The ith dependency of the equation
 			 ************************************************************************/
-			virtual const std::string& get_dependency (int i) = 0;
+			virtual const equation <datatype> *get_dependency (int i) = 0;
 		
 			/*!**********************************************************************
 			 * \brief Add a dependency to one of the solvers in the equation
@@ -87,7 +89,7 @@ namespace plans
 			 * \param name The name of the dependency
 			 * \param flags The solver flag indicating with which direction the dependency is associated
 			 ************************************************************************/
-			virtual void add_dependency (std::string name, int flags = 0x00) = 0;
+			virtual void add_dependency (equation <datatype> *name, int flags = 0x00) = 0;
 		
 			/*!**********************************************************************
 			 * \brief Return a pointer to the data associated with the solver
@@ -183,6 +185,16 @@ namespace plans
 
 			virtual void add_plan (const typename plan <datatype>::factory_container &i_container) = 0;
 			
+			equation <datatype> &operator+ (const typename plan <datatype>::factory_container &i_container) {
+				add_plan (-1.0 * i_container);
+				return *this;
+			}
+
+			equation <datatype> &operator== (const typename plan <datatype>::factory_container &i_container) {
+				add_plan (i_container);
+				return *this;
+			}
+
 			virtual void setup_plans () {
 				for (int i = 0; i < (int) pre_transform_plans.size (); ++i) {
 					pre_transform_plans [i]->setup ();

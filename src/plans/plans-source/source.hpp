@@ -81,7 +81,7 @@ namespace plans
 				 * \param i_coeff The coefficient to be used when constructing the plan
 				 * \param i_data_source The data source to be used when constructing the plan
 				 ************************************************************************/
-				factory (datatype i_coeff, datatype *i_data_source) : explicit_plan <datatype>::factory (i_coeff), data_source (i_data_source) {}
+				factory (datatype *i_data_source, datatype i_coeff = 1.0) : explicit_plan <datatype>::factory (i_coeff), data_source (i_data_source) {}
 			
 				virtual ~factory () {}
 			

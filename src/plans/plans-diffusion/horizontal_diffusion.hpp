@@ -105,14 +105,13 @@ namespace plans
 			{
 			private:
 				datatype alpha; //!< The implicit fraction for the plan to be constructed
-				datatype *data_in;
 			
 			public:
 				/*!**********************************************************************
 				 * \param i_coeff The diffusion coefficient for the plan to be constructed
 				 * \param i_alpha The implicit fraction for the plan to be constructed
 				 ************************************************************************/
-				factory (datatype *i_data_in, datatype i_coeff = 1.0, datatype i_alpha = 1.0) : implicit_plan <datatype>::factory (i_coeff), alpha (i_alpha), data_in (i_data_in) {}
+				factory (datatype i_coeff = 1.0, datatype i_alpha = 1.0) : implicit_plan <datatype>::factory (i_coeff), alpha (i_alpha) {}
 			
 				virtual ~factory () {}
 			
@@ -120,9 +119,8 @@ namespace plans
 				 * \copydoc implicit::factory::instance
 				 ************************************************************************/
 				virtual std::shared_ptr <plan <datatype> > _instance (grids::grid <datatype> **grids, datatype **matrices, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
-					DEBUG ("New data, " << data_in);
 					if (coeff) {
-						return std::shared_ptr <plan <datatype> > (new horizontal <datatype> (*grids [0], *grids [1], alpha, matrices [0], matrices [1], data_in, i_data_out, 1.0, i_element_flags, i_component_flags));
+						return std::shared_ptr <plan <datatype> > (new horizontal <datatype> (*grids [0], *grids [1], alpha, matrices [0], matrices [1], i_data_in, i_data_out, 1.0, i_element_flags, i_component_flags));
 					}
 					return std::shared_ptr <plan <datatype> > ();
 				}

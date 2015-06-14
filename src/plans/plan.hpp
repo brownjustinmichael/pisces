@@ -182,9 +182,10 @@ namespace plans
 			}
 
 			factory_container operator* (YAML::Node &node) {
-				if (node.IsDefined ()) {
+				// if (node.IsDefined ()) {
 					return *this * node.as <datatype> ();
-				}
+				// }
+				WARN ("Missing parameter... Assuming to be 0.0")
 				return factory_container ();
 			}
 
@@ -208,7 +209,7 @@ namespace plans
 	}
 
 	template <class datatype>
-	datatype operator* (YAML::Node &node, datatype other) {
+	datatype operator* (YAML::Node node, datatype other) {
 		return other * node;
 	}
 

@@ -55,6 +55,9 @@ namespace plans
 			post_plan = 0x04,
 			pre_solve_plan = 0x08
 		};
+
+		template <class datatype>
+		class equation;
 		
 		/*!*******************************************************************
 		 * \brief A class designed to solve a matrix equation
@@ -65,7 +68,7 @@ namespace plans
 		class solver : public plan <datatype>
 		{
 		private:
-			std::vector <std::string> deps; //!< A vector containing the dependencies of this solver
+			std::vector <equation <datatype>*> deps; //!< A vector containing the dependencies of this solver
 	
 			std::vector <std::shared_ptr <plan <datatype> > > pre_transform_plans; //!< A vector of shared pointers of plans to be executed before the transforms
 			std::vector <std::shared_ptr <plan <datatype> > > mid_transform_plans; //!< A vector of shared pointers of plans to be executed after the vertical transform
@@ -114,7 +117,7 @@ namespace plans
 			 * 
 			 * \return The ith dependency
 			 ************************************************************************/
-			virtual const std::string& get_dependency (int i) {
+			virtual const equation <datatype> *get_dependency (int i) {
 				return deps [i];
 			}
 		
@@ -123,8 +126,8 @@ namespace plans
 			 * 
 			 * \param name The name of the dependency to add
 			 ************************************************************************/
-			virtual void add_dependency (std::string name) {
-				deps.push_back (name);
+			virtual void add_dependency (equation <datatype> *equation) {
+				deps.push_back (equation);
 			}
 	
 			/*!**********************************************************************

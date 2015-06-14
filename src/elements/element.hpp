@@ -287,7 +287,7 @@ namespace pisces
 					
 					skip = false;
 					for (int j = 0; j < equations [*iter]->n_dependencies (); ++j) {
-						if (!(element_flags [equations [*iter]->get_dependency (j)] & solved)) {
+						if (!(*(equations [*iter]->get_dependency (j)->component_flags) & solved)) {
 							skip = true;
 							break;
 						}

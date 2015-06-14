@@ -38,12 +38,27 @@ namespace boundaries
 		 * \param i_value The value at which to fix the data at the edge
 		 * \param i_top A boolean regarding whether this is the top or bottom of an element
 		 ************************************************************************/
-		fixed_boundary (grids::grid <datatype> *i_grid_n, grids::grid <datatype> *i_grid_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n->get_n ())), top (i_top) {
-			ldn = i_grid_n->get_ld ();
-			m = i_grid_m->get_n ();
+		fixed_boundary (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n.get_n ())), top (i_top) {
+			ldn = i_grid_n.get_ld ();
+			m = i_grid_m.get_n ();
 		}
 		
 		virtual ~fixed_boundary () {}
+
+		class factory : public boundaries::boundary <datatype>::factory
+		{
+		private:
+			datatype value;
+
+		public:
+			factory (datatype i_value) : value (i_value) {}
+
+			virtual ~factory () {}
+			
+			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid <datatype> **grids, bool top) {
+				return std::shared_ptr <boundary <datatype>> (new fixed_boundary (*grids [0], *grids [1], value, top));
+			}
+		};
 		
 		/*!**********************************************************************
 		 * \copydoc boundary::calculate_rhs
@@ -85,15 +100,30 @@ namespace boundaries
 		 * \param i_value The value at which to fix the derivative at the edge
 		 * \param i_top A boolean regarding whether this is the top or bottom of an element
 		 ************************************************************************/
-		fixed_deriv_boundary (grids::grid <datatype> *i_grid_n, grids::grid <datatype> *i_grid_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n->get_n ())), top (i_top) {
-			ldn = i_grid_n->get_ld ();
-			m = i_grid_m->get_n ();
+		fixed_deriv_boundary (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n.get_n ())), top (i_top) {
+			ldn = i_grid_n.get_ld ();
+			m = i_grid_m.get_n ();
 			
 			// Get the derivative matrix from the grid object
-			deriv_matrix = i_grid_m->get_data (1) + (top ? m - 1 : 0);
+			deriv_matrix = i_grid_m.get_data (1) + (top ? m - 1 : 0);
 		}
 		
 		virtual ~fixed_deriv_boundary () {}
+
+		class factory : public boundaries::boundary <datatype>::factory
+		{
+		private:
+			datatype value;
+
+		public:
+			factory (datatype i_value) : value (i_value) {}
+
+			virtual ~factory () {}
+			
+			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid <datatype> **grids, bool top) {
+				return std::shared_ptr <boundary <datatype>> (new fixed_deriv_boundary (*grids [0], *grids [1], value, top));
+			}
+		};
 		
 		/*!**********************************************************************
 		 * \copydoc boundary::calculate_rhs
@@ -171,6 +201,21 @@ namespace boundaries
 		}
 		
 		virtual ~communicating_boundary () {}
+
+		class factory : public boundaries::boundary <datatype>::factory
+		{
+		private:
+			mpi::messenger *messenger_ptr;
+
+		public:
+			factory (mpi::messenger *i_messenger_ptr) : messenger_ptr (i_messenger_ptr) {}
+
+			virtual ~factory () {}
+			
+			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid <datatype> **grids, bool top) {
+				return std::shared_ptr <boundary <datatype>> (new communicating_boundary (messenger_ptr, grids [0]->get_ld (), grids [1]->get_n (), top ? grids [1]->get_excess_n () : grids [1]->get_excess_0 (), top));
+			}
+		};
 		
 		/*!**********************************************************************
 		 * \copydoc boundary::get_overlap

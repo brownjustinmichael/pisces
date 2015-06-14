@@ -91,6 +91,8 @@ namespace plans
 			 ************************************************************************/
 			collocation (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, mpi::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
 			
+			collocation (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, mpi::messenger* i_messenger_ptr, datatype& i_timestep, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : collocation (i_grid_n, i_grid_m, i_messenger_ptr, i_timestep, i_boundary_0.instance (i_grid_n, i_grid_m, false), i_boundary_n.instance (i_grid_n, i_grid_m, true), i_rhs, i_data, i_element_flags, i_component_flags) {}
+
 			virtual ~collocation () {}
 			
 			/*!**********************************************************************
@@ -125,6 +127,8 @@ namespace plans
 				datatype &timestep; //!< A reference to the timestep for the solver to be constructed
 				std::shared_ptr <boundaries::boundary <datatype>> boundary_0; //!< A shared pointer to the top boundary for the solver to be constructed
 				std::shared_ptr <boundaries::boundary <datatype>> boundary_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
+				typename boundaries::boundary <datatype>::factory *boundary_factory_0; //!< A shared pointer to the top boundary for the solver to be constructed
+				typename boundaries::boundary <datatype>::factory *boundary_factory_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
 				
 			public:
 				/*!**********************************************************************
@@ -134,6 +138,8 @@ namespace plans
 				 * \param i_boundary_n A shared pointer to the bottom boundary for the solver to be constructed
 				 ************************************************************************/
 				factory (mpi::messenger *i_messenger_ptr, datatype &i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n) : messenger_ptr (i_messenger_ptr), timestep (i_timestep), boundary_0 (i_boundary_0), boundary_n (i_boundary_n) {}
+
+				factory (mpi::messenger *i_messenger_ptr, datatype &i_timestep, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n) : messenger_ptr (i_messenger_ptr), timestep (i_timestep), boundary_factory_0 (&i_boundary_0), boundary_factory_n (&i_boundary_n) {}
 				
 				virtual ~factory () {}
 				
@@ -141,7 +147,7 @@ namespace plans
 				 * \copydoc solver::factory::instance
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::grid <datatype> **grids, datatype *i_data, datatype *i_rhs, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
-					return std::shared_ptr <plans::solvers::solver <datatype>> (new collocation (*grids [0], *grids [1], messenger_ptr, timestep, boundary_0, boundary_n, i_rhs, i_data, i_element_flags, i_component_flags));
+					return std::shared_ptr <plans::solvers::solver <datatype>> (new collocation (*grids [0], *grids [1], messenger_ptr, timestep, boundary_factory_0 ? boundary_factory_0->instance (grids, false) : boundary_0, boundary_factory_n ? boundary_factory_n->instance (grids, true) : boundary_n, i_rhs, i_data, i_element_flags, i_component_flags));
 				}
 			};
 		};

@@ -10,6 +10,7 @@
 #define BOUNDARY_HPP_013D6464
 
 #include "versions/version.hpp"
+#include "plans/grids/grid.hpp"
 
 /*!**********************************************************************
  * \namespace boundaries
@@ -52,6 +53,19 @@ namespace boundaries
 		boundary () {}
 		
 		virtual ~boundary () {}
+
+		class factory
+		{
+		public:			
+			virtual ~factory () {}
+			
+			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid <datatype> **grids, bool top) = 0;
+
+			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid <datatype> &grid_n, grids::grid <datatype> &grid_m, bool top) {
+				grids::grid <datatype> *grids [3] = {&grid_n, &grid_m};
+				return instance (grids, top);
+			}
+		};
 		
 		/*!**********************************************************************
 		 * \brief Get the version of the class

@@ -77,6 +77,8 @@ namespace plans
 			 * \param i_data A pointer to the data
 			 ************************************************************************/
 			fourier (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
+
+			fourier (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype& i_timestep, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : fourier (i_grid_n, i_grid_m, i_timestep, i_boundary_0.instance (i_grid_n, i_grid_m, false), i_boundary_n.instance (i_grid_n, i_grid_m, true), i_rhs, i_data, i_element_flags, i_component_flags) {}
 			
 			virtual ~fourier () {}
 			
@@ -110,6 +112,8 @@ namespace plans
 				datatype &timestep; //!< The timestep reference for the solver to be constructed
 				std::shared_ptr <boundaries::boundary <datatype>> boundary_0; //!< A shared pointer to the top boundary for the solver to be constructed
 				std::shared_ptr <boundaries::boundary <datatype>> boundary_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
+				typename boundaries::boundary <datatype>::factory *boundary_factory_0; //!< A shared pointer to the top boundary for the solver to be constructed
+				typename boundaries::boundary <datatype>::factory *boundary_factory_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
 				
 			public:
 				/*!**********************************************************************
@@ -118,13 +122,16 @@ namespace plans
 				 * \param i_boundary_n A shared pointer to the bottom boundary for the solver to be constructed
 				 ************************************************************************/
 				factory (datatype &i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n) : timestep (i_timestep), boundary_0 (i_boundary_0), boundary_n (i_boundary_n) {}
+
+				factory (datatype &i_timestep, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n) : timestep (i_timestep), boundary_factory_0 (&i_boundary_0), boundary_factory_n (&i_boundary_n) {}
+
 				virtual ~factory () {}
 				
 				/*!**********************************************************************
 				 * \copydoc solver::factory::instance
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::grid <datatype> **grids, datatype *i_data, datatype *i_rhs, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
-					return std::shared_ptr <plans::solvers::solver <datatype>> (new fourier (*grids [0], *grids [1], timestep, boundary_0, boundary_n, i_rhs, i_data, i_element_flags, i_component_flags));
+					return std::shared_ptr <plans::solvers::solver <datatype>> (new fourier (*grids [0], *grids [1], timestep, boundary_factory_0 ? boundary_factory_0->instance (grids, false) : boundary_0, boundary_factory_n ? boundary_factory_n->instance (grids, true) : boundary_n, i_rhs, i_data, i_element_flags, i_component_flags));
 				}
 			};
 		};

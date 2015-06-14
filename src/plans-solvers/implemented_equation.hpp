@@ -66,7 +66,7 @@ namespace plans
 			 * \param i_grid_n The grid object in the horizontal
 			 * \param i_grid_m The grid object in the vertical
 			 ************************************************************************/
-			implemented_equation (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype *i_data, int *i_element_flags, int *i_component_flags) : plans::solvers::equation <datatype> (i_data, i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), grid_n (i_grid_n), grid_m (i_grid_m) {
+			implemented_equation (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype *i_data, int *i_element_flags, int *i_component_flags, mpi::messenger *i_messenger_ptr) : plans::solvers::equation <datatype> (i_data, i_element_flags, i_component_flags, i_messenger_ptr), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), grid_n (i_grid_n), grid_m (i_grid_m) {
 				spectral_rhs_ptr = NULL;
 				real_rhs_ptr = NULL;
 				old_rhs_vec.resize (ldn * m, 0.0);
@@ -107,7 +107,7 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc equation::get_dependency
 			 ************************************************************************/
-			virtual const std::string& get_dependency (int i) {
+			virtual const equation <datatype> *get_dependency (int i) {
 				if (*component_flags & x_solve) {
 					return x_solver->get_dependency (i);
 				} else if (*component_flags & z_solve) {
@@ -121,7 +121,7 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc equation::add_dependency
 			 ************************************************************************/
-			virtual void add_dependency (std::string name, int flags = 0x00) {
+			virtual void add_dependency (equation <datatype> *name, int flags = 0x00) {
 				if (!(flags & not_x_solver)) {
 					if (x_solver) {
 						x_solver->add_dependency (name);

@@ -12,6 +12,16 @@
 #include "plans-diffusion/horizontal_diffusion.hpp"
 #include "plans-diffusion/vertical_diffusion.hpp"
 #include "plans-diffusion/variable_diffusion.hpp"
-#include "plans-diffusion/uniform_diffusion.hpp"
+
+#include "implicit_plan.hpp"
+#include "io/parameters.hpp"
+
+namespace plans
+{
+	template <class datatype>
+	typename implicit_plan <datatype>::factory_container diff (datatype coeff = 1.0) {
+		return typename implicit_plan <datatype>::factory_container (std::shared_ptr <typename implicit_plan <datatype>::factory> (new typename diffusion::vertical <datatype>::factory (coeff))) + typename implicit_plan <datatype>::factory_container (std::shared_ptr <typename implicit_plan <datatype>::factory> (new typename diffusion::horizontal <datatype>::factory (coeff)));
+	}
+} /* plans */
 
 #endif /* end of include guard: DIFFUSION_HPP_C1935DDC */
