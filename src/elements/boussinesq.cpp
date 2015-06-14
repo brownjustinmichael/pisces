@@ -138,65 +138,15 @@ namespace pisces
 		z_vel_ptr = data ("z_velocity");
 		
 		advection_coeff = 0.0;
-		cfl = i_params.get <datatype> ("time.cfl");
+		cfl = i_params ["time.cfl"].as <datatype> ();
 
-		// If we aren't at an edge, add the appropriate communicating boundary
+		*split_solver <datatype> (equations ["temperature"], timestep, dirichlet (1.0), dirichlet (0.0)) + advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) == params ["equations.temperature.diffusion"] * diff <datatype> ();
 
-		std::shared_ptr <typename boundaries::boundary <datatype>::factory> local_boundary_0, local_boundary_n;
-		std::string variable;
-		for (YAML::const_iterator iter = i_params ["equations"].begin (); iter != i_params ["equations"].end (); ++iter) {
-			variable = iter->first.as <std::string> ();
-			io::parameters::alias terms (i_params, "equations." + variable);
-			
-			// If the equation is labeled as ignore, do not construct an equation
-			if ((terms ["ignore"].IsDefined () && terms ["ignore"].as <bool> ()) || variable == "pressure") {
-				continue;
-			}
-			
-			// If no communicating boundary is available, we're on an edge, so use the appropriate edge case
-			if (!local_boundary_0) {
-				if (terms ["bottom"].IsDefined ()) {
-					if (terms ["bottom.type"].as <std::string> () == "fixed_value") {
-						local_boundary_0 = std::shared_ptr <typename boundaries::boundary <datatype>::factory> (new typename boundaries::fixed_boundary <datatype>::factory (terms ["bottom.value"].as <datatype> ()));
-					} else if (terms ["bottom.type"].as <std::string> () == "fixed_derivative") {
-						local_boundary_0 = std::shared_ptr <typename boundaries::boundary <datatype>::factory> (new typename boundaries::fixed_deriv_boundary <datatype>::factory (terms ["bottom.value"].as <datatype> ()));
-					}
-				}
-			}
-			if (!local_boundary_n) {
-				if (terms ["top"].IsDefined ()) {
-					if (terms ["top.type"].as <std::string> () == "fixed_value") {
-						local_boundary_n = std::shared_ptr <typename boundaries::boundary <datatype>::factory> (new typename fixed_boundary <datatype>::factory (terms ["top.value"].as <datatype> ()));
-					} else if (terms ["top.type"].as <std::string> () == "fixed_derivative") {
-						local_boundary_n = std::shared_ptr <typename boundaries::boundary <datatype>::factory> (new typename fixed_deriv_boundary <datatype>::factory (terms ["top.value"].as <datatype> ()));
-					}
-				}
-			}
-			
-			// Add the split directional solvers
-			*plans::split_solver <datatype> (equations [variable],  timestep, local_boundary_0, local_boundary_n) + terms ["advection"] * advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) == terms ["diffusion"] * diff <datatype> ();
-			// equations [variable]->add_solver (typename collocation <datatype>::factory (messenger_ptr, timestep, local_boundary_0, local_boundary_n), z_solver);
-			// equations [variable]->add_solver (typename fourier <datatype>::factory (timestep, local_boundary_0, local_boundary_n), x_solver);
-			
-			// *equations [variable] + terms ["advection"] * advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) == terms ["diffusion"] * diff <datatype> (ptr (variable));
-			
-			// If any source terms are specified, construct the appropriate source plans
-			if (terms ["sources"].IsDefined ()) {
-				for (YAML::const_iterator source_iter = terms ["sources"].begin (); source_iter != terms ["sources"].end (); ++source_iter) {
-					if (ptr (source_iter->first.as <std::string> ())) {
-						*equations [variable] == source_iter->second * src (ptr (source_iter->first.as <std::string> ()));
-					}
-				}
-			}
-		}
+		*split_solver <datatype> (equations ["composition"], timestep, dirichlet (1.0), dirichlet (0.0)) + advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) == params ["equations.composition.diffusion"] * diff <datatype> ();
 
-		// *split_solver <datatype> (equations ["temperature"], timestep, dirichlet (1.0), dirichlet (0.0)) + advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) == params ["temperature.diffusion"] * diff <datatype> ();
+		*split_solver <datatype> (equations ["x_velocity"], timestep, neumann (0.0), neumann (0.0)) + advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) == params ["equations.velocity.diffusion"] * diff <datatype> ();
 
-		// *split_solver <datatype> (equations ["composition"], timestep, dirichlet (1.0), dirichlet (0.0)) + advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) == params ["composition.diffusion"] * diff <datatype> ();
-
-		// *split_solver <datatype> (equations ["x_velocity"], timestep, neumann (0.0), neumann (0.0)) + advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) == params ["velocity.diffusion"] * diff <datatype> ();
-
-		// *split_solver <datatype> (equations ["z_velocity"], timestep, dirichlet (0.0), dirichlet (0.0)) + advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) == params ["z_velocity.sources.temperature"] * src <datatype> (ptr ("temperature")) + params ["z_velocity.sources.composition"] * src <datatype> (ptr ("composition")) + params ["velocity.diffusion"] * diff <datatype> ();
+		*split_solver <datatype> (equations ["z_velocity"], timestep, dirichlet (0.0), dirichlet (0.0)) + advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) == params ["equations.z_velocity.sources.temperature"] * src <datatype> (ptr ("temperature")) + params ["equations.z_velocity.sources.composition"] * src <datatype> (ptr ("composition")) + params ["equations.velocity.diffusion"] * diff <datatype> ();
 
 		div <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"]);
 		
