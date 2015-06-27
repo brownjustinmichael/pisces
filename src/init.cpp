@@ -57,6 +57,8 @@ int main (int argc, char *argv[])
 		horizontal::grid <double> horizontal_grid (new grids::axis (n, position_n0, position_nn));
 		vertical::grid <double> vertical_grid (new grids::axis (m, position_m0, position_mm, excess_0, excess_n));
 
+		DEBUG ("TOTAL M: " << m);
+
 		std::vector <double> temps_vec (n * m, 0.0), tempt_vec (n * m, 0.0);
 		double *temps = &temps_vec [0], *tempt = &tempt_vec [0];
 		const double *pos_z = &vertical_grid [0];

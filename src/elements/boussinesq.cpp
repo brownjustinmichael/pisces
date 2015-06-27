@@ -101,7 +101,7 @@ namespace pisces
 		+ params ["equations.velocity.diffusion"] * diff <datatype> ();
 
 		// Set up the velocity constraint
-		*div <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"])
+		*pdiv <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"])
 		==
 		0.0;
 		

@@ -378,15 +378,10 @@ namespace linalg
 		if (!info) {
 			info = &iinfo;
 		}
-		
-		// printf ("POINTER: %i %p %p %p %p %p\n", n, dl, d, du, du2, info);
-		
-		// for (int i = 0; i < n; ++i) {
-		// 	printf ("%f %f %f \n", dl [i], d [i], du [i]);
-		// }		
+				
 		dgttrf_ (&n, dl, d, du, du2, ipiv, info);
 		
-		if (*info != 0) {
+		if (*info != 0 && *info != n) {
 			FATAL ("Info is " << *info);
 			throw exceptions::cannot_factor ();
 		}
