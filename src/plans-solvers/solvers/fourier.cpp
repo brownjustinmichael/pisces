@@ -103,6 +103,13 @@ namespace plans
 			for (int j = excess_0; j < m - excess_n; ++j) {
 				linalg::diagonal_solve (ldn, &factorized_matrix [j], &data_temp [ex_overlap_0 + j], m, lda);
 			}
+
+			if (*component_flags & ignore_net) {
+				for (int i = 0; i < ldn; ++i)
+				{
+					DEBUG ("" << data_temp [i * m + m - 1] << " should be 0")
+				}
+			}
 			linalg::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data, lda);
 			
 			// Because we only have derivative information for the non-overlapping regions, linearly extrapolate the overlap

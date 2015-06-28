@@ -96,9 +96,10 @@ namespace pisces
 		*split_solver <datatype> (equations ["z_velocity"], timestep, dirichlet (0.0), dirichlet (0.0)) 
 		+ advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) 
 		== 
-		params ["equations.z_velocity.sources.temperature"] * src <datatype> (ptr ("temperature")) 
+		params ["equations.z_velocity.sources.temperature"] * src <datatype> (ptr ("temperature"))
 		+ params ["equations.z_velocity.sources.composition"] * src <datatype> (ptr ("composition")) 
 		+ params ["equations.velocity.diffusion"] * diff <datatype> ();
+		element_flags ["z_velocity"] |= ignore_net;
 
 		// Set up the velocity constraint
 		*pdiv <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"])

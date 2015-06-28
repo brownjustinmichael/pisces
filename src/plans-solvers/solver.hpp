@@ -44,6 +44,7 @@ namespace plans
 			real_rhs = 0x02,
 			factorized = 0x08,
 			first_run = 0x100,
+			ignore_net = 0x40000000
 		};
 		
 		/*!**********************************************************************

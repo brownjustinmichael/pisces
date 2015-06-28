@@ -83,10 +83,10 @@ namespace plans
 			
 			for (int j = 0; j < m; ++j)
 			{
-				diff [j] = pos_m [j + 1] - pos_m [j];
+				diff [j] = pos_m [j] - pos_m [j - 1];
 				diff2 [j] = pos_m [j + 1] - pos_m [j - 1];
 			}
-			diff [-1] = pos_m [0] - pos_m [-1];
+			diff [m] = pos_m [m] - pos_m [m - 1];
 
 			matrix.resize (4 * m * ldn);
 		}
@@ -106,17 +106,17 @@ namespace plans
 			for (int i = 0; i < ldn; ++i) {
 				for (int j = 0; j < m; ++j) {
 					// j is the gridpoint location of the solve on the velocity grid (I think)
-					sup_ptr [j] = 1.0 / diff [j] / diff2 [j];
-					diag_ptr [j] = (-1.0 / diff [j] - 1.0 / diff [j - 1]) / diff2 [j] - scalar * (i / 2) * (i / 2);
-					sub_ptr [j] = 1.0 / diff [j - 1] / diff2 [j];
+					sup_ptr [j] = 1.0 / diff [j + 1] / diff2 [j];
+					diag_ptr [j] = (-1.0 / diff [j + 1] - 1.0 / diff [j]) / diff2 [j] - scalar * (i / 2) * (i / 2);
+					sub_ptr [j] = 1.0 / diff [j] / diff2 [j];
 				}
 				if (id == 0) {
-					sup_ptr [0] = 1.0 / diff [0] / diff [0];
-					diag_ptr [0] = -1.0 / diff [0] / diff [0] - scalar * (i / 2) * (i / 2);
+					sup_ptr [0] = 2.0 / diff [1] / diff2 [0];
+					diag_ptr [0] = -2.0 / diff [1] / diff2 [0] - scalar * (i / 2) * (i / 2);
 				}
 				if (id == np - 1) {
-					diag_ptr [m - 1] = -1.0 / diff [m - 2] / diff [m - 2] - scalar * (i / 2) * (i / 2);
-					sub_ptr [m - 1] = 1.0 / diff [m - 2] / diff [m - 2];
+					diag_ptr [m - 1] = -2.0 / diff [m - 1] / diff2 [m - 1] - scalar * (i / 2) * (i / 2);
+					sub_ptr [m - 1] = 2.0 / diff [m - 1] / diff2 [m - 1];
 				}
 				sub_ptr += m;
 				diag_ptr += m;
@@ -130,19 +130,14 @@ namespace plans
 			int info;
 			TRACE ("Solving...");
 			bool retransform = false;
-			linalg::scale (m * ldn, 0.0, &data [0]);
-		
-			// std::shared_ptr <plans::plan <datatype> > transform_x = std::shared_ptr <plans::plan <datatype> > (new plans::transforms::vertical <datatype> (n, m, data_x, NULL, 0x00, element_flags, component_flags_x));
-			// std::shared_ptr <plans::plan <datatype> > transform_z = std::shared_ptr <plans::plan <datatype> > (new plans::transforms::vertical <datatype> (n, m, data_z, NULL, 0x00, element_flags, component_flags_z));
-			
-			// if (*component_flags_x & transformed_vertical) {
-			// 	DEBUG ("TRANSFORM!!!");
-			// 	transform_x->execute ();
-			// 	transform_z->execute ();
-			// 	retransform = true;
-			// }
+			// No net vertical flux
+			// linalg::scale (2 * m, 0.0, data_z);
+
 			if (!(*component_flags_x & transformed_vertical)) {
+				linalg::scale (m * ldn, 0.0, &data [0]);
+
 				datatype scalar = acos (-1.0) * 2.0 / (pos_n [n - 1] - pos_n [0]);
+				DEBUG ("VALUE " << data_z [0] << " " << data_z [m - 1])
 				
 				// Calculate the horizontal derivatives of the horizontal component
 				for (int i = 2; i < ldn; i += 2) {
@@ -155,13 +150,13 @@ namespace plans
 				// Calculate the vertical derivatives of the vertical component
 				for (int i = 0; i < ldn; ++i) {
 					if (id == 0) {
-						data [i * m] += (data_z [i * m + 1] - data_z [i * m]) / diff [0];
+						data [i * m] += (data_z [i * m + 1] - data_z [i * m]) / diff [1];
 					}
 					for (int j = 1; j < m - 1; ++j) {
 						data [i * m + j] += (data_z [i * m + j + 1] - data_z [i * m + j - 1]) / diff2 [j];
 					}
 					if (id == np - 1) {
-						data [i * m + m - 1] = (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / diff [m - 2];
+						data [i * m + m - 1] = (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / diff [m - 1];
 					}
 				}
 				linalg::block::tridiag_solve (id, np, m - excess_0 - excess_n, &matrix [excess_0], &matrix [excess_0 + m * ldn], &matrix [excess_0 + 2 * m * ldn], &matrix [excess_0 + 3 * m * ldn], &ipiv [0], &data [excess_0], &x [0], &xipiv [0], &info, ldn, m, m);
@@ -188,7 +183,7 @@ namespace plans
 					}
 				}
 				
-				// DEBUG (ldn * (m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0)) + excess_0 << " " << ldn * m)
+				DEBUG (ldn * (m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0)) + excess_0 << " " << ldn * m)
 				for (int i = 2; i < ldn; i += 2) {
 					for (int j = 0; j < m; ++j) {
 						data_x [i * m + j] += scalar * (i / 2) * data [(i + 1) * m + j];
@@ -206,21 +201,7 @@ namespace plans
 					}
 				}
 	#endif
-			} else {
-				// FATAL ("SHOULDN'T BE HERE" << *component_flags_x);
-				// throw 0;
 			}
-		
-			// if (retransform) {
-			// 	transform_x->execute ();
-			// 	transform_z->execute ();
-			// }
-			
-			// No net vertical flux
-			linalg::scale (2 * m, 0.0, data_z);
-			// linalg::scale (2 * m, 0.0, data_x);
-			// linalg::scale (m, 0.0, data_x + (ldn - 1) * m);
-			// linalg::scale (m, 0.0, data_z + (ldn - 1) * m);
 
 			TRACE ("Solved");
 		}

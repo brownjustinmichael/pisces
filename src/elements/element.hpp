@@ -298,9 +298,9 @@ namespace pisces
 					}
 				}
 				
-				int threads = std::min (params.get <int> ("parallel.solver.threads"), (int) can_be_solved.size ());
+				// int threads = std::min (params.get <int> ("parallel.solver.threads"), (int) can_be_solved.size ());
 				// #pragma omp parallel for num_threads (threads)
-				for (int i = 0; i < threads; ++i) {
+				for (int i = 0; i < 1; ++i) {
 					std::string name = can_be_solved [i];
 					equations [name]->solve ();
 					// #pragma omp atomic

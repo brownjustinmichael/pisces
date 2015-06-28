@@ -199,6 +199,7 @@ namespace pisces
 			
 			// Using the minimum timestep, check whether the code should increase or reduce the timestep
 			if (limiters) {
+				DEBUG ("Desired: " << shared_min << " Current: " << timestep);
 				if (timestep == 0.0) {
 					return init_timestep;
 				}

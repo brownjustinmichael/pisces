@@ -254,13 +254,10 @@ namespace plans
 				TRACE ("Adding plan...");
 				datatype *rhs;
 				if (i_factory.type () == plans::plan <datatype>::factory::impl) {
-					DEBUG ("SPECTRAL")
 					rhs = rhs_ptr (spectral_rhs);
 				} else if (i_factory.type () == plans::plan <datatype>::factory::real) {
-					DEBUG ("REAL");
 					rhs = rhs_ptr (real_rhs);
 				} else {
-					DEBUG ("NEW");
 					rhs = new_rhs_ptr;
 				}
 				grids::grid <datatype>* grids [2] = {&grid_n, &grid_m};
@@ -332,6 +329,9 @@ namespace plans
 				// Add in the spectral component (the explicit part of the implicit component) after the AB scheme
 				if (spectral_rhs_ptr) {
 					linalg::matrix_add_scaled (m, ldn, 1.0, spectral_rhs_ptr, cor_rhs_ptr);
+				}
+				if (*component_flags & ignore_net) {
+					linalg::scale (2 * m, 0.0, cor_rhs_ptr);
 				}
 				
 				// Solve either the x direction solve or the z direction solve
