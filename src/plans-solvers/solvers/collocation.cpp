@@ -73,14 +73,14 @@ namespace plans
 			
 			// Calculate the matrix contributions from the boundaries. Note, these take care of the timestep multiplication
 			if (boundary_0) {
-				boundary_0->calculate_matrix (timestep, default_matrix + excess_0, &matrix [excess_0], &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0], lda);
+				boundary_0->calculate_matrix (timestep / 2.0, default_matrix + excess_0, &matrix [excess_0], &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0], lda);
 			}
 			if (boundary_n) {
-				boundary_n->calculate_matrix (timestep, default_matrix + m - 1 - excess_n, &matrix [m - 1 - excess_n], &factorized_matrix [(ex_overlap_0) * (lda + 1) + m - 1 - excess_n], lda);
+				boundary_n->calculate_matrix (timestep / 2.0, default_matrix + m - 1 - excess_n, &matrix [m - 1 - excess_n], &factorized_matrix [(ex_overlap_0) * (lda + 1) + m - 1 - excess_n], lda);
 			}
 			
 			// Scale the matrices by the timestep
-			linalg::matrix_scale (lda - 2 - excess_0 - ex_overlap_0 - excess_n - ex_overlap_n, lda, timestep, &factorized_matrix [ex_overlap_0 + 1 + excess_0], lda);
+			linalg::matrix_scale (lda - 2 - excess_0 - ex_overlap_0 - excess_n - ex_overlap_n, lda, timestep / 2.0, &factorized_matrix [ex_overlap_0 + 1 + excess_0], lda);
 			
 			// Add in the original data to the matrix
 			linalg::matrix_add_scaled (m - 2 - excess_0 - excess_n, m, 1.0, default_matrix + excess_0 + 1, &factorized_matrix [(ex_overlap_0) * (lda + 1) + excess_0 + 1], m, lda);
@@ -103,7 +103,7 @@ namespace plans
 			
 			// Add the right hand side, scaled by the timestep
 			if (rhs_ptr) {
-				linalg::matrix_add_scaled (m, ldn, timestep, rhs_ptr, &data_temp [ex_overlap_0], m, lda);
+				linalg::matrix_add_scaled (m, ldn, timestep / 2.0, rhs_ptr, &data_temp [ex_overlap_0], m, lda);
 			}
 			
 			// Include the contributions from the boundaries; if there aren't boundaries, just use the data present
