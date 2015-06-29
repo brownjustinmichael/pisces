@@ -235,7 +235,9 @@ namespace plans
 				}
 				if (flags & mid_plan) {
 					for (int i = 0; i < (int) mid_transform_plans.size (); ++i) {
-						mid_transform_plans [i]->execute ();
+						if (!(flags & implicit_only) || ((flags & implicit_only) && mid_transform_plans [i]->implicit ())) {
+							mid_transform_plans [i]->execute ();
+						}
 					}
 				}
 				if (flags & post_plan) {

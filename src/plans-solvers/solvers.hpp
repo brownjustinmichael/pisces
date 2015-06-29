@@ -40,9 +40,9 @@ namespace plans
 		if (equation_ptr->messenger_ptr->get_id () + 1 < equation_ptr->messenger_ptr->get_np ()) {
 			boundary_n = std::shared_ptr <typename boundaries::boundary <datatype>::factory> (new typename boundaries::communicating_boundary <datatype>::factory (equation_ptr->messenger_ptr));
 		}
-		equation_ptr->add_solver (typename solvers::incompressible <datatype>::factory (equation_ptr->messenger_ptr,  *boundary_0, *boundary_n, *vel_n_ptr, *vel_m_ptr));
-			equation_ptr->get_solver (solvers::x_solver)->add_dependency (&*vel_n_ptr);
-			equation_ptr->get_solver (solvers::x_solver)->add_dependency (&*vel_m_ptr);
+		equation_ptr->add_solver (typename solvers::incompressible <datatype>::factory (equation_ptr->messenger_ptr,  *boundary_0, *boundary_n, *vel_n_ptr, *vel_m_ptr), solvers::z_solver);
+			equation_ptr->get_solver (solvers::z_solver)->add_dependency (&*vel_n_ptr);
+			equation_ptr->get_solver (solvers::z_solver)->add_dependency (&*vel_m_ptr);
 			return equation_ptr;
 	}
 
@@ -55,7 +55,7 @@ namespace plans
 		if (equation_ptr->messenger_ptr->get_id () + 1 < equation_ptr->messenger_ptr->get_np ()) {
 			boundary_n = std::shared_ptr <typename boundaries::boundary <datatype>::factory> (new typename boundaries::communicating_boundary <datatype>::factory (equation_ptr->messenger_ptr));
 		}
-		equation_ptr->add_solver (typename solvers::pseudo_incompressible <datatype>::factory (equation_ptr->messenger_ptr,  *boundary_0, *boundary_n, *vel_n_ptr, *vel_m_ptr));
+		equation_ptr->add_solver (typename solvers::pseudo_incompressible <datatype>::factory (equation_ptr->messenger_ptr,  *boundary_0, *boundary_n, *vel_n_ptr, *vel_m_ptr), solvers::x_solver);
 			equation_ptr->get_solver (solvers::x_solver)->add_dependency (&*vel_n_ptr);
 			equation_ptr->get_solver (solvers::x_solver)->add_dependency (&*vel_m_ptr);
 			return equation_ptr;

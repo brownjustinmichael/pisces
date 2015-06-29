@@ -54,7 +54,8 @@ namespace plans
 			pre_plan = 0x01,
 			mid_plan = 0x02,
 			post_plan = 0x04,
-			pre_solve_plan = 0x08
+			pre_solve_plan = 0x08,
+			implicit_only = 0x10
 		};
 
 		template <class datatype>

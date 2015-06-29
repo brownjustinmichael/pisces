@@ -112,6 +112,10 @@ namespace plans
 
 		virtual int type () = 0;
 
+		virtual bool implicit () {
+			return false;
+		}
+		
 		/*!**********************************************************************
 		 * \brief An abstract factory class designed to produce a plan instance
 		 * 

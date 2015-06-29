@@ -202,13 +202,13 @@ namespace plans
 				linalg::scale (m * ldn, 0.0, new_rhs_ptr);
 				
 				// Since this is an alternating direction solve, make sure to switch directions on reset
-				if (*component_flags & z_solve) {
-					*component_flags &= ~z_solve;
-					*component_flags |= x_solve;
-				} else {
-					*component_flags &= ~x_solve;
-					*component_flags |= z_solve;
-				}
+				// if (*component_flags & z_solve) {
+				// 	*component_flags &= ~z_solve;
+				// 	*component_flags |= x_solve;
+				// } else {
+				// 	*component_flags &= ~x_solve;
+				// 	*component_flags |= z_solve;
+				// }
 			}
 			
 			/*!**********************************************************************
@@ -335,14 +335,28 @@ namespace plans
 				}
 				
 				// Solve either the x direction solve or the z direction solve
-				if (*component_flags & x_solve) {
-					if (x_solver) {
-						x_solver->execute ();
+				if (x_solver) {
+					x_solver->execute ();
+					*component_flags &= ~x_solve;
+					*component_flags |= z_solve;
+				}
+
+				if (z_solver) {
+					linalg::matrix_copy (m, ldn, old_rhs_ptr, cor_rhs_ptr);
+
+					if (spectral_rhs_ptr) {
+						linalg::matrix_scale (m, ldn, 0.0, spectral_rhs_ptr);
+						equation <datatype>::execute_plans ((mid_plan | implicit_only));
+						linalg::matrix_add_scaled (m, ldn, 1.0, spectral_rhs_ptr, cor_rhs_ptr);
 					}
-				} else if (*component_flags & z_solve) {
-					if (z_solver) {
-						z_solver->execute ();
+
+					if (*component_flags & ignore_net) {
+						linalg::scale (2 * m, 0.0, cor_rhs_ptr);
 					}
+
+					z_solver->execute ();
+					*component_flags &= ~z_solve;
+					*component_flags |= x_solve;
 				}
 			}
 		};

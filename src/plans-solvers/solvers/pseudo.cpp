@@ -105,7 +105,6 @@ namespace plans
 			// Generate the matrix
 			for (int i = 0; i < ldn; ++i) {
 				for (int j = 0; j < m; ++j) {
-					// j is the gridpoint location of the solve on the velocity grid (I think)
 					sup_ptr [j] = 1.0 / diff [j + 1] / diff2 [j];
 					diag_ptr [j] = (-1.0 / diff [j + 1] - 1.0 / diff [j]) / diff2 [j] - scalar * (i / 2) * (i / 2);
 					sub_ptr [j] = 1.0 / diff [j] / diff2 [j];
@@ -133,17 +132,26 @@ namespace plans
 			// No net vertical flux
 			// linalg::scale (2 * m, 0.0, data_z);
 
-			if (!(*component_flags_x & transformed_vertical)) {
+			// std::shared_ptr <plans::plan <datatype> > transform_x = std::shared_ptr <plans::plan <datatype> > (new plans::transforms::vertical <datatype> (n, m, data_x, NULL, 0x00, element_flags, component_flags_x));
+			// std::shared_ptr <plans::plan <datatype> > transform_z = std::shared_ptr <plans::plan <datatype> > (new plans::transforms::vertical <datatype> (n, m, data_z, NULL, 0x00, element_flags, component_flags_z));
+			
+			// if (*component_flags_x & transformed_vertical) {
+			// 	DEBUG ("TRANSFORM!!!");
+			// 	transform_x->execute ();
+			// 	transform_z->execute ();
+			// 	retransform = true;
+			// }
+
+			// if (!(*component_flags_x & transformed_vertical)) {
 				linalg::scale (m * ldn, 0.0, &data [0]);
 
 				datatype scalar = acos (-1.0) * 2.0 / (pos_n [n - 1] - pos_n [0]);
-				DEBUG ("VALUE " << data_z [0] << " " << data_z [m - 1])
 				
 				// Calculate the horizontal derivatives of the horizontal component
 				for (int i = 2; i < ldn; i += 2) {
 					for (int j = 0; j < m; ++j) {
-						data [i * m + j] = -scalar * (i / 2) * data_x [(i + 1) * m + j];
-						data [(i + 1) * m + j] = scalar * (i / 2) * data_x [i * m + j];
+						data [i * m + j] += -scalar * (i / 2) * data_x [(i + 1) * m + j];
+						data [(i + 1) * m + j] += scalar * (i / 2) * data_x [i * m + j];
 					}
 				}
 				
@@ -183,7 +191,6 @@ namespace plans
 					}
 				}
 				
-				DEBUG (ldn * (m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0)) + excess_0 << " " << ldn * m)
 				for (int i = 2; i < ldn; i += 2) {
 					for (int j = 0; j < m; ++j) {
 						data_x [i * m + j] += scalar * (i / 2) * data [(i + 1) * m + j];
@@ -201,7 +208,12 @@ namespace plans
 					}
 				}
 	#endif
-			}
+			// }
+
+			// if (retransform) {
+			// 	transform_x->execute ();
+			// 	transform_z->execute ();
+			// }
 
 			TRACE ("Solved");
 		}

@@ -106,7 +106,7 @@ namespace pisces
 						// omp_set_num_threads (threads);
 						TIME (
 						DEBUG (n_steps);
-						if ((n_steps - 1) % 2 == 0) {
+						if (n_steps % 2 == 0) {
 						t_timestep = calculate_min_timestep ();
 						messenger_ptr->min (&t_timestep);}
 						, timestep_time, timestep_duration);
