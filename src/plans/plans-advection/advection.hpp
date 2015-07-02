@@ -62,7 +62,7 @@ namespace plans
 			 * \param i_vel_n A pointer to the horizontal component of the velocity
 			 * \param i_vel_m A pointer to the vertical component of the velocity
 			 ************************************************************************/
-			uniform (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_vel_n, datatype *i_vel_m, datatype *i_data_in, datatype *i_data_out = NULL, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : real_plan <datatype> (i_grid_n, i_grid_m, i_data_in, i_data_out, i_coeff, i_element_flags, i_component_flags), vel_n (i_vel_n), vel_m (i_vel_m), pos_n (&(grid_n [0])), pos_m (&(grid_m [0])) {
+			uniform (grids::variable <datatype> &i_vel_n, grids::variable <datatype> &i_vel_m, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : real_plan <datatype> (i_data_in, i_data_out, i_coeff, i_element_flags, i_component_flags), vel_n (i_vel_n.ptr ()), vel_m (i_vel_m.ptr ()), pos_n (&(grid_n [0])), pos_m (&(grid_m [0])) {
 				TRACE ("Adding advection...");
 				x_vec.resize (n * m);
 				x_ptr = &x_vec [0];
@@ -131,8 +131,8 @@ namespace plans
 			class factory : public real_plan <datatype>::factory
 			{
 			private:
-				datatype *vel_n; //!< A pointer to the horizontal component of the velocity
-				datatype *vel_m; //!< A pointer to the vertical component of the velocity
+				grids::variable <datatype> &vel_n; //!< A pointer to the horizontal component of the velocity
+				grids::variable <datatype> &vel_m; //!< A pointer to the vertical component of the velocity
 			
 			public:
 				/*!**********************************************************************
@@ -140,16 +140,16 @@ namespace plans
 				 * \param i_vel_n A pointer to the horizontal component of the velocity
 				 * \param i_vel_m A pointer to the vertical component of the velocity
 				 ************************************************************************/
-				factory (datatype* i_vel_n, datatype* i_vel_m, datatype i_coeff = -1.0) : real_plan <datatype>::factory (i_coeff), vel_n (i_vel_n), vel_m (i_vel_m) {}
+				factory (grids::variable <datatype> &i_vel_n, grids::variable <datatype> &i_vel_m, datatype i_coeff = -1.0) : real_plan <datatype>::factory (i_coeff), vel_n (i_vel_n), vel_m (i_vel_m) {}
 		
 				virtual ~factory () {}
 			
 				/*!**********************************************************************
 				 * \copydoc real_plan::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > _instance (grids::grid <datatype> **grids, datatype **matrices, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan <datatype> > (new uniform <datatype> (*grids [0], *grids [1], vel_n, vel_m, i_data_in, i_data_out, 1.0, i_element_flags, i_component_flags));
+						return std::shared_ptr <plans::plan <datatype> > (new uniform <datatype> (vel_n, vel_m, i_data_in, i_data_out, 1.0, i_element_flags, i_component_flags));
 					}
 					return std::shared_ptr <plans::plan <datatype> > ();
 				}

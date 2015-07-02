@@ -42,7 +42,10 @@ namespace data
 		uniform_n = 0x01, //!< Copy the input array across the data in the n direction
 		uniform_m = 0x02, //!< Copy the input array across the data in the m direction
 		no_save = 0x04,
-		no_variables = 0x08
+		no_variables = 0x08,
+		vector = 0x10,
+		vector2D = 0x10,
+		vector3D = 0x20
 	};
 
 	/*!**********************************************************************
@@ -56,6 +59,8 @@ namespace data
 	protected:
 		int id;
 		io::parameters &params;
+		std::vector <grids::grid <datatype>> grids;
+
 		static int mode; //!< The integer mode of the simulation (to prevent loading Chebyshev data into an even grid)
 		
 		std::vector <std::shared_ptr <io::output>> streams; //!< A vector of pointers to output streams
@@ -66,9 +71,8 @@ namespace data
 		int dump_condition; //!< The flag condition of the data to be checked for dump
 		bool dump_done; //!< A boolean stating whether the dump has happened
 		
-	protected:
 		std::vector <std::string> scalar_names; //!< The vector of variable names
-		std::map <std::string, std::vector <datatype>> scalars; //!< The string map of vectors containing the variable data
+		std::map <std::string, std::shared_ptr <grids::variable <datatype>>> variables; //!< The string map of vectors containing the variable data
 		datatype *weights;
 		
 	public:
@@ -89,8 +93,8 @@ namespace data
 		 * 
 		 * \return A pointer to the indexed data
 		 ************************************************************************/
-		datatype *operator[] (const std::string &name) {
-			return &(scalars [name] [0]);
+		grids::variable <datatype> &operator[] (const std::string &name) {
+			return *variables [name];
 		}
 		
 		/*!**********************************************************************
@@ -124,9 +128,9 @@ namespace data
 		 * 
 		 * \return A pointer to the indexed data
 		 ************************************************************************/
-		datatype *operator() (const std::string &name, const int index = 0) {
-			if (scalars.find (name) != scalars.end () && (int) scalars [name].size () != 0) {
-				return &(scalars [name] [index]);
+		datatype *operator() (const std::string &name, int index = 0) {
+			if (variables.find (name) != variables.end () && (int) variables.size () != 0) {
+				return variables [name]->ptr () + index * variables [name]->dims ();
 			}
 			return NULL;
 		}
@@ -151,15 +155,15 @@ namespace data
 		 * 
 		 * \return A pointer to the dataset
 		 ************************************************************************/
-		virtual datatype *initialize (std::string i_name, datatype* initial_conditions = NULL, int i_flags = 0x00) {
+		virtual grids::variable <datatype> &initialize (std::string i_name, datatype* initial_conditions = NULL, int i_flags = 0x00) {
 			flags [i_name] = 0x00;
-			datatype *ptr = _initialize (i_name, initial_conditions, i_flags);
+			grids::variable <datatype> &var = _initialize (i_name, initial_conditions, i_flags);
 			if (dump_stream) {
-				dump_stream->template append <datatype> (i_name, ptr);
+				dump_stream->template append <datatype> (i_name, var.ptr ());
 			}
 			scalar_names.push_back (i_name);
 			std::sort (scalar_names.begin (), scalar_names.end ());
-			return ptr;
+			return var;
 		}
 		
 		/*!**********************************************************************
@@ -356,7 +360,7 @@ namespace data
 		/*!**********************************************************************
 		 * \brief Initialize a new dataset in the data object
 		 ************************************************************************/
-		virtual datatype *_initialize (std::string i_name, datatype* initial_conditions = NULL, int i_flags = 0x00) = 0;
+		virtual grids::variable <datatype> &_initialize (std::string i_name, datatype* initial_conditions = NULL, int i_flags = 0x00) = 0;
 	};
 	
 	/*!**********************************************************************
@@ -368,6 +372,7 @@ namespace data
 	protected:
 		using data <datatype>::iterator;
 		using data <datatype>::weights;
+		using data <datatype>::variables;
 		
 		std::shared_ptr <grids::grid <datatype>> grid_n; //!< The horizontal grid object
 		std::shared_ptr <grids::grid <datatype>> grid_m; //!< The vertical grid object
@@ -420,24 +425,17 @@ namespace data
 		}
 		
 		virtual ~implemented_data () {}
-		
-		/*!**********************************************************************
-		 * \brief Gets the pointer to the variable at the given index
-		 * 
-		 * \param name The name of the variable
-		 * \param i The horizontal index
-		 * \param j The vertical index
-		 ************************************************************************/
-		datatype *operator () (const std::string name, const int i = 0, const int j = 0) {
-			return data <datatype>::operator() (name, i * grid_m->get_ld () + j); 
+
+		datatype *operator() (const std::string &name, int i = 0, int j = 0) {
+			return data <datatype>::operator() (name, i * m + j);
 		}
 		
 		/*!**********************************************************************
 		 * \copydoc data::setup_profile
 		 ************************************************************************/
 		virtual void setup_profile (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
-			typedef typename std::map <std::string, std::vector <datatype> >::iterator iterator;
-			for (iterator iter = data <datatype>::scalars.begin (); iter != data <datatype>::scalars.end (); ++iter) {
+			typedef typename std::map <std::string, std::shared_ptr <grids::variable <datatype>>>::iterator iterator;
+			for (iterator iter = data <datatype>::variables.begin (); iter != data <datatype>::variables.end (); ++iter) {
 				output_ptr->template append <datatype> (iter->first, (*this) (iter->first));
 				output_ptr->template append <datatype> ("rms_" + iter->first, std::shared_ptr <functors::functor> (new functors::root_mean_square_functor <datatype> ((*this) (iter->first), n, m)));
 				output_ptr->template append <datatype> ("avg_" + iter->first, std::shared_ptr <functors::functor> (new functors::average_functor <datatype> ((*this) (iter->first), n, m)));
@@ -482,10 +480,10 @@ namespace data
 		/*!**********************************************************************
 		 * \copydoc data::_initialize
 		 ************************************************************************/
-		virtual datatype *_initialize (std::string name, datatype* initial_conditions = NULL, int i_flags = 0x00) {
+		virtual grids::variable <datatype> &_initialize (std::string name, datatype* initial_conditions = NULL, int i_flags = 0x00) {
 			TRACE ("Initializing " << name << "...");
 			// Size allowing for real FFT buffer
-			data <datatype>::scalars [name].resize (grid_n->get_ld () * m, 0.0);
+			data <datatype>::variables [name] = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (*grid_n, *grid_m, i_flags & vector2D ? 2 : (i_flags & vector3D ? 3 : 1)));
 			if (name == "x") {
 				for (int j = 0; j < m; ++j) {
 					linalg::copy (n, &((*grid_n) [0]), (*this) (name, 0, j), 1, m);
@@ -516,7 +514,7 @@ namespace data
 				}
 			}
 			TRACE ("Done.");
-			return &(data <datatype>::scalars [name] [0]);
+			return *variables [name];
 		}
 	};
 } /* data */

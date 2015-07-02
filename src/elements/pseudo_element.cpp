@@ -6,6 +6,7 @@
  * Copyright 2014 Justin Brown. All rights reserved.
  ************************************************************************/
 
+#include "pseudo_element.hpp"
 #include "boussinesq.hpp"
 
 #include <sstream>
@@ -23,40 +24,6 @@
 #include "plans-solvers/boundaries/implemented_boundary.hpp"
 #include "plans-solvers/solvers.hpp"
 
-namespace data
-{
-	template <class datatype>
-	thermo_compositional_data <datatype>::thermo_compositional_data (grids::axis *i_axis_n, grids::axis *i_axis_m, int id, int n_elements, io::parameters& i_params) : implemented_data <datatype> (i_axis_n, i_axis_m, i_params, id, i_params.get <std::string> ("dump.file"), i_params.get <std::string> ("root") + i_params.get <std::string> ("dump.directory"), i_params.get <int> ("dump.every")) {
-
-		initialize ("pressure");
-		initialize ("composition");
-		initialize ("temperature");
-		initialize ("x_velocity");
-		initialize ("z_velocity");
-
-		// Set up the data from the input file in params
-		this->template setup_from <formats::netcdf> (i_params ["input"]);
-		
-		this->template setup_output_from <formats::netcdf> (i_params ["output.cart"]);
-
-		this->template setup_output_from <formats::netcdf> (i_params ["output.trans"], transformed_horizontal);
-
-		std::shared_ptr <io::output> stat_stream =
-		this->template setup_output_from <formats::netcdf> (i_params ["output.stat"], no_variables);
-
-		for (typename data <datatype>::iterator iter = this->begin (); iter != this->end (); ++iter) {
-			// For each data variable, output z_flux, average derivative across the center, average and max
-			std::string variable = *iter;
-			stat_stream->template append <datatype> ("max_" + variable, this->output_max (variable), formats::scalar);
-			stat_stream->template append <datatype> ("avg_" + variable, this->output_avg (variable), formats::scalar);
-			stat_stream->template append <datatype> ("deriv_" + variable, this->output_deriv (variable), formats::scalar);
-			stat_stream->template append <datatype> ("flux_" + variable, this->output_flux (variable, "z_velocity"), formats::scalar);
-		}
-	}
-	
-	template class thermo_compositional_data <double>;
-} /* data */
-
 namespace pisces
 {
 	using namespace plans;
@@ -64,7 +31,7 @@ namespace pisces
 	using namespace boundaries;
 	
 	template <class datatype>
-	boussinesq_element <datatype>::boussinesq_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags, bool load_diffusion) : 
+	pseudo_element <datatype>::pseudo_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags, bool load_diffusion) : 
 	implemented_element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags) {
 		TRACE ("Initializing...");
 		x_ptr = data ("x");
@@ -102,7 +69,7 @@ namespace pisces
 		element_flags ["z_velocity"] |= ignore_net;
 
 		// Set up the velocity constraint
-		*div <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"])
+		*pdiv <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"])
 		==
 		0.0;
 		
@@ -110,7 +77,7 @@ namespace pisces
 	}
 	
 	template <class datatype>
-	datatype boussinesq_element <datatype>::calculate_timestep (int i, int j, formats::virtual_file *virtual_file) {
+	datatype pseudo_element <datatype>::calculate_timestep (int i, int j, formats::virtual_file *virtual_file) {
 		if (!x_vel_ptr || !z_vel_ptr) {
 			return 1.0 / 0.0;
 		}
@@ -136,5 +103,5 @@ namespace pisces
 		return 1.0 / 0.0;
 	}
 	
-	template class boussinesq_element <double>;
+	template class pseudo_element <double>;
 } /* pisces */

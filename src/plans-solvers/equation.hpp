@@ -35,7 +35,7 @@ namespace plans
 			mpi::messenger *messenger_ptr;
 		
 		protected:
-			datatype *data; //!< A pointer to the data held by the equation object
+			grids::variable <datatype> &data; //!< A pointer to the data held by the equation object
 		
 		private:
 			std::vector <std::shared_ptr <plan <datatype> > > pre_transform_plans; //!< A vector of shared pointers of plans to be executed before the transforms
@@ -49,7 +49,7 @@ namespace plans
 			 * \param i_element_flags A pointer to the flags describing the global state of the element
 			 * \param i_component_flags A pointer to the flags describing the state of the local variable
 			 ************************************************************************/
-			equation (datatype *i_data, int *i_element_flags, int *i_component_flags, mpi::messenger *i_messenger_ptr = NULL) : element_flags (i_element_flags), component_flags (i_component_flags), messenger_ptr (i_messenger_ptr), data (i_data) {
+			equation (grids::variable <datatype> &i_data, int *i_element_flags, int *i_component_flags, mpi::messenger *i_messenger_ptr = NULL) : element_flags (i_element_flags), component_flags (i_component_flags), messenger_ptr (i_messenger_ptr), data (i_data) {
 				*component_flags &= ~factorized;
 			}
 			/*
@@ -98,6 +98,10 @@ namespace plans
 			 * Each solver is implemented to solve a matrix equation for a particular variable. This returns a pointer to the first element of that variable's dataset.
 			 ************************************************************************/
 			virtual datatype *data_ptr () {
+				return data.ptr ();
+			}
+
+			virtual grids::variable <datatype> &data_var () {
 				return data;
 			}
 			

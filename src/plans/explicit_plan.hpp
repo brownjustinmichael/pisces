@@ -41,7 +41,7 @@ namespace plans
 		 * \param i_element_flags A pointer to integer flags associated with the element on the whole
 		 * \param i_component_flags A pointer to the integer flags associated with the variable associated with the plan
 		 ************************************************************************/
-		explicit_plan (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype *i_data_in, datatype *i_data_out = NULL, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : plans::plan <datatype> (i_element_flags, i_component_flags, i_coeff), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), grid_n (i_grid_n), grid_m (i_grid_m), data_in (i_data_in), data_out (i_data_out ? i_data_out : i_data_in) {}
+		explicit_plan (grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : plans::plan <datatype> (i_element_flags, i_component_flags, i_coeff), n (i_data_in.get_grid (0).get_n ()), ldn (i_data_in.get_grid (0).get_ld ()), m (i_data_in.get_grid (1).get_n ()), grid_n (i_data_in.get_grid (0)), grid_m (i_data_in.get_grid (1)), data_in (i_data_in.ptr ()), data_out (i_data_out ? i_data_out : i_data_in.ptr ()) {}
 
 		virtual ~explicit_plan () {}
 		

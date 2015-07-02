@@ -179,7 +179,7 @@ namespace plans
 				 * 
 				 * This method creates a shared_ptr to a solver instance. The benefit to this inclusion is that the instance method can be called in a uniform way and hide communication of grid and matrix information from the user. If a plan would be created that would not do anything (e.g. something with a coefficient of 0.0), this will return a NULL shared pointer.
 				 ************************************************************************/
-				virtual std::shared_ptr <solver <datatype>> instance (grids::grid <datatype> **grids, datatype *i_data, datatype *i_rhs, int *i_element_flags = NULL, int *i_component_flags = NULL) const = 0;
+				virtual std::shared_ptr <solver <datatype>> instance (grids::variable <datatype> &i_data, datatype *i_rhs, int *i_element_flags = NULL, int *i_component_flags = NULL) const = 0;
 			};
 		};
 	} /* solvers */
