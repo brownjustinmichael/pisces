@@ -34,7 +34,7 @@ int main (int argc, char *argv[])
 		io::parameters parameters = config (&argc, &argv, id);
 
 		int m = parameters.get <int> ("grid.z.points") / n_elements + 1;
-		m += m % 2;
+		m += (m - 1) % 2;
 		int n = parameters.get <int> ("grid.x.points");
 		double position_m0 = -parameters.get <double> ("grid.z.width") / 2.0 + parameters.get <double> ("grid.z.width") / n_elements * id;
 		double position_mm = -parameters.get <double> ("grid.z.width") / 2.0 + parameters.get <double> ("grid.z.width") / n_elements * (id + 1);
@@ -97,7 +97,7 @@ int main (int argc, char *argv[])
 		char buffer [file_format.size () * 2];
 		snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
 
-		io::formatted_output <formats::netcdf> output_stream (formats::data_grid::two_d (n, m, 0, parameters.get <bool> ("input.full") ? n_elements * m : 0, 0, parameters.get <bool> ("input.full") ? id * m : 0), buffer, formats::replace_file);
+		io::formatted_output <formats::netcdf> output_stream (formats::data_grid::two_d (n, m), buffer, formats::replace_file);
 
 		double duration = 0.0;
 		int mode = mode_flag;

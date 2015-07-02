@@ -102,7 +102,7 @@ namespace pisces
 		element_flags ["z_velocity"] |= ignore_net;
 
 		// Set up the velocity constraint
-		*pdiv <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"])
+		*div <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"])
 		==
 		0.0;
 		

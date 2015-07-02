@@ -114,6 +114,7 @@ namespace plans
 					diag_ptr [0] = -2.0 / diff [1] / diff2 [0] - scalar * (i / 2) * (i / 2);
 				}
 				if (id == np - 1) {
+					DEBUG (diff2 [m - 1] << diff [m - 1]);
 					diag_ptr [m - 1] = -2.0 / diff [m - 1] / diff2 [m - 1] - scalar * (i / 2) * (i / 2);
 					sub_ptr [m - 1] = 2.0 / diff [m - 1] / diff2 [m - 1];
 				}
@@ -121,26 +122,19 @@ namespace plans
 				diag_ptr += m;
 				sup_ptr += m;
 			}
-			linalg::block::tridiag_factorize (id, np, m - excess_0 - excess_n, &matrix [excess_0], &matrix [excess_0 + m * ldn], &matrix [excess_0 + 2 * m * ldn], &matrix [excess_0 + 3 * m * ldn], &ipiv [0], &x [0], &xipiv [0], &info, ldn, m);
+			linalg::block::tridiag_factorize (id, np, m - (excess_0 ? excess_0 + 1 : 0) - (excess_n ? excess_n + 2 : 0), &matrix [excess_0], &matrix [excess_0 + m * ldn], &matrix [excess_0 + 2 * m * ldn], &matrix [excess_0 + 3 * m * ldn], &ipiv [0], &x [0], &xipiv [0], &info, ldn, m);
 		}
 		
 		template <class datatype>
 		void pseudo_incompressible <datatype>::execute () {
 			int info;
+			static int count = 0;
 			TRACE ("Solving...");
 			bool retransform = false;
 			// No net vertical flux
 			// linalg::scale (2 * m, 0.0, data_z);
-
-			// std::shared_ptr <plans::plan <datatype> > transform_x = std::shared_ptr <plans::plan <datatype> > (new plans::transforms::vertical <datatype> (n, m, data_x, NULL, 0x00, element_flags, component_flags_x));
-			// std::shared_ptr <plans::plan <datatype> > transform_z = std::shared_ptr <plans::plan <datatype> > (new plans::transforms::vertical <datatype> (n, m, data_z, NULL, 0x00, element_flags, component_flags_z));
-			
-			// if (*component_flags_x & transformed_vertical) {
-			// 	DEBUG ("TRANSFORM!!!");
-			// 	transform_x->execute ();
-			// 	transform_z->execute ();
-			// 	retransform = true;
-			// }
+			++count;
+			if (count % 2 == 0) return;
 
 			// if (!(*component_flags_x & transformed_vertical)) {
 				linalg::scale (m * ldn, 0.0, &data [0]);
@@ -167,21 +161,45 @@ namespace plans
 						data [i * m + m - 1] = (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / diff [m - 1];
 					}
 				}
-				linalg::block::tridiag_solve (id, np, m - excess_0 - excess_n, &matrix [excess_0], &matrix [excess_0 + m * ldn], &matrix [excess_0 + 2 * m * ldn], &matrix [excess_0 + 3 * m * ldn], &ipiv [0], &data [excess_0], &x [0], &xipiv [0], &info, ldn, m, m);
+
+				std::stringstream debug;
+				for (int j = 0; j < 5; ++j)
+				{
+					DEBUG (pos_m [0] << " " << pos_m [1] << pos_m [2])
+					for (int i = 0; i < ldn; ++i)
+					{
+						debug << data [i * m + j] << " ";
+					}
+					DEBUG (debug.str ());
+					debug.str ("");
+				}
+
+				for (int j = m - 5; j < m; ++j)
+				{
+					DEBUG (pos_m [m - 1] << " " << pos_m [m - 2] << " " << pos_m [m - 3])
+					for (int i = 0; i < ldn; ++i)
+					{
+						debug << data [i * m + j] << " ";
+					}
+					DEBUG (debug.str ());
+					debug.str ("");
+				}
+
+				linalg::block::tridiag_solve (id, np, m - (excess_0 ? excess_0 + 1 : 0) - (excess_n ? excess_n + 2 : 0), &matrix [excess_0], &matrix [excess_0 + m * ldn], &matrix [excess_0 + 2 * m * ldn], &matrix [excess_0 + 3 * m * ldn], &ipiv [0], &data [excess_0], &x [0], &xipiv [0], &info, ldn, m, m);
 				
 				// We can define our frame to be one with no net vertical flux
 				linalg::scale (2 * m, 0.0, &data [0]);
-				
+
 				// Communicate the edges of the pressure
 				if (boundary_n) {
 					boundary_n->send (&data [m - 2 * excess_n - 1], m, excess_n);
 				}
 				if (boundary_0) {
 					boundary_0->receive (&data [0], m, excess_0, 0.0);
-					boundary_0->send (&data [excess_0], m, excess_0);
+					boundary_0->send (&data [excess_0], m, excess_0 + 1);
 				}
 				if (boundary_n) {
-					boundary_n->receive (&data [m - excess_n - 1], m, excess_n, 0.0);
+					boundary_n->receive (&data [m - excess_n - 1], m, excess_n + 1, 0.0);
 				}
 				
 				// Update the velocities with the pressure derivatives
@@ -198,6 +216,28 @@ namespace plans
 					}
 				}
 
+				if (boundary_n) {
+					boundary_n->send (&data_z [m - 2 * excess_n - 1], m, excess_n);
+				}
+				if (boundary_0) {
+					boundary_0->receive (&data_z [0], m, excess_0, 0.0);
+					boundary_0->send (&data_z [excess_0], m, excess_0 + 1);
+				}
+				if (boundary_n) {
+					boundary_n->receive (&data_z [m - excess_n - 1], m, excess_n + 1, 0.0);
+				}
+
+				if (boundary_n) {
+					boundary_n->send (&data_x [m - 2 * excess_n - 1], m, excess_n);
+				}
+				if (boundary_0) {
+					boundary_0->receive (&data_x [0], m, excess_0, 0.0);
+					boundary_0->send (&data_x [excess_0], m, excess_0 + 1);
+				}
+				if (boundary_n) {
+					boundary_n->receive (&data_x [m - excess_n - 1], m, excess_n + 1, 0.0);
+				}
+
 	#ifdef CHECKNAN
 				for (int j = 0; j < m; ++j) {
 					for (int i = 0; i < ldn; ++i) {
@@ -208,12 +248,6 @@ namespace plans
 					}
 				}
 	#endif
-			// }
-
-			// if (retransform) {
-			// 	transform_x->execute ();
-			// 	transform_z->execute ();
-			// }
 
 			TRACE ("Solved");
 		}

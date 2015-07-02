@@ -20,6 +20,7 @@
 #include "logger/logger.hpp"
 #include "io/parameters.hpp"
 #include "plans/plan.hpp"
+#include "elements/pseudo_element.hpp"
 #include "elements/boussinesq.hpp"
 #include "elements/rezone.hpp"
 #include "config.hpp"
@@ -59,7 +60,7 @@ int main (int argc, char *argv[])
 		io::parameters parameters = config (&argc, &argv, id);
 		
 		int m = parameters.get <int> ("grid.z.points") / n_elements + 1;
-		m += m % 2;
+		m += (m - 1) % 2;
 
 		std::vector <double> positions (n_elements + 1);
 		for (int i = 0; i < n_elements + 1; ++i) {
@@ -79,7 +80,7 @@ int main (int argc, char *argv[])
 		
 		TRACE ("Constructing element");
 		
-		std::shared_ptr <pisces::element <double>> element (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
+		std::shared_ptr <pisces::element <double>> element (new pisces::pseudo_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
 		
 		if (pisces::element <double>::version () < versions::version ("0.6.0.0")) {
 			INFO ("element.version < 0.6.0.0");
@@ -110,7 +111,7 @@ int main (int argc, char *argv[])
 					virtual_input.reset (new io::formatted_input <formats::virtual_format> (formats::data_grid::two_d (n, m), "main/virtual_file"));
 					data.setup (virtual_input);
 				
-					element.reset (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
+					element.reset (new pisces::pseudo_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
 				}
 			}
 			element->run (n_steps, parameters.get <int> ("time.steps"), parameters.get <int> ("grid.rezone.check_every"), parameters.get <double> ("time.stop"));

@@ -53,8 +53,13 @@ namespace linalg
 				linalg::copy (nrhs, diag + n + ntop + nbot - 1, xdiag + 1, lda, ldx);
 				linalg::copy (nrhs, sup + n + ntop + nbot - 1, xsup + 1, lda, ldx);
 			}
-		
+			
+			// for (int j = 0; j < n + ntop + nbot; ++j)
+			// {
+			// 	DEBUG (sub [j] << " " << diag [j] << " " << sup [j]);
+			// }
 			for (int i = 0; i < nrhs; ++i) {
+
 				linalg::tridiagonal_factorize (n, sub + 1 + ntop + i * lda, diag + ntop + i * lda, sup + ntop + i * lda, supsup + ntop + i * lda, ipiv + i * lda, info);
 			}
 		
