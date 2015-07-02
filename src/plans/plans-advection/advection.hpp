@@ -34,6 +34,7 @@ namespace plans
 			using real_plan <datatype>::coeff;
 			using real_plan <datatype>::n;
 			using real_plan <datatype>::m;
+			using real_plan <datatype>::dims;
 			using real_plan <datatype>::grid_n;
 			using real_plan <datatype>::grid_m;
 			using real_plan <datatype>::data_in;
@@ -64,9 +65,9 @@ namespace plans
 			 ************************************************************************/
 			uniform (grids::variable <datatype> &i_vel_n, grids::variable <datatype> &i_vel_m, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : real_plan <datatype> (i_data_in, i_data_out, i_coeff, i_element_flags, i_component_flags), vel_n (i_vel_n.ptr ()), vel_m (i_vel_m.ptr ()), pos_n (&(grid_n [0])), pos_m (&(grid_m [0])) {
 				TRACE ("Adding advection...");
-				x_vec.resize (n * m);
+				x_vec.resize (n * m * dims);
 				x_ptr = &x_vec [0];
-				z_vec.resize (n * m);
+				z_vec.resize (n * m * dims);
 				z_ptr = &z_vec [0];
 			
 				// Calculate some derivative contributions that will be used frequently
@@ -101,28 +102,31 @@ namespace plans
 			 ************************************************************************/
 			virtual void execute () {
 				// Calculate the x component
-				linalg::scale (m, 0.0, x_ptr + m * (n - 1));
-				linalg::matrix_copy (m, n - 1, data_in + m, x_ptr);
-				linalg::matrix_add_scaled (m, n - 1, -1.0, data_in, x_ptr + m);
-				linalg::add_scaled (m, 1.0, data_in, x_ptr + m * (n - 1));
-				linalg::add_scaled (m, -1.0, data_in + m * (n - 1), x_ptr);
+				linalg::scale (m * dims, 0.0, x_ptr + m * (n - 1) * dims);
+				linalg::matrix_copy (m * dims, n - 1, data_in + m * dims, x_ptr);
+				linalg::matrix_add_scaled (m * dims, n - 1, -1.0, data_in, x_ptr + m * dims);
+				linalg::add_scaled (m * dims, 1.0, data_in, x_ptr + m * (n - 1) * dims);
+				linalg::add_scaled (m * dims, -1.0, data_in + m * (n - 1) * dims, x_ptr);
 			
 				// Calculate the z component
-				linalg::scale (n, 0.0, z_ptr + m - 1, m);
-				linalg::matrix_copy (m - 1, n, data_in + 1, z_ptr, m, m);
-				linalg::matrix_add_scaled (m - 1, n, -1.0, data_in, z_ptr + 1, m, m);
-				linalg::add_scaled (n, 1.0, data_in, z_ptr, m, m);
-				linalg::add_scaled (n, -1.0, data_in + m - 1, z_ptr + m - 1, m, m);
+				linalg::matrix_scale (dims, n, 0.0, z_ptr + (m - 1) * dims, m * dims);
+				linalg::matrix_copy ((m - 1) * dims, n, data_in + dims, z_ptr, m * dims, m * dims);
+				linalg::matrix_add_scaled ((m - 1) * dims, n, -1.0, data_in, z_ptr + dims, m * dims, m * dims);
+				linalg::matrix_add_scaled (dims, n, 1.0, data_in, z_ptr, m * dims, m * dims);
+				linalg::matrix_add_scaled (dims, n, -1.0, data_in + (m - 1) * dims, z_ptr + (m - 1) * dims, m * dims, m * dims);
 			
 				#pragma omp parallel for
-				for (int j = 0; j < m; ++j) {
-					for (int i = 0; i < n; ++i) {
-						x_ptr [i * m + j] = (vel_n [i * m + j] * x_ptr [i * m + j] * oodx_ptr [i] + vel_m [i * m + j] * z_ptr [i * m + j] * oodz_ptr [j]);
+				for (int i = 0; i < n; ++i) {
+					for (int j = 0; j < m; ++j) {
+						for (int k = 0; k < dims; ++k)
+						{
+							x_ptr [(i * m + j) * dims + k] = (vel_n [i * m + j] * x_ptr [(i * m + j) * dims + k] * oodx_ptr [i] + vel_m [i * m + j] * z_ptr [i * m + j] * oodz_ptr [j]);
+						}
 					}
 				}
 			
 				// Scale the whole thing by the coefficient
-				linalg::matrix_add_scaled (m, n, coeff, x_ptr, data_out);
+				linalg::matrix_add_scaled (m * dims, n, coeff, x_ptr, data_out);
 			}
 		
 			/*!**********************************************************************

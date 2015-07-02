@@ -29,6 +29,7 @@ namespace plans
 			using implicit_plan <datatype>::n;
 			using implicit_plan <datatype>::ldn;
 			using implicit_plan <datatype>::m;
+			using implicit_plan <datatype>::dims;
 			using implicit_plan <datatype>::grid_n;
 			using implicit_plan <datatype>::data_in;
 			using implicit_plan <datatype>::data_out;
@@ -65,7 +66,7 @@ namespace plans
 				if (matrix_n) {
 					// For Fourier modes, the matrix is diagonal and not particularly complicated
 					// We set up m of these matrices in case there is some z-dependence added in later
-					for (int j = 0; j < m; ++j) {
+					for (int j = 0; j < m * dims; ++j) {
 						matrix_n [j] = matrix_n [m + j] = 0.0;
 						for (int i = 2; i < ldn; ++i) {
 							matrix_n [i * m + j] = coeff * alpha * pioL2 * (datatype) ((i / 2) * (i / 2));
@@ -86,13 +87,13 @@ namespace plans
 					if (1.0 - alpha != 0.0) {
 						// #pragma omp parallel for
 						for (int i = 2; i < ldn; ++i) {
-							linalg::add_scaled (m, -coeff * (1.0 - alpha) * pioL2 * (i / 2) * (i / 2), data_in + i * m, data_out + i * m);
+							linalg::add_scaled (m * dims, -coeff * (1.0 - alpha) * pioL2 * (i / 2) * (i / 2), data_in + i * m * dims, data_out + i * m * dims);
 						}
 					}
 				} else {
 					// #pragma omp parallel for
 					for (int i = 2; i < ldn; ++i) {
-						linalg::add_scaled (m, -coeff * pioL2 * (i / 2) * (i / 2), data_in + i * m, data_out + i * m);
+						linalg::add_scaled (m * dims, -coeff * pioL2 * (i / 2) * (i / 2), data_in + i * m * dims, data_out + i * m * dims);
 					}
 				}
 				TRACE ("Operation complete.");
@@ -138,6 +139,7 @@ namespace plans
 			using implicit_plan <datatype>::n;
 			using implicit_plan <datatype>::ldn;
 			using implicit_plan <datatype>::m;
+			using implicit_plan <datatype>::dims;
 			using implicit_plan <datatype>::grid_n;
 			using implicit_plan <datatype>::data_in;
 			using implicit_plan <datatype>::data_out;
@@ -170,9 +172,12 @@ namespace plans
 				TRACE ("Setting up");
 				if (matrix_n) {
 					for (int j = 0; j < m; ++j) {
-						matrix_n [j] = matrix_n [m + j] = 0.0;
-						for (int i = 2; i < ldn; ++i) {
-							matrix_n [i * m + j] = coeff * diffusion [j] * alpha * pioL2 * (datatype) ((i / 2) * (i / 2));
+						for (int k = 0; k < dims; ++k)
+						{
+							matrix_n [j] = matrix_n [(m + j) * dims + k] = 0.0;
+							for (int i = 2; i < ldn; ++i) {
+								matrix_n [(i * m + j) * dims + k] = coeff * diffusion [j] * alpha * pioL2 * (datatype) ((i / 2) * (i / 2));
+							}						
 						}
 					}
 				} else {
@@ -194,8 +199,11 @@ namespace plans
 					if (1.0 - alpha != 0.0) {
 						// #pragma omp parallel for
 						for (int j = 0; j < m; ++j) {
-							for (int i = 2; i < ldn; ++i) {
-								data_out [i * m + j] -= coeff * diffusion [j] * (1.0 - alpha) * pioL2 * (i / 2) * (i / 2) * data_in [i * m + j];
+							for (int k = 0; k < dims; ++k)
+							{
+								for (int i = 2; i < ldn; ++i) {
+									data_out [(i * m + j) * dims + k] -= coeff * diffusion [j] * (1.0 - alpha) * pioL2 * (i / 2) * (i / 2) * data_in [(i * m + j) * dims + k];
+								}
 							}
 						}
 					}
@@ -203,7 +211,10 @@ namespace plans
 					// #pragma omp parallel for
 					for (int j = 0; j < m; ++j) {
 						for (int i = 2; i < ldn; ++i) {
-							data_out [i * m + j] -= coeff * diffusion [j] * pioL2 * (i / 2) * (i / 2) * data_in [i * m + j];
+							for (int k = 0; k < dims; ++k)
+							{
+								data_out [(i * m + j) * dims + k] -= coeff * diffusion [j] * pioL2 * (i / 2) * (i / 2) * data_in [(i * m + j) * dims + k];
+							}
 						}
 					}
 				}

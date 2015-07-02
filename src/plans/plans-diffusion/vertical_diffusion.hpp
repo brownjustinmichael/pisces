@@ -35,6 +35,7 @@ namespace plans
 			using implicit_plan <datatype>::n;
 			using implicit_plan <datatype>::ldn;
 			using implicit_plan <datatype>::m;
+			using implicit_plan <datatype>::dims;
 			using implicit_plan <datatype>::data_in;
 			using implicit_plan <datatype>::data_out;
 			using implicit_plan <datatype>::matrix_n;
@@ -43,6 +44,8 @@ namespace plans
 			using implicit_plan <datatype>::grid_m;
 		
 			datatype alpha; //!< The implicit fraction of the plan (1.0 for purely implicit, 0.0 for purely explicit)
+			std::vector <datatype> new_matrix_vec;
+			datatype *new_matrix;
 		
 		public:
 			using implicit_plan <datatype>::element_flags;
@@ -55,6 +58,9 @@ namespace plans
 			 * \param i_alpha The implicit fraction of the plan (1.0 for purely implicit, 0.0 for purely explicit)
 			 ************************************************************************/
 			vertical (datatype i_alpha, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : implicit_plan <datatype> (i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_coeff, i_element_flags, i_component_flags), alpha (i_alpha) {
+				new_matrix_vec.resize (m * m * dims * dims);
+				new_matrix = &new_matrix_vec [0];
+
 				setup ();
 			}
 		
@@ -68,8 +74,13 @@ namespace plans
 				TRACE ("Setting up");
 				if (matrix_m) {
 					for (int j = 0; j < m; ++j) {
-						linalg::add_scaled (m, -coeff * alpha, grid_m.get_data (2) + j, matrix_m + j, m, m);
+						// DEBUG ("Updating diff " << diffusion [j]);
+						for (int k = 0; k < dims; ++k)
+						{
+							linalg::add_scaled (m, coeff, grid_m.get_data (2) + j, new_matrix + m * dims * k + j * dims + k, m, m * dims);
+						}
 					}
+					linalg::add_scaled (m * m * dims * dims, -1.0 * alpha, new_matrix, matrix_m);
 				} else {
 					WARN ("No matrix");
 				}
@@ -83,10 +94,10 @@ namespace plans
 				// Depending on the direction of the solve, treat this term as either partially or fully explicit
 				if (*component_flags & z_solve) {
 					if (1.0 - alpha != 0.0) {
-						linalg::matrix_matrix_multiply (m, ldn, m, coeff * (1.0 - alpha), grid_m.get_data (2), data_in, 1.0, data_out, m);
+						linalg::matrix_matrix_multiply (m * dims, ldn, m * dims, 1.0 - alpha, new_matrix, data_in, 1.0, data_out);
 					}
 				} else {
-					linalg::matrix_matrix_multiply (m, ldn, m, coeff, grid_m.get_data (2), data_in, 1.0, data_out, m);
+					linalg::matrix_matrix_multiply (m * dims, ldn, m * dims, 1.0, new_matrix, data_in, 1.0, data_out);
 				}
 
 				TRACE ("Operation complete.");

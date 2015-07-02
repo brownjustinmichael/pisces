@@ -36,6 +36,7 @@ namespace plans
 			using explicit_plan <datatype>::n;
 			using explicit_plan <datatype>::ldn;
 			using explicit_plan <datatype>::m;
+			using explicit_plan <datatype>::dims;
 			using explicit_plan <datatype>::data_out;
 		
 			datatype *data_source; //!< The data pointer for the source data
@@ -51,7 +52,6 @@ namespace plans
 			 ************************************************************************/
 			uniform (grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : explicit_plan <datatype> (i_data_in, i_data_out, i_coeff, i_element_flags, i_component_flags), data_source (i_data_source.ptr ()) {
 				TRACE ("Adding source...");
-				DEBUG (" " << coeff);
 			}
 		
 			virtual ~uniform () {}
@@ -65,7 +65,7 @@ namespace plans
 			 ************************************************************************/
 			virtual void execute () {
 				TRACE ("Executing source...");
-				linalg::matrix_add_scaled (m, ldn, coeff, data_source, data_out, m, m);	
+				linalg::matrix_add_scaled (m * dims, ldn, coeff, data_source, data_out, m * dims, m * dims);	
 			}
 		
 			/*!**********************************************************************
@@ -108,6 +108,7 @@ namespace plans
 			using explicit_plan <datatype>::n;
 			using explicit_plan <datatype>::ldn;
 			using explicit_plan <datatype>::m;
+			using explicit_plan <datatype>::dims;
 			using explicit_plan <datatype>::data_out;
 				
 		public:
@@ -136,7 +137,7 @@ namespace plans
 				TRACE ("Executing source...");
 				for (int i = 0; i < ldn; ++i)
 				{
-					for (int j = 0; j < m; ++j)
+					for (int j = 0; j < m * dims; ++j)
 					{
 						data_out [i * m + j] += coeff;
 					}
