@@ -16,7 +16,7 @@
 namespace plans
 {
 	template <class datatype>
-	typename real_plan <datatype>::factory_container advec (datatype *vel_n, datatype *vel_m, datatype coeff = 1.0) {
+	typename real_plan <datatype>::factory_container advec (grids::variable <datatype> &vel_n, grids::variable <datatype> &vel_m, datatype coeff = 1.0) {
 		return typename real_plan <datatype>::factory_container (std::shared_ptr <typename real_plan <datatype>::factory> (new typename advection::uniform <datatype>::factory (vel_n, vel_m, coeff)));
 	}
 } /* plans */

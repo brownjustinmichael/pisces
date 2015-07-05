@@ -89,9 +89,9 @@ namespace plans
 			 * 0 0 interpolating row for below element  0 0
 			 * 0 0 boundary row for below element       0 0
 			 ************************************************************************/
-			collocation (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, mpi::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags);
+			collocation (mpi::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, int *i_element_flags, int *i_component_flags);
 			
-			collocation (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, mpi::messenger* i_messenger_ptr, datatype& i_timestep, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : collocation (i_grid_n, i_grid_m, i_messenger_ptr, i_timestep, i_boundary_0.instance (i_grid_n, i_grid_m, false), i_boundary_n.instance (i_grid_n, i_grid_m, true), i_rhs, i_data, i_element_flags, i_component_flags) {}
+			collocation (mpi::messenger* i_messenger_ptr, datatype& i_timestep, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, int *i_element_flags, int *i_component_flags) : collocation (i_messenger_ptr, i_timestep, i_boundary_0.instance (i_data.get_grid (0), i_data.get_grid (1), false), i_boundary_n.instance (i_data.get_grid (0), i_data.get_grid (1), true), i_rhs, i_data, i_element_flags, i_component_flags) {}
 
 			virtual ~collocation () {}
 			
@@ -146,8 +146,8 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc solver::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::grid <datatype> **grids, datatype *i_data, datatype *i_rhs, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
-					return std::shared_ptr <plans::solvers::solver <datatype>> (new collocation (*grids [0], *grids [1], messenger_ptr, timestep, boundary_factory_0 ? boundary_factory_0->instance (grids, false) : boundary_0, boundary_factory_n ? boundary_factory_n->instance (grids, true) : boundary_n, i_rhs, i_data, i_element_flags, i_component_flags));
+				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::variable <datatype> &i_data, datatype *i_rhs, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+					return std::shared_ptr <plans::solvers::solver <datatype>> (new collocation (messenger_ptr, timestep, boundary_factory_0 ? boundary_factory_0->instance (i_data.get_grids (), false) : boundary_0, boundary_factory_n ? boundary_factory_n->instance (i_data.get_grids (), true) : boundary_n, i_rhs, i_data, i_element_flags, i_component_flags));
 				}
 			};
 		};

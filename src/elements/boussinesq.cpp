@@ -76,28 +76,28 @@ namespace pisces
 
 		// Set up the temperature equation
 		*split_solver <datatype> (equations ["temperature"], timestep, dirichlet (1.0), dirichlet (0.0)) 
-		+ advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) 
+		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		params ["equations.temperature.diffusion"] * diff <datatype> ();
 
 		// Set up the composition equation
 		*split_solver <datatype> (equations ["composition"], timestep, dirichlet (1.0), dirichlet (0.0)) 
-		+ advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) 
+		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		params ["equations.composition.diffusion"] * diff <datatype> ();
 
 		// Set up the x_velocity equation, note the missing pressure term, which is handled in div
 		*split_solver <datatype> (equations ["x_velocity"], timestep, neumann (0.0), neumann (0.0)) 
-		+ advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) 
+		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		params ["equations.velocity.diffusion"] * diff <datatype> ();
 
 		// Set up the z_velocity equation, note the missing pressure term, which is handled in div
 		*split_solver <datatype> (equations ["z_velocity"], timestep, dirichlet (0.0), dirichlet (0.0)) 
-		+ advec <datatype> (ptr ("x_velocity"), ptr ("z_velocity")) 
+		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 		== 
-		params ["equations.z_velocity.sources.temperature"] * src <datatype> (ptr ("temperature"))
-		+ params ["equations.z_velocity.sources.composition"] * src <datatype> (ptr ("composition")) 
+		params ["equations.z_velocity.sources.temperature"] * src <datatype> (data ["temperature"])
+		+ params ["equations.z_velocity.sources.composition"] * src <datatype> (data ["composition"]) 
 		+ params ["equations.velocity.diffusion"] * diff <datatype> ();
 		element_flags ["z_velocity"] |= ignore_net;
 

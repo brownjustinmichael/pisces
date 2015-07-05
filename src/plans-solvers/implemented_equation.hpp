@@ -66,7 +66,7 @@ namespace plans
 			 * \param i_grid_n The grid object in the horizontal
 			 * \param i_grid_m The grid object in the vertical
 			 ************************************************************************/
-			implemented_equation (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype *i_data, int *i_element_flags, int *i_component_flags, mpi::messenger *i_messenger_ptr) : plans::solvers::equation <datatype> (i_data, i_element_flags, i_component_flags, i_messenger_ptr), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), grid_n (i_grid_n), grid_m (i_grid_m) {
+			implemented_equation (grids::variable <datatype> &i_data, int *i_element_flags, int *i_component_flags, mpi::messenger *i_messenger_ptr) : plans::solvers::equation <datatype> (i_data, i_element_flags, i_component_flags, i_messenger_ptr), n (i_data.get_grid (0).get_n ()), ldn (i_data.get_grid (0).get_ld ()), m (i_data.get_grid (1).get_n ()), grid_n (i_data.get_grid (0)), grid_m (i_data.get_grid (1)) {
 				spectral_rhs_ptr = NULL;
 				real_rhs_ptr = NULL;
 				old_rhs_vec.resize (ldn * m, 0.0);
@@ -243,8 +243,7 @@ namespace plans
 			 * \copydoc equation::add_solver(const typename solver<datatype>::factory&,int)
 			 ************************************************************************/
 			virtual void add_solver (const typename plans::solvers::solver <datatype>::factory &i_factory, int flags = 0x00) {
-				grids::grid <datatype>* grids [2] = {&grid_n, &grid_m};
-				plans::solvers::implemented_equation <datatype>::add_solver (i_factory.instance (grids, data, cor_rhs_ptr, element_flags, component_flags), flags);
+				plans::solvers::implemented_equation <datatype>::add_solver (i_factory.instance (data, cor_rhs_ptr, element_flags, component_flags), flags);
 			}
 			
 			/*!**********************************************************************
@@ -260,9 +259,8 @@ namespace plans
 				} else {
 					rhs = new_rhs_ptr;
 				}
-				grids::grid <datatype>* grids [2] = {&grid_n, &grid_m};
 				datatype* matrices [2] = {matrix_ptr (0), matrix_ptr (1)};
-				plans::solvers::equation <datatype>::add_plan (i_factory.instance (grids, matrices, data, rhs, element_flags, component_flags));
+				plans::solvers::equation <datatype>::add_plan (i_factory.instance (matrices, data, rhs, element_flags, component_flags));
 			}
 			
 			/*!**********************************************************************

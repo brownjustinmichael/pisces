@@ -29,6 +29,7 @@ namespace plans
 			using implicit_plan <datatype>::n;
 			using implicit_plan <datatype>::ldn;
 			using implicit_plan <datatype>::m;
+			using implicit_plan <datatype>::dims;
 			using implicit_plan <datatype>::grid_n;
 			using implicit_plan <datatype>::data_in;
 			using implicit_plan <datatype>::data_out;
@@ -48,7 +49,7 @@ namespace plans
 			 * \param i_coeff The diffusion coefficient
 			 * \param i_alpha The implicit fraction (1.0 for purely implicit, 0.0 for purely explicit)
 			 ************************************************************************/
-			horizontal (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_alpha, datatype *i_matrix_n, datatype *i_matrix_m, datatype *i_data_in, datatype *i_data_out = NULL, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : implicit_plan <datatype> (i_grid_n, i_grid_m, i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_coeff, i_element_flags, i_component_flags), alpha (i_alpha) {
+			horizontal (datatype i_alpha, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : implicit_plan <datatype> (i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_coeff, i_element_flags, i_component_flags), alpha (i_alpha) {
 				TRACE ("Instantiating...");
 				pioL2 = 4.0 * (std::acos (-1.0) * std::acos (-1.0) / (grid_n [n - 1] - grid_n [0]) / (grid_n [n - 1] - grid_n [0]));
 				setup ();
@@ -65,7 +66,7 @@ namespace plans
 				if (matrix_n) {
 					// For Fourier modes, the matrix is diagonal and not particularly complicated
 					// We set up m of these matrices in case there is some z-dependence added in later
-					for (int j = 0; j < m; ++j) {
+					for (int j = 0; j < m * dims; ++j) {
 						matrix_n [j] = matrix_n [m + j] = 0.0;
 						for (int i = 2; i < ldn; ++i) {
 							matrix_n [i * m + j] = coeff * alpha * pioL2 * (datatype) ((i / 2) * (i / 2));
@@ -86,13 +87,13 @@ namespace plans
 					if (1.0 - alpha != 0.0) {
 						// #pragma omp parallel for
 						for (int i = 2; i < ldn; ++i) {
-							linalg::add_scaled (m, -coeff * (1.0 - alpha) * pioL2 * (i / 2) * (i / 2), data_in + i * m, data_out + i * m);
+							linalg::add_scaled (m * dims, -coeff * (1.0 - alpha) * pioL2 * (i / 2) * (i / 2), data_in + i * m * dims, data_out + i * m * dims);
 						}
 					}
 				} else {
 					// #pragma omp parallel for
 					for (int i = 2; i < ldn; ++i) {
-						linalg::add_scaled (m, -coeff * pioL2 * (i / 2) * (i / 2), data_in + i * m, data_out + i * m);
+						linalg::add_scaled (m * dims, -coeff * pioL2 * (i / 2) * (i / 2), data_in + i * m * dims, data_out + i * m * dims);
 					}
 				}
 				TRACE ("Operation complete.");
@@ -118,9 +119,9 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc implicit::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plan <datatype> > _instance (grids::grid <datatype> **grids, datatype **matrices, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+				virtual std::shared_ptr <plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
 					if (coeff) {
-						return std::shared_ptr <plan <datatype> > (new horizontal <datatype> (*grids [0], *grids [1], alpha, matrices [0], matrices [1], i_data_in, i_data_out, 1.0, i_element_flags, i_component_flags));
+						return std::shared_ptr <plan <datatype> > (new horizontal <datatype> (alpha, matrices [0], matrices [1], i_data_in, i_data_out, 1.0, i_element_flags, i_component_flags));
 					}
 					return std::shared_ptr <plan <datatype> > ();
 				}
@@ -138,6 +139,7 @@ namespace plans
 			using implicit_plan <datatype>::n;
 			using implicit_plan <datatype>::ldn;
 			using implicit_plan <datatype>::m;
+			using implicit_plan <datatype>::dims;
 			using implicit_plan <datatype>::grid_n;
 			using implicit_plan <datatype>::data_in;
 			using implicit_plan <datatype>::data_out;
@@ -157,7 +159,7 @@ namespace plans
 			 * \param i_alpha The implicit fraction (1.0 for purely implicit, 0.0 for purely explicit)
 			 * \param i_diffusion A pointer to the datatype vector of diffusion coefficients
 			 ************************************************************************/
-			background_horizontal (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_alpha, datatype *i_diffusion, datatype *i_matrix_n, datatype *i_matrix_m, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : implicit_plan <datatype> (i_grid_n, i_grid_m, i_matrix_n, i_matrix_m, i_data_in, i_data_out, 1.0, i_element_flags, i_component_flags), alpha (i_alpha), diffusion (i_diffusion) {
+			background_horizontal (datatype i_alpha, datatype *i_diffusion, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) : implicit_plan <datatype> (i_matrix_n, i_matrix_m, i_data_in, i_data_out, 1.0, i_element_flags, i_component_flags), alpha (i_alpha), diffusion (i_diffusion) {
 				TRACE ("Instantiating...");
 				pioL2 = 4.0 * (std::acos (-1.0) * std::acos (-1.0) / (grid_n [n - 1] - grid_n [0]) / (grid_n [n - 1] - grid_n [0]));
 				setup ();
@@ -170,9 +172,12 @@ namespace plans
 				TRACE ("Setting up");
 				if (matrix_n) {
 					for (int j = 0; j < m; ++j) {
-						matrix_n [j] = matrix_n [m + j] = 0.0;
-						for (int i = 2; i < ldn; ++i) {
-							matrix_n [i * m + j] = coeff * diffusion [j] * alpha * pioL2 * (datatype) ((i / 2) * (i / 2));
+						for (int k = 0; k < dims; ++k)
+						{
+							matrix_n [j] = matrix_n [(m + j) * dims + k] = 0.0;
+							for (int i = 2; i < ldn; ++i) {
+								matrix_n [(i * m + j) * dims + k] = coeff * diffusion [j] * alpha * pioL2 * (datatype) ((i / 2) * (i / 2));
+							}						
 						}
 					}
 				} else {
@@ -194,8 +199,11 @@ namespace plans
 					if (1.0 - alpha != 0.0) {
 						// #pragma omp parallel for
 						for (int j = 0; j < m; ++j) {
-							for (int i = 2; i < ldn; ++i) {
-								data_out [i * m + j] -= coeff * diffusion [j] * (1.0 - alpha) * pioL2 * (i / 2) * (i / 2) * data_in [i * m + j];
+							for (int k = 0; k < dims; ++k)
+							{
+								for (int i = 2; i < ldn; ++i) {
+									data_out [(i * m + j) * dims + k] -= coeff * diffusion [j] * (1.0 - alpha) * pioL2 * (i / 2) * (i / 2) * data_in [(i * m + j) * dims + k];
+								}
 							}
 						}
 					}
@@ -203,7 +211,10 @@ namespace plans
 					// #pragma omp parallel for
 					for (int j = 0; j < m; ++j) {
 						for (int i = 2; i < ldn; ++i) {
-							data_out [i * m + j] -= coeff * diffusion [j] * pioL2 * (i / 2) * (i / 2) * data_in [i * m + j];
+							for (int k = 0; k < dims; ++k)
+							{
+								data_out [(i * m + j) * dims + k] -= coeff * diffusion [j] * pioL2 * (i / 2) * (i / 2) * data_in [(i * m + j) * dims + k];
+							}
 						}
 					}
 				}
@@ -231,8 +242,8 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc implicit::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plan <datatype> > _instance (grids::grid <datatype> **grids, datatype **matrices, datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
-					return std::shared_ptr <plan <datatype> > (new background_horizontal <datatype> (*grids [0], *grids [1], alpha, diffusion, matrices [0], matrices [1], i_data_in, i_data_out, i_element_flags, i_component_flags));
+				virtual std::shared_ptr <plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+					return std::shared_ptr <plan <datatype> > (new background_horizontal <datatype> (alpha, diffusion, matrices [0], matrices [1], i_data_in, i_data_out, i_element_flags, i_component_flags));
 				}
 			};
 		};

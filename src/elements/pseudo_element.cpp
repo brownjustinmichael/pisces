@@ -1,5 +1,9 @@
 /*!**********************************************************************
+<<<<<<< HEAD
  * \file pseudo.cpp
+=======
+ * \file boussinesq.cpp
+>>>>>>> devel
  * /Users/justinbrown/Dropbox/pisces
  * 
  * Created by Justin Brown on 2014-02-03.
@@ -13,7 +17,7 @@
 namespace pisces
 {
 	using namespace plans;
-	
+
 	template <class datatype>
 	pseudo_element <datatype>::pseudo_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags, bool load_diffusion) : 
 	boussinesq_element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags, load_diffusion) {
@@ -25,6 +29,6 @@ namespace pisces
 		
 	TRACE ("Initialized.");
 	}
-
+	
 	template class pseudo_element <double>;
 } /* pisces */

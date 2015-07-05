@@ -456,6 +456,45 @@ namespace grids
 			void _calculate_matrix ();
 		};
 	} /* fourier */
+
+	template <class datatype>
+	class variable
+	{
+	protected:
+		std::vector <grids::grid <datatype> *> grids;
+		int dimensions;
+		std::vector <double> data;
+
+	public:
+		variable (grids::grid <datatype> &i_grid_m, int i_dimensions = 1) : dimensions (i_dimensions) {
+			grids.push_back (&i_grid_m);
+			data.resize (i_grid_m.get_n () * dimensions);
+		}
+
+		variable (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, int i_dimensions = 1) : dimensions (i_dimensions) {
+			grids.push_back (&i_grid_n);
+			grids.push_back (&i_grid_m);
+			data.resize (i_grid_m.get_n () * i_grid_n.get_ld () * dimensions);
+		}
+
+		virtual ~variable () {}
+
+		datatype *ptr () {
+			return &data [0];
+		}
+
+		grid <datatype> &get_grid (int n) {
+			return *grids [n];
+		}
+
+		grid <datatype> **get_grids () {
+			return &grids [0];
+		}
+
+		const int dims () {
+			return dimensions;
+		}
+	};
 } /* grids */
 
 #endif /* end of include guard: COLLOCATION_HPP_3FRTUK5Z */

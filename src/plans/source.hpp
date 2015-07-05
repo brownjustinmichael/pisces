@@ -14,7 +14,7 @@
 namespace plans
 {
 	template <class datatype>
-	typename explicit_plan <datatype>::factory_container src (datatype *data_source, datatype coeff = 1.0) {
+	typename explicit_plan <datatype>::factory_container src (grids::variable <datatype> &data_source, datatype coeff = 1.0) {
 		return typename explicit_plan <datatype>::factory_container (std::shared_ptr <typename explicit_plan <datatype>::factory> (new typename source::uniform <datatype>::factory (data_source, coeff)));
 	}
 
