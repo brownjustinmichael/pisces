@@ -22,7 +22,7 @@ namespace boundaries
 	/*
 		TODO Make non ASCII documentation for this class
 	*/
-	
+
 	/*!**********************************************************************
 	 * \brief A class used to calculate cross-boundary matrices
 	 * 
@@ -160,6 +160,21 @@ namespace boundaries
 		 ************************************************************************/
 		virtual void calculate_matrix (datatype timestep, datatype *default_matrix, datatype *matrix_in, datatype *matrix_out, int lda, bool diverging = false) = 0;
 	};
+
+	template <class datatype>
+	void boundary_match (int m, std::shared_ptr <boundaries::boundary <datatype>> &boundary_0, std::shared_ptr <boundaries::boundary <datatype>> &boundary_n, datatype *data, int excess_0 = 1, int excess_n = 1) {
+	if (boundary_n) {
+		boundary_n->send (data + m - 2 * excess_n - 1, m, excess_n);
+	}
+	if (boundary_0) {
+		boundary_0->receive (data, m, excess_0, 0.0);
+		boundary_0->send (data + excess_0, m, excess_0 + 1);
+	}
+	if (boundary_n) {
+		boundary_n->receive (data + m - excess_n - 1, m, excess_n + 1, 0.0);
+	}
+}
+
 } /* boundaries */
 
 #endif /* end of include guard: BOUNDARY_HPP_013D6464 */
