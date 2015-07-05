@@ -97,7 +97,9 @@ conf.CheckLib ("gfortran")
 env = conf.Finish ()
 
 # Compile the main code
-env.Default (env.Program(target = "../run/isces", source = (["main.cpp"] + objects)))
+env.Default (env.Program(target = "../run/isces", source = (["isces.cpp"] + objects)))
+
+env.Default (env.Program(target = "../run/pisces", source = (["pisces.cpp"] + objects)))
 
 # Compile the code initializer
 env.Default (env.Program(target = "../run/isces_init", source = (["init.cpp"] + objects)))
