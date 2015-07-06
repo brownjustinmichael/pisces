@@ -32,10 +32,26 @@ namespace plans
 	namespace solvers
 	{
 		template <class datatype>
-		pseudo_incompressible <datatype>::pseudo_incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z, int *i_element_flags, int *i_component_flags, int * i_component_flags_x, int *i_component_flags_z) : solver <datatype> (i_element_flags, i_component_flags), n (i_data.get_grid (0).get_n ()), ldn (i_data.get_grid (0).get_ld ()), m (i_data.get_grid (1).get_n ()), excess_0 (i_data.get_grid (1).get_excess_0 ()), excess_n (i_data.get_grid (1).get_excess_n ()), data (i_data.ptr ()), data_x (i_data_x.ptr ()), data_z (i_data_z.ptr ()), grid_n (i_data.get_grid (0)), grid_m (i_data.get_grid (1)), pos_n (&grid_n [0]), messenger_ptr (i_messenger_ptr) {
+		pseudo_incompressible <datatype>::pseudo_incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype i_gamma, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z, datatype *i_pressure, int *i_element_flags, int *i_component_flags, int * i_component_flags_x, int *i_component_flags_z) : 
+			solver <datatype> (i_element_flags, i_component_flags), 
+			n (i_data.get_grid (0).get_n ()), 
+			ldn (i_data.get_grid (0).get_ld ()), 
+			m (i_data.get_grid (1).get_n ()), 
+			excess_0 (i_data.get_grid (1).get_excess_0 ()), 
+			excess_n (i_data.get_grid (1).get_excess_n ()), 
+			gamma (i_gamma), 
+			data (i_data.ptr ()), 
+			data_x (i_data_x.ptr ()), 
+			data_z (i_data_z.ptr ()), 
+			grid_n (i_data.get_grid (0)), 
+			grid_m (i_data.get_grid (1)), 
+			pos_n (&grid_n [0]), 
+			messenger_ptr (i_messenger_ptr) {
 			TRACE ("Building laplace solver...");
 			component_flags_x = i_component_flags_x;
 			component_flags_z = i_component_flags_z;
+
+			pressure = i_pressure;
 			
 			boundary_0 = i_boundary_0;
 			boundary_n = i_boundary_n;
@@ -53,8 +69,9 @@ namespace plans
 			pos_m = &positions [1];
 			diff.resize (m + 1);
 			diff2.resize (m);
+			grad_pressure.resize (m);
 		
-			for (int j = 0; j < m - 0; ++j) {
+			for (int j = 0; j < m; ++j) {
 				pos_m [j] = grid_m [j];
 			}
 
@@ -83,6 +100,21 @@ namespace plans
 			}
 			diff [m] = pos_m [m] - pos_m [m - 1];
 
+			for (int j = 1; j < m - 1; ++j)
+			{
+				grad_pressure [j] = (pressure [j + 1] - pressure [j - 1]) / diff2 [j];
+			}
+			grad_pressure [0] = (pressure [1] - pressure [0]) / diff [1];
+			grad_pressure [m - 1] = (pressure [m - 1] - pressure [m - 2]) / diff [m - 1];
+
+			grad2_pressure.resize (m);
+			for (int j = 0; j < m - 1; ++j)
+			{
+				grad2_pressure [j] = ((pressure [j + 1] - pressure [j]) / diff [j + 1] - (pressure [j] - pressure [j - 1]) / diff [j]) / diff2 [j];
+			}
+			grad2_pressure [0] = grad2_pressure [1];
+			grad2_pressure [m - 1] = grad2_pressure [m - 2];
+
 			matrix.resize (4 * m * ldn);
 		}
 
@@ -100,16 +132,15 @@ namespace plans
 			// Generate the matrix
 			for (int i = 0; i < ldn; ++i) {
 				for (int j = 0; j < m; ++j) {
-					sup_ptr [j] = 1.0 / diff [j + 1] / diff2 [j];
-					diag_ptr [j] = (-1.0 / diff [j + 1] - 1.0 / diff [j]) / diff2 [j] - scalar * (i / 2) * (i / 2);
-					sub_ptr [j] = 1.0 / diff [j] / diff2 [j];
+					sup_ptr [j] = 1.0 / diff [j + 1] / diff2 [j] + grad_pressure [j] / gamma / pressure [j] / diff2 [j];
+					diag_ptr [j] = (-1.0 / diff [j + 1] - 1.0 / diff [j]) / diff2 [j] - scalar * (i / 2) * (i / 2) + scalar * (grad2_pressure [j] / gamma / pressure [j] + (1. / gamma - 2.) / pressure [j] / pressure [j] * grad_pressure [j] * grad_pressure [j]);
+					sub_ptr [j] = 1.0 / diff [j] / diff2 [j] - grad_pressure [j] / gamma / pressure [j] / diff2 [j];
 				}
 				if (id == 0) {
 					sup_ptr [0] = 2.0 / diff [1] / diff2 [0];
 					diag_ptr [0] = -2.0 / diff [1] / diff2 [0] - scalar * (i / 2) * (i / 2);
 				}
 				if (id == np - 1) {
-					DEBUG (diff2 [m - 1] << diff [m - 1]);
 					diag_ptr [m - 1] = -2.0 / diff [m - 1] / diff2 [m - 1] - scalar * (i / 2) * (i / 2);
 					sub_ptr [m - 1] = 2.0 / diff [m - 1] / diff2 [m - 1];
 				}
@@ -123,13 +154,9 @@ namespace plans
 		template <class datatype>
 		void pseudo_incompressible <datatype>::execute () {
 			int info;
-			static int count = 0;
 			TRACE ("Solving...");
 			bool retransform = false;
 			// No net vertical flux
-			// linalg::scale (2 * m, 0.0, data_z);
-			++count;
-			if (count % 2 == 0) return;
 
 			linalg::scale (m * ldn, 0.0, &data [0]);
 
@@ -138,21 +165,21 @@ namespace plans
 			// Calculate the horizontal derivatives of the horizontal component
 			for (int i = 2; i < ldn; i += 2) {
 				for (int j = 0; j < m; ++j) {
-					data [i * m + j] += -scalar * (i / 2) * data_x [(i + 1) * m + j];
-					data [(i + 1) * m + j] += scalar * (i / 2) * data_x [i * m + j];
+					data [i * m + j] += -pressure [j] * scalar * (i / 2) * data_x [(i + 1) * m + j];
+					data [(i + 1) * m + j] += pressure [j] * scalar * (i / 2) * data_x [i * m + j];
 				}
 			}
 			
 			// Calculate the vertical derivatives of the vertical component
 			for (int i = 0; i < ldn; ++i) {
 				if (id == 0) {
-					data [i * m] += (data_z [i * m + 1] - data_z [i * m]) / diff [1];
+					data [i * m] += pressure [0] * (data_z [i * m + 1] - data_z [i * m]) / diff [1];
 				}
 				for (int j = 1; j < m - 1; ++j) {
-					data [i * m + j] += (data_z [i * m + j + 1] - data_z [i * m + j - 1]) / diff2 [j];
+					data [i * m + j] += pressure [j] * (data_z [i * m + j + 1] - data_z [i * m + j - 1]) / diff2 [j] + grad_pressure [j] * data_z [i * m + j] / gamma;
 				}
 				if (id == np - 1) {
-					data [i * m + m - 1] = (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / diff [m - 1];
+					data [i * m + m - 1] = pressure [m - 1] * (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / diff [m - 1];
 				}
 			}
 

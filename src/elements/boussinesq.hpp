@@ -33,7 +33,6 @@ namespace pisces
 		using implemented_element <datatype>::name;
 		using implemented_element <datatype>::cell_n;
 		using implemented_element <datatype>::cell_m;
-		using implemented_element <datatype>::grids;
 		using implemented_element <datatype>::matrix_ptr;
 		using implemented_element <datatype>::timestep;
 		using implemented_element <datatype>::duration;
@@ -50,6 +49,7 @@ namespace pisces
 		datatype *z_vel_ptr; //!< The pointer to the z velocity data, for speed
 		
 	protected:
+		using implemented_element <datatype>::grids;
 		using implemented_element <datatype>::n;
 		using implemented_element <datatype>::m;
 		using implemented_element <datatype>::equations;
