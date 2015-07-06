@@ -21,6 +21,7 @@ namespace pisces
 	{	
 	protected:
 		using boussinesq_element <datatype>::equations;
+		using boussinesq_element <datatype>::data;
 		using boussinesq_element <datatype>::m;
 		using boussinesq_element <datatype>::grids;
 		std::vector <datatype> pressure;

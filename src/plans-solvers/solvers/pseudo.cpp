@@ -194,7 +194,7 @@ namespace plans
 			// Update the velocities with the pressure derivatives
 			for (int i = 2; i < ldn; ++i) {
 				for (int j = 1; j < m - 1; ++j) {
-					data_z [i * m + j] -= (data [i * m + j + 1] - data [i * m + j - 1]) / diff2 [j];
+					data_z [i * m + j] -= (data [i * m + j + 1] - data [i * m + j - 1]) / diff2 [j] / pressure [j] + data [j] * grad_pressure [j] / pressure [j] / pressure [j] / gamma;
 				}
 			}
 			
