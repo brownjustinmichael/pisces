@@ -77,6 +77,132 @@ namespace plans
 			}
 		};
 	};
+
+	template <class datatype>
+	class compound_plan : public explicit_plan <datatype>
+	{
+	protected:
+		using plan <datatype>::data_in;
+		using plan <datatype>::data_out;
+		using plan <datatype>::element_flags;
+		using plan <datatype>::component_flags;
+
+		grids::variable <datatype> &data;
+
+		std::vector <std::shared_ptr <plan <datatype>>> plans;
+		std::vector <int> operators;
+		std::vector <datatype> total_vec;
+		std::vector <datatype> tmp_vec;
+
+		datatype *total, tmp;
+
+	public:
+		enum name
+		{
+			mult = 0x01,
+			div = 0x02
+		};
+
+		compound_plan (grids::variable <datatype> *i_data_in, datatype *i_data_out, int *i_element_flags = NULL, int *i_component_flags = NULL, datatype i_coeff = 1.0) : 
+		explicit_plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags, i_coeff),
+		data (i_data_in) {
+			tmp_vec.resize (i_data_in.size ());
+			total_vec.resize (i_data_in.size ());
+			tmp = &tmp_vec [0];
+			total = &total_vec [0];
+		}
+
+		~compound_plan () {}
+
+		void add_plan (const typename plans::plan <datatype>::factory &i_factory, int op = mult) {
+			TRACE ("Adding plan...");
+			if (i_factory.type () != plans::plan <datatype>::factory::expl) {
+				throw 100;
+			}
+			plans.push_back (i_factory.instance (NULL, data, &tmp [0], element_flags, component_flags));
+			operators.push_back (op);
+		}
+		
+		void execute () {
+			bool first = true;
+			for (int i = 0; i < (int) plans.size (); ++i)
+			{
+				plans [i].execute ();
+				if (first) {
+					linalg::add_scaled ((int) total_vec.size (), tmp, total);
+					first = false;
+					continue;
+				}
+				if (operators [i] == mult) {
+					for (int j = 0; j < (int) tmp_vec.size (); ++j)
+					{
+						total [j] *= tmp [j];
+					}
+				} else if (operators [i] == div) {
+					for (int j = 0; j < (int) tmp_vec.size (); ++j)
+					{
+						total [j] /= tmp [j];
+					}
+				} else {
+					FATAL ("Unrecognized operator");
+					throw 101;
+				}
+			}
+			linalg::add_scaled ((int) total_vec.size (), total, data_out);
+		}
+
+		class factory : public plan <datatype>::factory
+		{
+		protected:
+			std::vector <std::shared_ptr <typename plan <datatype>::factory>> factories;
+			std::vector <int> operators;
+
+		public:
+			factory () {}
+
+			~factory () {}
+
+			void add_plan (std::shared_ptr <typename plan <datatype>::factory> i_factory, int op = mult) {
+				factories.push_back (i_factory);
+				operators.push_back (op);
+			}
+
+			std::shared_ptr <typename plan <datatype>::factory> operator* (std::shared_ptr <typename plan <datatype>::factory> i_factory) {
+				add_plan (i_factory, mult);
+			}
+
+			std::shared_ptr <typename plan <datatype>::factory> operator/ (std::shared_ptr <typename plan <datatype>::factory> i_factory) {
+				add_plan (i_factory, div);
+			}
+
+			virtual std::shared_ptr <plan <datatype>> _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+				std::shared_ptr <plan <datatype>> plan = std::shared_ptr <compound_plan <datatype>> (new compound_plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags));
+				for (int i = 0; i < (int) factories.size (); ++i)
+				{
+					add_plan (factories [i], operators [i]);
+				}
+				return plan;
+			}
+		};
+	};
+
+	template <class datatype>
+	std::shared_ptr <typename compound_plan <datatype>::factory> operator* (std::shared_ptr <typename plan <datatype>::factory> i_factory1, std::shared_ptr <typename plan <datatype>::factory> i_factory2) {
+		std::shared_ptr <typename compound_plan <datatype>::factory> plan = typename std::shared_ptr <typename compound_plan <datatype>::factory> (new typename compound_plan <datatype>::factory ());
+
+		plan->add_plan (i_factory1, compound_plan <datatype>::mult);
+		plan->add_plan (i_factory2, compound_plan <datatype>::mult);
+		return plan;
+	}
+
+	template <class datatype>
+	std::shared_ptr <typename compound_plan <datatype>::factory> operator/ (std::shared_ptr <typename plan <datatype>::factory> i_factory1, std::shared_ptr <typename plan <datatype>::factory> i_factory2) {
+		std::shared_ptr <typename compound_plan <datatype>::factory> plan = std::shared_ptr <typename compound_plan <datatype>::factory> (new typename compound_plan <datatype>::factory ());
+
+		plan->add_plan (i_factory1, compound_plan <datatype>::mult);
+		plan->add_plan (i_factory2, compound_plan <datatype>::div);
+		return plan;
+	}
 } /* plans */
 
 #endif /* end of include guard: EXPLICIT_PLAN_HPP_5171CAFD */

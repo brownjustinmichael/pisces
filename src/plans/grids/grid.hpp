@@ -483,6 +483,10 @@ namespace grids
 			return &data [0];
 		}
 
+		int size () {
+			return data.size ();
+		}
+
 		grid <datatype> &get_grid (int n) {
 			return *grids [n];
 		}

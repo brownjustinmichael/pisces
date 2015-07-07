@@ -189,8 +189,20 @@ namespace plans
 				return container;
 			}
 
+			factory_container operator+ (std::shared_ptr <plan <datatype>::factory> i_factory) {
+				return *this + factory_container (i_factory);
+			}
+
 			factory_container operator- (factory_container j_container) {
 				return *this + (j_container * -1.0);
+			}
+
+			factory_container operator- (std::shared_ptr <plan <datatype>::factory> i_factory) {
+				return *this - factory_container (i_factory);
+			}
+
+			factory_container operator+ (grids::variable <datatype> &var) {
+				return *this + src (var);
 			}
 
 			factory_container operator+ (datatype scalar) {
@@ -208,15 +220,6 @@ namespace plans
 			
 		};
 	};
-
-	// template <class datatype>
-	// class compound_plan : public plan
-	// {
-	// public:
-	// 	compound_plan (int *i_element_flags = NULL, int *i_component_flags = NULL, datatype i_coeff = 1.0) {}
-	// 	~compound_plan () {}
-		
-	// };
 
 	template <class datatype>
 	typename plan <datatype>::factory_container operator* (typename plan <datatype>::factory_container i_container, datatype scalar) {
