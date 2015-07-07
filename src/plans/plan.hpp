@@ -221,20 +221,17 @@ namespace plans
 		};
 	};
 
-	template <class datatype>
-	typename plan <datatype>::factory_container operator* (typename plan <datatype>::factory_container i_container, datatype scalar) {
-		typename plan <datatype>::factory_container container (i_container);
-		for (int i = 0; i < (int) i_container.facts.size (); ++i)
-		{
-			container.facts [i]->coeff *= scalar;
-		}
-		return container;
-	}
+	typename plan <double>::factory_container operator+ (std::shared_ptr <typename plan <double>::factory> i_factory, std::shared_ptr <typename plan <double>::factory> j_factory);
+
+	typename plan <double>::factory_container operator- (std::shared_ptr <typename plan <double>::factory> i_factory, std::shared_ptr <typename plan <double>::factory> j_factory);
 
 	template <class datatype>
-	typename plan <datatype>::factory_container operator* (datatype scalar, typename plan <datatype>::factory_container i_container) {
-		return i_container * scalar;
-	}
+	typename plan <datatype>::factory_container operator* (typename plan <datatype>::factory_container i_container, datatype scalar);
+
+	typename std::shared_ptr <typename plan <double>::factory> operator* (std::shared_ptr <typename plan <double>::factory> i_factory, YAML::Node node);
+
+	template <class datatype>
+	typename plan <datatype>::factory_container operator* (datatype scalar, typename plan <datatype>::factory_container i_container);
 
 	template <class datatype>
 	datatype operator* (YAML::Node node, datatype other) {
