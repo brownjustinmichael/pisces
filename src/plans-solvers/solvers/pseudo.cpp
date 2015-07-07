@@ -33,20 +33,20 @@ namespace plans
 	{
 		template <class datatype>
 		pseudo_incompressible <datatype>::pseudo_incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype i_gamma, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z, datatype *i_pressure, int *i_element_flags, int *i_component_flags, int * i_component_flags_x, int *i_component_flags_z) : 
-			solver <datatype> (i_element_flags, i_component_flags), 
-			n (i_data.get_grid (0).get_n ()), 
-			ldn (i_data.get_grid (0).get_ld ()), 
-			m (i_data.get_grid (1).get_n ()), 
-			excess_0 (i_data.get_grid (1).get_excess_0 ()), 
-			excess_n (i_data.get_grid (1).get_excess_n ()), 
-			gamma (i_gamma), 
-			data (i_data.ptr ()), 
-			data_x (i_data_x.ptr ()), 
-			data_z (i_data_z.ptr ()), 
-			grid_n (i_data.get_grid (0)), 
-			grid_m (i_data.get_grid (1)), 
-			pos_n (&grid_n [0]), 
-			messenger_ptr (i_messenger_ptr) {
+		solver <datatype> (i_data.ptr (), NULL, i_element_flags, i_component_flags), 
+		n (i_data.get_grid (0).get_n ()), 
+		ldn (i_data.get_grid (0).get_ld ()), 
+		m (i_data.get_grid (1).get_n ()), 
+		excess_0 (i_data.get_grid (1).get_excess_0 ()), 
+		excess_n (i_data.get_grid (1).get_excess_n ()), 
+		gamma (i_gamma), 
+		data (i_data.ptr ()), 
+		data_x (i_data_x.ptr ()), 
+		data_z (i_data_z.ptr ()), 
+		grid_n (i_data.get_grid (0)), 
+		grid_m (i_data.get_grid (1)), 
+		pos_n (&grid_n [0]), 
+		messenger_ptr (i_messenger_ptr) {
 			TRACE ("Building laplace solver...");
 			component_flags_x = i_component_flags_x;
 			component_flags_z = i_component_flags_z;

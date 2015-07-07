@@ -61,7 +61,7 @@ namespace plans
 			 * 
 			 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
 			 ************************************************************************/
-			horizontal (int i_n, int i_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0) : plans::plan <datatype> (i_element_flags, i_component_flags) {
+			horizontal (int i_n, int i_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0) : plans::plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags) {
 				DEBUG (i_element_flags << " " << i_component_flags);
 				DEBUG (i_data_in << " " << i_data_out);
 				init (i_n, i_m, i_data_in, i_data_out, i_flags, i_threads);
@@ -79,7 +79,7 @@ namespace plans
 			 * 
 			 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
 			 ************************************************************************/
-			horizontal (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0) : plans::plan <datatype> (i_element_flags, i_component_flags) {
+			horizontal (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0) : plans::plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags) {
 				init (i_grid_n.get_n (), i_grid_m.get_n (), i_data_in, i_data_out, i_flags, i_threads);
 			}
 			
@@ -132,7 +132,7 @@ namespace plans
 			 * 
 			 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
 			 ************************************************************************/
-			vertical (int i_n, int i_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0) : plans::plan <datatype> (i_element_flags, i_component_flags) {
+			vertical (int i_n, int i_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0) : plans::plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags) {
 				init (i_n, i_m, i_data_in, i_data_out, i_flags, i_threads);
 			}
 			
@@ -148,7 +148,7 @@ namespace plans
 			 * 
 			 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
 			 ************************************************************************/
-			vertical (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0) : plans::plan <datatype> (i_element_flags, i_component_flags) {
+			vertical (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0) : plans::plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags) {
 				init (i_grid_n.get_n (), i_grid_m.get_n (), i_data_in, i_data_out, i_flags, i_threads);
 			}
 			

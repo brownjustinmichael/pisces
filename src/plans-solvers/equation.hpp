@@ -195,6 +195,10 @@ namespace plans
 				return *this;
 			}
 
+			equation <datatype> &operator- (const typename plan <datatype>::factory_container &i_container) {
+				return *this + (i_container * -1.0);
+			}
+
 			equation <datatype> &operator+ (const datatype scalar) {
 				add_plan (constant (-scalar));
 				return *this;

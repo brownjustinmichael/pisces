@@ -71,6 +71,8 @@ namespace plans
 	{
 	protected:
 		datatype coeff;
+		datatype* data_in; //!< A datatype pointer to the input data
+		datatype* data_out; //!< A datatype pointer to the output data
 		int *element_flags; //!< A pointer to the integer global flags
 		int *component_flags; //!< A pointer to the integer local flags
 
@@ -86,8 +88,10 @@ namespace plans
 		* \param i_element_flags A pointer to the integer global flags
 		* \param i_component_flags A pointer to the integer local flags
 		 ************************************************************************/
-		plan <datatype> (int *i_element_flags = NULL, int *i_component_flags = NULL, datatype i_coeff = 1.0) :
+		plan <datatype> (datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL, datatype i_coeff = 1.0) :
 		coeff (i_coeff), 
+		data_in (i_data_in),
+		data_out (i_data_out ? i_data_out : i_data_in),
 		element_flags (i_element_flags),
 		component_flags (i_component_flags) {}
 		
@@ -185,6 +189,10 @@ namespace plans
 				return container;
 			}
 
+			factory_container operator- (factory_container j_container) {
+				return *this + (j_container * -1.0);
+			}
+
 			factory_container operator+ (datatype scalar) {
 				return *this + constant (scalar);
 			}
@@ -200,6 +208,15 @@ namespace plans
 			
 		};
 	};
+
+	// template <class datatype>
+	// class compound_plan : public plan
+	// {
+	// public:
+	// 	compound_plan (int *i_element_flags = NULL, int *i_component_flags = NULL, datatype i_coeff = 1.0) {}
+	// 	~compound_plan () {}
+		
+	// };
 
 	template <class datatype>
 	typename plan <datatype>::factory_container operator* (typename plan <datatype>::factory_container i_container, datatype scalar) {

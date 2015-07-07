@@ -12,6 +12,7 @@
 
 #include "pseudo_element.hpp"
 
+#include "plans/diffusion.hpp"
 #include "plans-solvers/solvers.hpp"
 
 namespace pisces
@@ -28,7 +29,8 @@ namespace pisces
 			pressure [j] = 1.0 + (*grids [1]) [0] * 0.1;
 		}
 
-		*equations ["z_velocity"] + pressure_grad_1d (data ["temperature"], data ["composition"], &pressure [0]);
+		// *equations ["x_velocity"] - horizontal_stress (data ["z_velocity"]);
+		*equations ["z_velocity"] + pressure_grad_1d (data ["temperature"], data ["composition"], &pressure [0]);// - vertical_stress (data ["x_velocity"]);
 
 		// Set up the velocity constraint
 		*pdiv <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"], &pressure [0])

@@ -20,7 +20,16 @@ namespace plans
 	{
 		template <class datatype>
 		fourier <datatype>::fourier (datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, int *i_element_flags, int *i_component_flags) : 
-		solver <datatype> (i_element_flags, i_component_flags), n (i_data.get_grid (0).get_n ()), ldn (i_data.get_grid (0).get_ld ()), m (i_data.get_grid (1).get_n ()), data (i_data.ptr ()), timestep (i_timestep), excess_0 (i_data.get_grid (1).get_excess_0 ()), excess_n (i_data.get_grid (1).get_excess_n ()), default_matrix (i_data.get_grid (1).get_data (0)), pos_m (&(i_data.get_grid (1) [0])) {
+		solver <datatype> (i_data.ptr (), NULL, i_element_flags, i_component_flags), 
+		n (i_data.get_grid (0).get_n ()), 
+		ldn (i_data.get_grid (0).get_ld ()), 
+		m (i_data.get_grid (1).get_n ()), 
+		data (i_data.ptr ()), 
+		timestep (i_timestep), 
+		excess_0 (i_data.get_grid (1).get_excess_0 ()), 
+		excess_n (i_data.get_grid (1).get_excess_n ()), 
+		default_matrix (i_data.get_grid (1).get_data (0)), 
+		pos_m (&(i_data.get_grid (1) [0])) {
 			TRACE ("Building solver...");
 			matrix.resize (m * ldn);
 			factorized_matrix.resize (m * ldn);

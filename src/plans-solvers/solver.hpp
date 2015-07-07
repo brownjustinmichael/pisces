@@ -84,8 +84,8 @@ namespace plans
 			/*!*******************************************************************
 			 * \copydoc plan::plan ()
 			 *********************************************************************/
-			solver (int *i_element_flags, int *i_component_flags) : 
-			plan <datatype> (i_element_flags, i_component_flags) {}
+			solver (datatype *i_data_in, datatype *i_data_out, int *i_element_flags, int *i_component_flags) : 
+			plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags) {}
 	
 			virtual ~solver () {}
 

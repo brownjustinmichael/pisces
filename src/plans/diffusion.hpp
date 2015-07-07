@@ -22,6 +22,16 @@ namespace plans
 	typename implicit_plan <datatype>::factory_container diff (datatype coeff = 1.0) {
 		return typename implicit_plan <datatype>::factory_container (std::shared_ptr <typename implicit_plan <datatype>::factory> (new typename diffusion::vertical <datatype>::factory (coeff))) + typename implicit_plan <datatype>::factory_container (std::shared_ptr <typename implicit_plan <datatype>::factory> (new typename diffusion::horizontal <datatype>::factory (coeff)));
 	}
+
+	template <class datatype>
+	typename explicit_plan <datatype>::factory_container horizontal_stress (grids::variable <datatype> data_other, datatype coeff = 1.0) {
+		return typename explicit_plan <datatype>::factory_container (std::shared_ptr <typename explicit_plan <datatype>::factory> (new typename diffusion::horizontal_stress <datatype>::factory (data_other, coeff)));
+	}
+
+	template <class datatype>
+	typename explicit_plan <datatype>::factory_container vertical_stress (grids::variable <datatype> data_other, datatype coeff = 1.0) {
+		return typename explicit_plan <datatype>::factory_container (std::shared_ptr <typename explicit_plan <datatype>::factory> (new typename diffusion::vertical_stress <datatype>::factory (data_other, coeff)));
+	}
 } /* plans */
 
 #endif /* end of include guard: DIFFUSION_HPP_C1935DDC */
