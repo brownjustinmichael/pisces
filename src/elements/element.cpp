@@ -97,6 +97,13 @@ namespace pisces
 			, output_time, output_duration)
 				
 			TRACE ("Executing plans in real space...");
+
+			for (typename data::data <datatype>::iterator iter = data.begin (); iter < data.end (); ++iter)
+			{
+				if (data [*iter].update ()) {
+					transformers [*iter]->transform (plans::transforms::forward_horizontal | plans::transforms::no_read);
+				}
+			}
 			
 			// #pragma omp parallel sections num_threads(2)
 				// {
@@ -130,6 +137,7 @@ namespace pisces
 			, transform_time, transform_duration);
 
 			// Calculate the pre solver plans
+
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
 				equations [*iter]->execute_plans (plans::solvers::pre_solve_plan);
@@ -139,6 +147,7 @@ namespace pisces
 			TIME (
 			solve ();
 			, solve_time, solve_duration);
+
 
 			// Check whether the timestep has changed. If it has, mark all equations to be refactorized.
 

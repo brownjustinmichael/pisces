@@ -303,9 +303,9 @@ namespace plans
 				if (transform) transform->execute ();
 
 				if (!x_solver && !z_solver) {
-					linalg::matrix_copy (m, ldn, new_rhs_ptr, data.ptr ());
-					if (real_rhs_ptr) linalg::matrix_add_scaled (m, ldn, 1.0, real_rhs_ptr, data.ptr ());
-					if (spectral_rhs_ptr) linalg::matrix_add_scaled (m, ldn, 1.0, spectral_rhs_ptr, data.ptr ());
+					// linalg::matrix_copy (m, ldn, new_rhs_ptr, data.ptr ());
+					// if (real_rhs_ptr) linalg::matrix_add_scaled (m, ldn, 1.0, real_rhs_ptr, data.ptr ());
+					// if (spectral_rhs_ptr) linalg::matrix_add_scaled (m, ldn, 1.0, spectral_rhs_ptr, data.ptr ());
 					return;
 				}
 				

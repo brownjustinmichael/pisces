@@ -15,6 +15,7 @@
 
 #include "versions/version.hpp"
 #include "logger/logger.hpp"
+#include "linalg/utils.hpp"
 
 /*!**********************************************************************
  * \namespace grids
@@ -458,16 +459,33 @@ namespace grids
 	} /* fourier */
 
 	template <class datatype>
+	class compound_variable;
+
+	template <class datatype>
 	class variable
 	{
 	protected:
+		static std::vector <variable <datatype>> tmps;
+
 		std::vector <grids::grid <datatype> *> grids;
 		int dimensions;
 		std::vector <double> data;
+		std::vector <datatype *> vars;
+		// TODO This won't work. We need a way to keep references or entire variables
+		std::vector <variable <datatype> *> inner;
+		std::vector <int> ops;
+		bool needs_update = false;
 
 	public:
 		int component_flags;
 		int &element_flags;
+
+		enum operators {
+			add = 0x01,
+			sub = 0x02,
+			mul = 0x03,
+			div = 0x04
+		};
 
 		variable (grids::grid <datatype> &i_grid_m, int &i_element_flags, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags) {
 			grids.push_back (&i_grid_m);
@@ -500,6 +518,83 @@ namespace grids
 
 		const int dims () {
 			return dimensions;
+		}
+
+		void add_var (variable <datatype> &data, int op) {
+			needs_update = true;
+			DEBUG ("ADDING " << data.ptr ());
+			inner.push_back (&data);
+			vars.push_back (data.ptr ());
+			ops.push_back (op);
+		}
+
+		void reset_vars () {
+			needs_update = false;
+			inner.resize (0);
+			vars.resize (0);
+			ops.resize (0);
+		}
+
+		bool update () {
+			if (!needs_update) return false;
+			DEBUG ("UPDATING");
+			linalg::scale (this->size (), 0.0, this->ptr ());
+			datatype *tmp, *data = this->ptr ();
+			for (int i = 0; i < (int) vars.size (); ++i)
+			{
+				inner [i]->update ();
+				DEBUG ("CHECKING " << inner [i]->ptr ());
+				tmp = vars [i];
+				if (ops [i] == add) {
+					DEBUG ("ADD " << tmp [100]);
+					linalg::add_scaled (this->size (), tmp, data);
+					DEBUG ("ADD " << data [100]);
+				} else if (ops [i] == sub) {
+					DEBUG ("SUB");
+					linalg::add_scaled (this->size (), -1.0, tmp, data);
+				} else if (ops [i] == mul) {
+					DEBUG ("MULT");
+					for (int j = 0; j < this->size (); ++j)
+					{
+						data [j] *= tmp [j];
+					}
+				} else if (ops [i] == div) {
+					DEBUG ("DIV");
+					for (int j = 0; j < this->size (); ++j)
+					{
+						data [j] /= tmp [j];
+					}
+				}
+			}
+			return true;
+		}
+
+		variable <datatype> &operator== (variable <datatype> &&other) {
+			tmps.push_back (other);
+			DEBUG ("MAKING TEMP");
+			this->reset_vars ();
+			this->add_var (tmps [(int) tmps.size () - 1], add);
+			return *this;
+		}
+
+		variable <datatype> &operator== (variable <datatype> &other) {
+			this->reset_vars ();
+			this->add_var (other, add);
+			return *this;
+		}
+
+		variable <datatype> operator* (variable <datatype> &other) {
+			variable <datatype> new_var (*this);
+			new_var.add_var (*this, add);
+			new_var.add_var (other, mul);
+			return new_var;
+		}
+
+		variable <datatype> operator/ (variable <datatype> &other) {
+			variable <datatype> new_var (*this);
+			new_var.add_var (*this, add);
+			new_var.add_var (other, div);
+			return new_var;
 		}
 	};
 } /* grids */

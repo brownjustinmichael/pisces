@@ -277,6 +277,11 @@ namespace grids
 		}
 		
 	} /* horizontal */
+
+	template <class datatype>
+	std::vector <variable <datatype>> grids::variable <datatype>::tmps;
+
+	template class variable <double>;
 } /* grids */
 
 #endif /* end of include guard: COLLOCATION_CPP_HV4P0UOP */

@@ -88,7 +88,7 @@ namespace plans
 		* \param i_element_flags A pointer to the integer global flags
 		* \param i_component_flags A pointer to the integer local flags
 		 ************************************************************************/
-		plan <datatype> (datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL, datatype i_coeff = 1.0) :
+		plan (datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL, datatype i_coeff = 1.0) :
 		coeff (i_coeff), 
 		data_in (i_data_in),
 		data_out (i_data_out ? i_data_out : i_data_in),
