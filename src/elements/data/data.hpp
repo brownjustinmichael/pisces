@@ -78,9 +78,9 @@ namespace data
 	public:
 		datatype duration; //!< The total time elapsed in the simulation thus far
 		datatype timestep; //!< The current timestep
-		std::map <std::string, int> flags; //!< A map of the simulation flags
+		int flags; //!< A map of the simulation flags
 		data (io::parameters &i_params, int i_id = 0) : id (i_id), params (i_params) {
-			flags ["state"] = 0x0;
+			flags = 0x0;
 			duration = 0.0;
 		}
 		
@@ -156,7 +156,6 @@ namespace data
 		 * \return A pointer to the dataset
 		 ************************************************************************/
 		virtual grids::variable <datatype> &initialize (std::string i_name, datatype* initial_conditions = NULL, int i_flags = 0x00) {
-			flags [i_name] = 0x00;
 			grids::variable <datatype> &var = _initialize (i_name, initial_conditions, i_flags);
 			if (dump_stream) {
 				dump_stream->template append <datatype> (i_name, var.ptr ());
@@ -373,6 +372,7 @@ namespace data
 		using data <datatype>::iterator;
 		using data <datatype>::weights;
 		using data <datatype>::variables;
+		using data <datatype>::flags;
 		
 		std::shared_ptr <grids::grid <datatype>> grid_n; //!< The horizontal grid object
 		std::shared_ptr <grids::grid <datatype>> grid_m; //!< The vertical grid object
@@ -483,7 +483,7 @@ namespace data
 		virtual grids::variable <datatype> &_initialize (std::string name, datatype* initial_conditions = NULL, int i_flags = 0x00) {
 			TRACE ("Initializing " << name << "...");
 			// Size allowing for real FFT buffer
-			data <datatype>::variables [name] = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (*grid_n, *grid_m, i_flags & vector2D ? 2 : (i_flags & vector3D ? 3 : 1)));
+			data <datatype>::variables [name] = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (*grid_n, *grid_m, flags, i_flags & vector2D ? 2 : (i_flags & vector3D ? 3 : 1)));
 			if (name == "x") {
 				for (int j = 0; j < m; ++j) {
 					linalg::copy (n, &((*grid_n) [0]), (*this) (name, 0, j), 1, m);

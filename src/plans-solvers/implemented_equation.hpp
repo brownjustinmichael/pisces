@@ -260,7 +260,7 @@ namespace plans
 					rhs = new_rhs_ptr;
 				}
 				datatype* matrices [2] = {matrix_ptr (0), matrix_ptr (1)};
-				plans::solvers::equation <datatype>::add_plan (i_factory.instance (matrices, data, rhs, element_flags, component_flags));
+				plans::solvers::equation <datatype>::add_plan (i_factory.instance (matrices, data, rhs));
 			}
 			
 			/*!**********************************************************************

@@ -466,12 +466,15 @@ namespace grids
 		std::vector <double> data;
 
 	public:
-		variable (grids::grid <datatype> &i_grid_m, int i_dimensions = 1) : dimensions (i_dimensions) {
+		int component_flags;
+		int &element_flags;
+
+		variable (grids::grid <datatype> &i_grid_m, int &i_element_flags, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags) {
 			grids.push_back (&i_grid_m);
 			data.resize (i_grid_m.get_n () * dimensions);
 		}
 
-		variable (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, int i_dimensions = 1) : dimensions (i_dimensions) {
+		variable (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, int &i_element_flags, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags) {
 			grids.push_back (&i_grid_n);
 			grids.push_back (&i_grid_m);
 			data.resize (i_grid_m.get_n () * i_grid_n.get_ld () * dimensions);

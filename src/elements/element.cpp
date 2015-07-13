@@ -145,8 +145,8 @@ namespace pisces
 			duration += timestep;
 			INFO ("TOTAL TIME: " << duration);
 			if (t_timestep != timestep) {
-				for (std::map <std::string, int>::iterator iter = element_flags.begin (); iter != element_flags.end (); iter++) {
-					element_flags [iter->first] &= ~plans::solvers::factorized;
+				for (std::vector <std::string>::iterator iter = data.begin (); iter != data.end (); iter++) {
+					data [*iter].component_flags &= ~plans::solvers::factorized;
 				}
 				INFO ("Updating timestep: " << t_timestep);
 			}

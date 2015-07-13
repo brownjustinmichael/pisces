@@ -61,7 +61,7 @@ namespace pisces
 		datatype &timestep; //!< The datatype timestep length
 
 		data::data <datatype> &data; //!< An object that contains all the data in the simulation
-		std::map <std::string, int> &element_flags; //!< A map of integer flags
+		int &element_flags; //!< A map of integer flags
 		
 		std::map <std::string, std::shared_ptr <plans::solvers::equation <datatype>>> equations; //!< A vector of shared pointers to the matrix equations
 		std::map <std::string, std::shared_ptr <plans::transforms::transformer <datatype>>> transformers; //!< A map containing the transformer objects for each variable
@@ -115,7 +115,7 @@ namespace pisces
 		data (i_data),
 		element_flags (data.flags),
 		duration (i_data.duration) {
-			element_flags ["element"] = i_element_flags;
+			data.flags = i_element_flags;
 			name = i_name;
 			grids.resize (i_dimensions);
 			axes.resize (i_dimensions);
@@ -252,7 +252,7 @@ namespace pisces
 		virtual void factorize () {
 			TRACE ("Factorizing...");
 			for (iterator iter = begin (); iter != end (); iter++) {
-				if (!(element_flags [*iter] & plans::solvers::factorized)) {
+				if (!(data [*iter].component_flags & plans::solvers::factorized)) {
 					// DEBUG ("Factorizing " << *iter);
 					equations [*iter]->factorize ();
 				}
@@ -267,7 +267,7 @@ namespace pisces
 			// Execute the equations
 			// std::map <int, omp_lock_t> locks;
 			for (iterator iter = begin (); iter != end (); iter++) {
-				element_flags [*iter] &= ~solved;
+				data [*iter].component_flags &= ~solved;
 			}
 			bool completely_solved = false, skip;
 			std::vector <std::string> can_be_solved;
@@ -275,7 +275,7 @@ namespace pisces
 			while (!completely_solved) {
 				can_be_solved.clear ();
 				for (iterator iter = begin (); iter != end (); iter++) {
-					if (element_flags [*iter] & solved) {
+					if (data [*iter].component_flags & solved) {
 						continue;
 					}
 					
@@ -298,12 +298,12 @@ namespace pisces
 					std::string name = can_be_solved [i];
 					equations [name]->solve ();
 					// #pragma omp atomic
-					element_flags [name] |= solved;
+					data [name].component_flags |= solved;
 				}
 				
 				completely_solved = true;
 				for (iterator iter = begin (); iter != end (); iter++) {
-					completely_solved = completely_solved && (element_flags [*iter] & solved);
+					completely_solved = completely_solved && (data [*iter].component_flags & solved);
 				}
 			}
 			

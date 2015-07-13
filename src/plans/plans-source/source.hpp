@@ -50,7 +50,7 @@ namespace plans
 			 * 
 			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
 			 ************************************************************************/
-			uniform (grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : explicit_plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags, i_coeff), data_source (i_data_source.ptr ()) {
+			uniform (grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0) : explicit_plan <datatype> (i_data_in, i_data_out, i_coeff), data_source (i_data_source.ptr ()) {
 				TRACE ("Adding source...");
 			}
 		
@@ -88,9 +88,9 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc explicit_plan::factory::_instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan <datatype> > (new uniform <datatype> (data_source, i_data_in, i_data_out, 1.0, i_element_flags, i_component_flags));
+						return std::shared_ptr <plans::plan <datatype> > (new uniform <datatype> (data_source, i_data_in, i_data_out, 1.0));
 					}
 					return std::shared_ptr <plans::plan <datatype> > ();
 				}
@@ -122,7 +122,7 @@ namespace plans
 			 * 
 			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
 			 ************************************************************************/
-			z_src (datatype *i_data_source, grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : real_plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags, i_coeff), data_source (i_data_source) {
+			z_src (datatype *i_data_source, grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0) : real_plan <datatype> (i_data_in, i_data_out, i_coeff), data_source (i_data_source) {
 				TRACE ("Adding source...");
 			}
 		
@@ -163,9 +163,9 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc explicit_plan::factory::_instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan <datatype> > (new z_src <datatype> (data_source, i_data_in, i_data_out, 1.0, i_element_flags, i_component_flags));
+						return std::shared_ptr <plans::plan <datatype> > (new z_src <datatype> (data_source, i_data_in, i_data_out, 1.0));
 					}
 					return std::shared_ptr <plans::plan <datatype> > ();
 				}
@@ -202,8 +202,8 @@ namespace plans
 			 * 
 			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
 			 ************************************************************************/
-			pressure_grad_1d (grids::variable <datatype> &i_data_top, grids::variable <datatype> &i_data_bot, datatype *i_data_grad, grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : 
-			explicit_plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags, i_coeff), 
+			pressure_grad_1d (grids::variable <datatype> &i_data_top, grids::variable <datatype> &i_data_bot, datatype *i_data_grad, grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0) : 
+			explicit_plan <datatype> (i_data_in, i_data_out, i_coeff), 
 			data_grad (i_data_grad),
 			data_top (i_data_top.ptr ()),
 			data_bot (i_data_bot.ptr ()) {
@@ -267,9 +267,9 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc explicit_plan::factory::_instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan <datatype> > (new pressure_grad_1d <datatype> (data_top, data_bot, data_grad, i_data_in, i_data_out, 1.0, i_element_flags, i_component_flags));
+						return std::shared_ptr <plans::plan <datatype> > (new pressure_grad_1d <datatype> (data_top, data_bot, data_grad, i_data_in, i_data_out, 1.0));
 					}
 					return std::shared_ptr <plans::plan <datatype> > ();
 				}
@@ -299,7 +299,7 @@ namespace plans
 			 * 
 			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
 			 ************************************************************************/
-			constant (grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : explicit_plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags, i_coeff) {
+			constant (grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0) : explicit_plan <datatype> (i_data_in, i_data_out, i_coeff) {
 				TRACE ("Adding constant...");
 			}
 		
@@ -340,9 +340,9 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc explicit_plan::factory::_instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan <datatype> > (new constant <datatype> (i_data_in, i_data_out, 1.0, i_element_flags, i_component_flags));
+						return std::shared_ptr <plans::plan <datatype> > (new constant <datatype> (i_data_in, i_data_out, 1.0));
 					}
 					return std::shared_ptr <plans::plan <datatype> > ();
 				}

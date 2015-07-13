@@ -157,14 +157,14 @@ namespace plans
 			 * 
 			 * This method creates a shared_ptr to an implicit plan instance. The benefit to this inclusion is that the instance method can be called in a uniform way and hide communication of grid and matrix information from the user. If a plan would be created that would not do anything (e.g. something with a coefficient of 0.0), this will return a NULL shared pointer.
 			 ************************************************************************/
-			virtual std::shared_ptr <plan <datatype>> instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
-					std::shared_ptr <plan <datatype>> result = _instance (matrices, i_data_in, i_data_out, i_element_flags, i_component_flags);
+			virtual std::shared_ptr <plan <datatype>> instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL) const {
+					std::shared_ptr <plan <datatype>> result = _instance (matrices, i_data_in, i_data_out);
 					if (result) result->coeff *= coeff;
 					return result;
 				}
 
 		protected:
-			virtual std::shared_ptr <plan <datatype>> _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const = 0;
+			virtual std::shared_ptr <plan <datatype>> _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL) const = 0;
 		};
 
 		class factory_container

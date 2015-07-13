@@ -43,8 +43,8 @@ namespace plans
 		 * \param i_element_flags A pointer to integer flags associated with the element on the whole
 		 * \param i_component_flags A pointer to the integer flags associated with the variable associated with the plan
 		 ************************************************************************/
-		real_plan (grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL, datatype i_coeff = 1.0) : 
-		plans::plan <datatype> (i_data_in.ptr (), i_data_out, i_element_flags, i_component_flags, i_coeff), 
+		real_plan (grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, datatype i_coeff = 1.0) : 
+		plans::plan <datatype> (i_data_in.ptr (), i_data_out, &(i_data_in.element_flags), &(i_data_in.component_flags), i_coeff), 
 		n (i_data_in.get_grid (0).get_n ()), 
 		ldn (i_data_in.get_grid (0).get_ld ()), 
 		m (i_data_in.get_grid (1).get_n ()), 
@@ -108,8 +108,8 @@ namespace plans
 			div = 0x02
 		};
 
-		compound_plan (grids::variable <datatype> &i_data_in, datatype *i_data_out, int *i_element_flags = NULL, int *i_component_flags = NULL, datatype i_coeff = 1.0) : 
-		real_plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags, i_coeff),
+		compound_plan (grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0) : 
+		real_plan <datatype> (i_data_in, i_data_out, i_coeff),
 		data (i_data_in) {
 			tmp_vec.resize (i_data_in.size ());
 			total_vec.resize (i_data_in.size ());
@@ -124,7 +124,7 @@ namespace plans
 			if (i_factory.type () == plans::plan <datatype>::factory::impl) {
 				throw 100;
 			}
-			plans.push_back (i_factory.instance (NULL, data, &tmp [0], element_flags, component_flags));
+			plans.push_back (i_factory.instance (NULL, data, &tmp [0]));
 			operators.push_back (op);
 		}
 
@@ -190,8 +190,8 @@ namespace plans
 				add_plan (i_factory, div);
 			}
 
-			virtual std::shared_ptr <plan <datatype>> _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
-				std::shared_ptr <compound_plan <datatype>> plan = std::shared_ptr <compound_plan <datatype>> (new compound_plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags));
+			virtual std::shared_ptr <plan <datatype>> _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL) const {
+				std::shared_ptr <compound_plan <datatype>> plan = std::shared_ptr <compound_plan <datatype>> (new compound_plan <datatype> (i_data_in, i_data_out));
 				for (int i = 0; i < (int) factories.size (); ++i)
 				{
 					plan->add_plan (factories [i], operators [i]);

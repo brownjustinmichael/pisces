@@ -53,8 +53,8 @@ namespace plans
 			 * \param i_coeff The base coefficient to multiply the source
 			 * \param i_data_source A pointer to the source data
 			 ************************************************************************/
-			linear (datatype i_min, grids::variable <datatype> &i_data_source, datatype *i_bg_diff, int i_bg_every, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : 
-			real_plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags, i_coeff),
+			linear (datatype i_min, grids::variable <datatype> &i_data_source, datatype *i_bg_diff, int i_bg_every, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, datatype i_coeff = 1.0) : 
+			real_plan <datatype> (i_data_in, i_data_out, i_coeff),
 			bg_every (i_bg_every),
 			coeff (i_coeff),
 			min (i_min),
@@ -226,8 +226,8 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc real_plan::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
-					return std::shared_ptr <plans::plan <datatype> > (new linear <datatype> (min, data_source, bg_diff, bg_every, i_data_in, i_data_out, 1.0, i_element_flags, i_component_flags));
+				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL) const {
+					return std::shared_ptr <plans::plan <datatype> > (new linear <datatype> (min, data_source, bg_diff, bg_every, i_data_in, i_data_out, 1.0));
 				}
 			};
 		};

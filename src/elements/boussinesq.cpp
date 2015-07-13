@@ -100,7 +100,7 @@ namespace pisces
 		params ["equations.z_velocity.sources.temperature"] * src <datatype> (data ["temperature"])
 		+ params ["equations.z_velocity.sources.composition"] * src <datatype> (data ["composition"]) 
 		+ params ["equations.velocity.diffusion"] * diff <datatype> ();
-		element_flags ["z_velocity"] |= ignore_net;
+		data ["z_velocity"].component_flags |= ignore_net;
 
 		// Set up the velocity constraint
 		*div <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"])
