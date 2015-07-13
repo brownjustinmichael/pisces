@@ -19,8 +19,8 @@ namespace plans
 	namespace solvers
 	{
 		template <class datatype>
-		fourier <datatype>::fourier (datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, int *i_element_flags, int *i_component_flags) : 
-		solver <datatype> (i_data.ptr (), NULL, i_element_flags, i_component_flags), 
+		fourier <datatype>::fourier (datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data) : 
+		solver <datatype> (i_data), 
 		n (i_data.get_grid (0).get_n ()), 
 		ldn (i_data.get_grid (0).get_ld ()), 
 		m (i_data.get_grid (1).get_n ()), 

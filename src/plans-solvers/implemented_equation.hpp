@@ -243,7 +243,7 @@ namespace plans
 			 * \copydoc equation::add_solver(const typename solver<datatype>::factory&,int)
 			 ************************************************************************/
 			virtual void add_solver (const typename plans::solvers::solver <datatype>::factory &i_factory, int flags = 0x00) {
-				plans::solvers::implemented_equation <datatype>::add_solver (i_factory.instance (data, cor_rhs_ptr, element_flags, component_flags), flags);
+				plans::solvers::implemented_equation <datatype>::add_solver (i_factory.instance (data, cor_rhs_ptr), flags);
 			}
 			
 			/*!**********************************************************************

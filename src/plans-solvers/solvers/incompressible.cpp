@@ -32,8 +32,8 @@ namespace plans
 	namespace solvers
 	{
 		template <class datatype>
-		incompressible <datatype>::incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z, int *i_element_flags, int *i_component_flags, int * i_component_flags_x, int *i_component_flags_z) : 
-		solver <datatype> (i_data.ptr (), NULL, i_element_flags, i_component_flags), 
+		incompressible <datatype>::incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z) : 
+		solver <datatype> (i_data), 
 		n (i_data.get_grid (0).get_n ()), 
 		ldn (i_data.get_grid (0).get_ld ()), 
 		m (i_data.get_grid (1).get_n ()), 
@@ -47,8 +47,8 @@ namespace plans
 		pos_n (&grid_n [0]), 
 		messenger_ptr (i_messenger_ptr) {
 			TRACE ("Building laplace solver...");
-			component_flags_x = i_component_flags_x;
-			component_flags_z = i_component_flags_z;
+			component_flags_x = &(i_data_x.component_flags);
+			component_flags_z = &(i_data_z.component_flags);
 			
 			boundary_0 = i_boundary_0;
 			boundary_n = i_boundary_n;

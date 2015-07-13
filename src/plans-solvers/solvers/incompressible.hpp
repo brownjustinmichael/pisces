@@ -90,7 +90,7 @@ namespace plans
 			 * \param i_component_x A pointer to the x-component flags
 			 * \param i_component_z A pointer to the z-component flags
 			 ************************************************************************/
-			incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z, int *i_element_flags, int *i_component_flags, int *i_component_x, int *i_component_z);
+			incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z);
 			
 			virtual ~incompressible () {}
 			
@@ -142,8 +142,8 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc solver::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::variable <datatype> &i_data, datatype *i_rhs, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
-					return std::shared_ptr <plans::solvers::solver <datatype>> (new incompressible (messenger_ptr, boundary_factory_0 ? boundary_factory_0->instance (i_data.get_grids (), false) : boundary_0, boundary_factory_n ? boundary_factory_n->instance (i_data.get_grids (), true) : boundary_n, i_data, equation_x.data_var (), equation_z.data_var (), i_element_flags, i_component_flags, equation_x.component_flags, equation_z.component_flags));
+				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::variable <datatype> &i_data, datatype *i_rhs) const {
+					return std::shared_ptr <plans::solvers::solver <datatype>> (new incompressible (messenger_ptr, boundary_factory_0 ? boundary_factory_0->instance (i_data.get_grids (), false) : boundary_0, boundary_factory_n ? boundary_factory_n->instance (i_data.get_grids (), true) : boundary_n, i_data, equation_x.data_var (), equation_z.data_var ()));
 				}
 			};
 		};
