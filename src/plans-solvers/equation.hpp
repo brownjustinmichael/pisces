@@ -204,22 +204,14 @@ namespace plans
 				return *this;
 			}
 
-			equation <datatype> &operator- (const typename plan <datatype>::factory_container &i_container) {
-				return *this + (i_container * -1.0);
+			template <class other>
+			equation <datatype> &operator== (other i_other) {
+				return *this - i_other;
 			}
 
-			equation <datatype> &operator- (const std::shared_ptr <typename plan <datatype>::factory> i_factory) {
-				return *this - plan <datatype>::factory_container (i_factory);
-			}
-
-			equation <datatype> &operator== (const typename plan <datatype>::factory_container &i_container) {
-				add_plan (i_container);
-				return *this;
-			}
-
-			equation <datatype> &operator== (const datatype scalar) {
-				add_plan (constant (scalar));
-				return *this;
+			template <class other>
+			equation <datatype> &operator- (other i_other) {
+				return *this + i_other * (-1.0);
 			}
 
 			virtual void setup_plans () {

@@ -78,12 +78,16 @@ namespace mpi
 		public:
 			config (int *argc = NULL, char *** argv = NULL) {
 				// Initialize MPI
+				#ifdef _MPI
 				MPI::Init (*argc, *argv);
+				#endif
 			}
 			
 			virtual ~config () {
 				// Finalize MPI
+				#ifdef _MPI
 				MPI::Finalize ();
+				#endif
 			}
 		};
 		
@@ -181,8 +185,8 @@ namespace mpi
 		 * \brief Force the computer to skip any active MPI commands
 		 ************************************************************************/
 		void skip_all () {
-			int flags = mpi_skip;
 #ifdef _MPI
+			int flags = mpi_skip;
 			MPI::COMM_WORLD.Bcast (&flags, 1, mpi_type (&typeid (int)), 0);
 #endif // _MPI
 		}
@@ -191,8 +195,8 @@ namespace mpi
 		 * \brief Force the computer to kill all MPI processes
 		 ************************************************************************/
 		void kill_all () {
-			int flags = mpi_fatal;
 #ifdef _MPI
+			int flags = mpi_fatal;
 			MPI::COMM_WORLD.Bcast (&flags, 1, mpi_type (&typeid (int)), 0);
 #endif // _MPI
 		}

@@ -281,7 +281,7 @@ namespace plans
 			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
 			 ************************************************************************/
 			horizontal_stress (grids::variable <datatype> &i_data_other, grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : 
-			explicit_plan <datatype> (i_data_in, i_data_out, i_coeff, i_element_flags, i_component_flags), 
+			explicit_plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags, i_coeff), 
 			data_other (i_data_other.ptr ()) {
 				TRACE ("Adding stress...");
 				pioL = 2.0 * (std::acos (-1.0) / (grid_n [n - 1] - grid_n [0]));

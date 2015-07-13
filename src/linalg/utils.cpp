@@ -348,6 +348,10 @@ namespace linalg
 			daxpy_ (&n, &da, dx, &incx, dy, &incy);
 		}
 	}
+
+	void add_scaled (int n, const double *dx, double *dy, int incx, int incy) {
+		add_scaled (n, 1., dx, dy, incx, incy);
+	}
 	
 	void matrix_add_scaled (int n, int m, float da, float *dx, float *dy, int ldx, int ldy) {
 		int ione = 1;

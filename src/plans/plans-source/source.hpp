@@ -50,7 +50,7 @@ namespace plans
 			 * 
 			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
 			 ************************************************************************/
-			uniform (grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : explicit_plan <datatype> (i_data_in, i_data_out, i_coeff, i_element_flags, i_component_flags), data_source (i_data_source.ptr ()) {
+			uniform (grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : explicit_plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags, i_coeff), data_source (i_data_source.ptr ()) {
 				TRACE ("Adding source...");
 			}
 		
@@ -101,6 +101,81 @@ namespace plans
 		 * \brief A plan to add a source term to an equation
 		 ************************************************************************/
 		template <class datatype>
+		class z_src : public real_plan <datatype>
+		{
+		private:
+			using real_plan <datatype>::coeff;
+			using real_plan <datatype>::n;
+			using real_plan <datatype>::ldn;
+			using real_plan <datatype>::m;
+			using real_plan <datatype>::dims;
+			using real_plan <datatype>::data_out;
+		
+			datatype *data_source; //!< The data pointer for the source data
+		
+		public:
+			/*!**********************************************************************
+			 * \copydoc explicit_plan::explicit_plan
+			 * 
+			 * \param i_coeff The coefficient for the source term
+			 * \param i_data_source The data pointer for the source data
+			 * 
+			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
+			 ************************************************************************/
+			z_src (datatype *i_data_source, grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : real_plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags, i_coeff), data_source (i_data_source) {
+				TRACE ("Adding source...");
+			}
+		
+			virtual ~z_src () {}
+
+			virtual int type () {
+				return plan <datatype>::mid;
+			}
+		
+			/*!**********************************************************************
+			 * \copydoc explicit_plan::execute
+			 ************************************************************************/
+			virtual void execute () {
+				TRACE ("Executing source...");
+				for (int i = 0; i < ldn; ++i)
+				{
+					linalg::add_scaled (m, coeff, data_source, data_out + i * m);
+				}
+			}
+		
+			/*!**********************************************************************
+			 * \copydoc explicit_plan::factory
+			 ************************************************************************/
+			class factory : public real_plan <datatype>::factory
+			{
+			private:
+				datatype *data_source; //!< The data source to be used when constructing the plan
+			
+			public:
+				/*!**********************************************************************
+				 * \param i_coeff The coefficient to be used when constructing the plan
+				 * \param i_data_source The data source to be used when constructing the plan
+				 ************************************************************************/
+				factory (datatype *i_data_source, datatype i_coeff = 1.0) : real_plan <datatype>::factory (i_coeff), data_source (i_data_source) {}
+			
+				virtual ~factory () {}
+			
+				/*!**********************************************************************
+				 * \copydoc explicit_plan::factory::_instance
+				 ************************************************************************/
+				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+					if (coeff) {
+						return std::shared_ptr <plans::plan <datatype> > (new z_src <datatype> (data_source, i_data_in, i_data_out, 1.0, i_element_flags, i_component_flags));
+					}
+					return std::shared_ptr <plans::plan <datatype> > ();
+				}
+			};
+		};
+
+		/*!**********************************************************************
+		 * \brief A plan to add a source term to an equation
+		 ************************************************************************/
+		template <class datatype>
 		class pressure_grad_1d : public explicit_plan <datatype>
 		{
 		private:
@@ -128,7 +203,7 @@ namespace plans
 			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
 			 ************************************************************************/
 			pressure_grad_1d (grids::variable <datatype> &i_data_top, grids::variable <datatype> &i_data_bot, datatype *i_data_grad, grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : 
-			explicit_plan <datatype> (i_data_in, i_data_out, i_coeff, i_element_flags, i_component_flags), 
+			explicit_plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags, i_coeff), 
 			data_grad (i_data_grad),
 			data_top (i_data_top.ptr ()),
 			data_bot (i_data_bot.ptr ()) {
@@ -224,7 +299,7 @@ namespace plans
 			 * 
 			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
 			 ************************************************************************/
-			constant (grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : explicit_plan <datatype> (i_data_in, i_data_out, i_coeff, i_element_flags, i_component_flags) {
+			constant (grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : explicit_plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags, i_coeff) {
 				TRACE ("Adding constant...");
 			}
 		

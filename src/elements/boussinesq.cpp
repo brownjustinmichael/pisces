@@ -33,6 +33,7 @@ namespace data
 		initialize ("temperature");
 		initialize ("x_velocity");
 		initialize ("z_velocity");
+		initialize ("density");
 
 		// Set up the data from the input file in params
 		this->template setup_from <formats::netcdf> (i_params ["input"]);

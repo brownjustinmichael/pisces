@@ -29,7 +29,7 @@ namespace plans
 	}
 
 	template <class datatype>
-	std::shared_ptr <typename plan <datatype>::factory> vertical_stress (grids::variable <datatype> data_other, datatype coeff = 1.0) {
+	std::shared_ptr <typename plan <datatype>::factory> vertical_stress (grids::variable <datatype> &data_other, datatype coeff = 1.0) {
 		return std::shared_ptr <typename explicit_plan <datatype>::factory> (new typename diffusion::vertical_stress <datatype>::factory (data_other, coeff));
 	}
 } /* plans */

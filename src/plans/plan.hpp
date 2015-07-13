@@ -228,6 +228,12 @@ namespace plans
 	template <class datatype>
 	typename plan <datatype>::factory_container operator* (typename plan <datatype>::factory_container i_container, datatype scalar);
 
+	template <class datatype>
+	std::shared_ptr <typename plan <datatype>::factory> operator* (std::shared_ptr <typename plan <datatype>::factory> i_factory, datatype scalar) {
+		i_factory->coeff *= scalar;
+		return i_factory;
+	}
+
 	typename std::shared_ptr <typename plan <double>::factory> operator* (std::shared_ptr <typename plan <double>::factory> i_factory, YAML::Node node);
 
 	template <class datatype>

@@ -30,7 +30,7 @@ namespace plans
 		template <class datatype>
 		class vertical : public implicit_plan <datatype>
 		{
-		private:
+		protected:
 			using implicit_plan <datatype>::coeff;
 			using implicit_plan <datatype>::n;
 			using implicit_plan <datatype>::ldn;
@@ -58,7 +58,7 @@ namespace plans
 			 * \param i_alpha The implicit fraction of the plan (1.0 for purely implicit, 0.0 for purely explicit)
 			 ************************************************************************/
 			vertical (datatype i_alpha, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : implicit_plan <datatype> (i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_coeff, i_element_flags, i_component_flags), alpha (i_alpha) {
-				new_matrix_vec.resize (m * m * dims * dims);
+				new_matrix_vec.resize (m * m, 0.0);
 				new_matrix = &new_matrix_vec [0];
 
 				setup ();
@@ -71,16 +71,12 @@ namespace plans
 			}
 			
 			void setup () {
-				TRACE ("Setting up");
+				TRACE ("Setting up with coefficient " << coeff);
 				if (matrix_m) {
 					for (int j = 0; j < m; ++j) {
-						// DEBUG ("Updating diff " << diffusion [j]);
-						for (int k = 0; k < dims; ++k)
-						{
-							linalg::add_scaled (m, coeff, grid_m.get_data (2) + j, new_matrix + m * dims * k + j * dims + k, m, m * dims);
-						}
+						linalg::add_scaled (m, coeff, grid_m.get_data (2) + j, new_matrix + j, m, m);
 					}
-					linalg::add_scaled (m * m * dims * dims, -1.0 * alpha, new_matrix, matrix_m);
+					linalg::add_scaled (m * m, -1.0 * alpha, new_matrix, matrix_m);
 				} else {
 					WARN ("No matrix");
 				}
@@ -89,15 +85,15 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc implicit_plan::execute
 			 ************************************************************************/
-			void execute () {
+			virtual void execute () {
 				TRACE ("Operating...");
 				// Depending on the direction of the solve, treat this term as either partially or fully explicit
 				if (*component_flags & z_solve) {
 					if (1.0 - alpha != 0.0) {
-						linalg::matrix_matrix_multiply (m * dims, ldn, m * dims, 1.0 - alpha, new_matrix, data_in, 1.0, data_out);
+						linalg::matrix_matrix_multiply (m, ldn, m, 1.0 - alpha, new_matrix, data_in, 1.0, data_out);
 					}
 				} else {
-					linalg::matrix_matrix_multiply (m * dims, ldn, m * dims, 1.0, new_matrix, data_in, 1.0, data_out);
+					linalg::matrix_matrix_multiply (m, ldn, m, 1.0, new_matrix, data_in, 1.0, data_out);
 				}
 
 				TRACE ("Operation complete.");
@@ -138,7 +134,7 @@ namespace plans
 		template <class datatype>
 		class background_vertical : public implicit_plan <datatype>
 		{
-		private:
+		protected:
 			using implicit_plan <datatype>::coeff;
 			using implicit_plan <datatype>::n;
 			using implicit_plan <datatype>::ldn;
@@ -261,23 +257,22 @@ namespace plans
 		 * \brief A plan to add a source term to an equation
 		 ************************************************************************/
 		template <class datatype>
-		class vertical_stress : public explicit_plan <datatype>
+		class impl_vertical_stress : public vertical <datatype>
 		{
 		private:
-			using explicit_plan <datatype>::coeff;
-			using explicit_plan <datatype>::n;
-			using explicit_plan <datatype>::ldn;
-			using explicit_plan <datatype>::m;
-			using explicit_plan <datatype>::dims;
-			using explicit_plan <datatype>::data_in;
-			using explicit_plan <datatype>::data_out;
-			using explicit_plan <datatype>::grid_m;
-			using explicit_plan <datatype>::grid_n;
+			using vertical <datatype>::coeff;
+			using vertical <datatype>::n;
+			using vertical <datatype>::ldn;
+			using vertical <datatype>::m;
+			using vertical <datatype>::dims;
+			using vertical <datatype>::data_in;
+			using vertical <datatype>::data_out;
+			using vertical <datatype>::grid_m;
+			using vertical <datatype>::grid_n;
 
 			datatype *data_other;
 			datatype pioL;
 			const datatype *pos_m;
-			std::vector <datatype> diff;
 			std::vector <datatype> diff2;
 		
 		public:
@@ -289,20 +284,13 @@ namespace plans
 			 * 
 			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
 			 ************************************************************************/
-			vertical_stress (grids::variable <datatype> &i_data_other, grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : 
-			explicit_plan <datatype> (i_data_in, i_data_out, i_coeff, i_element_flags, i_component_flags), 
+			impl_vertical_stress (grids::variable <datatype> &i_data_other, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : 
+			vertical <datatype> (1.0, i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_coeff / 3.0, i_element_flags, i_component_flags), 
 			data_other (i_data_other.ptr ()) {
 				TRACE ("Adding stress...");
 				pioL = 2.0 * (std::acos (-1.0) / (grid_n [n - 1] - grid_n [0]));
 
 				pos_m = &grid_m [0];
-
-				diff.resize (m);
-				for (int j = 0; j < m - 1; ++j)
-				{
-					diff [j] = pos_m [j + 1] - pos_m [j];
-				}
-				diff [m - 1] = pos_m [m - 1] - pos_m [m - 2];
 
 				diff2.resize (m);
 				for (int j = 1; j < m - 1; ++j)
@@ -313,32 +301,22 @@ namespace plans
 				diff2 [m - 1] = pos_m [m - 1] - pos_m [m - 2];
 			}
 		
-			virtual ~vertical_stress () {}
-
-			virtual int type () {
-				return plan <datatype>::mid;
-			}
+			virtual ~impl_vertical_stress () {}
 		
 			/*!**********************************************************************
 			 * \copydoc explicit_plan::execute
 			 ************************************************************************/
 			virtual void execute () {
 				TRACE ("Executing source...");
-				for (int i = 0; i < ldn; i += 2)
+				vertical <datatype>::execute ();
+				for (int i = 0; i < ldn - 1; i += 2)
 				{
 					for (int j = 1; j < m - 1; ++j)
 					{
-						data_out [i * m + j] += coeff / 3. * ((data_in [i * m + j + 1] - data_in [i * m + j]) / diff [j] - (data_in [i * m + j] - data_in [i * m + j - 1]) / diff [j - 1]) / diff2 [j];
 						data_out [i * m + j] -= coeff / 3. * pioL * (data_other [(i + 1) * m + j + 1] - data_other [(i + 1) * m + j - 1]) / diff2 [j];
 
-						data_out [(i + 1) * m + j] += coeff / 3. * ((data_in [(i + 1) * m + j + 1] - data_in [(i + 1) * m + j]) / diff [j] - (data_in [(i + 1) * m + j] - data_in [(i + 1) * m + j - 1]) / diff [j - 1]) / diff2 [j];
 						data_out [(i + 1) * m + j] += coeff / 3. * pioL * (data_other [i * m + j + 1] - data_other [i * m + j - 1]) / diff2 [j];
 					}
-					// data_out [i * m + j] += coeff / 3. * pioL * pioL * (i / 2) * (i / 2) * data_in [i * m];
-					// data_out [i * m + j] -= coeff / 3. * pioL * (data_other [(i + 1) * m + j + 1] - data_other [(i + 1) * m + j - 1]) / diff2 [0];
-					
-					// data_out [(i + 1) * m + j] += coeff / 3. * pioL * pioL * (i / 2) * (i / 2) * data_in [(i + 1) * m + j + 1];
-					// data_out [(i + 1) * m + j] += coeff / 3. * pioL * (data_other [i * m + j + 1] - data_other [i * m + j - 1]) / diff2 [j];
 				}
 			}
 		
@@ -357,7 +335,114 @@ namespace plans
 				 ************************************************************************/
 				factory (grids::variable <datatype> &i_data_other, datatype i_coeff = 1.0) : 
 				explicit_plan <datatype>::factory (i_coeff), 
-				data_other (i_data_other) {}
+				data_other (i_data_other) {INFO (i_data_other.size ())}
+			
+				virtual ~factory () {}
+			
+				/*!**********************************************************************
+				 * \copydoc explicit_plan::factory::_instance
+				 ************************************************************************/
+				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL) const {
+					if (coeff) {
+						return std::shared_ptr <plans::plan <datatype> > (new impl_vertical_stress <datatype> (data_other, matrices [0], matrices [1], i_data_in, i_data_out, 1.0, i_element_flags, i_component_flags));
+					}
+					return std::shared_ptr <plans::plan <datatype> > ();
+				}
+			};
+		};
+
+		/*!**********************************************************************
+		 * \brief A plan to add a source term to an equation
+		 ************************************************************************/
+		template <class datatype>
+		class vertical_stress : public explicit_plan <datatype>
+		{
+		private:
+			using explicit_plan <datatype>::coeff;
+			using explicit_plan <datatype>::n;
+			using explicit_plan <datatype>::ldn;
+			using explicit_plan <datatype>::m;
+			using explicit_plan <datatype>::dims;
+			using explicit_plan <datatype>::data_in;
+			using explicit_plan <datatype>::data_out;
+			using explicit_plan <datatype>::grid_m;
+			using explicit_plan <datatype>::grid_n;
+
+			datatype *data_other;
+			datatype pioL;
+			const datatype *pos_m;
+			std::vector <datatype> diff, diff2;
+		
+		public:
+			/*!**********************************************************************
+			 * \copydoc explicit_plan::explicit_plan
+			 * 
+			 * \param i_coeff The coefficient for the source term
+			 * \param i_data_source The data pointer for the source data
+			 * 
+			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
+			 ************************************************************************/
+			vertical_stress (grids::variable <datatype> &i_data_other, grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : 
+			explicit_plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags, i_coeff / 3.0), 
+			data_other (i_data_other.ptr ()) {
+				TRACE ("Adding stress...");
+				pioL = 2.0 * (std::acos (-1.0) / (grid_n [n - 1] - grid_n [0]));
+
+				pos_m = &grid_m [0];
+
+				diff.resize (m + 1);
+				for (int j = 0; j < m - 1; ++j)
+				{
+					diff [j] = pos_m [j + 1] - pos_m [j];
+				}
+				diff [m - 1] = pos_m [m - 1] - pos_m [m - 2];
+				diff [m] = pos_m [m - 1] - pos_m [m - 2];
+
+				diff2.resize (m);
+				for (int j = 1; j < m - 1; ++j)
+				{
+					diff2 [j] = pos_m [j + 1] - pos_m [j - 1];
+				}
+				diff2 [0] = pos_m [1] - pos_m [0];
+				diff2 [m - 1] = pos_m [m - 1] - pos_m [m - 2];
+			}
+		
+			virtual ~vertical_stress () {}
+		
+			/*!**********************************************************************
+			 * \copydoc explicit_plan::execute
+			 ************************************************************************/
+			virtual void execute () {
+				TRACE ("Executing source...");
+				for (int i = 0; i < ldn - 1; i += 2)
+				{
+					for (int j = 1; j < m - 1; ++j)
+					{
+						data_out [i * m + j] += coeff / 3. * ((data_other [i * m + j + 1] - data_other [i * m + j]) / diff [j] - (data_other [i * m + j] - data_other [i * m + j - 1]) / diff [j - 1]) / diff2 [j];
+						data_out [i * m + j] -= coeff / 3. * pioL * (data_other [(i + 1) * m + j + 1] - data_other [(i + 1) * m + j - 1]) / diff2 [j];
+
+						data_out [i * m + j] += coeff / 3. * ((data_other [(i + 1) * m + j + 1] - data_other [(i + 1) * m + j]) / diff [j] - (data_other [(i + 1) * m + j] - data_other [(i + 1) * m + j - 1]) / diff [j - 1]) / diff2 [j];
+						data_out [(i + 1) * m + j] += coeff / 3. * pioL * (data_other [i * m + j + 1] - data_other [i * m + j - 1]) / diff2 [j];
+					}
+				}
+			}
+		
+			/*!**********************************************************************
+			 * \copydoc explicit_plan::factory
+			 ************************************************************************/
+			class factory : public explicit_plan <datatype>::factory
+			{
+			private:
+				grids::variable <datatype> &data_other; //!< The data source to be used when constructing the plan
+			
+			public:
+				/*!**********************************************************************
+				 * \param i_coeff The coefficient to be used when constructing the plan
+				 * \param i_data_source The data source to be used when constructing the plan
+				 ************************************************************************/
+				factory (grids::variable <datatype> &i_data_other, datatype i_coeff = 1.0) : 
+				explicit_plan <datatype>::factory (i_coeff), 
+				data_other (i_data_other) {INFO (i_data_other.size ())}
 			
 				virtual ~factory () {}
 			

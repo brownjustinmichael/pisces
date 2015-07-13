@@ -108,7 +108,7 @@ namespace plans
 			grad_pressure [m - 1] = (pressure [m - 1] - pressure [m - 2]) / diff [m - 1];
 
 			grad2_pressure.resize (m);
-			for (int j = 0; j < m - 1; ++j)
+			for (int j = 1; j < m - 1; ++j)
 			{
 				grad2_pressure [j] = ((pressure [j + 1] - pressure [j]) / diff [j + 1] - (pressure [j] - pressure [j - 1]) / diff [j]) / diff2 [j];
 			}

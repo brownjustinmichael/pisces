@@ -29,8 +29,10 @@ namespace pisces
 			pressure [j] = 1.0 + (*grids [1]) [0] * 0.1;
 		}
 
+		*equations ["density"] == src (data ["temperature"]) / src (data ["composition"]);// * z_src (&pressure [0]);
+
 		// *equations ["x_velocity"] - horizontal_stress (data ["z_velocity"]);
-		*equations ["z_velocity"] + pressure_grad_1d (data ["temperature"], data ["composition"], &pressure [0]);// - vertical_stress (data ["x_velocity"]);
+		*equations ["z_velocity"] - vertical_stress (data ["x_velocity"]);// + pressure_grad_1d (data ["temperature"], data ["composition"], &pressure [0]);
 
 		// Set up the velocity constraint
 		*pdiv <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"], &pressure [0])

@@ -54,7 +54,7 @@ namespace plans
 			 * \param i_data_source A pointer to the source data
 			 ************************************************************************/
 			linear (datatype i_min, grids::variable <datatype> &i_data_source, datatype *i_bg_diff, int i_bg_every, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, datatype i_coeff = 1.0, int *i_element_flags = NULL, int *i_component_flags = NULL) : 
-			real_plan <datatype> (i_data_in, i_data_out, i_coeff, i_element_flags, i_component_flags),
+			real_plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags, i_coeff),
 			bg_every (i_bg_every),
 			coeff (i_coeff),
 			min (i_min),
