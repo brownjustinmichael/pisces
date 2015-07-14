@@ -17,6 +17,49 @@ namespace plans
 {
 	namespace diffusion
 	{
+		template <class datatype>
+		class variable_diffusion : public real_plan <datatype>
+		{
+		protected:
+			using real_plan <datatype>::n;
+			using real_plan <datatype>::ldn;
+			using real_plan <datatype>::m;
+			using real_plan <datatype>::grid_n;
+			using real_plan <datatype>::grid_m;
+			using real_plan <datatype>::data_in;
+			using real_plan <datatype>::data_out;
+			
+			using real_plan <datatype>::element_flags;
+			using real_plan <datatype>::component_flags;
+
+			datatype *data_source;
+			datatype *pos_m;
+			datatype *pos_n;
+
+		public:
+			variable_diffusion (grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, datatype i_coeff = 1.0):
+			real_plan <datatype> (i_data_in, i_data_out, i_coeff),
+			data_source (i_data_source.ptr ()) {
+				pos_n = &grid_n [0];
+				pos_m = &grid_m [0];
+			}
+			
+			virtual ~variable_diffusion() {}
+
+			virtual void execute () {
+				for (int i = 0; i < n; ++i)
+				{
+					for (int j = 0; j < m; ++j)
+					{
+						data_out [i * m + j] += (data_in [i * m + j + 1] + data_in [i * m + j]) * (data_source [i * m + j + 1] - data_source [i * m + j]) / (pos_m [j + 1] - pos_m [j]) / (pos_m [j + 1] - pos_m [j - 1]);
+						data_out [i * m + j] += (data_in [i * m + j] + data_in [i * m + j - 1]) * (data_source [i * m + j] - data_source [i * m + j - 1]) / (pos_m [j] - pos_m [j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
+						data_out [i * m + j] += (data_in [(i + 1) * m + j] + data_in [i * m + j]) * (data_source [(i + 1) * m + j] - data_source [i * m + j]) / (pos_n [i + 1] - pos_n [i]) / (pos_n [i + 1] - pos_n [i - 1]);
+						data_out [i * m + j] += (data_in [i * m + j] + data_in [(i - 1) * m + j]) * (data_source [i * m + j] - data_source [(i - 1) * m + j]) / (pos_n [i] - pos_n [i - 1]) / (pos_n [i + 1] - pos_n [i - 1]);
+					}
+				}
+			}
+		};
+
 		/*!**********************************************************************
 		 * \brief A plan to enact a diffusion coefficient linearly dependent on a variable
 		 ************************************************************************/

@@ -157,6 +157,9 @@ namespace plans
 			TRACE ("Solving...");
 			bool retransform = false;
 			// No net vertical flux
+			static int count = 0;
+			count++;
+			if (count % 2) return;
 
 			linalg::scale (m * ldn, 0.0, &data [0]);
 
