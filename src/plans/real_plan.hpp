@@ -43,8 +43,8 @@ namespace plans
 		 * \param i_element_flags A pointer to integer flags associated with the element on the whole
 		 * \param i_component_flags A pointer to the integer flags associated with the variable associated with the plan
 		 ************************************************************************/
-		real_plan (grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, datatype i_coeff = 1.0) : 
-		plans::plan <datatype> (i_data_in.ptr (), i_data_out, &(i_data_in.element_flags), &(i_data_in.component_flags), i_coeff), 
+		real_plan (grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : 
+		plans::plan <datatype> (i_data_in.ptr (), i_data_out.ptr (), &(i_data_in.element_flags), &(i_data_in.component_flags), i_coeff), 
 		n (i_data_in.get_grid (0).get_n ()), 
 		ldn (i_data_in.get_grid (0).get_ld ()), 
 		m (i_data_in.get_grid (1).get_n ()), 
@@ -99,7 +99,7 @@ namespace plans
 		std::vector <datatype> total_vec;
 		std::vector <datatype> tmp_vec;
 
-		datatype *total, *tmp;
+		std::shared_ptr <grids::variable <datatype>> total, tmp;
 
 	public:
 		enum name
@@ -108,13 +108,12 @@ namespace plans
 			div = 0x02
 		};
 
-		compound_plan (grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0) : 
+		compound_plan (grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : 
 		real_plan <datatype> (i_data_in, i_data_out, i_coeff),
 		data (i_data_in) {
-			tmp_vec.resize (i_data_in.size ());
-			total_vec.resize (i_data_in.size ());
-			tmp = &tmp_vec [0];
-			total = &total_vec [0];
+			tmp = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (i_data_in.get_grid (0), i_data_in.get_grid (1), *element_flags));
+			total = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (i_data_in.get_grid (0), i_data_in.get_grid (1), *element_flags));
+
 		}
 
 		~compound_plan () {}
@@ -124,7 +123,7 @@ namespace plans
 			if (i_factory.type () == plans::plan <datatype>::factory::impl) {
 				throw 100;
 			}
-			plans.push_back (i_factory.instance (NULL, data, &tmp [0]));
+			plans.push_back (i_factory.instance (NULL, data, *tmp));
 			operators.push_back (op);
 		}
 
@@ -135,35 +134,34 @@ namespace plans
 		
 		void execute () {
 			bool first = true;
-			linalg::scale ((int) total_vec.size (), 0., total);
+			linalg::scale ((int) total_vec.size (), 0., total->ptr ());
 			for (int i = 0; i < (int) plans.size (); ++i)
 			{
-				linalg::scale ((int) tmp_vec.size (), 0., tmp);
+				linalg::scale (tmp->size (), 0., tmp->ptr ());
 				plans [i]->execute ();
-				DEBUG ("AFTER EXECUTE " << tmp [0]);
 				if (first) {
-					linalg::add_scaled ((int) total_vec.size (), tmp, total);
+					linalg::add_scaled (total->size (), tmp->ptr (), total->ptr ());
 					first = false;
 					continue;
 				}
+				datatype *tmp_ptr = tmp->ptr ();
+				datatype *total_ptr = tmp->ptr ();
 				if (operators [i] == mult) {
-					for (int j = 0; j < (int) tmp_vec.size (); ++j)
+					for (int j = 0; j < tmp->size (); ++j)
 					{
-						total [j] *= tmp [j];
+						total_ptr [j] *= tmp_ptr [j];
 					}
 				} else if (operators [i] == div) {
-					for (int j = 0; j < (int) tmp_vec.size (); ++j)
+					for (int j = 0; j < tmp->size (); ++j)
 					{
-						total [j] /= tmp [j];
+						total_ptr [j] /= tmp_ptr [j];
 					}
 				} else {
 					FATAL ("Unrecognized operator");
 					throw 101;
 				}
-				DEBUG ("RUNNING TOTAL " << total [0]);
 			}
-			linalg::add_scaled ((int) total_vec.size (), total, data_out);
-			DEBUG ("FINAL " << data_out [0]);
+			linalg::add_scaled (total->size (), total->ptr (), data_out);
 		}
 
 		class factory : public real_plan <datatype>::factory
@@ -190,7 +188,7 @@ namespace plans
 				add_plan (i_factory, div);
 			}
 
-			virtual std::shared_ptr <plan <datatype>> _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL) const {
+			virtual std::shared_ptr <plan <datatype>> _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 				std::shared_ptr <compound_plan <datatype>> plan = std::shared_ptr <compound_plan <datatype>> (new compound_plan <datatype> (i_data_in, i_data_out));
 				for (int i = 0; i < (int) factories.size (); ++i)
 				{

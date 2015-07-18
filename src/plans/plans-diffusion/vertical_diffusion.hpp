@@ -57,7 +57,7 @@ namespace plans
 			 * \param i_coeff The datatype diffusion coefficient
 			 * \param i_alpha The implicit fraction of the plan (1.0 for purely implicit, 0.0 for purely explicit)
 			 ************************************************************************/
-			vertical (datatype i_alpha, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, datatype i_coeff = 1.0) : implicit_plan <datatype> (i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_coeff), alpha (i_alpha) {
+			vertical (datatype i_alpha, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : implicit_plan <datatype> (i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_coeff), alpha (i_alpha) {
 				new_matrix_vec.resize (m * m, 0.0);
 				new_matrix = &new_matrix_vec [0];
 
@@ -119,7 +119,7 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc implicit_plan::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL) const {
+				virtual std::shared_ptr <plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					if (coeff) {
 						return std::shared_ptr <plan <datatype> > (new vertical <datatype> (alpha, matrices [0], matrices [1], i_data_in, i_data_out, 1.0));
 					}
@@ -165,7 +165,7 @@ namespace plans
 			 * \param i_alpha The implicit fraction of the plan (1.0 for purely implicit, 0.0 for purely explicit)
 			 * \param i_diffusion A pointer to a vector of diffusion coefficients
 			 ************************************************************************/
-			background_vertical (datatype i_alpha, datatype *i_diffusion, bool i_explicit_calculate, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL) : implicit_plan <datatype> (i_matrix_n, i_matrix_m, i_data_in, i_data_out, 1.0), alpha (i_alpha), diffusion (i_diffusion), explicit_calculate (i_explicit_calculate) {
+			background_vertical (datatype i_alpha, datatype *i_diffusion, bool i_explicit_calculate, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) : implicit_plan <datatype> (i_matrix_n, i_matrix_m, i_data_in, i_data_out, 1.0), alpha (i_alpha), diffusion (i_diffusion), explicit_calculate (i_explicit_calculate) {
 				oodz_vec.resize (m);
 				oodz = &oodz_vec [0];
 				coeff_dz_vec.resize (m);
@@ -247,7 +247,7 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc implicit_plan::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL) const {
+				virtual std::shared_ptr <plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					return std::shared_ptr <plan <datatype> > (new background_vertical <datatype> (alpha, diffusion, explicit_calculate, matrices [0], matrices [1], i_data_in, i_data_out));
 				}
 			};
@@ -284,7 +284,7 @@ namespace plans
 			 * 
 			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
 			 ************************************************************************/
-			impl_vertical_stress (grids::variable <datatype> &i_data_other, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0) : 
+			impl_vertical_stress (grids::variable <datatype> &i_data_other, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : 
 			vertical <datatype> (1.0, i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_coeff / 3.0), 
 			data_other (i_data_other.ptr ()) {
 				TRACE ("Adding stress...");
@@ -342,7 +342,7 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc explicit_plan::factory::_instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL) const {
+				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					if (coeff) {
 						return std::shared_ptr <plans::plan <datatype> > (new impl_vertical_stress <datatype> (data_other, matrices [0], matrices [1], i_data_in, i_data_out, 1.0));
 					}
@@ -382,7 +382,7 @@ namespace plans
 			 * 
 			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
 			 ************************************************************************/
-			vertical_stress (grids::variable <datatype> &i_data_other, grids::variable <datatype> &i_data_in, datatype *i_data_out, datatype i_coeff = 1.0) : 
+			vertical_stress (grids::variable <datatype> &i_data_other, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : 
 			explicit_plan <datatype> (i_data_in, i_data_out, i_coeff / 3.0), 
 			data_other (i_data_other.ptr ()) {
 				TRACE ("Adding stress...");
@@ -449,7 +449,7 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc explicit_plan::factory::_instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL) const {
+				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					if (coeff) {
 						return std::shared_ptr <plans::plan <datatype> > (new vertical_stress <datatype> (data_other, i_data_in, i_data_out, 1.0));
 					}

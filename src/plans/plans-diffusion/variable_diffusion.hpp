@@ -37,7 +37,7 @@ namespace plans
 			datatype *pos_n;
 
 		public:
-			variable_diffusion (grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, datatype i_coeff = 1.0):
+			variable_diffusion (grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0):
 			real_plan <datatype> (i_data_in, i_data_out, i_coeff),
 			data_source (i_data_source.ptr ()) {
 				pos_n = &grid_n [0];
@@ -96,7 +96,7 @@ namespace plans
 			 * \param i_coeff The base coefficient to multiply the source
 			 * \param i_data_source A pointer to the source data
 			 ************************************************************************/
-			linear (datatype i_min, grids::variable <datatype> &i_data_source, datatype *i_bg_diff, int i_bg_every, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL, datatype i_coeff = 1.0) : 
+			linear (datatype i_min, grids::variable <datatype> &i_data_source, datatype *i_bg_diff, int i_bg_every, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : 
 			real_plan <datatype> (i_data_in, i_data_out, i_coeff),
 			bg_every (i_bg_every),
 			coeff (i_coeff),
@@ -269,7 +269,7 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc real_plan::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL) const {
+				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					return std::shared_ptr <plans::plan <datatype> > (new linear <datatype> (min, data_source, bg_diff, bg_every, i_data_in, i_data_out, 1.0));
 				}
 			};

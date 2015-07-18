@@ -41,21 +41,29 @@ namespace plans
 			std::shared_ptr <plans::solvers::solver <datatype> > x_solver; //!< A pointer to the horizontal solver
 			std::shared_ptr <plans::solvers::solver <datatype> > z_solver; //!< A pointer to the vertical solver
 			
-			std::vector <datatype> spectral_rhs_vec; //!< A vector containing the right hand side from the spectral terms
-			std::vector <datatype> real_rhs_vec; //!< A vector containing the right hand side from the real terms
-			std::vector <datatype> old_rhs_vec; //!< A vector containing the right hand side from the last timestep
-			std::vector <datatype> old2_rhs_vec; //!< A vector containing the right hand side from two timesteps ago
-			std::vector <datatype> old3_rhs_vec; //!< A vector containing the right hand side from three timesteps ago
-			std::vector <datatype> new_rhs_vec; //!< A vector containing the total current right hand side
-			std::vector <datatype> cor_rhs_vec; //!< A vector containing the right hand side after the Adams Bashforth scheme
+			std::shared_ptr <grids::variable <datatype>> spectral_rhs_ptr;
+			std::shared_ptr <grids::variable <datatype>> real_rhs_ptr;
+			std::shared_ptr <grids::variable <datatype>> old_rhs_ptr;
+			std::shared_ptr <grids::variable <datatype>> old2_rhs_ptr;
+			std::shared_ptr <grids::variable <datatype>> old3_rhs_ptr;
+			std::shared_ptr <grids::variable <datatype>> new_rhs_ptr;
+			std::shared_ptr <grids::variable <datatype>> cor_rhs_ptr;
+
+			// std::vector <datatype> spectral_rhs_vec; //!< A vector containing the right hand side from the spectral terms
+			// std::vector <datatype> real_rhs_vec; //!< A vector containing the right hand side from the real terms
+			// std::vector <datatype> old_rhs_vec; //!< A vector containing the right hand side from the last timestep
+			// std::vector <datatype> old2_rhs_vec; //!< A vector containing the right hand side from two timesteps ago
+			// std::vector <datatype> old3_rhs_vec; //!< A vector containing the right hand side from three timesteps ago
+			// std::vector <datatype> new_rhs_vec; //!< A vector containing the total current right hand side
+			// std::vector <datatype> cor_rhs_vec; //!< A vector containing the right hand side after the Adams Bashforth scheme
 			
-			datatype *spectral_rhs_ptr; //!< A pointer to the spectral_rhs_vec for speed
-			datatype *real_rhs_ptr; //!< A pointer to the real_rhs_vec for speed
-			datatype *old_rhs_ptr; //!< A pointer to the old_rhs_vec for speed
-			datatype *old2_rhs_ptr; //!< A pointer to the old2_rhs_vec for speed
-			datatype *old3_rhs_ptr; //!< A pointer to the old3_rhs_vec for speed
-			datatype *new_rhs_ptr; //!< A pointer to the new_rhs_vec for speed
-			datatype *cor_rhs_ptr; //!< A pointer to the cor_rhs_vec for speed
+			// datatype *spectral_rhs_ptr; //!< A pointer to the spectral_rhs_vec for speed
+			// datatype *real_rhs_ptr; //!< A pointer to the real_rhs_vec for speed
+			// datatype *old_rhs_ptr; //!< A pointer to the old_rhs_vec for speed
+			// datatype *old2_rhs_ptr; //!< A pointer to the old2_rhs_vec for speed
+			// datatype *old3_rhs_ptr; //!< A pointer to the old3_rhs_vec for speed
+			// datatype *new_rhs_ptr; //!< A pointer to the new_rhs_vec for speed
+			// datatype *cor_rhs_ptr; //!< A pointer to the cor_rhs_vec for speed
 			
 			std::shared_ptr <plans::plan <datatype> > transform; //!< A shared pointer to a transform if the equation has a real_rhs_vec
 		
@@ -67,18 +75,11 @@ namespace plans
 			 * \param i_grid_m The grid object in the vertical
 			 ************************************************************************/
 			implemented_equation (grids::variable <datatype> &i_data, int *i_element_flags, int *i_component_flags, mpi::messenger *i_messenger_ptr) : plans::solvers::equation <datatype> (i_data, i_element_flags, i_component_flags, i_messenger_ptr), n (i_data.get_grid (0).get_n ()), ldn (i_data.get_grid (0).get_ld ()), m (i_data.get_grid (1).get_n ()), grid_n (i_data.get_grid (0)), grid_m (i_data.get_grid (1)) {
-				spectral_rhs_ptr = NULL;
-				real_rhs_ptr = NULL;
-				old_rhs_vec.resize (ldn * m, 0.0);
-				old_rhs_ptr = &old_rhs_vec [0];
-				old2_rhs_vec.resize (ldn * m, 0.0);
-				old2_rhs_ptr = &old2_rhs_vec [0];
-				old3_rhs_vec.resize (ldn * m, 0.0);
-				old3_rhs_ptr = &old3_rhs_vec [0];
-				new_rhs_vec.resize (ldn * m, 0.0);
-				new_rhs_ptr = &new_rhs_vec [0];
-				cor_rhs_vec.resize (ldn * m, 0.0);
-				cor_rhs_ptr = &cor_rhs_vec [0];
+				new_rhs_ptr = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (grid_n, grid_m, *element_flags));
+				old_rhs_ptr = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (grid_n, grid_m, *element_flags));
+				old2_rhs_ptr = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (grid_n, grid_m, *element_flags));
+				old3_rhs_ptr = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (grid_n, grid_m, *element_flags));
+				cor_rhs_ptr = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (grid_n, grid_m, *element_flags));
 			}
 			
 			virtual ~implemented_equation () {}
@@ -147,26 +148,23 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc equation::rhs_ptr
 			 ************************************************************************/
-			datatype *rhs_ptr (int index = spectral_rhs) {
+			grids::variable <datatype> &rhs (int index = spectral_rhs) {
 				if (index == spectral_rhs) {
 					// If the spectral_rhs has been requested and doesn't exist, make it
 					if (!spectral_rhs_ptr) {
-						spectral_rhs_vec.resize (ldn * m);
-						spectral_rhs_ptr = &spectral_rhs_vec [0];
+						spectral_rhs_ptr = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (grid_n, grid_m, *element_flags));
 					}
-					return spectral_rhs_ptr;
+					return *spectral_rhs_ptr;
 				} else if (index == real_rhs) {
 					// If the real_rhs has been requested and doesn't exist, make it and its transform
 					if (!real_rhs_ptr) {
-						real_rhs_vec.resize (ldn * m);
-						real_rhs_ptr = &real_rhs_vec [0];
-						flags = 0x00;
-						transform = std::shared_ptr <plans::plan <datatype> > (new plans::transforms::horizontal <datatype> (n, m, real_rhs_ptr, NULL, 0x00, element_flags, &flags));
+						real_rhs_ptr = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (grid_n, grid_m, *element_flags));
+						transform = std::shared_ptr <plans::plan <datatype> > (new plans::transforms::horizontal <datatype> (n, m, real_rhs_ptr->ptr (), NULL, 0x00, element_flags, &flags));
 					}
-					return real_rhs_ptr;
+					return *real_rhs_ptr;
 				} else {
 					// Use the default rhs
-					return new_rhs_ptr;
+					return *new_rhs_ptr;
 				}
 			}
 			
@@ -194,12 +192,12 @@ namespace plans
 			 ************************************************************************/
 			virtual void reset () {
 				if (spectral_rhs_ptr) {
-					linalg::scale (ldn * m, 0.0, spectral_rhs_ptr);
+					linalg::scale (ldn * m, 0.0, spectral_rhs_ptr->ptr ());
 				}
 				if (real_rhs_ptr) {
-					linalg::scale (ldn * m, 0.0, real_rhs_ptr);
+					linalg::scale (ldn * m, 0.0, real_rhs_ptr->ptr ());
 				}
-				linalg::scale (m * ldn, 0.0, new_rhs_ptr);
+				linalg::scale (m * ldn, 0.0, new_rhs_ptr->ptr ());
 				
 				// Since this is an alternating direction solve, make sure to switch directions on reset
 				// if (*component_flags & z_solve) {
@@ -243,7 +241,7 @@ namespace plans
 			 * \copydoc equation::add_solver(const typename solver<datatype>::factory&,int)
 			 ************************************************************************/
 			virtual void add_solver (const typename plans::solvers::solver <datatype>::factory &i_factory, int flags = 0x00) {
-				plans::solvers::implemented_equation <datatype>::add_solver (i_factory.instance (data, cor_rhs_ptr), flags);
+				plans::solvers::implemented_equation <datatype>::add_solver (i_factory.instance (data, cor_rhs_ptr->ptr ()), flags);
 			}
 			
 			/*!**********************************************************************
@@ -251,16 +249,16 @@ namespace plans
 			 ************************************************************************/
 			void add_plan (const typename plans::plan <datatype>::factory &i_factory) {
 				TRACE ("Adding plan...");
-				datatype *rhs;
+				grids::variable <datatype> *rhs_ptr;
 				if (i_factory.type () == plans::plan <datatype>::factory::impl) {
-					rhs = rhs_ptr (spectral_rhs);
+					rhs_ptr = &rhs (spectral_rhs);
 				} else if (i_factory.type () == plans::plan <datatype>::factory::real) {
-					rhs = rhs_ptr (real_rhs);
+					rhs_ptr = &rhs (real_rhs);
 				} else {
-					rhs = new_rhs_ptr;
+					rhs_ptr = &*new_rhs_ptr;
 				}
 				datatype* matrices [2] = {matrix_ptr (0), matrix_ptr (1)};
-				plans::solvers::equation <datatype>::add_plan (i_factory.instance (matrices, data, rhs));
+				plans::solvers::equation <datatype>::add_plan (i_factory.instance (matrices, data, *rhs_ptr));
 			}
 			
 			/*!**********************************************************************
@@ -310,33 +308,33 @@ namespace plans
 				}
 				
 				// Add in the components from the last three timesteps for the AB scheme
-				linalg::matrix_copy (m, ldn, old3_rhs_ptr, cor_rhs_ptr);
-				linalg::matrix_scale (m, ldn, -3. / 8., cor_rhs_ptr);
-				linalg::matrix_add_scaled (m, ldn, 37. / 24., old2_rhs_ptr, cor_rhs_ptr);
-				linalg::matrix_add_scaled (m, ldn, -59. / 24., old_rhs_ptr, cor_rhs_ptr);
+				linalg::matrix_copy (m, ldn, old3_rhs_ptr->ptr (), cor_rhs_ptr->ptr ());
+				linalg::matrix_scale (m, ldn, -3. / 8., cor_rhs_ptr->ptr ());
+				linalg::matrix_add_scaled (m, ldn, 37. / 24., old2_rhs_ptr->ptr (), cor_rhs_ptr->ptr ());
+				linalg::matrix_add_scaled (m, ldn, -59. / 24., old_rhs_ptr->ptr (), cor_rhs_ptr->ptr ());
 				
 				// De-alias the RHS
 				if (real_rhs_ptr) {
-					linalg::matrix_scale (m, ldn / 3, 0.0, real_rhs_ptr + m * (ldn - ldn / 3));
-					linalg::matrix_add_scaled (m, ldn, 1.0, real_rhs_ptr, new_rhs_ptr);
+					linalg::matrix_scale (m, ldn / 3, 0.0, real_rhs_ptr->ptr () + m * (ldn - ldn / 3));
+					linalg::matrix_add_scaled (m, ldn, 1.0, real_rhs_ptr->ptr (), new_rhs_ptr->ptr ());
 				}
 				
 				// Add in the component from this timestep
-				linalg::matrix_add_scaled (m, ldn, 55. / 24., new_rhs_ptr, cor_rhs_ptr);
+				linalg::matrix_add_scaled (m, ldn, 55. / 24., new_rhs_ptr->ptr (), cor_rhs_ptr->ptr ());
 				
 				// Rotate the old timestep pointers
-				datatype *temp = old3_rhs_ptr;
+				std::shared_ptr <grids::variable <datatype>> temp = old3_rhs_ptr;
 				old3_rhs_ptr = old2_rhs_ptr;
 				old2_rhs_ptr = old_rhs_ptr;
 				old_rhs_ptr = temp;
-				linalg::matrix_copy (m, ldn, new_rhs_ptr, old_rhs_ptr);
+				linalg::matrix_copy (m, ldn, new_rhs_ptr->ptr (), old_rhs_ptr->ptr ());
 				
 				// Add in the spectral component (the explicit part of the implicit component) after the AB scheme
 				if (spectral_rhs_ptr) {
-					linalg::matrix_add_scaled (m, ldn, 1.0, spectral_rhs_ptr, cor_rhs_ptr);
+					linalg::matrix_add_scaled (m, ldn, 1.0, spectral_rhs_ptr->ptr (), cor_rhs_ptr->ptr ());
 				}
 				if (*component_flags & ignore_net) {
-					linalg::scale (2 * m, 0.0, cor_rhs_ptr);
+					linalg::scale (2 * m, 0.0, cor_rhs_ptr->ptr ());
 				}
 				
 				// Solve either the x direction solve or the z direction solve
@@ -347,16 +345,16 @@ namespace plans
 				}
 
 				if (z_solver) {
-					linalg::matrix_copy (m, ldn, old_rhs_ptr, cor_rhs_ptr);
+					linalg::matrix_copy (m, ldn, old_rhs_ptr->ptr (), cor_rhs_ptr->ptr ());
 
 					if (spectral_rhs_ptr) {
-						linalg::matrix_scale (m, ldn, 0.0, spectral_rhs_ptr);
+						linalg::matrix_scale (m, ldn, 0.0, spectral_rhs_ptr->ptr ());
 						equation <datatype>::execute_plans ((mid_plan | implicit_only));
-						linalg::matrix_add_scaled (m, ldn, 1.0, spectral_rhs_ptr, cor_rhs_ptr);
+						linalg::matrix_add_scaled (m, ldn, 1.0, spectral_rhs_ptr->ptr (), cor_rhs_ptr->ptr ());
 					}
 
 					if (*component_flags & ignore_net) {
-						linalg::scale (2 * m, 0.0, cor_rhs_ptr);
+						linalg::scale (2 * m, 0.0, cor_rhs_ptr->ptr ());
 					}
 
 					z_solver->execute ();
