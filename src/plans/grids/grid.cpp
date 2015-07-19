@@ -279,7 +279,7 @@ namespace grids
 	} /* horizontal */
 
 	template <class datatype>
-	std::vector <variable <datatype>> grids::variable <datatype>::tmps;
+	std::vector <std::shared_ptr <variable <datatype>>> grids::variable <datatype>::tmps;
 
 	template <class datatype>
 	bool variable <datatype>::update () {

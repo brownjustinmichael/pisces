@@ -253,7 +253,7 @@ namespace pisces
 			TRACE ("Factorizing...");
 			for (iterator iter = begin (); iter != end (); iter++) {
 				if (!(data [*iter].component_flags & plans::solvers::factorized)) {
-					// DEBUG ("Factorizing " << *iter);
+					DEBUG ("Factorizing " << *iter);
 					equations [*iter]->factorize ();
 				}
 			}

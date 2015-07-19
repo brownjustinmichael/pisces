@@ -465,7 +465,7 @@ namespace grids
 	class variable
 	{
 	protected:
-		static std::vector <variable <datatype>> tmps;
+		static std::vector <std::shared_ptr <variable <datatype>>> tmps;
 
 		std::vector <grids::grid <datatype> *> grids;
 		int dimensions;
@@ -567,14 +567,6 @@ namespace grids
 
 		bool update ();
 
-		variable <datatype> &operator== (variable <datatype> &&other) {
-			tmps.push_back (other);
-			DEBUG ("MAKING TEMP " << other.get_ld ());
-			this->reset_vars ();
-			this->add_var (tmps [(int) tmps.size () - 1], add);
-			return *this;
-		}
-
 		variable <datatype> &operator== (variable <datatype> &other) {
 			this->reset_vars ();
 			this->add_var (other, add);
@@ -582,23 +574,22 @@ namespace grids
 			return *this;
 		}
 
-		variable <datatype> operator* (variable <datatype> &other) {
-			variable <datatype> new_var (*this);
-			new_var.add_var (*this, add);
-			new_var.add_var (other, mul);
-			DEBUG ("* " << other.get_ld () << " " << new_var.get_ld ());
+		variable <datatype> &operator* (variable <datatype> &other) {
+			std::shared_ptr <variable <datatype>> new_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags)));
+			new_var->add_var (*this, add);
+			new_var->add_var (other, mul);
+			tmps.push_back (new_var);
 
-			return new_var;
+			return *new_var;
 		}
 
-		variable <datatype> operator/ (variable <datatype> &other) {
-			variable <datatype> new_var (*this);
-			new_var.add_var (*this, add);
-			new_var.add_var (other, div);
+		variable <datatype> &operator/ (variable <datatype> &other) {
+			std::shared_ptr <variable <datatype>> new_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags)));
+			new_var->add_var (*this, add);
+			new_var->add_var (other, div);
+			tmps.push_back (new_var);
 
-			DEBUG ("/ " << other.get_ld () << " " << new_var.get_ld ());
-
-			return new_var;
+			return *new_var;
 		}
 	};
 } /* grids */

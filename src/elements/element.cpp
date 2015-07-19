@@ -83,11 +83,11 @@ namespace pisces
 				
 			TRACE ("Executing plans in half-space...");
 				
-			TIME (
-			for (iterator iter = begin (); iter != end (); iter++) {
-				equations [*iter]->execute_plans (plans::solvers::mid_plan);
-			}
-			, execution_time, execution_duration);
+			// TIME (
+			// for (iterator iter = begin (); iter != end (); iter++) {
+			// 	equations [*iter]->execute_plans (plans::solvers::mid_plan);
+			// }
+			// , execution_time, execution_duration);
 			
 			TIME (
 			transform (plans::transforms::forward_horizontal | plans::transforms::no_write | plans::transforms::no_read | plans::transforms::read_before);
@@ -140,9 +140,10 @@ namespace pisces
 
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
-				equations [*iter]->execute_plans (plans::solvers::pre_solve_plan);
+				equations [*iter]->execute_plans (plans::solvers::mid_plan);
 			}
 			, execution_time, execution_duration);
+			
 
 			TIME (
 			solve ();

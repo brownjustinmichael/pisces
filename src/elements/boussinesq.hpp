@@ -26,7 +26,7 @@ namespace pisces
 	template <class datatype>
 	class boussinesq_element : public implemented_element <datatype>
 	{
-	private:
+	protected:
 		using implemented_element <datatype>::element_flags;
 		using implemented_element <datatype>::params;
 		using implemented_element <datatype>::initialize;
