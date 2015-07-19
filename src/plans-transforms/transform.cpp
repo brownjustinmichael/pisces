@@ -152,6 +152,7 @@ namespace plans
 			}		
 			
 			// Switch the horizontal transform flag
+			DEBUG ("Component flags are at " << component_flags);
 			if (*component_flags & transformed_horizontal) {
 				*component_flags &= ~transformed_horizontal;
 			} else {

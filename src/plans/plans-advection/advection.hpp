@@ -137,7 +137,7 @@ namespace plans
 					}
 				}
 
-				for (int j = 0; j < m - 1; ++j)
+				for (int j = 1; j < m - 1; ++j)
 				{
 					data_out [j] += coeff * (vel_m [j + 1] * data_in [j + 1] - vel_m [j - 1] * data_in [j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
 					data_out [j] += coeff * (vel_n [m + j] * data_in [m + j] - vel_n [j] * data_in [j]) / (pos_n [1] - pos_n [0]);

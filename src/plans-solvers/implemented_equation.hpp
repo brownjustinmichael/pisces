@@ -75,6 +75,7 @@ namespace plans
 			 * \param i_grid_m The grid object in the vertical
 			 ************************************************************************/
 			implemented_equation (grids::variable <datatype> &i_data, int *i_element_flags, int *i_component_flags, mpi::messenger *i_messenger_ptr) : plans::solvers::equation <datatype> (i_data, i_element_flags, i_component_flags, i_messenger_ptr), n (i_data.get_grid (0).get_n ()), ldn (i_data.get_grid (0).get_ld ()), m (i_data.get_grid (1).get_n ()), grid_n (i_data.get_grid (0)), grid_m (i_data.get_grid (1)) {
+				flags = 0x00;
 				new_rhs_ptr = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (grid_n, grid_m, *element_flags));
 				old_rhs_ptr = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (grid_n, grid_m, *element_flags));
 				old2_rhs_ptr = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (grid_n, grid_m, *element_flags));

@@ -155,8 +155,8 @@ namespace data
 		 * 
 		 * \return A pointer to the dataset
 		 ************************************************************************/
-		virtual grids::variable <datatype> &initialize (std::string i_name, datatype* initial_conditions = NULL, int i_flags = 0x00) {
-			grids::variable <datatype> &var = _initialize (i_name, initial_conditions, i_flags);
+		virtual grids::variable <datatype> &initialize (std::string i_name, int i_flags = 0x00) {
+			grids::variable <datatype> &var = _initialize (i_name, i_flags);
 			if (dump_stream) {
 				dump_stream->template append <datatype> (i_name, var.ptr ());
 			}
@@ -359,7 +359,7 @@ namespace data
 		/*!**********************************************************************
 		 * \brief Initialize a new dataset in the data object
 		 ************************************************************************/
-		virtual grids::variable <datatype> &_initialize (std::string i_name, datatype* initial_conditions = NULL, int i_flags = 0x00) = 0;
+		virtual grids::variable <datatype> &_initialize (std::string i_name, int i_flags = 0x00) = 0;
 	};
 	
 	/*!**********************************************************************
@@ -480,9 +480,16 @@ namespace data
 		/*!**********************************************************************
 		 * \copydoc data::_initialize
 		 ************************************************************************/
-		virtual grids::variable <datatype> &_initialize (std::string name, datatype* initial_conditions = NULL, int i_flags = 0x00) {
+		virtual grids::variable <datatype> &_initialize (std::string name, int i_flags = 0x00) {
 			TRACE ("Initializing " << name << "...");
 			// Size allowing for real FFT buffer
+			if (i_flags & uniform_n) {
+				data <datatype>::variables [name] = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (*grid_m, flags));
+				return *variables [name];
+			} else if (i_flags & uniform_m) {
+				data <datatype>::variables [name] = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (*grid_n, flags));
+				return *variables [name];
+			}
 			data <datatype>::variables [name] = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (*grid_n, *grid_m, flags, i_flags & vector2D ? 2 : (i_flags & vector3D ? 3 : 1)));
 			if (name == "x") {
 				for (int j = 0; j < m; ++j) {
@@ -491,26 +498,6 @@ namespace data
 			} else if (name == "z") {
 				for (int i = 0; i < n; ++i) {
 					linalg::copy (m, &((*grid_m) [0]), (*this) (name, i));
-				}
-			} else {
-				if (initial_conditions) {
-					if ((i_flags & uniform_m) && (i_flags & uniform_n)) {
-						for (int i = 0; i < n; ++i) {
-							for (int j = 0; j < m; ++j) {
-								*(*this) (name, i, j) = *initial_conditions;
-							}
-						}
-					} else if (i_flags & uniform_m) {
-						for (int j = 0; j < m; ++j) {
-							linalg::copy (n, initial_conditions, (*this) (name, 0, j), 1, m);
-						}
-					} else if (i_flags & uniform_n) {
-						for (int i = 0; i < n; ++i) {
-							linalg::copy (m, initial_conditions, (*this) (name, i));
-						}
-					} else {
-						linalg::copy (n * m, initial_conditions, (*this) (name));
-					}
 				}
 			}
 			TRACE ("Done.");

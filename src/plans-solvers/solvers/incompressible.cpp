@@ -67,7 +67,7 @@ namespace plans
 				xipiv.resize (1);
 			}
 			
-			positions.resize (m + 6);
+			positions.resize (m + 6, 0.0);
 			new_positions.resize (m + 6);
 			pos_m = &positions [3];
 		
@@ -123,7 +123,7 @@ namespace plans
 			new_pos = &new_positions [3];
 			
 			// Update new_pos to contain the midpoints of pos_m
-			for (int j = -3; j < m + 3; ++j) {
+			for (int j = -3; j < m + 2; ++j) {
 				new_pos [j] = (pos_m [j] + pos_m [j + 1]) / 2.0;
 			}
 			if (id == 0) {

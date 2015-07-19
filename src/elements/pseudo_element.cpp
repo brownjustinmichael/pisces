@@ -1,9 +1,5 @@
 /*!**********************************************************************
-<<<<<<< HEAD
- * \file pseudo.cpp
-=======
- * \file boussinesq.cpp
->>>>>>> devel
+ * \file pseudo_element.cpp
  * /Users/justinbrown/Dropbox/pisces
  * 
  * Created by Justin Brown on 2014-02-03.
@@ -22,20 +18,20 @@ namespace pisces
 	template <class datatype>
 	pseudo_element <datatype>::pseudo_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags, bool load_diffusion) : 
 	boussinesq_element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags, load_diffusion) {
-		pressure.resize (m);
+		data.initialize ("bg_pressure", uniform_n);
 
 		for (int j = 0; j < m; ++j)
 		{
-			pressure [j] = 1.0 + (*grids [1]) [0] * 0.1;
+			data ["bg_pressure"].ptr () [j] = 1.0 + (*grids [1]) [j] * 0.1;
 		}
 
-		data ["density"] == data ["temperature"] / data ["composition"];// * z_src (&pressure [0]);
+		data ["density"] == data ["composition"] / data ["temperature"] * data ["bg_pressure"];
 
 		// *equations ["x_velocity"] - horizontal_stress (data ["z_velocity"]);
 		*equations ["z_velocity"] - vertical_stress (data ["x_velocity"]);// + pressure_grad_1d (data ["temperature"], data ["composition"], &pressure [0]);
 
 		// Set up the velocity constraint
-		*pdiv <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"], &pressure [0])
+		*pdiv <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"], data ["bg_pressure"].ptr ())
 		==
 		0.0;
 		

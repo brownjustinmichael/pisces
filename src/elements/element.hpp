@@ -296,6 +296,7 @@ namespace pisces
 				// #pragma omp parallel for num_threads (threads)
 				for (int i = 0; i < 1; ++i) {
 					std::string name = can_be_solved [i];
+					DEBUG ("Solving " << name);
 					equations [name]->solve ();
 					// #pragma omp atomic
 					data [name].component_flags |= solved;
