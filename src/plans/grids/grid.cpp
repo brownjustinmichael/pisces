@@ -318,7 +318,7 @@ namespace grids
 				{
 					for (int j = 0; j < ld; ++j)
 					{
-						data [i * ld + j] *= tmp [i * tld + j];
+						data [i * ld + j] /= tmp [i * tld + j];
 					}
 				}
 			}

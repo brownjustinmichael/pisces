@@ -74,6 +74,9 @@ namespace data
 		std::vector <std::string> scalar_names; //!< The vector of variable names
 		std::map <std::string, std::shared_ptr <grids::variable <datatype>>> variables; //!< The string map of vectors containing the variable data
 		datatype *weights;
+
+		std::map <std::string, std::shared_ptr <plans::transforms::transformer <datatype>>> transformers; //!< A map containing the transformer objects for each variable
+		std::vector <std::string> transforms; //!< A vector containing the variables with transforms
 		
 	public:
 		datatype duration; //!< The total time elapsed in the simulation thus far
@@ -163,6 +166,21 @@ namespace data
 			scalar_names.push_back (i_name);
 			std::sort (scalar_names.begin (), scalar_names.end ());
 			return var;
+		}
+
+		/*!**********************************************************************
+		 * \brief Transform the element according to the flags
+		 * 
+		 * \param i_flags The flags to pass to the transformer transform member (e.g. forward_horizontal, read_before)
+		 ************************************************************************/
+		void transform (int i_flags) {
+			TRACE ("Transforming...");
+			for (int i = 0; i < (int) scalar_names.size (); ++i) {
+				if (transformers [scalar_names [i]]) {
+					transformers [scalar_names [i]]->transform (i_flags);
+				}
+			}
+			check_streams (i_flags);
 		}
 		
 		/*!**********************************************************************
@@ -373,6 +391,7 @@ namespace data
 		using data <datatype>::weights;
 		using data <datatype>::variables;
 		using data <datatype>::flags;
+		using data <datatype>::transformers;
 		
 		std::shared_ptr <grids::grid <datatype>> grid_n; //!< The horizontal grid object
 		std::shared_ptr <grids::grid <datatype>> grid_m; //!< The vertical grid object
@@ -495,10 +514,14 @@ namespace data
 				for (int j = 0; j < m; ++j) {
 					linalg::copy (n, &((*grid_n) [0]), (*this) (name, 0, j), 1, m);
 				}
+				transformers [name] = NULL;
 			} else if (name == "z") {
 				for (int i = 0; i < n; ++i) {
 					linalg::copy (m, &((*grid_m) [0]), (*this) (name, i));
 				}
+				transformers [name] = NULL;
+			} else {
+				transformers [name] = std::shared_ptr <plans::transforms::transformer <datatype> > (new plans::transforms::implemented_transformer <datatype> (*grid_n, *grid_m, (*this) (name), NULL, plans::transforms::forward_vertical | plans::transforms::forward_horizontal | plans::transforms::inverse_vertical | plans::transforms::inverse_horizontal , &(flags), &((*this) [name].component_flags)));
 			}
 			TRACE ("Done.");
 			return *variables [name];

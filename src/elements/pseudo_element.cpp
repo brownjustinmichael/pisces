@@ -43,20 +43,19 @@ namespace pisces
 		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		params ["equations.velocity.diffusion"] * diff <datatype> ();
+		// + horizontal_stress (data ["z_velocity"]);
 
 		// Set up the z_velocity equation, note the missing pressure term, which is handled in div
 		*split_solver <datatype> (equations ["z_momentum"], timestep, dirichlet (0.0), dirichlet (0.0)) 
 		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 		== 
-		params ["equations.z_velocity.sources.temperature"] * src <datatype> (data ["temperature"])
-		+ params ["equations.z_velocity.sources.composition"] * src <datatype> (data ["composition"]) 
-		+ params ["equations.velocity.diffusion"] * diff <datatype> ();
+		// - grd <datatype> (data ["bg_pressure"])
+		// params ["equations.z_velocity.sources.density"] * src <datatype> (data ["density"])
+		params ["equations.velocity.diffusion"] * diff <datatype> ();
+		// + vertical_stress (data ["x_velocity"]);
 
-		// // *equations ["x_velocity"] - horizontal_stress (data ["z_velocity"]);
-		// *equations ["z_velocity"] - vertical_stress (data ["x_velocity"]);// + pressure_grad_1d (data ["temperature"], data ["composition"], &pressure [0]);
-
-		// Set up the velocity constraint
-		// *pdiv <datatype> (equations ["pressure"], equations ["x_momentum"], equations ["z_momentum"], data ["bg_pressure"].ptr ())
+		// // Set up the velocity constraint
+		// *pdiv <datatype> (equations ["pressure"], equations ["x_momentum"], equations ["z_momentum"], data ["x_velocity"], data ["z_velocity"], data ["density"], data ["bg_pressure"])
 		// ==
 		// 0.0;
 		

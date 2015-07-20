@@ -207,11 +207,7 @@ namespace pisces
 		 ************************************************************************/
 		void transform (int i_flags) {
 			TRACE ("Transforming...");
-			int threads = transform_threads;
-			#pragma omp parallel for num_threads (threads)
-			for (int i = 0; i < (int) transforms.size (); ++i) {
-				transformers [transforms [i]]->transform (i_flags);
-			}
+			data.transform (i_flags);
 		}
 	
 		/*!**********************************************************************

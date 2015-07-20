@@ -50,7 +50,7 @@ namespace plans
 			 * \param i_flags Integer flags to describe the setup (e.g. forward_vertical, inverse_horizontal, etc.)
 			 * \param i_threads The number of threads to use in the transform
 			 ************************************************************************/
-			implemented_transformer (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads) : plans::transforms::transformer <datatype> (i_element_flags, i_component_flags), ldn (i_grid_n.get_ld ()), ldm (i_grid_m.get_ld ()), data_in (i_data_in), data_out (i_data_out ? i_data_out : i_data_in) {
+			implemented_transformer (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 1) : plans::transforms::transformer <datatype> (i_element_flags, i_component_flags), ldn (i_grid_n.get_ld ()), ldm (i_grid_m.get_ld ()), data_in (i_data_in), data_out (i_data_out ? i_data_out : i_data_in) {
 				data.resize (ldn * ldm, 0.0);
 				// For each direction, check the flags to see which transforms to add and do so
 				if (i_flags & forward_vertical) {
