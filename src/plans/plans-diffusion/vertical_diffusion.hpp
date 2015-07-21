@@ -88,7 +88,7 @@ namespace plans
 			virtual void execute () {
 				TRACE ("Operating...");
 				// Depending on the direction of the solve, treat this term as either partially or fully explicit
-				if (*component_flags & z_solve) {
+				if (component_flags & z_solve) {
 					if (1.0 - alpha != 0.0) {
 						linalg::matrix_matrix_multiply (m, ldn, m, 1.0 - alpha, new_matrix, data_in, 1.0, data_out);
 					}
@@ -214,7 +214,7 @@ namespace plans
 			void execute () {
 				TRACE ("Operating...");
 				// Depending on the direction of the solve, treat this term as either partially or fully explicit
-				if (*component_flags & z_solve) {
+				if (component_flags & z_solve) {
 					if (1.0 - alpha != 0.0) {
 						linalg::matrix_matrix_multiply (m, ldn, m, 1.0 - alpha, new_matrix, data_in, 1.0, data_out, m);
 					}

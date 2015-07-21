@@ -67,6 +67,8 @@ namespace plans
 				static versions::version version ("1.0.1.0");
 				return version;
 			}
+
+			virtual int get_state () = 0;
 		
 			/*!**********************************************************************
 			 * \brief Get the number of dependencies in its current state

@@ -479,6 +479,7 @@ namespace grids
 		int total;
 
 	public:
+		int last_update;
 		int component_flags;
 		int &element_flags;
 
@@ -489,45 +490,40 @@ namespace grids
 			div = 0x04
 		};
 
-		variable (grids::grid <datatype> &i_grid_m, int &i_element_flags, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags) {
+		variable (grids::grid <datatype> &i_grid_m, int &i_element_flags, int states = 3, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags) {
 			grids.push_back (&i_grid_m);
-			DEBUG ("Making 1D object");
 			total = i_grid_m.get_n ();
-			data.resize (total * dimensions, 0.0);
+			data.resize (total * dimensions * states, 0.0);
 			ld = 0;
-			DEBUG ("1D Grid " << total);
 		}
 
-		variable (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, int &i_element_flags, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags) {
+		variable (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, int &i_element_flags, int states = 3, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags) {
 			grids.push_back (&i_grid_n);
 			grids.push_back (&i_grid_m);
-			data.resize (i_grid_m.get_n () * i_grid_n.get_ld () * dimensions, 0.0);
+			data.resize (i_grid_m.get_n () * i_grid_n.get_ld () * states * dimensions, 0.0);
 			ld = i_grid_m.get_n ();
 			total = i_grid_m.get_n () * i_grid_n.get_ld ();
-			DEBUG ("Grid info " << i_grid_m.get_n () << " " << i_grid_n.get_ld () << " " << dimensions << " " << total);
 		}
 
-		variable (int n, grids::grid <datatype> **i_grids, int &i_element_flags, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags) {
+		variable (int n, grids::grid <datatype> **i_grids, int &i_element_flags, int states = 3, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags) {
 			total = n > 1 ? 1 : 0;
 			for (int i = 0; i < n; ++i)
 			{
 				grids.push_back (i_grids [i]);
 				total *= i_grids [i]->get_ld ();
 			}
-			data.resize (total * dimensions, 0.0);
+			data.resize (total * states * dimensions, 0.0);
 			ld = i_grids [n - 1]->get_ld ();
-
-			DEBUG ("Last " << total);
 		}
 
 		virtual ~variable () {}
 
-		datatype *ptr () {
-			return &data [0];
+		datatype *ptr (int state = 0) {
+			return &data [state * total * dimensions];
 		}
 
 		const int size () const {
-			return data.size ();
+			return total * dimensions;
 		}
 
 		const int shape () const {
@@ -570,7 +566,6 @@ namespace grids
 		variable <datatype> &operator== (variable <datatype> &other) {
 			this->reset_vars ();
 			this->add_var (other, add);
-			DEBUG ("== " << other.get_ld () << " " << this->get_ld ());
 			return *this;
 		}
 

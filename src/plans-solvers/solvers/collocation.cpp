@@ -18,12 +18,11 @@ namespace plans
 	namespace solvers
 	{
 		template <class datatype>
-		collocation <datatype>::collocation (mpi::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data) : 
-		solver <datatype> (i_data, NULL), 
+		collocation <datatype>::collocation (mpi::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out) : 
+		solver <datatype> (i_data, i_data_out, this->get_state_in (), this->get_state ()), 
 		n (i_data.get_grid (0).get_n ()), 
 		ldn (i_data.get_grid (0).get_ld ()), 
 		m (i_data.get_grid (1).get_n ()), 
-		data (i_data.ptr ()), 
 		messenger_ptr (i_messenger_ptr), 
 		timestep (i_timestep), 
 		excess_0 (i_data.get_grid (1).get_excess_0 ()), 
@@ -102,6 +101,7 @@ namespace plans
 	
 		template <class datatype>
 		void collocation <datatype>::execute () {
+			solver <datatype>::execute ();
 			int info;
 			TRACE ("Executing solve...");
 			
@@ -118,18 +118,18 @@ namespace plans
 			
 			// Include the contributions from the boundaries; if there aren't boundaries, just use the data present
 			if (boundary_0) {
-				boundary_0->calculate_rhs (data + excess_0, &data_temp [ex_overlap_0 + excess_0], m, lda, z_solve);
+				boundary_0->calculate_rhs (data_in + excess_0, &data_temp [ex_overlap_0 + excess_0], m, lda, z_solve);
 			} else {
-				linalg::matrix_add_scaled (1 + excess_0, ldn, 1.0, data, &data_temp [ex_overlap_0], m, lda);
+				linalg::matrix_add_scaled (1 + excess_0, ldn, 1.0, data_in, &data_temp [ex_overlap_0], m, lda);
 			}
 			if (boundary_n) {
-				boundary_n->calculate_rhs (data + m - 1 - excess_n, &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda, z_solve);
+				boundary_n->calculate_rhs (data_in + m - 1 - excess_n, &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda, z_solve);
 			} else {
-				linalg::matrix_add_scaled (1 + excess_n, ldn, 1.0, data + m - 1 - excess_n, &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda);
+				linalg::matrix_add_scaled (1 + excess_n, ldn, 1.0, data_in + m - 1 - excess_n, &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda);
 			}
 			
 			// Add the data from the previous timestep
-			linalg::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
+			linalg::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data_in + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
 			
 			linalg::block::matrix_solve (messenger_ptr->get_id (), messenger_ptr->get_np (), inner_m, overlap_0, overlap_n, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, ldn, lda, sqrt ((int) boundary_matrix.size ()), lda);
 			
@@ -156,10 +156,10 @@ namespace plans
 	#endif
 			
 			TRACE ("Updating...");
-			linalg::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data, lda, m);
+			linalg::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data_out, lda, m);
 			
 			// This solve transforms, so we specify that in the component flags
-			*component_flags |= transformed_vertical;
+			component_flags |= transformed_vertical;
 			
 			TRACE ("Solve complete.")
 		}

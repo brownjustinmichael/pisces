@@ -31,11 +31,10 @@ namespace plans
 		class horizontal : public plans::plan <datatype>
 		{
 		protected:
-			int n; //!< The horizontal extent of the data
-			int m; //!< The vertical extent of the data
-			datatype *data_in; //!< A pointer to the input data
-			datatype *data_out; //!< A pointer to the output data
-		
+			using plans::plan <datatype>::data_in;
+			using plans::plan <datatype>::data_out;
+
+			int n, m;
 			int flags; //!< A set of flags for setting up the transform
 			int threads; //!< The integer number of threads to use
 			
@@ -52,24 +51,6 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc plan::plan
 			 * 
-			 * \param i_n The horizontal extent of the data
-			 * \param i_m The vertical extent of the data
-			 * \param i_data_in A pointer to the input data
-			 * \param i_data_out A pointer to the output data
-			 * \param i_flags A set of flags for setting up the transform (e.g. inverse)
-			 * \param i_threads The number of threads over which to split the transform
-			 * 
-			 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
-			 ************************************************************************/
-			horizontal (int i_n, int i_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0) : plans::plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags) {
-				DEBUG (i_element_flags << " " << i_component_flags);
-				DEBUG (i_data_in << " " << i_data_out);
-				init (i_n, i_m, i_data_in, i_data_out, i_flags, i_threads);
-			}
-			
-			/*!**********************************************************************
-			 * \copydoc plan::plan
-			 * 
 			 * \param i_grid_n The horizontal grid object
 			 * \param i_grid_m The vertical grid object
 			 * \param i_data_in A pointer to the input data
@@ -79,9 +60,13 @@ namespace plans
 			 * 
 			 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
 			 ************************************************************************/
-			horizontal (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0) : plans::plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags) {
-				init (i_grid_n.get_n (), i_grid_m.get_n (), i_data_in, i_data_out, i_flags, i_threads);
+			horizontal (grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, int state_in = 0, int state_out = 0, int i_flags = 0x00, int i_threads = 0) : 
+			plans::plan <datatype> (i_data_in, i_data_out, state_in, state_out) {
+				init (i_data_in.get_grid (0).get_n (), i_data_in.get_grid (1).get_n (), data_in, data_out, i_flags, i_threads);
 			}
+
+			horizontal (grids::variable <datatype> &i_data_in, int state_in = 0, int state_out = -1, int i_flags = 0x00, int i_threads = 0) : 
+			horizontal (i_data_in, i_data_in, state_in, state_out >= 0 ? state_in : state_out, i_flags, i_threads) {}
 			
 			virtual ~horizontal () {}
 			
@@ -104,11 +89,10 @@ namespace plans
 		class vertical : public plans::plan <datatype>
 		{
 		protected:
-			int n; //!< The horizontal extent of the data
-			int m; //!< The vertical extent of the data
-			datatype *data_in; //!< A pointer to the input data
-			datatype *data_out; //!< A pointer to the output data
-			
+			using plans::plan <datatype>::data_in;
+			using plans::plan <datatype>::data_out;
+
+			int n, m;
 			int flags; //!< A set of flags for setting up the transform
 			int threads; //!< The integer number of threads to use
 			
@@ -123,22 +107,6 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc plan::plan
 			 * 
-			 * \param i_n The horizontal extent of the data
-			 * \param i_m The vertical extent of the data
-			 * \param i_data_in A pointer to the input data
-			 * \param i_data_out A pointer to the output data
-			 * \param i_flags A set of flags for setting up the transform (e.g. inverse)
-			 * \param i_threads The number of threads over which to split the transform
-			 * 
-			 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
-			 ************************************************************************/
-			vertical (int i_n, int i_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0) : plans::plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags) {
-				init (i_n, i_m, i_data_in, i_data_out, i_flags, i_threads);
-			}
-			
-			/*!**********************************************************************
-			 * \copydoc plan::plan
-			 * 
 			 * \param i_grid_n The horizontal grid object
 			 * \param i_grid_m The vertical grid object
 			 * \param i_data_in A pointer to the input data
@@ -148,9 +116,13 @@ namespace plans
 			 * 
 			 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
 			 ************************************************************************/
-			vertical (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 0) : plans::plan <datatype> (i_data_in, i_data_out, i_element_flags, i_component_flags) {
-				init (i_grid_n.get_n (), i_grid_m.get_n (), i_data_in, i_data_out, i_flags, i_threads);
+			vertical (grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, int state_in = 0, int state_out = 0, int i_flags = 0x00, int i_threads = 0) : 
+			plans::plan <datatype> (i_data_in, i_data_out, state_in, state_out) {
+				init (i_data_in.get_grid (0).get_n (), i_data_in.get_grid (1).get_n (), data_in, data_out, i_flags, i_threads);
 			}
+
+			vertical (grids::variable <datatype> &i_data_in, int state_in = 0, int state_out = -1, int i_flags = 0x00, int i_threads = 0) : 
+			vertical (i_data_in, i_data_in, state_in, state_out >= 0 ? state_in : state_out, i_flags, i_threads) {}
 			
 			virtual ~vertical () {}
 			

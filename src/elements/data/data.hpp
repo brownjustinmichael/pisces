@@ -45,7 +45,7 @@ namespace data
 		no_variables = 0x08,
 		vector = 0x10,
 		vector2D = 0x10,
-		vector3D = 0x20
+		vector3D = 0x20,
 	};
 
 	/*!**********************************************************************
@@ -74,11 +74,10 @@ namespace data
 		std::vector <std::string> scalar_names; //!< The vector of variable names
 		std::map <std::string, std::shared_ptr <grids::variable <datatype>>> variables; //!< The string map of vectors containing the variable data
 		datatype *weights;
-
-		std::map <std::string, std::shared_ptr <plans::transforms::transformer <datatype>>> transformers; //!< A map containing the transformer objects for each variable
-		std::vector <std::string> transforms; //!< A vector containing the variables with transforms
 		
 	public:
+		std::map <std::string, std::shared_ptr <plans::transforms::transformer <datatype>>> transformers;
+
 		datatype duration; //!< The total time elapsed in the simulation thus far
 		datatype timestep; //!< The current timestep
 		int flags; //!< A map of the simulation flags
@@ -131,9 +130,9 @@ namespace data
 		 * 
 		 * \return A pointer to the indexed data
 		 ************************************************************************/
-		datatype *operator() (const std::string &name, int index = 0) {
+		datatype *operator() (const std::string &name, int state = 0, int index = 0) {
 			if (variables.find (name) != variables.end () && (int) variables.size () != 0) {
-				return variables [name]->ptr () + index * variables [name]->dims ();
+				return variables [name]->ptr (state) + index * variables [name]->dims ();
 			}
 			return NULL;
 		}
@@ -167,71 +166,14 @@ namespace data
 			std::sort (scalar_names.begin (), scalar_names.end ());
 			return var;
 		}
-
-		/*!**********************************************************************
-		 * \brief Transform the element according to the flags
-		 * 
-		 * \param i_flags The flags to pass to the transformer transform member (e.g. forward_horizontal, read_before)
-		 ************************************************************************/
-		void transform (int i_flags) {
-			TRACE ("Transforming...");
-			for (int i = 0; i < (int) scalar_names.size (); ++i) {
-				if (transformers [scalar_names [i]]) {
-					transformers [scalar_names [i]]->transform (i_flags);
-				}
-			}
-			check_streams (i_flags);
-		}
 		
 		/*!**********************************************************************
 		 * \brief Check whether any streams can be output and output them
 		 ************************************************************************/
-		void check_streams (int i_flags = 0x00) {
-			TRACE ("Transforming...");
+		void output () {
+			TRACE ("Output...");
 			for (int i = 0; i < (int) streams.size (); ++i) {
-				if (done [i]) continue;
-				if (stream_conditions [i] & transformed_vertical) {
-					if (!(i_flags & transformed_vertical)) {
-						continue;
-					}
-				} else {
-					if ((i_flags & transformed_vertical)) {
-						continue;
-					}
-				}
-				if (stream_conditions [i] & transformed_horizontal) {
-					if (!(i_flags & transformed_horizontal)) {
-						continue;
-					}
-				} else {
-					if ((i_flags & transformed_horizontal)) {
-						continue;
-					}
-				}
 				streams [i]->to_file ();
-				done [i] = true;
-			}
-			if (dump_stream && !dump_done) {
-				if (dump_condition & transformed_vertical) {
-					if (!(i_flags & transformed_vertical)) {
-						return;
-					}
-				} else {
-					if ((i_flags & transformed_vertical)) {
-						return;
-					}
-				}
-				if (dump_condition & transformed_horizontal) {
-					if (!(i_flags & transformed_horizontal)) {
-						return;
-					}
-				} else {
-					if ((i_flags & transformed_horizontal)) {
-						return;
-					}
-				}
-				dump_stream->to_file ();
-				dump_done = true;
 			}
 		}
 		
@@ -245,9 +187,10 @@ namespace data
 			dump_done = false;
 		}
 		
-		virtual std::shared_ptr <io::input> setup (std::shared_ptr <io::input> input_stream) {
+		virtual std::shared_ptr <io::input> setup (std::shared_ptr <io::input> input_stream, int state = real_real) {
 			for (data::iterator iter = begin (); iter != end (); ++iter) {
-				input_stream->append (*iter, (*this) (*iter));
+				input_stream->append (*iter, (*this) (*iter, state));
+				(*this) [*iter].last_update = state;
 			}
 			
 			input_stream->append ("t", &duration, formats::scalar);
@@ -258,6 +201,10 @@ namespace data
 			} catch (formats::exceptions::bad_variables &except) {
 				// Send a warning if there are missing variables in the input
 				WARN (except.what ());
+			}
+
+			for (data::iterator iter = begin (); iter != end (); ++iter) {
+				if (transformers [*iter]) transformers [*iter]->update ();
 			}
 
 			return input_stream;
@@ -304,13 +251,13 @@ namespace data
 		 * 
 		 * Given an output object, prepare it to output all the scalar fields tracked directly by the element. Make it one of the output streams called during output. If flags is normal_stream, output the variables when in Cartesian space, else if flags is transform_stream, output with horizontal grid in Fourier space, but vertical grid in Cartesian space.
 		 ************************************************************************/
-		std::shared_ptr <io::output> setup_output (std::shared_ptr <io::output> output, int flags = 0x00) {
+		std::shared_ptr <io::output> setup_output (std::shared_ptr <io::output> output, int state = real_real) {
 			// Iterate through the scalar fields and append them to the variables which the output will write to file
 			if (!(params ["output.output"].as <bool> ())) return NULL;
 
 			if (!(flags & no_variables)) {
 				for (data::iterator iter = begin (); iter != end (); ++iter) {
-					output->append (*iter, (*this) (*iter));
+					output->append (*iter, (*this) (*iter, state));
 				}
 			}
 			
@@ -319,8 +266,6 @@ namespace data
 
 			// Check the desired output time and save the output object in the appropriate variable
 			streams.push_back (output);
-			done.push_back (false);
-			stream_conditions.push_back (flags);
 
 			return output;
 		}
@@ -391,7 +336,6 @@ namespace data
 		using data <datatype>::weights;
 		using data <datatype>::variables;
 		using data <datatype>::flags;
-		using data <datatype>::transformers;
 		
 		std::shared_ptr <grids::grid <datatype>> grid_n; //!< The horizontal grid object
 		std::shared_ptr <grids::grid <datatype>> grid_m; //!< The vertical grid object
@@ -401,6 +345,7 @@ namespace data
 		std::vector <datatype> area;
 		
 	public:
+		using data <datatype>::transformers;
 		using data <datatype>::duration;
 		
 		/*!**********************************************************************
@@ -445,8 +390,8 @@ namespace data
 		
 		virtual ~implemented_data () {}
 
-		datatype *operator() (const std::string &name, int i = 0, int j = 0) {
-			return data <datatype>::operator() (name, i * m + j);
+		datatype *operator() (const std::string &name, int state = 0, int i = 0, int j = 0) {
+			return data <datatype>::operator() (name, state, i * m + j);
 		}
 		
 		/*!**********************************************************************
@@ -509,19 +454,19 @@ namespace data
 				data <datatype>::variables [name] = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (*grid_n, flags));
 				return *variables [name];
 			}
-			data <datatype>::variables [name] = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (*grid_n, *grid_m, flags, i_flags & vector2D ? 2 : (i_flags & vector3D ? 3 : 1)));
+			data <datatype>::variables [name] = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (*grid_n, *grid_m, flags, 3, i_flags & vector2D ? 2 : (i_flags & vector3D ? 3 : 1)));
 			if (name == "x") {
 				for (int j = 0; j < m; ++j) {
-					linalg::copy (n, &((*grid_n) [0]), (*this) (name, 0, j), 1, m);
+					linalg::copy (n, &((*grid_n) [0]), (*this) (name, real_real, 0, j), 1, m);
 				}
 				transformers [name] = NULL;
 			} else if (name == "z") {
 				for (int i = 0; i < n; ++i) {
-					linalg::copy (m, &((*grid_m) [0]), (*this) (name, i));
+					linalg::copy (m, &((*grid_m) [0]), (*this) (name, real_real, i));
 				}
 				transformers [name] = NULL;
 			} else {
-				transformers [name] = std::shared_ptr <plans::transforms::transformer <datatype> > (new plans::transforms::implemented_transformer <datatype> (*grid_n, *grid_m, (*this) (name), NULL, plans::transforms::forward_vertical | plans::transforms::forward_horizontal | plans::transforms::inverse_vertical | plans::transforms::inverse_horizontal , &(flags), &((*this) [name].component_flags)));
+				transformers [name] = std::shared_ptr <plans::transforms::transformer <datatype> > (new plans::transforms::implemented_transformer <datatype> (*grid_n, *grid_m, (*this) [name], plans::transforms::forward_vertical | plans::transforms::forward_horizontal | plans::transforms::inverse_vertical | plans::transforms::inverse_horizontal , &(flags), &((*this) [name].component_flags)));
 			}
 			TRACE ("Done.");
 			return *variables [name];

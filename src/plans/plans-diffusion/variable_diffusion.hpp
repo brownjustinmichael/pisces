@@ -238,7 +238,7 @@ namespace plans
 						bg_deriv [j] = (bg_state [j + 1] - bg_state [j - 1]);
 					}
 					bg_deriv [m - 1] = (bg_state [m - 1] - bg_state [m - 2]);
-					*component_flags &= ~plans_setup;
+					component_flags &= ~plans_setup;
 				}
 
 				count++;

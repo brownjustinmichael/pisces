@@ -27,13 +27,14 @@ namespace plans
 		class fourier : public solver <datatype>
 		{
 		private:
+			using plans::solvers::solver <datatype>::data_in;
+			using plans::solvers::solver <datatype>::data_out;
 			using plans::solvers::solver <datatype>::element_flags;
 			using plans::solvers::solver <datatype>::component_flags;
 			
 			int n; //!< The horizontal extent of the data
 			int ldn; //!< The horizontal extent of the data array
 			int m; //!< The vertical extent of the data
-			datatype *data; //!< A pointer to the data
 			
 			datatype& timestep; //!< A datatype reference to the current timestep
 			datatype *rhs_ptr; //!< A pointer to the right hand side of the equation
@@ -76,12 +77,16 @@ namespace plans
 			 * \param i_rhs A pointer to the right hand side of the equation
 			 * \param i_data A pointer to the data
 			 ************************************************************************/
-			fourier (datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data);
+			fourier (datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out);
 
-			fourier (datatype& i_timestep, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, int *i_element_flags, int *i_component_flags) : fourier (i_timestep, i_boundary_0.instance (i_data.get_grid (0), i_data.get_grid (1), false), i_boundary_n.instance (i_data.get_grid (0), i_data.get_grid (1), true), i_rhs, i_data) {}
+			fourier (datatype& i_timestep, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out, int *i_element_flags, int *i_component_flags) : fourier (i_timestep, i_boundary_0.instance (i_data.get_grid (0), i_data.get_grid (1), false), i_boundary_n.instance (i_data.get_grid (0), i_data.get_grid (1), true), i_rhs, i_data, i_data_out) {}
 			
 			virtual ~fourier () {}
 			
+			int get_state () {
+				return real_spectral;
+			}
+
 			/*!**********************************************************************
 			 * \copydoc solver::matrix_ptr
 			 ************************************************************************/
@@ -130,8 +135,8 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc solver::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::variable <datatype> &i_data, datatype *i_rhs) const {
-					return std::shared_ptr <plans::solvers::solver <datatype>> (new fourier (timestep, boundary_factory_0 ? boundary_factory_0->instance (i_data.get_grids (), false) : boundary_0, boundary_factory_n ? boundary_factory_n->instance (i_data.get_grids (), true) : boundary_n, i_rhs, i_data));
+				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out, datatype *i_rhs) const {
+					return std::shared_ptr <plans::solvers::solver <datatype>> (new fourier (timestep, boundary_factory_0 ? boundary_factory_0->instance (i_data.get_grids (), false) : boundary_0, boundary_factory_n ? boundary_factory_n->instance (i_data.get_grids (), true) : boundary_n, i_rhs, i_data, i_data_out));
 				}
 			};
 		};

@@ -31,7 +31,6 @@
 #include "plans/grids/grid.hpp"
 #include "plans/plan.hpp"
 #include "plans-solvers/equation.hpp"
-#include "plans-transforms/transformer.hpp"
 
 #include "rezone.hpp"
 #include "data/data.hpp"
@@ -64,10 +63,7 @@ namespace pisces
 		int &element_flags; //!< A map of integer flags
 		
 		std::map <std::string, std::shared_ptr <plans::solvers::equation <datatype>>> equations; //!< A vector of shared pointers to the matrix equations
-		std::map <std::string, std::shared_ptr <plans::transforms::transformer <datatype>>> transformers; //!< A map containing the transformer objects for each variable
-		std::vector <std::string> transforms; //!< A vector containing the variables with transforms
-		int transform_threads; //!< The number of transform threads available
-		
+
 	private:
 		datatype rezone_mult; //!< To merit rezoning, the new timestep must be at least this factor larger than the current one
 		std::vector <std::string> equation_keys; //!< A vector of integer keys to the equations map
@@ -121,7 +117,6 @@ namespace pisces
 			axes.resize (i_dimensions);
 			messenger_ptr = i_messenger_ptr;
 			timestep = 0.0;
-			transform_threads = params.get <int> ("parallel.transform.threads");
 			rezone_mult = params.get <datatype> ("grid.rezone.mult");
 		}
 		
@@ -199,16 +194,6 @@ namespace pisces
 			equation_keys.push_back (i_name);
 			TRACE ("Solver added.");
 		}
-		
-		/*!**********************************************************************
-		 * \brief Transform the element according to the flags
-		 * 
-		 * \param i_flags The flags to pass to the transformer transform member (e.g. forward_horizontal, read_before)
-		 ************************************************************************/
-		void transform (int i_flags) {
-			TRACE ("Transforming...");
-			data.transform (i_flags);
-		}
 	
 		/*!**********************************************************************
 		 * \brief Get the pointer to a matrix from a particular solver
@@ -267,6 +252,9 @@ namespace pisces
 			}
 			bool completely_solved = false, skip;
 			std::vector <std::string> can_be_solved;
+			DEBUG ("WELL BEFORE SOLVE " << (data ["temperature"].ptr (spectral_spectral) [200]));
+			DEBUG ("WELL BEFORE SOLVE " << (data ["temperature"].ptr (real_spectral) [200]));
+
 			
 			while (!completely_solved) {
 				can_be_solved.clear ();
@@ -293,7 +281,14 @@ namespace pisces
 				for (int i = 0; i < 1; ++i) {
 					std::string name = can_be_solved [i];
 					DEBUG ("Solving " << name);
+					DEBUG ("BEFORE SOLVE " << (data [name].ptr (equations [name]->get_state ()) [200]));
 					equations [name]->solve ();
+					DEBUG ("AFTER SOLVE " << (data [name].ptr (equations [name]->get_state ()) [200]));
+
+					data.transformers [name]->update ();
+
+					DEBUG ("REAL AFTER SOLVE " << (data [name].ptr (real_real) [200]));
+
 					// #pragma omp atomic
 					data [name].component_flags |= solved;
 				}
@@ -306,12 +301,11 @@ namespace pisces
 			
 			for (iterator iter = begin (); iter != end (); iter++) {
 				equations [*iter]->reset ();
+				data.transformers [*iter]->update ();
 			}
 			
 			// Make certain everything is fully transformed
 			
-			
-			transform (plans::transforms::forward_vertical | plans::transforms::no_read);
 			TRACE ("Solve complete.");
 		}
 		
@@ -345,7 +339,6 @@ namespace pisces
 		 ************************************************************************/
 		virtual formats::virtual_file *rezone_minimize_ts (datatype *positions, datatype min_size, datatype max_size, int n_tries = 20, int iters_fixed_t = 1000, datatype step_size = 1.0, datatype k = 1.0, datatype t_initial = 0.008, datatype mu_t = 1.003, datatype t_min = 2.0e-6, double (*function) (element <datatype> *, formats::virtual_file *) = element <datatype>::rezone_calculate_ts) {
 			TRACE ("Rezoning...");
-			transform (plans::transforms::inverse_horizontal | plans::transforms::inverse_vertical);
 
 			rezone_virtual_file = make_virtual_file (profile_only | timestep_only);
 			

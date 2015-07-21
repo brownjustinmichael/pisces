@@ -83,7 +83,7 @@ namespace plans
 			void execute () {	
 				TRACE ("Operating..." << element_flags);
 				// Depending on the direction of the solve, we'll either treat the term as partially implicit or fully explicit
-				if (*component_flags & x_solve) {
+				if (component_flags & x_solve) {
 					if (1.0 - alpha != 0.0) {
 						// #pragma omp parallel for
 						for (int i = 2; i < ldn; ++i) {
@@ -195,7 +195,7 @@ namespace plans
 			void execute () {	
 				TRACE ("Operating..." << element_flags);
 				// Depending on the direction of the solve, we'll either treat the term as partially implicit or fully explicit
-				if (*component_flags & x_solve) {
+				if (component_flags & x_solve) {
 					if (1.0 - alpha != 0.0) {
 						// #pragma omp parallel for
 						for (int j = 0; j < m; ++j) {

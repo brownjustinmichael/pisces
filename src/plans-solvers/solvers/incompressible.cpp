@@ -32,14 +32,15 @@ namespace plans
 	namespace solvers
 	{
 		template <class datatype>
-		incompressible <datatype>::incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z) : 
-		solver <datatype> (i_data), 
+		incompressible <datatype>::incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z) : 
+		solver <datatype> (i_data, i_data_out, this->get_state_in (), this->get_state ()), 
 		n (i_data.get_grid (0).get_n ()), 
 		ldn (i_data.get_grid (0).get_ld ()), 
 		m (i_data.get_grid (1).get_n ()), 
 		excess_0 (i_data.get_grid (1).get_excess_0 ()), 
 		excess_n (i_data.get_grid (1).get_excess_n ()), 
-		data (i_data.ptr ()), 
+		var_x (i_data_x),
+		var_z (i_data_z),
 		data_x (i_data_x.ptr ()), 
 		data_z (i_data_z.ptr ()), 
 		grid_n (i_data.get_grid (0)), 
@@ -170,6 +171,8 @@ namespace plans
 		
 		template <class datatype>
 		void incompressible <datatype>::execute () {
+			solver <datatype>::execute ();
+
 			int info;
 			TRACE ("Solving...");
 			bool retransform = false;
@@ -188,7 +191,7 @@ namespace plans
 			// 	transform_z->execute ();
 			// 	retransform = true;
 			// }
-			if (!(*component_flags_x & transformed_vertical)) {
+			// if (!(*component_flags_x & transformed_vertical)) {
 				datatype scalar = acos (-1.0) * 2.0 / (pos_n [n - 1] - pos_n [0]);
 				datatype *data_ptr = &data_temp [1];
 				
@@ -254,7 +257,7 @@ namespace plans
 				*/
 				for (int i = 2; i < ldn; ++i) {
 					for (int j = 0; j < m + 1 - (nbot == 0 ? 0 : excess_n + 1) - excess_0; ++j) {
-						data [i * m + j + excess_0] = (data_temp [i * (m + 2) + j + excess_0] + data_temp [i * (m + 2) + j + 1 + excess_0]) / 2.0;
+						data_out [i * m + j + excess_0] = (data_temp [i * (m + 2) + j + excess_0] + data_temp [i * (m + 2) + j + 1 + excess_0]) / 2.0;
 					}
 				}
 				
@@ -319,17 +322,17 @@ namespace plans
 	#ifdef CHECKNAN
 				for (int j = 0; j < m; ++j) {
 					for (int i = 0; i < ldn; ++i) {
-						if (std::isnan (data [i * m + j])) {
+						if (std::isnan (data_out [i * m + j])) {
 							FATAL ("Nan in laplace solver.");
 							throw linalg::exceptions::nan ();
 						}
 					}
 				}
 	#endif
-			} else {
-				// FATAL ("SHOULDN'T BE HERE" << *component_flags_x);
-				// throw 0;
-			}
+			// } else {
+			// 	// FATAL ("SHOULDN'T BE HERE" << *component_flags_x);
+			// 	// throw 0;
+			// }
 		
 			// if (retransform) {
 			// 	transform_x->execute ();
@@ -337,10 +340,15 @@ namespace plans
 			// }
 			
 			// No net vertical flux
-			linalg::scale (2 * m, 0.0, data_z);
-			// linalg::scale (2 * m, 0.0, data_x);
-			linalg::scale (m, 0.0, data_x + (ldn - 1) * m);
-			linalg::scale (m, 0.0, data_z + (ldn - 1) * m);
+			// linalg::scale (2 * m, 0.0, data_z);
+			// // linalg::scale (2 * m, 0.0, data_x);
+			// linalg::scale (m, 0.0, data_x + (ldn - 1) * m);
+			// linalg::scale (m, 0.0, data_z + (ldn - 1) * m);
+
+			var_x.component_flags &= ~transforms::updated;
+			var_x.last_update = get_state ();
+			var_z.component_flags &= ~transforms::updated;
+			var_z.last_update = get_state ();
 
 			TRACE ("Solved");
 		}

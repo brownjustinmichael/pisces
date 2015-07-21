@@ -32,15 +32,16 @@ namespace plans
 	namespace solvers
 	{
 		template <class datatype>
-		pseudo_incompressible <datatype>::pseudo_incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype i_gamma, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z, datatype *i_pressure) : 
-		solver <datatype> (i_data), 
+		pseudo_incompressible <datatype>::pseudo_incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype i_gamma, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z, datatype *i_pressure) : 
+		solver <datatype> (i_data, i_data_out, this->get_state_in (), this->get_state ()), 
 		n (i_data.get_grid (0).get_n ()), 
 		ldn (i_data.get_grid (0).get_ld ()), 
 		m (i_data.get_grid (1).get_n ()), 
 		excess_0 (i_data.get_grid (1).get_excess_0 ()), 
 		excess_n (i_data.get_grid (1).get_excess_n ()), 
 		gamma (i_gamma), 
-		data (i_data.ptr ()), 
+		var_x (i_data_x),
+		var_z (i_data_z),
 		data_x (i_data_x.ptr ()), 
 		data_z (i_data_z.ptr ()), 
 		grid_n (i_data.get_grid (0)), 
@@ -153,6 +154,8 @@ namespace plans
 		
 		template <class datatype>
 		void pseudo_incompressible <datatype>::execute () {
+			solver <datatype>::execute ();
+
 			int info;
 			TRACE ("Solving...");
 			bool retransform = false;
@@ -161,50 +164,50 @@ namespace plans
 			count++;
 			if (count % 2) return;
 
-			linalg::scale (m * ldn, 0.0, &data [0]);
+			linalg::scale (m * ldn, 0.0, data_out);
 
 			datatype scalar = acos (-1.0) * 2.0 / (pos_n [n - 1] - pos_n [0]);
 			
 			// Calculate the horizontal derivatives of the horizontal component
 			for (int i = 2; i < ldn; i += 2) {
 				for (int j = 0; j < m; ++j) {
-					data [i * m + j] += -pressure [j] * scalar * (i / 2) * data_x [(i + 1) * m + j];
-					data [(i + 1) * m + j] += pressure [j] * scalar * (i / 2) * data_x [i * m + j];
+					data_out [i * m + j] += -pressure [j] * scalar * (i / 2) * data_x [(i + 1) * m + j];
+					data_out [(i + 1) * m + j] += pressure [j] * scalar * (i / 2) * data_x [i * m + j];
 				}
 			}
 			
 			// Calculate the vertical derivatives of the vertical component
 			for (int i = 0; i < ldn; ++i) {
 				if (id == 0) {
-					data [i * m] += pressure [0] * (data_z [i * m + 1] - data_z [i * m]) / diff [1];
+					data_out [i * m] += pressure [0] * (data_z [i * m + 1] - data_z [i * m]) / diff [1];
 				}
 				for (int j = 1; j < m - 1; ++j) {
-					data [i * m + j] += pressure [j] * (data_z [i * m + j + 1] - data_z [i * m + j - 1]) / diff2 [j] + grad_pressure [j] * data_z [i * m + j] / gamma;
+					data_out [i * m + j] += pressure [j] * (data_z [i * m + j + 1] - data_z [i * m + j - 1]) / diff2 [j] + grad_pressure [j] * data_z [i * m + j] / gamma;
 				}
 				if (id == np - 1) {
-					data [i * m + m - 1] = pressure [m - 1] * (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / diff [m - 1];
+					data_out [i * m + m - 1] = pressure [m - 1] * (data_z [i * m + m - 1] - data_z [i * m + m - 2]) / diff [m - 1];
 				}
 			}
 
 			linalg::block::tridiag_solve (id, np, m - (excess_0 ? excess_0 + 1 : 0) - (excess_n ? excess_n + 2 : 0), &matrix [excess_0], &matrix [excess_0 + m * ldn], &matrix [excess_0 + 2 * m * ldn], &matrix [excess_0 + 3 * m * ldn], &ipiv [0], &data [excess_0], &x [0], &xipiv [0], &info, ldn, m, m);
 			
 			// We can define our frame to be one with no net vertical flux
-			linalg::scale (2 * m, 0.0, &data [0]);
+			linalg::scale (2 * m, 0.0, data_out);
 
 			// Communicate the edges of the pressure
-			boundaries::boundary_match (m, boundary_0, boundary_n, data, excess_0, excess_n);
+			boundaries::boundary_match (m, boundary_0, boundary_n, data_out, excess_0, excess_n);
 			
 			// Update the velocities with the pressure derivatives
 			for (int i = 2; i < ldn; ++i) {
 				for (int j = 1; j < m - 1; ++j) {
-					data_z [i * m + j] -= (data [i * m + j + 1] - data [i * m + j - 1]) / diff2 [j] / pressure [j] + data [j] * grad_pressure [j] / pressure [j] / pressure [j] / gamma;
+					data_z [i * m + j] -= (data_out [i * m + j + 1] - data_out [i * m + j - 1]) / diff2 [j] / pressure [j] + data_out [j] * grad_pressure [j] / pressure [j] / pressure [j] / gamma;
 				}
 			}
 			
 			for (int i = 2; i < ldn; i += 2) {
 				for (int j = 0; j < m; ++j) {
-					data_x [i * m + j] += scalar * (i / 2) * data [(i + 1) * m + j];
-					data_x [(i + 1) * m + j] -= scalar * (i / 2) * data [i * m + j];
+					data_x [i * m + j] += scalar * (i / 2) * data_out [(i + 1) * m + j];
+					data_x [(i + 1) * m + j] -= scalar * (i / 2) * data_out [i * m + j];
 				}
 			}
 
@@ -214,13 +217,18 @@ namespace plans
 #ifdef CHECKNAN
 			for (int j = 0; j < m; ++j) {
 				for (int i = 0; i < ldn; ++i) {
-					if (std::isnan (data [i * m + j])) {
+					if (std::isnan (data_out [i * m + j])) {
 						FATAL ("Nan in laplace solver.");
 						throw linalg::exceptions::nan ();
 					}
 				}
 			}
 #endif
+
+			var_x.component_flags &= ~transforms::updated;
+			var_x.last_update = get_state ();
+			var_z.component_flags &= ~transforms::updated;
+			var_z.last_update = get_state ();
 
 			TRACE ("Solved");
 		}

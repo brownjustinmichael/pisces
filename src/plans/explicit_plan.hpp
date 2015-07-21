@@ -43,7 +43,7 @@ namespace plans
 		 * \param i_component_flags A pointer to the integer flags associated with the variable associated with the plan
 		 ************************************************************************/
 		explicit_plan (grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : 
-		plans::plan <datatype> (i_data_in.ptr (), i_data_out.ptr (), &(i_data_in.element_flags), &(i_data_in.component_flags), i_coeff), 
+		plans::plan <datatype> (i_data_in, i_data_out, real_spectral, real_spectral, i_coeff), 
 		n (i_data_in.get_grid (0).get_n ()), 
 		ldn (i_data_in.get_grid (0).get_ld ()), 
 		m (i_data_in.get_grid (1).get_n ()), 

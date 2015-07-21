@@ -22,8 +22,6 @@ namespace plans
 		void horizontal <float>::init (int i_n, int i_m, float* i_data_in, float* i_data_out, int i_flags, int i_threads) {
 			n = i_n;
 			m = i_m;
-			data_in = i_data_in;
-			data_out = (i_data_out ? i_data_out : i_data_in);
 			flags = i_flags;
 		#ifdef _MP
 			threads = (i_threads ? i_threads : omp_get_max_threads ());
@@ -131,13 +129,6 @@ namespace plans
 			for (int i = 0; i < threads; ++i) {
 				fftwf_execute (plans_float [i]);
 			}
-			
-			// Switch the horizontal transform flag
-			if (*component_flags & transformed_horizontal) {
-				*component_flags &= ~transformed_horizontal;
-			} else {
-				*component_flags |= transformed_horizontal;
-			}
 		
 			linalg::scale (2 * (n / 2 + 1) * m, scalar, data_out);
 		}
@@ -145,22 +136,18 @@ namespace plans
 		template <>
 		void horizontal <double>::execute () {
 			TRACE ("Executing...");
+			DEBUG ("IN " << data_in [200]);
 		
 	#pragma omp parallel for num_threads (threads)
 			for (int i = 0; i < threads; ++i) {
 				fftw_execute (plans [i]);
 			}		
 			
-			// Switch the horizontal transform flag
-			DEBUG ("Component flags are at " << component_flags);
-			if (*component_flags & transformed_horizontal) {
-				*component_flags &= ~transformed_horizontal;
-			} else {
-				*component_flags |= transformed_horizontal;
-			}
-			
 			linalg::scale (2 * (n / 2 + 1) * m, scalar, data_out);
 			
+			DEBUG ("OUT " << data_out [200]);
+
+
 			TRACE ("Execution Complete.");
 		}
 	
@@ -248,20 +235,16 @@ namespace plans
 					fftwf_execute (plans_float [i]);
 				}
 			}
-			
-			// Switch the vertical transform flag
-			if (*component_flags & transformed_vertical) {
-				*component_flags &= ~transformed_vertical;
-			} else {
-				*component_flags |= transformed_vertical;
-			}
-						
+					
 			linalg::scale (2 * (n / 2 + 1) * m, scalar, data_out);
 		}
 	
 		template <>
 		void vertical <double>::execute () {
 			TRACE ("Executing...");
+
+						DEBUG ("IN " << data_in [200]);
+
 			
 			if (m > 1 && !(flags & ignore_m)) {
 	#pragma omp parallel for num_threads (threads)
@@ -270,15 +253,11 @@ namespace plans
 				}
 			}
 			
-			// Switch the vertical transform flag
-			if (*component_flags & transformed_vertical) {
-				*component_flags &= ~transformed_vertical;
-			} else {
-				*component_flags |= transformed_vertical;
-			}
-		
 			linalg::scale (2 * (n / 2 + 1) * m, scalar, data_out);
 		
+			DEBUG ("OUT " << data_out [200]);
+
+
 			TRACE ("Execution Complete.");
 		}
 	

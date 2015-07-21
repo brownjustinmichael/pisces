@@ -46,6 +46,14 @@ enum solve_element_flags {
 	z_solve = 0x80
 };
 
+
+enum states
+{
+	real_real = 0,
+	real_spectral = 1,
+	spectral_spectral = 2
+};
+
 /*!**********************************************************************
  * \namespace plans
  * 
@@ -71,10 +79,12 @@ namespace plans
 	{
 	protected:
 		datatype coeff;
-		datatype* data_in; //!< A datatype pointer to the input data
-		datatype* data_out; //!< A datatype pointer to the output data
-		int *element_flags; //!< A pointer to the integer global flags
-		int *component_flags; //!< A pointer to the integer local flags
+		datatype *data_in;
+		datatype *data_out;
+		grids::variable <datatype> &var_in; //!< A datatype pointer to the input data
+		grids::variable <datatype> &var_out; //!< A datatype pointer to the input data
+		int &element_flags; //!< A pointer to the integer global flags
+		int &component_flags; //!< A pointer to the integer local flags
 
 	public:
 		enum types {
@@ -88,12 +98,17 @@ namespace plans
 		* \param i_element_flags A pointer to the integer global flags
 		* \param i_component_flags A pointer to the integer local flags
 		 ************************************************************************/
-		plan (datatype *i_data_in, datatype *i_data_out = NULL, int *i_element_flags = NULL, int *i_component_flags = NULL, datatype i_coeff = 1.0) :
+		plan (grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, int state_in = 0, int state_out = 0, datatype i_coeff = 1.0) :
 		coeff (i_coeff), 
-		data_in (i_data_in),
-		data_out (i_data_out ? i_data_out : i_data_in),
-		element_flags (i_element_flags),
-		component_flags (i_component_flags) {}
+		data_in (i_data_in.ptr (state_in)),
+		data_out (i_data_out.ptr (state_out)),
+		var_in (i_data_in),
+		var_out (i_data_out),
+		element_flags (i_data_in.element_flags),
+		component_flags (i_data_in.component_flags) {}
+
+		plan (grids::variable <datatype> &i_data_in, int state = 0, datatype i_coeff = 1.0) :
+		plan (i_data_in, i_data_in, state, state, i_coeff) {}
 		
 		virtual ~plan () {}
 		

@@ -18,6 +18,7 @@
 #include "plans/implicit_plan.hpp"
 #include "plans/real_plan.hpp"
 #include "plans/grids/grid.hpp"
+#include "plans-transforms/transformer.hpp"
 
 /*!**********************************************************************
  * \namespace plans::solvers
@@ -44,7 +45,7 @@ namespace plans
 			real_rhs = 0x02,
 			factorized = 0x08,
 			first_run = 0x100,
-			ignore_net = 0x40000000
+			ignore_net = 0x40000000,
 		};
 		
 		/*!**********************************************************************
@@ -72,25 +73,27 @@ namespace plans
 		private:
 			std::vector <equation <datatype>*> deps; //!< A vector containing the dependencies of this solver
 	
-			std::vector <std::shared_ptr <plan <datatype> > > pre_transform_plans; //!< A vector of shared pointers of plans to be executed before the transforms
-			std::vector <std::shared_ptr <plan <datatype> > > mid_transform_plans; //!< A vector of shared pointers of plans to be executed after the vertical transform
-			std::vector <std::shared_ptr <plan <datatype> > > post_transform_plans; //!< A vector of shared pointers of plans to be executed after both transforms
-			std::vector <std::shared_ptr <plan <datatype> > > pre_solve_plans; //!< A vector of shared pointers of plans to be executed after both transforms
-	
 		public:
 			using plans::plan <datatype>::element_flags;
 			using plans::plan <datatype>::component_flags;
+			using plans::plan <datatype>::var_out;
 		
 			/*!*******************************************************************
 			 * \copydoc plan::plan ()
 			 *********************************************************************/
-			solver (grids::variable <datatype> &i_data_in, datatype *i_data_out = NULL) : 
-			plan <datatype> (i_data_in.ptr (), i_data_out, &(i_data_in.element_flags), &(i_data_in.component_flags)) {}
+			solver (grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, int state_in = 0, int state_out = 0) : 
+			plan <datatype> (i_data_in, i_data_out, state_in, state_out) {}
 	
 			virtual ~solver () {}
 
 			virtual int type () {
 				return 0;
+			}
+
+			virtual int get_state () = 0;
+
+			virtual int get_state_in () {
+				return real_spectral;
 			}
 		
 			/*!**********************************************************************
@@ -156,7 +159,10 @@ namespace plans
 			 * 
 			 * This method does not contain the actual implementation of the solution, which should be handled in _solve.
 			 *********************************************************************/
-			virtual void execute () = 0;
+			virtual void execute () {
+				component_flags &= ~transforms::updated;
+				var_out.last_update = get_state ();
+			}
 		
 			/*!**********************************************************************
 			 * \brief An abstract factory class which equations will be able to use for convenience
@@ -179,7 +185,7 @@ namespace plans
 				 * 
 				 * This method creates a shared_ptr to a solver instance. The benefit to this inclusion is that the instance method can be called in a uniform way and hide communication of grid and matrix information from the user. If a plan would be created that would not do anything (e.g. something with a coefficient of 0.0), this will return a NULL shared pointer.
 				 ************************************************************************/
-				virtual std::shared_ptr <solver <datatype>> instance (grids::variable <datatype> &i_data, datatype *i_rhs) const = 0;
+				virtual std::shared_ptr <solver <datatype>> instance (grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype *i_rhs) const = 0;
 			};
 		};
 	} /* solvers */

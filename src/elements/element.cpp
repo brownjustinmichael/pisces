@@ -38,9 +38,6 @@ namespace pisces
 		double transform_time = 0.0, execution_time = 0.0, solve_time = 0.0, factorize_time = 0.0, output_time = 0.0, timestep_time = 0.0;
 		std::chrono::duration <double> transform_duration = std::chrono::duration <double>::zero (), execution_duration = std::chrono::duration <double>::zero (), solve_duration = std::chrono::duration <double>::zero (), factorize_duration = std::chrono::duration <double>::zero (), output_duration = std::chrono::duration <double>::zero (), timestep_duration = std::chrono::duration <double>::zero ();
 
-		// If the element is in Cartesian space, transform to modal space and copy from the transform buffer
-		transform (plans::transforms::forward_horizontal | plans::transforms::forward_vertical | plans::transforms::no_read);
-
 		t_timestep = calculate_min_timestep ();
 		messenger_ptr->min (&t_timestep);
 
@@ -53,13 +50,7 @@ namespace pisces
 			data.reset ();
 			INFO ("Timestep: " << n_steps);
 
-			// Transform the vertical grid to Cartesian space in the background
-			TIME (
-			transform (plans::transforms::inverse_vertical | plans::transforms::no_write | plans::transforms::no_read | plans::transforms::read_before);
-			, transform_time, transform_duration);
-			TIME (
-			data.check_streams (transformed_horizontal | transformed_vertical);
-			, output_time, output_duration)
+			data.output ();
 			
 			// Factorize the matrices
 			TIME (
@@ -74,67 +65,30 @@ namespace pisces
 			}
 			, execution_time, execution_duration);
 
-			TIME (
-			transform (plans::transforms::inverse_horizontal | plans::transforms::no_write | plans::transforms::no_read | plans::transforms::read_before);
-			, transform_time, transform_duration);
-			TIME (
-			data.check_streams (transformed_horizontal);
-			, output_time, output_duration);
-				
 			TRACE ("Executing plans in half-space...");
-				
-			// TIME (
-			// for (iterator iter = begin (); iter != end (); iter++) {
-			// 	equations [*iter]->execute_plans (plans::solvers::mid_plan);
-			// }
-			// , execution_time, execution_duration);
-			
-			TIME (
-			transform (plans::transforms::forward_horizontal | plans::transforms::no_write | plans::transforms::no_read | plans::transforms::read_before);
-			, transform_time, transform_duration);
-			TIME (
-			data.check_streams ();
-			, output_time, output_duration)
-				
+
 			TRACE ("Executing plans in real space...");
 
-			for (typename data::data <datatype>::iterator iter = data.begin (); iter < data.end (); ++iter)
-			{
-				if (data [*iter].update ()) {
-					transformers [*iter]->transform (plans::transforms::forward_horizontal | plans::transforms::no_read);
-				}
-			}
+			// for (typename data::data <datatype>::iterator iter = data.begin (); iter < data.end (); ++iter)
+			// {
+			// 	if (data [*iter].update ()) {
+			// 		if (data.transformers [*iter]) data.transformers [*iter]->update_from (real_real);
+			// 	}
+			// }
 			
-			// #pragma omp parallel sections num_threads(2)
-				// {
-				// #pragma omp section
-					// {
-			// Calculate the minimum timestep among all elements
-						// omp_set_num_threads (threads);
-						TIME (
-						DEBUG (n_steps);
-						if (n_steps % 2 == 0) {
-						t_timestep = calculate_min_timestep ();
-						messenger_ptr->min (&t_timestep);}
-						, timestep_time, timestep_duration);
-					// }
-				// #pragma omp section
-					// {
-						// omp_set_num_threads (threads);
-						TIME (
-						for (iterator iter = begin (); iter != end (); iter++) {
-							// DEBUG ("Executing");
-							equations [*iter]->execute_plans (plans::solvers::post_plan);
-						}
-						, execution_time, execution_duration);
-					// }
-				// }
-			TRACE ("Updating...");
-
-			// Transform forward in the horizontal direction
 			TIME (
-			transform (plans::transforms::do_not_transform | plans::transforms::no_write);
-			, transform_time, transform_duration);
+			t_timestep = calculate_min_timestep ();
+			messenger_ptr->min (&t_timestep);
+			, timestep_time, timestep_duration);
+
+			TIME (
+			for (iterator iter = begin (); iter != end (); iter++) {
+				// DEBUG ("Executing");
+				equations [*iter]->execute_plans (plans::solvers::post_plan);
+			}
+			, execution_time, execution_duration);
+
+			TRACE ("Updating...");
 
 			// Calculate the pre solver plans
 
@@ -143,16 +97,22 @@ namespace pisces
 				equations [*iter]->execute_plans (plans::solvers::mid_plan);
 			}
 			, execution_time, execution_duration);
-			
+
+			data.output ();
+
+			DEBUG ("WELL WELL BEFORE SOLVE " << (data ["temperature"].ptr (real_real) [200]));
+			DEBUG ("WELL WELL BEFORE SOLVE " << (data ["temperature"].ptr (spectral_spectral) [200]));
+			DEBUG ("WELL WELL BEFORE SOLVE " << (data ["temperature"].ptr (real_spectral) [200]));
 
 			TIME (
 			solve ();
 			, solve_time, solve_duration);
 
-
 			// Check whether the timestep has changed. If it has, mark all equations to be refactorized.
 
 			duration += timestep;
+			data.output ();
+
 			INFO ("TOTAL TIME: " << duration);
 			if (t_timestep != timestep) {
 				for (std::vector <std::string>::iterator iter = data.begin (); iter != data.end (); iter++) {
@@ -167,8 +127,8 @@ namespace pisces
 			++n_steps;
 			--check_every;
 		}
-		transform (plans::transforms::do_not_transform | plans::transforms::no_write);
-		
+
+
 		INFO ("Profiling Factorize: CPU Time: " << factorize_time << " Wall Time: " << (double) factorize_duration.count () << " Efficiency: " << factorize_time / (double) factorize_duration.count () / omp_get_max_threads () * 100. << "%");
 		INFO ("Profiling Transform: CPU Time: " << transform_time << " Wall Time: " << (double) transform_duration.count () << " Efficiency: " << transform_time / (double) transform_duration.count () / omp_get_max_threads () * 100. << "%");
 		INFO ("Profiling Execute: CPU Time: " << execution_time << " Wall Time: " << (double) execution_duration.count () << " Efficiency: " << execution_time / (double) execution_duration.count () / omp_get_max_threads () * 100. << "%");
