@@ -49,7 +49,7 @@ namespace plans
 			 * \param i_coeff The diffusion coefficient
 			 * \param i_alpha The implicit fraction (1.0 for purely implicit, 0.0 for purely explicit)
 			 ************************************************************************/
-			horizontal (datatype i_alpha, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : implicit_plan <datatype> (i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_coeff), alpha (i_alpha) {
+			horizontal (datatype i_alpha, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : implicit_plan <datatype> (i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_coeff, real_spectral), alpha (i_alpha) {
 				TRACE ("Instantiating...");
 				pioL2 = 4.0 * (std::acos (-1.0) * std::acos (-1.0) / (grid_n [n - 1] - grid_n [0]) / (grid_n [n - 1] - grid_n [0]));
 				setup ();
@@ -84,6 +84,7 @@ namespace plans
 				TRACE ("Operating..." << element_flags);
 				// Depending on the direction of the solve, we'll either treat the term as partially implicit or fully explicit
 				if (component_flags & x_solve) {
+					DEBUG ("X SOLVE");
 					if (1.0 - alpha != 0.0) {
 						// #pragma omp parallel for
 						for (int i = 2; i < ldn; ++i) {
@@ -91,6 +92,8 @@ namespace plans
 						}
 					}
 				} else {
+					DEBUG ("Z SOLVE");
+
 					// #pragma omp parallel for
 					for (int i = 2; i < ldn; ++i) {
 						linalg::add_scaled (m * dims, -coeff * pioL2 * (i / 2) * (i / 2), data_in + i * m * dims, data_out + i * m * dims);
@@ -159,7 +162,7 @@ namespace plans
 			 * \param i_alpha The implicit fraction (1.0 for purely implicit, 0.0 for purely explicit)
 			 * \param i_diffusion A pointer to the datatype vector of diffusion coefficients
 			 ************************************************************************/
-			background_horizontal (datatype i_alpha, datatype *i_diffusion, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) : implicit_plan <datatype> (i_matrix_n, i_matrix_m, i_data_in, i_data_out, 1.0), alpha (i_alpha), diffusion (i_diffusion) {
+			background_horizontal (datatype i_alpha, datatype *i_diffusion, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) : implicit_plan <datatype> (i_matrix_n, i_matrix_m, i_data_in, i_data_out, 1.0, real_spectral), alpha (i_alpha), diffusion (i_diffusion) {
 				TRACE ("Instantiating...");
 				pioL2 = 4.0 * (std::acos (-1.0) * std::acos (-1.0) / (grid_n [n - 1] - grid_n [0]) / (grid_n [n - 1] - grid_n [0]));
 				setup ();

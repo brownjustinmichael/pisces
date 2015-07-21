@@ -240,6 +240,8 @@ namespace plans
 
 	typename plan <double>::factory_container operator- (std::shared_ptr <typename plan <double>::factory> i_factory, std::shared_ptr <typename plan <double>::factory> j_factory);
 
+	typename plan <double>::factory_container operator+ (std::shared_ptr <typename plan <double>::factory> i_factory, typename plan <double>::factory_container j_container);
+
 	template <class datatype>
 	typename plan <datatype>::factory_container operator* (typename plan <datatype>::factory_container i_container, datatype scalar);
 

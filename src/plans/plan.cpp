@@ -21,6 +21,10 @@
 		return plan <double>::factory_container (i_factory) - j_factory;
 	}
 
+	typename plan <double>::factory_container operator+ (std::shared_ptr <typename plan <double>::factory> i_factory, typename plan <double>::factory_container j_container) {
+		return j_container + i_factory;
+	}
+
 	template <>
 	typename plan <double>::factory_container operator* (typename plan <double>::factory_container i_container, double scalar) {
 		typename plan <double>::factory_container container (i_container);

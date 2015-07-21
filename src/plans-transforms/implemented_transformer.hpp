@@ -83,8 +83,8 @@ namespace plans
 					inverse_horizontal_transform->execute ();
 					forward_vertical_transform->execute ();
 				} else if (state == spectral_spectral) {
-					inverse_horizontal_transform->execute ();
 					inverse_vertical_transform->execute ();
+					inverse_horizontal_transform->execute ();
 				}
 				data.component_flags |= updated;
 			}

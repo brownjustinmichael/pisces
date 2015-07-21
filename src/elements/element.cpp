@@ -98,8 +98,6 @@ namespace pisces
 			}
 			, execution_time, execution_duration);
 
-			data.output ();
-
 			DEBUG ("WELL WELL BEFORE SOLVE " << (data ["temperature"].ptr (real_real) [200]));
 			DEBUG ("WELL WELL BEFORE SOLVE " << (data ["temperature"].ptr (spectral_spectral) [200]));
 			DEBUG ("WELL WELL BEFORE SOLVE " << (data ["temperature"].ptr (real_spectral) [200]));
@@ -111,7 +109,6 @@ namespace pisces
 			// Check whether the timestep has changed. If it has, mark all equations to be refactorized.
 
 			duration += timestep;
-			data.output ();
 
 			INFO ("TOTAL TIME: " << duration);
 			if (t_timestep != timestep) {

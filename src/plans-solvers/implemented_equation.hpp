@@ -142,18 +142,26 @@ namespace plans
 			grids::variable <datatype> &rhs (int index = spectral_rhs) {
 				if (index == spectral_rhs) {
 					// If the spectral_rhs has been requested and doesn't exist, make it
+					DEBUG ("Grabbing spectral");
 					if (!spectral_rhs_ptr) {
+												DEBUG ("Making");
+
 						spectral_rhs_ptr = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (grid_n, grid_m, *element_flags));
 					}
 					return *spectral_rhs_ptr;
 				} else if (index == real_rhs) {
 					// If the real_rhs has been requested and doesn't exist, make it and its transform
+					DEBUG ("Grabbing real");
+
 					if (!real_rhs_ptr) {
+						DEBUG ("Making");
 						real_rhs_ptr = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (grid_n, grid_m, *element_flags));
 						transform = std::shared_ptr <plans::plan <datatype> > (new plans::transforms::horizontal <datatype> (*real_rhs_ptr, real_real, real_spectral));
 					}
 					return *real_rhs_ptr;
 				} else {
+										DEBUG ("Grabbing default");
+
 					// Use the default rhs
 					return *new_rhs_ptr;
 				}
@@ -356,6 +364,8 @@ namespace plans
 
 
 					state = x_solver->get_state ();
+
+					DEBUG ("Out to " << state);
 				}
 
 				if (z_solver) {

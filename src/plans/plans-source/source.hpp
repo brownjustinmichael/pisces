@@ -50,7 +50,7 @@ namespace plans
 			 * 
 			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
 			 ************************************************************************/
-			uniform (grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : explicit_plan <datatype> (i_data_in, i_data_out, i_coeff), data_source (i_data_source.ptr ()) {
+			uniform (grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : explicit_plan <datatype> (i_data_in, i_data_out, i_coeff), data_source (i_data_source.ptr (real_spectral)) {
 				TRACE ("Adding source...");
 			}
 		
@@ -65,6 +65,9 @@ namespace plans
 			 ************************************************************************/
 			virtual void execute () {
 				TRACE ("Executing source...");
+				static int count = 0;
+				count++;
+				if (count > 5) return;
 				linalg::matrix_add_scaled (m * dims, ldn, coeff, data_source, data_out, m * dims, m * dims);	
 			}
 		
