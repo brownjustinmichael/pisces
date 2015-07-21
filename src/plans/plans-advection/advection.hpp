@@ -63,7 +63,8 @@ namespace plans
 			 * \param i_vel_n A pointer to the horizontal component of the velocity
 			 * \param i_vel_m A pointer to the vertical component of the velocity
 			 ************************************************************************/
-			uniform (grids::variable <datatype> &i_vel_n, grids::variable <datatype> &i_vel_m, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : real_plan <datatype> (i_data_in, i_data_out, i_coeff), vel_n (i_vel_n.ptr ()), vel_m (i_vel_m.ptr ()), pos_n (&(grid_n [0])), pos_m (&(grid_m [0])) {
+			uniform (grids::variable <datatype> &i_vel_n, grids::variable <datatype> &i_vel_m, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : 
+			real_plan <datatype> (i_data_in, i_data_out, i_coeff), vel_n (i_vel_n.ptr ()), vel_m (i_vel_m.ptr ()), pos_n (&(grid_n [0])), pos_m (&(grid_m [0])) {
 				TRACE ("Adding advection...");
 				x_vec.resize (n * m * dims);
 				x_ptr = &x_vec [0];

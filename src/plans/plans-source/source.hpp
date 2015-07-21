@@ -65,9 +65,6 @@ namespace plans
 			 ************************************************************************/
 			virtual void execute () {
 				TRACE ("Executing source...");
-				static int count = 0;
-				count++;
-				if (count > 5) return;
 				linalg::matrix_add_scaled (m * dims, ldn, coeff, data_source, data_out, m * dims, m * dims);	
 			}
 		

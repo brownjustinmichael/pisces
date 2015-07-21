@@ -195,6 +195,7 @@ namespace plans
 				}
 				if (real_rhs_ptr) {
 					linalg::scale (ldn * m, 0.0, real_rhs_ptr->ptr (real_spectral));
+					linalg::scale (ldn * m, 0.0, real_rhs_ptr->ptr (real_real));
 				}
 				linalg::scale (m * ldn, 0.0, new_rhs_ptr->ptr (real_spectral));
 				
@@ -318,8 +319,6 @@ namespace plans
 					return;
 				}
 				
-				DEBUG ("MAYBE " << cor_rhs_ptr->ptr (real_spectral) [200]);
-
 				// Add in the components from the last three timesteps for the AB scheme
 				linalg::matrix_copy (m, ldn, old3_rhs_ptr->ptr (real_spectral), cor_rhs_ptr->ptr (real_spectral));
 				linalg::matrix_scale (m, ldn, -3. / 8., cor_rhs_ptr->ptr (real_spectral));
@@ -353,19 +352,11 @@ namespace plans
 				int state = -1;
 				// Solve either the x direction solve or the z direction solve
 				if (x_solver) {
-				DEBUG ("MAYBE Old " << data.ptr (real_spectral) [200]);
-
-
 					x_solver->execute ();
 					*component_flags &= ~x_solve;
 					*component_flags |= z_solve;
 
-				DEBUG ("MAYBE New " << data.ptr (real_spectral) [200]);
-
-
 					state = x_solver->get_state ();
-
-					DEBUG ("Out to " << state);
 				}
 
 				if (z_solver) {
@@ -389,17 +380,7 @@ namespace plans
 					z_solver->execute ();
 					*component_flags &= ~z_solve;
 					*component_flags |= x_solve;
-
-					DEBUG ("MAYBE final " << data.ptr (state) [200]);
-
-					state = z_solver->get_state ();	
 				}
-					DEBUG ("MAYBE final " << data.ptr (state) [200]);
-
-			
-				DEBUG ("Def final " << data.ptr (state) [200]);
-
-
 			}
 		};
 	} /* solvers */

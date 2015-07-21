@@ -41,8 +41,8 @@ namespace plans
 		excess_n (i_data.get_grid (1).get_excess_n ()), 
 		var_x (i_data_x),
 		var_z (i_data_z),
-		data_x (i_data_x.ptr ()), 
-		data_z (i_data_z.ptr ()), 
+		data_x (i_data_x.ptr (real_spectral)), 
+		data_z (i_data_z.ptr (real_spectral)), 
 		grid_n (i_data.get_grid (0)), 
 		grid_m (i_data.get_grid (1)), 
 		pos_n (&grid_n [0]), 
@@ -172,6 +172,9 @@ namespace plans
 		template <class datatype>
 		void incompressible <datatype>::execute () {
 			solver <datatype>::execute ();
+			static int count = 0;
+			count++;
+			if (count % 2) return;
 
 			int info;
 			TRACE ("Solving...");
