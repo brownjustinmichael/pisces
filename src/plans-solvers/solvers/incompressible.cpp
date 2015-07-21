@@ -172,9 +172,6 @@ namespace plans
 		template <class datatype>
 		void incompressible <datatype>::execute () {
 			solver <datatype>::execute ();
-			static int count = 0;
-			count++;
-			if (count % 2) return;
 
 			int info;
 			TRACE ("Solving...");

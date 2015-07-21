@@ -66,7 +66,7 @@ namespace plans
 			std::shared_ptr <boundaries::boundary <datatype>> boundary_0; //!< A shared pointer to the top boundary object
 			std::shared_ptr <boundaries::boundary <datatype>> boundary_n; //!< A shared pointer to the bottom boundary object
 			
-			std::vector <datatype> data_temp; //!< A vector that represents the actual right hand side during the solve
+			std::vector <datatype> data_temp, diff, diff2; //!< A vector that represents the actual right hand side during the solve
 			std::vector <datatype> positions; //!< A vector containing the vertical positions
 			std::vector <datatype> new_positions; //!< A vector containing the midpoint vertical positions
 			
