@@ -129,8 +129,6 @@ namespace plans
 		*********************************************************************/
 		virtual void execute () = 0;
 
-		virtual int type () = 0;
-
 		virtual bool implicit () {
 			return false;
 		}
@@ -156,10 +154,6 @@ namespace plans
 
 			virtual ~factory () {}
 
-			virtual const int type () const {
-				return 0x00;
-			}
-			
 			/*!**********************************************************************
 			 * \brief The abstract instance creating class
 			 * 

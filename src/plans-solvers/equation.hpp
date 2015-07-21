@@ -112,15 +112,6 @@ namespace plans
 			virtual grids::grid <datatype> *grid_ptr (int index = 0) = 0;
 			
 			/*!**********************************************************************
-			 * \brief Return a pointer to the right hand side of the matrix equation
-			 * 
-			 * \param index The index specifying which right hand side, (explicit_rhs, implicit_rhs, real_rhs)
-			 * 
-			 * The matrix solve can have several right hand sides, in particular explicit, implicit, and real. Explicit right hand sides generally contain nonlinear terms. Implicit right hand sides contain an explicit version of the implicit terms on the left hand side for additional stability. Both of these are in spectral-cartesian space for a collocation method. The real right hand side contains the explicit terms in pure Cartesian space that are transformed by the solver before a solution is calculated.
-			 ************************************************************************/
-			virtual grids::variable <datatype> &rhs (int index = 0) = 0;
-
-			/*!**********************************************************************
 			 * \brief Return a pointer to the solver's matrix for the index dimension
 			 * 
 			 * \param index The index specifying from which dimension to grab the matrix

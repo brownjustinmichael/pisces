@@ -56,10 +56,6 @@ namespace plans
 		
 		virtual void setup () {}
 
-		virtual int type () {
-			return plan <datatype>::factory::real;
-		}
-		
 		/*!*******************************************************************
 		 * \copydoc plans::plan::execute ()
 		 *********************************************************************/
@@ -76,10 +72,6 @@ namespace plans
 			factory (datatype i_coeff = 1.0) : plan <datatype>::factory (i_coeff) {}
 
 			virtual ~factory () {}
-
-			virtual const int type () const {
-				return plan <datatype>::factory::real;
-			}
 		};
 	};
 } /* plans */

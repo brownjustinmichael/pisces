@@ -56,10 +56,6 @@ namespace plans
 		
 			virtual ~uniform () {}
 
-			virtual int type () {
-				return plan <datatype>::mid;
-			}
-		
 			/*!**********************************************************************
 			 * \copydoc explicit_plan::execute
 			 ************************************************************************/
@@ -130,10 +126,6 @@ namespace plans
 		
 			virtual ~uniform_grad_x () {}
 
-			virtual int type () {
-				return plan <datatype>::mid;
-			}
-		
 			/*!**********************************************************************
 			 * \copydoc explicit_plan::execute
 			 ************************************************************************/
@@ -210,10 +202,6 @@ namespace plans
 		
 			virtual ~uniform_grad_z () {}
 
-			virtual int type () {
-				return plan <datatype>::mid;
-			}
-		
 			/*!**********************************************************************
 			 * \copydoc explicit_plan::execute
 			 ************************************************************************/
@@ -288,10 +276,6 @@ namespace plans
 		
 			virtual ~z_src () {}
 
-			virtual int type () {
-				return plan <datatype>::mid;
-			}
-		
 			/*!**********************************************************************
 			 * \copydoc explicit_plan::execute
 			 ************************************************************************/
@@ -381,10 +365,6 @@ namespace plans
 		
 			virtual ~pressure_grad_1d () {}
 
-			virtual int type () {
-				return plan <datatype>::mid;
-			}
-		
 			/*!**********************************************************************
 			 * \copydoc explicit_plan::execute
 			 ************************************************************************/
@@ -465,10 +445,6 @@ namespace plans
 		
 			virtual ~constant () {}
 
-			virtual int type () {
-				return plan <datatype>::mid;
-			}
-		
 			/*!**********************************************************************
 			 * \copydoc explicit_plan::execute
 			 ************************************************************************/

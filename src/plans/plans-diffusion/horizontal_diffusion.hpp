@@ -56,10 +56,6 @@ namespace plans
 			}
 			
 			virtual ~horizontal () {}
-			
-			virtual int type () {
-				return plan <datatype>::mid;
-			}
 
 			void setup () {
 				TRACE ("Setting up");
@@ -188,10 +184,6 @@ namespace plans
 				}
 			}
 
-			virtual int type () {
-				return plan <datatype>::mid;
-			}
-			
 			/*!**********************************************************************
 			 * \copydoc implicit_plan::execute
 			 ************************************************************************/
@@ -309,10 +301,6 @@ namespace plans
 		
 			virtual ~horizontal_stress () {}
 
-			virtual int type () {
-				return plan <datatype>::mid;
-			}
-		
 			/*!**********************************************************************
 			 * \copydoc explicit_plan::execute
 			 ************************************************************************/

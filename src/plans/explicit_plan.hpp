@@ -60,10 +60,6 @@ namespace plans
 		 *********************************************************************/
 		virtual void execute () = 0;
 
-		virtual int type () {
-			return plan <datatype>::factory::expl;
-		}
-	
 		/*!**********************************************************************
 		 * \brief An abstract factory class designed to produce an explicit_plan instance
 		 * 
@@ -75,10 +71,6 @@ namespace plans
 			factory (datatype i_coeff = 1.0) : plan <datatype>::factory (i_coeff) {}
 
 			virtual ~factory () {}
-			
-			virtual const int type () const {
-				return plan <datatype>::factory::expl;
-			}
 		};
 	};
 } /* plans */

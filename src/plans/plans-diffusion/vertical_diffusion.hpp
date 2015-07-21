@@ -66,10 +66,6 @@ namespace plans
 		
 			virtual ~vertical () {}
 
-			virtual int type () {
-				return plan <datatype>::pre;
-			}
-			
 			void setup () {
 				TRACE ("Setting up with coefficient " << coeff);
 				if (matrix_m) {
@@ -184,10 +180,6 @@ namespace plans
 		
 			virtual ~background_vertical () {}
 
-			virtual int type () {
-				return plan <datatype>::pre;
-			}
-			
 			void setup () {
 				TRACE ("Setting up");
 				coeff_dz [0] = coeff * (diffusion [1] - diffusion [0]) * oodz [0];

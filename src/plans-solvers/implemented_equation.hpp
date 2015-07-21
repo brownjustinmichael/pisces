@@ -41,8 +41,6 @@ namespace plans
 			std::shared_ptr <plans::solvers::solver <datatype> > x_solver; //!< A pointer to the horizontal solver
 			std::shared_ptr <plans::solvers::solver <datatype> > z_solver; //!< A pointer to the vertical solver
 			
-			std::shared_ptr <grids::variable <datatype>> spectral_rhs_ptr;
-			std::shared_ptr <grids::variable <datatype>> real_rhs_ptr;
 			std::shared_ptr <grids::variable <datatype>> old_rhs_ptr;
 			std::shared_ptr <grids::variable <datatype>> old2_rhs_ptr;
 			std::shared_ptr <grids::variable <datatype>> old3_rhs_ptr;
@@ -71,6 +69,7 @@ namespace plans
 				old2_rhs_ptr = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (grid_n, grid_m, *element_flags));
 				old3_rhs_ptr = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (grid_n, grid_m, *element_flags));
 				cor_rhs_ptr = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (grid_n, grid_m, *element_flags));
+				transform = std::shared_ptr <plans::plan <datatype> > (new plans::transforms::horizontal <datatype> (*new_rhs_ptr, real_real));
 			}
 			
 			virtual ~implemented_equation () {}
@@ -137,37 +136,6 @@ namespace plans
 			}
 			
 			/*!**********************************************************************
-			 * \copydoc equation::rhs_ptr
-			 ************************************************************************/
-			grids::variable <datatype> &rhs (int index = spectral_rhs) {
-				if (index == spectral_rhs) {
-					// If the spectral_rhs has been requested and doesn't exist, make it
-					DEBUG ("Grabbing spectral");
-					if (!spectral_rhs_ptr) {
-												DEBUG ("Making");
-
-						spectral_rhs_ptr = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (grid_n, grid_m, *element_flags));
-					}
-					return *spectral_rhs_ptr;
-				} else if (index == real_rhs) {
-					// If the real_rhs has been requested and doesn't exist, make it and its transform
-					DEBUG ("Grabbing real");
-
-					if (!real_rhs_ptr) {
-						DEBUG ("Making");
-						real_rhs_ptr = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (grid_n, grid_m, *element_flags));
-						transform = std::shared_ptr <plans::plan <datatype> > (new plans::transforms::horizontal <datatype> (*real_rhs_ptr, real_real, real_spectral));
-					}
-					return *real_rhs_ptr;
-				} else {
-										DEBUG ("Grabbing default");
-
-					// Use the default rhs
-					return *new_rhs_ptr;
-				}
-			}
-			
-			/*!**********************************************************************
 			 * \copydoc equation::matrix_ptr
 			 ************************************************************************/
 			datatype *matrix_ptr (int index = 0) {
@@ -190,23 +158,9 @@ namespace plans
 			 * \copydoc equation::reset
 			 ************************************************************************/
 			virtual void reset () {
-				if (spectral_rhs_ptr) {
-					linalg::scale (ldn * m, 0.0, spectral_rhs_ptr->ptr (real_spectral));
-				}
-				if (real_rhs_ptr) {
-					linalg::scale (ldn * m, 0.0, real_rhs_ptr->ptr (real_spectral));
-					linalg::scale (ldn * m, 0.0, real_rhs_ptr->ptr (real_real));
-				}
-				linalg::scale (m * ldn, 0.0, new_rhs_ptr->ptr (real_spectral));
-				
-				// Since this is an alternating direction solve, make sure to switch directions on reset
-				// if (*component_flags & z_solve) {
-				// 	*component_flags &= ~z_solve;
-				// 	*component_flags |= x_solve;
-				// } else {
-				// 	*component_flags &= ~x_solve;
-				// 	*component_flags |= z_solve;
-				// }
+				linalg::scale (ldn * m, 0.0, new_rhs_ptr->ptr (real_real));
+				linalg::scale (ldn * m, 0.0, new_rhs_ptr->ptr (real_spectral));
+				linalg::scale (m * ldn, 0.0, new_rhs_ptr->ptr (spectral_spectral));
 			}
 			
 			/*!**********************************************************************
@@ -249,16 +203,8 @@ namespace plans
 			 ************************************************************************/
 			void add_plan (const typename plans::plan <datatype>::factory &i_factory) {
 				TRACE ("Adding plan...");
-				grids::variable <datatype> *rhs_ptr;
-				if (i_factory.type () == plans::plan <datatype>::factory::impl) {
-					rhs_ptr = &rhs (spectral_rhs);
-				} else if (i_factory.type () == plans::plan <datatype>::factory::real) {
-					rhs_ptr = &rhs (real_rhs);
-				} else {
-					rhs_ptr = &*new_rhs_ptr;
-				}
 				datatype* matrices [2] = {matrix_ptr (0), matrix_ptr (1)};
-				plans::solvers::equation <datatype>::add_plan (i_factory.instance (matrices, data, *rhs_ptr));
+				plans::solvers::equation <datatype>::add_plan (i_factory.instance (matrices, data, *new_rhs_ptr));
 			}
 			
 			/*!**********************************************************************
@@ -311,13 +257,6 @@ namespace plans
 				
 				// Transform the real_rhs
 				if (transform) transform->execute ();
-
-				if (!x_solver && !z_solver) {
-					// linalg::matrix_copy (m, ldn, new_rhs_ptr, data.ptr (real_spectral));
-					// if (real_rhs_ptr) linalg::matrix_add_scaled (m, ldn, 1.0, real_rhs_ptr, data.ptr (real_spectral));
-					// if (spectral_rhs_ptr) linalg::matrix_add_scaled (m, ldn, 1.0, spectral_rhs_ptr, data.ptr (real_spectral));
-					return;
-				}
 				
 				// Add in the components from the last three timesteps for the AB scheme
 				linalg::matrix_copy (m, ldn, old3_rhs_ptr->ptr (real_spectral), cor_rhs_ptr->ptr (real_spectral));
@@ -326,10 +265,8 @@ namespace plans
 				linalg::matrix_add_scaled (m, ldn, -59. / 24., old_rhs_ptr->ptr (real_spectral), cor_rhs_ptr->ptr (real_spectral));
 				
 				// De-alias the RHS
-				if (real_rhs_ptr) {
-					linalg::matrix_scale (m, ldn / 3, 0.0, real_rhs_ptr->ptr (real_spectral) + m * (ldn - ldn / 3));
-					linalg::matrix_add_scaled (m, ldn, 1.0, real_rhs_ptr->ptr (real_spectral), new_rhs_ptr->ptr (real_spectral));
-				}
+				linalg::matrix_scale (m, ldn / 3, 0.0, new_rhs_ptr->ptr (real_real) + m * (ldn - ldn / 3));
+				linalg::matrix_add_scaled (m, ldn, 1.0, new_rhs_ptr->ptr (real_real), new_rhs_ptr->ptr (real_spectral));
 				
 				// Add in the component from this timestep
 				linalg::matrix_add_scaled (m, ldn, 55. / 24., new_rhs_ptr->ptr (real_spectral), cor_rhs_ptr->ptr (real_spectral));
@@ -342,9 +279,7 @@ namespace plans
 				linalg::matrix_copy (m, ldn, new_rhs_ptr->ptr (real_spectral), old_rhs_ptr->ptr (real_spectral));
 				
 				// Add in the spectral component (the explicit part of the implicit component) after the AB scheme
-				if (spectral_rhs_ptr) {
-					linalg::matrix_add_scaled (m, ldn, 1.0, spectral_rhs_ptr->ptr (real_spectral), cor_rhs_ptr->ptr (real_spectral));
-				}
+				linalg::matrix_add_scaled (m, ldn, 1.0, new_rhs_ptr->ptr (spectral_spectral), cor_rhs_ptr->ptr (real_spectral));
 				if (*component_flags & ignore_net) {
 					linalg::scale (2 * m, 0.0, cor_rhs_ptr->ptr (real_spectral));
 				}
@@ -367,11 +302,9 @@ namespace plans
 
 					linalg::matrix_copy (m, ldn, old_rhs_ptr->ptr (real_spectral), cor_rhs_ptr->ptr (real_spectral));
 
-					if (spectral_rhs_ptr) {
-						linalg::matrix_scale (m, ldn, 0.0, spectral_rhs_ptr->ptr (real_spectral));
-						equation <datatype>::execute_plans (implicit_only);
-						linalg::matrix_add_scaled (m, ldn, 1.0, spectral_rhs_ptr->ptr (real_spectral), cor_rhs_ptr->ptr (real_spectral));
-					}
+					linalg::matrix_scale (m, ldn, 0.0, new_rhs_ptr->ptr (spectral_spectral));
+					equation <datatype>::execute_plans (implicit_only);
+					linalg::matrix_add_scaled (m, ldn, 1.0, new_rhs_ptr->ptr (spectral_spectral), cor_rhs_ptr->ptr (real_spectral));
 
 					if (*component_flags & ignore_net) {
 						linalg::scale (2 * m, 0.0, cor_rhs_ptr->ptr (real_spectral));

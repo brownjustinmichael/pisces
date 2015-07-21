@@ -162,10 +162,6 @@ namespace plans
 			
 			virtual ~linear () {}
 
-			virtual int type () {
-				return plan <datatype>::post;
-			}
-			
 			/*!**********************************************************************
 			 * \copydoc real_plan::execute
 			 ************************************************************************/

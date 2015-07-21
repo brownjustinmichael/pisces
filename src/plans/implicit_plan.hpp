@@ -48,7 +48,7 @@ namespace plans
 		 * \param i_component_flags A pointer to the integer flags associated with the variable associated with the plan
 		 ************************************************************************/
 		implicit_plan (datatype *i_matrix_n, datatype *i_matrix_m, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0, int state_in = spectral_spectral) :
-		plans::plan <datatype> (i_data_in, i_data_out, state_in, real_spectral, i_coeff), 
+		plans::plan <datatype> (i_data_in, i_data_out, state_in, spectral_spectral, i_coeff), 
 		matrix_n (i_matrix_n), 
 		matrix_m (i_matrix_m), 
 		n (i_data_in.get_grid (0).get_n ()), 
@@ -82,10 +82,6 @@ namespace plans
 			factory (datatype i_coeff = 1.0) : plan <datatype>::factory (i_coeff) {}
 
 			virtual ~factory () {}
-
-			virtual const int type () const {
-				return plan <datatype>::factory::impl;
-			}
 		};
 	};
 } /* plans */
