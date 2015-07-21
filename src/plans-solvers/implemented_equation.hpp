@@ -369,7 +369,7 @@ namespace plans
 
 					if (spectral_rhs_ptr) {
 						linalg::matrix_scale (m, ldn, 0.0, spectral_rhs_ptr->ptr (real_spectral));
-						equation <datatype>::execute_plans ((mid_plan | implicit_only));
+						equation <datatype>::execute_plans (implicit_only);
 						linalg::matrix_add_scaled (m, ldn, 1.0, spectral_rhs_ptr->ptr (real_spectral), cor_rhs_ptr->ptr (real_spectral));
 					}
 

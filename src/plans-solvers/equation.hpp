@@ -38,10 +38,7 @@ namespace plans
 			grids::variable <datatype> &data; //!< A pointer to the data held by the equation object
 		
 		private:
-			std::vector <std::shared_ptr <plan <datatype> > > pre_transform_plans; //!< A vector of shared pointers of plans to be executed before the transforms
-			std::vector <std::shared_ptr <plan <datatype> > > mid_transform_plans; //!< A vector of shared pointers of plans to be executed after the vertical transform
-			std::vector <std::shared_ptr <plan <datatype> > > post_transform_plans; //!< A vector of shared pointers of plans to be executed after both transforms
-			std::vector <std::shared_ptr <plan <datatype> > > pre_solve_plans; //!< A vector of shared pointers of plans to be executed after both transforms
+			std::vector <std::shared_ptr <plan <datatype> > > plans; //!< A vector of shared pointers of plans to be executed before the transforms
 
 		public:
 			/*!**********************************************************************
@@ -166,19 +163,7 @@ namespace plans
 				if (!i_plan) {
 					return;
 				}
-				int flags = i_plan->type ();
-				if (flags & plan <datatype>::pre) {
-					pre_transform_plans.push_back (i_plan);
-				}
-				if (flags & plan <datatype>::mid) {
-					mid_transform_plans.push_back (i_plan);
-				}
-				if (flags & plan <datatype>::post) {
-					post_transform_plans.push_back (i_plan);
-				}
-				if (flags & plan <datatype>::pre_solve) {
-					pre_solve_plans.push_back (i_plan);
-				}
+				plans.push_back (i_plan);
 				TRACE ("Added.");
 			}
 	
@@ -217,17 +202,8 @@ namespace plans
 			}
 
 			virtual void setup_plans () {
-				for (int i = 0; i < (int) pre_transform_plans.size (); ++i) {
-					pre_transform_plans [i]->setup ();
-				}
-				for (int i = 0; i < (int) mid_transform_plans.size (); ++i) {
-					mid_transform_plans [i]->setup ();
-				}
-				for (int i = 0; i < (int) post_transform_plans.size (); ++i) {
-					post_transform_plans [i]->setup ();
-				}
-				for (int i = 0; i < (int) pre_solve_plans.size (); ++i) {
-					pre_solve_plans [i]->setup ();
+				for (int i = 0; i < (int) plans.size (); ++i) {
+					plans [i]->setup ();
 				}
 				*component_flags |= plans_setup;
 			}
@@ -237,27 +213,10 @@ namespace plans
 			 * 
 			 * \param flags The flags of the plans to executed (e.g. pre_solve)
 			 ************************************************************************/
-			inline void execute_plans (int flags) {
-				if (flags & pre_plan) {
-					for (int i = 0; i < (int) pre_transform_plans.size (); ++i) {
-						pre_transform_plans [i]->execute ();
-					}
-				}
-				if (flags & mid_plan) {
-					for (int i = 0; i < (int) mid_transform_plans.size (); ++i) {
-						if (!(flags & implicit_only) || ((flags & implicit_only) && mid_transform_plans [i]->implicit ())) {
-							mid_transform_plans [i]->execute ();
-						}
-					}
-				}
-				if (flags & post_plan) {
-					for (int i = 0; i < (int) post_transform_plans.size (); ++i) {
-						post_transform_plans [i]->execute ();
-					}
-				}
-				if (flags & pre_solve_plan) {
-					for (int i = 0; i < (int) pre_solve_plans.size (); ++i) {
-						pre_solve_plans [i]->execute ();
+			inline void execute_plans (int flags = 0x00) {
+				for (int i = 0; i < (int) plans.size (); ++i) {
+					if (!(flags & implicit_only) || ((flags & implicit_only) && plans [i]->implicit ())) {
+						plans [i]->execute ();
 					}
 				}
 			}

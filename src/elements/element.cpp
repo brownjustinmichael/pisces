@@ -57,18 +57,6 @@ namespace pisces
 			factorize ();
 			, factorize_time, factorize_duration);
 
-			TRACE ("Executing plans in spectral space...");
-
-			TIME (
-			for (iterator iter = begin (); iter != end (); iter++) {
-				equations [*iter]->execute_plans (plans::solvers::pre_plan);
-			}
-			, execution_time, execution_duration);
-
-			TRACE ("Executing plans in half-space...");
-
-			TRACE ("Executing plans in real space...");
-
 			// for (typename data::data <datatype>::iterator iter = data.begin (); iter < data.end (); ++iter)
 			// {
 			// 	if (data [*iter].update ()) {
@@ -81,26 +69,13 @@ namespace pisces
 			messenger_ptr->min (&t_timestep);
 			, timestep_time, timestep_duration);
 
-			TIME (
-			for (iterator iter = begin (); iter != end (); iter++) {
-				// DEBUG ("Executing");
-				equations [*iter]->execute_plans (plans::solvers::post_plan);
-			}
-			, execution_time, execution_duration);
-
-			TRACE ("Updating...");
-
-			// Calculate the pre solver plans
+			TRACE ("Executing plans...");
 
 			TIME (
 			for (iterator iter = begin (); iter != end (); iter++) {
-				equations [*iter]->execute_plans (plans::solvers::mid_plan);
+				equations [*iter]->execute_plans ();
 			}
 			, execution_time, execution_duration);
-
-			DEBUG ("WELL WELL BEFORE SOLVE " << (data ["temperature"].ptr (real_real) [200]));
-			DEBUG ("WELL WELL BEFORE SOLVE " << (data ["temperature"].ptr (spectral_spectral) [200]));
-			DEBUG ("WELL WELL BEFORE SOLVE " << (data ["temperature"].ptr (real_spectral) [200]));
 
 			TIME (
 			solve ();
