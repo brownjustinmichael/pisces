@@ -353,11 +353,11 @@ namespace plans
 				// Solve either the x direction solve or the z direction solve
 				if (x_solver) {
 					x_solver->execute ();
-					*component_flags &= ~x_solve;
-					*component_flags |= z_solve;
-
 					state = x_solver->get_state ();
 				}
+
+				*component_flags &= ~x_solve;
+				*component_flags |= z_solve;
 
 				if (z_solver) {
 					if (state >= 0 && state != z_solver->get_state_in ()) {
@@ -378,9 +378,10 @@ namespace plans
 					}
 
 					z_solver->execute ();
-					*component_flags &= ~z_solve;
-					*component_flags |= x_solve;
 				}
+
+				*component_flags &= ~z_solve;
+				*component_flags |= x_solve;
 			}
 		};
 	} /* solvers */

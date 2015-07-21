@@ -19,6 +19,16 @@ namespace plans
 	}
 
 	template <class datatype>
+	std::shared_ptr <typename plan <datatype>::factory> grad_x (grids::variable <datatype> &data_source, datatype coeff = 1.0) {
+		return std::shared_ptr <typename explicit_plan <datatype>::factory> (new typename source::uniform_grad_x <datatype>::factory (data_source, coeff));
+	}
+
+	template <class datatype>
+	std::shared_ptr <typename plan <datatype>::factory> grad_z (grids::variable <datatype> &data_source, datatype coeff = 1.0) {
+		return std::shared_ptr <typename explicit_plan <datatype>::factory> (new typename source::uniform_grad_z <datatype>::factory (data_source, coeff));
+	}
+
+	template <class datatype>
 	std::shared_ptr <typename plan <datatype>::factory> z_src (datatype *data_source, datatype coeff = 1.0) {
 		return std::shared_ptr <typename real_plan <datatype>::factory> (new typename source::z_src <datatype>::factory (data_source, coeff));
 	}

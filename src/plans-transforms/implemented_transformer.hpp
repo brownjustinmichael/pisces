@@ -55,16 +55,16 @@ namespace plans
 				// For each direction, check the flags to see which transforms to add and do so
 				TRACE("Initializing...");
 				if (i_flags & forward_vertical) {
-					forward_vertical_transform = std::shared_ptr <plans::plan <datatype>> (new plans::transforms::vertical <datatype> (data, data, real_spectral, spectral_spectral, 0x00, i_threads));
+					forward_vertical_transform = std::shared_ptr <plans::plan <datatype>> (new plans::transforms::vertical <datatype> (data, real_spectral, spectral_spectral, 0x00, i_threads));
 				}
 				if (i_flags & inverse_vertical) {
-					inverse_vertical_transform = std::shared_ptr <plans::plan <datatype>> (new plans::transforms::vertical <datatype> (data, data, spectral_spectral, real_spectral, inverse, i_threads));
+					inverse_vertical_transform = std::shared_ptr <plans::plan <datatype>> (new plans::transforms::vertical <datatype> (data, spectral_spectral, real_spectral, inverse, i_threads));
 				}
 				if (i_flags & forward_horizontal) {
-					forward_horizontal_transform = std::shared_ptr <plans::plan <datatype>> (new plans::transforms::horizontal <datatype> (data, data, real_real, real_spectral, 0x00, i_threads));
+					forward_horizontal_transform = std::shared_ptr <plans::plan <datatype>> (new plans::transforms::horizontal <datatype> (data, real_real, real_spectral, 0x00, i_threads));
 				}
 				if (i_flags & inverse_horizontal) {
-					inverse_horizontal_transform = std::shared_ptr <plans::plan <datatype>> (new plans::transforms::horizontal <datatype> (data, data, real_spectral, real_real, inverse, i_threads));
+					inverse_horizontal_transform = std::shared_ptr <plans::plan <datatype>> (new plans::transforms::horizontal <datatype> (data, real_spectral, real_real, inverse, i_threads));
 				}
 			}
 			

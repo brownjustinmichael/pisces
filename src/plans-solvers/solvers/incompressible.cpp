@@ -255,11 +255,6 @@ namespace plans
 				/*
 					TODO Make this more efficient
 				*/
-				for (int i = 2; i < ldn; ++i) {
-					for (int j = 0; j < m + 1 - (nbot == 0 ? 0 : excess_n + 1) - excess_0; ++j) {
-						data_out [i * m + j + excess_0] = (data_temp [i * (m + 2) + j + excess_0] + data_temp [i * (m + 2) + j + 1 + excess_0]) / 2.0;
-					}
-				}
 				
 				// Update the velocities with the pressure derivatives
 				// DEBUG (ldn * (m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0)) + excess_0 << " " << ldn * m)
@@ -274,6 +269,12 @@ namespace plans
 					for (int j = 0; j < m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
 						ndata_x [i * m + j] += scalar * (i / 2) * (data_ptr [(i + 1) * (m + 2) + j] + data_ptr [(i + 1) * (m + 2) + j - 1]) / 2.0;
 						ndata_x [(i + 1) * m + j] -= scalar * (i / 2) * (data_ptr [i * (m + 2) + j] + data_ptr [i * (m + 2) + j - 1]) / 2.0;
+					}
+				}
+
+				for (int i = 2; i < ldn; ++i) {
+					for (int j = 0; j < m + 1 - (nbot == 0 ? 0 : excess_n + 1) - excess_0; ++j) {
+						data_out [i * m + j + excess_0] = (data_temp [i * (m + 2) + j + excess_0] + data_temp [i * (m + 2) + j + 1 + excess_0]) / 2.0 + data_in [i * m + j + excess_0];
 					}
 				}
 				
@@ -317,7 +318,6 @@ namespace plans
 				// 	DEBUG (debug.str ());
 				// 	debug.str ("");
 				// }
-				
 
 	#ifdef CHECKNAN
 				for (int j = 0; j < m; ++j) {

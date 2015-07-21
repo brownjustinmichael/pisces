@@ -199,7 +199,7 @@ namespace pisces
 			if (limiters) {
 				DEBUG ("Desired: " << shared_min << " Current: " << timestep);
 				if (timestep == 0.0) {
-					return init_timestep;
+					return std::min (init_timestep, max_timestep);
 				}
 				if (shared_min * down_mult_timestep > timestep) {
 					// If the minimum is larger than the current, increase the timestep

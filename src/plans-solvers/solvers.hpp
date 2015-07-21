@@ -26,7 +26,7 @@ namespace plans
 		if (equation_ptr->messenger_ptr->get_id () + 1 < equation_ptr->messenger_ptr->get_np ()) {
 			boundary_n = std::shared_ptr <typename boundaries::boundary <datatype>::factory> (new typename boundaries::communicating_boundary <datatype>::factory (equation_ptr->messenger_ptr));
 		}
-		equation_ptr->add_solver (typename solvers::collocation <datatype>::factory (equation_ptr->messenger_ptr, timestep, *boundary_0, *boundary_n), solvers::z_solver);
+		// equation_ptr->add_solver (typename solvers::collocation <datatype>::factory (equation_ptr->messenger_ptr, timestep, *boundary_0, *boundary_n), solvers::z_solver);
 		equation_ptr->add_solver (typename solvers::fourier <datatype>::factory (timestep, *boundary_0, *boundary_n), solvers::x_solver);
 		return equation_ptr;
 	}

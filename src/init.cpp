@@ -63,7 +63,7 @@ int main (int argc, char *argv[])
 		double *temps = &temps_vec [0], *tempt = &tempt_vec [0];
 		const double *pos_z = &vertical_grid [0];
 		
-		double stop = 0.0, sbot = 0.0;
+		double stop = 0.0, sbot = 1.0;
 		if (parameters ["equations.composition.top.type"].as <std::string> () == "fixed_value") {
 			stop = parameters ["equations.composition.top.value"].as <double> ();
 		}
@@ -71,7 +71,7 @@ int main (int argc, char *argv[])
 			sbot = parameters ["equations.composition.bottom.value"].as <double> ();
 		}
 		
-		double ttop = 0.0, tbot = 0.0;
+		double ttop = 0.0, tbot = 1.0;
 		if (parameters ["equations.temperature.top.type"].as <std::string> () == "fixed_value") {
 			ttop = parameters ["equations.temperature.top.value"].as <double> ();
 		}

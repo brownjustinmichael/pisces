@@ -77,9 +77,14 @@ namespace pisces
 			}
 			, execution_time, execution_duration);
 
+			DEBUG (data ["temperature"].ptr (real_real) [800]);
+
 			TIME (
 			solve ();
 			, solve_time, solve_duration);
+
+			DEBUG (data ["temperature"].ptr (real_real) [800]);
+
 
 			// Check whether the timestep has changed. If it has, mark all equations to be refactorized.
 

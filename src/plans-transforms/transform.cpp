@@ -45,7 +45,7 @@ namespace plans
 				int index = 0;
 				for (int i = 0; i < threads; ++i) {
 					major_iodim.n = m / threads + (i < (m % threads)? 1: 0);
-					plans_float [i] = fftwf_plan_guru_split_dft_r2c (1, &iodim, 1, &major_iodim, data_in + index, data_out + index, data_out + m + index, FFTW_MEASURE);
+					plans_float [i] = fftwf_plan_guru_split_dft_r2c (1, &iodim, 1, &major_iodim, data_in + index, data_out + index, data_out + m + index, FFTW_MEASURE | FFTW_PRESERVE_INPUT);
 					index += major_iodim.n;
 				}
 			} else {
@@ -55,7 +55,7 @@ namespace plans
 				int index = 0;
 				for (int i = 0; i < threads; ++i) {
 					major_iodim.n = m / threads + (i < (m % threads)? 1: 0);
-					plans_float [i] = fftwf_plan_guru_split_dft_c2r (1, &iodim, 1, &major_iodim, data_in + index, data_in + m + index, data_out + index, FFTW_MEASURE);
+					plans_float [i] = fftwf_plan_guru_split_dft_c2r (1, &iodim, 1, &major_iodim, data_in + index, data_in + m + index, data_out + index, FFTW_MEASURE | FFTW_PRESERVE_INPUT);
 					index += major_iodim.n;
 				}
 			}
@@ -97,7 +97,7 @@ namespace plans
 				int index = 0;
 				for (int i = 0; i < threads; ++i) {
 					major_iodim.n = m / threads + (i < (m % threads)? 1: 0);
-					plans [i] = fftw_plan_guru_split_dft_r2c (1, &iodim, 1, &major_iodim, data_in + index, data_out + index, data_out + m + index, FFTW_MEASURE);
+					plans [i] = fftw_plan_guru_split_dft_r2c (1, &iodim, 1, &major_iodim, data_in + index, data_out + index, data_out + m + index, FFTW_MEASURE | FFTW_PRESERVE_INPUT);
 					index += major_iodim.n;
 				}
 			} else {
@@ -107,7 +107,7 @@ namespace plans
 				int index = 0;
 				for (int i = 0; i < threads; ++i) {
 					major_iodim.n = m / threads + (i < (m % threads)? 1: 0);
-					plans [i] = fftw_plan_guru_split_dft_c2r (1, &iodim, 1, &major_iodim, data_in + index, data_in + m + index, data_out + index, FFTW_MEASURE);
+					plans [i] = fftw_plan_guru_split_dft_c2r (1, &iodim, 1, &major_iodim, data_in + index, data_in + m + index, data_out + index, FFTW_MEASURE | FFTW_PRESERVE_INPUT);
 					index += major_iodim.n;
 				}
 			}
@@ -136,16 +136,19 @@ namespace plans
 		template <>
 		void horizontal <double>::execute () {
 			TRACE ("Executing...");
-			DEBUG ("IN " << data_in [200]);
+			DEBUG ("IN " << data_in [200] << " at " << data_in);
 		
 	#pragma omp parallel for num_threads (threads)
 			for (int i = 0; i < threads; ++i) {
 				fftw_execute (plans [i]);
 			}		
 			
+			DEBUG ("IN " << data_in [200] << " at " << data_in);
+
+
 			linalg::scale (2 * (n / 2 + 1) * m, scalar, data_out);
-			
-			DEBUG ("OUT " << data_out [200]);
+
+			DEBUG ("OUT " << data_out [200] << " at " << data_out);
 
 
 			TRACE ("Execution Complete.");
@@ -243,7 +246,7 @@ namespace plans
 		void vertical <double>::execute () {
 			TRACE ("Executing...");
 
-						DEBUG ("IN " << data_in [200]);
+						DEBUG ("IN " << data_in [200] << " at " << data_in);
 
 			
 			if (m > 1 && !(flags & ignore_m)) {
@@ -255,7 +258,7 @@ namespace plans
 			
 			linalg::scale (2 * (n / 2 + 1) * m, scalar, data_out);
 		
-			DEBUG ("OUT " << data_out [200]);
+			DEBUG ("OUT " << data_out [200] << " at " << data_out);
 
 
 			TRACE ("Execution Complete.");
