@@ -29,8 +29,7 @@ namespace plans
 			inverse = 0x20,
 			no_write = 0x40,
 			no_read = 0x80,
-			read_before = 0x100,
-			updated = 0x80000000
+			read_before = 0x100
 		};
 		
 		/*!*******************************************************************

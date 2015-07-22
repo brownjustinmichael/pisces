@@ -74,7 +74,7 @@ namespace plans
 			 * \copydoc transformer::_transform
 			 ************************************************************************/
 			void update () {
-				if ((data.component_flags & updated)) return;
+				if ((data.component_flags & grids::updated)) return;
 				int state = data.last_update;
 				if (state == real_real) {
 					forward_horizontal_transform->execute ();
@@ -86,7 +86,8 @@ namespace plans
 					inverse_vertical_transform->execute ();
 					inverse_horizontal_transform->execute ();
 				}
-				data.component_flags |= updated;
+				data.component_flags |= grids::updated;
+				data.state++;
 			}
 		};
 	} /* transforms */

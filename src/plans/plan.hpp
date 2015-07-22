@@ -16,6 +16,7 @@
 #include "logger/logger.hpp"
 #include "io/parameters.hpp"
 #include "grids/grid.hpp"
+#include "grids/variable.hpp"
 #include <map>
 
 /*!*******************************************************************
@@ -232,9 +233,12 @@ namespace plans
 
 	typename plan <double>::factory_container operator+ (std::shared_ptr <typename plan <double>::factory> i_factory, std::shared_ptr <typename plan <double>::factory> j_factory);
 
-	typename plan <double>::factory_container operator- (std::shared_ptr <typename plan <double>::factory> i_factory, std::shared_ptr <typename plan <double>::factory> j_factory);
-
 	typename plan <double>::factory_container operator+ (std::shared_ptr <typename plan <double>::factory> i_factory, typename plan <double>::factory_container j_container);
+
+	template <class type>
+	typename plan <double>::factory_container operator- (std::shared_ptr <typename plan <double>::factory> i_factory, type i_other) {
+		return i_factory + (-1.) * i_other;
+	}
 
 	template <class datatype>
 	typename plan <datatype>::factory_container operator* (typename plan <datatype>::factory_container i_container, datatype scalar);
@@ -244,6 +248,8 @@ namespace plans
 		i_factory->coeff *= scalar;
 		return i_factory;
 	}
+
+	typename plan <double>::factory_container operator- (std::shared_ptr <typename plan <double>::factory> i_factory);
 
 	typename std::shared_ptr <typename plan <double>::factory> operator* (std::shared_ptr <typename plan <double>::factory> i_factory, YAML::Node node);
 

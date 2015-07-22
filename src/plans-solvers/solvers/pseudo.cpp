@@ -225,9 +225,9 @@ namespace plans
 			}
 #endif
 
-			var_x.component_flags &= ~transforms::updated;
+			var_x.component_flags &= ~grids::updated;
 			var_x.last_update = get_state ();
-			var_z.component_flags &= ~transforms::updated;
+			var_z.component_flags &= ~grids::updated;
 			var_z.last_update = get_state ();
 
 			TRACE ("Solved");

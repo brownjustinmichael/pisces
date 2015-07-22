@@ -265,6 +265,12 @@ namespace pisces
 				data.transformers [equation_keys [i]]->update ();
 			}
 
+			for (typename data::data <datatype>::iterator iter = data.begin (); iter != data.end (); ++iter)
+			{
+				data [*iter].update ();
+				if (data.transformers [*iter]) data.transformers [*iter]->update ();
+			}
+
 			for (int i = 0; i < (int) corrector_keys.size (); ++i)
 			{
 				data [corrector_keys [i]].component_flags &= ~solved;

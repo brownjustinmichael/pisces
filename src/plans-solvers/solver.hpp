@@ -156,7 +156,7 @@ namespace plans
 			 * This method does not contain the actual implementation of the solution, which should be handled in _solve.
 			 *********************************************************************/
 			virtual void execute () {
-				component_flags &= ~transforms::updated;
+				component_flags &= ~grids::updated;
 				var_out.last_update = get_state ();
 			}
 		

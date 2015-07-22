@@ -277,56 +277,6 @@ namespace grids
 		}
 		
 	} /* horizontal */
-
-	template <class datatype>
-	std::vector <std::shared_ptr <variable <datatype>>> grids::variable <datatype>::tmps;
-
-	template <class datatype>
-	bool variable <datatype>::update () {
-		if (!needs_update) return false;
-		DEBUG ("Update attempt");
-		linalg::scale (this->size (), 0.0, this->ptr ());
-		datatype *tmp, *data = this->ptr ();
-		for (int i = 0; i < (int) vars.size (); ++i)
-		{
-			inner [i]->update ();
-			tmp = vars [i];
-			int n = total / ld;
-			int tld = inner [i]->get_ld ();
-			DEBUG ("Values " << tmp << " " << tld << " " << ld << " " << total << " " << inner [i]->size ());
-			if (ops [i] == add) {
-				for (int i = 0; i < n; ++i)
-				{
-					DEBUG ("Inner " << i << " " << tld << " " << ld << " " << tmp [10] << " " << tmp [40]);
-					linalg::add_scaled (ld, tmp + i * tld, data + i * ld);
-				}
-			} else if (ops [i] == sub) {
-				for (int i = 0; i < n; ++i)
-				{
-					linalg::add_scaled (ld, -1.0, tmp + i * tld, data + i * ld);
-				}
-			} else if (ops [i] == mul) {
-				for (int i = 0; i < n; ++i)
-				{
-					for (int j = 0; j < ld; ++j)
-					{
-						data [i * ld + j] *= tmp [i * tld + j];
-					}
-				}
-			} else if (ops [i] == div) {
-				for (int i = 0; i < n; ++i)
-				{
-					for (int j = 0; j < ld; ++j)
-					{
-						data [i * ld + j] /= tmp [i * tld + j];
-					}
-				}
-			}
-		}
-		return true;
-	}
-
-	template class variable <double>;
 } /* grids */
 
 #endif /* end of include guard: COLLOCATION_CPP_HV4P0UOP */

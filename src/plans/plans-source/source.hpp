@@ -185,6 +185,7 @@ namespace plans
 			using explicit_plan <datatype>::data_out;
 		
 			const datatype *data_source, *pos_m; //!< The data pointer for the source data
+			const int ld_source;
 		
 		public:
 			/*!**********************************************************************
@@ -195,7 +196,10 @@ namespace plans
 			 * 
 			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
 			 ************************************************************************/
-			uniform_grad_z (grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : explicit_plan <datatype> (i_data_in, i_data_out, i_coeff), data_source (i_data_source.ptr (real_spectral)) {
+			uniform_grad_z (grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : 
+			explicit_plan <datatype> (i_data_in, i_data_out, i_coeff), 
+			data_source (i_data_source.ptr (real_spectral)),
+			ld_source (i_data_source.get_ld ()) {
 				TRACE ("Adding source...");
 				pos_m = &(i_data_in.get_grid (1) [0]);
 			}
@@ -211,7 +215,7 @@ namespace plans
 				{
 					for (int j = 1; j < m - 1; ++j)
 					{
-						data_out [i * m + j] += coeff * (data_source [i * m + j + 1] - data_source [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
+						data_out [i * m + j] += coeff * (data_source [i * ld_source + j + 1] - data_source [i * ld_source + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
 					}
 				}
 			}

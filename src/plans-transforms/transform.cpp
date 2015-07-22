@@ -111,7 +111,6 @@ namespace plans
 					index += major_iodim.n;
 				}
 			}
-						DEBUG ("DONE");
 
 		}
 		
@@ -136,20 +135,13 @@ namespace plans
 		template <>
 		void horizontal <double>::execute () {
 			TRACE ("Executing...");
-			DEBUG ("IN " << data_in [200] << " at " << data_in);
 		
 	#pragma omp parallel for num_threads (threads)
 			for (int i = 0; i < threads; ++i) {
 				fftw_execute (plans [i]);
 			}		
-			
-			DEBUG ("IN " << data_in [200] << " at " << data_in);
-
 
 			linalg::scale (2 * (n / 2 + 1) * m, scalar, data_out);
-
-			DEBUG ("OUT " << data_out [200] << " at " << data_out);
-
 
 			TRACE ("Execution Complete.");
 		}
@@ -246,9 +238,6 @@ namespace plans
 		void vertical <double>::execute () {
 			TRACE ("Executing...");
 
-						DEBUG ("IN " << data_in [200] << " at " << data_in);
-
-			
 			if (m > 1 && !(flags & ignore_m)) {
 	#pragma omp parallel for num_threads (threads)
 				for (int i = 0; i < threads; ++i) {
@@ -258,9 +247,6 @@ namespace plans
 			
 			linalg::scale (2 * (n / 2 + 1) * m, scalar, data_out);
 		
-			DEBUG ("OUT " << data_out [200] << " at " << data_out);
-
-
 			TRACE ("Execution Complete.");
 		}
 	

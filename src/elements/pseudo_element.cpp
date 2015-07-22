@@ -30,13 +30,17 @@ namespace pisces
 
 		data.initialize ("bg_pressure", uniform_n);
 
-
 		for (int j = 0; j < m; ++j)
 		{
 			data ["bg_pressure"].ptr () [j] = 1.0 + (*grids [1]) [j] * 0.1;
 		}
 
 		data ["density"] == data ["composition"] / data ["temperature"] * data ["bg_pressure"];
+
+		*split_solver <datatype> (equations ["composition"], timestep, neumann (0.0), neumann (0.0)) 
+		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
+		== 
+		params ["equations.composition.diffusion"] * diff <datatype> ();
 
 		// Set up the x_velocity equation, note the missing pressure term, which is handled in div
 		*split_solver <datatype> (equations ["x_momentum"], timestep, neumann (0.0), neumann (0.0)) 
@@ -49,10 +53,11 @@ namespace pisces
 		*split_solver <datatype> (equations ["z_momentum"], timestep, dirichlet (0.0), dirichlet (0.0)) 
 		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 		== 
-		// - grd <datatype> (data ["bg_pressure"])
-		// params ["equations.z_velocity.sources.density"] * src <datatype> (data ["density"])
-		params ["equations.velocity.diffusion"] * diff <datatype> ();
+		- grad_z <datatype> (data ["bg_pressure"])
+		- params ["equations.z_velocity.sources.density"] * src <datatype> (data ["density"])
+		+ params ["equations.velocity.diffusion"] * diff <datatype> ();
 		// + vertical_stress (data ["x_velocity"]);
+		data ["z_momentum"].component_flags |= plans::solvers::ignore_net;
 
 		// // Set up the velocity constraint
 		// *pdiv <datatype> (equations ["pressure"], equations ["x_momentum"], equations ["z_momentum"], data ["x_velocity"], data ["z_velocity"], data ["density"], data ["bg_pressure"])
@@ -97,7 +102,7 @@ namespace data
 	template <class datatype>
 	pseudo_data <datatype>::pseudo_data (grids::axis *i_axis_n, grids::axis *i_axis_m, int id, int n_elements, io::parameters& i_params) : implemented_data <datatype> (i_axis_n, i_axis_m, i_params, id, i_params.get <std::string> ("dump.file"), i_params.get <std::string> ("root") + i_params.get <std::string> ("dump.directory"), i_params.get <int> ("dump.every")) {
 		
-		initialize ("pressure");
+		initialize ("pressure", corrector);
 		initialize ("composition");
 		initialize ("temperature");
 		initialize ("x_velocity");
