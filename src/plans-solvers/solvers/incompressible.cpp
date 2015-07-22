@@ -274,7 +274,7 @@ namespace plans
 
 				for (int i = 2; i < ldn; ++i) {
 					for (int j = 0; j < m + 1 - (nbot == 0 ? 0 : excess_n + 1) - excess_0; ++j) {
-						data_out [i * m + j + excess_0] = (data_temp [i * (m + 2) + j + excess_0] + data_temp [i * (m + 2) + j + 1 + excess_0]) / 2.0 + data_in [i * m + j + excess_0];
+						data_out [i * m + j + excess_0] = (data_temp [i * (m + 2) + j + excess_0] + data_temp [i * (m + 2) + j + 1 + excess_0]) / 2.0;
 					}
 				}
 				

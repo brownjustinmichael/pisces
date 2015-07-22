@@ -91,6 +91,7 @@ namespace plans
 				} else {
 					linalg::matrix_matrix_multiply (m, ldn, m, 1.0, new_matrix, data_in, 1.0, data_out);
 				}
+				
 
 				TRACE ("Operation complete.");
 			}

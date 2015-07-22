@@ -18,7 +18,7 @@
  * 
  * \brief The minimum number of elements for automatic OpenMP parallelization in utils
  ************************************************************************/
-#define MIN_PARALLEL 1024 * 1024 * 1024
+#define MIN_PARALLEL 1024 * 1024
 
 /*!*******************************************************************
  * \brief Function from BLAS that calculates a dot product

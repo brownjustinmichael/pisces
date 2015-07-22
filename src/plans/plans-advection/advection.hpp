@@ -125,6 +125,7 @@ namespace plans
 				// Scale the whole thing by the coefficient
 				// linalg::matrix_add_scaled (m * dims, n, coeff, x_ptr, data_out);
 
+				#pragma omp parallel for
 				for (int i = 1; i < n - 1; ++i)
 				{
 					for (int j = 1; j < m - 1; ++j)
