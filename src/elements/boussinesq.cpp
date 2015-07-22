@@ -28,7 +28,7 @@ namespace data
 	template <class datatype>
 	thermo_compositional_data <datatype>::thermo_compositional_data (grids::axis *i_axis_n, grids::axis *i_axis_m, int id, int n_elements, io::parameters& i_params) : implemented_data <datatype> (i_axis_n, i_axis_m, i_params, id, i_params.get <std::string> ("dump.file"), i_params.get <std::string> ("root") + i_params.get <std::string> ("dump.directory"), i_params.get <int> ("dump.every")) {
 
-		initialize ("pressure");
+		initialize ("pressure", corrector);
 		initialize ("composition");
 		initialize ("temperature");
 		initialize ("x_velocity");

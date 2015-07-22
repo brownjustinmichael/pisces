@@ -67,6 +67,7 @@ namespace pisces
 	private:
 		datatype rezone_mult; //!< To merit rezoning, the new timestep must be at least this factor larger than the current one
 		std::vector <std::string> equation_keys; //!< A vector of integer keys to the equations map
+		std::vector <std::string> corrector_keys; //!< A vector of integer keys to the equations map
 		
 	public:
 		datatype &duration; //!< The datatype total simulated time
@@ -191,7 +192,13 @@ namespace pisces
 		inline void add_equation (std::string i_name, std::shared_ptr <plans::solvers::equation <datatype> > i_solver_ptr) {
 			TRACE ("Adding solver...");
 			equations [i_name] = i_solver_ptr;
-			equation_keys.push_back (i_name);
+			if (data.is_corrector [i_name]) {
+				DEBUG ("Adding corrector");
+				corrector_keys.push_back (i_name);
+			} else {
+				equation_keys.push_back (i_name);
+			}
+
 			TRACE ("Solver added.");
 		}
 	
@@ -246,66 +253,30 @@ namespace pisces
 		virtual void solve () {
 			TRACE ("Beginning solve...");
 			// Execute the equations
-			// std::map <int, omp_lock_t> locks;
-			for (iterator iter = begin (); iter != end (); iter++) {
-				data [*iter].component_flags &= ~solved;
+			for (int i = 0; i < (int) equation_keys.size (); i++)
+			{
+				data [equation_keys [i]].component_flags &= ~solved;
+				equations [equation_keys [i]]->solve ();
 			}
-			bool completely_solved = false, skip;
-			std::vector <std::string> can_be_solved;
-			DEBUG ("WELL BEFORE SOLVE " << (data ["temperature"].ptr (spectral_spectral) [200]));
-			DEBUG ("WELL BEFORE SOLVE " << (data ["temperature"].ptr (real_spectral) [200]));
 
-			
-			while (!completely_solved) {
-				can_be_solved.clear ();
-				for (iterator iter = begin (); iter != end (); iter++) {
-					if (data [*iter].component_flags & solved) {
-						continue;
-					}
-					
-					skip = false;
-					for (int j = 0; j < equations [*iter]->n_dependencies (); ++j) {
-						if (!(*(equations [*iter]->get_dependency (j)->component_flags) & solved)) {
-							skip = true;
-							break;
-						}
-					}
-					
-					if (!skip) {
-						can_be_solved.push_back (*iter);
-					}
-				}
-				
-				// int threads = std::min (params.get <int> ("parallel.solver.threads"), (int) can_be_solved.size ());
-				// #pragma omp parallel for num_threads (threads)
-				for (int i = 0; i < 1; ++i) {
-					std::string name = can_be_solved [i];
-					DEBUG ("Solving " << name);
-					DEBUG ("BEFORE SOLVE " << (data [name].ptr (equations [name]->get_state ()) [200]));
-					equations [name]->solve ();
-					DEBUG ("AFTER SOLVE " << (data [name].ptr (equations [name]->get_state ()) [200]));
+			#pragma omp parallel for
+			for (int i = 0; i < (int) equation_keys.size (); i++)
+			{
+				data.transformers [equation_keys [i]]->update ();
+			}
 
-					data.transformers [name]->update ();
-
-					DEBUG ("REAL AFTER SOLVE " << (data [name].ptr (real_real) [200]));
-
-					// #pragma omp atomic
-					data [name].component_flags |= solved;
-				}
-				
-				completely_solved = true;
-				for (iterator iter = begin (); iter != end (); iter++) {
-					completely_solved = completely_solved && (data [*iter].component_flags & solved);
-				}
+			for (int i = 0; i < (int) corrector_keys.size (); ++i)
+			{
+				data [corrector_keys [i]].component_flags &= ~solved;
+				equations [corrector_keys [i]]->solve ();
 			}
 			
-			for (iterator iter = begin (); iter != end (); iter++) {
+			for (iterator iter = begin (); iter != end (); iter++)
+			{
 				equations [*iter]->reset ();
 				data.transformers [*iter]->update ();
 			}
-			
-			// Make certain everything is fully transformed
-			
+
 			TRACE ("Solve complete.");
 		}
 		

@@ -175,175 +175,118 @@ namespace plans
 
 			int info;
 			TRACE ("Solving...");
-			bool retransform = false;
 			int kl = 2;
 			int ku = 1;
 			int lda = 2 * kl + ku + 1;
 				
 			linalg::scale ((m + 2) * ldn, 0.0, &data_temp [0]);
 		
-			// std::shared_ptr <plans::plan <datatype> > transform_x = std::shared_ptr <plans::plan <datatype> > (new plans::transforms::vertical <datatype> (n, m, data_x, NULL, 0x00, element_flags, component_flags_x));
-			// std::shared_ptr <plans::plan <datatype> > transform_z = std::shared_ptr <plans::plan <datatype> > (new plans::transforms::vertical <datatype> (n, m, data_z, NULL, 0x00, element_flags, component_flags_z));
+			datatype scalar = acos (-1.0) * 2.0 / (pos_n [n - 1] - pos_n [0]);
+			datatype *data_ptr = &data_temp [1];
 			
-			// if (*component_flags_x & transformed_vertical) {
-			// 	DEBUG ("TRANSFORM!!!");
-			// 	transform_x->execute ();
-			// 	transform_z->execute ();
-			// 	retransform = true;
-			// }
-			// if (!(*component_flags_x & transformed_vertical)) {
-				datatype scalar = acos (-1.0) * 2.0 / (pos_n [n - 1] - pos_n [0]);
-				datatype *data_ptr = &data_temp [1];
-				
-				datatype *npos_m = &pos_m [excess_0], *ndata_z = &data_z [excess_0], *ndata_x = &data_x [excess_0];
-				
-				data_ptr += excess_0;
+			datatype *npos_m = &pos_m [excess_0], *ndata_z = &data_z [excess_0], *ndata_x = &data_x [excess_0];
 			
-				linalg::scale (ldn * (m + 2), 0.0, &data_temp [0]);
-				
-				// std::stringstream debug;
-				// for (int j = 0; j < m; ++j) {
-				// 	for (int i = 0; i < ldn; ++i) {
-				// 		debug << data_z [i * m + j] << " ";
-				// 	}
-				// 	DEBUG (debug.str ());
-				// 	debug.str ("");
-				// }
-				
-				// Calculate the horizontal derivatives of the horizontal component
-				for (int i = 2; i < ldn; i += 2) {
-					for (int j = -1; j < m + 1 + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
-						data_ptr [i * (m + 2) + j] = -scalar * (i / 2) * ndata_x [(i + 1) * m + j];
-						data_ptr [(i + 1) * (m + 2) + j] = scalar * (i / 2) * ndata_x [i * m + j];
-					}
-				}
-				
-				// Calculate the vertical derivatives of the vertical component
-				for (int i = 0; i < ldn; ++i) {
-					if (id == 0) {
-						data_ptr [i * (m + 2) - 1] = 0.0;
-						data_ptr [i * (m + 2)] += (ndata_z [i * m + 1] - ndata_z [i * m]) / (npos_m [1] - npos_m [0]);
-					}
-					for (int j = (id == 0 ? 1 : 0); j < m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
-						data_ptr [i * (m + 2) + j] += (ndata_z [i * m + j + 1] - ndata_z [i * m + j - 1]) / (npos_m [j + 1] - npos_m [j - 1]);
-					}
-					if (id == np - 1) {
-						data_ptr [i * (m + 2) + (m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0))] = 0.0;
-					}
-				}
-			
-				linalg::block::banded_solve (id, np, m + (nbot == 0 ? 1 : -nbot - excess_n - 1) + (id == 0 ? 1: -excess_0 - ntop), kl, ku, &matrix [(id == 0 ? 0 : 1 + excess_0) * 6], &ipiv [0], &data_temp [(id == 0 ? 0 : 1 + excess_0)], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn, lda, m + 2 + kl + ku, m + 2);
-				
-				// We can define our frame to be one with no net vertical flux
-				linalg::scale (2 * (m + 2), 0.0, &data_temp [0]);
-				// DEBUG (data_x [0] << " " << data_x [m] << " " << data_x [2 * m] << " " << data_x [3 * m] << " " << data_x [(ldn - 2) * m] << " " << data_x [(ldn - 1) * m]);
-				// DEBUG (data_z [0] << " " << data_z [m] << " " << data_z [2 * m] << " " << data_z [3 * m] << " " << data_z [(ldn - 4) * m] << " " << data_z [(ldn - 3) * m] << " " << data_z [(ldn - 2) * m] << " " << data_z [(ldn - 1) * m]);
-				
-				// Communicate the edges of the pressure
-				if (boundary_n) {
-					boundary_n->send (&data_temp [m - excess_n - 1], m + 2, 1);
-				}
-				if (boundary_0) {
-					boundary_0->receive (&data_ptr [-1], m + 2, 1, 0.0);
-					boundary_0->send (&data_ptr [0], m + 2, 1);
-				}
-				if (boundary_n) {
-					boundary_n->receive (&data_temp [m - excess_n], m + 2, 1, 0.0);
-				}
-				
-				// Update the pressure
-				/*
-					TODO Make this more efficient
-				*/
-				
-				// Update the velocities with the pressure derivatives
-				// DEBUG (ldn * (m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0)) + excess_0 << " " << ldn * m)
-				for (int i = 2; i < ldn; ++i) {
-					for (int j = 0; j < m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
-						ndata_z [i * m + j] -= (data_ptr [i * (m + 2) + j] - data_ptr [i * (m + 2) + j - 1]) / (new_pos [j] - new_pos [j - 1]);
-					}
-				}
-				
-				// DEBUG (ldn * (m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0)) + excess_0 << " " << ldn * m)
-				for (int i = 2; i < ldn; i += 2) {
-					for (int j = 0; j < m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
-						ndata_x [i * m + j] += scalar * (i / 2) * (data_ptr [(i + 1) * (m + 2) + j] + data_ptr [(i + 1) * (m + 2) + j - 1]) / 2.0;
-						ndata_x [(i + 1) * m + j] -= scalar * (i / 2) * (data_ptr [i * (m + 2) + j] + data_ptr [i * (m + 2) + j - 1]) / 2.0;
-					}
-				}
-
-				for (int i = 2; i < ldn; ++i) {
-					for (int j = 0; j < m + 1 - (nbot == 0 ? 0 : excess_n + 1) - excess_0; ++j) {
-						data_out [i * m + j + excess_0] = (data_temp [i * (m + 2) + j + excess_0] + data_temp [i * (m + 2) + j + 1 + excess_0]) / 2.0;
-					}
-				}
-				
-				// Since only one boundary was solved, get the other and the overlap region from the adjacent element
-				if (boundary_0) {
-					// This should be 1 + ex_excess_0
-					boundary_0->send (&data_z [excess_0], m, 1 + excess_0);
-				}
-				if (boundary_n) {
-					boundary_n->receive (&data_z [m - 1 - excess_n], m, 1 + excess_n, 0.0);
-					// This should be m - 1 - excess_n - ex_excess_n and ex_excess_n
-					boundary_n->send (&data_z [m - 1 - excess_n - excess_n], m, excess_n);
-				}
-				if (boundary_0) {
-					boundary_0->receive (&data_z [0], m, excess_0, 0.0);
-				}
-
-				if (boundary_0) {
-					// This should be 1 + ex_excess_0
-					boundary_0->send (&data_x [excess_0], m, 1 + excess_0);
-				}
-				if (boundary_n) {
-					boundary_n->receive (&data_x [m - 1 - excess_n], m, 1 + excess_n, 0.0);
-					// This should be m - 1 - excess_n - ex_excess_n and ex_excess_n
-					boundary_n->send (&data_x [m - 1 - excess_n - excess_n], m, excess_n);
-				}
-				if (boundary_0) {
-					boundary_0->receive (&data_x [0], m, excess_0, 0.0);
-				}
-				
-				// DEBUG (data_x [0] << " " << data_x [m] << " " << data_x [2 * m] << " " << data_x [3 * m] << " " << data_x [(ldn - 2) * m] << " " << data_x [(ldn - 1) * m]);
-				// DEBUG (data_z [0] << " " << data_z [m] << " " << data_z [2 * m] << " " << data_z [3 * m] << " " << data_z [(ldn - 4) * m] << " " << data_z [(ldn - 3) * m] << " " << data_z [(ldn - 2) * m] << " " << data_z [(ldn - 1) * m]);
-				
-				// DEBUG (data_x [0] << " " << data_x [m] << " " << data_x [2 * m] << " " << data_x [3 * m] << " " << data_x [(ldn - 2) * m] << " " << data_x [(ldn - 1) * m]);
-				// DEBUG (data_z [0] << " " << data_z [m] << " " << data_z [2 * m] << " " << data_z [3 * m] << " " << data_z [(ldn - 4) * m] << " " << data_z [(ldn - 3) * m] << " " << data_z [(ldn - 2) * m] << " " << data_z [(ldn - 1) * m]);
-				//
-				// for (int j = 0; j < m; ++j) {
-				// 	for (int i = 0; i < ldn; ++i) {
-				// 		debug << data_z [i * m + j] << " ";
-				// 	}
-				// 	DEBUG (debug.str ());
-				// 	debug.str ("");
-				// }
-
-	#ifdef CHECKNAN
-				for (int j = 0; j < m; ++j) {
-					for (int i = 0; i < ldn; ++i) {
-						if (std::isnan (data_out [i * m + j])) {
-							FATAL ("Nan in laplace solver.");
-							throw linalg::exceptions::nan ();
-						}
-					}
-				}
-	#endif
-			// } else {
-			// 	// FATAL ("SHOULDN'T BE HERE" << *component_flags_x);
-			// 	// throw 0;
-			// }
+			data_ptr += excess_0;
 		
-			// if (retransform) {
-			// 	transform_x->execute ();
-			// 	transform_z->execute ();
-			// }
+			linalg::scale (ldn * (m + 2), 0.0, &data_temp [0]);
 			
-			// No net vertical flux
-			// linalg::scale (2 * m, 0.0, data_z);
-			// // linalg::scale (2 * m, 0.0, data_x);
-			// linalg::scale (m, 0.0, data_x + (ldn - 1) * m);
-			// linalg::scale (m, 0.0, data_z + (ldn - 1) * m);
+			// Calculate the horizontal derivatives of the horizontal component
+			#pragma omp parallel for
+			for (int i = 2; i < ldn; i += 2) {
+				for (int j = -1; j < m + 1 + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
+					data_ptr [i * (m + 2) + j] = -scalar * (i / 2) * ndata_x [(i + 1) * m + j];
+					data_ptr [(i + 1) * (m + 2) + j] = scalar * (i / 2) * ndata_x [i * m + j];
+				}
+			}
+			
+			// Calculate the vertical derivatives of the vertical component
+			#pragma omp parallel for
+			for (int i = 0; i < ldn; ++i) {
+				if (id == 0) {
+					data_ptr [i * (m + 2) - 1] = 0.0;
+					data_ptr [i * (m + 2)] += (ndata_z [i * m + 1] - ndata_z [i * m]) / (npos_m [1] - npos_m [0]);
+				}
+				for (int j = (id == 0 ? 1 : 0); j < m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
+					data_ptr [i * (m + 2) + j] += (ndata_z [i * m + j + 1] - ndata_z [i * m + j - 1]) / (npos_m [j + 1] - npos_m [j - 1]);
+				}
+				if (id == np - 1) {
+					data_ptr [i * (m + 2) + (m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0))] = 0.0;
+				}
+			}
+		
+			linalg::block::banded_solve (id, np, m + (nbot == 0 ? 1 : -nbot - excess_n - 1) + (id == 0 ? 1: -excess_0 - ntop), kl, ku, &matrix [(id == 0 ? 0 : 1 + excess_0) * 6], &ipiv [0], &data_temp [(id == 0 ? 0 : 1 + excess_0)], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn, lda, m + 2 + kl + ku, m + 2);
+			
+			// We can define our frame to be one with no net vertical flux
+			linalg::scale (2 * (m + 2), 0.0, &data_temp [0]);
+			
+			// Communicate the edges of the pressure
+			if (boundary_n) {
+				boundary_n->send (&data_temp [m - excess_n - 1], m + 2, 1);
+			}
+			if (boundary_0) {
+				boundary_0->receive (&data_ptr [-1], m + 2, 1, 0.0);
+				boundary_0->send (&data_ptr [0], m + 2, 1);
+			}
+			if (boundary_n) {
+				boundary_n->receive (&data_temp [m - excess_n], m + 2, 1, 0.0);
+			}
+			
+			// Update the velocities with the pressure derivatives
+			#pragma omp parallel for
+			for (int i = 2; i < ldn; i += 2) {
+				for (int j = 0; j < m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
+					ndata_x [i * m + j] += scalar * (i / 2) * (data_ptr [(i + 1) * (m + 2) + j] + data_ptr [(i + 1) * (m + 2) + j - 1]) / 2.0;
+					ndata_x [(i + 1) * m + j] -= scalar * (i / 2) * (data_ptr [i * (m + 2) + j] + data_ptr [i * (m + 2) + j - 1]) / 2.0;
+				}
+			}
+
+			#pragma omp parallel for
+			for (int i = 2; i < ldn; ++i) {
+				for (int j = 0; j < m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
+					ndata_z [i * m + j] -= (data_ptr [i * (m + 2) + j] - data_ptr [i * (m + 2) + j - 1]) / (new_pos [j] - new_pos [j - 1]);
+				}
+				for (int j = 0; j < m + 1 - (nbot == 0 ? 0 : excess_n + 1) - excess_0; ++j) {
+					data_out [i * m + j + excess_0] = (data_temp [i * (m + 2) + j + excess_0] + data_temp [i * (m + 2) + j + 1 + excess_0]) / 2.0;
+				}
+			}
+			
+			// Since only one boundary was solved, get the other and the overlap region from the adjacent element
+			if (boundary_0) {
+				// This should be 1 + ex_excess_0
+				boundary_0->send (&data_z [excess_0], m, 1 + excess_0);
+			}
+			if (boundary_n) {
+				boundary_n->receive (&data_z [m - 1 - excess_n], m, 1 + excess_n, 0.0);
+				// This should be m - 1 - excess_n - ex_excess_n and ex_excess_n
+				boundary_n->send (&data_z [m - 1 - excess_n - excess_n], m, excess_n);
+			}
+			if (boundary_0) {
+				boundary_0->receive (&data_z [0], m, excess_0, 0.0);
+			}
+
+			if (boundary_0) {
+				// This should be 1 + ex_excess_0
+				boundary_0->send (&data_x [excess_0], m, 1 + excess_0);
+			}
+			if (boundary_n) {
+				boundary_n->receive (&data_x [m - 1 - excess_n], m, 1 + excess_n, 0.0);
+				// This should be m - 1 - excess_n - ex_excess_n and ex_excess_n
+				boundary_n->send (&data_x [m - 1 - excess_n - excess_n], m, excess_n);
+			}
+			if (boundary_0) {
+				boundary_0->receive (&data_x [0], m, excess_0, 0.0);
+			}
+
+#ifdef CHECKNAN
+			for (int j = 0; j < m; ++j) {
+				for (int i = 0; i < ldn; ++i) {
+					if (std::isnan (data_out [i * m + j])) {
+						FATAL ("Nan in laplace solver.");
+						throw linalg::exceptions::nan ();
+					}
+				}
+			}
+#endif
 
 			var_x.component_flags &= ~transforms::updated;
 			var_x.last_update = get_state ();

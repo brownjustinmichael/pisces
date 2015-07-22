@@ -46,6 +46,7 @@ namespace data
 		vector = 0x10,
 		vector2D = 0x10,
 		vector3D = 0x20,
+		corrector = 0x40
 	};
 
 	/*!**********************************************************************
@@ -76,6 +77,7 @@ namespace data
 		datatype *weights;
 		
 	public:
+		std::map <std::string, bool> is_corrector;
 		std::map <std::string, std::shared_ptr <plans::transforms::transformer <datatype>>> transformers;
 
 		datatype duration; //!< The total time elapsed in the simulation thus far
@@ -164,6 +166,7 @@ namespace data
 			}
 			scalar_names.push_back (i_name);
 			std::sort (scalar_names.begin (), scalar_names.end ());
+			is_corrector [i_name] = i_flags & corrector;
 			return var;
 		}
 		
