@@ -66,6 +66,7 @@ namespace grids
 			}
 		}
 		component_flags &= ~updated;
+		last_update = 0;
 		state++;
 		return state;
 	}

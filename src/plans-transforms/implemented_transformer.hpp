@@ -74,8 +74,12 @@ namespace plans
 			 * \copydoc transformer::_transform
 			 ************************************************************************/
 			void update () {
-				if ((data.component_flags & grids::updated)) return;
+				if ((data.component_flags & grids::updated)) {
+					DEBUG ("Skipping");
+					return;
+				}
 				int state = data.last_update;
+				DEBUG ("Updating from " << state);
 				if (state == real_real) {
 					forward_horizontal_transform->execute ();
 					forward_vertical_transform->execute ();

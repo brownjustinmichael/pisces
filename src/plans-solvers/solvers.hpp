@@ -41,13 +41,11 @@ namespace plans
 			boundary_n = std::shared_ptr <typename boundaries::boundary <datatype>::factory> (new typename boundaries::communicating_boundary <datatype>::factory (equation_ptr->messenger_ptr));
 		}
 		equation_ptr->add_solver (typename solvers::incompressible <datatype>::factory (equation_ptr->messenger_ptr,  *boundary_0, *boundary_n, *vel_n_ptr, *vel_m_ptr), solvers::x_solver);
-			equation_ptr->get_solver (solvers::x_solver)->add_dependency (&*vel_n_ptr);
-			equation_ptr->get_solver (solvers::x_solver)->add_dependency (&*vel_m_ptr);
 			return equation_ptr;
 	}
 
 	template <class datatype>
-	std::shared_ptr <solvers::equation <datatype>> pdiv (std::shared_ptr <solvers::equation <datatype>> equation_ptr, std::shared_ptr <solvers::equation <datatype>> vel_n_ptr, std::shared_ptr <solvers::equation <datatype>> vel_m_ptr, datatype *pressure, datatype gamma = 5./3.) {
+	std::shared_ptr <solvers::equation <datatype>> pdiv (std::shared_ptr <solvers::equation <datatype>> equation_ptr, std::shared_ptr <solvers::equation <datatype>> vel_n_ptr, std::shared_ptr <solvers::equation <datatype>> vel_m_ptr, datatype *pressure, datatype *density, datatype *x_vel, datatype *z_vel, datatype gamma = 5./3.) {
 		std::shared_ptr <typename boundaries::boundary <datatype>::factory> boundary_0, boundary_n;
 		if (equation_ptr->messenger_ptr->get_id () > 0) {
 			boundary_0 = std::shared_ptr <typename boundaries::boundary <datatype>::factory> (new typename boundaries::communicating_boundary <datatype>::factory (equation_ptr->messenger_ptr));
@@ -55,9 +53,7 @@ namespace plans
 		if (equation_ptr->messenger_ptr->get_id () + 1 < equation_ptr->messenger_ptr->get_np ()) {
 			boundary_n = std::shared_ptr <typename boundaries::boundary <datatype>::factory> (new typename boundaries::communicating_boundary <datatype>::factory (equation_ptr->messenger_ptr));
 		}
-		equation_ptr->add_solver (typename solvers::pseudo_incompressible <datatype>::factory (equation_ptr->messenger_ptr,  *boundary_0, *boundary_n, gamma, *vel_n_ptr, *vel_m_ptr, pressure), solvers::x_solver);
-			equation_ptr->get_solver (solvers::x_solver)->add_dependency (&*vel_n_ptr);
-			equation_ptr->get_solver (solvers::x_solver)->add_dependency (&*vel_m_ptr);
+		equation_ptr->add_solver (typename solvers::pseudo_incompressible <datatype>::factory (equation_ptr->messenger_ptr,  *boundary_0, *boundary_n, *vel_n_ptr, *vel_m_ptr, density, pressure, x_vel, z_vel, gamma), solvers::x_solver);
 			return equation_ptr;
 	}
 

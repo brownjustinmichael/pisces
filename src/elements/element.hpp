@@ -255,8 +255,10 @@ namespace pisces
 			// Execute the equations
 			for (int i = 0; i < (int) equation_keys.size (); i++)
 			{
+				DEBUG ("Solving " << equation_keys [i]);
 				data [equation_keys [i]].component_flags &= ~solved;
 				equations [equation_keys [i]]->solve ();
+				// data.transformers [equation_keys [i]]->update ();
 			}
 
 			#pragma omp parallel for
@@ -267,14 +269,18 @@ namespace pisces
 
 			for (typename data::data <datatype>::iterator iter = data.begin (); iter != data.end (); ++iter)
 			{
+				DEBUG ("Updating " << *iter);
 				data [*iter].update ();
 				if (data.transformers [*iter]) data.transformers [*iter]->update ();
 			}
 
 			for (int i = 0; i < (int) corrector_keys.size (); ++i)
 			{
+				DEBUG ("Correcting " << corrector_keys [i]);
 				data [corrector_keys [i]].component_flags &= ~solved;
 				equations [corrector_keys [i]]->solve ();
+				equations [corrector_keys [i]]->reset ();
+				if (data.transformers [corrector_keys [i]]) data.transformers [corrector_keys [i]]->update ();
 			}
 			
 			for (iterator iter = begin (); iter != end (); iter++)

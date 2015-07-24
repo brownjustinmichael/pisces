@@ -117,7 +117,7 @@ namespace plans
 		 * \return The version of the class
 		 ************************************************************************/
 		static versions::version& version () {
-			static versions::version version ("1.1.1.0");
+			static versions::version version ("2.1.1.0");
 			return version;
 		}
 		

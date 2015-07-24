@@ -37,10 +37,10 @@ namespace pisces
 
 		data ["density"] == data ["composition"] / data ["temperature"] * data ["bg_pressure"];
 
-		*split_solver <datatype> (equations ["composition"], timestep, neumann (0.0), neumann (0.0)) 
-		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
-		== 
-		params ["equations.composition.diffusion"] * diff <datatype> ();
+		// *split_solver <datatype> (equations ["composition"], timestep, dirichlet (2.0), dirichlet (1.0)) 
+		// // + advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
+		// == 
+		// params ["equations.composition.diffusion"] * diff <datatype> ();
 
 		// Set up the x_velocity equation, note the missing pressure term, which is handled in div
 		*split_solver <datatype> (equations ["x_momentum"], timestep, neumann (0.0), neumann (0.0)) 
@@ -59,8 +59,9 @@ namespace pisces
 		// + vertical_stress (data ["x_velocity"]);
 		data ["z_momentum"].component_flags |= plans::solvers::ignore_net;
 
-		// // Set up the velocity constraint
-		// *pdiv <datatype> (equations ["pressure"], equations ["x_momentum"], equations ["z_momentum"], data ["x_velocity"], data ["z_velocity"], data ["density"], data ["bg_pressure"])
+		// *div <datatype> (equations ["pressure"], equations ["x_momentum"], equations ["z_momentum"]);
+		// Set up the velocity constraint
+		*pdiv <datatype> (equations ["pressure"], equations ["x_momentum"], equations ["z_momentum"], data ["density"].ptr (real_spectral), data ["bg_pressure"].ptr (), data ["x_velocity"].ptr (real_spectral), data ["z_velocity"].ptr (real_spectral));
 		// ==
 		// 0.0;
 		
