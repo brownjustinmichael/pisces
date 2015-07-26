@@ -64,11 +64,17 @@ namespace plans
 						
 			std::vector <datatype> x; //!< Additional storage for the block banded solve
 
+			// std::shared_ptr <plans <datatype>> transform;
+
 			std::vector <datatype> matrix, positions, new_positions, bufferl, bufferr, data_temp; //!< The matrix data for the banded solve
 			std::vector <int> ipiv; //!< The positional swap information for the banded solve
 			std::vector <int> xipiv; //!< The positional swap information for the block banded solve
 			std::vector <datatype> grad_pressure, grad_density;
 			std::vector <datatype> grad2_pressure;
+
+			grids::variable <datatype> &rhs;
+
+			std::shared_ptr <plan <datatype>> transform;
 
 		public:
 			/*!**********************************************************************
@@ -85,7 +91,7 @@ namespace plans
 			 * \param i_component_x A pointer to the x-component flags
 			 * \param i_component_z A pointer to the z-component flags
 			 ************************************************************************/
-			pseudo_incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z, datatype *i_density, datatype *i_pressure, datatype *i_x_vel, datatype *i_z_vel, datatype i_gamma = 5. / 3.);
+			pseudo_incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out, grids::variable <datatype> &rhs, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z, datatype *i_density, datatype *i_pressure, datatype i_gamma = 5. / 3.);
 			
 			virtual ~pseudo_incompressible () {}
 
@@ -163,8 +169,8 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc solver::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out, datatype *i_rhs) const {
-					return std::shared_ptr <plans::solvers::solver <datatype>> (new pseudo_incompressible (messenger_ptr, boundary_factory_0 ? boundary_factory_0->instance (i_data.get_grids (), false) : boundary_0, boundary_factory_n ? boundary_factory_n->instance (i_data.get_grids (), true) : boundary_n, i_data, i_data_out, equation_x.data_var (), equation_z.data_var (), density, pressure, x_vel, z_vel, gamma));
+				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out, grids::variable <datatype> &i_rhs) const {
+					return std::shared_ptr <plans::solvers::solver <datatype>> (new pseudo_incompressible (messenger_ptr, boundary_factory_0 ? boundary_factory_0->instance (i_data.get_grids (), false) : boundary_0, boundary_factory_n ? boundary_factory_n->instance (i_data.get_grids (), true) : boundary_n, i_data, i_data_out, i_rhs, equation_x.data_var (), equation_z.data_var (), density, pressure, gamma));
 				}
 			};
 		};

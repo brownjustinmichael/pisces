@@ -32,7 +32,7 @@ namespace plans
 	namespace solvers
 	{
 		template <class datatype>
-		pseudo_incompressible <datatype>::pseudo_incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z, datatype *i_density, datatype *i_pressure, datatype *i_x_vel, datatype *i_z_vel, datatype i_gamma) : 
+		pseudo_incompressible <datatype>::pseudo_incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out, grids::variable <datatype> &i_rhs, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z, datatype *i_density, datatype *i_pressure, datatype i_gamma) : 
 		solver <datatype> (i_data, i_data_out, this->get_state_in (), this->get_state ()), 
 		n (i_data.get_grid (0).get_n ()), 
 		ldn (i_data.get_grid (0).get_ld ()), 
@@ -46,7 +46,8 @@ namespace plans
 		grid_n (i_data.get_grid (0)), 
 		grid_m (i_data.get_grid (1)), 
 		pos_n (&grid_n [0]), 
-		messenger_ptr (i_messenger_ptr) {
+		messenger_ptr (i_messenger_ptr), 
+		rhs (i_rhs) {
 			TRACE ("Building laplace solver...");
 			component_flags_x = &(i_data_x.component_flags);
 			component_flags_z = &(i_data_z.component_flags);
@@ -54,9 +55,6 @@ namespace plans
 			pressure = i_pressure;
 			density = i_density;
 			gamma = i_gamma;
-
-			x_vel = i_x_vel;
-			z_vel = i_z_vel;
 
 			boundary_0 = i_boundary_0;
 			boundary_n = i_boundary_n;
@@ -130,6 +128,8 @@ namespace plans
 			bufferr.resize (np * (m + 2) * ku * ldn);
 			
 			data_temp.resize ((m + 2) * ldn);
+
+			transform = typename std::shared_ptr <plan <datatype>> (new  transforms::horizontal <datatype> (rhs, real_real));
 		}
 
 		template <class datatype>
@@ -168,12 +168,12 @@ namespace plans
 					matrix_ptr [(j - 2) * lda + 2] = 1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (npos_m [j + 1] - npos_m [j - 1]);
 					matrix_ptr [(j - 1) * lda + 1] = 
 						-1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (npos_m [j + 1] - npos_m [j - 1])
-						- scalar * (i / 2) * (i / 2) / 2.0;
+						- scalar * (i / 2) * (i / 2) / 2.0
 						- grad_pressure [excess_0 + j] / gamma * grad_pressure [excess_0 + j] / gamma / 2.
 						- grad2_pressure [excess_0 + j] / gamma / 2.;
 					matrix_ptr [(j) * lda] = 
 						-1.0 / (new_pos [j + 1] - new_pos [j]) / (npos_m [j + 1] - npos_m [j - 1])
-						- scalar * (i / 2) * (i / 2) / 2.0;
+						- scalar * (i / 2) * (i / 2) / 2.0
 						- grad_pressure [excess_0 + j] / gamma * grad_pressure [excess_0 + j] / gamma / 2.
 						- grad2_pressure [excess_0 + j] / gamma / 2.;
 					matrix_ptr [(j + 1) * lda - 1] = 1.0 / (new_pos [j + 1] - new_pos [j]) / (npos_m [j + 1] - npos_m [j - 1]);
@@ -212,6 +212,30 @@ namespace plans
 			int lda = 2 * kl + ku + 1;
 				
 			linalg::scale ((m + 2) * ldn, 0.0, &data_temp [0]);
+
+			datatype *rhs_real = rhs.ptr ();
+
+			for (int i = 1; i < n - 1; ++i)
+			{
+				for (int j = 1; j < m - 1; ++j)
+				{
+					rhs_real [i * m + j] -= (data_x [i * m + j] + (data_in [(i + 1) * m + j] - data_in [(i - 1) * m + j]) / (pos_n [i + 1] - pos_n [i - 1])) * (density [(i + 1) * m + j] - density [(i - 1) * m + j]) / (pos_n [i + 1] - pos_n [i - 1]);
+					rhs_real [i * m + j] -= (data_z [i * m + j] + data_in [i * m + j] * grad_pressure [j] - (data_in [i * m + j + 1] - data_in [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1])) * (density [i * m + j + 1] - density [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
+				}
+			}
+
+			for (int j = 1; j < m - 1; ++j)
+			{
+				rhs_real [j] -= (data_x [j] + (data_in [m + j] - data_in [j]) / (pos_n [1] - pos_n [0])) * (density [m + j] - density [j]) / (pos_n [1] - pos_n [0]);
+				rhs_real [j] -= (data_z [j] + data_in [j] * grad_pressure [j] - (data_in [j + 1] - data_in [j - 1]) / (pos_m [j + 1] - pos_m [j - 1])) * (density [j + 1] - density [j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
+				rhs_real [(n - 1) * m + j] -= (data_x [(n - 1) * m + j] + (data_in [(n - 1) * m + j] - data_in [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2])) * (density [(n - 1) * m + j] - density [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]);
+				rhs_real [(n - 1) * m + j] -= (data_z [(n - 1) * m + j] + data_in [(n - 1) * m + j] * grad_pressure [j] - (data_in [(n - 1) * m + j + 1] - data_in [(n - 1) * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1])) * (density [(n - 1) * m + j + 1] - density [(n - 1) * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
+			}
+
+			transform->execute ();
+
+			linalg::matrix_copy (m, ldn, rhs_real, &data_temp [1], m, m + 2);
+			linalg::matrix_add_scaled (m, ldn, 1.0, rhs.ptr (real_spectral), &data_temp [1], m, m + 2);
 		
 			datatype scalar = acos (-1.0) * 2.0 / (pos_n [n - 1] - pos_n [0]);
 			datatype *data_ptr = &data_temp [1];
@@ -236,10 +260,10 @@ namespace plans
 			for (int i = 0; i < ldn; ++i) {
 				if (id == 0) {
 					data_ptr [i * (m + 2) - 1] = 0.0;
-					data_ptr [i * (m + 2)] += (ndata_z [i * m + 1] - ndata_z [i * m]) / (npos_m [1] - npos_m [0]);// + ndata_z [i * m] / gamma * grad_pressure [0];
+					data_ptr [i * (m + 2)] += (ndata_z [i * m + 1] - ndata_z [i * m]) / (npos_m [1] - npos_m [0]) + ndata_z [i * m] / gamma * grad_pressure [0];
 				}
 				for (int j = (id == 0 ? 1 : 0); j < m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
-					data_ptr [i * (m + 2) + j] += (ndata_z [i * m + j + 1] - ndata_z [i * m + j - 1]) / (npos_m [j + 1] - npos_m [j - 1]);// + ndata_z [i * m + j] / gamma * grad_pressure [j];
+					data_ptr [i * (m + 2) + j] += (ndata_z [i * m + j + 1] - ndata_z [i * m + j - 1]) / (npos_m [j + 1] - npos_m [j - 1]) + ndata_z [i * m + j] / gamma * grad_pressure [j];
 				}
 				if (id == np - 1) {
 					data_ptr [i * (m + 2) + (m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0))] = 0.0;
@@ -278,8 +302,8 @@ namespace plans
 			#pragma omp parallel for
 			for (int i = 2; i < ldn; ++i) {
 				for (int j = 0; j < m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
-					ndata_z [i * m + j] -= (data_ptr [i * (m + 2) + j] - data_ptr [i * (m + 2) + j - 1]) / (new_pos [j] - new_pos [j - 1]);
-						//- (data_ptr [i * (m + 2) + j] + data_ptr [i * (m + 2) + j - 1]) / 2.0 / gamma * grad_pressure [j] / pressure [j];
+					ndata_z [i * m + j] -= (data_ptr [i * (m + 2) + j] - data_ptr [i * (m + 2) + j - 1]) / (new_pos [j] - new_pos [j - 1])
+						- (data_ptr [i * (m + 2) + j] + data_ptr [i * (m + 2) + j - 1]) / 2.0 / gamma * grad_pressure [j] / pressure [j];
 				}
 				for (int j = 0; j < m + 1 - (nbot == 0 ? 0 : excess_n + 1) - excess_0; ++j) {
 					data_out [i * m + j + excess_0] = (data_temp [i * (m + 2) + j + excess_0] + data_temp [i * (m + 2) + j + 1 + excess_0]) / 2.0;

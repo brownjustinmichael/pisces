@@ -45,7 +45,7 @@ namespace plans
 	}
 
 	template <class datatype>
-	std::shared_ptr <solvers::equation <datatype>> pdiv (std::shared_ptr <solvers::equation <datatype>> equation_ptr, std::shared_ptr <solvers::equation <datatype>> vel_n_ptr, std::shared_ptr <solvers::equation <datatype>> vel_m_ptr, datatype *pressure, datatype *density, datatype *x_vel, datatype *z_vel, datatype gamma = 5./3.) {
+	std::shared_ptr <solvers::equation <datatype>> pdiv (std::shared_ptr <solvers::equation <datatype>> equation_ptr, std::shared_ptr <solvers::equation <datatype>> vel_n_ptr, std::shared_ptr <solvers::equation <datatype>> vel_m_ptr, datatype *density, datatype *pressure, datatype *x_vel, datatype *z_vel, datatype gamma = 5./3.) {
 		std::shared_ptr <typename boundaries::boundary <datatype>::factory> boundary_0, boundary_n;
 		if (equation_ptr->messenger_ptr->get_id () > 0) {
 			boundary_0 = std::shared_ptr <typename boundaries::boundary <datatype>::factory> (new typename boundaries::communicating_boundary <datatype>::factory (equation_ptr->messenger_ptr));
