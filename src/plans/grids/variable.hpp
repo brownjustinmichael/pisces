@@ -124,6 +124,7 @@ namespace grids
 		variable <datatype> &operator== (variable <datatype> &other) {
 			this->reset_vars ();
 			this->add_var (other, add);
+			this->update ();
 			return *this;
 		}
 

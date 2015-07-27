@@ -80,7 +80,6 @@ namespace plans
 				TRACE ("Operating..." << element_flags);
 				// Depending on the direction of the solve, we'll either treat the term as partially implicit or fully explicit
 				if (component_flags & x_solve) {
-					DEBUG ("X SOLVE");
 					if (1.0 - alpha != 0.0) {
 						// #pragma omp parallel for
 						for (int i = 2; i < ldn; ++i) {
@@ -88,8 +87,6 @@ namespace plans
 						}
 					}
 				} else {
-					DEBUG ("Z SOLVE");
-
 					// #pragma omp parallel for
 					for (int i = 2; i < ldn; ++i) {
 						linalg::add_scaled (m * dims, -coeff * pioL2 * (i / 2) * (i / 2), data_in + i * m * dims, data_out + i * m * dims);
@@ -306,6 +303,7 @@ namespace plans
 			 ************************************************************************/
 			virtual void execute () {
 				TRACE ("Executing source...");
+				DEBUG ("The pointer is now " << data_other);
 				for (int i = 0; i < ldn; i += 2)
 				{
 					for (int j = 1; j < m - 1; ++j)

@@ -37,17 +37,21 @@ namespace pisces
 
 		data ["density"] == data ["composition"] / data ["temperature"] * data ["bg_pressure"];
 
-		// *split_solver <datatype> (equations ["composition"], timestep, dirichlet (2.0), dirichlet (1.0)) 
-		// // + advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
-		// == 
-		// params ["equations.composition.diffusion"] * diff <datatype> ();
+		data ["x_velocity"] == data ["x_momentum"] / data ["density"];
+		data ["z_velocity"] == data ["z_momentum"] / data ["density"];
+
+		*split_solver <datatype> (equations ["composition"], timestep, dirichlet (2.0), dirichlet (1.0)) 
+		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
+		== 
+		params ["equations.composition.diffusion"] * density_diff <datatype> (data ["density"]);
 
 		// Set up the x_velocity equation, note the missing pressure term, which is handled in div
 		*split_solver <datatype> (equations ["x_momentum"], timestep, neumann (0.0), neumann (0.0)) 
 		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 		== 
-		params ["equations.velocity.diffusion"] * diff <datatype> ();
-		// + horizontal_stress (data ["z_velocity"]);
+		params ["equations.velocity.diffusion"] * density_diff <datatype> (data ["density"])
+		+ horizontal_stress (data ["z_momentum"])
+		;
 
 		// Set up the z_velocity equation, note the missing pressure term, which is handled in div
 		*split_solver <datatype> (equations ["z_momentum"], timestep, dirichlet (0.0), dirichlet (0.0)) 
@@ -55,15 +59,16 @@ namespace pisces
 		== 
 		- grad_z <datatype> (data ["bg_pressure"])
 		- params ["equations.z_velocity.sources.density"] * src <datatype> (data ["density"])
-		+ params ["equations.velocity.diffusion"] * diff <datatype> ();
-		// + vertical_stress (data ["x_velocity"]);
+		+ params ["equations.velocity.diffusion"] * density_diff <datatype> (data ["density"])
+		+ vertical_stress (data ["x_momentum"])
+		;
 		data ["z_momentum"].component_flags |= plans::solvers::ignore_net;
 
 		// *div <datatype> (equations ["pressure"], equations ["x_momentum"], equations ["z_momentum"]);
 		// Set up the velocity constraint
-		*pdiv <datatype> (equations ["pressure"], equations ["x_momentum"], equations ["z_momentum"], data ["density"].ptr (real_spectral), data ["bg_pressure"].ptr (), data ["x_velocity"].ptr (real_spectral), data ["z_velocity"].ptr (real_spectral));
-		// ==
-		// 0.0;
+		*pdiv <datatype> (equations ["pressure"], equations ["x_momentum"], equations ["z_momentum"], data ["density"].ptr (real_spectral), data ["bg_pressure"].ptr (), data ["x_velocity"].ptr (real_spectral), data ["z_velocity"].ptr (real_spectral))
+		==
+		0.0;
 		
 	TRACE ("Initialized.");
 	}
@@ -111,9 +116,6 @@ namespace data
 		initialize ("z_velocity");
 		initialize ("z_momentum");
 		initialize ("density");
-
-		(*this) ["x_velocity"] == (*this) ["x_momentum"] / (*this) ["density"];
-		(*this) ["z_velocity"] == (*this) ["z_momentum"] / (*this) ["density"];
 
 		// Set up the data from the input file in params
 		this->template setup_from <formats::netcdf> (i_params ["input"]);
