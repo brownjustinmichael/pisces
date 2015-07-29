@@ -11,6 +11,8 @@ Import ("defaults")
 Import ("root")
 Import ("quiet")
 
+print ("I am in directory", os.getcwd ())
+
 def directory (path, dirname):
     """
     Get the directory name relative to the given path
@@ -85,7 +87,7 @@ for dirname, dirnames, filenames in os.walk (path):
         for filename in filenames:
             if filename == "SConscript":
                 # Load any SConscript files found
-                env.SConscript(dirname + '/' + filename, variant_dir = os.path.join (".", directory (path, dirname)), duplicate = 0, exports = {'env': env, "objects": objects, "include_mp": include_mp})
+                env.SConscript(dirname + '/' + filename, duplicate = 0, exports = {'env': env, "objects": objects, "include_mp": include_mp})
                 
             if filename.split ('.') [-1] == 'cpp':
                 # Add any .cpp files found to the list of objects to compile
@@ -107,6 +109,9 @@ env.Default (env.Program(target = "../run/isces_init", source = (["init.cpp"] + 
 env.Default (env.Program(target = "../run/isces_var", source = (["varmain.cpp"] + objects)))
 
 env.Default (env.Program(target = "../run/isces_varinit", source = (["varinit.cpp"] + objects)))
+
+print (Dir('.').abspath)
+print (objects [3] [0].abspath)
 
 # Add the tests, which can be run with scons check
 env.SConscript('../test/SConscript', variant_dir = "./test", duplicate = 0, exports = {'env': env, "objects": objects, "include_mp": include_mp})

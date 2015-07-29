@@ -122,36 +122,4 @@ namespace pisces
 	};
 } /* pisces */
 
-namespace data
-{
-	/*!**********************************************************************
-	 * \brief A data object designed to hold and output thermo-compositional data
-	 ************************************************************************/
-	template <class datatype>
-	class pseudo_data : public implemented_data <datatype>
-	{
-	protected:
-		using implemented_data <datatype>::initialize;
-		using implemented_data <datatype>::n;
-		using implemented_data <datatype>::m;
-		using implemented_data <datatype>::grid_m;
-		using implemented_data <datatype>::iterator;
-		using implemented_data <datatype>::duration;
-		
-		std::vector <datatype> area; //!< A vector containing the area of each cell, for weighted averages
-		
-	public:
-		/*!**********************************************************************
-		 * \param i_axis_n The horizontal axis object
-		 * \param i_axis_m The vertical axis object
-		 * \param i_name The integer name of the element
-		 * \param n_elements The total number of elements
-		 * \param i_params The parameters object associated with the run
-		 ************************************************************************/
-		pseudo_data (grids::axis *i_axis_n, grids::axis *i_axis_m, int i_name, int n_elements, io::parameters& i_params);
-		
-		virtual ~pseudo_data () {}
-	};
-} /* data */
-
 #endif /* end of include guard: pseudo_TWO_D_HPP_OQ800X4X */

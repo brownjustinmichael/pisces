@@ -95,6 +95,10 @@ namespace plans
 			
 			virtual ~pseudo_incompressible () {}
 
+			int get_state_in () {
+				return real_real;
+			}
+
 			int get_state () {
 				return real_spectral;
 			}

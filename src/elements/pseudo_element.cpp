@@ -37,36 +37,40 @@ namespace pisces
 
 		data ["density"] == data ["composition"] / data ["temperature"] * data ["bg_pressure"];
 
-		data ["x_velocity"] == data ["x_momentum"] / data ["density"];
-		data ["z_velocity"] == data ["z_momentum"] / data ["density"];
+		data.transformers ["density"]->update ();
 
 		*split_solver <datatype> (equations ["composition"], timestep, dirichlet (2.0), dirichlet (1.0)) 
 		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		params ["equations.composition.diffusion"] * density_diff <datatype> (data ["density"]);
 
+		*split_solver <datatype> (equations ["temperature"], timestep, dirichlet (2.0), dirichlet (1.0)) 
+		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
+		== 
+		params ["equations.composition.diffusion"] * density_diff <datatype> (data ["density"]);
+
 		// Set up the x_velocity equation, note the missing pressure term, which is handled in div
-		*split_solver <datatype> (equations ["x_momentum"], timestep, neumann (0.0), neumann (0.0)) 
+		*split_solver <datatype> (equations ["x_velocity"], timestep, neumann (0.0), neumann (0.0)) 
 		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		params ["equations.velocity.diffusion"] * density_diff <datatype> (data ["density"])
-		+ horizontal_stress (data ["z_momentum"])
+		+ horizontal_stress (data ["z_velocity"])
 		;
 
 		// Set up the z_velocity equation, note the missing pressure term, which is handled in div
-		*split_solver <datatype> (equations ["z_momentum"], timestep, dirichlet (0.0), dirichlet (0.0)) 
+		*split_solver <datatype> (equations ["z_velocity"], timestep, dirichlet (0.0), dirichlet (0.0)) 
 		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		- grad_z <datatype> (data ["bg_pressure"])
 		- params ["equations.z_velocity.sources.density"] * src <datatype> (data ["density"])
 		+ params ["equations.velocity.diffusion"] * density_diff <datatype> (data ["density"])
-		+ vertical_stress (data ["x_momentum"])
+		+ vertical_stress (data ["x_velocity"])
 		;
-		data ["z_momentum"].component_flags |= plans::solvers::ignore_net;
+		data ["z_velocity"].component_flags |= plans::solvers::ignore_net;
 
-		// *div <datatype> (equations ["pressure"], equations ["x_momentum"], equations ["z_momentum"]);
+		// *div <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"])
 		// Set up the velocity constraint
-		*pdiv <datatype> (equations ["pressure"], equations ["x_momentum"], equations ["z_momentum"], data ["density"].ptr (real_spectral), data ["bg_pressure"].ptr (), data ["x_velocity"].ptr (real_spectral), data ["z_velocity"].ptr (real_spectral))
+		*pdiv <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"], data ["density"].ptr (real_spectral), data ["bg_pressure"].ptr (), data ["x_velocity"].ptr (real_spectral), data ["z_velocity"].ptr (real_spectral))
 		==
 		0.0;
 		
@@ -102,40 +106,3 @@ namespace pisces
 
 	template class pseudo_element <double>;
 } /* pisces */
-
-namespace data
-{
-	template <class datatype>
-	pseudo_data <datatype>::pseudo_data (grids::axis *i_axis_n, grids::axis *i_axis_m, int id, int n_elements, io::parameters& i_params) : implemented_data <datatype> (i_axis_n, i_axis_m, i_params, id, i_params.get <std::string> ("dump.file"), i_params.get <std::string> ("root") + i_params.get <std::string> ("dump.directory"), i_params.get <int> ("dump.every")) {
-		
-		initialize ("pressure", corrector);
-		initialize ("composition");
-		initialize ("temperature");
-		initialize ("x_velocity");
-		initialize ("x_momentum");
-		initialize ("z_velocity");
-		initialize ("z_momentum");
-		initialize ("density");
-
-		// Set up the data from the input file in params
-		this->template setup_from <formats::netcdf> (i_params ["input"]);
-		
-		this->template setup_output_from <formats::netcdf> (i_params ["output.cart"]);
-
-		this->template setup_output_from <formats::netcdf> (i_params ["output.trans"], transformed_horizontal);
-
-		std::shared_ptr <io::output> stat_stream =
-		this->template setup_output_from <formats::netcdf> (i_params ["output.stat"], no_variables);
-
-		for (typename data <datatype>::iterator iter = this->begin (); iter != this->end (); ++iter) {
-			// For each data variable, output z_flux, average derivative across the center, average and max
-			std::string variable = *iter;
-			stat_stream->template append <datatype> ("max_" + variable, this->output_max (variable), formats::scalar);
-			stat_stream->template append <datatype> ("avg_" + variable, this->output_avg (variable), formats::scalar);
-			stat_stream->template append <datatype> ("deriv_" + variable, this->output_deriv (variable), formats::scalar);
-			stat_stream->template append <datatype> ("flux_" + variable, this->output_flux (variable, "z_velocity"), formats::scalar);
-		}
-	}
-	
-	template class pseudo_data <double>;
-} /* data */

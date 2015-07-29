@@ -76,7 +76,7 @@ int main (int argc, char *argv[])
 		
 		TRACE ("Building data");
 		
-		data::pseudo_data <double> data (&horizontal_axis, &vertical_axis, id, n_elements, parameters);
+		data::thermo_compositional_data <double> data (&horizontal_axis, &vertical_axis, id, n_elements, parameters);
 		
 		TRACE ("Constructing element");
 		

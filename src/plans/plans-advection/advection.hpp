@@ -98,50 +98,50 @@ namespace plans
 			 * \copydoc real_plan::execute
 			 ************************************************************************/
 			virtual void execute () {
-				// // Calculate the x component
-				// linalg::scale (m * dims, 0.0, x_ptr + m * (n - 1) * dims);
-				// linalg::matrix_copy (m * dims, n - 1, data_in + m * dims, x_ptr);
-				// linalg::matrix_add_scaled (m * dims, n - 1, -1.0, data_in, x_ptr + m * dims);
-				// linalg::add_scaled (m * dims, 1.0, data_in, x_ptr + m * (n - 1) * dims);
-				// linalg::add_scaled (m * dims, -1.0, data_in + m * (n - 1) * dims, x_ptr);
+				// Calculate the x component
+				linalg::scale (m * dims, 0.0, x_ptr + m * (n - 1) * dims);
+				linalg::matrix_copy (m * dims, n - 1, data_in + m * dims, x_ptr);
+				linalg::matrix_add_scaled (m * dims, n - 1, -1.0, data_in, x_ptr + m * dims);
+				linalg::add_scaled (m * dims, 1.0, data_in, x_ptr + m * (n - 1) * dims);
+				linalg::add_scaled (m * dims, -1.0, data_in + m * (n - 1) * dims, x_ptr);
 			
-				// // Calculate the z component
-				// linalg::matrix_scale (dims, n, 0.0, z_ptr + (m - 1) * dims, m * dims);
-				// linalg::matrix_copy ((m - 1) * dims, n, data_in + dims, z_ptr, m * dims, m * dims);
-				// linalg::matrix_add_scaled ((m - 1) * dims, n, -1.0, data_in, z_ptr + dims, m * dims, m * dims);
-				// linalg::matrix_add_scaled (dims, n, 1.0, data_in, z_ptr, m * dims, m * dims);
-				// linalg::matrix_add_scaled (dims, n, -1.0, data_in + (m - 1) * dims, z_ptr + (m - 1) * dims, m * dims, m * dims);
+				// Calculate the z component
+				linalg::matrix_scale (dims, n, 0.0, z_ptr + (m - 1) * dims, m * dims);
+				linalg::matrix_copy ((m - 1) * dims, n, data_in + dims, z_ptr, m * dims, m * dims);
+				linalg::matrix_add_scaled ((m - 1) * dims, n, -1.0, data_in, z_ptr + dims, m * dims, m * dims);
+				linalg::matrix_add_scaled (dims, n, 1.0, data_in, z_ptr, m * dims, m * dims);
+				linalg::matrix_add_scaled (dims, n, -1.0, data_in + (m - 1) * dims, z_ptr + (m - 1) * dims, m * dims, m * dims);
 			
-				// #pragma omp parallel for
-				// for (int i = 0; i < n; ++i) {
-				// 	for (int j = 0; j < m; ++j) {
-				// 		for (int k = 0; k < dims; ++k)
-				// 		{
-				// 			x_ptr [(i * m + j) * dims + k] = (vel_n [i * m + j] * x_ptr [(i * m + j) * dims + k] * oodx_ptr [i] + vel_m [i * m + j] * z_ptr [i * m + j] * oodz_ptr [j]);
-				// 		}
-				// 	}
-				// }
-			
-				// Scale the whole thing by the coefficient
-				// linalg::matrix_add_scaled (m * dims, n, coeff, x_ptr, data_out);
-
 				#pragma omp parallel for
-				for (int i = 1; i < n - 1; ++i)
-				{
-					for (int j = 1; j < m - 1; ++j)
-					{
-						data_out [i * m + j] += coeff * (vel_m [i * m + j + 1] * data_in [i * m + j + 1] - vel_m [i * m + j - 1] * data_in [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
-						data_out [i * m + j] += coeff * (vel_n [(i + 1) * m + j] * data_in [(i + 1) * m + j] - vel_n [(i - 1) * m + j] * data_in [(i - 1) * m + j]) / (pos_n [i + 1] - pos_n [i - 1]);
+				for (int i = 0; i < n; ++i) {
+					for (int j = 0; j < m; ++j) {
+						for (int k = 0; k < dims; ++k)
+						{
+							x_ptr [(i * m + j) * dims + k] = (vel_n [i * m + j] * x_ptr [(i * m + j) * dims + k] * oodx_ptr [i] + vel_m [i * m + j] * z_ptr [i * m + j] * oodz_ptr [j]);
+						}
 					}
 				}
+			
+				// Scale the whole thing by the coefficient
+				linalg::matrix_add_scaled (m * dims, n, coeff, x_ptr, data_out);
 
-				for (int j = 1; j < m - 1; ++j)
-				{
-					data_out [j] += coeff * (vel_m [j + 1] * data_in [j + 1] - vel_m [j - 1] * data_in [j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
-					data_out [j] += coeff * (vel_n [m + j] * data_in [m + j] - vel_n [j] * data_in [j]) / (pos_n [1] - pos_n [0]);
-					data_out [(n - 1) * m + j] += coeff * (vel_m [(n - 1) * m + j + 1] * data_in [(n - 1) * m + j + 1] - vel_m [(n - 1) * m + j - 1] * data_in [(n - 1) * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
-					data_out [(n - 1) * m + j] += coeff * (vel_n [(n - 1) * m + j] * data_in [(n - 1) * m + j] - vel_n [(n - 2) * m + j] * data_in [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]);
-				}
+				// #pragma omp parallel for
+				// for (int i = 1; i < n - 1; ++i)
+				// {
+				// 	for (int j = 1; j < m - 1; ++j)
+				// 	{
+				// 		data_out [i * m + j] += coeff * (vel_m [i * m + j + 1] * data_in [i * m + j + 1] - vel_m [i * m + j - 1] * data_in [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
+				// 		data_out [i * m + j] += coeff * (vel_n [(i + 1) * m + j] * data_in [(i + 1) * m + j] - vel_n [(i - 1) * m + j] * data_in [(i - 1) * m + j]) / (pos_n [i + 1] - pos_n [i - 1]);
+				// 	}
+				// }
+
+				// for (int j = 1; j < m - 1; ++j)
+				// {
+				// 	data_out [j] += coeff * (vel_m [j + 1] * data_in [j + 1] - vel_m [j - 1] * data_in [j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
+				// 	data_out [j] += coeff * (vel_n [m + j] * data_in [m + j] - vel_n [j] * data_in [j]) / (pos_n [1] - pos_n [0]);
+				// 	data_out [(n - 1) * m + j] += coeff * (vel_m [(n - 1) * m + j + 1] * data_in [(n - 1) * m + j + 1] - vel_m [(n - 1) * m + j - 1] * data_in [(n - 1) * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
+				// 	data_out [(n - 1) * m + j] += coeff * (vel_n [(n - 1) * m + j] * data_in [(n - 1) * m + j] - vel_n [(n - 2) * m + j] * data_in [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]);
+				// }
 			}
 
 			/*!**********************************************************************

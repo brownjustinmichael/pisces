@@ -18,83 +18,111 @@ namespace plans
 	namespace diffusion
 	{
 		template <class datatype>
-		class variable_diffusion : public real_plan <datatype>
+		class variable_diffusion : public implicit_plan <datatype>
 		{
 		protected:
-			using real_plan <datatype>::n;
-			using real_plan <datatype>::ldn;
-			using real_plan <datatype>::m;
-			using real_plan <datatype>::grid_n;
-			using real_plan <datatype>::grid_m;
-			using real_plan <datatype>::data_in;
-			using real_plan <datatype>::data_out;
+			using implicit_plan <datatype>::n;
+			using implicit_plan <datatype>::ldn;
+			using implicit_plan <datatype>::m;
+			using implicit_plan <datatype>::grid_n;
+			using implicit_plan <datatype>::grid_m;
+			using implicit_plan <datatype>::data_in;
+			using implicit_plan <datatype>::data_out;
+			using implicit_plan <datatype>::coeff;
+			using implicit_plan <datatype>::matrix_n;
+			using implicit_plan <datatype>::matrix_m;
 			
-			using real_plan <datatype>::element_flags;
-			using real_plan <datatype>::component_flags;
+			using implicit_plan <datatype>::element_flags;
+			using implicit_plan <datatype>::component_flags;
 
-			datatype *data_source, *spectral_data_source;
+			datatype *data_source, *spectral_data_source, *new_matrix;
+			std::vector<datatype> bg_deriv, bg_deriv2, new_matrix_vec, bg_val, current;
 			const datatype *pos_m;
 			const datatype *pos_n;
 
 		public:
-			variable_diffusion (grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0):
-			real_plan <datatype> (i_data_in, i_data_out, i_coeff),
-			data_source (i_data_source.ptr ()) {
+			variable_diffusion (datatype *matrix_n, datatype *matrix_m, grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0):
+			implicit_plan <datatype> (matrix_n, matrix_m, i_data_in, i_data_out, i_coeff, real_real, real_real),
+			data_source (i_data_source.ptr (real_real)) {
 				pos_n = &grid_n [0];
 				pos_m = &grid_m [0];
-				spectral_data_source = i_data_source.ptr (real_spectral);
+				spectral_data_source = i_data_source.ptr (spectral_spectral);
+				bg_deriv.resize (m, 0.0);
+				bg_deriv2.resize (m, 0.0);
+				bg_val.resize (m, 0.0);
+				new_matrix_vec.resize (m * m, 0.0);
+				new_matrix = &new_matrix_vec [0];
+				current.resize (m * ldn, 0.0);
 			}
 			
-			virtual ~variable_diffusion() {}
+			virtual ~variable_diffusion () {}
 
-			// void setup () {
-			// 	TRACE ("Setting up with coefficient " << coeff);
-			// 	if (matrix_m) {
-			// 		linalg::add_scaled (m, coeff * log (spectral_data_source [1] / spectral_data_source [0]) / (pos_m [1] - pos_m [0]), grid_m.get_data (1), new_matrix, m, m);
-			// 		for (int j = 1; j < m - 1; ++j) {
-			// 			linalg::add_scaled (m, coeff * log (spectral_data_source [j + 1] / spectral_data_source [j - 1]) / (pos_m [j + 1] - pos_m [j - 1]), grid_m.get_data (1) + j, new_matrix + j, m, m);
-			// 			linalg::add_scaled (m, coeff * log (spectral_data_source [j + 1] / spectral_data_source [j]), grid_m.get_data (0) + j, new_matrix + j, m, m);
-			// 		}
-			// 		linalg::add_scaled (m, coeff * log (spectral_data_source [m - 1] / spectral_data_source [m - 2]), grid_m.get_data (1) + m - 1, new_matrix + m - 1, m, m);
-			// 		linalg::add_scaled (m * m, -1.0 * alpha, new_matrix, matrix_m);
-			// 	} else {
-			// 		WARN ("No matrix");
-			// 	}
-			// }
+			void setup () {
+				TRACE ("Setting up with coefficient " << coeff);
+				if (matrix_m) {
+					linalg::add_scaled (m, coeff * log (data_source [1] / data_source [0]) / (pos_m [1] - pos_m [0]), grid_m.get_data (1), new_matrix, m, m);
+					for (int j = 1; j < m - 1; ++j) {
+						bg_deriv [j] = 0.0;
+						bg_deriv2 [j] = 0.0;
+						for (int i = 0; i < n; ++i)
+						{
+							bg_deriv [j] += log (data_source [i * m + j + 1] / data_source [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
+							bg_deriv2 [j] += log (data_source [i * m + j + 1] / data_source [i * m + j]) / (pos_m [j + 1] - pos_m [j]) - log (data_source [i * m + j] / data_source [i * m + j - 1]) / (pos_m [j] - pos_m [j - 1]);
+						}
+						bg_deriv [j] /= n;
+						bg_deriv2 [j] /= n;
+					}
+
+					for (int j = 1; j < m - 1; ++j) {
+						linalg::add_scaled (m, coeff * bg_deriv [j], grid_m.get_data (1) + j, new_matrix + j, m, m);
+
+						linalg::add_scaled (m, coeff * bg_deriv2 [j] / (pos_m [j + 1] - pos_m [j - 1]) * 2., grid_m.get_data (0) + j, new_matrix + j, m, m);
+					}
+					linalg::add_scaled (m, coeff * log (data_source [m - 1] / data_source [m - 2]), grid_m.get_data (1) + m - 1, new_matrix + m - 1, m, m);
+					linalg::add_scaled (m * m, -1.0, new_matrix, matrix_m);
+				} else {
+					WARN ("No matrix");
+				}
+			}
 
 			virtual void execute () {
+				linalg::add_scaled (m * ldn, 1.0, &current [0], data_out);
+				linalg::scale (m * ldn, 0.0, &current [0]);
 				for (int i = 0; i < n; ++i)
 				{
 					for (int j = 1; j < m - 1; ++j)
 					{
-						data_out [i * m + j] += (data_in [i * m + j + 1] + data_in [i * m + j]) / 2. * log (data_source [i * m + j + 1] / data_source [i * m + j]) / (pos_m [j + 1] - pos_m [j]) / (pos_m [j + 1] - pos_m [j - 1]);
-						data_out [i * m + j] -= (data_in [i * m + j] + data_in [i * m + j - 1]) / 2. * log (data_source [i * m + j] / data_source [i * m + j - 1]) / (pos_m [j] - pos_m [j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
+						current [i * m + j] += coeff * (log (data_source [i * m + j + 1] / data_source [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]) - bg_deriv [j]) * (data_in [i * m + j + 1] - data_in [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
+
+						// current [i * m + j] += coeff * ((log (data_source [i * m + j + 1] / data_source [i * m + j]) / (pos_m [j + 1] - pos_m [j]) - log (data_source [i * m + j] / data_source [i * m + j - 1]) / (pos_m [j] - pos_m [j - 1])) - bg_deriv2 [j]) * 2.  / (pos_m [j + 1] - pos_m [j - 1]) * data_in [i * m + j];
 					}
 				}
 
-				// for (int i = 1; i < n - 1; ++i)
-				// {
-				// 	for (int j = 1; j < m - 1; ++j)
-				// 	{
-				// 		data_out [i * m + j] += (data_in [(i + 1) * m + j] + data_in [i * m + j]) / 2. * log (data_source [å(i + 1) * m + j] / data_source [i * m + j]) / (pos_n [i + 1] - pos_n [i]) / (pos_n [i + 1] - pos_n [i - 1]);
-				// 		data_out [i * m + j] -= (data_in [i * m + j] + data_in [(i - 1) * m + j]) / 2. * log (data_source [i * m + j] / data_source [(i - 1) * m + j]) / (pos_n [i] - pos_n [i - 1]) / (pos_n [i + 1] - pos_n [i - 1]);
-				// 	}
-				// }
+				for (int i = 1; i < n - 1; ++i)
+				{
+					for (int j = 1; j < m - 1; ++j)
+					{
+						current [i * m + j] += coeff * (log (data_source [(i + 1) * m + j] / data_source [(i - 1) * m + j]) / (pos_n [i + 1] - pos_n [i - 1])) * (data_in [(i + 1) * m + j] - data_in [(i - 1) * m + j]) / (pos_n [i + 1] - pos_n [i - 1]);
 
-				// for (int j = 1; j < m - 1; ++j)
-				// {
-				// 	data_out [j] += (data_in [m + j] + data_in [j]) / 2. * log (data_source [m + j] / data_source [j]) / (pos_n [1] - pos_n [0]) / 2. / (pos_n [1] - pos_n [0]);
-				// 	data_out [j] -= (data_in [j] + data_in [(n - 1) * m + j]) / 2. * log (data_source [j] / data_source [(n - 1) * m + j]) / (pos_n [1] - pos_n [0]) / 2. / (pos_n [1] - pos_n [0]);
+						// data_out [i * m + j] += coeff * ((log (data_source [(i + 1) * m + j] / data_source [i * m + j]) / (pos_n [i + 1] - pos_n [i]) - log (data_source [i * m + j] / data_source [(i - 1) * m + j]) / (pos_n [i] - pos_n [i - 1]))) * 2. / (pos_n [i + 1] - pos_n [i - 1]) * data_in [i * m + j];
+					}
+				}
 
-				// 	data_out [(n - 1) * m + j] += (data_in [j] + data_in [(n - 1) * m + j]) / 2. * log (data_source [j] / data_source [(n - 1) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]) / 2. / (pos_n [n - 1] - pos_n [n - 2]);
-				// 	data_out [(n - 1) * m + j] -= (data_in [(n - 1) * m + j] + data_in [(n - 2) * m + j]) / 2. * log (data_source [(n - 1) * m + j] / data_source [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]) / 2. / (pos_n [n - 1] - pos_n [n - 2]);
-				// }
+				for (int j = 1; j < m - 1; ++j)
+				{
+					current [m + j] += coeff * (log (data_source [m + j] / data_source [j]) / (pos_n [1] - pos_n [0])) * (data_in [m + j] - data_in [j]) / (pos_n [1] - pos_n [0]);
+					// data_out [j] += coeff * ((log (data_source [m + j] / data_source [j]) / (pos_n [1] - pos_n [0]) - log (data_source [j] / data_source [(n - 1) * m + j]) / (pos_n [1] - pos_n [0]))) / (pos_n [1] - pos_n [0]) * data_in [j];
+
+					current [(n - 1) * m + j] += coeff * (log (data_source [(n - 1) * m + j] / data_source [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2])) * (data_in [(n - 1) * m + j] - data_in [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]);
+					// data_out [(n - 1) * m + j] += coeff * ((log (data_source [j] / data_source [(n - 1) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]) - log (data_source [(n - 1) * m + j] / data_source [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]))) / (pos_n [n - 1] - pos_n [n - 2]) * data_in [(n - 1) * m + j];
+
+				}
 			}
 
 			/*!**********************************************************************
-			 * \copydoc real_plan::factory
+			 * \copydoc implicit_plan::factory
 			 ************************************************************************/
-			class factory : public real_plan <datatype>::factory
+			class factory : public implicit_plan <datatype>::factory
 			{
 			private:
 				grids::variable <datatype> &data_source; //!< The source data pointer for the plan to be constructed
@@ -104,15 +132,15 @@ namespace plans
 				 * \param i_coeff The base coefficient for the plan to be constructed
 				 * \param i_data_source The source data pointer for the plan to be constructed
 				 ************************************************************************/
-				factory (grids::variable <datatype> &i_data_source, datatype i_coeff = 1.0) : real_plan <datatype>::factory (i_coeff), data_source (i_data_source) {}
+				factory (grids::variable <datatype> &i_data_source, datatype i_coeff = 1.0) : implicit_plan <datatype>::factory (i_coeff), data_source (i_data_source) {}
 				
 				virtual ~factory () {}
 				
 				/*!**********************************************************************
-				 * \copydoc real_plan::factory::instance
+				 * \copydoc implicit_plan::factory::instance
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
-					return std::shared_ptr <plans::plan <datatype> > (new variable_diffusion <datatype> (data_source, i_data_in, i_data_out, 1.0));
+					return std::shared_ptr <plans::plan <datatype> > (new variable_diffusion <datatype> (matrices [0], matrices [1], data_source, i_data_in, i_data_out, 1.0));
 				}
 			};
 		};
