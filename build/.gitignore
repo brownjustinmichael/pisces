@@ -6,6 +6,9 @@
 *.cdf
 .scon*
 .scon*/*
+test/*
+test/*/*
+test/*/*/*
 
 !SConstruct
 !Doxyfile
