@@ -29,7 +29,6 @@ namespace pisces
 	protected:
 		using implemented_element <datatype>::element_flags;
 		using implemented_element <datatype>::params;
-		using implemented_element <datatype>::initialize;
 		using implemented_element <datatype>::name;
 		using implemented_element <datatype>::cell_n;
 		using implemented_element <datatype>::cell_m;
@@ -56,6 +55,8 @@ namespace pisces
 		using implemented_element <datatype>::messenger_ptr;
 		
 	public:
+		using implemented_element <datatype>::initialize;
+
 		using element <datatype>::ptr;
 		
 		/*!**********************************************************************
@@ -131,7 +132,6 @@ namespace data
 	class thermo_compositional_data : public implemented_data <datatype>
 	{
 	protected:
-		using implemented_data <datatype>::initialize;
 		using implemented_data <datatype>::n;
 		using implemented_data <datatype>::m;
 		using implemented_data <datatype>::grid_m;
@@ -141,6 +141,8 @@ namespace data
 		std::vector <datatype> area; //!< A vector containing the area of each cell, for weighted averages
 		
 	public:
+		using implemented_data <datatype>::initialize;
+
 		/*!**********************************************************************
 		 * \param i_axis_n The horizontal axis object
 		 * \param i_axis_m The vertical axis object

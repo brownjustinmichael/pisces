@@ -70,49 +70,20 @@ namespace mpi
 	private:
 		int id; //!< The integer id of the current process
 		int np; //!< The integer number of total processes
+		bool finalize;
 		
 		std::vector <int> stati; //!< A vector of the status of each processor
-		
-		class config
-		{
-		public:
-			config (int *argc = NULL, char *** argv = NULL) {
-				// Initialize MPI
-				#ifdef _MPI
-				MPI::Init (*argc, *argv);
-				#endif
-			}
-			
-			virtual ~config () {
-				// Finalize MPI
-				#ifdef _MPI
-				MPI::Finalize ();
-				#endif
-			}
-		};
-		
+
 	public:
 		/*!**********************************************************************
 		 * \param argc An integer pointer to the number of command arguments
 		 * \param argv A pointer to an array of character arrays of command arguments
 		 ************************************************************************/
-		messenger (int* argc = NULL, char*** argv = NULL) {
-#ifdef _MPI
-			static config config_instance (argc, argv);
-			np = MPI::COMM_WORLD.Get_size ();
-			id = MPI::COMM_WORLD.Get_rank ();
-			
-			// Enable the MPI error handler
-			MPI::COMM_WORLD.Set_errhandler(MPI::ERRORS_THROW_EXCEPTIONS);
-#else
-			np = 1;
-			id = 0;
-#endif // _MPI
-			stati.resize (np);
-		}
+		messenger (int* argc = NULL, char*** argv = NULL, bool finalize = true);
 		
 		virtual ~messenger () {
-			kill_all ();
+			INFO ("Shooting the messenger");
+			// kill_all ();
 		}
 		
 		/*!**********************************************************************
@@ -148,58 +119,17 @@ namespace mpi
 		 * 
 		 * \return True if all clear, false if the next process should be skipped
 		 ************************************************************************/
-		bool check_all () {
-			TRACE ("Checking...");
-			int flags = mpi_all_clear;
-#ifdef _MPI
-			// Gather the status of each messenger across the processes
-			MPI::COMM_WORLD.Gather (&flags, 1, mpi_type (&typeid (int)), &stati [0], 1, mpi_type (&typeid (int)), 0);
-#endif // _MPI
-			// Combine all the statuses into one set of binary flags
-			/*
-				TODO Because this is small, it's probably cheaper to combine the flags on every processor
-			*/
-			if (id == 0) {
-				for (int i = 0; i < np; ++i) {
-					flags |= stati [i];
-				}
-			}
-#ifdef _MPI
-			// Broadcast the combined flags
-			MPI::COMM_WORLD.Bcast (&flags, 1, mpi_type (&typeid (int)), 0);
-#endif // _MPI
-			// If there's a fatal flag, kill all processes
-			if (flags & mpi_fatal) {
-				throw 0;
-			}
-			TRACE ("Check complete.");
-			// Return whether every processor is ready for instructions
-			if (flags != mpi_all_clear) {
-				return false;
-			} else {
-				return true;
-			}
-		}
+		bool check_all ();
 		
 		/*!**********************************************************************
 		 * \brief Force the computer to skip any active MPI commands
 		 ************************************************************************/
-		void skip_all () {
-#ifdef _MPI
-			int flags = mpi_skip;
-			MPI::COMM_WORLD.Bcast (&flags, 1, mpi_type (&typeid (int)), 0);
-#endif // _MPI
-		}
+		void skip_all ();
 		
 		/*!**********************************************************************
 		 * \brief Force the computer to kill all MPI processes
 		 ************************************************************************/
-		void kill_all () {
-#ifdef _MPI
-			int flags = mpi_fatal;
-			MPI::COMM_WORLD.Bcast (&flags, 1, mpi_type (&typeid (int)), 0);
-#endif // _MPI
-		}
+		void kill_all ();
 		
 		/*!**********************************************************************
 		 * \brief Send the data to a given process with a specific tag

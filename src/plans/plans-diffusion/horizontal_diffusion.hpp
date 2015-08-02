@@ -51,6 +51,7 @@ namespace plans
 			 ************************************************************************/
 			horizontal (datatype i_alpha, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : implicit_plan <datatype> (i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_coeff, real_spectral), alpha (i_alpha) {
 				TRACE ("Instantiating...");
+				INFO("COEFF IS " << coeff);
 				pioL2 = 4.0 * (std::acos (-1.0) * std::acos (-1.0) / (grid_n [n - 1] - grid_n [0]) / (grid_n [n - 1] - grid_n [0]));
 				setup ();
 			}
@@ -59,6 +60,7 @@ namespace plans
 
 			void setup () {
 				TRACE ("Setting up");
+				INFO("COEFF IS NOW " << coeff);
 				if (matrix_n) {
 					// For Fourier modes, the matrix is diagonal and not particularly complicated
 					// We set up m of these matrices in case there is some z-dependence added in later
@@ -108,7 +110,8 @@ namespace plans
 				 * \param i_coeff The diffusion coefficient for the plan to be constructed
 				 * \param i_alpha The implicit fraction for the plan to be constructed
 				 ************************************************************************/
-				factory (datatype i_coeff = 1.0, datatype i_alpha = 1.0) : implicit_plan <datatype>::factory (i_coeff), alpha (i_alpha) {}
+				factory (datatype i_coeff = 1.0, datatype i_alpha = 1.0) : implicit_plan <datatype>::factory (i_coeff), alpha (i_alpha) {
+				}
 			
 				virtual ~factory () {}
 			
@@ -117,7 +120,7 @@ namespace plans
 				 ************************************************************************/
 				virtual std::shared_ptr <plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					if (coeff) {
-						return std::shared_ptr <plan <datatype> > (new horizontal <datatype> (alpha, matrices [0], matrices [1], i_data_in, i_data_out, 1.0));
+						return std::shared_ptr <plan <datatype> > (new horizontal <datatype> (alpha, matrices [0], matrices [1], i_data_in, i_data_out, coeff));
 					}
 					return std::shared_ptr <plan <datatype> > ();
 				}
@@ -346,7 +349,7 @@ namespace plans
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan <datatype> > (new horizontal_stress <datatype> (data_other, i_data_in, i_data_out, 1.0));
+						return std::shared_ptr <plans::plan <datatype> > (new horizontal_stress <datatype> (data_other, i_data_in, i_data_out, coeff));
 					}
 					return std::shared_ptr <plans::plan <datatype> > ();
 				}

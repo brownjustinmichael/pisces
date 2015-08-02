@@ -136,7 +136,8 @@ namespace data
 			if (variables.find (name) != variables.end () && (int) variables.size () != 0) {
 				return variables [name]->ptr (state) + index * variables [name]->dims ();
 			}
-			return NULL;
+			ERROR ("Variable " << name << " is undefined");
+			throw 500;
 		}
 		
 		/*!**********************************************************************
@@ -254,12 +255,15 @@ namespace data
 		 * 
 		 * Given an output object, prepare it to output all the scalar fields tracked directly by the element. Make it one of the output streams called during output. If flags is normal_stream, output the variables when in Cartesian space, else if flags is transform_stream, output with horizontal grid in Fourier space, but vertical grid in Cartesian space.
 		 ************************************************************************/
-		std::shared_ptr <io::output> setup_output (std::shared_ptr <io::output> output, int state = real_real) {
+		std::shared_ptr <io::output> setup_output (std::shared_ptr <io::output> output, int state = real_real, int flags = 0x00) {
 			// Iterate through the scalar fields and append them to the variables which the output will write to file
+			TRACE ("Setting up output stream...");
+
 			if (!(params ["output.output"].as <bool> ())) return NULL;
 
 			if (!(flags & no_variables)) {
 				for (data::iterator iter = begin (); iter != end (); ++iter) {
+					TRACE ("Appending " << *iter << " to output...");
 					output->append (*iter, (*this) (*iter, state));
 				}
 			}
@@ -274,17 +278,19 @@ namespace data
 		}
 
 		template <class format>
-		std::shared_ptr <io::output> setup_output_from (YAML::Node output_params, const formats::data_grid &grid, int flags) {
+		std::shared_ptr <io::output> setup_output_from (YAML::Node output_params, const formats::data_grid &grid, int state = real_real, int flags = 0x00) {
 			// Iterate through the scalar fields and append them to the variables for which the input will search
+			TRACE ("Setting up output from YAML Node...");
 			if (file_from (output_params) == "") return NULL;
 
 			std::shared_ptr <io::output> output_stream;
 			if (output_params ["timed"].IsDefined () && output_params ["timed"].as <bool> ()) {
 				output_stream.reset (new io::timed_appender_output <datatype, formats::netcdf> (grid, file_from (output_params), timestep, output_params ["every"].as <datatype> ()));
 			} else {
+				DEBUG ("NOT TIMED");
 				output_stream.reset (new io::appender_output <formats::netcdf> (grid, file_from (output_params), output_params ["every"].as <int> ()));
 			}
-			return setup_output (output_stream, flags);
+			return setup_output (output_stream, state, flags);
 		}
 		
 		/*!**********************************************************************
@@ -359,7 +365,12 @@ namespace data
 		 * \param dump_directory The string directory to store the dump
 		 * \param dump_every The frequency to dump to file
 		 ************************************************************************/
-		implemented_data (grids::axis *i_axis_n, grids::axis *i_axis_m, io::parameters &i_params, int i_name = 0, std::string dump_file = "", std::string dump_directory = "./", int dump_every = 1) : data <datatype> (i_params, i_name), grid_n (std::shared_ptr <grids::grid <datatype>> (new typename grids::horizontal::grid <datatype> (i_axis_n))), grid_m (std::shared_ptr <grids::grid <datatype>> (new typename grids::vertical::grid <datatype> (i_axis_m))), n (grid_n->get_n ()), m (grid_m->get_n ()) {
+		implemented_data (grids::axis *i_axis_n, grids::axis *i_axis_m, io::parameters &i_params, int i_name = 0, std::string dump_file = "", std::string dump_directory = "./", int dump_every = 1) : 
+		data <datatype> (i_params, i_name), 
+		grid_n (std::shared_ptr <grids::grid <datatype>> (new typename grids::horizontal::grid <datatype> (i_axis_n))), 
+		grid_m (std::shared_ptr <grids::grid <datatype>> (new typename grids::vertical::grid <datatype> (i_axis_m))), 
+		n (grid_n->get_n ()), 
+		m (grid_m->get_n ()) {
 			// Set up output
 			const formats::data_grid o_grid = formats::data_grid::two_d (n, m, 0, 0, 0, 0);
 			
@@ -421,10 +432,10 @@ namespace data
 		}
 
 		template <class format>
-		std::shared_ptr <io::output> setup_output_from (YAML::Node output_params, int flags = 0x00) {
+		std::shared_ptr <io::output> setup_output_from (YAML::Node output_params, int state = real_real, int flags = 0x00) {
 			const formats::data_grid grid = formats::data_grid::two_d (n, m);
 
-			return data <datatype>::template setup_output_from <format> (output_params, grid, flags);
+			return data <datatype>::template setup_output_from <format> (output_params, grid, state, flags);
 		}
 
 		std::shared_ptr <functors::functor> output_max (std::string variable) {

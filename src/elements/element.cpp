@@ -27,7 +27,7 @@
 namespace pisces
 {
 	template <class datatype>
-	void element <datatype>::run (int &n_steps, int max_steps, int check_every, datatype stop) {
+	void element <datatype>::run (int &n_steps) {
 		TRACE ("Running...");
 		datatype t_timestep;
 
@@ -41,28 +41,30 @@ namespace pisces
 		t_timestep = calculate_min_timestep ();
 		messenger_ptr->min (&t_timestep);
 
+		for (typename data::data <datatype>::iterator iter = data.begin (); iter != data.end (); ++iter) {
+			if (data.transformers [*iter]) data.transformers [*iter]->update ();
+		}
+
 		// Set up openmp to run multiple plans simultaneously
 		omp_set_nested (true);
 		int threads = params.get <int> ("parallel.maxthreads");
 		std::stringstream debug;
+		datatype stop = params ["time.stop"].as <datatype> ();
+		int max_steps = params.get <int> ("time.steps");
+		int check_every = params.get <int> ("grid.rezone.check_every");
 		// Iterate through the total number of timesteps
 		while (n_steps < max_steps && check_every != 0 && duration < stop) {
 			data.reset ();
 			INFO ("Timestep: " << n_steps);
 
+			TIME (
 			data.output ();
+			, output_time, output_duration);
 			
 			// Factorize the matrices
 			TIME (
 			factorize ();
 			, factorize_time, factorize_duration);
-
-			// for (typename data::data <datatype>::iterator iter = data.begin (); iter < data.end (); ++iter)
-			// {
-			// 	if (data [*iter].update ()) {
-			// 		if (data.transformers [*iter]) data.transformers [*iter]->update_from (real_real);
-			// 	}
-			// }
 			
 			TIME (
 			t_timestep = calculate_min_timestep ();
@@ -85,12 +87,12 @@ namespace pisces
 
 			DEBUG (data ["temperature"].ptr (real_real) [800]);
 
-
 			// Check whether the timestep has changed. If it has, mark all equations to be refactorized.
 
 			duration += timestep;
 
 			INFO ("TOTAL TIME: " << duration);
+			if (t_timestep + duration > stop) t_timestep = stop - duration;
 			if (t_timestep != timestep) {
 				for (std::vector <std::string>::iterator iter = data.begin (); iter != data.end (); iter++) {
 					data [*iter].component_flags &= ~plans::solvers::factorized;

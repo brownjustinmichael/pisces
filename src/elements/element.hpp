@@ -52,6 +52,7 @@ namespace pisces
 	class element
 	{
 	protected:
+		int n_steps = 0;
 		std::vector <grids::axis> axes; //!< A vector of axis objects, containing the basic grid information
 		int name; //!< An integer representation of the element, to be used in file output
 		int dimensions; //!< The integer number of dimensions in the element
@@ -370,7 +371,10 @@ namespace pisces
 		 * 
 		 * This method tells the element to begin the main run of the simulation. It runs through all the specified plans in the appropriate order, and updates the values as necessary. Output, if desired, is specified by the output streams.
 		 ************************************************************************/
-		virtual void run (int &n_steps, int max_steps, int check_every = -1, datatype stop = 100.0);
+		 virtual void run (int &n_steps);
+		 virtual void run () {
+		 	run (n_steps);
+		 }
 		
 		/*!**********************************************************************
 		 * \brief Protected method to make a virtual file of the current state

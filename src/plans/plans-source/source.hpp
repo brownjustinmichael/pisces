@@ -86,7 +86,7 @@ namespace plans
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan <datatype> > (new uniform <datatype> (data_source, i_data_in, i_data_out, 1.0));
+						return std::shared_ptr <plans::plan <datatype> > (new uniform <datatype> (data_source, i_data_in, i_data_out, coeff));
 					}
 					return std::shared_ptr <plans::plan <datatype> > ();
 				}
@@ -163,7 +163,7 @@ namespace plans
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan <datatype> > (new uniform_grad_x <datatype> (data_source, i_data_in, i_data_out, 1.0));
+						return std::shared_ptr <plans::plan <datatype> > (new uniform_grad_x <datatype> (data_source, i_data_in, i_data_out, coeff));
 					}
 					return std::shared_ptr <plans::plan <datatype> > ();
 				}
@@ -242,7 +242,7 @@ namespace plans
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan <datatype> > (new uniform_grad_z <datatype> (data_source, i_data_in, i_data_out, 1.0));
+						return std::shared_ptr <plans::plan <datatype> > (new uniform_grad_z <datatype> (data_source, i_data_in, i_data_out, coeff));
 					}
 					return std::shared_ptr <plans::plan <datatype> > ();
 				}
@@ -313,7 +313,7 @@ namespace plans
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan <datatype> > (new z_src <datatype> (data_source, i_data_in, i_data_out, 1.0));
+						return std::shared_ptr <plans::plan <datatype> > (new z_src <datatype> (data_source, i_data_in, i_data_out, coeff));
 					}
 					return std::shared_ptr <plans::plan <datatype> > ();
 				}
@@ -413,7 +413,7 @@ namespace plans
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan <datatype> > (new pressure_grad_1d <datatype> (data_top, data_bot, data_grad, i_data_in, i_data_out, 1.0));
+						return std::shared_ptr <plans::plan <datatype> > (new pressure_grad_1d <datatype> (data_top, data_bot, data_grad, i_data_in, i_data_out, coeff));
 					}
 					return std::shared_ptr <plans::plan <datatype> > ();
 				}
@@ -482,7 +482,7 @@ namespace plans
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan <datatype> > (new constant <datatype> (i_data_in, i_data_out, 1.0));
+						return std::shared_ptr <plans::plan <datatype> > (new constant <datatype> (i_data_in, i_data_out, coeff));
 					}
 					return std::shared_ptr <plans::plan <datatype> > ();
 				}

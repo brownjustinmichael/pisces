@@ -28,6 +28,7 @@ namespace grids
 		int dimensions;
 		std::vector <datatype> data;
 		std::vector <datatype *> vars;
+		int states;
 		// TODO This won't work. We need a way to keep references or entire variables
 		std::vector <variable <datatype> *> inner;
 		std::vector <int> ops;
@@ -37,7 +38,7 @@ namespace grids
 
 	public:
 		int state = 0;
-		int last_update;
+		int last_update = 0;
 		int component_flags;
 		int &element_flags;
 
@@ -48,36 +49,53 @@ namespace grids
 			div = 0x04
 		};
 
-		variable (grids::grid <datatype> &i_grid_m, int &i_element_flags, int states = 3, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags) {
+		variable (grids::grid <datatype> &i_grid_m, int &i_element_flags, int i_states = 3, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags) {
+			DEBUG ("Initializing with " << i_states);
 			grids.push_back (&i_grid_m);
 			total = i_grid_m.get_n ();
-			data.resize (total * dimensions * states, 0.0);
+			data.resize (total * dimensions * i_states, 0.0);
 			ld = 0;
+			states = i_states;
 		}
 
-		variable (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, int &i_element_flags, int states = 3, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags) {
+		variable (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, int &i_element_flags, int i_states = 3, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags) {
+			DEBUG ("Initializing with " << i_states);
 			grids.push_back (&i_grid_n);
 			grids.push_back (&i_grid_m);
-			data.resize (i_grid_m.get_n () * i_grid_n.get_ld () * states * dimensions, 0.0);
+			data.resize (i_grid_m.get_n () * i_grid_n.get_ld () * i_states * dimensions, 0.0);
 			ld = i_grid_m.get_n ();
 			total = i_grid_m.get_n () * i_grid_n.get_ld ();
+			states = i_states;
 		}
 
-		variable (int n, grids::grid <datatype> **i_grids, int &i_element_flags, int states = 3, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags) {
+		variable (int n, grids::grid <datatype> **i_grids, int &i_element_flags, int i_states = 3, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags) {
+			DEBUG ("Initializing with " << i_states);
 			total = n > 1 ? 1 : 0;
 			for (int i = 0; i < n; ++i)
 			{
 				grids.push_back (i_grids [i]);
 				total *= i_grids [i]->get_ld ();
 			}
-			data.resize (total * states * dimensions, 0.0);
+			data.resize (total * i_states * dimensions, 0.0);
 			ld = i_grids [n - 1]->get_ld ();
+			states = i_states;
 		}
 
 		virtual ~variable () {}
 
-		datatype *ptr (int state = 0) {
-			return &data [state * total * dimensions];
+		datatype &operator[] (int index) {
+			component_flags &= ~updated;
+			last_update = 0;
+			state++;
+			return data [index];
+		}
+
+		datatype *ptr (int i_state = 0) {
+			if (i_state >= states) {
+				ERROR ("State " << i_state << " not initialized.");
+				throw 501;
+			}
+			return &data [i_state * total * dimensions];
 		}
 
 		const int size () const {
@@ -126,6 +144,18 @@ namespace grids
 			this->add_var (other, add);
 			this->update ();
 			return *this;
+		}
+
+		variable <datatype> &operator+ (datatype other) {
+			std::shared_ptr <variable <datatype>> new_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags)));
+			std::shared_ptr <variable <datatype>> uni_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags)));
+			linalg::copy (this->size (), &other, uni_var->ptr (), 0);
+			new_var->add_var (*this, add);
+			new_var->add_var (*uni_var, add);
+			tmps.push_back (new_var);
+			tmps.push_back (uni_var);
+
+			return *new_var;
 		}
 
 		variable <datatype> &operator* (variable <datatype> &other) {

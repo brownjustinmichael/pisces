@@ -24,15 +24,14 @@ private:
 	
 public:
 	void test_advection () {
-		std::vector <double> x_velocity, z_velocity, data, rhs, rhs_compare;
 		int n = 200, m = 500;
+		int flags;
+
+		grids::horizontal::grid <double> grid_n (n, -1.0, 1.0);
+		grids::vertical::grid <double> grid_m (m, -1.0, 1.0);
 		
-		x_velocity.resize (n * m);
-		z_velocity.resize (n * m);
-		data.resize (n * m);
-		rhs.resize (n * m);
-		rhs_compare.resize (n * m);
-		
+		grids::variable <double> x_velocity (grid_n, grid_m, flags), z_velocity (grid_n, grid_m, flags), data (grid_n, grid_m, flags), rhs (grid_n, grid_m, flags), rhs_compare (grid_n, grid_m, flags);
+
 		for (int j = 0; j < m; ++j) {
 			for (int i = 0; i < n; ++i) {
 				x_velocity [i * m + j] = rand () % 1000 / 1000;
@@ -41,10 +40,7 @@ public:
 			}
 		}
 		
-		grids::horizontal::grid <double> grid_n (n, -1.0, 1.0);
-		grids::vertical::grid <double> grid_m (m, -1.0, 1.0);
-		
-		plans::advection::uniform <double> plan (grid_n, grid_m, &x_velocity [0], &z_velocity [0], &data [0], &rhs [0], 1.0);
+		plans::advection::uniform <double> plan (x_velocity, z_velocity, data, rhs);
 		
 		plan.execute ();
 		

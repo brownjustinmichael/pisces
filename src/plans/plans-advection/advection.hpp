@@ -168,7 +168,7 @@ namespace plans
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan <datatype> > (new uniform <datatype> (vel_n, vel_m, i_data_in, i_data_out, 1.0));
+						return std::shared_ptr <plans::plan <datatype> > (new uniform <datatype> (vel_n, vel_m, i_data_in, i_data_out, coeff));
 					}
 					return std::shared_ptr <plans::plan <datatype> > ();
 				}

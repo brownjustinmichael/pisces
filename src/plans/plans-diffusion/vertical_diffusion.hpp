@@ -72,7 +72,9 @@ namespace plans
 
 			void setup () {
 				TRACE ("Setting up with coefficient " << coeff);
+				INFO ("COEFFICIENT VERTICAL IS " << coeff);
 				if (matrix_m) {
+					linalg::scale (m * m, 0.0, new_matrix);
 					for (int j = 0; j < m; ++j) {
 						linalg::add_scaled (m, coeff, grid_m.get_data (2) + j, new_matrix + j, m, m);
 					}
@@ -145,7 +147,7 @@ namespace plans
 				 ************************************************************************/
 				virtual std::shared_ptr <plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					if (coeff) {
-						return std::shared_ptr <plan <datatype> > (new vertical <datatype> (alpha, matrices [0], matrices [1], i_data_in, i_data_out, 1.0));
+						return std::shared_ptr <plan <datatype> > (new vertical <datatype> (alpha, matrices [0], matrices [1], i_data_in, i_data_out, coeff));
 					}
 					return std::shared_ptr <plan <datatype> > ();
 				}
@@ -364,7 +366,7 @@ namespace plans
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan <datatype> > (new impl_vertical_stress <datatype> (data_other, matrices [0], matrices [1], i_data_in, i_data_out, 1.0));
+						return std::shared_ptr <plans::plan <datatype> > (new impl_vertical_stress <datatype> (data_other, matrices [0], matrices [1], i_data_in, i_data_out, coeff));
 					}
 					return std::shared_ptr <plans::plan <datatype> > ();
 				}
@@ -471,7 +473,7 @@ namespace plans
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan <datatype> > (new vertical_stress <datatype> (data_other, i_data_in, i_data_out, 1.0));
+						return std::shared_ptr <plans::plan <datatype> > (new vertical_stress <datatype> (data_other, i_data_in, i_data_out, coeff));
 					}
 					return std::shared_ptr <plans::plan <datatype> > ();
 				}

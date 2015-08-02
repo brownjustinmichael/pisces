@@ -140,7 +140,7 @@ namespace plans
 				 * \copydoc implicit_plan::factory::instance
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
-					return std::shared_ptr <plans::plan <datatype> > (new variable_diffusion <datatype> (matrices [0], matrices [1], data_source, i_data_in, i_data_out, 1.0));
+					return std::shared_ptr <plans::plan <datatype> > (new variable_diffusion <datatype> (matrices [0], matrices [1], data_source, i_data_in, i_data_out, coeff));
 				}
 			};
 		};
@@ -332,7 +332,8 @@ namespace plans
 			 ************************************************************************/
 			class factory : public real_plan <datatype>::factory
 			{
-			private:
+			protected:
+				using real_plan <datatype>::factory::coeff;
 				datatype min; //!< The value for the coefficient
 				grids::variable <datatype> &data_source; //!< The source data pointer for the plan to be constructed
 				datatype *bg_diff;
@@ -351,7 +352,7 @@ namespace plans
 				 * \copydoc real_plan::factory::instance
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
-					return std::shared_ptr <plans::plan <datatype> > (new linear <datatype> (min, data_source, bg_diff, bg_every, i_data_in, i_data_out, 1.0));
+					return std::shared_ptr <plans::plan <datatype> > (new linear <datatype> (min, data_source, bg_diff, bg_every, i_data_in, i_data_out, coeff));
 				}
 			};
 		};

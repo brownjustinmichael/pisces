@@ -19,26 +19,26 @@
 
 class element_test_suite : public CxxTest::TestSuite
 {
-	mpi::messenger process_messenger;
+	std::shared_ptr <mpi::messenger> process_messenger;
 	
 public:
 	void test_elements () {
+		if (!process_messenger) process_messenger.reset (new mpi::messenger ());
 		int id = 0;
 		int n_elements = 1;
 		
-		logger::log_config::set_severity (3);
+		logger::log_config::set_severity (2);
 		formats::ascii::print_headers = false;
 		
 		io::parameters parameters;
 		
 		parameters ["root"] = std::string (PISCES_ROOT) + "/test/elements/";
-		parameters ["output.files.diffusion_%02i.output"] = true;
-		parameters ["output.files.diffusion_%02i.every"] = 10;
-		parameters ["output.files.diffusion_%02i.stat"] = true;
-		parameters ["output.output"] = false;
+		parameters ["output.cart.file"] = "diffusion_%02i";
+		parameters ["output.cart.every"] = 1;
+		// parameters ["output.output"] = false;
 		parameters ["dump.file"] = "";
 		
-		parameters ["time.steps"] = 200;
+		parameters ["time.stop"] = 1.0;
 		parameters ["time.max"] = 0.1;
 		parameters ["time.init"] = 0.1;
 		
@@ -49,6 +49,7 @@ public:
 		parameters ["equations.composition.ignore"] = true;
 		
 		parameters ["equations.temperature.advection"] = 0.0;
+		parameters ["equations.temperature.diffusion"] = 1.0;
 		
 		parameters ["grid.x.width"] = 20.0;
 		parameters ["grid.z.width"] = 20.0;
@@ -56,43 +57,38 @@ public:
 		int m = 200;
 		int name = id;
 		int n = 300;
-		double scale = 1.0 / 2.0 / 3.14159;
-		double width = 1.0;
+		double scale = 1.0 / 4.0 / acos (-1.0);
+		double width = 2.0;
 
 		grids::axis horizontal_axis (n, -parameters.get <double> ("grid.x.width") / 2.0, parameters.get <double> ("grid.x.width") / 2.0);
 		grids::axis vertical_axis (m, -parameters.get <double> ("grid.z.width") / 2.0, parameters.get <double> ("grid.z.width") / 2.0, id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
 
 		data::thermo_compositional_data <double> data (&horizontal_axis, &vertical_axis, id, n_elements, parameters);
+		data.initialize ("temperature_0");
 
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
-				data ("temperature") [i * m + j] = scale * exp (-(data ("x") [i * m + j] * data ("x") [i * m + j] + data ("z") [i * m + j] * data ("z") [i * m + j]) / 2.0 / width / width);
+				data ["temperature"] [i * m + j] = scale * exp (-(data ("x") [i * m + j] * data ("x") [i * m + j] + data ("z") [i * m + j] * data ("z") [i * m + j]) / width / width);
+				data ["temperature_0"] [i * m + j] = scale / 2.0 * exp (-(data ("x") [i * m + j] * data ("x") [i * m + j] + data ("z") [i * m + j] * data ("z") [i * m + j]) / width / width / 2.0);
 			}
 		}
 
-		std::shared_ptr <pisces::element <double>> element (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
+		std::shared_ptr <pisces::element <double>> element (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &*process_messenger, 0x00));
 
-		int n_steps = 0;
-		while (n_steps < parameters.get <int> ("time.steps")) {
-			element->run (n_steps, parameters.get <int> ("time.steps"), parameters.get <int> ("grid.rezone.check_every"));
+		element->run ();
+		
+		double total = 0.0;
+		double diff = 0.0;
+		for (int i = 0; i < n; ++i)
+		{
+			for (int j = 0; j < m; ++j)
+			{
+				diff += data ("temperature") [i * m + j] - data ("temperature_0") [i * m + j];
+				total += data ("temperature_0") [i * m + j];	
+			}
 		}
-		
-		std::string command = "./compare_cdf.py ";
-		
-		std::string file_format = parameters.get <std::string> ("root") + parameters.get <std::string> ("input.directory") + std::string ("diffusion_%02i.cdf");
-		char buffer [file_format.size () * 2];
-		snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
-		command += buffer;
-		
-		file_format = parameters.get <std::string> ("root") + parameters.get <std::string> ("output.directory") + std::string ("diffusion_%02i.cdf");
-		snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
-		command += " ";
-		command += buffer;
-		
-		int exit_status = system (command.c_str ());
-		
-		if (exit_status != 0) {
-			TS_ASSERT (false);
-		}
+
+		INFO ("L1 relative error is " << diff / total);
+		TS_ASSERT (fabs (diff / total) < 1.e-5);
 	}
 };

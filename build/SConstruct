@@ -18,10 +18,13 @@ exports ["ccompiler"] = "mpicc"
 # exports ["ccompiler"] = "mpiicc"
 exports ["compiler_flags"] = []
 # exports ["compiler_flags"] = ["-mt_mpi"]
+exports ["lapack_location"] = "/usr/local/opt/lapack/"
+exports ["cxxtestgen_location"] = "/usr/local/Cellar/cxxtest/4.3/libexec/bin/cxxtestgen"
 
 exports ["root"] = os.path.abspath ("..") + "/"
 exports ["defaults"] = os.path.join (exports ["root"], exports ["defaults"])
 
-exports ["env"] = Environment (ENV = os.environ, tools = ["default", "cxxtest"])
+exports ["env"] = Environment (tools = ["default"], **os.environ)
+exports ["env"].Tool ("cxxtest", CXXTEST = exports ["cxxtestgen_location"])
 
 exports ["env"].SConscript ("../src/SConscript", variant_dir = ".", duplicate = 0, exports = exports)

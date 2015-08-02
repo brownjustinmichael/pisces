@@ -32,40 +32,48 @@ namespace pisces
 
 		for (int j = 0; j < m; ++j)
 		{
-			data ["bg_pressure"].ptr () [j] = 1.0 + (*grids [1]) [j] * 0.1;
+			data ["bg_pressure"].ptr () [j] = 1.0e6 * (1.0 - (*grids [1]) [j] * 0.1);
 		}
 
-		data ["density"] == data ["composition"] / data ["temperature"] * data ["bg_pressure"];
+		data ["density"] == (data ["composition"] + 1.0) / data ["temperature"] * data ["bg_pressure"];
 
 		data.transformers ["density"]->update ();
 
-		*split_solver <datatype> (equations ["composition"], timestep, dirichlet (2.0), dirichlet (1.0)) 
+		DEBUG ("Conditions: " << i_params ["equations.composition.bottom.value"] << " " << i_params ["equations.composition.top.value"]);
+		// This currently evolves the "mean molecular weight" but according to the wrong equation. This should be the mass fraction.
+		*split_solver <datatype> (equations ["composition"], timestep, 
+			dirichlet (i_params ["equations.composition.bottom.value"].as <datatype> ()), 
+			dirichlet (i_params ["equations.composition.top.value"].as <datatype> ())) 
 		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		params ["equations.composition.diffusion"] * density_diff <datatype> (data ["density"]);
 
-		*split_solver <datatype> (equations ["temperature"], timestep, dirichlet (2.0), dirichlet (1.0)) 
-		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
-		== 
-		params ["equations.composition.diffusion"] * density_diff <datatype> (data ["density"]);
+		// *split_solver <datatype> (equations ["temperature"], timestep, 
+		// 	dirichlet (i_params ["equations.temperature.bottom.value"].as <datatype> ()), 
+		// 	dirichlet (i_params ["equations.temperature.top.value"].as <datatype> ())) 
+		// + advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
+		// == 
+		// params ["equations.temperature.diffusion"] * density_diff <datatype> (data ["density"]);
 
 		// Set up the x_velocity equation, note the missing pressure term, which is handled in div
 		*split_solver <datatype> (equations ["x_velocity"], timestep, neumann (0.0), neumann (0.0)) 
-		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
+		// + advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		params ["equations.velocity.diffusion"] * density_diff <datatype> (data ["density"])
-		+ horizontal_stress (data ["z_velocity"])
+		// The stresses still need the density terms
+		// + horizontal_stress (data ["z_velocity"])
 		;
 
 		// Set up the z_velocity equation, note the missing pressure term, which is handled in div
 		*split_solver <datatype> (equations ["z_velocity"], timestep, dirichlet (0.0), dirichlet (0.0)) 
-		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
+		// + advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		- grad_z <datatype> (data ["bg_pressure"])
 		- params ["equations.z_velocity.sources.density"] * src <datatype> (data ["density"])
 		+ params ["equations.velocity.diffusion"] * density_diff <datatype> (data ["density"])
-		+ vertical_stress (data ["x_velocity"])
+		// + vertical_stress (data ["x_velocity"])
 		;
+		data ["x_velocity"].component_flags |= plans::solvers::ignore_net;
 		data ["z_velocity"].component_flags |= plans::solvers::ignore_net;
 
 		// *div <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"])

@@ -10,8 +10,10 @@ Import ("vertical_grid")
 Import ("defaults")
 Import ("root")
 Import ("quiet")
+Import ("lapack_location")
 
-print ("I am in directory", os.getcwd ())
+env.Append (CPPFLAGS = ["-I%s/include" % lapack_location])
+env.Append (LDFLAGS = ["-L%s/lib" % lapack_location])
 
 def directory (path, dirname):
     """

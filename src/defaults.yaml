@@ -90,26 +90,22 @@ input:
     file: input_%02i
     full: true
 output:
-    count: 0
-    name: ""
     directory: output/
     output: true
-    files:
-        cart_%02i_%%02i:
-            every: 1000
-            full: true
-        timed_%02i_%%02i:
-            every: 0.1
-            timed: true
-            full: true
-        trans_%02i_%%02i:
-            every: 0.1
-            timed: true
-            transform: true
-            full: true
-        stat_%02i_%%02i:
-            every: 100
-            stat: true
+    name: ""
+    number: 0
+    cart:
+        file: cart_%02i_%%02i
+        every: 1000
+        timed: false
+    trans:
+        file: stat_%02i_%%02i
+        every: 100
+        timed: false
+    stat:
+        file: stat_%02i_%%02i
+        every: 100
+        timed: false
 dump:
     file: dump_%02i
     directory: input/

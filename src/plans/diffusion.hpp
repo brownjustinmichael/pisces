@@ -32,7 +32,6 @@ namespace plans
 
 	template <class datatype>
 	std::shared_ptr <typename plan <datatype>::factory> horizontal_stress (grids::variable <datatype> &data_other, datatype coeff = 1.0) {
-		DEBUG ("Horizontal pointer " << data_other.ptr ());
 		return std::shared_ptr <typename explicit_plan <datatype>::factory> (new typename diffusion::horizontal_stress <datatype>::factory (data_other, coeff));
 	}
 

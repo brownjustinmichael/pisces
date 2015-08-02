@@ -52,7 +52,9 @@ namespace io
 		 * \param i_file_name The string representation of the output file; do not include the extension; it will be added later
 		 * \param i_file_format The integer io_flag associated with the desired output type (e.g. replace_file)
 		 *********************************************************************/
-		output (formats::data_grid i_grid, std::string i_file_name = "out", int i_file_format = formats::replace_file) : file_name (i_file_name), file_format (i_file_format), grid (i_grid) {}
+		output (formats::data_grid i_grid, std::string i_file_name = "out", int i_file_format = formats::replace_file) : file_name (i_file_name), file_format (i_file_format), grid (i_grid) {
+			DEBUG ("Names has size " << names.size ());
+		}
 
 		virtual ~output () {}
 		
@@ -295,7 +297,9 @@ namespace io
 		 * \param i_file_name A string file name
 		 * \param i_output_every The integer frequency of outputs
 		 ************************************************************************/
-		appender_output (formats::data_grid i_grid, std::string i_file_name, int i_output_every = 1) : formatted_output <format> (i_grid, i_file_name, formats::append_file), output_every (i_output_every > 0 ? i_output_every : 1), count (0) {}
+		appender_output (formats::data_grid i_grid, std::string i_file_name, int i_output_every = 1) : formatted_output <format> (i_grid, i_file_name, formats::append_file), output_every (i_output_every > 0 ? i_output_every : 1), count (0) {
+			DEBUG ("CONSTRUCTING");
+		}
 
 		virtual ~appender_output () {}
 

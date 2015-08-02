@@ -113,7 +113,7 @@ int main (int argc, char *argv[])
 					element.reset (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
 				}
 			}
-			element->run (n_steps, parameters.get <int> ("time.steps"), parameters.get <int> ("grid.rezone.check_every"), parameters.get <double> ("time.stop"));
+			element->run (n_steps);
 		}
 
 		cend = clock ();

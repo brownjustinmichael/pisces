@@ -62,7 +62,7 @@ public:
 		
 		int n_steps = 0;
 		while (n_steps < parameters.get <int> ("time.steps")) {
-			element->run (n_steps, parameters.get <int> ("time.steps"), parameters.get <int> ("grid.rezone.check_every"));
+			element->run (n_steps);
 		}
 		
 		std::string command = "./compare_cdf.py ";
