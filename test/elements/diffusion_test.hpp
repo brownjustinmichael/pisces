@@ -83,12 +83,12 @@ public:
 		{
 			for (int j = 0; j < m; ++j)
 			{
-				diff += data ("temperature") [i * m + j] - data ("temperature_0") [i * m + j];
-				total += data ("temperature_0") [i * m + j];	
+				diff += (data ("temperature") [i * m + j] - data ("temperature_0") [i * m + j]) * (data ("temperature") [i * m + j] - data ("temperature_0") [i * m + j]);
+				total += data ("temperature_0") [i * m + j] * data ("temperature_0") [i * m + j];	
 			}
 		}
 
-		INFO ("L1 relative error is " << diff / total);
+		INFO ("L2 relative error is " << diff / total);
 		TS_ASSERT (fabs (diff / total) < 1.e-5);
 	}
 };

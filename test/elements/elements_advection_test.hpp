@@ -37,10 +37,10 @@ public:
 		parameters ["output.cart.file"] = "advection_%02i";
 		parameters ["output.cart.every"] = 10;
 		parameters ["dump.file"] = "";
-		parameters ["time.stop"] = 20.0;
+		parameters ["time.stop"] = 1.0;
 		parameters ["time.steps"] = 1000000;
-		parameters ["time.max"] = 0.01;
-		parameters ["time.init"] = 0.01;
+		parameters ["time.max"] = 0.0001;
+		parameters ["time.init"] = 0.0001;
 		
 		parameters ["input.file"] = "";
 		
@@ -51,20 +51,16 @@ public:
 		parameters ["equations.z_velocity.sources.temperature"] = 0.0;
 		// parameters ["equations.z_velocity.sources.composition"] = 0.0;
 		
-		parameters ["equations.temperature.diffusion"] = 0.0;
-		parameters ["equations.composition.diffusion"] = 0.0;
-		parameters ["equations.composition.advection"] = 0.0;
+		parameters ["equations.temperature.diffusion"] = 0.1;
 		
 		parameters ["grid.x.width"] = 20.0;
 		parameters ["grid.z.width"] = 20.0;
 
-		parameters ["time.mult"] = 1.02;
-
-		int m = 200;
+		int m = 50;
 		int name = id;
 		int n = 300;
-		double scale = 1.0 / 2.0 / 3.14159;
-		double width = 1.0;
+		double scale = 1.0 / 4.0 / acos (-1.0) / 0.1;
+		double width = 2.0 * sqrt (0.1);
 
 		grids::axis horizontal_axis (n, -parameters.get <double> ("grid.x.width") / 2.0, parameters.get <double> ("grid.x.width") / 2.0);
 		grids::axis vertical_axis (m, -parameters.get <double> ("grid.z.width") / 2.0, parameters.get <double> ("grid.z.width") / 2.0, id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
@@ -75,8 +71,9 @@ public:
 
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
-				data ["temperature_0"] [i * m + j] = data ["temperature"] [i * m + j] = data ["composition"] [i * m + j] = scale * exp (-(data ("x") [i * m + j] * data ("x") [i * m + j] + data ("z") [i * m + j] * data ("z") [i * m + j]) / 2.0 / width / width);
-				data ["x_velocity"] [i * m + j] = 1.0;
+				data ["temperature"] [i * m + j] = data ["composition"] [i * m + j] = scale * exp (-(data ("x") [i * m + j] * data ("x") [i * m + j] + data ("z") [i * m + j] * data ("z") [i * m + j]) / width / width);
+				data ["temperature_0"] [i * m + j] = scale / 2.0 * exp (-(data ("x") [i * m + j] * data ("x") [i * m + j] + data ("z") [i * m + j] * data ("z") [i * m + j]) / width / width / 2.0);
+				data ["x_velocity"] [i * m + j] = 20.0;
 			}
 		}
 
@@ -90,30 +87,12 @@ public:
 		{
 			for (int j = 0; j < m; ++j)
 			{
-				diff += data ("temperature") [i * m + j] - data ("temperature_0") [i * m + j];
-				total += data ("temperature_0") [i * m + j];	
+				diff += (data ("temperature") [i * m + j] - data ("temperature_0") [i * m + j]) * (data ("temperature") [i * m + j] - data ("temperature_0") [i * m + j]);
+				total += data ("temperature_0") [i * m + j] * data ("temperature_0") [i * m + j];	
 			}
 		}
 
-		INFO ("L1 relative error is " << diff / total);
-		TS_ASSERT (diff / total < 2.2e-4);
-
-		// std::string command = "./compare_cdf.py ";
-		
-		// std::string file_format = parameters.get <std::string> ("root") + parameters.get <std::string> ("input.directory") + std::string ("advection_%02i.cdf");
-		// char buffer [file_format.size () * 2];
-		// snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
-		// command += buffer;
-		
-		// file_format = parameters.get <std::string> ("root") + parameters.get <std::string> ("output.directory") + std::string ("advection_%02i.cdf");
-		// snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
-		// command += " ";
-		// command += buffer;
-		
-		// int exit_status = system (command.c_str ());
-		
-		// if (exit_status != 0) {
-		// 	TS_ASSERT (false);
-		// }
+		INFO ("L2 relative error is " << diff / total);
+		TS_ASSERT (fabs (diff / total) < 3.0e-2);
 	}
 };

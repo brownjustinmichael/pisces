@@ -18,10 +18,7 @@
 #define TEST_TINY 1.e-6
 
 class plan_solver_test_suite : public CxxTest::TestSuite
-{
-private:
-	mpi::messenger mess;
-	
+{	
 public:
 	void test_advection () {
 		int n = 200, m = 500;
@@ -34,9 +31,10 @@ public:
 
 		for (int j = 0; j < m; ++j) {
 			for (int i = 0; i < n; ++i) {
-				x_velocity [i * m + j] = rand () % 1000 / 1000;
-				z_velocity [i * m + j] = rand () % 1000 / 1000;
-				data [i * m + j] = rand () % 1000 / 1000;
+				x_velocity [i * m + j] = (rand () % 1000) / 1000.;
+				z_velocity [i * m + j] = (rand () % 1000) / 1000.;
+				data [i * m + j] = (rand () % 1000) / 1000.;
+				rhs [i * m + j] = 0.0;
 			}
 		}
 		
@@ -52,7 +50,7 @@ public:
 		
 		for (int i = 1; i < n - 1; ++i) {
 			for (int j = 1; j < m - 1; ++j) {
-				TSM_ASSERT_DELTA ("Advection failure", rhs_compare [i * m + j], -rhs [i * m + j], 1.0e-8);
+				TSM_ASSERT_DELTA ("Advection failure", rhs_compare [i * m + j], rhs [i * m + j], 1.0e-8);
 			}
 		}
 	}

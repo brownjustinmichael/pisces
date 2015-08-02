@@ -19,12 +19,14 @@
 
 class element_test_suite : public CxxTest::TestSuite
 {
-	mpi::messenger process_messenger;
+	std::shared_ptr <mpi::messenger> process_messenger;
 	
 public:
 	void test_elements () {
-		int id = process_messenger.get_id ();
-		int n_elements = process_messenger.get_np ();
+		if (!process_messenger) process_messenger.reset (new mpi::messenger ());
+
+		int id = process_messenger->get_id ();
+		int n_elements = process_messenger->get_np ();
 		
 		logger::log_config::set_severity (3);
 		int num = 0;
@@ -58,29 +60,11 @@ public:
 
 		data::thermo_compositional_data <double> data (&horizontal_axis, &vertical_axis, id, n_elements, parameters);
 		
-		std::shared_ptr <pisces::element <double>> element (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
+		std::shared_ptr <pisces::element <double>> element (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &*process_messenger, 0x00));
 		
 		int n_steps = 0;
 		while (n_steps < parameters.get <int> ("time.steps")) {
 			element->run (n_steps);
-		}
-		
-		std::string command = "./compare_cdf.py ";
-		
-		std::string file_format = parameters.get <std::string> ("root") + parameters.get <std::string> ("input.directory") + std::string ("compare_%02i.cdf");
-		char buffer [file_format.size () * 2];
-		snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
-		command += buffer;
-		
-		file_format = parameters.get <std::string> ("root") + parameters.get <std::string> ("output.directory") + std::string ("compare_%02i.cdf");
-		snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
-		command += " ";
-		command += buffer;
-		
-		int exit_status = system (command.c_str ());
-		
-		if (exit_status != 0) {
-			TS_ASSERT (false);
 		}
 	}
 };

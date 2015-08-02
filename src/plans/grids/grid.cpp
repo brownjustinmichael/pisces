@@ -199,7 +199,7 @@ namespace grids
 	{
 		template <class datatype>
 		grid <datatype>::grid (int i_n, double i_position_0, double i_position_n, int i_excess_0, int i_excess_n, int i_ld) : 
-		grids::grid <datatype> (3, i_n, i_position_0, i_position_n, i_excess_0, i_excess_n, i_ld == 0 ? 2 * (n / 2 + 1) : i_ld) {
+		grids::grid <datatype> (3, i_n, i_position_0, i_position_n, i_excess_0, i_excess_n, i_ld == 0 ? 2 * (i_n / 2 + 1) : i_ld) {
 			TRACE ("Instantiating...");
 
 			scale = 2.0 / sqrt (n);

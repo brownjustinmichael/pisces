@@ -25,13 +25,15 @@
 class mpi_solver_test_suite : public CxxTest::TestSuite
 {
 private:
-	mpi::messenger mess;
-	
+	std::shared_ptr <mpi::messenger> process_messenger;
+
 public:
 	void test_block_solver () {
+		if (!process_messenger) process_messenger.reset (new mpi::messenger ());	
+
 		int timesteps = 1;
-		int id = mess.get_id ();
-		int np = mess.get_np ();
+		int id = process_messenger->get_id ();
+		int np = process_messenger->get_np ();
 		int n = 10, nrhs = 10, ntop = 0, nbot = 0;
 		if (id != 0) {
 			ntop = 1;
@@ -41,10 +43,10 @@ public:
 		}
 		int lda = n + ntop + nbot, ldx = 0, ldb = lda;
 	
-		std::vector <int> ns (mess.get_np ());
-		mess.gather <int> (1, &ntop, &ns [0]);
-		if (mess.get_id () == 0) {
-			for (int i = 0; i < mess.get_np (); ++i) {
+		std::vector <int> ns (process_messenger->get_np ());
+		process_messenger->gather <int> (1, &ntop, &ns [0]);
+		if (process_messenger->get_id () == 0) {
+			for (int i = 0; i < process_messenger->get_np (); ++i) {
 				ldx += ns [i];
 			}
 		} else {
@@ -112,7 +114,7 @@ public:
 			// cbegin = clock ();
 			// begin = std::chrono::system_clock::now ();
 		
-			linalg::block::matrix_factorize (mess.get_id (), mess.get_np (), n, ntop, nbot, &a [0], &ipiv [0], &x [0], &xipiv [0], &ns [0], &info, lda, ldx);
+			linalg::block::matrix_factorize (process_messenger->get_id (), process_messenger->get_np (), n, ntop, nbot, &a [0], &ipiv [0], &x [0], &xipiv [0], &ns [0], &info, lda, ldx);
 	
 			// cmid = clock ();
 			// mid = std::chrono::system_clock::now ();
@@ -120,7 +122,7 @@ public:
 			// mb += mid - begin;
 			// cmb += cmid - cbegin;
 		
-			linalg::block::matrix_solve (mess.get_id (), mess.get_np (), n, ntop, nbot, &a [0], &ipiv [0], &b [0], &x [0], &xipiv [0], &ns [0], &info, nrhs, lda, ldx, ldb);
+			linalg::block::matrix_solve (process_messenger->get_id (), process_messenger->get_np (), n, ntop, nbot, &a [0], &ipiv [0], &b [0], &x [0], &xipiv [0], &ns [0], &info, nrhs, lda, ldx, ldb);
 	
 			// cend = clock ();
 			// end = std::chrono::system_clock::now ();
@@ -134,16 +136,16 @@ public:
 			
 			if (id != 0) {
 				linalg::matrix_copy (ntop, nrhs, &bcopy [0], &bufftop [0], ldb, ntop);
-				mess.send (ntop * nrhs, &bufftop [0], id - 1, 0);
+				process_messenger->send (ntop * nrhs, &bufftop [0], id - 1, 0);
 			}
 			if (id != np - 1) {
 				linalg::matrix_copy (nbot, nrhs, &bcopy [n + ntop], &buffbot [0], ldb, nbot);
-				mess.recv (nbot * nrhs, &rbuffbot [0], id + 1, 0);
-				mess.send (nbot * nrhs, &buffbot [0], id + 1, 1);
+				process_messenger->recv (nbot * nrhs, &rbuffbot [0], id + 1, 0);
+				process_messenger->send (nbot * nrhs, &buffbot [0], id + 1, 1);
 				linalg::matrix_add_scaled (nbot, nrhs, 1.0, &rbuffbot [0], &bcopy [n + ntop], nbot, ldb);
 			}
 			if (id != 0) {
-				mess.recv (ntop * nrhs, &rbufftop [0], id - 1, 1);
+				process_messenger->recv (ntop * nrhs, &rbufftop [0], id - 1, 1);
 				linalg::matrix_add_scaled (ntop, nrhs, 1.0, &rbufftop [0], &bcopy [0], ntop, ldb);
 			}
 			
@@ -162,8 +164,8 @@ public:
 		// io::parameters <double> params ("../input/block_parameters.txt");
 		// omp_set_num_threads(params.nmp);
 
-		int id = mess.get_id ();
-		int np = mess.get_np ();
+		int id = process_messenger->get_id ();
+		int np = process_messenger->get_np ();
 		int n = 60, nrhs = 70, ntop = 0, nbot = 0;
 		if (id != 0) {
 			ntop = 1;
@@ -227,19 +229,19 @@ public:
 		}
 
 		if (id != 0) {
-			mess.send (nrhs, &edge_0 [0], id - 1, 0);
+			process_messenger->send (nrhs, &edge_0 [0], id - 1, 0);
 		}
 		if (id != np - 1) {
-			mess.recv (nrhs, &redge_n [0], id + 1, 0);
+			process_messenger->recv (nrhs, &redge_n [0], id + 1, 0);
 			for (int i = 0; i < nrhs; ++i) {
 				bcopy [i * n + n - 1] -= supcopy [i * n + n - 1] * redge_n [i];
 			}
 		}
 		if (id != np - 1) {
-			mess.send (nrhs, &edge_n [0], id + 1, 1);
+			process_messenger->send (nrhs, &edge_n [0], id + 1, 1);
 		}
 		if (id != 0) {
-			mess.recv (nrhs, &redge_0 [0], id - 1, 1);
+			process_messenger->recv (nrhs, &redge_0 [0], id - 1, 1);
 			for (int i = 0; i < nrhs; ++i) {
 				bcopy [i * n] -= subcopy [i * n] * redge_0 [i];
 			}
@@ -253,8 +255,8 @@ public:
 	}
 	
 	void test_block_banded_solve () {
-		int id = mess.get_id ();
-		int np = mess.get_np ();
+		int id = process_messenger->get_id ();
+		int np = process_messenger->get_np ();
 		int n = 60, nrhs = 10, ntop = 0, nbot = 0;
 
 		int ku = 1, kl = 2;
@@ -352,16 +354,16 @@ public:
 			}
 
 			if (id != 0) {
-				mess.send (nrhs * ku, &edge_0 [0], id - 1, 0);
+				process_messenger->send (nrhs * ku, &edge_0 [0], id - 1, 0);
 			}
 			if (id != np - 1) {
-				mess.recv (nrhs * ku, &redge_n [0], id + 1, 0);
+				process_messenger->recv (nrhs * ku, &redge_n [0], id + 1, 0);
 			}
 			if (id != np - 1) {
-				mess.send (nrhs * kl, &edge_n [0], id + 1, 1);
+				process_messenger->send (nrhs * kl, &edge_n [0], id + 1, 1);
 			}
 			if (id != 0) {
-				mess.recv (nrhs * kl, &redge_0 [0], id - 1, 1);
+				process_messenger->recv (nrhs * kl, &redge_0 [0], id - 1, 1);
 			}
 
 			for (int i = 0; i < nrhs; ++i) {
