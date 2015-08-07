@@ -264,8 +264,9 @@ namespace plans
 			datatype *data_other;
 			datatype pioL;
 			const datatype *pos_m, *pos_n;
-			std::vector <datatype> oodz, oodx;
-			std::vector <datatype> oodz2, oodx2;
+			datatype *oodx, *oodz, *oodx2, *oodz2;
+			std::vector <datatype> oodz_vec, oodx_vec;
+			std::vector <datatype> oodz2_vec, oodx2_vec;
 		
 		public:
 			/*!**********************************************************************
@@ -286,35 +287,10 @@ namespace plans
 				pos_n = &grid_n [0];
 				pos_m = &grid_m [0];
 
-				oodz.resize (m);
-				for (int j = 0; j < m - 1; ++j)
-				{
-					oodz [j] = 1.0 / (pos_m [j + 1] - pos_m [j]);
-				}
-				oodz [m - 1] = 1.0 / (pos_m [m - 1] - pos_m [m - 2]);
-
-				oodz2.resize (m);
-				for (int j = 1; j < m - 1; ++j)
-				{
-					oodz2 [j] = 1.0 / (pos_m [j + 1] - pos_m [j - 1]);
-				}
-				oodz2 [0] = 0.5 / (pos_m [1] - pos_m [0]);
-				oodz2 [m - 1] = 0.5 / (pos_m [m - 1] - pos_m [m - 2]);
-
-				oodx.resize (n);
-				for (int i = 0; i < n - 1; ++i)
-				{
-					oodx [i] = 1.0 / (pos_n [i + 1] - pos_n [i]);
-				}
-				oodx [n - 1] = 1.0 / (pos_n [n - 1] - pos_n [n - 2]);
-
-				oodx2.resize (n);
-				for (int i = 1; i < n - 1; ++i)
-				{
-					oodx2 [i] = 1.0 / (pos_n [i + 1] - pos_n [i - 1]);
-				}
-				oodx2 [0] = 0.5 / (pos_n [1] - pos_n [0]);
-				oodx2 [n - 1] = 0.5 / (pos_n [n - 1] - pos_n [n - 2]);
+				oodx = grid_n.get_ood ();
+				oodx2 = grid_n.get_ood2 ();
+				oodz = grid_m.get_ood ();
+				oodz2 = grid_m.get_ood2 ();
 			}
 		
 			virtual ~horizontal_stress () {}
@@ -325,11 +301,12 @@ namespace plans
 			virtual void execute () {
 				TRACE ("Executing source...");
 				DEBUG ("The pointer is now " << data_other);
-				int p1 = 0, m1 = 0;
+				#pragma omp parallel for
 				for (int i = 0; i < n; ++i)
 				{
+					int p1 = 0, m1 = 0;
 					p1 = (i + 1) % n;
-					m1 = (i - 1) % n;
+					m1 = (i - 1 + n) % n;
 					for (int j = 1; j < m - 1; ++j)
 					{
 						data_out [i * m + j] += coeff / 3. * (density [p1 * m + j] + density [i * m + j]) / 2. * (data_in [p1 * m + j] - data_in [i * m + j]) * oodx [i] * oodx2 [i] / density [i * m + j];

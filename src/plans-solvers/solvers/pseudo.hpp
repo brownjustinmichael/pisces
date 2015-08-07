@@ -76,6 +76,8 @@ namespace plans
 
 			std::shared_ptr <plan <datatype>> transform;
 
+			datatype *oodx, *oodx2, *oodz, *oodz2;
+
 		public:
 			/*!**********************************************************************
 			 * \copydoc solver::solver

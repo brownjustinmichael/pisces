@@ -35,10 +35,10 @@ namespace plans
 			using implicit_plan <datatype>::element_flags;
 			using implicit_plan <datatype>::component_flags;
 
-			datatype *data_source, *spectral_data_source, *new_matrix;
-			std::vector<datatype> bg_deriv, bg_deriv2, new_matrix_vec, bg_val, current;
-			const datatype *pos_m;
-			const datatype *pos_n;
+			datatype *data_source, *spectral_data_source, *new_matrix, *current, *bg_deriv, *bg_deriv2;
+			std::vector<datatype> bg_deriv_vec, bg_deriv2_vec, new_matrix_vec, bg_val, current_vec;
+			const datatype *pos_m, *pos_n;
+			datatype *oodx, *oodz, *oodx2, *oodz2;
 
 		public:
 			variable_diffusion (datatype *matrix_n, datatype *matrix_m, grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0):
@@ -47,12 +47,20 @@ namespace plans
 				pos_n = &grid_n [0];
 				pos_m = &grid_m [0];
 				spectral_data_source = i_data_source.ptr (spectral_spectral);
-				bg_deriv.resize (m, 0.0);
-				bg_deriv2.resize (m, 0.0);
+				bg_deriv_vec.resize (m, 0.0);
+				bg_deriv = &bg_deriv_vec [0];
+				bg_deriv2_vec.resize (m, 0.0);
+				bg_deriv2 = &bg_deriv2_vec [0];
 				bg_val.resize (m, 0.0);
 				new_matrix_vec.resize (m * m, 0.0);
 				new_matrix = &new_matrix_vec [0];
-				current.resize (m * ldn, 0.0);
+				current_vec.resize (m * ldn, 0.0);
+				current = &current_vec [0];
+
+				oodx = grid_n.get_ood ();
+				oodx2 = grid_n.get_ood2 ();
+				oodz = grid_m.get_ood ();
+				oodz2 = grid_m.get_ood2 ();
 			}
 			
 			virtual ~variable_diffusion () {}
@@ -86,36 +94,20 @@ namespace plans
 			}
 
 			virtual void execute () {
-				linalg::add_scaled (m * ldn, 1.0, &current [0], data_out);
-				linalg::scale (m * ldn, 0.0, &current [0]);
+				linalg::add_scaled (m * ldn, 1.0, current, data_out);
+				linalg::scale (m * ldn, 0.0, current);
+				#pragma omp parallel for
 				for (int i = 0; i < n; ++i)
 				{
+					int m1 = 0, p1 = 0;
+					p1 = (i + 1) % n;
+					m1 = (i - 1 + n) % n;
 					for (int j = 1; j < m - 1; ++j)
 					{
-						current [i * m + j] += coeff * (log (data_source [i * m + j + 1] / data_source [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]) - bg_deriv [j]) * (data_in [i * m + j + 1] - data_in [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
+						current [i * m + j] += coeff * (log (data_source [i * m + j + 1] / data_source [i * m + j - 1]) * oodz2 [j] - bg_deriv [j]) * (data_in [i * m + j + 1] - data_in [i * m + j - 1]) * oodz2 [j];
 
-						// current [i * m + j] += coeff * ((log (data_source [i * m + j + 1] / data_source [i * m + j]) / (pos_m [j + 1] - pos_m [j]) - log (data_source [i * m + j] / data_source [i * m + j - 1]) / (pos_m [j] - pos_m [j - 1])) - bg_deriv2 [j]) * 2.  / (pos_m [j + 1] - pos_m [j - 1]) * data_in [i * m + j];
+						current [i * m + j] += coeff * (log (data_source [p1 * m + j] / data_source [m1 * m + j]) * oodx2 [i]) * (data_in [p1 * m + j] - data_in [m1 * m + j]) * oodx2 [i];
 					}
-				}
-
-				for (int i = 1; i < n - 1; ++i)
-				{
-					for (int j = 1; j < m - 1; ++j)
-					{
-						current [i * m + j] += coeff * (log (data_source [(i + 1) * m + j] / data_source [(i - 1) * m + j]) / (pos_n [i + 1] - pos_n [i - 1])) * (data_in [(i + 1) * m + j] - data_in [(i - 1) * m + j]) / (pos_n [i + 1] - pos_n [i - 1]);
-
-						// data_out [i * m + j] += coeff * ((log (data_source [(i + 1) * m + j] / data_source [i * m + j]) / (pos_n [i + 1] - pos_n [i]) - log (data_source [i * m + j] / data_source [(i - 1) * m + j]) / (pos_n [i] - pos_n [i - 1]))) * 2. / (pos_n [i + 1] - pos_n [i - 1]) * data_in [i * m + j];
-					}
-				}
-
-				for (int j = 1; j < m - 1; ++j)
-				{
-					current [m + j] += coeff * (log (data_source [m + j] / data_source [j]) / (pos_n [1] - pos_n [0])) * (data_in [m + j] - data_in [j]) / (pos_n [1] - pos_n [0]);
-					// data_out [j] += coeff * ((log (data_source [m + j] / data_source [j]) / (pos_n [1] - pos_n [0]) - log (data_source [j] / data_source [(n - 1) * m + j]) / (pos_n [1] - pos_n [0]))) / (pos_n [1] - pos_n [0]) * data_in [j];
-
-					current [(n - 1) * m + j] += coeff * (log (data_source [(n - 1) * m + j] / data_source [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2])) * (data_in [(n - 1) * m + j] - data_in [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]);
-					// data_out [(n - 1) * m + j] += coeff * ((log (data_source [j] / data_source [(n - 1) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]) - log (data_source [(n - 1) * m + j] / data_source [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]))) / (pos_n [n - 1] - pos_n [n - 2]) * data_in [(n - 1) * m + j];
-
 				}
 			}
 

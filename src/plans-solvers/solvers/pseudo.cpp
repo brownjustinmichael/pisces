@@ -130,6 +130,11 @@ namespace plans
 			data_temp.resize ((m + 2) * ldn);
 
 			transform = typename std::shared_ptr <plan <datatype>> (new  transforms::horizontal <datatype> (rhs, real_real));
+
+			oodx = grid_n.get_ood ();
+			oodx2 = grid_n.get_ood2 ();
+			oodz = grid_m.get_ood ();
+			oodz2 = grid_m.get_ood2 ();
 		}
 
 		template <class datatype>
@@ -161,8 +166,9 @@ namespace plans
 			new_pos += excess_0;
 			
 			// Generate the matrix
+			#pragma omp parallel for
 			for (int i = 0; i < ldn; ++i) {
-				matrix_ptr = &matrix [(i) * (m + 2 + kl + ku) * lda + kl + ku + (kl + ku + excess_0) * lda];
+				datatype *matrix_ptr = &matrix [(i) * (m + 2 + kl + ku) * lda + kl + ku + (kl + ku + excess_0) * lda];
 				for (int j = 0; j < m + (nbot == 0 ? 0 : -excess_n - 1) + (id == 0 ? 0: -excess_0); ++j) {
 					// j is the gridpoint location of the solve on the velocity grid (I think)
 					matrix_ptr [(j - 2) * lda + 2] = 1.0 / (new_pos [j - 1] - new_pos [j - 2]) / (npos_m [j + 1] - npos_m [j - 1]);
@@ -215,25 +221,17 @@ namespace plans
 
 			datatype *rhs_real = rhs.ptr ();
 
-			for (int i = 1; i < n - 1; ++i)
+			#pragma omp parallel for
+			for (int i = 0; i < n; ++i)
 			{
+				int p1 = (i - 1) % n;
+				int m1 = (i - 1 + n) % n;
 				for (int j = 1; j < m - 1; ++j)
 				{
-					rhs_real [i * m + j] -= ((data_in [(i + 1) * m + j] - data_in [(i - 1) * m + j]) / (pos_n [i + 1] - pos_n [i - 1])) * log (density [(i + 1) * m + j] / density [(i - 1) * m + j]) / (pos_n [i + 1] - pos_n [i - 1]);
-					rhs_real [i * m + j] -= (data_in [i * m + j] * grad_pressure [j] / gamma + (data_in [i * m + j + 1] - data_in [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1])) * log (density [i * m + j + 1] / density [i * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
-					rhs_real [i * m + j] -= data_in [i * m + j] * ((log (density [i * m + j + 1] / density [i * m + j]) / (pos_m [j + 1] - pos_m [j]) - log (density [i * m + j] / density [i * m + j - 1]) / (pos_m [j] - pos_m [j - 1])) / (pos_m [j + 1] - pos_m [j - 1]) + (log (density [(i + 1) * m + j] / density [i * m + j]) / (pos_n [i + 1] - pos_n [i]) - log (density [i * m + j] / density [(i - 1) * m + j]) / (pos_n [i] - pos_n [i - 1])) / (pos_n [i + 1] - pos_n [i - 1])) * 2.;
+					rhs_real [i * m + j] -= ((data_in [p1 * m + j] - data_in [m1 * m + j]) * oodx2 [i]) * log (density [p1 * m + j] / density [m1 * m + j]) * oodx2 [i];
+					rhs_real [i * m + j] -= (data_in [i * m + j] * grad_pressure [j] / gamma + (data_in [i * m + j + 1] - data_in [i * m + j - 1]) * oodz2 [j]) * log (density [i * m + j + 1] / density [i * m + j - 1]) * oodz2 [j];
+					rhs_real [i * m + j] -= data_in [i * m + j] * ((log (density [i * m + j + 1] / density [i * m + j]) * oodz [j] - log (density [i * m + j] / density [i * m + j - 1]) * oodz [j - 1]) * oodz2 [j] + (log (density [p1 * m + j] / density [i * m + j]) * oodx [i] - log (density [i * m + j] / density [m1 * m + j]) * oodx [m1]) * oodx2 [i]) * 2.;
 				}
-			}
-
-			for (int j = 1; j < m - 1; ++j)
-			{
-				rhs_real [j] -= ((data_in [m + j] - data_in [j]) / (pos_n [1] - pos_n [0])) * log (density [m + j] / density [j]) / (pos_n [1] - pos_n [0]);
-				rhs_real [j] -= (data_in [j] * grad_pressure [j] - (data_in [j + 1] - data_in [j - 1]) / (pos_m [j + 1] - pos_m [j - 1])) * log (density [j + 1] / density [j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
-				rhs_real [j] -= data_in [j] * ((log (density [j + 1] / density [j]) / (pos_m [j + 1] - pos_m [j]) - log (density [j] / density [j - 1]) / (pos_m [j] - pos_m [j - 1])) / (pos_m [j + 1] - pos_m [j - 1]) + (log (density [m + j] / density [j]) / (pos_n [1] - pos_n [0]) - log (density [j] / density [(n - 1) * m + j]) / (pos_n [1] - pos_n [0])) / (pos_n [1] - pos_n [0])) * 2.;
-
-				rhs_real [(n - 1) * m + j] -= ((data_in [(n - 1) * m + j] - data_in [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2])) * log (density [(n - 1) * m + j] / density [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]);
-				rhs_real [(n - 1) * m + j] -= (data_in [(n - 1) * m + j] * grad_pressure [j] - (data_in [(n - 1) * m + j + 1] - data_in [(n - 1) * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1])) * log (density [(n - 1) * m + j + 1] / density [(n - 1) * m + j - 1]) / (pos_m [j + 1] - pos_m [j - 1]);
-				rhs_real [(n - 1) * m + j] -= data_in [(n - 1) * m + j] * ((log (density [(n - 1) * m + j + 1] / density [(n - 1) * m + j]) / (pos_m [j + 1] - pos_m [j]) - log (density [(n - 1) * m + j] / density [(n - 1) * m + j - 1]) / (pos_m [j] - pos_m [j - 1])) / (pos_m [j + 1] - pos_m [j - 1]) + (log (density [j] / density [(n - 1) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]) - log (density [(n - 1) * m + j] / density [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2])) / (pos_n [n - 1] - pos_n [n - 2])) * 2.;
 			}
 
 			transform->execute ();

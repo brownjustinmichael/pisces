@@ -49,6 +49,7 @@ namespace grids
 					linalg::add_scaled (ld, -1.0, tmp + i * tld, data + i * ld);
 				}
 			} else if (ops [i] == mul) {
+				#pragma omp parallel for
 				for (int i = 0; i < n; ++i)
 				{
 					for (int j = 0; j < ld; ++j)
@@ -57,6 +58,7 @@ namespace grids
 					}
 				}
 			} else if (ops [i] == div) {
+				#pragma omp parallel for
 				for (int i = 0; i < n; ++i)
 				{
 					for (int j = 0; j < ld; ++j)

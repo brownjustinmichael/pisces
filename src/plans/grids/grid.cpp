@@ -37,6 +37,16 @@ namespace grids
 			} else {
 				positions [0] = (position_0 + position_n) / 2.0;
 			}
+
+			this->ood [0] = 1.0 / (positions [1] - positions [0]);
+			this->ood2 [0] = 0.5 * this->ood [0];
+			for (int i = 1; i < n - 1; ++i)
+			{
+				this->ood [i] = 1.0 / (positions [i + 1] - positions [i]);
+				this->ood2 [i] = 1.0 / (positions [i + 1] - positions [i - 1]);
+			}
+			this->ood [n - 1] = 1.0 / (positions [n - 1] - positions [n - 2]);
+			this->ood2 [n - 1] = 0.5 * this->ood [n - 1];
 		
 		
 			width = positions [n - 1] - positions [0];
@@ -65,6 +75,16 @@ namespace grids
 				positions [0] = (position_0 + position_n) / 2.0;
 			}
 		
+			this->ood [0] = 1.0 / (positions [1] - positions [0]);
+			this->ood2 [0] = 0.5 * this->ood [0];
+			for (int i = 1; i < n - 1; ++i)
+			{
+				this->ood [i] = 1.0 / (positions [i + 1] - positions [i]);
+				this->ood2 [i] = 1.0 / (positions [i + 1] - positions [i - 1]);
+			}
+			this->ood [n - 1] = 1.0 / (positions [n - 1] - positions [n - 2]);
+			this->ood2 [n - 1] = 0.5 * this->ood [n - 1];
+			
 		
 			width = positions [n - 1] - positions [0];
 
@@ -165,6 +185,15 @@ namespace grids
 				positions [0] = (position_0 + position_n) / 2.0;
 			}
 
+			this->ood [0] = 1.0 / (positions [1] - positions [0]);
+			this->ood2 [0] = 0.5 * this->ood [0];
+			for (int i = 1; i < n - 1; ++i)
+			{
+				this->ood [i] = 1.0 / (positions [i + 1] - positions [i]);
+				this->ood2 [i] = 1.0 / (positions [i + 1] - positions [i - 1]);
+			}
+			this->ood [n - 1] = 1.0 / (positions [n - 1] - positions [n - 2]);
+			this->ood2 [n - 1] = 0.5 * this->ood [n - 1];
 
 			// _calculate_matrix ();
 
@@ -212,7 +241,16 @@ namespace grids
 			} else {
 				positions [0] = (position_0 + position_n) / 2.0;
 			}
-		
+
+			this->ood [0] = 1.0 / (positions [1] - positions [0]);
+			this->ood2 [0] = 0.5 * this->ood [0];
+			for (int i = 1; i < n - 1; ++i)
+			{
+				this->ood [i] = 1.0 / (positions [i + 1] - positions [i]);
+				this->ood2 [i] = 1.0 / (positions [i + 1] - positions [i - 1]);
+			}
+			this->ood [n - 1] = 1.0 / (positions [n - 1] - positions [n - 2]);
+			this->ood2 [n - 1] = 0.5 * this->ood [n - 1];
 		
 			// _calculate_matrix ();
 	
@@ -235,6 +273,15 @@ namespace grids
 				positions [0] = (position_0 + position_n) / 2.0;
 			}
 		
+			this->ood [0] = 1.0 / (positions [1] - positions [0]);
+			this->ood2 [0] = 0.5 * this->ood [0];
+			for (int i = 1; i < n - 1; ++i)
+			{
+				this->ood [i] = 1.0 / (positions [i + 1] - positions [i]);
+				this->ood2 [i] = 1.0 / (positions [i + 1] - positions [i - 1]);
+			}
+			this->ood [n - 1] = 1.0 / (positions [n - 1] - positions [n - 2]);
+			this->ood2 [n - 1] = 0.5 * this->ood [n - 1];
 		
 			// _calculate_matrix ();
 	
