@@ -377,23 +377,24 @@ namespace plans
 		 * \brief A plan to add a source term to an equation
 		 ************************************************************************/
 		template <class datatype>
-		class vertical_stress : public explicit_plan <datatype>
+		class vertical_stress : public real_plan <datatype>
 		{
 		private:
-			using explicit_plan <datatype>::coeff;
-			using explicit_plan <datatype>::n;
-			using explicit_plan <datatype>::ldn;
-			using explicit_plan <datatype>::m;
-			using explicit_plan <datatype>::dims;
-			using explicit_plan <datatype>::data_in;
-			using explicit_plan <datatype>::data_out;
-			using explicit_plan <datatype>::grid_m;
-			using explicit_plan <datatype>::grid_n;
+			using real_plan <datatype>::coeff;
+			using real_plan <datatype>::n;
+			using real_plan <datatype>::ldn;
+			using real_plan <datatype>::m;
+			using real_plan <datatype>::dims;
+			using real_plan <datatype>::data_in;
+			using real_plan <datatype>::data_out;
+			using real_plan <datatype>::grid_m;
+			using real_plan <datatype>::grid_n;
 
+			datatype *density;
 			datatype *data_other;
 			datatype pioL;
-			const datatype *pos_m;
-			std::vector <datatype> diff, diff2;
+			const datatype *pos_m, *pos_n;
+			std::vector <datatype> oodx, oodx2, oodz, oodz2;
 		
 		public:
 			/*!**********************************************************************
@@ -404,29 +405,45 @@ namespace plans
 			 * 
 			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
 			 ************************************************************************/
-			vertical_stress (grids::variable <datatype> &i_data_other, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : 
-			explicit_plan <datatype> (i_data_in, i_data_out, i_coeff / 3.0), 
+			vertical_stress (grids::variable <datatype> &i_density, grids::variable <datatype> &i_data_other, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : 
+			real_plan <datatype> (i_data_in, i_data_out, i_coeff / 3.0), 
+			density (i_density.ptr ()),
 			data_other (i_data_other.ptr ()) {
 				TRACE ("Adding stress...");
 				pioL = 2.0 * (std::acos (-1.0) / (grid_n [n - 1] - grid_n [0]));
 
+				pos_n = &grid_n [0];
 				pos_m = &grid_m [0];
 
-				diff.resize (m + 1);
+				oodz.resize (m);
 				for (int j = 0; j < m - 1; ++j)
 				{
-					diff [j] = pos_m [j + 1] - pos_m [j];
+					oodz [j] = 1.0 / (pos_m [j + 1] - pos_m [j]);
 				}
-				diff [m - 1] = pos_m [m - 1] - pos_m [m - 2];
-				diff [m] = pos_m [m - 1] - pos_m [m - 2];
+				oodz [m - 1] = 1.0 / (pos_m [m - 1] - pos_m [m - 2]);
 
-				diff2.resize (m);
+				oodz2.resize (m);
 				for (int j = 1; j < m - 1; ++j)
 				{
-					diff2 [j] = pos_m [j + 1] - pos_m [j - 1];
+					oodz2 [j] = 1.0 / (pos_m [j + 1] - pos_m [j - 1]);
 				}
-				diff2 [0] = pos_m [1] - pos_m [0];
-				diff2 [m - 1] = pos_m [m - 1] - pos_m [m - 2];
+				oodz2 [0] = 0.5 / (pos_m [1] - pos_m [0]);
+				oodz2 [m - 1] = 0.5 / (pos_m [m - 1] - pos_m [m - 2]);
+
+				oodx.resize (n);
+				for (int i = 0; i < n - 1; ++i)
+				{
+					oodx [i] = 1.0 / (pos_n [i + 1] - pos_n [i]);
+				}
+				oodx [n - 1] = 1.0 / (pos_n [n - 1] - pos_n [n - 2]);
+
+				oodx2.resize (n);
+				for (int i = 1; i < n - 1; ++i)
+				{
+					oodx2 [i] = 1.0 / (pos_n [i + 1] - pos_n [i - 1]);
+				}
+				oodx2 [0] = 0.5 / (pos_n [1] - pos_n [0]);
+				oodx2 [n - 1] = 0.5 / (pos_n [n - 1] - pos_n [n - 2]);
 			}
 		
 			virtual ~vertical_stress () {}
@@ -436,15 +453,21 @@ namespace plans
 			 ************************************************************************/
 			virtual void execute () {
 				TRACE ("Executing source...");
-				for (int i = 0; i < ldn - 1; i += 2)
+				int p1 = 0, m1 = 0;
+				for (int i = 0; i < n; ++i)
 				{
+					p1 = (i + 1) % n;
+					m1 = (i - 1) % n;
 					for (int j = 1; j < m - 1; ++j)
 					{
-						data_out [i * m + j] += coeff / 3. * ((data_other [i * m + j + 1] - data_other [i * m + j]) / diff [j] - (data_other [i * m + j] - data_other [i * m + j - 1]) / diff [j - 1]) / diff2 [j];
-						data_out [i * m + j] -= coeff / 3. * pioL * (data_other [(i + 1) * m + j + 1] - data_other [(i + 1) * m + j - 1]) / diff2 [j];
+						data_out [i * m + j] += coeff / 3. * (density [i * m + j + 1] + density [i * m + j]) / 2. * (data_in [i * m + j + 1] - data_in [i * m + j]) * oodz [j] * oodz2 [j] / density [i * m + j];
+						data_out [i * m + j] -= coeff / 3. * (density [i * m + j] + density [i * m + j - 1]) / 2. * (data_in [i * m + j] - data_in [i * m + j - 1]) * oodz [j - 1] * oodz2 [j] / density [i * m + j];
 
-						data_out [i * m + j] += coeff / 3. * ((data_other [(i + 1) * m + j + 1] - data_other [(i + 1) * m + j]) / diff [j] - (data_other [(i + 1) * m + j] - data_other [(i + 1) * m + j - 1]) / diff [j - 1]) / diff2 [j];
-						data_out [(i + 1) * m + j] += coeff / 3. * pioL * (data_other [i * m + j + 1] - data_other [i * m + j - 1]) / diff2 [j];
+						data_out [i * m + j] -= coeff * 2. / 3. * (density [i * m + j + 1] + density [i * m + j]) / 2. * (data_other [p1 * m + j] - data_other [i * m + j]) * oodx [i] * oodz2 [j] / density [i * m + j];
+						data_out [i * m + j] += coeff * 2. / 3. * (density [i * m + j] + density [i * m + j - 1]) / 2. * (data_other [i * m + j] - data_other [m1 * m + j]) * oodx [m1] * oodz2 [j] / density [i * m + j];
+
+						data_out [i * m + j] += coeff * (density [p1 * m + j] + density [i * m + j]) / 2. * (data_other [i * m + j + 1] - data_other [i * m + j]) * oodz [j] * oodx2 [i] / density [i * m + j];
+						data_out [i * m + j] -= coeff * (density [i * m + j] + density [m1 * m + j]) / 2. * (data_other [i * m + j] - data_other [i * m + j - 1]) * oodz [j - 1] * oodx2 [i] / density [i * m + j];
 					}
 				}
 			}
@@ -455,6 +478,7 @@ namespace plans
 			class factory : public explicit_plan <datatype>::factory
 			{
 			private:
+				grids::variable <datatype> &density; //!< The data source to be used when constructing the plan
 				grids::variable <datatype> &data_other; //!< The data source to be used when constructing the plan
 			
 			public:
@@ -462,9 +486,10 @@ namespace plans
 				 * \param i_coeff The coefficient to be used when constructing the plan
 				 * \param i_data_source The data source to be used when constructing the plan
 				 ************************************************************************/
-				factory (grids::variable <datatype> &i_data_other, datatype i_coeff = 1.0) : 
+				factory (grids::variable <datatype> &i_density, grids::variable <datatype> &i_data_other, datatype i_coeff = 1.0) : 
 				explicit_plan <datatype>::factory (i_coeff), 
-				data_other (i_data_other) {INFO (i_data_other.size ())}
+				density (i_density),
+				data_other (i_data_other) {}
 			
 				virtual ~factory () {}
 			
@@ -473,7 +498,7 @@ namespace plans
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan <datatype> > (new vertical_stress <datatype> (data_other, i_data_in, i_data_out, coeff));
+						return std::shared_ptr <plans::plan <datatype> > (new vertical_stress <datatype> (density, data_other, i_data_in, i_data_out, coeff));
 					}
 					return std::shared_ptr <plans::plan <datatype> > ();
 				}

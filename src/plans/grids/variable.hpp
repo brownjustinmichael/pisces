@@ -41,6 +41,7 @@ namespace grids
 		int last_update = 0;
 		int component_flags;
 		int &element_flags;
+		std::string name;
 
 		enum operators {
 			add = 0x01,
@@ -49,33 +50,36 @@ namespace grids
 			div = 0x04
 		};
 
-		variable (grids::grid <datatype> &i_grid_m, int &i_element_flags, int i_states = 3, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags) {
-			DEBUG ("Initializing with " << i_states);
+		variable (grids::grid <datatype> &i_grid_m, int &i_element_flags, std::string i_name = "", int i_states = 3, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags), name (i_name) {
+			DEBUG ("Initializing " << name << " with " << i_states);
 			grids.push_back (&i_grid_m);
 			total = i_grid_m.get_n ();
+			DEBUG ("TOTAL " << total);
 			data.resize (total * dimensions * i_states, 0.0);
 			ld = 0;
 			states = i_states;
 		}
 
-		variable (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, int &i_element_flags, int i_states = 3, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags) {
-			DEBUG ("Initializing with " << i_states);
+		variable (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, int &i_element_flags, std::string i_name = "", int i_states = 3, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags), name (i_name) {
+			DEBUG ("Initializing " << name << " with " << i_states);
 			grids.push_back (&i_grid_n);
 			grids.push_back (&i_grid_m);
-			data.resize (i_grid_m.get_n () * i_grid_n.get_ld () * i_states * dimensions, 0.0);
-			ld = i_grid_m.get_n ();
 			total = i_grid_m.get_n () * i_grid_n.get_ld ();
+			DEBUG ("TOTAL " << total);
+			data.resize (total * i_states * dimensions, 0.0);
+			ld = i_grid_m.get_n ();
 			states = i_states;
 		}
 
-		variable (int n, grids::grid <datatype> **i_grids, int &i_element_flags, int i_states = 3, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags) {
-			DEBUG ("Initializing with " << i_states);
-			total = n > 1 ? 1 : 0;
+		variable (int n, grids::grid <datatype> **i_grids, int &i_element_flags, std::string i_name = "", int i_states = 3, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags), name (i_name) {
+			DEBUG ("Initializing " << name << " with " << i_states);
+			total = n >= 1 ? 1 : 0;
 			for (int i = 0; i < n; ++i)
 			{
 				grids.push_back (i_grids [i]);
 				total *= i_grids [i]->get_ld ();
 			}
+			DEBUG ("TOTAL " << total);
 			data.resize (total * i_states * dimensions, 0.0);
 			ld = i_grids [n - 1]->get_ld ();
 			states = i_states;
@@ -97,6 +101,8 @@ namespace grids
 			}
 			return &data [i_state * total * dimensions];
 		}
+
+		std::string get_name ();
 
 		const int size () const {
 			return total * dimensions;
@@ -123,7 +129,6 @@ namespace grids
 		}
 
 		void add_var (variable <datatype> &data, int op) {
-			DEBUG ("ADDING " << data.ptr ());
 			inner.push_back (&data);
 			vars.push_back (data.ptr ());
 			ops.push_back (op);
@@ -148,7 +153,7 @@ namespace grids
 
 		variable <datatype> &operator+ (datatype other) {
 			std::shared_ptr <variable <datatype>> new_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags)));
-			std::shared_ptr <variable <datatype>> uni_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags)));
+			std::shared_ptr <variable <datatype>> uni_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, std::to_string (other))));
 			linalg::copy (this->size (), &other, uni_var->ptr (), 0);
 			new_var->add_var (*this, add);
 			new_var->add_var (*uni_var, add);
@@ -158,9 +163,25 @@ namespace grids
 			return *new_var;
 		}
 
-		variable <datatype> &operator* (variable <datatype> &other) {
+		variable <datatype> &operator* (datatype other) {
 			std::shared_ptr <variable <datatype>> new_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags)));
+			std::shared_ptr <variable <datatype>> uni_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, std::to_string (other))));
+			linalg::copy (this->size (), &other, uni_var->ptr (), 0);
 			new_var->add_var (*this, add);
+			new_var->add_var (*uni_var, mul);
+			tmps.push_back (new_var);
+			tmps.push_back (uni_var);
+
+			return *new_var;
+		}
+
+		variable <datatype> &operator* (variable <datatype> &other) {
+			std::shared_ptr <variable <datatype>> new_var;
+			if (this->shape () > other.shape ()) {
+				new_var.reset (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags));
+			} else {
+				new_var.reset (new variable <datatype> (other.shape (), other.get_grids (), this->element_flags));
+			}			new_var->add_var (*this, add);
 			new_var->add_var (other, mul);
 			tmps.push_back (new_var);
 
@@ -168,7 +189,13 @@ namespace grids
 		}
 
 		variable <datatype> &operator/ (variable <datatype> &other) {
-			std::shared_ptr <variable <datatype>> new_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags)));
+			DEBUG ("THE PREVIOUS SHAPE IS " << this->shape ());
+			std::shared_ptr <variable <datatype>> new_var;
+			if (this->shape () > other.shape ()) {
+				new_var.reset (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags));
+			} else {
+				new_var.reset (new variable <datatype> (other.shape (), other.get_grids (), this->element_flags));
+			}
 			new_var->add_var (*this, add);
 			new_var->add_var (other, div);
 			tmps.push_back (new_var);
@@ -176,6 +203,16 @@ namespace grids
 			return *new_var;
 		}
 	};
+
+	template <class datatype>
+	variable <datatype> &operator+ (datatype first, variable <datatype> &other) {
+		return other + first;
+	}
+
+	template <class datatype>
+	variable <datatype> &operator- (datatype first, variable <datatype> &other) {
+		return other * (-1.) + first;
+	}
 }
 
 #endif /* end of include guard: VARIABLE_H__ */

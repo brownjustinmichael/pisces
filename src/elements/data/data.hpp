@@ -462,13 +462,13 @@ namespace data
 			TRACE ("Initializing " << name << "...");
 			// Size allowing for real FFT buffer
 			if (i_flags & uniform_n) {
-				data <datatype>::variables [name] = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (*grid_m, flags));
+				data <datatype>::variables [name] = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (*grid_m, flags, name));
 				return *variables [name];
 			} else if (i_flags & uniform_m) {
-				data <datatype>::variables [name] = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (*grid_n, flags));
+				data <datatype>::variables [name] = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (*grid_n, flags, name));
 				return *variables [name];
 			}
-			data <datatype>::variables [name] = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (*grid_n, *grid_m, flags, 3, i_flags & vector2D ? 2 : (i_flags & vector3D ? 3 : 1)));
+			data <datatype>::variables [name] = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (*grid_n, *grid_m, flags, name, 3, i_flags & vector2D ? 2 : (i_flags & vector3D ? 3 : 1)));
 			if (name == "x") {
 				for (int j = 0; j < m; ++j) {
 					linalg::copy (n, &((*grid_n) [0]), (*this) (name, real_real, 0, j), 1, m);

@@ -35,12 +35,13 @@ namespace pisces
 			data ["bg_pressure"].ptr () [j] = 1.0e6 * (1.0 - (*grids [1]) [j] * 0.1);
 		}
 
-		data ["density"] == (data ["composition"] + 1.0) / data ["temperature"] * data ["bg_pressure"];
+		// data ["mmw"] == m2 / (1 - massfrac / m1 * (m1 - m2))
+		data ["density"] == data ["bg_pressure"] / data ["temperature"] / (1.0 - data ["composition"] * i_params ["equations.constants.mass_ratio"].as <datatype> ());
+		// The mass ratio is (m1 - m2) / m1: near 1 => m1 >> m2, near 0 => m1 ~= m2; m1 > m2 by definition
 
 		data.transformers ["density"]->update ();
 
 		DEBUG ("Conditions: " << i_params ["equations.composition.bottom.value"] << " " << i_params ["equations.composition.top.value"]);
-		// This currently evolves the "mean molecular weight" but according to the wrong equation. This should be the mass fraction.
 		*split_solver <datatype> (equations ["composition"], timestep, 
 			dirichlet (i_params ["equations.composition.bottom.value"].as <datatype> ()), 
 			dirichlet (i_params ["equations.composition.top.value"].as <datatype> ())) 
@@ -60,8 +61,7 @@ namespace pisces
 		// + advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		params ["equations.velocity.diffusion"] * density_diff <datatype> (data ["density"])
-		// The stresses still need the density terms
-		// + horizontal_stress (data ["z_velocity"])
+		+ horizontal_stress (data ["density"], data ["z_velocity"])
 		;
 
 		// Set up the z_velocity equation, note the missing pressure term, which is handled in div
@@ -71,7 +71,7 @@ namespace pisces
 		- grad_z <datatype> (data ["bg_pressure"])
 		- params ["equations.z_velocity.sources.density"] * src <datatype> (data ["density"])
 		+ params ["equations.velocity.diffusion"] * density_diff <datatype> (data ["density"])
-		// + vertical_stress (data ["x_velocity"])
+		+ vertical_stress (data ["density"], data ["x_velocity"])
 		;
 		data ["x_velocity"].component_flags |= plans::solvers::ignore_net;
 		data ["z_velocity"].component_flags |= plans::solvers::ignore_net;

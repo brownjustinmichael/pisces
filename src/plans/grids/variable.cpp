@@ -29,12 +29,13 @@ namespace grids
 			return state;
 		}
 
-		DEBUG ("Update attempt");
+		DEBUG ("Update attempt on " << this->get_name ());
 		linalg::scale (this->size (), 0.0, this->ptr ());
 		datatype *tmp, *data = this->ptr ();
 		for (int i = 0; i < (int) vars.size (); ++i)
 		{
-			tmp = vars [i];
+			DEBUG ("Incorporating " << inner [i]->get_name () << " at " << inner [i]->ptr ());
+			tmp = inner [i]->ptr ();
 			int n = total / ld;
 			int tld = inner [i]->get_ld ();
 			if (ops [i] == add) {
@@ -69,6 +70,37 @@ namespace grids
 		last_update = 0;
 		state++;
 		return state;
+	}
+
+	template <class datatype>
+	std::string variable <datatype>::get_name () {
+		std::string return_val = name;
+		bool inner_bool = false;
+		for (int i = 0; i < (int) this->inner.size (); ++i)
+		{
+		 	inner_bool = true;
+		 	if (i != 0) {
+		 		switch (this->ops [i]) {
+		 			case add:
+		 				return_val += "+";
+		 				break;
+	 				case sub:
+	 					return_val += "-";
+	 					break;
+	 				case mul:
+	 					return_val += "*";
+	 					break;
+	 				case div:
+	 					return_val += "/";
+	 					break;
+		 		}
+		 	} else {
+		 		return_val += "(";
+		 	}
+		 	return_val += this->inner [i]->get_name ();
+		}
+		if (inner_bool) return_val += ")";
+		return return_val;
 	}
 
 	template class variable <double>;
