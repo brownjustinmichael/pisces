@@ -333,19 +333,28 @@ namespace plans
 				#pragma omp parallel for
 				for (int i = 0; i < n; ++i)
 				{
-					int p1 = 0, m1 = 0;
+					int p1 = 0, m1 = 0, g = 0;
 					p1 = (i + 1) % n;
 					m1 = (i - 1 + n) % n;
 					for (int j = 1; j < m - 1; ++j)
 					{
-						data_out [i * m + j] += coeff / 3. * (density [i * m + j + 1] + density [i * m + j]) / 2. * (data_in [i * m + j + 1] - data_in [i * m + j]) * oodz [j] * oodz2 [j] / density [i * m + j];
-						data_out [i * m + j] -= coeff / 3. * (density [i * m + j] + density [i * m + j - 1]) / 2. * (data_in [i * m + j] - data_in [i * m + j - 1]) * oodz [j - 1] * oodz2 [j] / density [i * m + j];
+						g = i * m + j;
+						data_out [g] += coeff / 3. * (density [g + 1] + density [g]) / 2. * (data_in [g + 1] - data_in [g]) * oodz [j] * oodz2 [j] / density [g];
+						data_out [g] -= coeff / 3. * (density [g] + density [g - 1]) / 2. * (data_in [g] - data_in [g - 1]) * oodz [j - 1] * oodz2 [j] / density [g];
 
-						data_out [i * m + j] -= coeff * 2. / 3. * (density [i * m + j + 1] + density [i * m + j]) / 2. * (data_other [p1 * m + j] - data_other [i * m + j]) * oodx [i] * oodz2 [j] / density [i * m + j];
-						data_out [i * m + j] += coeff * 2. / 3. * (density [i * m + j] + density [i * m + j - 1]) / 2. * (data_other [i * m + j] - data_other [m1 * m + j]) * oodx [m1] * oodz2 [j] / density [i * m + j];
+						// data_out [g] -= coeff * 2. / 3. * (density [g + 1] + density [g]) / 2. * (data_other [p1 * m + j] - data_other [g]) * oodx [i] * oodz2 [j] / density [g];
+						// data_out [g] += coeff * 2. / 3. * (density [g] + density [g - 1]) / 2. * (data_other [g] - data_other [m1 * m + j]) * oodx [m1] * oodz2 [j] / density [g];
 
-						data_out [i * m + j] += coeff * (density [p1 * m + j] + density [i * m + j]) / 2. * (data_other [i * m + j + 1] - data_other [i * m + j]) * oodz [j] * oodx2 [i] / density [i * m + j];
-						data_out [i * m + j] -= coeff * (density [i * m + j] + density [m1 * m + j]) / 2. * (data_other [i * m + j] - data_other [i * m + j - 1]) * oodz [j - 1] * oodx2 [i] / density [i * m + j];
+						// data_out [g] += coeff * (density [p1 * m + j] + density [g]) / 2. * (data_other [g + 1] - data_other [g]) * oodz [j] * oodx2 [i] / density [g];
+						// data_out [g] -= coeff * (density [g] + density [m1 * m + j]) / 2. * (data_other [g] - data_other [g - 1]) * oodz [j - 1] * oodx2 [i] / density [g];
+
+						data_out [g] -= coeff * 2. / 3. * density [g + 1] * (data_other [p1 * m + j + 1] - data_other [m1 * m + j + 1]) * oodx2 [i] * oodz2 [j] / density [g];
+						data_out [g] += coeff * 2. / 3. * density [g - 1] * (data_other [p1 * m + j - 1] - data_other [m1 * m + j - 1]) * oodx2 [i] * oodz2 [j] / density [g];
+
+						data_out [g] += coeff * density [p1 * m + j] * (data_other [p1 * m + j + 1] - data_other [p1 * m + j - 1]) * oodz2 [j] * oodx2 [i] / density [g];
+						data_out [g] -= coeff * density [m1 * m + j] * (data_other [m1 * m + j + 1] - data_other [m1 * m + j - 1]) * oodz2 [j] * oodx2 [i] / density [g];
+
+
 					}
 				}
 			}

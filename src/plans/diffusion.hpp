@@ -19,15 +19,15 @@
 namespace plans
 {
 	template <class datatype>
-	typename plan <datatype>::factory_container diff (datatype coeff = 1.0) {
-		return typename implicit_plan <datatype>::factory_container (std::shared_ptr <typename implicit_plan <datatype>::factory> (new typename diffusion::vertical <datatype>::factory (coeff))) + 
-		typename implicit_plan <datatype>::factory_container (std::shared_ptr <typename implicit_plan <datatype>::factory> (new typename diffusion::horizontal <datatype>::factory (coeff)));
+	typename plan <datatype>::factory_container diff (datatype alpha = 1.0, datatype coeff = 1.0) {
+		return typename implicit_plan <datatype>::factory_container (std::shared_ptr <typename implicit_plan <datatype>::factory> (new typename diffusion::vertical <datatype>::factory (coeff, alpha))) + 
+		typename implicit_plan <datatype>::factory_container (std::shared_ptr <typename implicit_plan <datatype>::factory> (new typename diffusion::horizontal <datatype>::factory (coeff, alpha)));
 	}
 
 	template <class datatype>
-	typename plan <datatype>::factory_container density_diff (grids::variable <datatype> &density, datatype coeff = 1.0) {
-		return diff <datatype> (coeff) +
-		typename plan <datatype>::factory_container (std::shared_ptr <typename plan <datatype>::factory> (new typename diffusion::variable_diffusion <datatype>::factory (density, coeff)));
+	typename plan <datatype>::factory_container density_diff (grids::variable <datatype> &density, datatype alpha = 1.0, datatype coeff = 1.0) {
+		return diff <datatype> (alpha, coeff);// +
+		// typename plan <datatype>::factory_container (std::shared_ptr <typename plan <datatype>::factory> (new typename diffusion::variable_diffusion <datatype>::factory (density, coeff)));
 	}
 
 	template <class datatype>

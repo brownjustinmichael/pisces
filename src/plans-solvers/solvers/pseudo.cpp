@@ -226,18 +226,20 @@ namespace plans
 			{
 				int p1 = (i - 1) % n;
 				int m1 = (i - 1 + n) % n;
+				int g = 0;
 				for (int j = 1; j < m - 1; ++j)
 				{
-					rhs_real [i * m + j] -= ((data_in [p1 * m + j] - data_in [m1 * m + j]) * oodx2 [i]) * log (density [p1 * m + j] / density [m1 * m + j]) * oodx2 [i];
-					rhs_real [i * m + j] -= (data_in [i * m + j] * grad_pressure [j] / gamma + (data_in [i * m + j + 1] - data_in [i * m + j - 1]) * oodz2 [j]) * log (density [i * m + j + 1] / density [i * m + j - 1]) * oodz2 [j];
-					rhs_real [i * m + j] -= data_in [i * m + j] * ((log (density [i * m + j + 1] / density [i * m + j]) * oodz [j] - log (density [i * m + j] / density [i * m + j - 1]) * oodz [j - 1]) * oodz2 [j] + (log (density [p1 * m + j] / density [i * m + j]) * oodx [i] - log (density [i * m + j] / density [m1 * m + j]) * oodx [m1]) * oodx2 [i]) * 2.;
+					g = i * m + j;
+					rhs_real [g] -= ((data_in [p1 * m + j] - data_in [m1 * m + j]) * oodx2 [i]) * log (density [p1 * m + j] / density [m1 * m + j]) * oodx2 [i];
+					rhs_real [g] -= (data_in [g] * grad_pressure [j] / gamma + (data_in [g + 1] - data_in [g - 1]) * oodz2 [j]) * log (density [g + 1] / density [g - 1]) * oodz2 [j];
+					rhs_real [g] -= data_in [g] * ((log (density [g + 1] / density [g]) * oodz [j] - log (density [g] / density [g - 1]) * oodz [j - 1]) * oodz2 [j] + (log (density [p1 * m + j] / density [g]) * oodx [i] - log (density [g] / density [m1 * m + j]) * oodx [m1]) * oodx2 [i]) * 2.;
 				}
 			}
 
 			transform->execute ();
 
 			linalg::matrix_copy (m, ldn, rhs_real, &data_temp [1], m, m + 2);
-			linalg::matrix_add_scaled (m, ldn, 1.0, rhs.ptr (real_spectral), &data_temp [1], m, m + 2);
+			linalg::matrix_add_scaled (m, ldn, (gamma - 1.0) / gamma, rhs.ptr (real_spectral), &data_temp [1], m, m + 2);
 		
 			datatype scalar = acos (-1.0) * 2.0 / (pos_n [n - 1] - pos_n [0]);
 			datatype *data_ptr = &data_temp [1];

@@ -87,7 +87,9 @@ namespace pisces
 
 		// Set up the temperature equation
 		if (!(i_params ["equations.temperature.ignore"].IsDefined () && i_params ["equations.temperature.ignore"].as <bool> ())) {
-			*split_solver <datatype> (equations ["temperature"], timestep, dirichlet (0.0), dirichlet (0.0))
+			*split_solver <datatype> (equations ["temperature"], timestep, 
+				dirichlet (i_params ["equations.temperature.bottom.value"].as <datatype> ()), 
+				dirichlet (i_params ["equations.temperature.top.value"].as <datatype> ())) 
 			+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 			+ params ["equations.temperature.sources.z_velocity"] * src <datatype> (data ["z_velocity"]) 
 			== 
@@ -96,7 +98,9 @@ namespace pisces
 
 		// Set up the composition equation
 		if (!(i_params ["equations.composition.ignore"].IsDefined () && i_params ["equations.composition.ignore"].as <bool> ())) {
-			*split_solver <datatype> (equations ["composition"], timestep, dirichlet (0.0), dirichlet (0.0)) 
+			*split_solver <datatype> (equations ["composition"], timestep, 
+				dirichlet (i_params ["equations.composition.bottom.value"].as <datatype> ()), 
+				dirichlet (i_params ["equations.composition.top.value"].as <datatype> ())) 
 			+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 			+ params ["equations.composition.sources.z_velocity"] * src <datatype> (data ["z_velocity"]) 
 			== 
@@ -104,7 +108,7 @@ namespace pisces
 		}
 
 		// Set up the x_velocity equation, note the missing pressure term, which is handled in div
-		if (!(i_params ["equations.velocity.ignore"].IsDefined () && i_params ["equations.velocity.ignore"].as <bool> ())) {
+		if (!(i_params ["equations.x_velocity.ignore"].IsDefined () && i_params ["equations.x_velocity.ignore"].as <bool> ())) {
 			*split_solver <datatype> (equations ["x_velocity"], timestep, neumann (0.0), neumann (0.0)) 
 			+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 			== 
@@ -112,7 +116,7 @@ namespace pisces
 		}
 
 		// Set up the z_velocity equation, note the missing pressure term, which is handled in div
-		if (!(i_params ["equations.velocity.ignore"].IsDefined () && i_params ["equations.velocity.ignore"].as <bool> ())) {
+		if (!(i_params ["equations.z_velocity.ignore"].IsDefined () && i_params ["equations.z_velocity.ignore"].as <bool> ())) {
 			*split_solver <datatype> (equations ["z_velocity"], timestep, dirichlet (0.0), dirichlet (0.0)) 
 			+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 			== 
@@ -120,6 +124,9 @@ namespace pisces
 			+ params ["equations.z_velocity.sources.composition"] * src <datatype> (data ["composition"]) 
 			+ params ["equations.velocity.diffusion"] * diff <datatype> ();
 			data ["z_velocity"].component_flags |= ignore_net;
+			DEBUG ("PARAM IS " << params ["equations.z_velocity.sources.composition"]);
+		} else {
+			DEBUG ("IGNORING");
 		}
 
 		// Set up the velocity constraint

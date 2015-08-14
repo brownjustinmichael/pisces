@@ -133,6 +133,8 @@ namespace plans
 		virtual bool implicit () {
 			return false;
 		}
+
+		class factory_container;
 		
 		/*!**********************************************************************
 		 * \brief An abstract factory class designed to produce a plan instance

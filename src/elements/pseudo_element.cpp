@@ -29,16 +29,18 @@ namespace pisces
 		cfl = i_params ["time.cfl"].as <datatype> ();
 
 		data.initialize ("bg_pressure", uniform_n);
+		data.initialize ("mmw");
 
 		for (int j = 0; j < m; ++j)
 		{
-			data ["bg_pressure"].ptr () [j] = 1.0e6 * (1.0 - (*grids [1]) [j] * 0.1);
+			data ["bg_pressure"].ptr () [j] = 1.0e6 * (1.0 - (*grids [1]) [j] * 0.0);
 		}
 
-		// data ["mmw"] == m2 / (1 - massfrac / m1 * (m1 - m2))
-		data ["density"] == data ["bg_pressure"] / data ["temperature"] / (1.0 - data ["composition"] * i_params ["equations.constants.mass_ratio"].as <datatype> ());
+		data ["mmw"] == 1.0 / (1.0 - data ["composition"] * i_params ["equations.constants.mass_ratio"].as <datatype> ());
+		data ["density"] == data ["bg_pressure"] / data ["temperature"] * data ["mmw"];
 		// The mass ratio is (m1 - m2) / m1: near 1 => m1 >> m2, near 0 => m1 ~= m2; m1 > m2 by definition
 
+		data.transformers ["mmw"]->update ();
 		data.transformers ["density"]->update ();
 
 		DEBUG ("Conditions: " << i_params ["equations.composition.bottom.value"] << " " << i_params ["equations.composition.top.value"]);
@@ -49,16 +51,19 @@ namespace pisces
 		== 
 		params ["equations.composition.diffusion"] * density_diff <datatype> (data ["density"]);
 
-		// *split_solver <datatype> (equations ["temperature"], timestep, 
-		// 	dirichlet (i_params ["equations.temperature.bottom.value"].as <datatype> ()), 
-		// 	dirichlet (i_params ["equations.temperature.top.value"].as <datatype> ())) 
-		// + advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
-		// == 
-		// params ["equations.temperature.diffusion"] * density_diff <datatype> (data ["density"]);
+		*split_solver <datatype> (equations ["temperature"], timestep, 
+			dirichlet (i_params ["equations.temperature.bottom.value"].as <datatype> ()), 
+			dirichlet (i_params ["equations.temperature.top.value"].as <datatype> ())) 
+		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
+		== 
+		params ["equations.temperature.diffusion"] * density_diff <datatype> (data ["density"] / data ["mmw"])
+		// + params ["equations.velocity.diffusion"] * heat <datatype> (data ["mmw"], data ["x_velocity"], data ["z_velocity"])
+		// - diverge <datatype> (data ["temperature"], data ["x_velocity"], data ["z_velocity"])
+		;
 
 		// Set up the x_velocity equation, note the missing pressure term, which is handled in div
 		*split_solver <datatype> (equations ["x_velocity"], timestep, neumann (0.0), neumann (0.0)) 
-		// + advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
+		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		params ["equations.velocity.diffusion"] * density_diff <datatype> (data ["density"])
 		+ horizontal_stress (data ["density"], data ["z_velocity"])
@@ -66,7 +71,7 @@ namespace pisces
 
 		// Set up the z_velocity equation, note the missing pressure term, which is handled in div
 		*split_solver <datatype> (equations ["z_velocity"], timestep, dirichlet (0.0), dirichlet (0.0)) 
-		// + advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
+		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		- grad_z <datatype> (data ["bg_pressure"])
 		- params ["equations.z_velocity.sources.density"] * src <datatype> (data ["density"])
@@ -78,9 +83,12 @@ namespace pisces
 
 		// *div <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"])
 		// Set up the velocity constraint
-		*pdiv <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"], data ["density"].ptr (real_spectral), data ["bg_pressure"].ptr (), data ["x_velocity"].ptr (real_spectral), data ["z_velocity"].ptr (real_spectral))
+		*pdiv <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"], data ["density"].ptr (real_spectral), data ["bg_pressure"].ptr (), i_params ["equations.constants.gamma"].as <datatype> ())
 		==
-		0.0;
+		0.0
+		// params ["equations.temperature.diffusion"] * density_diff <datatype> (data ["density"] / data ["mmw"], 0.0)
+		// params ["equations.velocity.diffusion"] * heat <datatype> (data ["mmw"], data ["x_velocity"], data ["z_velocity"])
+		;
 		
 	TRACE ("Initialized.");
 	}

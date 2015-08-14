@@ -35,7 +35,7 @@ namespace plans
 			using implicit_plan <datatype>::element_flags;
 			using implicit_plan <datatype>::component_flags;
 
-			datatype *data_source, *spectral_data_source, *new_matrix, *current, *bg_deriv, *bg_deriv2;
+			datatype *data_source, *new_matrix, *current, *bg_deriv, *bg_deriv2;
 			std::vector<datatype> bg_deriv_vec, bg_deriv2_vec, new_matrix_vec, bg_val, current_vec;
 			const datatype *pos_m, *pos_n;
 			datatype *oodx, *oodz, *oodx2, *oodz2;
@@ -46,7 +46,6 @@ namespace plans
 			data_source (i_data_source.ptr (real_real)) {
 				pos_n = &grid_n [0];
 				pos_m = &grid_m [0];
-				spectral_data_source = i_data_source.ptr (spectral_spectral);
 				bg_deriv_vec.resize (m, 0.0);
 				bg_deriv = &bg_deriv_vec [0];
 				bg_deriv2_vec.resize (m, 0.0);
@@ -99,14 +98,18 @@ namespace plans
 				#pragma omp parallel for
 				for (int i = 0; i < n; ++i)
 				{
-					int m1 = 0, p1 = 0;
+					int m1 = 0, p1 = 0, g = 0;
 					p1 = (i + 1) % n;
 					m1 = (i - 1 + n) % n;
 					for (int j = 1; j < m - 1; ++j)
 					{
-						current [i * m + j] += coeff * (log (data_source [i * m + j + 1] / data_source [i * m + j - 1]) * oodz2 [j] - bg_deriv [j]) * (data_in [i * m + j + 1] - data_in [i * m + j - 1]) * oodz2 [j];
+						g = i * m + j;
+						current [g] += coeff * (log (data_source [g + 1] / data_source [g - 1]) * oodz2 [j] - bg_deriv [j]) * (data_in [g + 1] - data_in [g - 1]) * oodz2 [j];
 
-						current [i * m + j] += coeff * (log (data_source [p1 * m + j] / data_source [m1 * m + j]) * oodx2 [i]) * (data_in [p1 * m + j] - data_in [m1 * m + j]) * oodx2 [i];
+						current [g] += coeff * (log (data_source [p1 * m + j] / data_source [m1 * m + j]) * oodx2 [i]) * (data_in [p1 * m + j] - data_in [m1 * m + j]) * oodx2 [i];
+						if (current [g] != current [g]) {
+							DEBUG ("issue " << data_source [p1 * m + j] << " " << data_source [m1 * m + j] << " " << data_source [g + 1] << " " << data_source [g - 1]);
+						}
 					}
 				}
 			}

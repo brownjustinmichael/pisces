@@ -136,7 +136,7 @@ namespace plans
 				datatype gamma;
 				plans::solvers::equation <datatype> &equation_x; //!< A reference to the x-component equation
 				plans::solvers::equation <datatype> &equation_z; //!< A reference to the z-component equation
-				datatype *pressure, *density, *x_vel, *z_vel;
+				datatype *pressure, *density;
 
 			public:
 				/*!**********************************************************************
@@ -146,7 +146,7 @@ namespace plans
 				 * \param i_equation_x A reference to the x-component equation
 				 * \param i_equation_z A reference to the z-component equation
 				 ************************************************************************/
-				factory (mpi::messenger *i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, plans::solvers::equation <datatype> &i_equation_x, plans::solvers::equation <datatype> &i_equation_z, datatype *i_density, datatype *i_pressure, datatype *i_x_vel, datatype *i_z_vel, datatype i_gamma = 5. / 3.) : 
+				factory (mpi::messenger *i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, plans::solvers::equation <datatype> &i_equation_x, plans::solvers::equation <datatype> &i_equation_z, datatype *i_density, datatype *i_pressure, datatype i_gamma = 5. / 3.) : 
 				messenger_ptr (i_messenger_ptr), 
 				boundary_0 (i_boundary_0), 
 				boundary_n (i_boundary_n), 
@@ -154,11 +154,9 @@ namespace plans
 				equation_x (i_equation_x), 
 				equation_z (i_equation_z), 
 				pressure (i_pressure),
-				density (i_density),
-				x_vel (i_x_vel),
-				z_vel (i_z_vel) {}
+				density (i_density) {}
 
-				factory (mpi::messenger *i_messenger_ptr, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n, plans::solvers::equation <datatype> &i_equation_x, plans::solvers::equation <datatype> &i_equation_z, datatype *i_density, datatype *i_pressure, datatype *i_x_vel, datatype *i_z_vel, datatype i_gamma = 5. / 3.) : 
+				factory (mpi::messenger *i_messenger_ptr, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n, plans::solvers::equation <datatype> &i_equation_x, plans::solvers::equation <datatype> &i_equation_z, datatype *i_density, datatype *i_pressure, datatype i_gamma = 5. / 3.) : 
 				messenger_ptr (i_messenger_ptr), 
 				boundary_factory_0 (&i_boundary_0), 
 				boundary_factory_n (&i_boundary_n), 
@@ -166,9 +164,7 @@ namespace plans
 				equation_x (i_equation_x), 
 				equation_z (i_equation_z), 
 				pressure (i_pressure),
-				density (i_density),
-				x_vel (i_x_vel),
-				z_vel (i_z_vel) {}
+				density (i_density) {}
 				
 				virtual ~factory () {}
 				

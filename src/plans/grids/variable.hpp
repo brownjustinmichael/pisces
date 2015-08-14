@@ -151,26 +151,32 @@ namespace grids
 			return *this;
 		}
 
+		static void store_var (std::shared_ptr <variable <datatype>> &other) {
+			tmps.push_back (other);
+		}
+
 		variable <datatype> &operator+ (datatype other) {
-			std::shared_ptr <variable <datatype>> new_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags)));
-			std::shared_ptr <variable <datatype>> uni_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, std::to_string (other))));
+			std::shared_ptr <variable <datatype>> new_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, "", 1)));
+			std::shared_ptr <variable <datatype>> uni_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, std::to_string (other), 1)));
 			linalg::copy (this->size (), &other, uni_var->ptr (), 0);
 			new_var->add_var (*this, add);
 			new_var->add_var (*uni_var, add);
-			tmps.push_back (new_var);
-			tmps.push_back (uni_var);
+			store_var (new_var);
+			store_var (uni_var);
+			new_var->update ();
 
 			return *new_var;
 		}
 
 		variable <datatype> &operator* (datatype other) {
-			std::shared_ptr <variable <datatype>> new_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags)));
-			std::shared_ptr <variable <datatype>> uni_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, std::to_string (other))));
+			std::shared_ptr <variable <datatype>> new_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, "", 1)));
+			std::shared_ptr <variable <datatype>> uni_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, std::to_string (other), 1)));
 			linalg::copy (this->size (), &other, uni_var->ptr (), 0);
 			new_var->add_var (*this, add);
 			new_var->add_var (*uni_var, mul);
-			tmps.push_back (new_var);
-			tmps.push_back (uni_var);
+			store_var (new_var);
+			store_var (uni_var);
+			new_var->update ();
 
 			return *new_var;
 		}
@@ -178,12 +184,13 @@ namespace grids
 		variable <datatype> &operator* (variable <datatype> &other) {
 			std::shared_ptr <variable <datatype>> new_var;
 			if (this->shape () > other.shape ()) {
-				new_var.reset (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags));
+				new_var.reset (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, "", 1));
 			} else {
-				new_var.reset (new variable <datatype> (other.shape (), other.get_grids (), this->element_flags));
+				new_var.reset (new variable <datatype> (other.shape (), other.get_grids (), this->element_flags, "", 1));
 			}			new_var->add_var (*this, add);
 			new_var->add_var (other, mul);
-			tmps.push_back (new_var);
+			store_var (new_var);
+			new_var->update ();
 
 			return *new_var;
 		}
@@ -192,13 +199,14 @@ namespace grids
 			DEBUG ("THE PREVIOUS SHAPE IS " << this->shape ());
 			std::shared_ptr <variable <datatype>> new_var;
 			if (this->shape () > other.shape ()) {
-				new_var.reset (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags));
+				new_var.reset (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, "", 1));
 			} else {
-				new_var.reset (new variable <datatype> (other.shape (), other.get_grids (), this->element_flags));
+				new_var.reset (new variable <datatype> (other.shape (), other.get_grids (), this->element_flags, "", 1));
 			}
 			new_var->add_var (*this, add);
 			new_var->add_var (other, div);
-			tmps.push_back (new_var);
+			store_var (new_var);
+			new_var->update ();
 
 			return *new_var;
 		}
@@ -212,6 +220,15 @@ namespace grids
 	template <class datatype>
 	variable <datatype> &operator- (datatype first, variable <datatype> &other) {
 		return other * (-1.) + first;
+	}
+
+	template <class datatype>
+	variable <datatype> &operator/ (datatype first, variable <datatype> &other) {
+		std::shared_ptr <variable <datatype>> uni_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (other.shape (), other.get_grids (), other.element_flags, std::to_string (first))));
+		linalg::copy (other.size (), &first, uni_var->ptr (), 0);
+		variable <datatype>::store_var (uni_var);
+
+		return *uni_var / other;
 	}
 }
 
