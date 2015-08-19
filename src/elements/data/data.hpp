@@ -271,6 +271,8 @@ namespace data
 			output->append ("t", &duration, formats::scalar);
 			output->append ("dt", &timestep, formats::scalar);
 
+			output->add_global_attribute ("params", params.string ());
+
 			// Check the desired output time and save the output object in the appropriate variable
 			streams.push_back (output);
 

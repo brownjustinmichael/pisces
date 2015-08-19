@@ -3,6 +3,9 @@ import SCons.Conftest
 
 exports = {}
 
+import sys
+print ("Python version is %s" % str (sys.version))
+
 exports ["include_mpi"] = True
 exports ["include_vt"] = False
 exports ["include_mp"] = True
@@ -19,7 +22,7 @@ exports ["ccompiler"] = "mpicc"
 exports ["compiler_flags"] = []
 # exports ["compiler_flags"] = ["-mt_mpi"]
 exports ["lapack_location"] = "/usr/local/opt/lapack/"
-exports ["cxxtestgen_location"] = "/usr/local/Cellar/cxxtest/4.3/libexec/bin/cxxtestgen"
+exports ["cxxtestgen_location"] = "/usr/local/Cellar/cxxtest/4.4/libexec/bin/cxxtestgen"
 
 exports ["root"] = os.path.abspath ("..") + "/"
 exports ["defaults"] = os.path.join (exports ["root"], exports ["defaults"])

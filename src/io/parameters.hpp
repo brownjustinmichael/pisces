@@ -35,6 +35,9 @@ namespace io
 	 ************************************************************************/
 	class parameters : public YAML::Node
 	{
+	protected:
+		std::string yaml_data;
+
 	public:
 		using YAML::Node::operator=; // Use the assignment operator from the super class
 	
@@ -116,6 +119,15 @@ namespace io
 		 ************************************************************************/
 		static YAML::Node copy (const YAML::Node &from, const YAML::Node to);
 	
+		std::string &string () {
+			TRACE ("Emitting parameters");
+			YAML::Emitter out;
+			out << *this;
+			yaml_data = out.c_str ();
+			TRACE ("Complete.");
+			return yaml_data;
+		}
+
 		/*!**********************************************************************
 		 * \brief Overload the index operator for the YAML::Node
 		 * 

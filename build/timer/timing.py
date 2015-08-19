@@ -13,7 +13,9 @@ app = Celery('pisces_timer', backend = 'amqp')
 app.config_from_object (celeryconfig)
 
 @app.task
-def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wrapper.py", processes = 1, threads = 1, torque = False, commandRoot = "job", hours = 1):
+def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wrapper.py", processes = 1, threads = 1, torque = False, commandRoot = "job", hours = 1, stat_file = ""):
+    print ("STAT FILE IS %s" % stat_file)
+
     if isinstance (command, str):
         command = [command]
     
@@ -136,9 +138,16 @@ class Timer (object):
 
                 for arg in self.uniques:
                     arg.setRandom ()
-                times [variances] = timeCommand.delay (command = self.getCommand (), setupCommand = self.getSetupCommand (), processes = processes, threads = threads, commandRoot = self.commandRoot, **kwargs)
+                # times [variances] = timeCommand.delay (command = self.getCommand (), setupCommand = self.getSetupCommand (), processes = processes, threads = threads, commandRoot = self.commandRoot, stat_file = self ["stat"] ().split () [-1], **kwargs)
+                times [variances] = timeCommand (command = self.getCommand (), setupCommand = self.getSetupCommand (), processes = processes, threads = threads, commandRoot = self.commandRoot, stat_file = self ["stat"] ().split () [-1], **kwargs)
 
         return times
+
+    def __getitem__ (self, key):
+        for arg in self.commandArgs:
+            if arg.name == key:
+                return arg
+        raise IndexError ("No argument named %s" % key)
 
 class Argument (object):
     """
@@ -156,6 +165,7 @@ class Argument (object):
         self.processes = kwargs.get ("processes", False)
         self.threads = kwargs.get ("threads", False)
         self.runOnly = kwargs.get ("runOnly", "")
+        self.name = kwargs.get ("name", self.command)
         
     def getValue (self):
         return self._value

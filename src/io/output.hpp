@@ -62,7 +62,7 @@ namespace io
 		 * \return The version of the class
 		 ************************************************************************/
 		static versions::version& version () {
-			static versions::version version ("1.1.0.0");
+			static versions::version version ("1.2.0.0");
 			return version;
 		}
 		
@@ -90,6 +90,8 @@ namespace io
 		 * \return A pointer to the appropriate write function for int arrays
 		 ************************************************************************/
 		virtual func_t *get_function (const int *) = 0;
+
+		virtual void add_global_attribute (std::string name, std::string attribute) = 0;
 
 		/*!**********************************************************************
 		 * \brief Append a datatype functor to the list to be output
@@ -163,7 +165,11 @@ namespace io
 		/*!**********************************************************************
 		 * \copydoc output::output
 		 ************************************************************************/
-		formatted_output (formats::data_grid i_grid, std::string i_file_name = "out", int i_file_format = formats::replace_file) : output (i_grid, i_file_name + format::extension (), i_file_format) {}		
+		formatted_output (formats::data_grid i_grid, std::string i_file_name = "out", int i_file_format = formats::replace_file) : 
+		output (i_grid, i_file_name + format::extension (), i_file_format) {
+			if (format::uses_files) check_file (file_name.c_str ());
+			format::open_file (grid, file_name.c_str (), output::file_format);
+		}		
 
 		virtual ~formatted_output () {}
 		
@@ -193,6 +199,10 @@ namespace io
 		virtual func_t *get_function (const int *ptr) {
 			return &format::template write <int>;
 		}
+
+		virtual void add_global_attribute (std::string name, std::string attribute) {
+			format::add_global_attribute (file_name, name, attribute);
+		}
 		
 		/*!**********************************************************************
 		 * \brief Check it the file opens; otherwise, raise an exception
@@ -220,9 +230,12 @@ namespace io
 			TRACE ("Sending to file...");
 	
 			INFO ("Outputting to file " << file_name << "...");
-			
+
 			if (format::uses_files) check_file (file_name.c_str ());
-			format::open_file (grid, file_name.c_str (), output::file_format);
+			if (!format::is_open (file_name)) {
+				DEBUG ("FILE IS NOT OPEN");
+				format::open_file (grid, file_name.c_str (), output::file_format);
+			}
 	
 			// Calculate the inner values of any relevant functors
 			for (int i = 0; i < (int) functor_ptrs.size (); ++i) {

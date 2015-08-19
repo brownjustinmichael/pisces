@@ -15,8 +15,8 @@
 namespace plans
 {
 	template <class datatype>
-	std::shared_ptr <typename plan <datatype>::factory> src (grids::variable <datatype> &data_source, datatype coeff = 1.0) {
-		return std::shared_ptr <typename explicit_plan <datatype>::factory> (new typename source::uniform <datatype>::factory (data_source, coeff));
+	std::shared_ptr <typename plan <datatype>::factory> src (grids::variable <datatype> &data_source, bool dealias = false, datatype coeff = 1.0) {
+		return std::shared_ptr <typename explicit_plan <datatype>::factory> (new typename source::uniform <datatype>::factory (data_source, dealias, coeff));
 	}
 
 	template <class datatype>

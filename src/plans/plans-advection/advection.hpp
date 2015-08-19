@@ -47,8 +47,6 @@ namespace plans
 		
 			std::vector <datatype> x_vec; //!< A vector to hold the x component of the calculation
 			std::vector <datatype> z_vec; //!< A vector to hold the z component of the calculation
-			std::vector <datatype> oodx_vec; //!< A vector to hold the 1/dx component of the calculation
-			std::vector <datatype> oodz_vec; //!< A vector to hold the 1/dz component of the calculation
 		
 			datatype *x_ptr; //!< A pointer to x_vec for speed
 			datatype *z_ptr; //!< A pointer to z_vec for speed
@@ -72,24 +70,8 @@ namespace plans
 				z_ptr = &z_vec [0];
 			
 				// Calculate some derivative contributions that will be used frequently
-				oodx_vec.resize (n);
-				oodx_ptr = &oodx_vec [0];
-				oodz_vec.resize (m);
-				oodz_ptr = &oodz_vec [0];
-			
-				// Calculate 1/dx
-				oodx_ptr [0] = 0.5 / (pos_n [1] - pos_n [0]);
-				for (int i = 1; i < n - 1; ++i) {
-					oodx_ptr [i] = 1.0 / (pos_n [i + 1] - pos_n [i - 1]);
-				}
-				oodx_ptr [n - 1] = 0.5 / (pos_n [n - 1] - pos_n [n - 2]);
-			
-				// Calculate 1/dz
-				oodz_ptr [0] = 1.0 / (pos_m [1] - pos_m [0]);
-				for (int i = 1; i < m - 1; ++i) {
-					oodz_ptr [i] = 1.0 / (pos_m [i + 1] - pos_m [i - 1]);
-				}
-				oodz_ptr [m - 1] = 1.0 / (pos_m [m - 1] - pos_m [m - 2]);
+				oodx_ptr = grid_n.get_ood2 ();
+				oodz_ptr = grid_m.get_ood2 ();
 			}
 	
 			virtual ~uniform () {}

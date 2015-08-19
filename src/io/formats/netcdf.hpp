@@ -51,7 +51,7 @@ namespace formats
 		static std::map <std::string, std::vector <std::string>> failures; //!< A map of failures for exception handling
 		static std::map <std::string, int> records; //!< A map of the current record of each file
 		static std::map <std::string, bool> first; //!< A map of booleans regarding whether a file has been output yet
-		
+
 	public:
 		static bool uses_files; //!< A boolean that contains whether this format uses file (true)
 		
@@ -78,6 +78,16 @@ namespace formats
 		 ************************************************************************/
 		static void close_file (std::string file_name, int file_type);
 		
+		static void add_global_attribute (std::string file_name, std::string name, std::string attribute) {
+			DEBUG ("Attributes are " << attribute);
+			files [file_name]->putAtt (name, attribute.c_str ());
+		}
+
+		static bool is_open (std::string file_name) {
+			if (files [file_name]) return true;
+			return false;
+		}
+
 		/*!**********************************************************************
 		 * \copydoc virtual_format::write
 		 ************************************************************************/

@@ -244,6 +244,11 @@ namespace formats
 		 ************************************************************************/
 		static std::string extension () {return "";}
 		
+		static bool is_open (std::string file_name) {
+			if (virtual_files.find(file_name) != virtual_files.end()) return true;
+			return false;
+		}
+
 		/*!**********************************************************************
 		 * \brief Open the virtual file for read/write
 		 ************************************************************************/
@@ -266,6 +271,8 @@ namespace formats
 		static void close_file (std::string file_name, int file_type) {
 		}
 		
+		static void add_global_attribute (std::string file_name, std::string name, std::string &attribute) {}
+
 		/*!**********************************************************************
 		 * \brief Write to file
 		 * 

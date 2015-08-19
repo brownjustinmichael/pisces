@@ -168,6 +168,26 @@ namespace grids
 			return *new_var;
 		}
 
+		variable <datatype> &operator+ (variable <datatype> &other) {
+			std::shared_ptr <variable <datatype>> new_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, "", 1)));
+			new_var->add_var (*this, add);
+			new_var->add_var (other, add);
+			store_var (new_var);
+			new_var->update ();
+
+			return *new_var;
+		}
+
+		variable <datatype> &operator- (variable <datatype> &other) {
+			std::shared_ptr <variable <datatype>> new_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, "", 1)));
+			new_var->add_var (*this, add);
+			new_var->add_var (other, sub);
+			store_var (new_var);
+			new_var->update ();
+
+			return *new_var;
+		}
+
 		variable <datatype> &operator* (datatype other) {
 			std::shared_ptr <variable <datatype>> new_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, "", 1)));
 			std::shared_ptr <variable <datatype>> uni_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, std::to_string (other), 1)));

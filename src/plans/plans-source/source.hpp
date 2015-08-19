@@ -40,7 +40,8 @@ namespace plans
 			using explicit_plan <datatype>::data_out;
 		
 			datatype *data_source; //!< The data pointer for the source data
-		
+			bool dealias;
+
 		public:
 			/*!**********************************************************************
 			 * \copydoc explicit_plan::explicit_plan
@@ -50,7 +51,10 @@ namespace plans
 			 * 
 			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
 			 ************************************************************************/
-			uniform (grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : explicit_plan <datatype> (i_data_in, i_data_out, i_coeff), data_source (i_data_source.ptr (real_spectral)) {
+			uniform (grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0, bool i_dealias = false) : 
+			explicit_plan <datatype> (i_data_in, i_data_out, i_coeff), 
+			data_source (i_data_source.ptr (real_spectral)),
+			dealias (i_dealias) {
 				TRACE ("Adding source...");
 			}
 		
@@ -61,7 +65,7 @@ namespace plans
 			 ************************************************************************/
 			virtual void execute () {
 				TRACE ("Executing source...");
-				linalg::matrix_add_scaled (m * dims, ldn, coeff, data_source, data_out, m * dims, m * dims);	
+				linalg::matrix_add_scaled (m * dims, dealias ? ldn * 2 / 3 : ldn, coeff, data_source, data_out, m * dims, m * dims);	
 			}
 		
 			/*!**********************************************************************
@@ -71,13 +75,17 @@ namespace plans
 			{
 			private:
 				grids::variable <datatype> &data_source; //!< The data source to be used when constructing the plan
+				bool dealias;
 			
 			public:
 				/*!**********************************************************************
 				 * \param i_coeff The coefficient to be used when constructing the plan
 				 * \param i_data_source The data source to be used when constructing the plan
 				 ************************************************************************/
-				factory (grids::variable <datatype> &i_data_source, datatype i_coeff = 1.0) : explicit_plan <datatype>::factory (i_coeff), data_source (i_data_source) {}
+				factory (grids::variable <datatype> &i_data_source, bool i_dealias = false, datatype i_coeff = 1.0) : 
+				explicit_plan <datatype>::factory (i_coeff), 
+				data_source (i_data_source),
+				dealias (i_dealias) {}
 			
 				virtual ~factory () {}
 			
@@ -86,7 +94,7 @@ namespace plans
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan <datatype> > (new uniform <datatype> (data_source, i_data_in, i_data_out, coeff));
+						return std::shared_ptr <plans::plan <datatype> > (new uniform <datatype> (data_source, i_data_in, i_data_out, coeff, dealias));
 					}
 					return std::shared_ptr <plans::plan <datatype> > ();
 				}

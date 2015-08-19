@@ -37,13 +37,13 @@ namespace pisces
 		}
 
 		data ["mmw"] == 1.0 / (1.0 - data ["composition"] * i_params ["equations.constants.mass_ratio"].as <datatype> ());
-		data ["density"] == data ["bg_pressure"] / data ["temperature"] * data ["mmw"];
+		// data ["density"] == data ["bg_pressure"] / data ["temperature"];// * data ["mmw"];
+		data ["density"] == data ["temperature"];// * data ["mmw"];
 		// The mass ratio is (m1 - m2) / m1: near 1 => m1 >> m2, near 0 => m1 ~= m2; m1 > m2 by definition
 
 		data.transformers ["mmw"]->update ();
 		data.transformers ["density"]->update ();
 
-		DEBUG ("Conditions: " << i_params ["equations.composition.bottom.value"] << " " << i_params ["equations.composition.top.value"]);
 		*split_solver <datatype> (equations ["composition"], timestep, 
 			dirichlet (i_params ["equations.composition.bottom.value"].as <datatype> ()), 
 			dirichlet (i_params ["equations.composition.top.value"].as <datatype> ())) 
@@ -66,7 +66,7 @@ namespace pisces
 		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		params ["equations.velocity.diffusion"] * density_diff <datatype> (data ["density"])
-		+ horizontal_stress (data ["density"], data ["z_velocity"])
+		// + horizontal_stress (data ["density"], data ["z_velocity"])
 		;
 
 		// Set up the z_velocity equation, note the missing pressure term, which is handled in div
@@ -74,9 +74,9 @@ namespace pisces
 		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		- grad_z <datatype> (data ["bg_pressure"])
-		- params ["equations.z_velocity.sources.density"] * src <datatype> (data ["density"])
+		- params ["equations.z_velocity.sources.density"] * src <datatype> (data ["density"], true)
 		+ params ["equations.velocity.diffusion"] * density_diff <datatype> (data ["density"])
-		+ vertical_stress (data ["density"], data ["x_velocity"])
+		// + vertical_stress (data ["density"], data ["x_velocity"])
 		;
 		data ["x_velocity"].component_flags |= plans::solvers::ignore_net;
 		data ["z_velocity"].component_flags |= plans::solvers::ignore_net;
