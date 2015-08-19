@@ -10,6 +10,7 @@
 #define VERSION_HPP_9E6C97DA
 
 #include <string>
+#include <sstream>
 
 /*!**********************************************************************
  * \namespace versions
@@ -91,6 +92,12 @@ namespace versions
 		 ************************************************************************/
 		bool operator= (const version &otherVersion) const {
 			return major == otherVersion.major && minor == otherVersion.minor && revision == otherVersion.revision && build == otherVersion.build;
+		}
+
+		operator std::string() {
+			std::stringstream repr;
+			repr << major << "." << minor << "." << revision << "." << build;
+			return repr.str();
 		}
 	};
 } /* versions */

@@ -38,6 +38,9 @@ namespace pisces
 		double transform_time = 0.0, execution_time = 0.0, solve_time = 0.0, factorize_time = 0.0, output_time = 0.0, timestep_time = 0.0;
 		std::chrono::duration <double> transform_duration = std::chrono::duration <double>::zero (), execution_duration = std::chrono::duration <double>::zero (), solve_duration = std::chrono::duration <double>::zero (), factorize_duration = std::chrono::duration <double>::zero (), output_duration = std::chrono::duration <double>::zero (), timestep_duration = std::chrono::duration <double>::zero ();
 
+		data.add_stream_attribute("version", version());
+		data.add_stream_attribute("element", name());
+
 		t_timestep = calculate_min_timestep ();
 		messenger_ptr->min (&t_timestep);
 

@@ -89,6 +89,14 @@ namespace data
 		}
 		
 		virtual ~data () {}
+
+		/*!**********************************************************************
+		 * \return The version of the class
+		 ************************************************************************/
+		static versions::version& version () {
+			static versions::version version ("1.0.0.0");
+			return version;
+		}
 		
 		/*!**********************************************************************
 		 * \brief Given an integer index to one of the scalar variables, return a pointer to that dataset
@@ -246,6 +254,13 @@ namespace data
 
 			return setup (input_stream);
 		}
+
+		void add_stream_attribute (std::string name, std::string attribute) {
+			for (auto iter = streams.begin (); iter < streams.end (); ++iter)
+			{
+				(*iter)->add_global_attribute (name, attribute);
+			}
+		}
 	
 		/*!**********************************************************************
 		 * \brief Given an output_stream, append all relevant outputs
@@ -272,6 +287,8 @@ namespace data
 			output->append ("dt", &timestep, formats::scalar);
 
 			output->add_global_attribute ("params", params.string ());
+			output->add_global_attribute ("data_version", version ());
+			output->add_global_attribute ("output_version", output->version ());
 
 			// Check the desired output time and save the output object in the appropriate variable
 			streams.push_back (output);

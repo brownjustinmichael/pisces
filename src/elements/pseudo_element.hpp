@@ -64,6 +64,10 @@ namespace pisces
 		pseudo_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags);
 		
 		virtual ~pseudo_element () {}
+
+		virtual std::string name() {
+			return "pseudo";
+		}
 		
 		/*!**********************************************************************
 		 * \copydoc implemented_element::calculate_timestep

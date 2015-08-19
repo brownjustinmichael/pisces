@@ -133,6 +133,8 @@ namespace pisces
 			static versions::version version ("1.1.0.0");
 			return version;
 		}
+
+		virtual std::string name() = 0;
 		
 		/*!*******************************************************************
 		 * \brief Get the datatype reference to the named scalar

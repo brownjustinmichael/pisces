@@ -1,7 +1,3 @@
-init:
-    scale: 0.001
-    mean: 0.0
-    sigma: 10.
 grid:
     x:
         points: 256
@@ -31,59 +27,6 @@ time:
     cfl: 0.4
     alpha: 1.00
     allow: 1000.0
-equations:
-    temperature:
-        diffusion: 1.0
-        advection: 1.0
-        sources:
-            z_velocity: 1.0
-        top:
-            type: fixed_value
-            value: 0.0
-        bottom:
-            type: fixed_value
-            value: 0.0
-    composition:
-        diffusion: 0.5
-        advection: 1.0
-        sources:
-            z_velocity: 0.5
-        top:
-            type: fixed_value
-            value: 0.0
-        bottom:
-            type: fixed_value
-            value: 0.0
-    velocity:
-        ignore: True
-        diffusion: 0.5
-        advection: 1.0
-    x_velocity:
-        ignore: False
-        link: "equations.velocity"
-        top:
-            type: fixed_derivative
-            value: 0.0
-        bottom:
-            type: fixed_derivative
-            value: 0.0
-    z_velocity:
-        ignore: False
-        link: "equations.velocity"
-        sources:
-            temperature: 0.5
-            composition: -0.5
-        top:
-            type: fixed_value
-            value: 0.0
-        bottom:
-            type: fixed_value
-            value: 0.0
-    pressure:
-        ignore: false
-        incompressible: true
-        x_velocity: x_velocity
-        z_velocity: z_velocity
 root: ./
 input:
     directory: input/
