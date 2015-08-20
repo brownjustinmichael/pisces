@@ -52,7 +52,6 @@ namespace pisces
 	class element
 	{
 	protected:
-		int n_steps = 0;
 		std::vector <grids::axis> axes; //!< A vector of axis objects, containing the basic grid information
 		int name; //!< An integer representation of the element, to be used in file output
 		int dimensions; //!< The integer number of dimensions in the element
@@ -134,7 +133,7 @@ namespace pisces
 			return version;
 		}
 
-		virtual std::string name() = 0;
+		virtual std::string class_name() = 0;
 		
 		/*!*******************************************************************
 		 * \brief Get the datatype reference to the named scalar
@@ -375,7 +374,7 @@ namespace pisces
 		 ************************************************************************/
 		 virtual void run (int &n_steps);
 		 virtual void run () {
-		 	run (n_steps);
+		 	run (data.n_steps);
 		 }
 		
 		/*!**********************************************************************

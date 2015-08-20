@@ -119,7 +119,7 @@ namespace formats
 			netCDF::NcVar ncdata = files [file_name]->getVar (name.c_str ());
 			if (ncdata.isNull ()) {
 				ncdata = files [file_name]->addVar (name.c_str (), netcdf_type (&typeid (datatype)), scalar_dims);
-				ncdata.setFill (true, NULL);
+				// ncdata.setFill (true, NULL);
 			}
 			ncdata.putVar (offsets, sizes, data);
 		}

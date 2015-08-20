@@ -13,6 +13,8 @@
 #include <map>
 #include <memory>
 #include <algorithm>
+#include <ctime>
+#include <chrono>
 
 #include "linalg/utils.hpp"
 
@@ -75,8 +77,17 @@ namespace data
 		std::vector <std::string> scalar_names; //!< The vector of variable names
 		std::map <std::string, std::shared_ptr <grids::variable <datatype>>> variables; //!< The string map of vectors containing the variable data
 		datatype *weights;
+
+		clock_t cbegin, cend;
+		std::chrono::time_point <std::chrono::system_clock> tbegin, tend;
+
+		double timing_cputime = 0.0;
+		double timing_walltime = 0.0;
+		std::chrono::duration <double> timing_duration = std::chrono::duration <double>::zero ();
 		
 	public:
+		int n_steps = 0;
+
 		std::map <std::string, bool> is_corrector;
 		std::map <std::string, std::shared_ptr <plans::transforms::transformer <datatype>>> transformers;
 
@@ -86,6 +97,8 @@ namespace data
 		data (io::parameters &i_params, int i_id = 0) : id (i_id), params (i_params) {
 			flags = 0x0;
 			duration = 0.0;
+			cbegin=clock();
+			tbegin=std::chrono::system_clock::now();
 		}
 		
 		virtual ~data () {}
@@ -184,6 +197,11 @@ namespace data
 		 ************************************************************************/
 		void output () {
 			TRACE ("Output...");
+			cend=clock();
+			tend=std::chrono::system_clock::now();
+			timing_cputime=((double) (cend - cbegin))/CLOCKS_PER_SEC;
+			timing_duration=tend - tbegin;
+			timing_walltime=timing_duration.count();
 			for (int i = 0; i < (int) streams.size (); ++i) {
 				streams [i]->to_file ();
 			}
@@ -285,6 +303,9 @@ namespace data
 			
 			output->append ("t", &duration, formats::scalar);
 			output->append ("dt", &timestep, formats::scalar);
+			output->append ("cputime", &timing_cputime, formats::scalar);
+			output->append ("walltime", &timing_walltime, formats::scalar);
+			output->append("step", &n_steps, formats::scalar);
 
 			output->add_global_attribute ("params", params.string ());
 			output->add_global_attribute ("data_version", version ());

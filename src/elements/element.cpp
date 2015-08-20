@@ -39,7 +39,9 @@ namespace pisces
 		std::chrono::duration <double> transform_duration = std::chrono::duration <double>::zero (), execution_duration = std::chrono::duration <double>::zero (), solve_duration = std::chrono::duration <double>::zero (), factorize_duration = std::chrono::duration <double>::zero (), output_duration = std::chrono::duration <double>::zero (), timestep_duration = std::chrono::duration <double>::zero ();
 
 		data.add_stream_attribute("version", version());
-		data.add_stream_attribute("element", name());
+		data.add_stream_attribute("element", class_name());
+		data.add_stream_attribute("id", std::to_string (messenger_ptr->get_id()));
+		data.add_stream_attribute("np", std::to_string (messenger_ptr->get_np()));
 
 		t_timestep = calculate_min_timestep ();
 		messenger_ptr->min (&t_timestep);
@@ -57,6 +59,7 @@ namespace pisces
 		int check_every = params.get <int> ("grid.rezone.check_every");
 		// Iterate through the total number of timesteps
 		while (n_steps < max_steps && check_every != 0 && duration < stop) {
+			data.n_steps = n_steps;
 			data.reset ();
 			INFO ("Timestep: " << n_steps);
 

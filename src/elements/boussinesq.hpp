@@ -66,7 +66,7 @@ namespace pisces
 		
 		virtual ~boussinesq_element () {}
 
-		virtual std::string name() {
+		virtual std::string class_name() {
 			return "boussinesq";
 		}
 		
