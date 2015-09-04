@@ -25,7 +25,7 @@ namespace formats
 	 * 
 	 * This function throws an io::bad_type exception if the type is not known
 	 * 
-	 * \return The netCDF::NcType object associated with the input type
+	 * \return The netCDF::NcType object associated with the input type 
 	 ************************************************************************/
 	inline netCDF::NcType netcdf_type (const std::type_info* type) {
 		if (type == &typeid (double)) {

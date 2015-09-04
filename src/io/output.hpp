@@ -47,6 +47,7 @@ namespace io
 		std::vector <int> dims; //!< A vector of the integer number of dimensions for each output
 
 	public:
+		int full=0;
 		/*!*******************************************************************
 		 * \param i_grid The data_grid object representing the structure of the data
 		 * \param i_file_name The string representation of the output file; do not include the extension; it will be added later
@@ -161,6 +162,9 @@ namespace io
 	template <class format>
 	class formatted_output : public output
 	{
+	private:
+		std::map <std::string, std::string> globals;
+		bool first = true;
 	public:
 		/*!**********************************************************************
 		 * \copydoc output::output
@@ -168,7 +172,7 @@ namespace io
 		formatted_output (formats::data_grid i_grid, std::string i_file_name = "out", int i_file_format = formats::replace_file) : 
 		output (i_grid, i_file_name + format::extension (), i_file_format) {
 			if (format::uses_files) check_file (file_name.c_str ());
-			format::open_file (grid, file_name.c_str (), output::file_format);
+			// format::open_file (grid, file_name.c_str (), output::file_format);
 		}		
 
 		virtual ~formatted_output () {}
@@ -201,9 +205,9 @@ namespace io
 		}
 
 		virtual void add_global_attribute (std::string name, std::string attribute) {
-			format::add_global_attribute (file_name, name, attribute);
+			globals [name] = attribute;
 		}
-		
+
 		/*!**********************************************************************
 		 * \brief Check it the file opens; otherwise, raise an exception
 		 * 
@@ -233,8 +237,15 @@ namespace io
 
 			if (format::uses_files) check_file (file_name.c_str ());
 			if (!format::is_open (file_name)) {
-				DEBUG ("FILE IS NOT OPEN");
 				format::open_file (grid, file_name.c_str (), output::file_format);
+			}
+
+			if (first) {
+				for (auto iter = globals.begin (); iter != globals.end (); ++iter)
+				{
+					format::add_global_attribute (file_name, iter->first, iter->second);
+				}
+				first = false;
 			}
 	
 			// Calculate the inner values of any relevant functors
@@ -360,6 +371,7 @@ namespace io
 		 ************************************************************************/
 		void to_file (int record = -1) {
 			TRACE ("Sending to file...");
+			INFO("PREVIOUS " << previous << " EVERY " << output_every << " DIFF " << duration - previous);
 			while (duration - previous >= output_every) {
 				formatted_output <format>::to_file (record);
 				previous += output_every;

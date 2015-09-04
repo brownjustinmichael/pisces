@@ -97,7 +97,7 @@ int main (int argc, char *argv[])
 		cbegin = clock ();
 		begin = std::chrono::system_clock::now ();
 
-		int n_steps = 0;
+		int n_steps = data.n_steps;
 		std::shared_ptr <io::input> virtual_input;
 		while (n_steps < parameters.get <int> ("time.steps") && element->duration < parameters.get <double> ("time.stop")) {
 			if (parameters.get <int> ("grid.rezone.check_every") > 0 && n_steps != 0 && n_elements > 1) {

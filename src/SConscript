@@ -107,6 +107,7 @@ env.Default (env.Program(target = "../run/pisces", source = (["pisces.cpp"] + ob
 
 # Compile the code initializer
 env.Default (env.Program(target = "../run/isces_init", source = (["init.cpp"] + objects)))
+env.Default (env.Program(target = "../run/pisces_init", source = (["pisces_init.cpp"] + objects)))
 
 env.Default (env.Program(target = "../run/isces_var", source = (["varmain.cpp"] + objects)))
 

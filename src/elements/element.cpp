@@ -40,7 +40,7 @@ namespace pisces
 
 		data.add_stream_attribute("version", version());
 		data.add_stream_attribute("element", class_name());
-		data.add_stream_attribute("id", std::to_string (messenger_ptr->get_id()));
+		data.add_stream_attribute("pid", std::to_string (messenger_ptr->get_id()));
 		data.add_stream_attribute("np", std::to_string (messenger_ptr->get_np()));
 
 		t_timestep = calculate_min_timestep ();

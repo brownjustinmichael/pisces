@@ -220,9 +220,9 @@ Using the equation of state and the new entropy equation, we can derive an equat
 	We can non-dimensionalize the equations as follows:
 		\begin{align}
 			p_{0} &= \frac{\rho T}{\overline{m}} \\
-			\frac{D}{Dt}\rho\vect{u} &= -\nabla\left(p_{0} + p_{1}\right) + \frac{p_{1}}{\gamma p_{0}}\nabla{p_{0}} - \rho \hat{y} + \nabla \cdot \vect{\Pi} \\
-			\frac{D}{Dt}\overline{m} &= \nabla \cdot \rho \tau \nabla \frac{\overline {m}}{\rho} \\
-			\frac{1}{\gamma - 1}\frac{D}{Dt}\rho T &= -\rho T \nabla \cdot \vect{u} + \overline{m}\left(\nabla\vect{u}:\vect{\Pi} + \nabla\cdot \frac{\rho}{\overline{m}}\nabla{T}\right)\left(1 + Q\right) \\
+			\rho\frac{D}{Dt}\vect{u} &= -\nabla\left(p_{0} + p_{1}\right) + \frac{p_{1}}{\gamma p_{0}}\nabla{p_{0}} - \rho \hat{y} + \nabla \cdot \vect{\Pi} \\
+			\rho\frac{D}{Dt}\xi &= \nabla \cdot \rho \tau \nabla \xi \\
+			\frac{1}{\gamma - 1}\rho\frac{D}{Dt} T &= -\rho T \nabla \cdot \vect{u} + \overline{m}\left(\nabla\vect{u}:\vect{\Pi} + \nabla\cdot \frac{\rho}{\overline{m}}\nabla{T}\right)\left(1 + Q\right) \\
 			\nabla\cdot{p_{0}^{\frac{1}{\gamma}}} &= \frac{\gamma - 1}{\gamma}p_{0}^{\frac{1}{\gamma}-1}\left(\nabla\vect{u}:\vect{\Pi}-\nabla\cdot \frac{\rho}{\overline{m}}\nabla{T}\right)\left(1 + Q\right) \\
 			\Pi_{ij} &= \rho \mathrm{Pr}\left(\frac{\partial u_{i}}{\partial x_{j}} + \frac{\partial u_{j}}{\partial x_{i}} - \frac{2}{3}\delta_{ij}\nabla\cdot{\vect{u}}\right)
 		\end{align}

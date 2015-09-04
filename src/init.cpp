@@ -82,12 +82,18 @@ int main (int argc, char *argv[])
 		double height = parameters.get <double> ("grid.z.width");
 		double diff_bottom = parameters.get <double> ("equations.temperature.diffusion");
 		
-		double scale = parameters.get <double> ("init.scale");
+		double scale = 0.001;
 		#pragma omp parallel for
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
-				temps [i * m + j] = (stop - sbot) / (height) * (pos_z [j] + height / 2.0) + sbot;
 				tempt [i * m + j] = (ttop - tbot) / (height) * (pos_z [j] + height / 2.0) + tbot;
+				if (pos_z [j] > 0.0) {
+					temps [i * m + j] = stop;
+					// tempt [i * m + j] = ttop;
+				} else {
+					temps [i * m + j] = sbot;
+					// tempt [i * m + j] = tbot;
+				}
 				temps [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3;
 				tempt [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3;
 			}

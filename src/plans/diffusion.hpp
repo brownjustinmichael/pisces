@@ -26,8 +26,8 @@ namespace plans
 
 	template <class datatype>
 	typename plan <datatype>::factory_container density_diff (grids::variable <datatype> &density, datatype alpha = 1.0, datatype coeff = 1.0) {
-		return diff <datatype> (alpha, coeff);// +
-		// typename plan <datatype>::factory_container (std::shared_ptr <typename plan <datatype>::factory> (new typename diffusion::variable_diffusion <datatype>::factory (density, coeff)));
+		return diff <datatype> (alpha, coeff) +
+		typename plan <datatype>::factory_container (std::shared_ptr <typename plan <datatype>::factory> (new typename diffusion::variable_diffusion <datatype>::factory (density, coeff)));
 	}
 
 	template <class datatype>

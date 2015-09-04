@@ -39,8 +39,8 @@ namespace pisces
 				}
 				
 				if (terms ["bg_diffusion"].IsDefined ()) {
-					datatype lo_diffusion = terms ["diffusion"].as <datatype> ();
-					datatype hi_diffusion = terms ["bg_diffusion"].as <datatype> ();
+					datatype lo_diffusion = 1.0e-6;
+					datatype hi_diffusion = terms ["bg_diffusion"].as <datatype> () - terms ["diffusion"].as <datatype> ();
 					datatype diff_width = 0.2;
 					if (terms ["diff_width"].IsDefined ()) {
 						diff_width = terms ["diff_width"].as <datatype> ();
@@ -49,11 +49,10 @@ namespace pisces
 						diffusion [variable] [i] = exp (atan (ptr ("z") [i] / diff_width) * (log (hi_diffusion) - log(lo_diffusion)) / 3.14159 + log (lo_diffusion) + (log (hi_diffusion) - log (lo_diffusion)) / 2.0);
 						DEBUG ("Diffusion: " << diffusion [variable] [i]);
 					}
+
+					equations [variable]->add_plan (typename diffusion::background_vertical <datatype>::factory (1.0, &(diffusion [variable] [0])));
+					equations [variable]->add_plan (typename diffusion::background_horizontal <datatype>::factory (1.0, &(diffusion [variable] [0])));
 				}
-			
-				// If a diffusion value is specified, construct the diffusion plans
-				equations [variable]->add_plan (typename diffusion::background_vertical <datatype>::factory (i_params.get <datatype> ("time.alpha"), &diffusion [variable] [0]));
-				equations [variable]->add_plan (typename diffusion::background_horizontal <datatype>::factory (i_params.get <datatype> ("time.alpha"), &diffusion [variable] [0]));
 			
 				if (terms ["variable_diffusion"].IsDefined ()) {
 					DEBUG ("Implementing...");

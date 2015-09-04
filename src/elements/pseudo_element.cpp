@@ -33,12 +33,15 @@ namespace pisces
 
 		for (int j = 0; j < m; ++j)
 		{
-			data ["bg_pressure"].ptr () [j] = 1.0e6 * (1.0 - (*grids [1]) [j] * 0.0);
+			if ((*grids [1]) [j] > 0.0) {
+				data ["bg_pressure"].ptr () [j] = i_params ["equations.pressure.zero"].as<datatype>() + (*grids [1]) [j] * (i_params ["equations.pressure.top"].as<datatype>() - i_params ["equations.pressure.zero"].as<datatype>()) * 2.;
+			} else {
+				data ["bg_pressure"].ptr () [j] = i_params ["equations.pressure.zero"].as<datatype>() + (*grids [1]) [j] * (i_params ["equations.pressure.zero"].as<datatype>() - i_params ["equations.pressure.bottom"].as<datatype>()) * 2.;
+			}
 		}
 
 		data ["mmw"] == 1.0 / (1.0 - data ["composition"] * i_params ["equations.constants.mass_ratio"].as <datatype> ());
-		// data ["density"] == data ["bg_pressure"] / data ["temperature"];// * data ["mmw"];
-		data ["density"] == data ["temperature"];// * data ["mmw"];
+		data ["density"] == data ["bg_pressure"] / data ["temperature"] * data ["mmw"];
 		// The mass ratio is (m1 - m2) / m1: near 1 => m1 >> m2, near 0 => m1 ~= m2; m1 > m2 by definition
 
 		data.transformers ["mmw"]->update ();
@@ -58,7 +61,7 @@ namespace pisces
 		== 
 		params ["equations.temperature.diffusion"] * density_diff <datatype> (data ["density"] / data ["mmw"])
 		// + params ["equations.velocity.diffusion"] * heat <datatype> (data ["mmw"], data ["x_velocity"], data ["z_velocity"])
-		// - diverge <datatype> (data ["temperature"], data ["x_velocity"], data ["z_velocity"])
+		- diverge <datatype> (data ["temperature"], data ["x_velocity"], data ["z_velocity"])
 		;
 
 		// Set up the x_velocity equation, note the missing pressure term, which is handled in div
@@ -66,7 +69,7 @@ namespace pisces
 		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		params ["equations.velocity.diffusion"] * density_diff <datatype> (data ["density"])
-		// + horizontal_stress (data ["density"], data ["z_velocity"])
+		+ params ["equations.velocity.diffusion"] * horizontal_stress (data ["density"], data ["z_velocity"])
 		;
 
 		// Set up the z_velocity equation, note the missing pressure term, which is handled in div
@@ -76,7 +79,7 @@ namespace pisces
 		- grad_z <datatype> (data ["bg_pressure"])
 		- params ["equations.z_velocity.sources.density"] * src <datatype> (data ["density"], true)
 		+ params ["equations.velocity.diffusion"] * density_diff <datatype> (data ["density"])
-		// + vertical_stress (data ["density"], data ["x_velocity"])
+		+ params ["equations.velocity.diffusion"] * vertical_stress (data ["density"], data ["x_velocity"])
 		;
 		data ["x_velocity"].component_flags |= plans::solvers::ignore_net;
 		data ["z_velocity"].component_flags |= plans::solvers::ignore_net;
@@ -85,9 +88,8 @@ namespace pisces
 		// Set up the velocity constraint
 		*pdiv <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"], data ["density"].ptr (real_spectral), data ["bg_pressure"].ptr (), i_params ["equations.constants.gamma"].as <datatype> ())
 		==
-		0.0
-		// params ["equations.temperature.diffusion"] * density_diff <datatype> (data ["density"] / data ["mmw"], 0.0)
-		// params ["equations.velocity.diffusion"] * heat <datatype> (data ["mmw"], data ["x_velocity"], data ["z_velocity"])
+		params ["equations.temperature.diffusion"] * density_diff <datatype> (data ["density"] / data ["mmw"], 0.0)
+		+ params ["equations.velocity.diffusion"] * heat <datatype> (data ["mmw"], data ["x_velocity"], data ["z_velocity"])
 		;
 		
 	TRACE ("Initialized.");

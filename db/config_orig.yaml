@@ -1,0 +1,93 @@
+dump:
+  directory: input/
+  every: 100
+  file: dump_%02i
+equations:
+  composition:
+    bottom:
+      type: fixed_value
+      value: 1.0
+    diffusion: 0.1
+    ignore: true
+    top:
+      type: fixed_value
+      value: 0.0
+  constants:
+    gamma: 1.667
+    mass_ratio: 0.5
+  temperature:
+    bottom:
+      type: fixed_value
+      value: 1.0
+    diffusion: 1.0
+    sources:
+      z_velocity: 0.0
+    top:
+      type: fixed_value
+      value: 2.0
+  velocity:
+    diffusion: 6.8
+  z_velocity:
+    sources:
+      composition: -1.0
+      density: 1.0
+      temperature: 1.0
+grid:
+  rezone:
+    check_every: -1000
+    iters_fixed_t: 1
+    k: 1.0
+    max_size: 0.7
+    min_size: 0.2
+    mu_t: 1.003
+    mult: 1.0
+    n_tries: 1
+    step_size: 5.0
+    t_initial: 8e-1
+    t_min: 2e-1
+  x:
+    points: 256
+    width: 2.828
+  z:
+    points: 256
+    width: 1.0
+input:
+  directory: input/
+  file: input_%02i
+  full: true
+np: 1
+output:
+  cart:
+    every: 1
+    file: ""
+    timed: false
+  directory: output/
+  name: ''
+  number: 0
+  output: true
+  stat:
+    timed_every: 1.0
+    file: stat_%02i_%%02i
+    timed: true
+  trans:
+    every: 1
+    file: ""
+    timed: false
+parallel:
+  maxthreads: 16
+  solver:
+    threads: 1
+  transform:
+    subthreads: 1
+    threads: 1
+root: ./
+time:
+  allow: 1000.0
+  alpha: 1.0
+  cfl: 0.2
+  down_mult: 0.5
+  init: 1.0e-06
+  max: 0.001
+  mult: 1.01
+  steps: 1000000
+  stop: 10.0

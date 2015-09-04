@@ -72,7 +72,6 @@ namespace plans
 
 			void setup () {
 				TRACE ("Setting up with coefficient " << coeff);
-				INFO ("COEFFICIENT VERTICAL IS " << coeff);
 				if (matrix_m) {
 					linalg::scale (m * m, 0.0, new_matrix);
 					for (int j = 0; j < m; ++j) {

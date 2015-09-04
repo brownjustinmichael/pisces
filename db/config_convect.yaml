@@ -1,0 +1,62 @@
+grid:
+    x:
+        points: 64
+        width: 2.828
+    z:
+        points: 64
+        width: 1.0
+    rezone:
+        check_every: -1000
+        min_size: 0.2
+        max_size: 0.7
+time:
+    steps: 2000000
+    stop: 300
+    init: 1e-6
+    max: 1.e-0
+    mult: 1.01
+    down_mult: 0.5
+    cfl: 0.2
+equations:
+    temperature:
+        diffusion: 1.0
+        advection: 1.0
+        sources:
+            z_velocity: 0.0
+        top:
+            type: fixed_value
+            value: 0.0
+        bottom:
+            type: fixed_value
+            value: 1.0
+    composition:
+        ignore: true
+        top:
+            type: fixed_value
+            value: 0.0
+        bottom:
+            type: fixed_value
+            value: 1.0
+    velocity:
+        diffusion: 6.8
+        advection: 1.0
+    z_velocity:
+        sources:
+            temperature: 4471000.0
+            composition: 0.0
+output:
+    directory: output/
+    number: 0
+    cart:
+        file: cart_%02i_%%02i
+        every: 1000
+    stat:
+        file: stat_%02i_%%02i
+        every: 100
+parallel:
+    maxthreads: 16
+    transform:
+        threads: 1
+        subthreads: 1
+    solver:
+        threads: 1

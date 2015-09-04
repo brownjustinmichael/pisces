@@ -62,44 +62,35 @@ int main (int argc, char *argv[])
 		const double *pos_z = &vertical_grid [0];
 		
 		double stop = 0.0, sbot = 0.0;
-		if (parameters ["equations.composition.top.type"].as <std::string> () == "fixed_value") {
-			stop = parameters ["equations.composition.top.value"].as <double> ();
-		}
-		if (parameters ["equations.composition.bottom.type"].as <std::string> () == "fixed_value") {
-			sbot = parameters ["equations.composition.bottom.value"].as <double> ();
-		}
+		stop = parameters ["equations.composition.top.value"].as <double> ();
+		sbot = parameters ["equations.composition.bottom.value"].as <double> ();
 		
 		double ttop = 0.0, tbot = 0.0;
-		if (parameters ["equations.temperature.top.type"].as <std::string> () == "fixed_value") {
-			ttop = parameters ["equations.temperature.top.value"].as <double> ();
-		}
-		if (parameters ["equations.temperature.bottom.type"].as <std::string> () == "fixed_value") {
-			tbot = parameters ["equations.temperature.bottom.value"].as <double> ();
-		}
-		
+		ttop = parameters ["equations.temperature.top.value"].as <double> ();
+		tbot = parameters ["equations.temperature.bottom.value"].as <double> ();
+	
 		double height = parameters.get <double> ("grid.z.width");
 		double diff_bottom = parameters.get <double> ("equations.temperature.diffusion");
 		double diff_top = parameters ["equations.temperature.bg_diffusion"].IsDefined () ? parameters.get <double> ("equations.temperature.bg_diffusion") : diff_bottom;
 		double diff_width = parameters ["equations.temperature.diff_width"].IsDefined () ? parameters.get <double> ("equations.temperature.diff_width") : parameters.get <double> ("equations.composition.diff_width");
 		double bg_scale = -(tbot - ttop) / ((height / 2. - diff_width) * (1. / diff_top + 1. / diff_bottom) + 2. * diff_width / (diff_top - diff_bottom) * log (diff_top / diff_bottom));
 		
-		double scale = parameters.get <double> ("init.scale");
 		#pragma omp parallel for
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
 				temps [i * m + j] = sbot;
 				// tempt [i * m + j] = (ttop - tbot) / (height) * (pos_z [j] + height / 2.0) + tbot;
-				tempt [i * m + j] = tbot + bg_scale * (std::min (pos_z [j], -diff_width) + height / 2.) / diff_bottom;
+				tempt [i * m + j] = (tbot + ttop) / 2.0 + pos_z [j] * (ttop - tbot) / 2.0;
 				if (pos_z [j] > -diff_width) {
-					tempt [i * m + j] += bg_scale * 2. * diff_width / (diff_top - diff_bottom) * log ((diff_top - diff_bottom) / 2. / diff_width / diff_bottom * std::min (pos_z [j], diff_width) + (diff_top + diff_bottom) / 2. / diff_bottom);
+					// tempt [i * m + j] += bg_scale * 2. * diff_width / (diff_top - diff_bottom) * log ((diff_top - diff_bottom) / 2. / diff_width / diff_bottom * std::min (pos_z [j], diff_width) + (diff_top + diff_bottom) / 2. / diff_bottom);
 					temps [i * m + j] = (stop - sbot) / (diff_width) * (pos_z [j]) / 2.0;
 					if (pos_z [j] > diff_width) {
-						tempt [i * m + j] += bg_scale * (pos_z [j] - diff_width) / diff_top;
+						// tempt [i * m + j] += bg_scale * (pos_z [j] - diff_width) / diff_top;
 						temps [i * m + j] = stop;
 					}
 				}
-				temps [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3;
-				tempt [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3;
+				temps [i * m + j] += (double) (rand () % 2000 - 1000) / 1.0e4;
+				tempt [i * m + j] += (double) (rand () % 2000 - 1000) / 1.0e4;
 			}
 		}
 

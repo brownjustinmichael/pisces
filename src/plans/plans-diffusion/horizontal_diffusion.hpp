@@ -51,7 +51,6 @@ namespace plans
 			 ************************************************************************/
 			horizontal (datatype i_alpha, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : implicit_plan <datatype> (i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_coeff, real_spectral), alpha (i_alpha) {
 				TRACE ("Instantiating...");
-				INFO("COEFF IS " << coeff);
 				pioL2 = 4.0 * (std::acos (-1.0) * std::acos (-1.0) / (grid_n [n - 1] - grid_n [0]) / (grid_n [n - 1] - grid_n [0]));
 				setup ();
 			}
@@ -60,7 +59,6 @@ namespace plans
 
 			void setup () {
 				TRACE ("Setting up");
-				INFO("COEFF IS NOW " << coeff);
 				if (matrix_n) {
 					// For Fourier modes, the matrix is diagonal and not particularly complicated
 					// We set up m of these matrices in case there is some z-dependence added in later

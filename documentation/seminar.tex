@@ -559,7 +559,7 @@ We define $P (E (s), E (s'), T)$, the probability to accept a new state, $s'$, t
 	\only<1>{\bf Fully Compressible}
 	\only<2>{\bf Incompressible, Current Equations}
 	\only<3>{\bf Pseudo-Incompressible}
-	\only<4>{\bf Pseudo-Incompressible, Energy Conserving (Wood, private communication)}
+	% \only<4>{\bf Pseudo-Incompressible, Energy Conserving (Wood, private communication)}
 	\only<1>{
 	\begin{align}
 		\rho\frac{D}{D{t}}{\mathbf{u}} =& -\nabla p + \rho \mathbf{g} + \nabla\cdot\mathbf{\Pi} \\
@@ -574,15 +574,25 @@ We define $P (E (s), E (s'), T)$, the probability to accept a new state, $s'$, t
 		\frac{D}{D{t}}{T} + w\frac{d}{dz}T_{0} =& \kappa_T \nabla^{2}T \\
 		\frac{D}{D{t}}{\xi_{i}} + w\frac{d}{dz}\xi_{i,0}=& \kappa_{i}\nabla^{2}\xi_{i}
 	\end{align}}
-	\only<3,4>{
+	\only<3>{
 	\begin{align}
 		\rho\frac{D}{D{t}}\mathbf{u}=&-\nabla\left(p_{0}+p_{1}\right)+\frac{p_{1}}{\rho}\left(\frac{\partial p}{\partial \rho}\right)^{-1}\nabla p_{0} -\rho\nabla\Phi+\nabla\cdot\mathbf{\Pi}\\
 		p_{0}\left(z\right)=&p\left(\rho,s,\xi_{1},\xi_{2},\dots\right)\\
 		\frac{D}{D{t}}\rho =& -\rho\nabla\cdot\mathbf{u} \\
 		\rho{T}\frac{D}{D{t}}{s} =& \nabla\mathbf{u}:\mathbf{\Pi} + \sum_{i}\mu_{i}\nabla\cdot\mathbf{C}_{i} - \nabla\cdot{\mathbf{H}}\\
-		\rho\frac{D}{D{t}}\xi_{i}=&-\nabla\cdot\mathbf{C}_{i}, \only<4>{\left(T,\mu_{i}\right)\equiv\left(\frac{\partial e}{\partial s},\frac{\partial e}{\partial \xi_{i}}\right)+p_{1}\frac{\partial{\left(\frac{\partial e}{\partial s},\frac{\partial e}{\partial \xi_{i}}\right)}/\partial{\rho}}{\partial{p}/\partial{\rho}}}
+		\rho\frac{D}{D{t}}\xi_{i}=&-\nabla\cdot\mathbf{C}_{i}, 
+		% \only<4>{\left(T,\mu_{i}\right)\equiv\left(\frac{\partial e}{\partial s},\frac{\partial e}{\partial \xi_{i}}\right)+p_{1}\frac{\partial{\left(\frac{\partial e}{\partial s},\frac{\partial e}{\partial \xi_{i}}\right)}/\partial{\rho}}{\partial{p}/\partial{\rho}}}
 	\end{align}}
 \end{overprint}
+}
+
+\frame{\frametitle{Incompressible Non-Dimensionalization}
+	\begin{align}
+		\frac{D}{D{t}}{\mathbf{u}} =& -\nabla p + \frac{-\mathrm{Ra}_{T}T+\mathrm{Ra}_{\mu}\mu}{\mathrm{Pr}} + \nabla^{2}\mathbf{u} \\
+		\nabla\cdot\mathbf{u} =& 0 \\
+		\frac{D}{D{t}}{T} =& \nabla\cdot\left(\mathrm{Pr}^{-1}+\frac{\kappa_{T,1}}{\nu}\left(z\right)\right) \nabla T \\
+		\frac{D}{D{t}}{\xi_{i}} =& \frac{\tau}{\mathrm{Pr}}\nabla^{2}\xi_{i}
+	\end{align}
 }
 
 \frame{\frametitle{To solve these equations, we choose the equation of state of an ideal mixture.}
@@ -595,37 +605,30 @@ We define $P (E (s), E (s'), T)$, the probability to accept a new state, $s'$, t
 	\end{align}
 }
 
-\frame{\frametitle{We can simplify this greatly by assuming a perfect gas and converting the entropy equation into a pseudo-temperature equation.}
+\frame{\frametitle{We can simplify this by expressing the entropy equation as a temperature equation.}
 \begin{overprint}
 	\only<1>{
-	\begin{align}
-		\frac{De}{Dt}=&\frac{\partial e}{\partial \rho}\frac{D\rho}{Dt}+\frac{\partial e}{\partial s}\frac{Ds}{Dt}+\sum_{i}\frac{\partial e}{\partial \xi_{i}}\frac{D\xi_{i}}{Dt}=c_{v}\frac{D}{Dt}\frac{\partial e}{\partial s}\\
-	\end{align}
-		We draw a distinction between $\frac{\partial e}{\partial s}\equiv\tilde{T}$ and $T$, as there's no guarantee they are the same in the pseudo-incompressible equations.
+		\begin{equation}
+			\frac{D}{Dt}T=\frac{\partial T}{\partial \rho}\frac{D}{Dt}\rho + \frac{\partial T}{\partial s}\frac{D}{Dt}s + \frac{\partial T}{\partial \xi_{i}}\frac{D}{Dt}\xi_{i}.
+		\end{equation}
+		We can use the remainder of the governing equations and the equation of state to get the full equation.
 	}
 	\only<2>{
-	\begin{align}
-		\frac{De}{Dt}=&\frac{p}{\rho^{2}}\frac{D\rho}{Dt}+\tilde{T}\frac{Ds}{Dt}+\sum_{i}\tilde{\mu_{i}}\frac{D\xi_{i}}{Dt}=c_{v}\frac{D}{Dt}\tilde{T}\\
-		\rho{T}\frac{D}{D{t}}{s} =& \rho\frac{T}{\tilde{T}}\left(c_{v}\frac{D}{Dt}\tilde{T}-\frac{p}{\rho^{2}}\frac{D\rho}{Dt}-\sum_{i}\tilde{\mu_{i}}\frac{D\xi_{i}}{Dt}\right)\\
-		=&\nabla\mathbf{u}:\mathbf{\Pi} + \sum_{i}\mu_{i}\nabla\cdot\mathbf{C}_{i} - \nabla\cdot{\mathbf{H}\left(T\right)}
-	\end{align}
-	}
-	\only<3>{
-	After some algebra,
-	\begin{align}
-		\rho{c_{v}}\frac{D}{D{t}}{\tilde{T}}=&\frac{c_{p}p}{c_{p}p+kp_{1}}\left(\nabla\mathbf{u}:\mathbf{\Pi} - \nabla\cdot{\mathbf{H}\left(\frac{c_{p}p+kp_{1}}{c_{p}p}\tilde{T}\right)}\right)-p\nabla\cdot{\mathbf{u}}
-	\end{align}
+		\begin{equation}
+			\rho\frac{D}{Dt}T=-\left(\gamma - 1\right)\rho T\nabla\cdot{u} + \left(\gamma - 1\right)\frac{\overline{m}}{k}\left(\nabla\vect{u}:\vect{\Pi}-\nabla\cdot{\vect{H}}\right).
+		\end{equation}
 	}
 \end{overprint}
 }
 
 \frame{\frametitle{Governing Equations}
 	\begin{align}
-		\rho\frac{D}{D{t}}\mathbf{u}=&-\nabla\left(p_{0}+p_{1}\right)+\frac{p_{1}}{\gamma p_{0}}\nabla p_{0} -\rho\nabla\Phi+\nabla\cdot\mathbf{\Pi}\\
-		\nabla\cdot{p_{0}^{\frac{1}{\gamma}}\mathbf{u}}=&\frac{1}{\gamma p_{0}^{\frac{\gamma-1}{\gamma}}}\left(\frac{\partial{p}}{\partial{s}}\frac{D}{D{t}}s+\sum_{i}\frac{\partial{p}}{\partial{\xi_{i}}}\frac{D}{D{t}}\xi_{i}\right)\\
-		p_{0}\left(z\right)=&\frac{k\rho\tilde{T}}{\overline{m}}\\
-		\rho{\frac{k}{\gamma-1}}\frac{D}{D{t}}{\tilde{T}}=&\frac{p_{0}}{p_{0}+\frac{\gamma-1}{\gamma}p_{1}}\left(\nabla\mathbf{u}:\mathbf{\Pi} - \nabla\cdot{\mathbf{H}}\right)-p\nabla\cdot{\mathbf{u}}\\
-		\rho\frac{D}{D{t}}\xi_{i}=&-\nabla\cdot\mathbf{C}_{i}
+		p_{0} &= \frac{\rho T}{\overline{m}} \\
+		\rho\frac{D}{Dt}\vect{u} &= -\nabla\left(p_{0} + p_{1}\right) + \frac{p_{1}}{\gamma p_{0}}\nabla{p_{0}} - \rho \hat{y} + \nabla \cdot \vect{\Pi} \\
+		\rho\frac{D}{Dt}\xi &= \nabla \cdot \rho \tau \nabla \xi \\
+		\frac{1}{\gamma - 1}\rho\frac{D}{Dt} T &= -\rho T \nabla \cdot \vect{u} + \overline{m}\left(\nabla\vect{u}:\vect{\Pi} + \nabla\cdot \frac{\rho}{\overline{m}}\nabla{T}\right)\left(1 + Q\right) \\
+		\nabla\cdot{p_{0}^{\frac{1}{\gamma}}} &= \frac{\gamma - 1}{\gamma}p_{0}^{\frac{1}{\gamma}-1}\left(\nabla\vect{u}:\vect{\Pi}-\nabla\cdot \frac{\rho}{\overline{m}}\nabla{T}\right)\left(1 + Q\right) \\
+		\Pi_{ij} &= \rho \mathrm{Pr}\left(\frac{\partial u_{i}}{\partial x_{j}} + \frac{\partial u_{j}}{\partial x_{i}} - \frac{2}{3}\delta_{ij}\nabla\cdot{\vect{u}}\right)
 	\end{align}
 }
 
