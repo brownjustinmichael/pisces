@@ -199,7 +199,7 @@ namespace plans
 			}
 
 			equation <datatype> &operator+ (const datatype scalar) {
-				add_plan ((const std::shared_ptr <typename plan <datatype>::factory>) constant (-scalar));
+				add_plan ((typename plan <datatype>::factory_container) constant (-scalar));
 				return *this;
 			}
 
