@@ -64,6 +64,8 @@ namespace plans
 			int lda; //!< The leading dimension of the matrices
 			
 			const datatype *pos_m; //!< A pointer to the array of positions in the vertical
+
+			void init (datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out);
 			
 		public:
 			/*!**********************************************************************
@@ -77,9 +79,17 @@ namespace plans
 			 * \param i_rhs A pointer to the right hand side of the equation
 			 * \param i_data A pointer to the data
 			 ************************************************************************/
-			fourier (datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out);
-
-			fourier (datatype& i_timestep, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out, int *i_element_flags, int *i_component_flags) : fourier (i_timestep, i_boundary_0.instance (i_data.get_grid (0), i_data.get_grid (1), false), i_boundary_n.instance (i_data.get_grid (0), i_data.get_grid (1), true), i_rhs, i_data, i_data_out) {}
+			fourier (datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out) :
+			solver <datatype> (i_data, i_data_out, this->get_state_in (), this->get_state ()),
+			timestep (i_timestep) {
+				init (i_timestep, i_boundary_0, i_boundary_n, i_rhs, i_data, i_data_out);
+			}
+			
+			fourier (datatype& i_timestep, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out) :
+			solver <datatype> (i_data, i_data_out, this->get_state_in (), this->get_state ()),
+			timestep (i_timestep) {
+				init (i_timestep, i_boundary_0.instance (i_data.get_grid (0), i_data.get_grid (1), false), i_boundary_n.instance (i_data.get_grid (0), i_data.get_grid (1), true), i_rhs, i_data, i_data_out);
+			}
 			
 			virtual ~fourier () {}
 			
