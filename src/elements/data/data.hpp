@@ -344,7 +344,7 @@ namespace data
 		std::shared_ptr <io::output> setup_output_from (YAML::Node output_params, const formats::data_grid &grid, int state = real_real, int flags = 0x00) {
 			// Iterate through the scalar fields and append them to the variables for which the input will search
 			TRACE ("Setting up output from YAML Node...");
-			if (file_from (output_params) == "") return std::shared_ptr <io::input> ();
+			if (file_from (output_params) == "") return std::shared_ptr <io::output> ();
 
 			std::shared_ptr <io::output> output_stream;
 			if (output_params ["timed"].IsDefined () && output_params ["timed"].as <bool> ()) {
