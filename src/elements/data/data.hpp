@@ -188,12 +188,18 @@ namespace data
 		 ************************************************************************/
 		virtual grids::variable <datatype> &initialize (std::string i_name, int i_flags = 0x00) {
 			grids::variable <datatype> &var = _initialize (i_name, i_flags);
+			int output_flags = formats::all_d;
+			if (i_flags & uniform_n) {
+				INFO ("THIS IS 1D");
+				output_flags = formats::m_profile;
+			}
+
 			if (dump_stream) {
-				dump_stream->template append <datatype> (i_name, var.ptr ());
+				dump_stream->template append <datatype> (i_name, var.ptr (), output_flags);
 			}
 			for (auto iter = streams.begin (); iter != streams.end (); ++iter)
 			{
-				(*iter)->template append <datatype> (i_name, var.ptr ());
+				(*iter)->template append <datatype> (i_name, var.ptr (), output_flags);
 			}
 			scalar_names.push_back (i_name);
 			std::sort (scalar_names.begin (), scalar_names.end ());

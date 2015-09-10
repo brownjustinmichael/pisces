@@ -13,18 +13,33 @@ new=nc.Dataset(args.output, "w")
 
 axis=1
 
-dims=tuple()
+dims=[]
 
 i=0
 for dimension in data.dimensions:
+	new.createDimension(dimension, len(data.dimensions[dimension]))
 	if i!=axis:
-		new.createDimension(dimension, len(data.dimensions[dimension]))
-		dims+=(dimension,)
+		dims+=[dimension,]
+	else:
+		removed=dimension
 	i+=1
 
 for variable in data.variables:
-	new.createVariable(variable, data[variable].dtype, dimensions=dims)
-	new[variable][:]=np.mean(data[variable], axis=axis)
+	print("Extracting %s" % variable)
+	var_dims=list(data[variable].dimensions)
 
+	to_mean=False
+	try:
+		var_dims.pop(var_dims.index(removed))
+		to_mean=True
+	except ValueError:
+		pass
+	new.createVariable(variable, data[variable].dtype, dimensions=var_dims)
+	if to_mean:
+		new[variable][:]=np.mean(data[variable], axis=axis)
+	else:
+		new[variable][:]=data[variable][:]
+
+# assert(False)
 # data.close()
 new.close()
