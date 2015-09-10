@@ -24,7 +24,7 @@ namespace plans
 		/*!*******************************************************************
 		 * \brief A class designed to track and implement the solvers of a particular dataset
 		 * 
-		 * Note that the design of the element class expects that calling only the solve does not change the dataset. The solveed dataset must first be read back into the original for the solve to take effect.
+		 * Note that the design of the element class expects that calling only the solve does not change the dataset. The solved dataset must first be read back into the original for the solve to take effect. In general, 
 		 *********************************************************************/
 		template <class datatype>
 		class equation
@@ -32,7 +32,7 @@ namespace plans
 		public:
 			int *element_flags; //!< A pointer to the flags describing the global state of the element
 			int *component_flags; //!< A pointer to the flags describing the state of the local variable
-			mpi::messenger *messenger_ptr;
+			mpi::messenger *messenger_ptr; //!< A pointer to the mpi::messenger object associated with the equation
 		
 		protected:
 			grids::variable <datatype> &data; //!< A pointer to the data held by the equation object
@@ -45,8 +45,13 @@ namespace plans
 			 * \param i_data A pointer to the data associated with the equation
 			 * \param i_element_flags A pointer to the flags describing the global state of the element
 			 * \param i_component_flags A pointer to the flags describing the state of the local variable
+			 * \param i_messenger_ptr A pointer to the mpi messenger object that may be needed for particular solvers
 			 ************************************************************************/
-			equation (grids::variable <datatype> &i_data, int *i_element_flags, int *i_component_flags, mpi::messenger *i_messenger_ptr = NULL) : element_flags (i_element_flags), component_flags (i_component_flags), messenger_ptr (i_messenger_ptr), data (i_data) {
+			equation (grids::variable <datatype> &i_data, int *i_element_flags, int *i_component_flags, mpi::messenger *i_messenger_ptr = NULL) : 
+			element_flags (i_element_flags), 
+			component_flags (i_component_flags), 
+			messenger_ptr (i_messenger_ptr), 
+			data (i_data) {
 				*component_flags &= ~factorized;
 			}
 			/*
@@ -65,6 +70,13 @@ namespace plans
 				return version;
 			}
 
+			/*!**********************************************************************
+			 * \brief Get the state of the variable object upon output
+			 *
+			 * The equation solve function operates on a variable instance, which can have various states (e.g. real-real or real-spectral). The solve operation updates only one of these, leaving the variable and transformer classes to repopulate the other states. This returns the state that is updated during the evaluation of solve.
+			 * 
+			 * \return The state of the variable object upon output
+			 ************************************************************************/
 			virtual int get_state () = 0;
 		
 			/*!**********************************************************************
@@ -95,11 +107,20 @@ namespace plans
 			 * \brief Return a pointer to the data associated with the solver
 			 * 
 			 * Each solver is implemented to solve a matrix equation for a particular variable. This returns a pointer to the first element of that variable's dataset.
+			 *
+			 * \return The pointer to the associated data
 			 ************************************************************************/
 			virtual datatype *data_ptr () {
 				return data.ptr ();
 			}
 
+			/*!**********************************************************************
+			 * \brief Return the variable object of the data associated with the solver
+			 *
+			 * If more advanced interactions with the data are needed, a variable object can be returned at increased computational cost.
+			 * 
+			 * \return A reference to the variable object associated with the solver
+			 ************************************************************************/
 			virtual grids::variable <datatype> &data_var () {
 				return data;
 			}

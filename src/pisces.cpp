@@ -26,21 +26,6 @@
 #include "config.hpp"
 
 /*!*******************************************************************
- * \mainpage
- *
- * \author Justin Brown
- *
- * \section Introduction
- *
- * The goal of this project is to set up a code designed to do 2D 
- * Boussinesq simulations using a spectral element scheme.
- * 
- * WARNING: This code uses the C++ shared_ptr object. If you are unfamiliar with this object, this can lead to some problems. Always generate a shared_ptr either with the make_shared C++ standard library function or by setting the shared pointer to the result of the "new" operator. This will avoid many future headaches on your part. Never set a shared_ptr to a pointer of a previously existing object as the computer will attempt to call the destructor to the object twice. (This often appears as a segmentation fault after the code has finished while the computer cleans up.)
- *
- * Possible further reaching goals: 3D, pseudo-incompressible
- *********************************************************************/
-
-/*!*******************************************************************
  * \brief The main call
  * 
  * \param argc The integer number of command line arguments

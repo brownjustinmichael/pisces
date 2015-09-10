@@ -454,9 +454,12 @@ namespace linalg
 			int threads = omp_get_max_threads ();
 			#pragma omp parallel for
 			for (int i = 0; i < threads; ++i) {
-				int num = m / threads + (i < (m % threads) ? 1 : 0);
-				int dist = i * (m / threads) + std::min (m % threads, i);
-				dgemm_ (&charN, &charN, &num, &n, &k, &alpha, a + dist, &lda, b, &ldb, &beta, c + dist, &ldc);
+				// int num = m / threads + (i < (m % threads) ? 1 : 0);
+				// int dist = i * (m / threads) + std::min (m % threads, i);
+				// dgemm_ (&charN, &charN, &num, &n, &k, &alpha, a + dist, &lda, b, &ldb, &beta, c + dist, &ldc);
+				int num = n / threads + (i < (n % threads) ? 1 : 0);
+				int dist = i * (n / threads) + std::min (n % threads, i);
+				dgemm_ (&charN, &charN, &m, &num, &k, &alpha, a + dist * lda, &lda, b, &ldb, &beta, c + dist * ldc, &ldc);
 			}
 		} else {
 			dgemm_ (&charN, &charN, &m, &n, &k, &alpha, a, &lda, b, &ldb, &beta, c, &ldc);

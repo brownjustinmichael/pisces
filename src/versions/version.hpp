@@ -94,6 +94,11 @@ namespace versions
 			return major == otherVersion.major && minor == otherVersion.minor && revision == otherVersion.revision && build == otherVersion.build;
 		}
 
+		/*!**********************************************************************
+		 * \brief Get the string representation of the version
+		 *
+		 * \return The string representation of the version
+		 ************************************************************************/
 		operator std::string() {
 			std::stringstream repr;
 			repr << major << "." << minor << "." << revision << "." << build;

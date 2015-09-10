@@ -187,6 +187,10 @@ namespace data
 			if (dump_stream) {
 				dump_stream->template append <datatype> (i_name, var.ptr ());
 			}
+			for (auto iter = streams.begin (); iter != streams.end (); ++iter)
+			{
+				(*iter)->template append <datatype> (i_name, var.ptr ());
+			}
 			scalar_names.push_back (i_name);
 			std::sort (scalar_names.begin (), scalar_names.end ());
 			is_corrector [i_name] = i_flags & corrector;

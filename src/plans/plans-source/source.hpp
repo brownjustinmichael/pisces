@@ -102,6 +102,85 @@ namespace plans
 		};
 
 		/*!**********************************************************************
+		 * \brief A plan to add a source term to an equation in real-real space
+		 ************************************************************************/
+		template <class datatype>
+		class uniform_real : public real_plan <datatype>
+		{
+		private:
+			using real_plan <datatype>::coeff;
+			using real_plan <datatype>::n;
+			using real_plan <datatype>::ldn;
+			using real_plan <datatype>::m;
+			using real_plan <datatype>::dims;
+			using real_plan <datatype>::data_out;
+		
+			datatype *data_source; //!< The data pointer for the source data
+			bool dealias;
+
+		public:
+			/*!**********************************************************************
+			 * \copydoc real_plan::real_plan
+			 * 
+			 * \param i_coeff The coefficient for the source term
+			 * \param i_data_source The data pointer for the source data
+			 * 
+			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
+			 ************************************************************************/
+			uniform_real (grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0, bool i_dealias = false) : 
+			real_plan <datatype> (i_data_in, i_data_out, i_coeff), 
+			data_source (i_data_source.ptr (real_real)),
+			dealias (i_dealias) {
+				TRACE ("Adding source...");
+			}
+		
+			virtual ~uniform_real () {}
+
+			/*!**********************************************************************
+			 * \copydoc real_plan::execute
+			 ************************************************************************/
+			virtual void execute () {
+				TRACE ("Executing source...");
+				DEBUG ("HERE " << data_source [400]);
+				DEBUG ("HERE " << data_source [401]);
+				DEBUG ("HERE " << data_source [402]);
+				linalg::matrix_add_scaled (m * dims, dealias ? ldn * 2 / 3 : ldn, coeff, data_source, data_out, m * dims, m * dims);	
+			}
+		
+			/*!**********************************************************************
+			 * \copydoc real_plan::factory
+			 ************************************************************************/
+			class factory : public real_plan <datatype>::factory
+			{
+			private:
+				grids::variable <datatype> &data_source; //!< The data source to be used when constructing the plan
+				bool dealias;
+			
+			public:
+				/*!**********************************************************************
+				 * \param i_coeff The coefficient to be used when constructing the plan
+				 * \param i_data_source The data source to be used when constructing the plan
+				 ************************************************************************/
+				factory (grids::variable <datatype> &i_data_source, bool i_dealias = false, datatype i_coeff = 1.0) : 
+				real_plan <datatype>::factory (i_coeff), 
+				data_source (i_data_source),
+				dealias (i_dealias) {}
+			
+				virtual ~factory () {}
+			
+				/*!**********************************************************************
+				 * \copydoc real_plan::factory::_instance
+				 ************************************************************************/
+				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
+					if (coeff) {
+						return std::shared_ptr <plans::plan <datatype> > (new uniform_real <datatype> (data_source, i_data_in, i_data_out, coeff, dealias));
+					}
+					return std::shared_ptr <plans::plan <datatype> > ();
+				}
+			};
+		};
+
+		/*!**********************************************************************
 		 * \brief A plan to add a source term to an equation
 		 ************************************************************************/
 		template <class datatype>

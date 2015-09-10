@@ -85,19 +85,39 @@ namespace pisces
 		
 		cfl = i_params ["time.cfl"].as <datatype> ();
 
+		data.initialize ("korre_Ts", uniform_n);
+		if (i_params ["equations.temperature.korre_Ts"].IsDefined ()) {
+			datatype Ain = i_params ["equations.temperature.korre_Ts.Ain"].as <datatype> ();
+			datatype din = i_params ["equations.temperature.korre_Ts.din"].as <datatype> ();
+			datatype rt = i_params ["equations.temperature.korre_Ts.rt"].as <datatype> ();
+			datatype Aout = i_params ["equations.temperature.korre_Ts.Aout"].as <datatype> ();
+			datatype dout = i_params ["equations.temperature.korre_Ts.dout"].as <datatype> ();
+
+			for (int j = 0; j < m; ++j)
+			{
+				if (z_ptr [j] > rt) {
+					data ["korre_Ts"] [j] = -Aout * std::tanh ((z_ptr [j] - rt) / dout);
+				} else {
+					data ["korre_Ts"] [j] = -Ain * std::tanh ((z_ptr [j] - rt) / din);
+				}
+				DEBUG (data["korre_Ts"] [j])
+			}
+		}
+		
 		// Set up the temperature equation
 		if (!(i_params ["equations.temperature.ignore"].IsDefined () && i_params ["equations.temperature.ignore"].as <bool> ())) {
 			*split_solver <datatype> (equations ["temperature"], timestep, 
 				dirichlet (i_params ["equations.temperature.bottom.value"].as <datatype> ()), 
 				dirichlet (i_params ["equations.temperature.top.value"].as <datatype> ())) 
-			+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
-			+ params ["equations.temperature.sources.z_velocity"] * src <datatype> (data ["z_velocity"]) 
+			+ advec <datatype> (data ["x_velocity"], data ["z_velocity"])
+			+ src (data ["z_velocity"] * data ["korre_Ts"])
 			== 
-			params ["equations.temperature.diffusion"] * diff <datatype> ();
+			params ["equations.temperature.sources.z_velocity"] * src <datatype> (data ["z_velocity"]) 
+			+ params ["equations.temperature.diffusion"] * diff <datatype> ();
 		}
 
 		// Set up the composition equation
-		if (!(i_params ["equations.composition.ignore"].IsDefined () && i_params ["equations.composition.ignore"].as <bool> ())) {
+		if (i_params ["equations.composition"].IsDefined () && !(i_params ["equations.composition.ignore"].IsDefined () && i_params ["equations.composition.ignore"].as <bool> ())) {
 			*split_solver <datatype> (equations ["composition"], timestep, 
 				dirichlet (i_params ["equations.composition.bottom.value"].as <datatype> ()), 
 				dirichlet (i_params ["equations.composition.top.value"].as <datatype> ())) 

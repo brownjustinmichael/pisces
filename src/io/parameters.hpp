@@ -158,6 +158,16 @@ namespace io
 				throw exceptions::key_does_not_exist (key);
 			}
 		}
+
+		template <typename datatype>
+		const datatype get (std::string key, datatype default_value) {
+			YAML::Node node = operator[] (key);
+			if (operator[] (key).IsDefined ()) {
+				return operator[] (key).as <datatype> ();
+			} else {
+				return default_value;
+			}
+		}
 	};
 } /* io */
 

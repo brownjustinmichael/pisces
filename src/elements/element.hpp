@@ -291,6 +291,8 @@ namespace pisces
 				data.transformers [*iter]->update ();
 			}
 
+			grids::variable <datatype>::update_tmps ();
+
 			TRACE ("Solve complete.");
 		}
 		

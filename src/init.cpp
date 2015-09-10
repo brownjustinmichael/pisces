@@ -64,21 +64,13 @@ int main (int argc, char *argv[])
 		const double *pos_z = &vertical_grid [0];
 		
 		double stop = 0.0, sbot = 1.0;
-		if (parameters ["equations.composition.top.type"].as <std::string> () == "fixed_value") {
-			stop = parameters ["equations.composition.top.value"].as <double> ();
-		}
-		if (parameters ["equations.composition.bottom.type"].as <std::string> () == "fixed_value") {
-			sbot = parameters ["equations.composition.bottom.value"].as <double> ();
-		}
-		
+		stop = parameters.get <double> ("equations.composition.top.value", 0.0);
+		sbot = parameters.get <double> ("equations.composition.bottom.value", 0.0);
+
 		double ttop = 0.0, tbot = 1.0;
-		if (parameters ["equations.temperature.top.type"].as <std::string> () == "fixed_value") {
-			ttop = parameters ["equations.temperature.top.value"].as <double> ();
-		}
-		if (parameters ["equations.temperature.bottom.type"].as <std::string> () == "fixed_value") {
-			tbot = parameters ["equations.temperature.bottom.value"].as <double> ();
-		}
-		
+		ttop = parameters.get <double> ("equations.temperature.top.value", 0.0);
+		tbot = parameters.get <double> ("equations.temperature.bottom.value", 0.0);
+	
 		double height = parameters.get <double> ("grid.z.width");
 		double diff_bottom = parameters.get <double> ("equations.temperature.diffusion");
 		

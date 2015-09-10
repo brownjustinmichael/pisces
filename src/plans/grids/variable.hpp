@@ -124,6 +124,11 @@ namespace grids
 			return dimensions;
 		}
 
+		const int get_states () {
+			return states;
+		}
+
+
 		int get_ld () {
 			return ld;
 		}
@@ -153,6 +158,13 @@ namespace grids
 
 		static void store_var (std::shared_ptr <variable <datatype>> &other) {
 			tmps.push_back (other);
+		}
+
+		static void update_tmps () {
+			for (auto iter = tmps.begin (); iter != tmps.end (); ++iter)
+			{
+				(*iter)->update ();
+			}
 		}
 
 		variable <datatype> &operator+ (datatype other) {
