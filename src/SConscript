@@ -6,6 +6,7 @@ for include_dir in include_dirs:
 
 for library_dir in library_dirs:
     env.Append (LINKFLAGS = ["-L%s" % library_dir])
+    env.Append (CPPFLAGS = ["-L%s" % library_dir])
 
 def directory (path, dirname):
     """
