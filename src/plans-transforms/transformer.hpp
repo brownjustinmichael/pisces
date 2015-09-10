@@ -67,4 +67,10 @@ namespace plans
 	} /* transforms */
 } /* plans */
 
+template <class datatype>
+std::shared_ptr <plans::transforms::transformer <datatype>> NULL_transformer () {
+	return std::shared_ptr <plans::transforms::transformer <datatype>> ();
+}
+
+
 #endif /* end of include guard: TRANSFORM_HPP_S8KRHTX3 */

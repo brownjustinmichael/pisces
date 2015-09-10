@@ -12,6 +12,7 @@
 #ifndef PLAN_HPP_S9YPWHOM
 #define PLAN_HPP_S9YPWHOM
 
+#include <memory>
 #include "versions/version.hpp"
 #include "logger/logger.hpp"
 #include "io/parameters.hpp"
@@ -262,4 +263,11 @@ namespace plans
 	}
 
 } /* plans */
+
+template <class datatype>
+std::shared_ptr <plans::plan <datatype>> NULL_plan () {
+	return std::shared_ptr <plans::plan <datatype>> ();
+}
+
+
 #endif /* end of include guard: PLAN_HPP_S9YPWHOM */

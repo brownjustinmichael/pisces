@@ -532,12 +532,12 @@ namespace data
 				for (int j = 0; j < m; ++j) {
 					linalg::copy (n, &((*grid_n) [0]), (*this) (name, real_real, 0, j), 1, m);
 				}
-				transformers [name] = NULL;
+				transformers [name] = NULL_transformer <datatype> ();
 			} else if (name == "z") {
 				for (int i = 0; i < n; ++i) {
 					linalg::copy (m, &((*grid_m) [0]), (*this) (name, real_real, i));
 				}
-				transformers [name] = NULL;
+				transformers [name] = NULL_transformer <datatype> ();
 			} else {
 				transformers [name] = std::shared_ptr <plans::transforms::transformer <datatype> > (new plans::transforms::implemented_transformer <datatype> (*grid_n, *grid_m, (*this) [name], plans::transforms::forward_vertical | plans::transforms::forward_horizontal | plans::transforms::inverse_vertical | plans::transforms::inverse_horizontal , &(flags), &((*this) [name].component_flags)));
 			}
