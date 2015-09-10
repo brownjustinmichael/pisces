@@ -262,7 +262,7 @@ namespace grids
 
 	template <class datatype>
 	variable <datatype> &operator/ (datatype first, variable <datatype> &other) {
-		std::shared_ptr <variable <datatype>> uni_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (other.shape (), other.get_grids (), other.element_flags, std::to_string (first))));
+		std::shared_ptr <variable <datatype>> uni_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (other.shape (), other.get_grids (), other.element_flags, std::to_string ((long double) first))));
 		linalg::copy (other.size (), &first, uni_var->ptr (), 0);
 		variable <datatype>::store_var (uni_var);
 
