@@ -13,15 +13,15 @@
 
  namespace plans
  {
-	typename plan <double>::factory_container operator+ (std::shared_ptr <typename plan <double>::factory> i_factory, std::shared_ptr <typename plan <double>::factory> j_factory) {
+	plan <double>::factory_container operator+ (std::shared_ptr <plan <double>::factory> i_factory, std::shared_ptr <plan <double>::factory> j_factory) {
 		return plan <double>::factory_container (i_factory) + j_factory;
 	}
 
-	typename plan <double>::factory_container operator+ (std::shared_ptr <typename plan <double>::factory> i_factory, typename plan <double>::factory_container j_container) {
+	plan <double>::factory_container operator+ (std::shared_ptr <plan <double>::factory> i_factory, plan <double>::factory_container j_container) {
 		return j_container + i_factory;
 	}
 
-	typename plan <double>::factory_container operator- (std::shared_ptr <typename plan <double>::factory> i_factory) {
+	plan <double>::factory_container operator- (std::shared_ptr <plan <double>::factory> i_factory) {
 		return i_factory * (-1.);
 	}
 
@@ -35,13 +35,13 @@
 		return container;
 	}
 
-	typename std::shared_ptr <typename plan <double>::factory> operator* (std::shared_ptr <typename plan <double>::factory> i_factory, YAML::Node node) {
+	std::shared_ptr <plan <double>::factory> operator* (std::shared_ptr <plan <double>::factory> i_factory, YAML::Node node) {
 		i_factory->coeff *= node.as <double> ();
 		return i_factory;
 	}
 
 	template <>
-	typename plan <double>::factory_container operator* (double scalar, typename plan <double>::factory_container i_container) {
+	plan <double>::factory_container operator* (double scalar, plan <double>::factory_container i_container) {
 		return i_container * scalar;
 	}
  }
