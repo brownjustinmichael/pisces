@@ -305,7 +305,7 @@ namespace data
 			// Iterate through the scalar fields and append them to the variables which the output will write to file
 			TRACE ("Setting up output stream...");
 
-			if (!(params ["output.output"].as <bool> ())) return NULL;
+			if (!(params ["output.output"].as <bool> ())) return std::shared_ptr <io::output> ();
 
 			if (!(flags & no_variables)) {
 				for (data::iterator iter = begin (); iter != end (); ++iter) {
