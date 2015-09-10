@@ -26,8 +26,8 @@
 	}
 
 	template <>
-	typename plan <double>::factory_container operator* (typename plan <double>::factory_container i_container, double scalar) {
-		typename plan <double>::factory_container container (i_container);
+	plan <double>::factory_container operator* (plan <double>::factory_container i_container, double scalar) {
+		plan <double>::factory_container container (i_container);
 		for (int i = 0; i < (int) i_container.facts.size (); ++i)
 		{
 			container.facts [i]->coeff *= scalar;
