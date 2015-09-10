@@ -21,9 +21,10 @@ exports ["ccompiler"] = "mpicc"
 # exports ["ccompiler"] = "mpiicc"
 exports ["compiler_flags"] = []
 # exports ["compiler_flags"] = ["-mt_mpi"]
-exports ["lapack_location"] = "/usr/local/opt/lapack/"
 exports ["cxxtestgen_location"] = "/usr/local/Cellar/cxxtest/4.4/libexec/bin/cxxtestgen"
 exports ["cxxtest"] = True
+exports ["include_dirs"] = ["/usr/local/opt/lapack/include"]
+exports ["library_dirs"] = ["/usr/local/opt/lapack/lib"]
 
 exports ["root"] = os.path.abspath ("..") + "/"
 exports ["defaults"] = os.path.join (exports ["root"], exports ["defaults"])

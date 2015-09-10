@@ -1,8 +1,11 @@
 import os, inspect
 Import ("*")
 
-env.Append (CPPFLAGS = ["-I%s/include" % lapack_location])
-env.Append (LDFLAGS = ["-L%s/lib" % lapack_location])
+for include_dir in include_dirs:
+    env.Append (CPPFLAGS = ["-I%s" % include_dir])
+
+for library_dir in library_dirs:
+    env.Append (LDFLAGS = ["-L%s" % library_dir])
 
 def directory (path, dirname):
     """
