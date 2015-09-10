@@ -3,8 +3,8 @@ Import ("env")
 conf = Configure (env)
 
 if not conf.CheckLib ("gsl"):
-	conf.CheckLib ("irc")
-	conf.CheckLib ("imf")
+    conf.CheckLib ("irc")
+    conf.CheckLib ("imf")
     conf.CheckLib ("gslcblas")
     conf.CheckLib ("gsl")
     
