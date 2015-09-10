@@ -1,8 +1,8 @@
 import os, inspect
 Import ("*")
 
-env.Append (CPPFLAGS = ["-g OMPI_CXX g++"])
-env.Append (CPPFLAGS = ["-g OMPI_CC gcc"])
+for env_var in env_vars:
+    env ["ENV"] [env_var] = env_vars [env_var]
 
 for include_dir in include_dirs:
     env.Append (CPPFLAGS = ["-I%s" % include_dir])
