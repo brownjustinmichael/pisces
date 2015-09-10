@@ -18,17 +18,16 @@ namespace plans
 	namespace solvers
 	{
 		template <class datatype>
-		collocation <datatype>::collocation (mpi::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out) : 
-		solver <datatype> (i_data, i_data_out, this->get_state_in (), this->get_state ()), 
-		n (i_data.get_grid (0).get_n ()), 
-		ldn (i_data.get_grid (0).get_ld ()), 
-		m (i_data.get_grid (1).get_n ()), 
-		messenger_ptr (i_messenger_ptr), 
-		timestep (i_timestep), 
-		excess_0 (i_data.get_grid (1).get_excess_0 ()), 
-		excess_n (i_data.get_grid (1).get_excess_n ()), 
-		default_matrix (i_data.get_grid (1).get_data (0)) {
+		collocation <datatype>::init (mpi::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out) {
 			TRACE ("Building solver...");
+			n = i_data.get_grid (0).get_n ();
+			ldn = i_data.get_grid (0).get_ld ();
+			m = i_data.get_grid (1).get_n ();
+			messenger_ptr = i_messenger_ptr;
+			excess_0 = i_data.get_grid (1).get_excess_0 ();
+			excess_n = i_data.get_grid (1).get_excess_n ();
+			default_matrix = i_data.get_grid (1).get_data (0);
+
 			matrix.resize (m * m, 0.0);
 			rhs_ptr = i_rhs;
 			

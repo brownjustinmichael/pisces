@@ -65,6 +65,8 @@ namespace plans
 			int overlap_n; //!< The total overlap region on the bottom
 			int lda; //!< The leading dimension of the matrices
 			
+		void init (mpi::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out);
+
 		public:
 			/*!**********************************************************************
 			 * \copydoc solver::solver
@@ -90,9 +92,17 @@ namespace plans
 			 * 0 0 interpolating row for below element  0 0
 			 * 0 0 boundary row for below element       0 0
 			 ************************************************************************/
-			collocation (mpi::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out);
+			collocation (mpi::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out) :
+			solver <datatype> (i_data, i_data_out, this->get_state_in (), this->get_state ()),
+			timestep (i_timestep) {
+				init (i_messenger_ptr, i_timestep, i_boundary_0, i_boundary_n, i_rhs, i_data, i_data_out);
+			}
 			
-			collocation (mpi::messenger* i_messenger_ptr, datatype& i_timestep, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out) : collocation (i_messenger_ptr, i_timestep, i_boundary_0.instance (i_data.get_grid (0), i_data.get_grid (1), false), i_boundary_n.instance (i_data.get_grid (0), i_data.get_grid (1), true), i_rhs, i_data, i_data_out) {}
+			collocation (mpi::messenger* i_messenger_ptr, datatype& i_timestep, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out) :
+			solver <datatype> (i_data, i_data_out, this->get_state_in (), this->get_state ()),
+			timestep (i_timestep) {
+				init (i_messenger_ptr, i_timestep, i_boundary_0.instance (i_data.get_grid (0), i_data.get_grid (1), false), i_boundary_n.instance (i_data.get_grid (0), i_data.get_grid (1), true), i_rhs, i_data, i_data_out);
+			}
 
 			virtual ~collocation () {}
 
