@@ -175,7 +175,7 @@ namespace grids
 
 		variable <datatype> &operator+ (datatype other) {
 			std::shared_ptr <variable <datatype>> new_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, "", 1)));
-			std::shared_ptr <variable <datatype>> uni_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, std::to_string ((double) other), 1)));
+			std::shared_ptr <variable <datatype>> uni_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, std::to_string ((long double) other), 1)));
 			linalg::copy (this->size (), &other, uni_var->ptr (), 0);
 			new_var->add_var (*this, add);
 			new_var->add_var (*uni_var, add);
