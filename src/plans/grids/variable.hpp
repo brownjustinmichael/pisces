@@ -37,8 +37,8 @@ namespace grids
 		int total;
 
 	public:
-		int state = 0;
-		int last_update = 0;
+		int state;
+		int last_update;
 		int component_flags;
 		int &element_flags;
 		std::string name;
@@ -57,6 +57,8 @@ namespace grids
 			DEBUG ("TOTAL " << total);
 			data.resize (total * dimensions * i_states, 0.0);
 			ld = 0;
+			state = 0;
+			last_update = 0;
 			states = i_states;
 		}
 
@@ -68,6 +70,8 @@ namespace grids
 			DEBUG ("TOTAL " << total);
 			data.resize (total * i_states * dimensions, 0.0);
 			ld = i_grid_m.get_n ();
+			state = 0;
+			last_update = 0;
 			states = i_states;
 		}
 
@@ -82,6 +86,8 @@ namespace grids
 			DEBUG ("TOTAL " << total);
 			data.resize (total * i_states * dimensions, 0.0);
 			ld = i_grids [n - 1]->get_ld ();
+			state = 0;
+			last_update = 0;
 			states = i_states;
 		}
 
