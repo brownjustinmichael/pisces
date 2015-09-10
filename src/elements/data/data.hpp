@@ -82,12 +82,12 @@ namespace data
 		clock_t cbegin, cend;
 		std::chrono::time_point <std::chrono::system_clock> tbegin, tend;
 
-		double timing_cputime = 0.0;
-		double timing_walltime = 0.0;
-		std::chrono::duration <double> timing_duration = std::chrono::duration <double>::zero ();
+		double timing_cputime;
+		double timing_walltime;
+		std::chrono::duration <double> timing_duration;
 		
 	public:
-		int n_steps = 0;
+		int n_steps;
 
 		std::map <std::string, bool> is_corrector;
 		std::map <std::string, std::shared_ptr <plans::transforms::transformer <datatype>>> transformers;
@@ -100,6 +100,10 @@ namespace data
 			duration = 0.0;
 			cbegin=clock();
 			tbegin=std::chrono::system_clock::now();
+			timing_cputime = 0.0;
+			timing_walltime = 0.0;
+			timing_duration = std::chrono::duration <double>::zero ();
+			n_steps = 0;
 		}
 		
 		virtual ~data () {}

@@ -185,7 +185,9 @@ namespace plans
 		public:
 			std::vector <std::shared_ptr <factory>> facts;
 
-			factory_container (std::shared_ptr <factory> i_fact = NULL) {
+			factory_container () {}
+
+			factory_container (std::shared_ptr <factory> i_fact) {
 				facts.push_back (i_fact);
 			}
 
@@ -232,9 +234,9 @@ namespace plans
 		};
 	};
 
-	typename plan <double>::factory_container operator+ (std::shared_ptr <typename plan <double>::factory> i_factory, std::shared_ptr <typename plan <double>::factory> j_factory);
+	plan <double>::factory_container operator+ (std::shared_ptr <plan <double>::factory> i_factory, std::shared_ptr <plan <double>::factory> j_factory);
 
-	typename plan <double>::factory_container operator+ (std::shared_ptr <typename plan <double>::factory> i_factory, typename plan <double>::factory_container j_container);
+	plan <double>::factory_container operator+ (std::shared_ptr <plan <double>::factory> i_factory, plan <double>::factory_container j_container);
 
 	template <class type>
 	typename plan <double>::factory_container operator- (std::shared_ptr <typename plan <double>::factory> i_factory, type i_other) {
@@ -250,9 +252,9 @@ namespace plans
 		return i_factory;
 	}
 
-	typename plan <double>::factory_container operator- (std::shared_ptr <typename plan <double>::factory> i_factory);
+	plan <double>::factory_container operator- (std::shared_ptr <plan <double>::factory> i_factory);
 
-	typename std::shared_ptr <typename plan <double>::factory> operator* (std::shared_ptr <typename plan <double>::factory> i_factory, YAML::Node node);
+	std::shared_ptr <plan <double>::factory> operator* (std::shared_ptr <plan <double>::factory> i_factory, YAML::Node node);
 
 	template <class datatype>
 	typename plan <datatype>::factory_container operator* (datatype scalar, typename plan <datatype>::factory_container i_container);

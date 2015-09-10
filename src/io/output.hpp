@@ -47,13 +47,14 @@ namespace io
 		std::vector <int> dims; //!< A vector of the integer number of dimensions for each output
 
 	public:
-		int full=0;
+		int full;
 		/*!*******************************************************************
 		 * \param i_grid The data_grid object representing the structure of the data
 		 * \param i_file_name The string representation of the output file; do not include the extension; it will be added later
 		 * \param i_file_format The integer io_flag associated with the desired output type (e.g. replace_file)
 		 *********************************************************************/
 		output (formats::data_grid i_grid, std::string i_file_name = "out", int i_file_format = formats::replace_file) : file_name (i_file_name), file_format (i_file_format), grid (i_grid) {
+			full = 0;
 			DEBUG ("Names has size " << names.size ());
 		}
 
@@ -164,13 +165,14 @@ namespace io
 	{
 	private:
 		std::map <std::string, std::string> globals;
-		bool first = true;
+		bool first;
 	public:
 		/*!**********************************************************************
 		 * \copydoc output::output
 		 ************************************************************************/
 		formatted_output (formats::data_grid i_grid, std::string i_file_name = "out", int i_file_format = formats::replace_file) : 
 		output (i_grid, i_file_name + format::extension (), i_file_format) {
+			first = true;
 			if (format::uses_files) check_file (file_name.c_str ());
 			// format::open_file (grid, file_name.c_str (), output::file_format);
 		}		
