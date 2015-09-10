@@ -1,16 +1,5 @@
 import os, inspect
-Import ("env")
-Import ("include_mp")
-Import ("include_mpi")
-Import ("dimensions")
-Import ("cppcompiler")
-Import ("ccompiler")
-Import ("compiler_flags")
-Import ("vertical_grid")
-Import ("defaults")
-Import ("root")
-Import ("quiet")
-Import ("lapack_location")
+Import ("*")
 
 env.Append (CPPFLAGS = ["-I%s/include" % lapack_location])
 env.Append (LDFLAGS = ["-L%s/lib" % lapack_location])
@@ -117,4 +106,5 @@ print (Dir('.').abspath)
 print (objects [3] [0].abspath)
 
 # Add the tests, which can be run with scons check
-env.SConscript('../test/SConscript', variant_dir = "./test", duplicate = 0, exports = {'env': env, "objects": objects, "include_mp": include_mp})
+if cxxtest:
+    env.SConscript('../test/SConscript', variant_dir = "./test", duplicate = 0, exports = {'env': env, "objects": objects, "include_mp": include_mp})
