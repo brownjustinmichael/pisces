@@ -101,6 +101,8 @@ namespace formats
 			
 			DEBUG ("DONE");
 		}
+
+		static void set_time (std::string file_name, double time) {}
 		
 		/*!**********************************************************************
 		 * \copydoc virtual_format::close_file

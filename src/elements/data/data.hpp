@@ -356,7 +356,7 @@ namespace data
 			if (output_params ["timed"].IsDefined () && output_params ["timed"].as <bool> ()) {
 				output_stream.reset (new io::timed_appender_output <datatype, formats::netcdf> (grid, file_from (output_params), duration, output_params ["timed_every"].as <datatype> ()));
 			} else {
-				output_stream.reset (new io::appender_output <formats::netcdf> (grid, file_from (output_params), output_params ["every"].as <int> ()));
+				output_stream.reset (new io::appender_output <formats::netcdf> (grid, file_from (output_params), &duration, output_params ["every"].as <int> ()));
 			}
 			return setup_output (output_stream, state, flags);
 		}

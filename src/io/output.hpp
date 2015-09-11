@@ -64,7 +64,7 @@ namespace io
 		 * \return The version of the class
 		 ************************************************************************/
 		static versions::version& version () {
-			static versions::version version ("1.2.0.0");
+			static versions::version version ("1.3.0.0");
 			return version;
 		}
 		
@@ -166,12 +166,14 @@ namespace io
 	private:
 		std::map <std::string, std::string> globals;
 		bool first;
+		double *time_ptr;
 	public:
 		/*!**********************************************************************
 		 * \copydoc output::output
 		 ************************************************************************/
-		formatted_output (formats::data_grid i_grid, std::string i_file_name = "out", int i_file_format = formats::replace_file) : 
-		output (i_grid, i_file_name + format::extension (), i_file_format) {
+		formatted_output (formats::data_grid i_grid, std::string i_file_name = "out", int i_file_format = formats::replace_file, double *i_time_ptr = NULL) : 
+		output (i_grid, i_file_name + format::extension (), i_file_format),
+		time_ptr (i_time_ptr) {
 			first = true;
 			if (format::uses_files) check_file (file_name.c_str ());
 			// format::open_file (grid, file_name.c_str (), output::file_format);
@@ -283,7 +285,7 @@ namespace io
 		 * \param i_file_format A string file format, using standard string formatting for the increments (e.g. "output_%02d")
 		 * \param i_output_every The integer frequency of outputs
 		 ************************************************************************/
-		incremental (formats::data_grid i_grid, std::string i_file_format, int i_output_every = 1) : formatted_output <format> (i_grid, "", formats::replace_file), file_format (i_file_format + format::extension ()), output_every (i_output_every > 0 ? i_output_every : 1),
+		incremental (formats::data_grid i_grid, std::string i_file_format, double *i_time_ptr = NULL, int i_output_every = 1) : formatted_output <format> (i_grid, "", formats::replace_file, i_time_ptr), file_format (i_file_format + format::extension ()), output_every (i_output_every > 0 ? i_output_every : 1),
 		count (0) {}
 
 		virtual ~incremental () {}
@@ -323,7 +325,7 @@ namespace io
 		 * \param i_file_name A string file name
 		 * \param i_output_every The integer frequency of outputs
 		 ************************************************************************/
-		appender_output (formats::data_grid i_grid, std::string i_file_name, int i_output_every = 1) : formatted_output <format> (i_grid, i_file_name, formats::append_file), output_every (i_output_every > 0 ? i_output_every : 1), count (0) {
+		appender_output (formats::data_grid i_grid, std::string i_file_name, double *i_time_ptr = NULL, int i_output_every = 1) : formatted_output <format> (i_grid, i_file_name, formats::append_file, i_time_ptr), output_every (i_output_every > 0 ? i_output_every : 1), count (0) {
 			DEBUG ("CONSTRUCTING");
 		}
 
@@ -362,7 +364,7 @@ namespace io
 		 * \param i_file_name A string file name
 		 * \param i_output_every The integer frequency of outputs
 		 ************************************************************************/
-		timed_appender_output (formats::data_grid i_grid, std::string i_file_name, datatype &i_duration, datatype i_output_every = 1.0) : formatted_output <format> (i_grid, i_file_name, formats::append_file), duration (i_duration), output_every (i_output_every > 0.0 ? i_output_every : 1.0), previous (-output_every) {}
+		timed_appender_output (formats::data_grid i_grid, std::string i_file_name, datatype &i_duration, datatype i_output_every = 1.0) : formatted_output <format> (i_grid, i_file_name, formats::append_file, &i_duration), duration (i_duration), output_every (i_output_every > 0.0 ? i_output_every : 1.0), previous (-output_every) {}
 
 		virtual ~timed_appender_output () {}
 

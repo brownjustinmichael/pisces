@@ -72,7 +72,7 @@ namespace formats
 		 * \copydoc virtual_format::open_file
 		 ************************************************************************/
 		static void open_file (const data_grid &grid, std::string file_name, int file_type);
-		
+
 		/*!**********************************************************************
 		 * \copydoc virtual_format::close_file
 		 ************************************************************************/

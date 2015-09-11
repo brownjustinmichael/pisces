@@ -262,6 +262,8 @@ namespace formats
 			*/
 			virtual_files [file_name];
 		}
+
+		static void set_time (std::string file_name, double time) {}
 		
 		/*!**********************************************************************
 		 * \brief Close the file
