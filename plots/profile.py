@@ -12,6 +12,7 @@ data=nc.Dataset(args.input)
 new=nc.Dataset(args.output, "w")
 
 axis=1
+deriv="z"
 
 dims=[]
 
@@ -39,6 +40,11 @@ for variable in data.variables:
 		new[variable][:]=np.mean(data[variable], axis=axis)
 	else:
 		new[variable][:]=data[variable][:]
+
+	if deriv in var_dims:
+		new.createVariable(variable + "_deriv", data[variable].dtype, dimensions=var_dims)
+		new[variable + "_deriv"][:]=0.
+		new[variable + "_deriv"][...,:-1]=np.diff(new[variable], axis=var_dims.index(deriv))
 
 # assert(False)
 # data.close()
