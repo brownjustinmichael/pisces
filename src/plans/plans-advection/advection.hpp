@@ -141,7 +141,7 @@ namespace plans
 				 * \param i_vel_n A pointer to the horizontal component of the velocity
 				 * \param i_vel_m A pointer to the vertical component of the velocity
 				 ************************************************************************/
-				factory (grids::variable <datatype> &i_vel_n, grids::variable <datatype> &i_vel_m, datatype i_coeff = -1.0) : real_plan <datatype>::factory (i_coeff), vel_n (i_vel_n), vel_m (i_vel_m) {}
+				factory (grids::variable <datatype> &i_vel_n, grids::variable <datatype> &i_vel_m, datatype i_coeff = 1.0) : real_plan <datatype>::factory (i_coeff), vel_n (i_vel_n), vel_m (i_vel_m) {}
 		
 				virtual ~factory () {}
 			

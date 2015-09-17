@@ -5,14 +5,16 @@ import numpy as np
 parser=argparse.ArgumentParser()
 parser.add_argument("input")
 parser.add_argument("output")
+parser.add_argument("--axis", default="z")
+parser.add_argument("--deriv", default=None)
 
 args=parser.parse_args()
 
 data=nc.Dataset(args.input)
 new=nc.Dataset(args.output, "w")
 
-axis=1
-deriv="z"
+axis=list(data.dimensions.keys()).index(args.axis)
+deriv=args.deriv
 
 dims=[]
 
@@ -31,20 +33,23 @@ for variable in data.variables:
 
 	to_mean=False
 	try:
-		var_dims.pop(var_dims.index(removed))
+		axis=var_dims.index(args.axis)
+		var_dims.pop(axis)
 		to_mean=True
 	except ValueError:
 		pass
+
 	new.createVariable(variable, data[variable].dtype, dimensions=var_dims)
+
 	if to_mean:
 		new[variable][:]=np.mean(data[variable], axis=axis)
 	else:
 		new[variable][:]=data[variable][:]
 
-	if deriv in var_dims:
+	if deriv is not None and deriv in list(data[variable].dimensions):
 		new.createVariable(variable + "_deriv", data[variable].dtype, dimensions=var_dims)
 		new[variable + "_deriv"][:]=0.
-		new[variable + "_deriv"][...,:-1]=np.diff(new[variable], axis=var_dims.index(deriv))
+		new[variable + "_deriv"][...,:-1]=np.mean(np.diff(data[variable], axis=list(data[variable].dimensions).index(deriv)), axis=axis)
 
 # assert(False)
 # data.close()

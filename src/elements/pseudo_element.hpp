@@ -1,5 +1,5 @@
 /*!**********************************************************************
- * \file pseudo.hpp
+ * \file pseudo_element.hpp
  * /Users/justinbrown/Dropbox/pisces
  * 
  * Created by Justin Brown on 2014-02-03.

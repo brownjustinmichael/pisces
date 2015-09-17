@@ -1,17 +1,17 @@
 grid:
     x:
-        points: 64
+        points: 256
         width: 2.828
     z:
         points: 64
-        width: 1.0
+        width: 2.0
     rezone:
         check_every: -1000
         min_size: 0.2
         max_size: 0.7
 time:
-    steps: 2000000
-    stop: 300
+    steps: 10000
+    stop: 10.
     init: 1e-6
     max: 1.e-0
     mult: 1.01
@@ -24,18 +24,14 @@ equations:
         sources:
             z_velocity: 0.0
         top:
-            type: fixed_value
-            value: 0.0
+            value: -1.0
         bottom:
-            type: fixed_value
             value: 1.0
     composition:
         ignore: true
         top:
-            type: fixed_value
-            value: 0.0
+            value: -1.0
         bottom:
-            type: fixed_value
             value: 1.0
     velocity:
         diffusion: 6.8
@@ -49,7 +45,7 @@ output:
     number: 0
     cart:
         file: cart_%02i_%%02i
-        every: 1000
+        every: 100
     stat:
         file: stat_%02i_%%02i
         every: 100

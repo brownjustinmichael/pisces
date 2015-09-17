@@ -45,9 +45,9 @@ Session=sqlalchemy.orm.sessionmaker(bind=engine)
 
 # This dictionary allows easy translation of types into types that sql will recognize
 strtypes={int: "integer", 
-          float: "real", 
+          float: "double precision", 
           str: "text", 
-          np.float64: "real", 
+          np.float64: "double precision", 
           np.int32: "integer", 
           bool: "bool", 
           type(None): "text"}
@@ -211,11 +211,17 @@ class SimulationEntry(object):
             os.chdir(self.entry.cwd)
         self.to_file(**kwargs)
 
-        exit=subprocess.call(["mpiexec", "-np", str(self.entry.np if self.entry.np else 1), execute] + ([] if debug is None else ["-D%i" % debug]))
+        try:
+            np = str(self.entry.np if self.entry.np else 1), init
+        except AttributeError:
+            np = "1"
+
+        exit=subprocess.call(["mpiexec", "-np", np, execute] + ([] if debug is None else ["-D%i" % debug]))
         if exit != 0:
             raise RuntimeError("The subprocess exited with a nonzero exit code of %i" % exit)
         new=[]
-        for i in range(self.entry.np if self.entry.np else 1):
+
+        for i in range(int (np)):
             new+=StepEntry.from_file(session, os.path.join(self.entry.root, self.entry.output__directory, ((self.entry.output__stat__file % i) % self.entry.output__number) + ".cdf"), sim=self, reset=reset)
         os.chdir(currentdir)
         return new
@@ -236,7 +242,11 @@ class SimulationEntry(object):
         self.to_file()
         os.makedirs(os.path.join(self.entry.root, self.entry.input__directory), exist_ok=True)
         os.makedirs(os.path.join(self.entry.root, self.entry.output__directory), exist_ok=True)
-        subprocess.call(["mpiexec", "-np", str(self.entry.np if self.entry.np else 1), init] + ([] if debug is None else ["-D%i" % debug]))
+        try:
+            np = str(self.entry.np if self.entry.np else 1)
+        except AttributeError:
+            np = "1"
+        subprocess.call(["mpiexec", "-np", np, init] + ([] if debug is None else ["-D%i" % debug]))
         os.chdir(currentdir)
 
         return self.resume(cwd=cwd, debug=debug, session=session, **kwargs)
@@ -245,6 +255,7 @@ class SimulationEntry(object):
         for column in SimulationEntry.Table.__table__.columns:
             if column.key.startswith(key):
                 value=getattr(self.entry, column.key)
+                print (column.key, value)
                 if type(value) != float:
                     query=query.filter(getattr(SimulationEntry.Table, column.key)==value)
                 else:

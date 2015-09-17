@@ -100,7 +100,6 @@ namespace pisces
 				} else {
 					data ["korre_Ts"] [j] = -Ain * std::tanh ((z_ptr [j] - rt) / din);
 				}
-				DEBUG (data["korre_Ts"] [j])
 			}
 		}
 		
@@ -110,7 +109,7 @@ namespace pisces
 				dirichlet (i_params ["equations.temperature.bottom.value"].as <datatype> ()), 
 				dirichlet (i_params ["equations.temperature.top.value"].as <datatype> ())) 
 			+ advec <datatype> (data ["x_velocity"], data ["z_velocity"])
-			+ src (data ["z_velocity"] * data ["korre_Ts"])
+			// + src (data ["z_velocity"] * data ["korre_Ts"])
 			== 
 			params ["equations.temperature.sources.z_velocity"] * src <datatype> (data ["z_velocity"]) 
 			+ params ["equations.temperature.diffusion"] * diff <datatype> ();
@@ -144,7 +143,7 @@ namespace pisces
 			+ params ["equations.z_velocity.sources.composition"] * src <datatype> (data ["composition"]) 
 			+ params ["equations.velocity.diffusion"] * diff <datatype> ();
 			data ["z_velocity"].component_flags |= ignore_net;
-			DEBUG ("PARAM IS " << params ["equations.z_velocity.sources.composition"]);
+			DEBUG ("PARAM IS " << params ["equations.z_velocity.sources.temperature"]);
 		} else {
 			DEBUG ("IGNORING");
 		}
