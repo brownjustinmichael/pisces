@@ -41,23 +41,20 @@ namespace plans
 			std::shared_ptr <plans::solvers::solver <datatype> > x_solver; //!< A pointer to the horizontal solver
 			std::shared_ptr <plans::solvers::solver <datatype> > z_solver; //!< A pointer to the vertical solver
 			
-			std::shared_ptr <grids::variable <datatype>> old_rhs_ptr;
-			std::shared_ptr <grids::variable <datatype>> old2_rhs_ptr;
-			std::shared_ptr <grids::variable <datatype>> old3_rhs_ptr;
-			std::shared_ptr <grids::variable <datatype>> new_rhs_ptr;
-			std::shared_ptr <grids::variable <datatype>> cor_rhs_ptr;
+			std::shared_ptr <grids::variable <datatype>> old_rhs_ptr; //!< A variable of the old rhs pointer, for accuracy
+			std::shared_ptr <grids::variable <datatype>> old2_rhs_ptr; //!< A variable of the rhs pointer from two steps ago
+			std::shared_ptr <grids::variable <datatype>> old3_rhs_ptr; //!< A variable of the rhs pointer from three steps ago
+			std::shared_ptr <grids::variable <datatype>> new_rhs_ptr; //!< A variable of the current rhs pointer
+			std::shared_ptr <grids::variable <datatype>> cor_rhs_ptr; //!< A variable of the corrected rhs pointer, taking into account the older rhs pointers
 			
 			std::shared_ptr <plans::plan <datatype> > transform; //!< A shared pointer to a transform if the equation has a real_rhs_vec
 		
 		public:
 			/*!**********************************************************************
 			 * \copydoc equation::equation
-			 * 
-			 * \param i_grid_n The grid object in the horizontal
-			 * \param i_grid_m The grid object in the vertical
 			 ************************************************************************/
-			implemented_equation (grids::variable <datatype> &i_data, int *i_element_flags, int *i_component_flags, mpi::messenger *i_messenger_ptr) : 
-			plans::solvers::equation <datatype> (i_data, i_element_flags, i_component_flags, i_messenger_ptr), 
+			implemented_equation (grids::variable <datatype> &i_data, mpi::messenger *i_messenger_ptr) : 
+			plans::solvers::equation <datatype> (i_data, i_messenger_ptr), 
 			n (i_data.get_grid (0).get_n ()), 
 			ldn (i_data.get_grid (0).get_ld ()), 
 			m (i_data.get_grid (1).get_n ()), 
@@ -107,6 +104,36 @@ namespace plans
 					FATAL ("Cannot get dependency without valid solve direction " << *component_flags);
 					throw 0;
 				}
+			}
+
+			/**
+			 * @brief Get the state that the equation will output to
+			 * @details Each solver outputs to one state in a variable. The equation class will progress through several solvers and output at last in one state in the data. This returns that state.
+			 * @return The integer state that the equation outputs to
+			 */
+			int get_state () {
+				if (z_solver) {
+					DEBUG ("Z Solve state is " << z_solver->get_state ());
+					return z_solver->get_state ();
+				} else if (x_solver) {
+					DEBUG ("X Solve state is " << x_solver->get_state ());
+					return x_solver->get_state ();
+				}
+				return 0;
+			}
+			
+			/*!**********************************************************************
+			 * \copydoc equation::get_solver
+			 ************************************************************************/
+			virtual std::shared_ptr <plans::solvers::solver <datatype>> get_solver (int flags = 0x00) {
+				if (!(flags & not_x_solver)) {
+					return x_solver;
+				}
+				if (!(flags & not_z_solver)) {
+					return z_solver;
+				}
+				FATAL ("Invalid flags: " << flags);
+				throw 0;
 			}
 			
 			/*!**********************************************************************
@@ -162,21 +189,8 @@ namespace plans
 				linalg::scale (ldn * m, 0.0, new_rhs_ptr->ptr (real_spectral));
 				linalg::scale (m * ldn, 0.0, new_rhs_ptr->ptr (spectral_spectral));
 			}
-			
-			/*!**********************************************************************
-			 * \copydoc equation::get_solver
-			 ************************************************************************/
-			virtual std::shared_ptr <plans::solvers::solver <datatype>> get_solver (int flags = 0x00) {
-				if (!(flags & not_x_solver)) {
-					return x_solver;
-				}
-				if (!(flags & not_z_solver)) {
-					return z_solver;
-				}
-				FATAL ("Invalid flags: " << flags);
-				throw 0;
-			}
-			
+
+
 			/*!**********************************************************************
 			 * \copydoc equation::add_solver
 			 ************************************************************************/
@@ -199,7 +213,7 @@ namespace plans
 			}
 			
 			/*!**********************************************************************
-			 * \copydoc equation::add_plan(const typename explicit_plan<datatype>::factory&,int)
+			 * \copydoc equation::add_plan(const typename plan<datatype>::factory&)
 			 ************************************************************************/
 			void add_plan (const typename plans::plan <datatype>::factory &i_factory) {
 				TRACE ("Adding plan...");
@@ -208,32 +222,23 @@ namespace plans
 			}
 			
 			/*!**********************************************************************
-			 * \copydoc equation::add_plan(const typename explicit_plan<datatype>::factory&,int)
+			 * \copydoc equation::add_plan(const typename plan<datatype>::factory_container&)
 			 ************************************************************************/
-			void add_plan (const typename plans::plan <datatype>::factory_container &i_factory) {
+			void add_plan (const typename plans::plan <datatype>::factory_container &i_container) {
 				TRACE ("Adding plan...");
-				for (int i = 0; i < (int) i_factory.facts.size (); ++i)
+				for (int i = 0; i < (int) i_container.facts.size (); ++i)
 				{
-					if (i_factory.facts [i]) add_plan (*(i_factory.facts [i]));
+					if (i_container.facts [i]) add_plan (*(i_container.facts [i]));
 				}
 			}
 
+			/**
+			 * @copydoc equation::setup_plans
+			 */
 			void setup_plans () {
 				if (x_solver) x_solver->setup ();
 				if (z_solver) z_solver->setup ();
 				equation <datatype>::setup_plans ();
-			}
-
-			int get_state () {
-				TRACE ("GETTING STATE");
-				if (z_solver) {
-					DEBUG ("Z Solve state is " << z_solver->get_state ());
-					return z_solver->get_state ();
-				} else if (x_solver) {
-					DEBUG ("X Solve state is " << x_solver->get_state ());
-					return x_solver->get_state ();
-				}
-				return 0;
 			}
 		
 		protected:

@@ -25,21 +25,24 @@
 		return i_factory * (-1.);
 	}
 
-	template <>
-	plan <double>::factory_container operator* (plan <double>::factory_container i_container, double scalar) {
-		plan <double>::factory_container container (i_container);
-		for (int i = 0; i < (int) i_container.facts.size (); ++i)
-		{
-			container.facts [i]->coeff *= scalar;
-		}
-		return container;
-	}
+	// template <>
+	// plan <double>::factory_container operator* (plan <double>::factory_container i_container, double scalar) {
+	// 	plan <double>::factory_container container (i_container);
+	// 	for (int i = 0; i < (int) i_container.facts.size (); ++i)
+	// 	{
+	// 		container.facts [i]->coeff *= scalar;
+	// 	}
+	// 	return container;
+	// }
 
 	std::shared_ptr <plan <double>::factory> operator* (std::shared_ptr <plan <double>::factory> i_factory, YAML::Node node) {
 		i_factory->coeff *= node.as <double> ();
 		return i_factory;
 	}
 
+	/**
+	 * @copydoc operator*(datatype, plan<datatype>::factory_container)
+	 */
 	template <>
 	plan <double>::factory_container operator* (double scalar, plan <double>::factory_container i_container) {
 		return i_container * scalar;

@@ -133,6 +133,9 @@ namespace pisces
 			return version;
 		}
 
+		/**
+		 * @return The name of the class, for record keeping
+		 */
 		virtual std::string class_name() = 0;
 		
 		/*!*******************************************************************
@@ -312,13 +315,14 @@ namespace pisces
 		 * \param positions A datatype pointer to the zoning positions
 		 * \param min_size The datatype minimum distance between zoning positions
 		 * \param max_size The datatype maximum distance between zoning positions
-		 * \param n_tries the number of attempts before stepping
-		 * \param iters_fixed_t the integer number of iterations at each temperature
-		 * \param step_size the real maximum step size
-		 * \param k a real boltzmann constant
-		 * \param t_initial the real initial temperature
-		 * \param mu_t the real damping factor for temperature
-		 * \param t_min the real damping factor parameter for temperature
+		 * \param n_tries The number of attempts before stepping
+		 * \param iters_fixed_t The integer number of iterations at each temperature
+		 * \param step_size The real maximum step size
+		 * \param k A real boltzmann constant
+		 * \param t_initial The real initial temperature
+		 * \param mu_t The real damping factor for temperature
+		 * \param t_min The real damping factor parameter for temperature
+		 * @param function The merit function to minimize, if unspecified, use rezone_calculate_ts
 		 * 
 		 * Using a simulated annealing technique, rezone all the elements such that the timestep is minimized across them. This is an expensive operation and should be used sparingly.
 		 * 
@@ -372,9 +376,17 @@ namespace pisces
 		/*!**********************************************************************
 		 * \brief The main function call of the class
 		 * 
+		 * @param n_steps A reference to the present number of steps. If unspecified, use the default one in the data class
+		 * 
 		 * This method tells the element to begin the main run of the simulation. It runs through all the specified plans in the appropriate order, and updates the values as necessary. Output, if desired, is specified by the output streams.
 		 ************************************************************************/
 		 virtual void run (int &n_steps);
+
+		 /*!**********************************************************************
+		  * \brief The main function call of the class
+		  * 
+		  * This method tells the element to begin the main run of the simulation. It runs through all the specified plans in the appropriate order, and updates the values as necessary. Output, if desired, is specified by the output streams. This version uses the default n_steps integer in the data class to track the number of steps taken.
+		  ************************************************************************/
 		 virtual void run () {
 		 	run (data.n_steps);
 		 }

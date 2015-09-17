@@ -69,16 +69,13 @@ namespace plans
 
 		public:
 			/*!**********************************************************************
-			 * \copydoc solver::solver
-			 * 
-			 * \param i_grid_n The horizontal grid object
-			 * \param i_grid_m The vertical grid object
-			 * \param i_messenger_ptr A pointer to the mpi messenger object
+			 * @param i_messenger_ptr A pointer to the mpi messenger object
 			 * \param i_timestep A datatype reference to the current timestep
 			 * \param i_boundary_0 A shared pointer to the top boundary object
 			 * \param i_boundary_n A shared pointer to the bottom boundary object
 			 * \param i_rhs A pointer to the right hand side of the equation
-			 * \param i_data A pointer to the data
+			 * \param i_data A reference to the data to read
+			 * \param i_data_out A reference to the data to update
 			 * 
 			 * The collocation matrix is set up as 
 			 * 
@@ -98,6 +95,15 @@ namespace plans
 				init (i_messenger_ptr, i_timestep, i_boundary_0, i_boundary_n, i_rhs, i_data, i_data_out);
 			}
 			
+			/*!**********************************************************************
+			 * @param i_messenger_ptr A pointer to the mpi messenger object
+			 * \param i_timestep A datatype reference to the current timestep
+			 * \param i_boundary_0 A boundary factory for the top boundary
+			 * \param i_boundary_n A boundary factory for the bottom boundary
+			 * \param i_rhs A pointer to the right hand side of the equation
+			 * \param i_data A reference to the data to read
+			 * \param i_data_out A reference to the data to update
+			 ************************************************************************/
 			collocation (mpi::messenger* i_messenger_ptr, datatype& i_timestep, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out) :
 			solver <datatype> (i_data, i_data_out, this->get_state_in (), this->get_state ()),
 			timestep (i_timestep) {
@@ -106,6 +112,9 @@ namespace plans
 
 			virtual ~collocation () {}
 
+			/**
+			 * @copydoc solver::get_state
+			 */
 			int get_state () {
 				return spectral_spectral;
 			}
@@ -123,7 +132,6 @@ namespace plans
 			void factorize ();
 			
 			void setup () {
-				DEBUG ("FIXING");
 				linalg::scale (m * m, 0.0, &matrix [0]);
 			}
 			
@@ -152,17 +160,31 @@ namespace plans
 				 * \param i_boundary_0 A shared pointer to the top boundary for the solver to be constructed
 				 * \param i_boundary_n A shared pointer to the bottom boundary for the solver to be constructed
 				 ************************************************************************/
-				factory (mpi::messenger *i_messenger_ptr, datatype &i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n) : messenger_ptr (i_messenger_ptr), timestep (i_timestep), boundary_0 (i_boundary_0), boundary_n (i_boundary_n) {}
+				factory (mpi::messenger *i_messenger_ptr, datatype &i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n) : 
+				messenger_ptr (i_messenger_ptr), 
+				timestep (i_timestep), 
+				boundary_0 (i_boundary_0), 
+				boundary_n (i_boundary_n) {}
 
-				factory (mpi::messenger *i_messenger_ptr, datatype &i_timestep, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n) : messenger_ptr (i_messenger_ptr), timestep (i_timestep), boundary_factory_0 (&i_boundary_0), boundary_factory_n (&i_boundary_n) {}
+				/*!**********************************************************************
+				 * \param i_messenger_ptr A pointer to the mpi messenger object for the solver to be constructed
+				 * \param i_timestep A reference to the timestep for the solver to be constructed
+				 * \param i_boundary_0 A boundary factory to the top boundary
+				 * \param i_boundary_n A boundary factory to the bottom boundary
+				 ************************************************************************/
+				factory (mpi::messenger *i_messenger_ptr, datatype &i_timestep, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n) : 
+				messenger_ptr (i_messenger_ptr), 
+				timestep (i_timestep), 
+				boundary_factory_0 (&i_boundary_0), 
+				boundary_factory_n (&i_boundary_n) {}
 				
 				virtual ~factory () {}
 				
 				/*!**********************************************************************
 				 * \copydoc solver::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out, grids::variable <datatype> &i_rhs) const {
-					return std::shared_ptr <plans::solvers::solver <datatype>> (new collocation (messenger_ptr, timestep, boundary_factory_0 ? boundary_factory_0->instance (i_data.get_grids (), false) : boundary_0, boundary_factory_n ? boundary_factory_n->instance (i_data.get_grids (), true) : boundary_n, i_rhs.ptr (real_spectral), i_data, i_data_out));
+				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, grids::variable <datatype> &i_rhs) const {
+					return std::shared_ptr <plans::solvers::solver <datatype>> (new collocation (messenger_ptr, timestep, boundary_factory_0 ? boundary_factory_0->instance (i_data_in.get_grids (), false) : boundary_0, boundary_factory_n ? boundary_factory_n->instance (i_data_in.get_grids (), true) : boundary_n, i_rhs.ptr (real_spectral), i_data_in, i_data_out));
 				}
 			};
 		};

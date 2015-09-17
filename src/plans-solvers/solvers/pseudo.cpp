@@ -1,5 +1,5 @@
 /*!**********************************************************************
- * \file pseudo_incompressible.cpp
+ * \file pseudo.cpp
  * /Users/justinbrown/Dropbox/pisces
  * 
  * Created by Justin Brown on 2013-10-14.

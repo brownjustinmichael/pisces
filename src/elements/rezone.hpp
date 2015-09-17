@@ -20,25 +20,34 @@ namespace pisces
 	template <class datatype>
 	class element;
 	
+	/**
+	 * @brief A collection of data and methods useful in rezoning data
+	 * @details The rezone data class is designed to minimize the necessary interface with the gsl library and with the virtual file objects needed to rezone the data.
+	 */
 	template <class datatype>
 	struct rezone_data {
-		element <datatype> *element_ptr;
-		int id;
-		int np;
+		element <datatype> *element_ptr; //!< A pointer to the element to rezone
+		int id; //!< The id of the process
+		int np; //!< The number of processes currently running
 		/*
 			TODO It might be possible to make this dynamic
 		*/
-		datatype positions [64];
-		datatype min_size;
-		datatype max_size;
-		double (*merit_func) (element <datatype> *element_ptr, formats::virtual_file *);
+		datatype positions [64]; //!< The array of positions used in the iterations
+		datatype min_size; //!< The minimmum extent of any element
+		datatype max_size; //!< The maximum extent of any element
+		double (*merit_func) (element <datatype> *element_ptr, formats::virtual_file *); //!< A merit function to be maximized
 		
+		/**
+		 * @brief Given the merit function associated with the rezone data, this function is in the correct form for gsl to parse
+		 * 
+		 * @param i_rezone_data A pointer to the rezone data
+		 * @return The merit value that the merit function has returned, summed over all elements
+		 */
 		static double func (void *i_rezone_data) {
 			element <datatype> *element_ptr = ((rezone_data <datatype> *) i_rezone_data)->element_ptr;
 			mpi::messenger *messenger_ptr = element_ptr->messenger_ptr;
 			double value = ((rezone_data <datatype> *)i_rezone_data)->merit_func (element_ptr, element_ptr->make_rezoned_virtual_file (((rezone_data <datatype> *)i_rezone_data)->positions, &*(element_ptr->rezone_virtual_file), profile_only));
 			messenger_ptr->sum (&value);
-			DEBUG ("SUM: " << value);
 			return value;
 		}
 		
@@ -162,6 +171,8 @@ namespace pisces
 	 * \param output_grid A pointer to the grid describing the desired extent of the output data
 	 * \param input_virtual_file A pointer to the virtual file containing the input data
 	 * \param output_virtual_file A pointer to the virtual file constructed by rezone. If NULL, use the input_virtual_file
+	 * @param value_buffer A pointer to a buffer to hold the entire data of one variable
+	 * @param inter_buffer A pointer to a buffer to hold the positional data of the vertical dimension
 	 * 
 	 * This method takes an input_virtual_file and input_grid and rezones them according to the extent of output_grid. It will do so by communicating with the other elements to collect the data necessary for the rezone.
 	 ************************************************************************/

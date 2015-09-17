@@ -65,6 +65,9 @@ namespace pisces
 		
 		virtual ~pseudo_element () {}
 
+		/**
+		 * @copydoc element::class_name
+		 */
 		virtual std::string class_name() {
 			return "pseudo";
 		}

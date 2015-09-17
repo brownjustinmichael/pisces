@@ -15,9 +15,17 @@
 
 namespace plans
 {
+	/**
+	 * @brief Shorthand to generate an advection plan
+	 * 
+	 * @param vel_n A reference to the x component of the velocity
+	 * @param vel_m A reference to the z component of the velocity
+	 * 
+	 * @return [description]
+	 */
 	template <class datatype>
-	std::shared_ptr <typename plan <datatype>::factory> advec (grids::variable <datatype> &vel_n, grids::variable <datatype> &vel_m, datatype coeff = 1.0) {
-		return std::shared_ptr <typename real_plan <datatype>::factory> (new typename advection::uniform <datatype>::factory (vel_n, vel_m, coeff));
+	std::shared_ptr <typename plan <datatype>::factory> advec (grids::variable <datatype> &vel_n, grids::variable <datatype> &vel_m) {
+		return std::shared_ptr <typename real_plan <datatype>::factory> (new typename advection::uniform <datatype>::factory (vel_n, vel_m));
 	}
 } /* plans */
 

@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file main.cpp
+ * \file isces.cpp
  * PISCES
  * 
  * Created by Justin Brown on 2013-04-08.

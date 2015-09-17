@@ -37,6 +37,14 @@ namespace pisces
 		
 		virtual ~vardiff_element () {}
 		
+		/**
+		 * @brief An alternate rezone merit function that seeks the regions with strongest derivatives
+		 * 
+		 * @param element_ptr A pointer to the element in question
+		 * @param virt A virtual file on which to operate the merit function
+		 * 
+		 * @return A value to be minimized in order to get the boundaries to occur at strongest derivatives
+		 */
 		static double rezone_merit (element <datatype> *element_ptr, formats::virtual_file *virt) {
 			datatype *temp = &(virt->index <datatype> ("temperature"));
 			datatype *vel = &(virt->index <datatype> ("z_velocity"));
@@ -45,7 +53,6 @@ namespace pisces
 			for (int j = 0; j < virt->dims ["z"] [1] - 1; ++j) {
 				value += -(vel [j] - vel [j + 1]) * (vel [j] - vel [j + 1]) - 1.0e3 * (temp [j] - temp [j + 1]) * (temp [j] - temp [j + 1]) + 1.0e-5 / ((pos [j] - pos [j + 1]) * (pos [j] - pos [j + 1]));
 			}
-			DEBUG (value);
 			return value;
 		}
 	};

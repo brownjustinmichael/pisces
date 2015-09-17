@@ -54,13 +54,33 @@ namespace boundaries
 		
 		virtual ~boundary () {}
 
+		/**
+		 * @brief A factory from which a boundary instance can be generated
+		 */
 		class factory
 		{
 		public:			
 			virtual ~factory () {}
 			
+			/**
+			 * @brief Generate an instance of a boundary object associated with the factory
+			 * 
+			 * @param grids An array of grid objects needed to construct the boundary
+			 * @param top Whether this is a top boundary
+			 * 
+			 * @return A shared pointer to the newly constructed boundary class
+			 */
 			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid <datatype> **grids, bool top) = 0;
 
+			/**
+			 * @brief Generate an instance of a boundary object associated with the factory
+			 * 
+			 * @param grid_n A reference to the horizontal grid
+			 * @param grid_m A reference to the vertical grid
+			 * @param top Whether this is a top boundary
+			 * 
+			 * @return A shared pointer to the newly constructed boundary class
+			 */
 			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid <datatype> &grid_n, grids::grid <datatype> &grid_m, bool top) {
 				grids::grid <datatype> *grids [3] = {&grid_n, &grid_m};
 				return instance (grids, top);
@@ -161,6 +181,17 @@ namespace boundaries
 		virtual void calculate_matrix (datatype timestep, datatype *default_matrix, datatype *matrix_in, datatype *matrix_out, int lda, bool diverging = false) = 0;
 	};
 
+	/**
+	 * @brief Match the boundaries of a class if they are communicating boundaries
+	 * @details This function was added as a shorthand to match any overlapping regions of elements quickly
+	 * 
+	 * @param m The number of datapoints in the vertical
+	 * @param boundary_0 A shared pointer to the top boundary
+	 * @param boundary_n A shared pointer to the bottom boundary
+	 * @param data The pointer to the data 
+	 * @param excess_0 The number of excess points past the top boundary
+	 * @param excess_n The number of excess points past the bottom boundary
+	 */
 	template <class datatype>
 	void boundary_match (int m, std::shared_ptr <boundaries::boundary <datatype>> &boundary_0, std::shared_ptr <boundaries::boundary <datatype>> &boundary_n, datatype *data, int excess_0 = 1, int excess_n = 1) {
 	if (boundary_n) {

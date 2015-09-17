@@ -32,20 +32,19 @@ namespace plans
 		int n; //!< An integer number of data elements (grid points) that collocation_1D will be built to handle
 		int ldn; //!< The integer max dimension in the horizontal direction
 		int m; //!< The integer number of data elements in the vertical
-		int dims;
+		int dims; //!< The number of dimensions the plan operates on
 		grids::grid <datatype> &grid_n; //!< A reference to the horizontal grid object
 		grids::grid <datatype> &grid_m; //!< A reference to the vertical grid object
 		
 	public:
 		/*!**********************************************************************
-		 * \param i_grid_n The grid object associated with the horizontal direction
-		 * \param i_grid_m The grid object associated with the vertical direction
+		 * \param i_data_in A reference to the input data variable for the plan
+		 * \param i_data_out A reference to the output data variable for the plan
+		 * @param i_coeff A coefficient by which the plan output should be multiplied
 		 * \param i_matrix_n The datatype matrix associated with the horizontal solve
 		 * \param i_matrix_m The datatype matrix associated with the vertical solve
-		 * \param i_data_in The input data for the plan
-		 * \param i_data_out The output data for the plan
-		 * \param i_element_flags A pointer to integer flags associated with the element on the whole
-		 * \param i_component_flags A pointer to the integer flags associated with the variable associated with the plan
+		 * @param state_in The state of i_data_in to use as the input
+		 * @param state_out The state of i_datat_out to use as the output
 		 ************************************************************************/
 		implicit_plan (datatype *i_matrix_n, datatype *i_matrix_m, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0, int state_in = spectral_spectral, int state_out = spectral_spectral) :
 		plans::plan <datatype> (i_data_in, i_data_out, state_in, state_out, i_coeff), 
@@ -64,25 +63,10 @@ namespace plans
 			return true;
 		}
 		
-		virtual void setup () = 0;
-		
 		/*!*******************************************************************
 		 * \copydoc plan::execute ()
 		 *********************************************************************/
 		virtual void execute () = 0;
-
-		/*!**********************************************************************
-		 * \brief An abstract factory class designed to produce an implicit_plan instance
-		 * 
-		 * This factory class is implemented to make the creation of plan objects more intuitive. A factory can be given to an equation object, and the equation will know about the grids, data, and flags, so these need not be specified by the user.
-		 ************************************************************************/
-		class factory : public plan <datatype>::factory
-		{
-		public:
-			factory (datatype i_coeff = 1.0) : plan <datatype>::factory (i_coeff) {}
-
-			virtual ~factory () {}
-		};
 	};
 } /* plans */
 

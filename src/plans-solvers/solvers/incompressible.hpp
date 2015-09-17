@@ -37,8 +37,8 @@ namespace plans
 			int excess_0; //!< The number of excess points are included on the top
 			int excess_n; //!< The number of excess points are included on the bottom
 			
-			grids::variable <datatype> &var_x;
-			grids::variable <datatype> &var_z;
+			grids::variable <datatype> &var_x; //!< A reference to the x component of the velocity
+			grids::variable <datatype> &var_z; //!< A reference to the z component of the velocity
 			datatype *data_x; //!< A pointer to the x component of the data
 			datatype *data_z; //!< A pointer to the z component of the data
 			datatype *new_pos; //!< A pointer to the grid positions in the solve (midpoints)
@@ -80,18 +80,13 @@ namespace plans
 			
 		public:
 			/*!**********************************************************************
-			 * \copydoc solver::solver
-			 * 
-			 * \param i_grid_n The horizontal grid object
-			 * \param i_grid_m The vertical grid object
 			 * \param i_messenger_ptr A pointer to the mpi messenger
 			 * \param i_boundary_0 A shared pointer to the top boundary object
 			 * \param i_boundary_n A shared pointer to the bottom boundary object
 			 * \param i_data A pointer to the initial data
-			 * \param i_data_x A pointer to the x-component data
-			 * \param i_data_z A pointer to the z-component data
-			 * \param i_component_x A pointer to the x-component flags
-			 * \param i_component_z A pointer to the z-component flags
+			 * \param i_data_out A pointer to the location to output the data
+			 * \param i_data_x A reference to the x component of the velocity
+			 * \param i_data_z A reference to the z component of the velocity
 			 ************************************************************************/
 			incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z);
 			
@@ -104,6 +99,9 @@ namespace plans
 				return NULL;
 			}
 		
+			/**
+			 * @copydoc solver::get_state
+			 */
 			int get_state () {
 				return real_spectral;
 			}
@@ -142,15 +140,22 @@ namespace plans
 				 ************************************************************************/
 				factory (mpi::messenger *i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, plans::solvers::equation <datatype> &i_equation_x, plans::solvers::equation <datatype> &i_equation_z) : messenger_ptr (i_messenger_ptr), boundary_0 (i_boundary_0), boundary_n (i_boundary_n), equation_x (i_equation_x), equation_z (i_equation_z) {}
 
-				factory (mpi::messenger *i_messenger_ptr, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n, plans::solvers::equation <datatype> &i_equation_x, plans::solvers::equation <datatype> &i_equation_z) : messenger_ptr (i_messenger_ptr), boundary_factory_0 (&i_boundary_0), boundary_factory_n (&i_boundary_n), equation_x (i_equation_x), equation_z (i_equation_z) {}
+				/*!**********************************************************************
+				 * \param i_messenger_ptr A pointer to the mpi messenger object for the solver to be constructed
+				 * \param i_boundary_0 A boundary factory for the top boundary
+				 * \param i_boundary_n A boundary factory for the bottom boundary
+				 * \param i_equation_x A reference to the x-component equation
+				 * \param i_equation_z A reference to the z-component equation
+				 ************************************************************************/
+ 				factory (mpi::messenger *i_messenger_ptr, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n, plans::solvers::equation <datatype> &i_equation_x, plans::solvers::equation <datatype> &i_equation_z) : messenger_ptr (i_messenger_ptr), boundary_factory_0 (&i_boundary_0), boundary_factory_n (&i_boundary_n), equation_x (i_equation_x), equation_z (i_equation_z) {}
 				
 				virtual ~factory () {}
 				
 				/*!**********************************************************************
 				 * \copydoc solver::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out, grids::variable <datatype> &i_rhs) const {
-					return std::shared_ptr <plans::solvers::solver <datatype>> (new incompressible (messenger_ptr, boundary_factory_0 ? boundary_factory_0->instance (i_data.get_grids (), false) : boundary_0, boundary_factory_n ? boundary_factory_n->instance (i_data.get_grids (), true) : boundary_n, i_data, i_data_out, equation_x.data_var (), equation_z.data_var ()));
+				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, grids::variable <datatype> &i_rhs) const {
+					return std::shared_ptr <plans::solvers::solver <datatype>> (new incompressible (messenger_ptr, boundary_factory_0 ? boundary_factory_0->instance (i_data_in.get_grids (), false) : boundary_0, boundary_factory_n ? boundary_factory_n->instance (i_data_in.get_grids (), true) : boundary_n, i_data_in, i_data_out, equation_x.data_var (), equation_z.data_var ()));
 				}
 			};
 		};

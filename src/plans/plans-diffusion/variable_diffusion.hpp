@@ -17,6 +17,10 @@ namespace plans
 {
 	namespace diffusion
 	{
+		/**
+		 * @brief An implicit plan designed to include diffusion with an additional multiplier
+		 * @details The precise form of the term is grad dot ($source) grad ($data). This usually occurs in the inclusion of density to the equations, though that is not the only case where terms like this appear. The execution of this plan does use a bit of a hack for stability: the right hand side generated is that from a full timestep ago.
+		 */
 		template <class datatype>
 		class variable_diffusion : public implicit_plan <datatype>
 		{
@@ -35,12 +39,32 @@ namespace plans
 			using implicit_plan <datatype>::element_flags;
 			using implicit_plan <datatype>::component_flags;
 
-			datatype *data_source, *new_matrix, *current, *bg_deriv, *bg_deriv2;
-			std::vector<datatype> bg_deriv_vec, bg_deriv2_vec, new_matrix_vec, bg_val, current_vec;
-			const datatype *pos_m, *pos_n;
-			datatype *oodx, *oodz, *oodx2, *oodz2;
+			datatype *data_source; //!< A pointer to the source data
+			datatype *new_matrix; //!< A pointer to the diffusion matrix
+			datatype *current; //!< A pointer to the current values of the diffusion
+			datatype *bg_deriv; //!< A pointer to the derivative of the background source
+			datatype *bg_deriv2; //!<  pointer to the second derivative of the background source
+			std::vector<datatype> bg_deriv_vec; //!< A vector containing the derivative of the background diffusion
+			std::vector<datatype> bg_deriv2_vec; //!< A vector containing the derivative of the background diffusion
+			std::vector<datatype> new_matrix_vec; //!< A vector containing the implicit diffusion matrix
+			std::vector<datatype> bg_val; //!< A vector containing the average background source
+			std::vector<datatype> current_vec; //!< A vector containing the current data
+			const datatype *pos_m; //!< A pointer to the vertical position, for speed
+			const datatype *pos_n; //!< A pointer to the horizontal positions, for speed
+			datatype *oodx; //!< An array of one over the differential of x, centered in the cell
+			datatype *oodx2; //!< An array of one over the differential of x, centered at the boundary
+			datatype *oodz; //!< An array of one over the differential of z, centered in the cell
+			datatype *oodz2; //!< An array of one over the differential of z, centered at the boundary
 
 		public:
+			/**
+			 * @param matrix_n A pointer to the horizontal matrix
+			 * @param matrix_m A pointer to the vertical matrix
+			 * @param i_data_source A reference to the source value that enters inside the divergence
+			 * @param i_data_in A reference to the input data
+			 * @param i_data_out A reference to the output data
+			 * @param i_coeff The coefficient by which to multiply the results
+			 */
 			variable_diffusion (datatype *matrix_n, datatype *matrix_m, grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0):
 			implicit_plan <datatype> (matrix_n, matrix_m, i_data_in, i_data_out, i_coeff, real_real, real_real),
 			data_source (i_data_source.ptr (real_real)) {
@@ -64,6 +88,9 @@ namespace plans
 			
 			virtual ~variable_diffusion () {}
 
+			/**
+			 * @copydoc plan::setup
+			 */
 			void setup () {
 				TRACE ("Setting up with coefficient " << coeff);
 				if (matrix_m) {
@@ -92,6 +119,9 @@ namespace plans
 				}
 			}
 
+			/**
+			 * @copydoc plan::execute
+			 */
 			virtual void execute () {
 				linalg::add_scaled (m * ldn, 1.0, current, data_out);
 				linalg::scale (m * ldn, 0.0, current);
@@ -107,15 +137,12 @@ namespace plans
 						current [g] += coeff * (log (data_source [g + 1] / data_source [g - 1]) * oodz2 [j] - bg_deriv [j]) * (data_in [g + 1] - data_in [g - 1]) * oodz2 [j];
 
 						current [g] += coeff * (log (data_source [p1 * m + j] / data_source [m1 * m + j]) * oodx2 [i]) * (data_in [p1 * m + j] - data_in [m1 * m + j]) * oodx2 [i];
-						if (current [g] != current [g]) {
-							DEBUG ("issue " << data_source [p1 * m + j] << " " << data_source [m1 * m + j] << " " << data_source [g + 1] << " " << data_source [g - 1]);
-						}
 					}
 				}
 			}
 
 			/*!**********************************************************************
-			 * \copydoc implicit_plan::factory
+			 * \copydoc plan::factory
 			 ************************************************************************/
 			class factory : public implicit_plan <datatype>::factory
 			{
@@ -132,7 +159,7 @@ namespace plans
 				virtual ~factory () {}
 				
 				/*!**********************************************************************
-				 * \copydoc implicit_plan::factory::instance
+				 * \copydoc plan::factory::instance
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					return std::shared_ptr <plans::plan <datatype> > (new variable_diffusion <datatype> (matrices [0], matrices [1], data_source, i_data_in, i_data_out, coeff));
@@ -158,23 +185,43 @@ namespace plans
 			using real_plan <datatype>::element_flags;
 			using real_plan <datatype>::component_flags;
 			
-			int bg_every, count;
+			int bg_every; //!< The number of evaluations between which to recalculate the background diffusion
+			int count; //!< The current count of evaluations
 			
 			datatype coeff; //!< The base coefficient to multiply the source
 			datatype min; //!< The minimum value of the coefficient
 			datatype *data_source; //!< A pointer to the source data
 			datatype pioL2; //!< The value pi / L^2 for speed
 			
-			std::vector <datatype> x1_vec, x2_vec, z1_vec, z2_vec, oodx_vec, oodz_vec, oodx2_vec, oodz2_vec, bg_state_vec, bg_deriv_vec;
-			datatype *x1_ptr, *x2_ptr, *z1_ptr, *z2_ptr, *oodx_ptr, *oodz_ptr, *oodx2_ptr, *oodz2_ptr, *bg_state, *bg_diff, *bg_deriv;
-			const datatype *pos_n, *pos_m;
+			std::vector <datatype> x1_vec; //!< A vector for an intermediary step
+			std::vector <datatype> x2_vec; //!< A vector for an intermediary step
+			std::vector <datatype> z1_vec; //!< A vector for an intermediary step
+			std::vector <datatype> z2_vec; //!< A vector for an intermediary step
+			std::vector <datatype> bg_state_vec; //!< A vector to contain the background state for the diffusion coefficient
+			std::vector <datatype> bg_deriv_vec; //!< A vector ot contain the derivative of the background state for the diffusion coefficient
+
+			datatype *x1_ptr; //!< A pointer to the x1 vector
+			datatype *x2_ptr; //!< A pointer to the x2 vector
+			datatype *z1_ptr; //!< A pointer to the z1 vector
+			datatype *z2_ptr; //!< A pointer to the x2 vector
+			datatype *bg_state; //!< A pointer to the bg_state vector
+			datatype *bg_diff; //!< A pointer to the background diffusion coefficient
+			datatype *bg_deriv; //!< A pointer to the bg_deriv vector
+			const datatype *pos_m; //!< A pointer to the vertical position, for speed
+			const datatype *pos_n; //!< A pointer to the horizontal positions, for speed
+			datatype *oodx; //!< An array of one over the differential of x, centered in the cell
+			datatype *oodx2; //!< An array of one over the differential of x, centered at the boundary
+			datatype *oodz; //!< An array of one over the differential of z, centered in the cell
+			datatype *oodz2; //!< An array of one over the differential of z, centered at the boundary
 			
 		public:
 			/*!**********************************************************************
 			 * \copydoc real_plan::real_plan
 			 * 
-			 * \param i_coeff The base coefficient to multiply the source
+			 * @param i_min The minimum value of the coefficient
 			 * \param i_data_source A pointer to the source data
+			 * @param i_bg_diff The background diffusion coefficient
+			 * @param i_bg_every The number of evaluations between which to recalculate the background diffusion
 			 ************************************************************************/
 			linear (datatype i_min, grids::variable <datatype> &i_data_source, datatype *i_bg_diff, int i_bg_every, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : 
 			real_plan <datatype> (i_data_in, i_data_out, i_coeff),
@@ -197,45 +244,15 @@ namespace plans
 				z2_ptr = &z2_vec [0];
 			
 				// Calculate some derivative contributions that will be used frequently
-				oodx_vec.resize (n);
-				oodx_ptr = &oodx_vec [0];
-				oodx2_vec.resize (n);
-				oodx2_ptr = &oodx2_vec [0];
-				oodz_vec.resize (m);
-				oodz_ptr = &oodz_vec [0];
-				oodz2_vec.resize (m);
-				oodz2_ptr = &oodz2_vec [0];
+				oodx = grid_n.get_ood ();
+				oodx2 = grid_n.get_ood2 ();
+				oodz = grid_m.get_ood ();
+				oodz2 = grid_m.get_ood2 ();
 				
 				bg_state_vec.resize (m, 0.0);
 				bg_state = &bg_state_vec [0];
 				bg_deriv_vec.resize (m, 0.0);
 				bg_deriv = &bg_deriv_vec [0];
-				
-				// Calculate 1/dx
-				oodx_ptr [0] = 0.5 / (pos_n [1] - pos_n [0]);
-				for (int i = 1; i < n - 1; ++i) {
-					oodx_ptr [i] = 1.0 / (pos_n [i + 1] - pos_n [i - 1]);
-				}
-				oodx_ptr [n - 1] = 0.5 / (pos_n [n - 1] - pos_n [n - 2]);
-			
-				// Calculate 1/dz
-				oodz_ptr [0] = 1.0 / (pos_m [1] - pos_m [0]);
-				for (int i = 1; i < m - 1; ++i) {
-					oodz_ptr [i] = 1.0 / (pos_m [i + 1] - pos_m [i - 1]);
-				}
-				oodz_ptr [m - 1] = 1.0 / (pos_m [m - 1] - pos_m [m - 2]);
-				
-				// Calculate 1/dx^2
-				for (int i = 0; i < n - 1; ++i) {
-					oodx2_ptr [i] = 1.0 / (pos_n [i + 1] - pos_n [i]);
-				}
-				oodx2_ptr [n - 1] = 1.0 / (pos_n [n - 1] - pos_n [n - 2]);
-			
-				// Calculate 1/dz&2
-				for (int i = 0; i < m - 1; ++i) {
-					oodz2_ptr [i] = 1.0 / (pos_m [i + 1] - pos_m [i]);
-				}
-				oodz2_ptr [m - 1] = 1.0 / (pos_m [m - 1] - pos_m [m - 2]);
 				
 				count = 0;
 			}
@@ -268,7 +285,7 @@ namespace plans
 
 				for (int i = 0; i < n; ++i) {
 					for (int j = 1; j < m - 1; ++j) {
-						data_out [i * m + j] += std::max (coeff * (data_source [i * m + j] - bg_state [j]), min + 1.0e-4) * ((x1_ptr [i * m + j] * oodx2_ptr [i] - x2_ptr [i * m + j] * oodx2_ptr [(i - 1) % n]) * oodx_ptr [i] * 2.0 + (z1_ptr [i * m + j] * oodz2_ptr [j] - z2_ptr [i * m + j] * oodz2_ptr [j - 1]) * oodz_ptr [j] * 2.0);
+						data_out [i * m + j] += std::max (coeff * (data_source [i * m + j] - bg_state [j]), min + 1.0e-4) * ((x1_ptr [i * m + j] * oodx2 [i] - x2_ptr [i * m + j] * oodx2 [(i - 1) % n]) * oodx [i] * 2.0 + (z1_ptr [i * m + j] * oodz2 [j] - z2_ptr [i * m + j] * oodz2 [j - 1]) * oodz [j] * 2.0);
 					}
 				}
 
@@ -294,7 +311,7 @@ namespace plans
 
 				for (int i = 0; i < n; ++i) {
 					for (int j = 1; j < m - 1; ++j) {
-						data_out [i * m + j] += coeff * (x1_ptr [i * m + j] * oodx_ptr [i] * x2_ptr [i * m + j] * oodx_ptr [i] + (z1_ptr [i * m + j] - bg_deriv [j]) * oodz_ptr [j] * z2_ptr [i * m + j] * oodz_ptr [j]);
+						data_out [i * m + j] += coeff * (x1_ptr [i * m + j] * oodx [i] * x2_ptr [i * m + j] * oodx [i] + (z1_ptr [i * m + j] - bg_deriv [j]) * oodz [j] * z2_ptr [i * m + j] * oodz [j]);
 					}
 				}
 
@@ -323,28 +340,31 @@ namespace plans
 			}
 			
 			/*!**********************************************************************
-			 * \copydoc real_plan::factory
+			 * \copydoc plan::factory
 			 ************************************************************************/
 			class factory : public real_plan <datatype>::factory
 			{
 			protected:
 				using real_plan <datatype>::factory::coeff;
-				datatype min; //!< The value for the coefficient
+				datatype min; //!< The minimum value for the coefficient
 				grids::variable <datatype> &data_source; //!< The source data pointer for the plan to be constructed
-				datatype *bg_diff;
-				int bg_every;
+				datatype *bg_diff; //!< The background diffusion coefficient
+				int bg_every; //!< The number of evaluations between which to recalculate the background diffusion
 				
 			public:
 				/*!**********************************************************************
 				 * \param i_coeff The base coefficient for the plan to be constructed
 				 * \param i_data_source The source data pointer for the plan to be constructed
+				 * @param i_min The minimum value of the data for the plan to be constructed
+				 * @param i_bg_diff The background diffusion coefficient
+				 * @param i_bg_every The number of evaluations between which to recalculate the background diffusion
 				 ************************************************************************/
 				factory (datatype i_coeff, datatype i_min, grids::variable <datatype> &i_data_source, datatype *i_bg_diff, int i_bg_every) : real_plan <datatype>::factory (i_coeff), min (i_min), data_source (i_data_source), bg_diff (i_bg_diff), bg_every (i_bg_every) {}
 				
 				virtual ~factory () {}
 				
 				/*!**********************************************************************
-				 * \copydoc real_plan::factory::instance
+				 * \copydoc plan::factory::instance
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					return std::shared_ptr <plans::plan <datatype> > (new linear <datatype> (min, data_source, bg_diff, bg_every, i_data_in, i_data_out, coeff));

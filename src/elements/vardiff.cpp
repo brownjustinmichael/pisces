@@ -18,7 +18,7 @@ namespace pisces
 	
 	template <class datatype>
 	vardiff_element <datatype>::vardiff_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
-	boussinesq_element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags, false) {
+	boussinesq_element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags) {
 		TRACE ("Initializing...");
 		
 		std::string variable;

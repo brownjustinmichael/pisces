@@ -36,7 +36,7 @@ namespace io
 	class parameters : public YAML::Node
 	{
 	protected:
-		std::string yaml_data;
+		std::string yaml_data; //!< The string representation of the parameters in YAML
 
 	public:
 		using YAML::Node::operator=; // Use the assignment operator from the super class
@@ -119,12 +119,14 @@ namespace io
 		 ************************************************************************/
 		static YAML::Node copy (const YAML::Node &from, const YAML::Node to);
 	
+		/**
+		 * @return A string representation of the full YAML output
+		 */
 		std::string &string () {
 			TRACE ("Emitting parameters");
 			YAML::Emitter out;
 			out << *this;
 			yaml_data = out.c_str ();
-			TRACE ("Complete.");
 			return yaml_data;
 		}
 
@@ -159,6 +161,16 @@ namespace io
 			}
 		}
 
+		/*!**********************************************************************
+		 * \brief Get the parameter associated with the given key, if it does not exist, return the default value
+		 * 
+		 * \param key The string representation of the parameter
+		 * \param default_value The default valie to use if the key does not exist
+		 * 
+		 * This method is included for convenience. It avoids some of the messy YAML syntax and takes advantage of the overwritted index operator. Returns default_value if the index does not exist
+		 * 
+		 * \return Returns the value of the given parameter
+		 ************************************************************************/
 		template <typename datatype>
 		const datatype get (std::string key, datatype default_value) {
 			YAML::Node node = operator[] (key);

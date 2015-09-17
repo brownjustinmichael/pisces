@@ -78,11 +78,25 @@ namespace formats
 		 ************************************************************************/
 		static void close_file (std::string file_name, int file_type);
 		
+		/**
+		 * @brief Add a string global attribute to the output file
+		 * @details This attribute is not time dependent, and is not associated with any of the individual variables.
+		 * 
+		 * @param file_name The name of the file to which the attribute should be added
+		 * @param name The name of the attribute
+		 * @param attribute The string content of the attribute
+		 */
 		static void add_global_attribute (std::string file_name, std::string name, std::string attribute) {
 			DEBUG ("Attributes are " << attribute);
 			files [file_name]->putAtt (name, attribute.c_str ());
 		}
 
+		/**
+		 * @brief Check whether the file is currently open
+		 * 
+		 * @param file_name The file to check
+		 * @return True if the file is open, false otherwise
+		 */
 		static bool is_open (std::string file_name) {
 			if (files [file_name]) return true;
 			return false;

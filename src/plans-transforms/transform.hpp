@@ -34,7 +34,8 @@ namespace plans
 			using plans::plan <datatype>::data_in;
 			using plans::plan <datatype>::data_out;
 
-			int n, m;
+			int n; //!< The number of horizontal data points
+			int m; //!< The number of vertical data points
 			int flags; //!< A set of flags for setting up the transform
 			int threads; //!< The integer number of threads to use
 			
@@ -45,18 +46,27 @@ namespace plans
 			fftw_iodim iodim; //!< A dimensional object needed by fftw
 			
 		private:
+			/**
+			 * @brief Initialize the transform plan
+			 * @details This member initializes the transform plan, including the dimensionalities and the FFTW plans that work beneath the hood.
+			 * 
+			 * @param i_n The number of horizontal data points
+			 * @param i_m The number of vertical data points
+			 * @param i_data_in The pointer to the input data
+			 * @param i_data_out The pointer to the output data
+			 * @param i_flags A set of flags for setting up the transform (e.g. inverse)
+			 * @param i_threads The number of threads over which to split the transform
+			 */
 			void init (int i_n, int i_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int i_threads = 0);
 			
 		public:
 			/*!**********************************************************************
-			 * \copydoc plan::plan
-			 * 
-			 * \param i_grid_n The horizontal grid object
-			 * \param i_grid_m The vertical grid object
-			 * \param i_data_in A pointer to the input data
-			 * \param i_data_out A pointer to the output data
+			 * \param i_data_in A reference to the variable object of the input data
+			 * \param i_data_out A reference to the variable object of the output data
 			 * \param i_flags A set of flags for setting up the transform (e.g. inverse)
 			 * \param i_threads The number of threads over which to split the transform
+			 * @param state_in The integer input state of the data (e.g. real_real, real_spectral)
+			 * @param state_out The integer output state of the data (e.g. real_real, real_spectral)
 			 * 
 			 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
 			 ************************************************************************/
@@ -65,17 +75,22 @@ namespace plans
 				init (i_data_in.get_grid (0).get_n (), i_data_in.get_grid (1).get_n (), data_in, data_out, i_flags, i_threads);
 			}
 
+			/*!**********************************************************************
+			 * @brief A shorthand constructor for an in-place transform
+			 * 
+			 * \param i_data_in A reference to the variable object of the input data
+			 * \param i_flags A set of flags for setting up the transform (e.g. inverse)
+			 * \param i_threads The number of threads over which to split the transform
+			 * @param state_in The integer input state of the data (e.g. real_real, real_spectral)
+			 * @param state_out The integer output state of the data (e.g. real_real, real_spectral)
+			 * 
+			 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
+			 ************************************************************************/
 			horizontal (grids::variable <datatype> &i_data_in, int state_in = 0, int state_out = -1, int i_flags = 0x00, int i_threads = 0) : plans::plan <datatype> (i_data_in, i_data_in, state_in, state_out >= 0 ? state_out : state_in) {
 				init (i_data_in.get_grid (0).get_n (), i_data_in.get_grid (1).get_n (), data_in, data_out, i_flags, i_threads);
 			}
 			
 			virtual ~horizontal () {}
-			
-			void setup () {}
-
-			virtual int type () {
-				return 0;
-			}
 			
 			/*!**********************************************************************
 			 * \copydoc plan::execute
@@ -93,7 +108,8 @@ namespace plans
 			using plans::plan <datatype>::data_in;
 			using plans::plan <datatype>::data_out;
 
-			int n, m;
+			int n; //!< The number of data points in the horizontal direction
+			int m; //!< The number of data points in the vertical direction
 			int flags; //!< A set of flags for setting up the transform
 			int threads; //!< The integer number of threads to use
 			
@@ -106,14 +122,12 @@ namespace plans
 			
 		public:
 			/*!**********************************************************************
-			 * \copydoc plan::plan
-			 * 
-			 * \param i_grid_n The horizontal grid object
-			 * \param i_grid_m The vertical grid object
-			 * \param i_data_in A pointer to the input data
-			 * \param i_data_out A pointer to the output data
+			 * \param i_data_in A reference to the variable object of the input data
+			 * \param i_data_out A reference to the variable object of the output data
 			 * \param i_flags A set of flags for setting up the transform (e.g. inverse)
 			 * \param i_threads The number of threads over which to split the transform
+			 * @param state_in The integer input state of the data (e.g. real_real, real_spectral)
+			 * @param state_out The integer output state of the data (e.g. real_real, real_spectral)
 			 * 
 			 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
 			 ************************************************************************/
@@ -122,17 +136,21 @@ namespace plans
 				init (i_data_in.get_grid (0).get_n (), i_data_in.get_grid (1).get_n (), data_in, data_out, i_flags, i_threads);
 			}
 
+			/*!**********************************************************************
+			 * @brief A shorthand constructor to use for an in-place transform
+			 * 
+			 * \param i_data_in A reference to the variable object of the input data
+			 * \param i_flags A set of flags for setting up the transform (e.g. inverse)
+			 * \param i_threads The number of threads over which to split the transform
+			 * @param state_in The integer input state of the data (e.g. real_real, real_spectral)
+			 * @param state_out The integer output state of the data (e.g. real_real, real_spectral)
+			 * 
+			 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)			 ************************************************************************/
 			vertical (grids::variable <datatype> &i_data_in, int state_in = 0, int state_out = -1, int i_flags = 0x00, int i_threads = 0) : plans::plan <datatype> (i_data_in, i_data_in, state_in, state_out >= 0 ? state_out : state_in) {
 				init (i_data_in.get_grid (0).get_n (), i_data_in.get_grid (1).get_n (), data_in, data_out, i_flags, i_threads);
 			}
 			
 			virtual ~vertical () {}
-			
-			void setup () {}
-
-			virtual int type () {
-				return 0;
-			}
 			
 			/*!**********************************************************************
 			 * \copydoc plan::execute

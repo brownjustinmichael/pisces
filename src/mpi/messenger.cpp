@@ -10,13 +10,23 @@
  
  namespace mpi
  {	
+ 	/**
+ 	 * @brief A configuration class to be instantiated once in control of initializing MPI
+ 	 */
  	class config
  	{
 	protected:
-		bool finalize;
+		bool finalize; //!< Whether to actually call MPI finalize (mostly for debugging use)
 
  	public:
- 		config (int *argc = NULL, char *** argv = NULL, bool i_finalize = true) : finalize (i_finalize) {
+ 		/**
+ 		 * @param argc A pointer to the number of command line arguments
+ 		 * @param argv A pointer to an array of command line arguments
+ 		 * @param i_finalize Whether to call MPI finalize (for debugging)
+ 		 * @return [description]
+ 		 */
+ 		config (int *argc = NULL, char *** argv = NULL, bool i_finalize = true) : 
+ 		finalize (i_finalize) {
  			// Initialize MPI
  			#ifdef _MPI
  			MPI::Init (*argc, *argv);

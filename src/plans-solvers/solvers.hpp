@@ -18,6 +18,15 @@
 
 namespace plans
 {
+	/**
+	 * @brief Shorthand to generate a split directional solve
+	 * 
+	 * @param equation_ptr A shared pointer to an equation
+	 * @param timestep A reference to the timestep duration of the system
+	 * @param boundary_0 A boundary factory to the top boundary
+	 * @param boundary_n A boundary factory to the bottom boundary
+	 * @return The equation pointer for use in equation definitions
+	 */
 	template <class datatype>
 	std::shared_ptr <solvers::equation <datatype>> split_solver (std::shared_ptr <typename solvers::equation <datatype>> equation_ptr, datatype &timestep, std::shared_ptr <typename boundaries::boundary <datatype>::factory> boundary_0, std::shared_ptr <typename boundaries::boundary <datatype>::factory> boundary_n) {
 		if (equation_ptr->messenger_ptr->get_id () > 0) {
@@ -31,6 +40,14 @@ namespace plans
 		return equation_ptr;
 	}
 
+	/**
+	 * @brief Shorthand to generate a divergence corrector
+	 * 
+	 * @param equation_ptr A shared pointer to an equation
+	 * @param vel_n_ptr A pointer to the x directional velocity equation
+	 * @param vel_m_ptr A pointer to the z directional velocity equation
+	 * @return The equation pointer for use in equation definitions
+	 */
 	template <class datatype>
 	std::shared_ptr <solvers::equation <datatype>> div (std::shared_ptr <solvers::equation <datatype>> equation_ptr, std::shared_ptr <solvers::equation <datatype>> vel_n_ptr, std::shared_ptr <solvers::equation <datatype>> vel_m_ptr) {
 		std::shared_ptr <typename boundaries::boundary <datatype>::factory> boundary_0, boundary_n;
@@ -44,6 +61,17 @@ namespace plans
 			return equation_ptr;
 	}
 
+	/**
+	 * @brief Shorthand to generate a divergence corrector
+	 * 
+	 * @param equation_ptr A shared pointer to an equation
+	 * @param vel_n_ptr A pointer to the x directional velocity equation
+	 * @param vel_m_ptr A pointer to the z directional velocity equation
+	 * @param density A pointer to the density data
+	 * @param pressure A pointer to the pressure data
+	 * @param gamma The ratio of specific heats
+	 * @return The equation pointer for use in equation definitions
+	 */
 	template <class datatype>
 	std::shared_ptr <solvers::equation <datatype>> pdiv (std::shared_ptr <solvers::equation <datatype>> equation_ptr, std::shared_ptr <solvers::equation <datatype>> vel_n_ptr, std::shared_ptr <solvers::equation <datatype>> vel_m_ptr, datatype *density, datatype *pressure, datatype gamma = 5./3.) {
 		std::shared_ptr <typename boundaries::boundary <datatype>::factory> boundary_0, boundary_n;
@@ -57,11 +85,23 @@ namespace plans
 			return equation_ptr;
 	}
 
+	/**
+	 * @brief Shorthand to generate dirichlet boundary conditions
+	 * 
+	 * @param value The value to be set at the dirichlet boundary
+	 * @return The boundary factory associated with the dirichlet boundary
+	 */
 	template <class datatype>
 	typename std::shared_ptr <typename boundaries::boundary <datatype>::factory> dirichlet (datatype value) {
 		return std::shared_ptr <typename boundaries::boundary <datatype>::factory> (new typename boundaries::fixed_boundary <datatype>::factory (value));
 	}
 
+	/**
+	 * @brief Shorthand to generate neumann boundary conditions
+	 * 
+	 * @param value The value to be set at the neumann boundary
+	 * @return The boundary factory associated with the neumann boundary
+	 */
 	template <class datatype>
 	typename std::shared_ptr <typename boundaries::boundary <datatype>::factory> neumann (datatype value) {
 		return std::shared_ptr <typename boundaries::boundary <datatype>::factory> (new typename boundaries::fixed_deriv_boundary <datatype>::factory (value));

@@ -1,6 +1,6 @@
 /*!***********************************************************************
- * \file main.cpp
- * Spectral Element
+ * \file pisces_init.cpp
+ * PISCES
  * 
  * Created by Justin Brown on 2013-04-08.
  * Copyright 2013 Justin Brown. All rights reserved.
@@ -20,6 +20,12 @@
 
 using namespace grids;
 
+/*!*******************************************************************
+ * \brief The main call
+ * 
+ * \param argc The integer number of command line arguments
+ * \param argv The character array of command line arguments
+ *********************************************************************/
 int main (int argc, char *argv[])
 {
 	try {

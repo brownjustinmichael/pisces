@@ -70,7 +70,7 @@ namespace mpi
 	private:
 		int id; //!< The integer id of the current process
 		int np; //!< The integer number of total processes
-		bool finalize;
+		bool finalize; //!< Whether to call MPI finalize at the end of the program
 		
 		std::vector <int> stati; //!< A vector of the status of each processor
 
@@ -78,6 +78,7 @@ namespace mpi
 		/*!**********************************************************************
 		 * \param argc An integer pointer to the number of command arguments
 		 * \param argv A pointer to an array of character arrays of command arguments
+		 * @param finalize Whether to call MPI finalize at the end of the program
 		 ************************************************************************/
 		messenger (int* argc = NULL, char*** argv = NULL, bool finalize = true);
 		

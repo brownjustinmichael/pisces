@@ -62,15 +62,22 @@ namespace plans
 				return version;
 			}
 
+			/**
+			 * @brief Update the transforms of the associated variable 
+			 * @details Grabs the last updated state of the variable and uses that to generate all the transformed states.
+			 */
 			virtual void update () = 0;
 		};
 	} /* transforms */
 } /* plans */
 
+/**
+ * @brief A null shared pointer to a transformer class for convenience
+ * @return A null shared pointer to a transformer class
+ */
 template <class datatype>
 std::shared_ptr <plans::transforms::transformer <datatype>> NULL_transformer () {
 	return std::shared_ptr <plans::transforms::transformer <datatype>> ();
 }
-
 
 #endif /* end of include guard: TRANSFORM_HPP_S8KRHTX3 */

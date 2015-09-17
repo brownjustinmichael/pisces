@@ -55,10 +55,10 @@ namespace pisces
 		std::map <int, int> excesses; //!< A vector of the edge positions
 		std::vector<int> cell_n; //!< An integer array for tracking each cell number for output
 		std::vector<int> cell_m; //!< An integer array for tracking each cell number for output
-		std::vector <datatype> value_buffer_vec;
-		datatype* value_buffer;
-		std::vector <datatype> inter_buffer_vec;
-		datatype* inter_buffer;
+		std::vector <datatype> value_buffer_vec; //!< A vector for interpolating over the data in rezoning
+		datatype* value_buffer; //!< A pointer to the value_buffer vector
+		std::vector <datatype> inter_buffer_vec; //!< A vector for interpolating over the positions in rezoning
+		datatype* inter_buffer; //!< A pointer to the inter_buffer vector
 		
 		datatype max_timestep; //!< The maximum timestep value
 		datatype init_timestep; //!< The starting timestep value
@@ -110,7 +110,7 @@ namespace pisces
 			for (typename data::data <datatype>::iterator iter = data.begin (); iter != data.end (); ++iter) {
 				if ((*iter != "x") && (*iter != "z")) {
 					DEBUG ("Adding " << *iter);
-					element <datatype>::add_equation (*iter, std::shared_ptr <plans::solvers::equation <datatype> > (new plans::solvers::implemented_equation <datatype> (data [*iter], &(data.flags), &(data [*iter].component_flags), i_messenger_ptr)));
+					element <datatype>::add_equation (*iter, std::shared_ptr <plans::solvers::equation <datatype> > (new plans::solvers::implemented_equation <datatype> (data [*iter], i_messenger_ptr)));
 				}
 			}
 			
@@ -169,7 +169,12 @@ namespace pisces
 		}
 		
 		/*!**********************************************************************
-		 * \copydoc element::calculate_timestep
+		 * @brief Calculate the timestep for a given cell
+		 * 
+		 * @param i The horizontal index
+		 * @param j The vertical index
+		 * @param virtual_file A pointer to a virtual file for which to calculate the timestep, if NULL use the current state
+		 * @return The timestep for the cell
 		 ************************************************************************/
 		virtual datatype calculate_timestep (int i, int j, formats::virtual_file *virtual_file = NULL) = 0;
 		

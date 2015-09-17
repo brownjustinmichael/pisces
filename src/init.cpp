@@ -1,5 +1,5 @@
 /*!***********************************************************************
- * \file main.cpp
+ * \file init.cpp
  * Spectral Element
  * 
  * Created by Justin Brown on 2013-04-08.
@@ -20,6 +20,12 @@
 
 using namespace grids;
 
+/*!*******************************************************************
+ * \brief The main call
+ * 
+ * \param argc The integer number of command line arguments
+ * \param argv The character array of command line arguments
+ *********************************************************************/
 int main (int argc, char *argv[])
 {
 	try {

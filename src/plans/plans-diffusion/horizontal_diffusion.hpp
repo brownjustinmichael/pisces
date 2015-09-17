@@ -42,10 +42,11 @@ namespace plans
 			using implicit_plan <datatype>::element_flags;
 			using implicit_plan <datatype>::component_flags;
 		
-		
 			/*!**********************************************************************
-			 * \copydoc implicit_plan::implicit_plan
-			 * 
+			 * \param i_data_in A reference to the input data variable for the plan
+			 * \param i_data_out A reference to the output data variable for the plan
+			 * \param i_matrix_n The datatype matrix associated with the horizontal solve
+			 * \param i_matrix_m The datatype matrix associated with the vertical solve
 			 * \param i_coeff The diffusion coefficient
 			 * \param i_alpha The implicit fraction (1.0 for purely implicit, 0.0 for purely explicit)
 			 ************************************************************************/
@@ -96,7 +97,7 @@ namespace plans
 			}
 		
 			/*!**********************************************************************
-			 * \copydoc implicit_plan::factory
+			 * \copydoc plan::factory
 			 ************************************************************************/
 			class factory : public implicit_plan <datatype>::factory
 			{
@@ -114,7 +115,7 @@ namespace plans
 				virtual ~factory () {}
 			
 				/*!**********************************************************************
-				 * \copydoc implicit::factory::instance
+				 * \copydoc plan::factory::instance
 				 ************************************************************************/
 				virtual std::shared_ptr <plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					if (coeff) {
@@ -151,8 +152,10 @@ namespace plans
 			using implicit_plan <datatype>::component_flags;
 		
 			/*!**********************************************************************
-			 * \copydoc implicit_plan::implicit_plan
-			 * 
+			 * \param i_data_in A reference to the input data variable for the plan
+			 * \param i_data_out A reference to the output data variable for the plan
+			 * \param i_matrix_n The datatype matrix associated with the horizontal solve
+			 * \param i_matrix_m The datatype matrix associated with the vertical solve
 			 * \param i_alpha The implicit fraction (1.0 for purely implicit, 0.0 for purely explicit)
 			 * \param i_diffusion A pointer to the datatype vector of diffusion coefficients
 			 ************************************************************************/
@@ -215,7 +218,7 @@ namespace plans
 			}
 		
 			/*!**********************************************************************
-			 * \copydoc implicit_plan::factory
+			 * \copydoc plan::factory
 			 ************************************************************************/
 			class factory : public implicit_plan <datatype>::factory
 			{
@@ -233,7 +236,7 @@ namespace plans
 				virtual ~factory () {}
 			
 				/*!**********************************************************************
-				 * \copydoc implicit::factory::instance
+				 * \copydoc plan::factory::instance
 				 ************************************************************************/
 				virtual std::shared_ptr <plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					return std::shared_ptr <plan <datatype> > (new background_horizontal <datatype> (alpha, diffusion, matrices [0], matrices [1], i_data_in, i_data_out));
@@ -258,20 +261,23 @@ namespace plans
 			using real_plan <datatype>::grid_m;
 			using real_plan <datatype>::grid_n;
 
-			datatype *density;
-			datatype *data_other;
-			datatype pioL;
-			const datatype *pos_m, *pos_n;
-			datatype *oodx, *oodz, *oodx2, *oodz2;
-			std::vector <datatype> oodz_vec, oodx_vec;
-			std::vector <datatype> oodz2_vec, oodx2_vec;
+			datatype *density; //!< A pointer to the density data
+			datatype *data_other; //!< A pointer to the other velocity component
+			datatype pioL; //!< The value 2*pi / the width of the system, for speed and convenience
+			const datatype *pos_m; //!< A pointer to the vertical position, for speed
+			const datatype *pos_n; //!< A pointer to the horizontal positions, for speed
+			datatype *oodx; //!< An array of one over the differential of x, centered in the cell
+			datatype *oodx2; //!< An array of one over the differential of x, centered at the boundary
+			datatype *oodz; //!< An array of one over the differential of z, centered in the cell
+			datatype *oodz2; //!< An array of one over the differential of z, centered at the boundary
 		
 		public:
 			/*!**********************************************************************
 			 * \copydoc explicit_plan::explicit_plan
 			 * 
 			 * \param i_coeff The coefficient for the source term
-			 * \param i_data_source The data pointer for the source data
+			 * \param i_data_other The data pointer for the other velocity component
+			 * @param i_density A reference to the density variable
 			 * 
 			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
 			 ************************************************************************/
@@ -321,7 +327,7 @@ namespace plans
 			}
 		
 			/*!**********************************************************************
-			 * \copydoc explicit_plan::factory
+			 * \copydoc plan::factory
 			 ************************************************************************/
 			class factory : public explicit_plan <datatype>::factory
 			{
@@ -332,7 +338,8 @@ namespace plans
 			public:
 				/*!**********************************************************************
 				 * \param i_coeff The coefficient to be used when constructing the plan
-				 * \param i_data_source The data source to be used when constructing the plan
+				 * \param i_data_other The data of the other velocity component to be used when constructing the plan
+				 * @param i_density A reference to the density variable
 				 ************************************************************************/
 				factory (grids::variable <datatype> &i_density, grids::variable <datatype> &i_data_other, datatype i_coeff = 1.0) : 
 				explicit_plan <datatype>::factory (i_coeff), 
@@ -342,7 +349,7 @@ namespace plans
 				virtual ~factory () {}
 			
 				/*!**********************************************************************
-				 * \copydoc explicit_plan::factory::_instance
+				 * \copydoc plan::factory::_instance
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					if (coeff) {

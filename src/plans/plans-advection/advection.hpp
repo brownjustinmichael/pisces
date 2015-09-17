@@ -127,7 +127,7 @@ namespace plans
 			}
 
 			/*!**********************************************************************
-			 * \copydoc real_plan::factory
+			 * \copydoc plan::factory
 			 ************************************************************************/
 			class factory : public real_plan <datatype>::factory
 			{
@@ -146,7 +146,7 @@ namespace plans
 				virtual ~factory () {}
 			
 				/*!**********************************************************************
-				 * \copydoc real_plan::factory::instance
+				 * \copydoc plan::factory::instance
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
 					if (coeff) {

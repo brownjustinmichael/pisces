@@ -45,16 +45,25 @@ namespace boundaries
 		
 		virtual ~fixed_boundary () {}
 
+		/**
+		 * @copydoc boundary::factory
+		 */
 		class factory : public boundaries::boundary <datatype>::factory
 		{
 		private:
-			datatype value;
+			datatype value; //!< The value of the boundary
 
 		public:
+			/**
+			 * @param i_value The value of the boundary
+			 */
 			factory (datatype i_value) : value (i_value) {}
 
 			virtual ~factory () {}
 			
+			/**
+			 * @copydoc boundary::factory::instance
+			 */
 			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid <datatype> **grids, bool top) {
 				return std::shared_ptr <boundary <datatype>> (new fixed_boundary (*grids [0], *grids [1], value, top));
 			}
@@ -110,16 +119,25 @@ namespace boundaries
 		
 		virtual ~fixed_deriv_boundary () {}
 
+		/**
+		 * @copydoc boundary::factory
+		 */
 		class factory : public boundaries::boundary <datatype>::factory
 		{
 		private:
-			datatype value;
+			datatype value; //!< The value at which the derivative will be fixed
 
 		public:
+			/**
+			 * @param i_value The value at which the derivative will be fixed
+			 */
 			factory (datatype i_value) : value (i_value) {}
 
 			virtual ~factory () {}
 			
+			/**
+			 * @copydoc boundary::factory::instance
+			 */
 			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid <datatype> **grids, bool top) {
 				return std::shared_ptr <boundary <datatype>> (new fixed_deriv_boundary (*grids [0], *grids [1], value, top));
 			}
@@ -202,16 +220,25 @@ namespace boundaries
 		
 		virtual ~communicating_boundary () {}
 
+		/**
+		 * @copydoc boundary::factory
+		 */
 		class factory : public boundaries::boundary <datatype>::factory
 		{
 		private:
-			mpi::messenger *messenger_ptr;
+			mpi::messenger *messenger_ptr; //!< A pointer to the mpi messenger object
 
 		public:
+			/**
+			 * @param i_messenger_ptr A pointer to the mpi messenger object
+			 */
 			factory (mpi::messenger *i_messenger_ptr) : messenger_ptr (i_messenger_ptr) {}
 
 			virtual ~factory () {}
 			
+			/**
+			 * @copydoc boundary::factory::instance
+			 */
 			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid <datatype> **grids, bool top) {
 				return std::shared_ptr <boundary <datatype>> (new communicating_boundary (messenger_ptr, grids [0]->get_ld (), grids [1]->get_n (), top ? grids [1]->get_excess_n () : grids [1]->get_excess_0 (), top));
 			}

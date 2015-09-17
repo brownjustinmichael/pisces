@@ -61,9 +61,9 @@ namespace data
 	class data
 	{
 	protected:
-		int id;
-		io::parameters &params;
-		std::vector <grids::grid <datatype>> grids;
+		int id; //!< The id of the current process
+		io::parameters &params; //!< A reference to the parameters
+		std::vector <grids::grid <datatype>> grids; //!< A vector of the grid objects for each dimension
 
 		static int mode; //!< The integer mode of the simulation (to prevent loading Chebyshev data into an even grid)
 		
@@ -77,25 +77,34 @@ namespace data
 		
 		std::vector <std::string> scalar_names; //!< The vector of variable names
 		std::map <std::string, std::shared_ptr <grids::variable <datatype>>> variables; //!< The string map of vectors containing the variable data
-		datatype *weights;
+		datatype *weights; //!< Weights to be used for averaging over the data
 
-		clock_t cbegin, cend;
-		std::chrono::time_point <std::chrono::system_clock> tbegin, tend;
+		clock_t cbegin; //!< A beginning time, for timing
+		clock_t cend; //!< An ending time, for timing 
+		std::chrono::time_point <std::chrono::system_clock> tbegin; //!< A beginning time, for wall clock timing
+		std::chrono::time_point <std::chrono::system_clock> tend; //!< An ending time, for wall clock timing
 
-		double timing_cputime;
-		double timing_walltime;
-		std::chrono::duration <double> timing_duration;
+		double timing_cputime; //!< A double to keep track of cpu time
+		double timing_walltime; //!< A double to keep track of wall time
+		std::chrono::duration <double> timing_duration; //!< A duration object, for conversion from time_point to double
 		
 	public:
-		int n_steps;
+		int n_steps; //!< The number of steps the system has taken
 
-		std::map <std::string, bool> is_corrector;
-		std::map <std::string, std::shared_ptr <plans::transforms::transformer <datatype>>> transformers;
+		std::map <std::string, bool> is_corrector; //!< A map indicating whether an equation is a solver or a corrector (correctors take place only after all solvers are done)
+		std::map <std::string, std::shared_ptr <plans::transforms::transformer <datatype>>> transformers; //!< A map of shared pointers to the transformers associated with each variable
 
 		datatype duration; //!< The total time elapsed in the simulation thus far
 		datatype timestep; //!< The current timestep
 		int flags; //!< A map of the simulation flags
-		data (io::parameters &i_params, int i_id = 0) : id (i_id), params (i_params) {
+
+		/**
+		 * @param i_params A reference to the parameters object associated with the run
+		 * @param i_id The integer identifier of this process, for output purposes
+		 */
+		data (io::parameters &i_params, int i_id = 0) : 
+		id (i_id), 
+		params (i_params) {
 			flags = 0x0;
 			duration = 0.0;
 			cbegin=clock();
@@ -114,17 +123,6 @@ namespace data
 		static versions::version& version () {
 			static versions::version version ("1.0.0.0");
 			return version;
-		}
-		
-		/*!**********************************************************************
-		 * \brief Given an integer index to one of the scalar variables, return a pointer to that dataset
-		 * 
-		 * \param name The integer name to index
-		 * 
-		 * \return A pointer to the indexed data
-		 ************************************************************************/
-		grids::variable <datatype> &operator[] (const std::string &name) {
-			return *variables [name];
 		}
 		
 		/*!**********************************************************************
@@ -149,23 +147,7 @@ namespace data
 		iterator end () {
 			return scalar_names.end ();
 		}
-		
-		/*!**********************************************************************
-		 * \brief Given an integer name to one of the scalar variables and an index within that dataset, return a pointer to that dataset at the given index
-		 * 
-		 * \param name The integer name to index
-		 * \param index The integer index inside the named variable
-		 * 
-		 * \return A pointer to the indexed data
-		 ************************************************************************/
-		datatype *operator() (const std::string &name, int state = 0, int index = 0) {
-			if (variables.find (name) != variables.end () && (int) variables.size () != 0) {
-				return variables [name]->ptr (state) + index * variables [name]->dims ();
-			}
-			ERROR ("Variable " << name << " is undefined");
-			throw 500;
-		}
-		
+
 		/*!**********************************************************************
 		 * \brief Get the mode of the simulation
 		 * 
@@ -179,7 +161,6 @@ namespace data
 		 * \brief Initialize a dataset for the simulation
 		 * 
 		 * \param i_name The integer name to give the new dataset
-		 * \param initial_conditions The initial values of the dataset
 		 * \param i_flags The flags indicating how to apply the initial conditions (uniform_n, uniform_m, or NULL)
 		 * 
 		 * This function initializes the dataset.
@@ -233,6 +214,46 @@ namespace data
 			dump_done = false;
 		}
 		
+		/**
+		 * @brief Return the string representation of the path to a file specified in a YAML Node
+		 * @details The keys specified in the YAML Node can be "file" for the name of the file and "directory" for the directory in which the file should be located. If no directory is given, this will check the global parameters for "output.directory" to use instead. The output file can have two format-specified integers as %i and %%i. The first will be replaced with the id number of the process. The second will be replaced with the contents of "output.number" or zero.
+		 * 
+		 * @param i_params The Yaml Node from which the file name is to be constructed
+		 * @return The string representation of the path to a file specified in the given YAML Node
+		 */
+		std::string file_from (YAML::Node i_params) {
+			if (!(i_params.IsDefined ())) return "";
+
+			std::string file_format = "";
+			if (i_params ["file"].IsDefined ()) file_format = i_params ["file"].as <std::string> ();
+
+			if (file_format == "") return "";
+
+			if (i_params ["directory"].IsDefined ()) {
+				file_format = i_params ["directory"].as <std::string> () + file_format;
+			} else if (params ["output.directory"].IsDefined ()) {
+				file_format = params ["output.directory"].as <std::string> () + file_format;
+			}
+
+			char buffer [file_format.size () * 2];
+			snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
+
+			file_format = buffer;
+
+			snprintf (buffer, file_format.size () * 2, file_format.c_str (), params ["output.number"].as <int> ());
+
+			return buffer;
+		}
+
+		/**
+		 * @brief Set up the data object from an input stream
+		 * @details Read in the input stream into the data object. Warnings will be raised if any variables appear to be missing, but anything absent will be assumed to be zero, and the computation will commence
+		 * 
+		 * @param input_stream The input stream to read in
+		 * @param state The state of the data into which the data should be read in
+		 * 
+		 * @return A pointer to the input stream parameter
+		 */
 		virtual std::shared_ptr <io::input> setup (std::shared_ptr <io::input> input_stream, int state = real_real) {
 			for (data::iterator iter = begin (); iter != end (); ++iter) {
 				input_stream->append (*iter, (*this) (*iter, state));
@@ -259,30 +280,15 @@ namespace data
 			return input_stream;
 		}
 
-		std::string file_from (YAML::Node i_params) {
-			if (!(i_params.IsDefined ())) return "";
-
-			std::string file_format = "";
-			if (i_params ["file"].IsDefined ()) file_format = i_params ["file"].as <std::string> ();
-
-			if (file_format == "") return "";
-
-			if (i_params ["directory"].IsDefined ()) {
-				file_format = i_params ["directory"].as <std::string> () + file_format;
-			} else if (params ["output.directory"].IsDefined ()) {
-				file_format = params ["output.directory"].as <std::string> () + file_format;
-			}
-
-			char buffer [file_format.size () * 2];
-			snprintf (buffer, file_format.size () * 2, file_format.c_str (), id);
-
-			file_format = buffer;
-
-			snprintf (buffer, file_format.size () * 2, file_format.c_str (), params ["output.number"].as <int> ());
-
-			return buffer;
-		}
-
+		/**
+		 * @brief Set up the data from a YAML Node of the input parameters and a grid
+		 * @details This method is added for a more convenient call to the setup tool.
+		 * 
+		 * @param input_params The YAML Node describing the parameters definining the input file
+		 * @param grid a data_grid object that describes the dimensions of the input file
+		 * 
+		 * @return A shared pointer to the input object
+		 */
 		template <class format>
 		std::shared_ptr <io::input> setup_from (YAML::Node input_params, const formats::data_grid &grid) {
 			if (file_from (input_params) == "") return std::shared_ptr <io::input> ();
@@ -292,6 +298,13 @@ namespace data
 			return setup (input_stream);
 		}
 
+		/**
+		 * @brief Add a global attribute to each stream associated with the data object
+		 * @details Outputs can have string attributes associated with them to allow for metadata storage.
+		 * 
+		 * @param name The key of the associated attribute
+		 * @param attribute The string attribute to add to the output
+		 */
 		void add_stream_attribute (std::string name, std::string attribute) {
 			for (auto iter = streams.begin (); iter < streams.end (); ++iter)
 			{
@@ -302,7 +315,8 @@ namespace data
 		/*!**********************************************************************
 		 * \brief Given an output_stream, append all relevant outputs
 		 * 
-		 * \param output_ptr A shared_ptr to the output object
+		 * \param output A shared_ptr to the output object
+		 * @param state The integer state from which the output should be read
 		 * \param flags The integer flags to specify the type of output (transform stream, normal_stream)
 		 * 
 		 * Given an output object, prepare it to output all the scalar fields tracked directly by the element. Make it one of the output streams called during output. If flags is normal_stream, output the variables when in Cartesian space, else if flags is transform_stream, output with horizontal grid in Fourier space, but vertical grid in Cartesian space.
@@ -318,7 +332,6 @@ namespace data
 					TRACE ("Appending " << *iter << " to output...");
 					output->append (*iter, (*this) (*iter, state));
 				}
-				output->full=1;
 			}
 			
 			output->append ("t", &duration, formats::scalar);
@@ -346,6 +359,16 @@ namespace data
 			return output;
 		}
 
+		/**
+		 * @brief Set up an output stream from a YAML Node
+		 * @details Given a YAML Node, which can have various keys, construct an output stream. These keys can be "file" for the file name, "timed" for whether to output every set amount of time or number of time steps, "timed_every" for the duration of time between outputs if "timed" was true, and "every" for the number of time steps between outputs if "timed" was false.
+		 * 
+		 * @param output_params The YAML Node associated with the output stream
+		 * @param grid The data_grid containing the information about the desired dimensions to output
+		 * @param state The state to output
+		 * @param flags Any flags associated with the output
+		 * @return A shared pointer to the newly constructed output stream
+		 */
 		template <class format>
 		std::shared_ptr <io::output> setup_output_from (YAML::Node output_params, const formats::data_grid &grid, int state = real_real, int flags = 0x00) {
 			// Iterate through the scalar fields and append them to the variables for which the input will search
@@ -396,6 +419,35 @@ namespace data
 			TODO These three methods are related in purpose but varied in design; they should be unified
 		*/
 		
+		/*!**********************************************************************
+		 * \brief Given an integer index to one of the scalar variables, return a pointer to that dataset
+		 * 
+		 * \param name The integer name to index
+		 * 
+		 * \return A pointer to the indexed data
+		 ************************************************************************/
+		grids::variable <datatype> &operator[] (const std::string &name) {
+			return *variables [name];
+		}
+		
+		/*!**********************************************************************
+		 * \brief Given an integer name to one of the scalar variables and an index within that dataset, return a pointer to that dataset at the given index
+		 * 
+		 * \param name The integer name to index
+		 * @param state The integer state of the variable from which the data should be directed
+		 * \param index The integer index inside the named variable
+		 * 
+		 * \return A pointer to the indexed data
+		 ************************************************************************/
+		datatype *operator() (const std::string &name, int state = 0, int index = 0) {
+			if (variables.find (name) != variables.end () && (int) variables.size () != 0) {
+				return variables [name]->ptr (state) + index * variables [name]->dims ();
+			}
+			ERROR ("Variable " << name << " is undefined");
+			throw 500;
+		}
+		
+
 	protected:
 		/*!**********************************************************************
 		 * \brief Initialize a new dataset in the data object
@@ -420,7 +472,7 @@ namespace data
 		int n; //!< The horizontal extent of the data
 		int m; //!< The vertical extent of the data
 
-		std::vector <datatype> area;
+		std::vector <datatype> area; //!< A calculation of the area encompassed by each cell in the grid
 		
 	public:
 		using data <datatype>::transformers;
@@ -429,6 +481,7 @@ namespace data
 		/*!**********************************************************************
 		 * \param i_axis_n The horizontal axis object
 		 * \param i_axis_m The vertical axis object
+		 * @param i_params The io::parameters object associated with the run
 		 * \param i_name The integer name of the element
 		 * \param dump_file The string name of the dump file (no extension)
 		 * \param dump_directory The string directory to store the dump
@@ -473,10 +526,6 @@ namespace data
 		
 		virtual ~implemented_data () {}
 
-		datatype *operator() (const std::string &name, int state = 0, int i = 0, int j = 0) {
-			return data <datatype>::operator() (name, state, i * m + j);
-		}
-		
 		/*!**********************************************************************
 		 * \copydoc data::setup_profile
 		 ************************************************************************/
@@ -493,6 +542,13 @@ namespace data
 			data <datatype>::setup_profile (output_ptr, flags);
 		}
 
+		/**
+		 * @brief Set up the data from a YAML Node
+		 * @details This calls the setup_from method of the superclass, but here the data_grid object is constructed for you for convenience
+		 * 
+		 * @param input_params The YAML Node to construct the input stream from
+		 * @return A shared pointer to the resulting input stream object
+		 */
 		template <class format>
 		std::shared_ptr <io::input> setup_from (YAML::Node input_params) {
 			const formats::data_grid grid = formats::data_grid::two_d (n, m);
@@ -500,6 +556,15 @@ namespace data
 			return data <datatype>::template setup_from <format> (input_params, grid);
 		}
 
+		/**
+		 * @brief Set up an output stream from a YAML Node
+		 * @details This calls the setup_output_from method of the superclass, but here the data_grid object is constructed for you for convenience
+		 * 
+		 * @param output_params The YAML Node from which the output stream should be constructed
+		 * @param state The state from which anything in the output stream should be read
+		 * @param flags Any flags to the output stream setup that are desired to be passed
+		 * @return A shared pointer to the newly constructed output stream 
+		 */
 		template <class format>
 		std::shared_ptr <io::output> setup_output_from (YAML::Node output_params, int state = real_real, int flags = 0x00) {
 			const formats::data_grid grid = formats::data_grid::two_d (n, m);
@@ -507,22 +572,61 @@ namespace data
 			return data <datatype>::template setup_output_from <format> (output_params, grid, state, flags);
 		}
 
+		/**
+		 * @brief Construct a functor that returns the max of a given string variable
+		 * 
+		 * @param variable The string variable from which the max should be gathered
+		 * @return The max functor, which should be added to an output stream
+		 */
 		std::shared_ptr <functors::functor> output_max (std::string variable) {
 			return std::shared_ptr <functors::functor> (new functors::max_functor <double> (n, m, (*this) (variable)));
 		}
 
+		/**
+		 * @brief Construct a functor that returns the average of a given string variable
+		 * 
+		 * @param variable The string variable from which the average should be calculated
+		 * @return The average functor, which should be added to an output stream
+		 */
 		std::shared_ptr <functors::functor> output_avg (std::string variable) {
 			return std::shared_ptr <functors::functor> (new functors::weighted_average_functor <double> (n, m, this->weights, (*this) (variable)));
 		}
 
+		/**
+		 * @brief Construct a functor that takes the average of the derivative for a given string variable in the vertical direction
+		 * 
+		 * @param variable The string variable from which the average of the derivative should be calculated
+		 * @return The derivative functor, which should be added to an output stream
+		 */
 		std::shared_ptr <functors::functor> output_deriv (std::string variable) {
 			return typename std::shared_ptr <functors::functor> (new functors::average_functor <double> (n, 1, typename std::shared_ptr <functors::functor> (new typename functors::slice_functor <double> (n, m, m / 2, typename std::shared_ptr <functors::functor> (new functors::deriv_functor <double> ((*this) (variable), n, m, &(*grid_m) [0]))))));
 		}
 
+		/**
+		 * @brief Construct a flux functor for a given string variable
+		 * 
+		 * @param variable The string variable for which to construct the flux
+		 * @param velocity The string representation of the velocity variable needed to construct the flux
+		 * 
+		 * @return The flux functor, which should be added to an output stream.
+		 */
 		std::shared_ptr <functors::functor> output_flux (std::string variable, std::string velocity) {
 			return typename std::shared_ptr <functors::functor> (new functors::average_functor <double> (n, 1, typename std::shared_ptr <functors::functor> (new typename functors::slice_functor <double> (n, m, m / 2, typename std::shared_ptr <functors::functor> (new typename functors::product_functor <double> (n, m, (*this) (velocity), (*this) (variable)))))));
 		}
 	
+		/**
+		 * @brief Index the data in two dimensions and return the appropriate pointer
+		 * 
+		 * @param name The name of the variable to index
+		 * @param state The state of the variable to index
+		 * @param i The x index of the variable to index
+		 * @param j The z index of the variable to index
+		 * @return A pointer to the data cell for the given variable and state
+		 */
+		datatype *operator() (const std::string &name, int state = 0, int i = 0, int j = 0) {
+			return data <datatype>::operator() (name, state, i * m + j);
+		}
+
 	protected:
 		/*!**********************************************************************
 		 * \copydoc data::_initialize

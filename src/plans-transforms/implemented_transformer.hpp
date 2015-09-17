@@ -42,8 +42,7 @@ namespace plans
 			 * 
 			 * \param i_grid_n The horizontal grid object
 			 * \param i_grid_m The vertical grid object
-			 * \param i_data_in A pointer to the data to input
-			 * \param i_data_out A pointer to the data to output
+			 * \param i_data A pointer to the data to input and output
 			 * \param i_flags Integer flags to describe the setup (e.g. forward_vertical, inverse_horizontal, etc.)
 			 * \param i_threads The number of threads to use in the transform
 			 ************************************************************************/
@@ -71,7 +70,7 @@ namespace plans
 			virtual ~implemented_transformer () {}
 			
 			/*!**********************************************************************
-			 * \copydoc transformer::_transform
+			 * \copydoc transformer::update
 			 ************************************************************************/
 			void update () {
 				if ((data.component_flags & grids::updated)) {

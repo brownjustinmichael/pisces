@@ -100,7 +100,9 @@ namespace grids
 		datatype position_n; //!< The position at index n - 1 - excess_n
 		int derivs; //!< The integer number of derivatives deep the collocation grid runs
 		
-		std::vector <datatype> positions, ood, ood2; //!< A vector containing the positions along the axis
+		std::vector <datatype> positions; //!< A vector containing the positions along the axis
+		std::vector <datatype> ood; //!< A vector containing one over the cell centered differential
+		std::vector <datatype> ood2; //!< A vector containing one over the boundary centered differential
 		bool calculated_matrix; //!< A boolean describing whether the collocation matrix has been calculated
 	
 	private:
@@ -227,10 +229,16 @@ namespace grids
 			return &(data [deriv] [0]);
 		}
 
+		/**
+		 * @return A pointer to one over the cell centered differential of the position
+		 */
 		inline datatype* get_ood () {
 			return &ood [0];
 		}
 		
+		/**
+		 * @return A pointer to one over the boundary centered differential of the position
+		 */
 		inline datatype* get_ood2 () {
 			return &ood2 [0];
 		}

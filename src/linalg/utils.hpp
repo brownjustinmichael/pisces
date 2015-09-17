@@ -200,6 +200,15 @@ namespace linalg
 	 *********************************************************************/
 	void add_scaled (int n, double da, const double *x, double *y, int incx = 1, int incy = 1);
 
+	/*!*******************************************************************
+	 * \brief Perform the operation dy = dx + dy
+	 * 
+	 * \param n An integer number of elements to operate on
+	 * \param x The double array dx
+	 * \param y The double array dy which is replaced with the output
+	 * \param incx The integer spacing of elements in dx
+	 * \param incy The integer spacing of elements in dy
+	 *********************************************************************/
 	void add_scaled (int n, const double *x, double *y, int incx = 1, int incy = 1);
 	
 	/*!**********************************************************************

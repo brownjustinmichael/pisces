@@ -62,7 +62,7 @@ namespace pisces
 		/*!**********************************************************************
 		 * \copydoc implemented_element::implemented_element
 		 ************************************************************************/
-		boussinesq_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags, bool load_diffusion = true);
+		boussinesq_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags);
 		
 		virtual ~boussinesq_element () {}
 
