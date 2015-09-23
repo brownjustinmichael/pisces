@@ -85,8 +85,12 @@ namespace pisces
 		
 		cfl = i_params ["time.cfl"].as <datatype> ();
 
+		// Add a background temperature gradient of the form
+		// -C*Aout * arctan((z-rt)/dout), z < rt
+		// -C*Ain * arctan((z-rt)/din), z > rt
 		data.initialize ("korre_Ts", uniform_n);
 		if (i_params ["equations.temperature.korre_Ts"].IsDefined ()) {
+			datatype C = i_params ["equations.temperature.korre_Ts.C"].as <datatype> ();
 			datatype Ain = i_params ["equations.temperature.korre_Ts.Ain"].as <datatype> ();
 			datatype din = i_params ["equations.temperature.korre_Ts.din"].as <datatype> ();
 			datatype rt = i_params ["equations.temperature.korre_Ts.rt"].as <datatype> ();
@@ -96,23 +100,47 @@ namespace pisces
 			for (int j = 0; j < m; ++j)
 			{
 				if (z_ptr [j] > rt) {
-					data ["korre_Ts"] [j] = -Aout * std::tanh ((z_ptr [j] - rt) / dout);
+					data ["korre_Ts"] [j] = -C * Aout * std::tanh ((z_ptr [j] - rt) / dout);
 				} else {
-					data ["korre_Ts"] [j] = -Ain * std::tanh ((z_ptr [j] - rt) / din);
+					data ["korre_Ts"] [j] = -C * Ain * std::tanh ((z_ptr [j] - rt) / din);
 				}
 			}
 		}
+
+		bool uniform_diff = true;
+		data.initialize ("temperature_diffusion", uniform_n);
+		if (i_params ["equations.temperature.korre_diff"].IsDefined ()) {
+			uniform_diff = false;
+			datatype Prcz = 1.0 / i_params ["equations.temperature.diffusion"].as <datatype> ();
+			datatype Prrz = 1.0 / i_params ["equations.temperature.korre_diff.rz_diffusion"].as <datatype> ();
+
+			DEBUG ("VARS ARE " << Prcz << " " << Prrz);
+
+			datatype A = (Prcz * data ["korre_Ts"] [0] + Prrz) / (data ["korre_Ts"] [0] + 1.);
+			assert (A < Prcz);
+			for (int j = 0; j < m; ++j)
+			{
+				data ["temperature_diffusion"] [j] = 1. / (A - data ["korre_Ts"] [j] * (Prcz - A));
+				DEBUG ("DIFF IS " << data ["temperature_diffusion"] [j]);
+			}
+		}
+
 		
 		// Set up the temperature equation
 		if (!(i_params ["equations.temperature.ignore"].IsDefined () && i_params ["equations.temperature.ignore"].as <bool> ())) {
 			*split_solver <datatype> (equations ["temperature"], timestep, 
-				dirichlet (i_params ["equations.temperature.bottom.value"].as <datatype> ()), 
+				neumann (0.0), 
 				dirichlet (i_params ["equations.temperature.top.value"].as <datatype> ())) 
 			+ advec <datatype> (data ["x_velocity"], data ["z_velocity"])
-			// + src (data ["z_velocity"] * data ["korre_Ts"])
+			+ src (data ["z_velocity"] * data ["korre_Ts"])
 			== 
-			params ["equations.temperature.sources.z_velocity"] * src <datatype> (data ["z_velocity"]) 
-			+ params ["equations.temperature.diffusion"] * diff <datatype> ();
+			params ["equations.temperature.sources.z_velocity"] * src <datatype> (data ["z_velocity"]);
+
+			if (uniform_diff) {
+				*equations ["temperature"] == params ["equations.temperature.diffusion"] * diff <datatype> ();
+			} else {
+				*equations ["temperature"] == bg_diff <datatype> (data ["temperature_diffusion"].ptr ());
+			}
 		}
 
 		// Set up the composition equation
@@ -128,24 +156,26 @@ namespace pisces
 
 		// Set up the x_velocity equation, note the missing pressure term, which is handled in div
 		if (!(i_params ["equations.x_velocity.ignore"].IsDefined () && i_params ["equations.x_velocity.ignore"].as <bool> ())) {
-			*split_solver <datatype> (equations ["x_velocity"], timestep, neumann (0.0), neumann (0.0)) 
+			*split_solver <datatype> (equations ["x_velocity"], timestep, 
+				neumann (0.0), 
+				neumann (0.0)) 
 			+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 			== 
 			params ["equations.velocity.diffusion"] * diff <datatype> ();
+			if (params.get ("equations.x_velocity.ignore_net", false)) data ["x_velocity"].component_flags |= ignore_net;
 		}
 
 		// Set up the z_velocity equation, note the missing pressure term, which is handled in div
 		if (!(i_params ["equations.z_velocity.ignore"].IsDefined () && i_params ["equations.z_velocity.ignore"].as <bool> ())) {
-			*split_solver <datatype> (equations ["z_velocity"], timestep, dirichlet (0.0), dirichlet (0.0)) 
+			*split_solver <datatype> (equations ["z_velocity"], timestep, 
+				dirichlet (0.0), 
+				dirichlet (0.0)) 
 			+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 			== 
 			params ["equations.z_velocity.sources.temperature"] * src <datatype> (data ["temperature"])
 			+ params ["equations.z_velocity.sources.composition"] * src <datatype> (data ["composition"]) 
 			+ params ["equations.velocity.diffusion"] * diff <datatype> ();
-			data ["z_velocity"].component_flags |= ignore_net;
-			DEBUG ("PARAM IS " << params ["equations.z_velocity.sources.temperature"]);
-		} else {
-			DEBUG ("IGNORING");
+			if (params.get ("equations.z_velocity.ignore_net", false)) data ["z_velocity"].component_flags |= ignore_net;
 		}
 
 		// Set up the velocity constraint

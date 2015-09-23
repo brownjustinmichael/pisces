@@ -1,10 +1,10 @@
 grid:
     x:
         points: 256
-        width: 2.828
+        width: 1.414
     z:
         points: 64
-        width: 2.0
+        width: 1.0
     rezone:
         check_every: -1000
         min_size: 0.2
@@ -22,11 +22,11 @@ equations:
         diffusion: 1.0
         advection: 1.0
         sources:
-            z_velocity: 0.0
+            z_velocity: 1.0
         top:
-            value: -1.0
+            value: 0.0
         bottom:
-            value: 1.0
+            value: 0.0
     composition:
         ignore: true
         top:
@@ -36,7 +36,10 @@ equations:
     velocity:
         diffusion: 6.8
         advection: 1.0
+    x_velocity:
+        ignore_net: true
     z_velocity:
+        ignore_net: true
         sources:
             temperature: 4471000.0
             composition: 0.0

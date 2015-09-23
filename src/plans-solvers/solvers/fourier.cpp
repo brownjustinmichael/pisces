@@ -42,6 +42,8 @@ namespace plans
 			overlap_n = boundary_n ? boundary_n->get_overlap () : 0;
 			lda = m + ex_overlap_n + ex_overlap_0;
 			inner_m = lda - overlap_0 - overlap_n;
+
+			pos_m = &(i_data.get_grid (1) [0]);
 			
 			data_temp.resize (lda * ldn);
 			TRACE ("Solver built.");
@@ -106,14 +108,20 @@ namespace plans
 				boundary_0->receive (&data_temp [ex_overlap_0], lda);
 			}
 			
+			TRACE ("Executing diagonal solve");
+
 			// Solve the diagonal equation for each vertical slice
 			#pragma omp parallel for
 			for (int j = excess_0; j < m - excess_n; ++j) {
 				linalg::diagonal_solve (ldn, &factorized_matrix [j], &data_temp [ex_overlap_0 + j], m, lda);
 			}
 
+			TRACE ("Diagonal solve complete.")
+
 			linalg::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data_out, lda);
-			
+
+			DEBUG (data_out << " " << pos_m);
+
 			// Because we only have derivative information for the non-overlapping regions, linearly extrapolate the overlap
 			for (int i = 0; i < ldn; ++i) {
 				for (int j = excess_0 - 1; j >= 0; --j) {

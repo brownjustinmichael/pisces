@@ -233,7 +233,6 @@ class SimulationEntry(object):
         # try:
         #     self.entry=session.query(SimulationEntry).filter(SimulationEntry.hash==self.calculate_hash()).one()
         # except NoResultFound:
-        print ("DEBUG IS ", debug, [] if debug is None else ["-D%i" % debug])
         currentdir=os.getcwd()
         if cwd:
             os.chdir(cwd)
@@ -255,7 +254,6 @@ class SimulationEntry(object):
         for column in SimulationEntry.Table.__table__.columns:
             if column.key.startswith(key):
                 value=getattr(self.entry, column.key)
-                print (column.key, value)
                 if type(value) != float:
                     query=query.filter(getattr(SimulationEntry.Table, column.key)==value)
                 else:

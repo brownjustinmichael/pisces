@@ -130,6 +130,8 @@ namespace plans
 			// Add the data from the previous timestep
 			linalg::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data_in + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
 			
+			TRACE ("Performing matrix solve.")
+
 			linalg::block::matrix_solve (messenger_ptr->get_id (), messenger_ptr->get_np (), inner_m, overlap_0, overlap_n, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, ldn, lda, sqrt ((int) boundary_matrix.size ()), lda);
 			
 			TRACE ("Matrix solve complete.");

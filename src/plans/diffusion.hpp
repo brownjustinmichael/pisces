@@ -32,6 +32,20 @@ namespace plans
 	}
 
 	/**
+	 * @brief Shorthand to include both directions of background diffusion plans
+	 * 
+	 * @param i_diffusion A pointer to the background diffusion array (one-dimensional in the z-direction)
+	 * @param alpha The implicit parameter (1.0 is fully implicit, 0.0 is fully explicit)
+	 * 
+	 * @return A factory container containing the diffusion plans
+	 */
+	template <class datatype>
+	typename plan <datatype>::factory_container bg_diff (datatype *i_diffusion, datatype alpha = 1.0) {
+		return typename implicit_plan <datatype>::factory_container (std::shared_ptr <typename plan <datatype>::factory> (new typename diffusion::background_vertical <datatype>::factory (alpha, i_diffusion))) + 
+		typename implicit_plan <datatype>::factory_container (std::shared_ptr <typename plan <datatype>::factory> (new typename diffusion::background_horizontal <datatype>::factory (alpha, i_diffusion)));
+	}
+
+	/**
 	 * @brief Shorthand to include density-weighted diffusion plans
 	 * 
 	 * @param density A referencec to the density variable

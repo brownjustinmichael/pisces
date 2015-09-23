@@ -49,7 +49,10 @@ for variable in data.variables:
 	if deriv is not None and deriv in list(data[variable].dimensions):
 		new.createVariable(variable + "_deriv", data[variable].dtype, dimensions=var_dims)
 		new[variable + "_deriv"][:]=0.
-		new[variable + "_deriv"][...,:-1]=np.mean(np.diff(data[variable], axis=list(data[variable].dimensions).index(deriv)), axis=axis)
+		if to_mean:
+			new[variable + "_deriv"][...,:-1]=np.mean(np.diff(data[variable], axis=list(data[variable].dimensions).index(deriv)), axis=axis)
+		else:
+			new[variable + "_deriv"][...,:-1]=np.diff(data[variable], axis=list(data[variable].dimensions).index(deriv))
 
 # assert(False)
 # data.close()
