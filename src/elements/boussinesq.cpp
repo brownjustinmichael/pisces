@@ -178,12 +178,12 @@ namespace pisces
 			if (params.get ("equations.z_velocity.ignore_net", false)) data ["z_velocity"].component_flags |= ignore_net;
 		}
 
-		// // Set up the velocity constraint
-		// if (!(i_params ["equations.pressure.ignore"].IsDefined () && i_params ["equations.pressure.ignore"].as <bool> ())) {
-		// 	*div <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"])
-		// 	==
-		// 	0.0;
-		// }
+		// Set up the velocity constraint
+		if (!(i_params ["equations.pressure.ignore"].IsDefined () && i_params ["equations.pressure.ignore"].as <bool> ())) {
+			*div <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"])
+			==
+			0.0;
+		}
 		
 	TRACE ("Initialized.");
 	}

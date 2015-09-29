@@ -59,7 +59,7 @@ namespace linalg
 		 * 
 		 * For details on the algorithm, see linalg::block::matrix_solve
 		 ************************************************************************/
-		void banded_solve (int id, int np, int n, int kl, int ku, double* matrix, int* ipiv, double* b, double *x, int *xipiv, double *bufferl, double *bufferr, int *info = NULL, int nrhs = 1, int lda = -1, int ldaa = -1, int ldb = -1);
+		void banded_solve (int id, int np, int n, int kl, int ku, double* matrix, int* ipiv, double* b, double *x, int *xipiv, double *bufferl, double *bufferr, double *buffer, int *info = NULL, int nrhs = 1, int lda = -1, int ldaa = -1, int ldb = -1);
 	} /* block */
 } /* linalg */
 
