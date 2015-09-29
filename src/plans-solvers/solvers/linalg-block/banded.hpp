@@ -34,7 +34,7 @@ namespace linalg
 		 * 
 		 * The input matrix should be in banded LAPACK format. To handle the overlap region, which wouldn't normally appear in such a format, extend the matrix by kl on the left and ku on the right. The overlapping data should be included in the same format. For details on the algorithm, see linalg::block::matrix_factorize.
 		 ************************************************************************/
-		void banded_factorize (int id, int np, int n, int kl, int ku, double* matrix, int* ipiv, double *x, int *xipiv, double *bufferl, double *bufferr, int *info = NULL, int nrhs = 1, int lda = -1, int ldaa = -1);
+		void banded_factorize (int id, int np, int n, int kl, int ku, double* matrix, int* ipiv, double *x, int *xipiv, double *bufferl, double *bufferr, double *buffer, int *info = NULL, int nrhs = 1, int lda = -1, int ldaa = -1);
 		
 		/*!**********************************************************************
 		 * \brief Solve a banded block matrix

@@ -73,6 +73,7 @@ namespace plans
 			std::vector <datatype> x; //!< Additional storage for the block banded solve
 			std::vector <datatype> bufferl; //!< Additional storage for the block banded solve
 			std::vector <datatype> bufferr; //!< Additional storage for the block banded solve
+			std::vector <datatype> buffer; //!< Additional storage for the block banded solve
 			
 			std::vector <datatype> matrix; //!< The matrix data for the banded solve
 			std::vector <int> ipiv; //!< The positional swap information for the banded solve

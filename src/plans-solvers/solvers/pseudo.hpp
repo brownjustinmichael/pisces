@@ -69,7 +69,7 @@ namespace plans
 			std::vector <datatype> x; //!< Additional storage for the block banded solve
 
 
-			std::vector <datatype> matrix, positions, new_positions, bufferl, bufferr, data_temp; //!< The matrix data for the banded solve
+			std::vector <datatype> matrix, positions, new_positions, bufferl, bufferr, buffer, data_temp; //!< The matrix data for the banded solve
 			std::vector <int> ipiv; //!< The positional swap information for the banded solve
 			std::vector <int> xipiv; //!< The positional swap information for the block banded solve
 			std::vector <datatype> grad_pressure, grad_density;

@@ -104,6 +104,7 @@ namespace plans
 			matrix.resize ((lda) * (m + 2 + kl + ku) * ldn);
 			bufferl.resize (np * (m + 2) * kl * ldn);
 			bufferr.resize (np * (m + 2) * ku * ldn);
+			buffer.resize (np * 4 * (ku + kl) * (ku + kl) * ldn);
 			
 			data_temp.resize ((m + 2) * ldn);
 		}
@@ -166,7 +167,7 @@ namespace plans
 				}
 			}
 			
-			linalg::block::banded_factorize (id, np, m + (nbot == 0 ? 1 : -nbot - excess_n - 1) + (id == 0 ? 1: -excess_0 - ntop), kl, ku, &matrix [(id == 0 ? 0 : 1 + excess_0) * lda], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, ldn, lda, m + 2 + kl + ku);
+			linalg::block::banded_factorize (id, np, m + (nbot == 0 ? 1 : -nbot - excess_n - 1) + (id == 0 ? 1: -excess_0 - ntop), kl, ku, &matrix [(id == 0 ? 0 : 1 + excess_0) * lda], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &buffer [0], &info, ldn, lda, m + 2 + kl + ku);
 		}
 		
 		template <class datatype>
