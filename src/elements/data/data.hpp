@@ -201,7 +201,7 @@ namespace data
 			for (int i = 0; i < (int) streams.size (); ++i) {
 				streams [i]->to_file ();
 			}
-			dump_stream->to_file();
+			if (dump_stream) dump_stream->to_file();
 		}
 		
 		/*!**********************************************************************
