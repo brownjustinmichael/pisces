@@ -212,7 +212,7 @@ class SimulationEntry(object):
         self.to_file(**kwargs)
 
         try:
-            np = str(self.entry.np if self.entry.np else 1), init
+            np = str(self.entry.np if self.entry.np else 1)
         except AttributeError:
             np = "1"
 

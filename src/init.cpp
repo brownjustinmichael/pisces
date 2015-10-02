@@ -92,8 +92,8 @@ int main (int argc, char *argv[])
 					temps [i * m + j] = sbot;
 					// tempt [i * m + j] = tbot;
 				}
-				temps [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3;
-				tempt [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3;
+				temps [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3 * std::cos(pos_z [j] * 3.14159);
+				tempt [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3 * std::cos(pos_z [j] * 3.14159);
 			}
 		}
 

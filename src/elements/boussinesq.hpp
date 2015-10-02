@@ -41,10 +41,13 @@ namespace pisces
 		std::vector <datatype> diffusion; //!< A vector of diffusion data, for background diffusion
 		datatype advection_coeff; //!< The advection coefficient, for speed
 		datatype cfl; //!< The cfl coefficient, for speed
+		datatype allow; //!< The change allowance, for speed
 		datatype *x_ptr; //!< The pointer to the x data, for speed
 		datatype *z_ptr; //!< The pointer to the z data, for speed
 		datatype *x_vel_ptr; //!< The pointer to the x velocity data, for speed
 		datatype *z_vel_ptr; //!< The pointer to the z velocity data, for speed
+		datatype *t_spectral; //!< A pointer to the T spectral data, for speed
+		datatype *t_rhs; //!< A pointer to the T rhs data, for speed
 		
 	protected:
 		using implemented_element <datatype>::data;

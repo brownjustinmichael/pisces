@@ -4,53 +4,71 @@ import numpy
 
 session=db.Session()
 
-base=db.SimulationEntry.from_params("config_orig.yaml")
+base=db.SimulationEntry.from_params("config_convect.yaml")
 q=session.query(db.SimulationEntry.Table)
-q=base.same_sub(q, "equations")
 
 var="flux_temperature"
 dts=[]
 nps=[]
 vals=[]
 
-for dt in range(2, -5, -1):
-	for np in range(6, 11):
+for dt in numpy.arange(-0.5, -2.0, -0.25):
+	for np in range(4, 8):
+		print ("Checking with dt = %f, np = %i" % (10.**dt, 2**np))
 		sim=base.clone()
 		sim.entry.grid__x__points=2**np
 		sim.entry.grid__z__points=2**np
-		sim.entry.time__max=2.**dt
-		sim.entry.time__init=2.**dt
-		sim.entry.output__stat__file="stat_%i_%i_%%02i_%%%%02i" % (dt, np)
-		query=sim.same_sub(q, "time")
+		# sim.entry.time__max=10.**dt
+		# sim.entry.time__init=10.**dt
+		sim.entry.time__cfl=float(10.**dt)
+		sim.entry.output__stat__file="stat_low_%f_%i_%%02i_%%%%02i" % (dt, np)
+		sim.entry.output__cart__file="cart_low_%f_%i_%%02i_%%%%02i" % (dt, np)
+		query=sim.same_sub(q, "equations")
+		query=sim.same_sub(query, "time")
 		query=sim.same_sub(query, "grid")
 
-		if query.first() is None or db.SimulationEntry(query.first()).steps(session).count() == 0:
+		if query.first () is None:
 			session.add(sim.entry)
-			session.commit()
-			new=sim.run(cwd="../sims/pisces_test/", session=session)
+			print ("Running with dt = %f, np = %i" % (10.**dt, 2**np))
+			new=sim.run(cwd="../sims/convect/", execute="../../run/isces", reset=False, debug=3)
 			session.commit()
 
+		print (query.first ().id)
+
 		step=db.SimulationEntry(query.first()).steps(session).order_by(db.StepEntry.Table.step.desc()).first()
-		dts.append(dt)
+		print (step)
+		dts.append(10.**dt)
 		nps.append(np)
 		vals.append(getattr(step, var))
 
-vals=numpy.abs ((numpy.array(vals) - vals[-1])/vals[-1])
-dx=base.entry.grid__z__width / 2 ** numpy.array(nps)
-dx=dx[vals>0.]
-dts=2.**numpy.array(dts)[vals>0.]
-vals=vals[vals>0.]
-s=plt.scatter(dts, vals, c=dx)
+		scale_vals=numpy.abs ((numpy.array(vals) - vals[-1])/vals[-1])
+		# vals=numpy.abs ((numpy.array(vals)))
+		dx=base.entry.grid__z__width / 2 ** numpy.array(nps)
+		scale_dx=dx[scale_vals>0.]
+		scale_dts=numpy.array(dts)[scale_vals>0.]
+		scale_vals=scale_vals[scale_vals>0.]
+		
+		if len (scale_vals) > 0:
+			plt.clf ()
 
-print(vals)
-print(dts)
+			plt.xscale("log")
+			plt.yscale("log")
 
-plt.xscale("log")
-plt.yscale("log")
-plt.ylim((10**numpy.floor(numpy.log10(min(vals))), 10**numpy.ceil(numpy.log10(max(vals)))))
-plt.xlim((10**numpy.floor(numpy.log10(min(dts))), 10**numpy.ceil(numpy.log10(max(dts)))))
+			# plt.ylim((10**numpy.floor(numpy.log10(min(scale_vals))), 10**numpy.ceil(numpy.log10(max(scale_vals)))))
+			# plt.xlim((10**numpy.floor(numpy.log10(min(scale_dts))), 10**numpy.ceil(numpy.log10(max(scale_dts)))))
 
-plt.colorbar(s)
+			s=plt.scatter(scale_dts, scale_vals, c=scale_dx)
+			plt.colorbar(s)
 
-plt.show()
+			plt.draw ()
+			plt.pause(0.0001) 
+
+
+plt.show ()
+
+
+# [  6.21590946e-01   5.72423735e-02   1.42262605e-05   2.14029603e-01   5.71841510e-02   3.10420927e-06   2.13842404e-01   5.71581537e-02]
+# [ 0.70710678  0.70710678  0.70710678  0.5         0.5         0.5  0.35355339  0.35355339]
+
+
 

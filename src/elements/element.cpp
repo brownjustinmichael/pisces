@@ -67,16 +67,6 @@ namespace pisces
 			data.output ();
 			, output_time, output_duration);
 			
-			// Factorize the matrices
-			TIME (
-			factorize ();
-			, factorize_time, factorize_duration);
-			
-			TIME (
-			t_timestep = calculate_min_timestep ();
-			messenger_ptr->min (&t_timestep);
-			, timestep_time, timestep_duration);
-
 			TRACE ("Executing plans...");
 
 			TIME (
@@ -85,17 +75,15 @@ namespace pisces
 			}
 			, execution_time, execution_duration);
 
-			DEBUG (data ["temperature"].ptr (real_real) [800]);
-
 			TIME (
-			solve ();
-			, solve_time, solve_duration);
+			t_timestep = calculate_min_timestep ();
+			messenger_ptr->min (&t_timestep);
+			, timestep_time, timestep_duration);
 
-			DEBUG (data ["temperature"].ptr (real_real) [800]);
-
-			// Check whether the timestep has changed. If it has, mark all equations to be refactorized.
-
-			duration += timestep;
+			// Factorize the matrices
+			TIME (
+			factorize ();
+			, factorize_time, factorize_duration);
 
 			INFO ("TOTAL TIME: " << duration);
 			if (t_timestep + duration > stop) t_timestep = stop - duration;
@@ -106,6 +94,14 @@ namespace pisces
 				INFO ("Updating timestep: " << t_timestep);
 			}
 			timestep = t_timestep;
+
+			TIME (
+			solve ();
+			, solve_time, solve_duration);
+
+			// Check whether the timestep has changed. If it has, mark all equations to be refactorized.
+
+			duration += timestep;
 
 			TRACE ("Update complete");
 

@@ -84,6 +84,7 @@ namespace pisces
 		z_vel_ptr = data ("z_velocity", real_real);
 		
 		cfl = i_params ["time.cfl"].as <datatype> ();
+		allow = i_params ["time.allow"].as <datatype> ();
 
 		// Add a background temperature gradient of the form
 		// -C*Aout * arctan((z-rt)/dout), z < rt
@@ -129,7 +130,7 @@ namespace pisces
 		// Set up the temperature equation
 		if (!(i_params ["equations.temperature.ignore"].IsDefined () && i_params ["equations.temperature.ignore"].as <bool> ())) {
 			*split_solver <datatype> (equations ["temperature"], timestep, 
-				neumann (0.0), 
+				dirichlet (i_params ["equations.temperature.bottom.value"].as <datatype> ()), 
 				dirichlet (i_params ["equations.temperature.top.value"].as <datatype> ())) 
 			+ advec <datatype> (data ["x_velocity"], data ["z_velocity"])
 			+ src (data ["z_velocity"] * data ["korre_Ts"])
@@ -141,6 +142,8 @@ namespace pisces
 			} else {
 				*equations ["temperature"] == bg_diff <datatype> (data ["temperature_diffusion"].ptr ());
 			}
+			t_spectral = data ["temperature"].ptr (real_spectral);
+			t_rhs = equations ["temperature"]->rhs_ptr (real_spectral);
 		}
 
 		// Set up the composition equation
@@ -209,7 +212,7 @@ namespace pisces
 			if ((i == 0 || i == n - 1)) {
 				return std::abs ((z_ptr [i * m + j + 1] - z_ptr [i * m + j - 1]) / z_vel_ptr [i * m + j]) * cfl;
 			} else {
-				return std::min (std::abs ((x_ptr [(i + 1) * m + j] - x_ptr [(i - 1) * m + j]) / x_vel_ptr [i * m + j]), std::abs ((z_ptr [i * m + j + 1] - z_ptr [i * m + j - 1]) / z_vel_ptr [i * m + j])) * cfl;
+				return std::min (std::abs ((x_ptr [(i + 1) * m + j] - x_ptr [(i - 1) * m + j]) / x_vel_ptr [i * m + j]) * cfl, std::abs ((z_ptr [i * m + j + 1] - z_ptr [i * m + j - 1]) / z_vel_ptr [i * m + j]) * cfl);
 			}
 		}
 		return 1.0 / 0.0;

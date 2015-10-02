@@ -121,6 +121,17 @@ namespace plans
 				}
 				return 0;
 			}
+
+			/**
+			 * @brief Return a pointer to the rhs data
+			 * 
+			 * @param state The state of the rhs data to retrieve
+			 * 
+			 * @return The pointer to the rhs data
+			 */
+			virtual datatype *rhs_ptr  (int state = 0) {
+				return new_rhs_ptr->ptr (state);
+			}
 			
 			/*!**********************************************************************
 			 * \copydoc equation::get_solver

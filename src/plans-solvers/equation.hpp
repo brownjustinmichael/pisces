@@ -112,6 +112,15 @@ namespace plans
 				return data.ptr ();
 			}
 
+			/**
+			 * @brief Return a pointer to the rhs data
+			 * 
+			 * @param state The state of the rhs data to retrieve
+			 * 
+			 * @return The pointer to the rhs data
+			 */
+			virtual datatype *rhs_ptr  (int state = 0) = 0;
+
 			/*!**********************************************************************
 			 * \brief Return the variable object of the data associated with the solver
 			 *
