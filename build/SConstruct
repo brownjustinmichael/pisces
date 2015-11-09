@@ -23,8 +23,8 @@ exports ["compiler_flags"] = []
 # exports ["compiler_flags"] = ["-mt_mpi"]
 exports ["cxxtestgen_location"] = "/usr/local/Cellar/cxxtest/4.4/libexec/bin/cxxtestgen"
 exports ["cxxtest"] = True
-exports ["include_dirs"] = ["/usr/local/opt/lapack/include"]
-exports ["library_dirs"] = ["/usr/local/opt/lapack/lib"]
+exports ["include_dirs"] = ["/usr/local/include", "/usr/local/opt/lapack/include"]
+exports ["library_dirs"] = ["/usr/local/lib", "/usr/local/opt/lapack/lib"]
 exports ["env_vars"] = {}
 
 exports ["root"] = os.path.abspath ("..") + "/"

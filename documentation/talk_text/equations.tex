@@ -1,0 +1,19 @@
+\frame{\frametitle{Governing equations \citep{Spiegel1960}}
+\begin{overprint}
+\only<1>{
+\begin{align}
+	\rho_{0}\frac{D}{D{t}}{\mathbf{u}} =& -\nabla p + \left(-\alpha{T}+\beta\mu\right)\rho_{0}\mathbf{g} + \nu\rho_{0}\nabla^{2}\mathbf{u} \\
+	\nabla\cdot\mathbf{u} =& 0 \\
+	\frac{D}{D{t}}{T} + w\frac{d}{dz}T_{0} =& \kappa_T \nabla^{2}T \\
+	\frac{D}{D{t}}{\mu} + w\frac{d}{dz}\mu_{0}=& \kappa_{\mu}\nabla^{2}\mu
+\end{align}}
+\only<2>{
+\begin{align}
+	\frac{1}{\rm{Pr}}\frac{D}{D{t}}{\mathbf{u}} =& -\nabla p + \left(-T+\mu\right)\mathbf{\hat{z}} + \nabla^{2}\mathbf{u},\rm{Pr}\equiv\frac{\nu}{\kappa_{T}} \\
+	\nabla\cdot\mathbf{u} =& 0 \\
+	\frac{D}{D{t}}{T} \pm w =& \nabla^{2}T \\
+	\frac{D}{D{t}}{\mu} \pm \frac{w}{R_{0}}=& \tau\nabla^{2}\mu, R_{0}\equiv\frac{\alpha\left(T_{0z}-T_{\rm{ad},z}\right)}{\beta\mu_{0z}}, \tau\equiv\frac{\kappa_{\mu}}{\kappa_{T}}
+\end{align}
+The $+$ corresponds to FC and the $-$, ODDC.}
+\end{overprint}
+}

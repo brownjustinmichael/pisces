@@ -130,7 +130,7 @@ namespace pisces
 		// Set up the temperature equation
 		if (!(i_params ["equations.temperature.ignore"].IsDefined () && i_params ["equations.temperature.ignore"].as <bool> ())) {
 			*split_solver <datatype> (equations ["temperature"], timestep, 
-				dirichlet (i_params ["equations.temperature.bottom.value"].as <datatype> ()), 
+				neumann (i_params ["equations.temperature.bottom.value"].as <datatype> ()), 
 				dirichlet (i_params ["equations.temperature.top.value"].as <datatype> ())) 
 			+ advec <datatype> (data ["x_velocity"], data ["z_velocity"])
 			+ src (data ["z_velocity"] * data ["korre_Ts"])
@@ -142,8 +142,7 @@ namespace pisces
 			} else {
 				*equations ["temperature"] == bg_diff <datatype> (data ["temperature_diffusion"].ptr ());
 			}
-			t_spectral = data ["temperature"].ptr (real_spectral);
-			t_rhs = equations ["temperature"]->rhs_ptr (real_spectral);
+			// if (i_params ["equations.temperature.linear"].IsDefined ()) *equations ["temperature"] == plans::diffusion::linear <datatype>::factory (i_params ["equations.temperature.linear"].as <datatype> (), 0.0, data ["temperature_diffusion"].ptr (), 10000);
 		}
 
 		// Set up the composition equation
