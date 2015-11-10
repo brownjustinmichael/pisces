@@ -409,7 +409,6 @@ namespace plans
 	type operator* (YAML::Node node, type other) {
 		return other * node;
 	}
-
 } /* plans */
 
 #endif /* end of include guard: PLAN_HPP_S9YPWHOM */

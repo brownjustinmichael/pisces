@@ -23,7 +23,6 @@ namespace plans
 		/*!**********************************************************************
 		 * \brief An implicit plan that calculates horizontal diffusion for Fourier modes
 		 ************************************************************************/
-		template <class datatype>
 		class horizontal : public implicit_plan
 		{
 		private:
@@ -37,8 +36,8 @@ namespace plans
 			using implicit_plan::data_out;
 			using implicit_plan::matrix_n;
 		
-			datatype alpha; //!< The implicit fraction (1.0 for purely implicit, 0.0 for purely explicit)
-			datatype pioL2; //!< The value pi / L ^ 2 to save computational time
+			double alpha; //!< The implicit fraction (1.0 for purely implicit, 0.0 for purely explicit)
+			double pioL2; //!< The value pi / L ^ 2 to save computational time
 		
 		public:
 			using implicit_plan::element_flags;
@@ -47,12 +46,12 @@ namespace plans
 			/*!**********************************************************************
 			 * \param i_data_in A reference to the input data variable for the plan
 			 * \param i_data_out A reference to the output data variable for the plan
-			 * \param i_matrix_n The datatype matrix associated with the horizontal solve
-			 * \param i_matrix_m The datatype matrix associated with the vertical solve
+			 * \param i_matrix_n The double matrix associated with the horizontal solve
+			 * \param i_matrix_m The double matrix associated with the vertical solve
 			 * \param i_coeff The diffusion coefficient
 			 * \param i_alpha The implicit fraction (1.0 for purely implicit, 0.0 for purely explicit)
 			 ************************************************************************/
-			horizontal (datatype i_alpha, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable &i_data_in, grids::variable &i_data_out, datatype i_coeff = 1.0) : implicit_plan (i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_coeff, real_spectral), alpha (i_alpha) {
+			horizontal (double i_alpha, double *i_matrix_n, double *i_matrix_m, grids::variable &i_data_in, grids::variable &i_data_out, double i_coeff = 1.0) : implicit_plan (i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_coeff, real_spectral), alpha (i_alpha) {
 				TRACE ("Instantiating...");
 				pioL2 = 4.0 * (std::acos (-1.0) * std::acos (-1.0) / (grid_n [n - 1] - grid_n [0]) / (grid_n [n - 1] - grid_n [0]));
 				setup ();
@@ -68,7 +67,7 @@ namespace plans
 					for (int j = 0; j < m * dims; ++j) {
 						matrix_n [j] = matrix_n [m + j] = 0.0;
 						for (int i = 2; i < ldn; ++i) {
-							matrix_n [i * m + j] = coeff * alpha * pioL2 * (datatype) ((i / 2) * (i / 2));
+							matrix_n [i * m + j] = coeff * alpha * pioL2 * (double) ((i / 2) * (i / 2));
 						}
 					}
 				} else {
@@ -104,14 +103,14 @@ namespace plans
 			class factory : public implicit_plan::factory
 			{
 			private:
-				datatype alpha; //!< The implicit fraction for the plan to be constructed
+				double alpha; //!< The implicit fraction for the plan to be constructed
 			
 			public:
 				/*!**********************************************************************
 				 * \param i_coeff The diffusion coefficient for the plan to be constructed
 				 * \param i_alpha The implicit fraction for the plan to be constructed
 				 ************************************************************************/
-				factory (datatype i_coeff = 1.0, datatype i_alpha = 1.0) : implicit_plan::factory (i_coeff), alpha (i_alpha) {
+				factory (double i_coeff = 1.0, double i_alpha = 1.0) : implicit_plan::factory (i_coeff), alpha (i_alpha) {
 				}
 			
 				virtual ~factory () {}
@@ -119,9 +118,9 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc plan::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plan > _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
+				virtual std::shared_ptr <plan > _instance (double **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
 					if (coeff) {
-						return std::shared_ptr <plan > (new horizontal <datatype> (alpha, matrices [0], matrices [1], i_data_in, i_data_out, coeff));
+						return std::shared_ptr <plan > (new horizontal (alpha, matrices [0], matrices [1], i_data_in, i_data_out, coeff));
 					}
 					return std::shared_ptr <plan > ();
 				}
@@ -131,7 +130,6 @@ namespace plans
 		/*!**********************************************************************
 		 * \brief A horizontal diffusion plan that varies with z
 		 ************************************************************************/
-		template <class datatype>
 		class background_horizontal : public implicit_plan
 		{
 		private:
@@ -145,9 +143,9 @@ namespace plans
 			using implicit_plan::data_out;
 			using implicit_plan::matrix_n;
 		
-			datatype alpha; //!< The implicit fraction (1.0 for purely implicit, 0.0 for purely explicit)
-			datatype *diffusion; //!< A pointer to the datatype vector of diffusion coefficients
-			datatype pioL2; //!< The value pi / L ^ 2 to save computational time
+			double alpha; //!< The implicit fraction (1.0 for purely implicit, 0.0 for purely explicit)
+			double *diffusion; //!< A pointer to the double vector of diffusion coefficients
+			double pioL2; //!< The value pi / L ^ 2 to save computational time
 
 		public:
 			using implicit_plan::element_flags;
@@ -156,12 +154,12 @@ namespace plans
 			/*!**********************************************************************
 			 * \param i_data_in A reference to the input data variable for the plan
 			 * \param i_data_out A reference to the output data variable for the plan
-			 * \param i_matrix_n The datatype matrix associated with the horizontal solve
-			 * \param i_matrix_m The datatype matrix associated with the vertical solve
+			 * \param i_matrix_n The double matrix associated with the horizontal solve
+			 * \param i_matrix_m The double matrix associated with the vertical solve
 			 * \param i_alpha The implicit fraction (1.0 for purely implicit, 0.0 for purely explicit)
-			 * \param i_diffusion A pointer to the datatype vector of diffusion coefficients
+			 * \param i_diffusion A pointer to the double vector of diffusion coefficients
 			 ************************************************************************/
-			background_horizontal (datatype i_alpha, datatype *i_diffusion, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable &i_data_in, grids::variable &i_data_out) : implicit_plan (i_matrix_n, i_matrix_m, i_data_in, i_data_out, 1.0, real_spectral), alpha (i_alpha), diffusion (i_diffusion) {
+			background_horizontal (double i_alpha, double *i_diffusion, double *i_matrix_n, double *i_matrix_m, grids::variable &i_data_in, grids::variable &i_data_out) : implicit_plan (i_matrix_n, i_matrix_m, i_data_in, i_data_out, 1.0, real_spectral), alpha (i_alpha), diffusion (i_diffusion) {
 				TRACE ("Instantiating...");
 				pioL2 = 4.0 * (std::acos (-1.0) * std::acos (-1.0) / (grid_n [n - 1] - grid_n [0]) / (grid_n [n - 1] - grid_n [0]));
 				setup ();
@@ -178,7 +176,7 @@ namespace plans
 						{
 							matrix_n [j] = matrix_n [(m + j) * dims + k] = 0.0;
 							for (int i = 2; i < ldn; ++i) {
-								matrix_n [(i * m + j) * dims + k] = coeff * diffusion [j] * alpha * pioL2 * (datatype) ((i / 2) * (i / 2));
+								matrix_n [(i * m + j) * dims + k] = coeff * diffusion [j] * alpha * pioL2 * (double) ((i / 2) * (i / 2));
 							}						
 						}
 					}
@@ -225,23 +223,23 @@ namespace plans
 			class factory : public implicit_plan::factory
 			{
 			private:
-				datatype alpha; //!< The implicit fraction for the plan to be constructed
-				datatype *diffusion; //!< The pointer to the diffusion vector for the plan to be constructed
+				double alpha; //!< The implicit fraction for the plan to be constructed
+				double *diffusion; //!< The pointer to the diffusion vector for the plan to be constructed
 			
 			public:
 				/*!**********************************************************************
 				 * \param i_alpha The implicit fraction for the plan to be constructed
 				 * \param i_diffusion The pointer to the diffusion vector for the plan to be constructed
 				 ************************************************************************/
-				factory (datatype i_alpha, datatype *i_diffusion) : alpha (i_alpha), diffusion (i_diffusion) {}
+				factory (double i_alpha, double *i_diffusion) : alpha (i_alpha), diffusion (i_diffusion) {}
 			
 				virtual ~factory () {}
 			
 				/*!**********************************************************************
 				 * \copydoc plan::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plan > _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
-					return std::shared_ptr <plan > (new background_horizontal <datatype> (alpha, diffusion, matrices [0], matrices [1], i_data_in, i_data_out));
+				virtual std::shared_ptr <plan > _instance (double **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
+					return std::shared_ptr <plan > (new background_horizontal (alpha, diffusion, matrices [0], matrices [1], i_data_in, i_data_out));
 				}
 			};
 		};
@@ -249,7 +247,6 @@ namespace plans
 		/*!**********************************************************************
 		 * \brief A plan to add a source term to an equation
 		 ************************************************************************/
-		template <class datatype>
 		class horizontal_stress : public real_plan
 		{
 		private:
@@ -263,15 +260,15 @@ namespace plans
 			using real_plan::grid_m;
 			using real_plan::grid_n;
 
-			datatype *density; //!< A pointer to the density data
-			datatype *data_other; //!< A pointer to the other velocity component
-			datatype pioL; //!< The value 2*pi / the width of the system, for speed and convenience
-			const datatype *pos_m; //!< A pointer to the vertical position, for speed
-			const datatype *pos_n; //!< A pointer to the horizontal positions, for speed
-			datatype *oodx; //!< An array of one over the differential of x, centered in the cell
-			datatype *oodx2; //!< An array of one over the differential of x, centered at the boundary
-			datatype *oodz; //!< An array of one over the differential of z, centered in the cell
-			datatype *oodz2; //!< An array of one over the differential of z, centered at the boundary
+			double *density; //!< A pointer to the density data
+			double *data_other; //!< A pointer to the other velocity component
+			double pioL; //!< The value 2*pi / the width of the system, for speed and convenience
+			const double *pos_m; //!< A pointer to the vertical position, for speed
+			const double *pos_n; //!< A pointer to the horizontal positions, for speed
+			double *oodx; //!< An array of one over the differential of x, centered in the cell
+			double *oodx2; //!< An array of one over the differential of x, centered at the boundary
+			double *oodz; //!< An array of one over the differential of z, centered in the cell
+			double *oodz2; //!< An array of one over the differential of z, centered at the boundary
 		
 		public:
 			/*!**********************************************************************
@@ -283,7 +280,7 @@ namespace plans
 			 * 
 			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
 			 ************************************************************************/
-			horizontal_stress (grids::variable &i_density, grids::variable &i_data_other, grids::variable &i_data_in, grids::variable &i_data_out, datatype i_coeff = 1.0) : 
+			horizontal_stress (grids::variable &i_density, grids::variable &i_data_other, grids::variable &i_data_in, grids::variable &i_data_out, double i_coeff = 1.0) : 
 			real_plan (i_data_in, i_data_out, i_coeff), 
 			density (i_density.ptr ()),
 			data_other (i_data_other.ptr ()) {
@@ -343,7 +340,7 @@ namespace plans
 				 * \param i_data_other The data of the other velocity component to be used when constructing the plan
 				 * @param i_density A reference to the density variable
 				 ************************************************************************/
-				factory (grids::variable &i_density, grids::variable &i_data_other, datatype i_coeff = 1.0) : 
+				factory (grids::variable &i_density, grids::variable &i_data_other, double i_coeff = 1.0) : 
 				explicit_plan::factory (i_coeff), 
 				density (i_density),
 				data_other (i_data_other) {}
@@ -353,9 +350,9 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc plan::factory::_instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan > _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
+				virtual std::shared_ptr <plans::plan > _instance (double **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan > (new horizontal_stress <datatype> (density, data_other, i_data_in, i_data_out, coeff));
+						return std::shared_ptr <plans::plan > (new horizontal_stress (density, data_other, i_data_in, i_data_out, coeff));
 					}
 					return std::shared_ptr <plans::plan > ();
 				}

@@ -10,11 +10,26 @@
 
 namespace plans
 {
-	std::shared_ptr <typename plan::factory> horizontal_stress (grids::variable &density, grids::variable &data_other) {
-		return std::shared_ptr <typename explicit_plan::factory> (new typename diffusion::horizontal_stress <double>::factory (density, data_other, 1.0));
+	plan::factory_container diff (double alpha) {
+		return implicit_plan::factory_container (std::shared_ptr <implicit_plan::factory> (new diffusion::vertical::factory (1.0, alpha))) + 
+		implicit_plan::factory_container (std::shared_ptr <implicit_plan::factory> (new diffusion::horizontal::factory (1.0, alpha)));
 	}
 
-	std::shared_ptr <typename plan::factory> vertical_stress (grids::variable &density, grids::variable &data_other) {
-		return std::shared_ptr <typename explicit_plan::factory> (new typename diffusion::vertical_stress <double>::factory (density, data_other, 1.0));
+	plan::factory_container bg_diff (double *i_diffusion, double alpha) {
+		return implicit_plan::factory_container (std::shared_ptr <plan::factory> (new diffusion::background_vertical::factory (alpha, i_diffusion))) + 
+		implicit_plan::factory_container (std::shared_ptr <plan::factory> (new diffusion::background_horizontal::factory (alpha, i_diffusion)));
+	}
+
+	plan::factory_container density_diff (grids::variable &density, double alpha) {
+		return diff (alpha) +
+		plan::factory_container (std::shared_ptr <plan::factory> (new diffusion::variable_diffusion::factory (density, 1.0)));
+	}
+
+	std::shared_ptr <plan::factory> horizontal_stress (grids::variable &density, grids::variable &data_other) {
+		return std::shared_ptr <explicit_plan::factory> (new diffusion::horizontal_stress::factory (density, data_other, 1.0));
+	}
+
+	std::shared_ptr <plan::factory> vertical_stress (grids::variable &density, grids::variable &data_other) {
+		return std::shared_ptr <explicit_plan::factory> (new diffusion::vertical_stress::factory (density, data_other, 1.0));
 	}
 } /* plans */

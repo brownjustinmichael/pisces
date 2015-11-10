@@ -25,11 +25,7 @@ namespace plans
 	 * 
 	 * @return A factory container containing the diffusion plans
 	 */
-	template <class datatype>
-	typename plan::factory_container diff (datatype alpha = 1.0) {
-		return typename implicit_plan::factory_container (std::shared_ptr <typename implicit_plan::factory> (new typename diffusion::vertical <datatype>::factory (1.0, alpha))) + 
-		typename implicit_plan::factory_container (std::shared_ptr <typename implicit_plan::factory> (new typename diffusion::horizontal <datatype>::factory (1.0, alpha)));
-	}
+	plan::factory_container diff (double alpha = 1.0);
 
 	/**
 	 * @brief Shorthand to include both directions of background diffusion plans
@@ -39,11 +35,7 @@ namespace plans
 	 * 
 	 * @return A factory container containing the diffusion plans
 	 */
-	template <class datatype>
-	typename plan::factory_container bg_diff (datatype *i_diffusion, datatype alpha = 1.0) {
-		return typename implicit_plan::factory_container (std::shared_ptr <typename plan::factory> (new typename diffusion::background_vertical <datatype>::factory (alpha, i_diffusion))) + 
-		typename implicit_plan::factory_container (std::shared_ptr <typename plan::factory> (new typename diffusion::background_horizontal <datatype>::factory (alpha, i_diffusion)));
-	}
+	plan::factory_container bg_diff (double *i_diffusion, double alpha = 1.0);
 
 	/**
 	 * @brief Shorthand to include density-weighted diffusion plans
@@ -53,11 +45,7 @@ namespace plans
 	 * 
 	 * @return A factory container containing the diffusion plans
 	 */
-	template <class datatype>
-	typename plan::factory_container density_diff (grids::variable &density, datatype alpha = 1.0) {
-		return diff <datatype> (alpha) +
-		typename plan::factory_container (std::shared_ptr <typename plan::factory> (new typename diffusion::variable_diffusion <datatype>::factory (density, 1.0)));
-	}
+	plan::factory_container density_diff (grids::variable &density, double alpha = 1.0);
 
 	/**
 	 * @brief Shorthand to include stress terms for the horizontal component of the velocity
@@ -66,7 +54,7 @@ namespace plans
 	 * @param data_other A reference to the other component of the velocity
 	 * @return A shared pointer to the factory produced by this
 	 */
-	std::shared_ptr <typename plan::factory> horizontal_stress (grids::variable &density, grids::variable &data_other);
+	std::shared_ptr <plan::factory> horizontal_stress (grids::variable &density, grids::variable &data_other);
 
 	/**
 	 * @brief Shorthand to include stress terms for the vertical component of the velocity
@@ -75,7 +63,7 @@ namespace plans
 	 * @param data_other A reference to the other component of the velocity
 	 * @return A shared pointer to the factory produced by this
 	 */
-	std::shared_ptr <typename plan::factory> vertical_stress (grids::variable &density, grids::variable &data_other);
+	std::shared_ptr <plan::factory> vertical_stress (grids::variable &density, grids::variable &data_other);
 } /* plans */
 
 #endif /* end of include guard: DIFFUSION_HPP_C1935DDC */

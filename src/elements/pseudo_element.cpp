@@ -50,35 +50,35 @@ namespace pisces
 		*split_solver <datatype> (equations ["composition"], timestep, 
 			dirichlet (i_params ["equations.composition.bottom.value"].as <datatype> ()), 
 			dirichlet (i_params ["equations.composition.top.value"].as <datatype> ())) 
-		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
+		+ advec (data ["x_velocity"], data ["z_velocity"]) 
 		== 
-		params ["equations.composition.diffusion"] * density_diff <datatype> (data ["density"]);
+		params ["equations.composition.diffusion"] * density_diff (data ["density"]);
 
 		*split_solver <datatype> (equations ["temperature"], timestep, 
 			dirichlet (i_params ["equations.temperature.bottom.value"].as <datatype> ()), 
 			dirichlet (i_params ["equations.temperature.top.value"].as <datatype> ())) 
-		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
+		+ advec (data ["x_velocity"], data ["z_velocity"]) 
 		== 
-		params ["equations.temperature.diffusion"] * density_diff <datatype> (data ["density"] / data ["mmw"])
+		params ["equations.temperature.diffusion"] * density_diff (data ["density"] / data ["mmw"])
 		// + params ["equations.velocity.diffusion"] * heat <datatype> (data ["mmw"], data ["x_velocity"], data ["z_velocity"])
-		- diverge <datatype> (data ["temperature"], data ["x_velocity"], data ["z_velocity"])
+		- diverge (data ["temperature"], data ["x_velocity"], data ["z_velocity"])
 		;
 
 		// Set up the x_velocity equation, note the missing pressure term, which is handled in div
 		*split_solver <datatype> (equations ["x_velocity"], timestep, neumann (0.0), neumann (0.0)) 
-		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
+		+ advec (data ["x_velocity"], data ["z_velocity"]) 
 		== 
-		params ["equations.velocity.diffusion"] * density_diff <datatype> (data ["density"])
+		params ["equations.velocity.diffusion"] * density_diff (data ["density"])
 		+ params ["equations.velocity.diffusion"] * horizontal_stress (data ["density"], data ["z_velocity"])
 		;
 
 		// Set up the z_velocity equation, note the missing pressure term, which is handled in div
 		*split_solver <datatype> (equations ["z_velocity"], timestep, dirichlet (0.0), dirichlet (0.0)) 
-		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
+		+ advec (data ["x_velocity"], data ["z_velocity"]) 
 		== 
-		- grad_z <datatype> (data ["bg_pressure"])
+		- grad_z (data ["bg_pressure"])
 		- params ["equations.z_velocity.sources.density"] * src (data ["density"], true)
-		+ params ["equations.velocity.diffusion"] * density_diff <datatype> (data ["density"])
+		+ params ["equations.velocity.diffusion"] * density_diff (data ["density"])
 		+ params ["equations.velocity.diffusion"] * vertical_stress (data ["density"], data ["x_velocity"])
 		;
 		data ["x_velocity"].component_flags |= plans::solvers::ignore_net;
@@ -88,8 +88,8 @@ namespace pisces
 		// Set up the velocity constraint
 		*pdiv <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"], data ["density"].ptr (real_spectral), data ["bg_pressure"].ptr (), i_params ["equations.constants.gamma"].as <datatype> ())
 		==
-		params ["equations.temperature.diffusion"] * density_diff <datatype> (data ["density"] / data ["mmw"], 0.0)
-		+ params ["equations.velocity.diffusion"] * heat <datatype> (data ["mmw"], data ["x_velocity"], data ["z_velocity"])
+		params ["equations.temperature.diffusion"] * density_diff (data ["density"] / data ["mmw"], 0.0)
+		+ params ["equations.velocity.diffusion"] * heat (data ["mmw"], data ["x_velocity"], data ["z_velocity"])
 		;
 		
 	TRACE ("Initialized.");

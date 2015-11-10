@@ -23,10 +23,7 @@ namespace plans
 	 * 
 	 * @return [description]
 	 */
-	template <class datatype>
-	std::shared_ptr <typename plan::factory> advec (grids::variable &vel_n, grids::variable &vel_m) {
-		return std::shared_ptr <typename real_plan::factory> (new typename advection::uniform <datatype>::factory (vel_n, vel_m));
-	}
+	std::shared_ptr <plan::factory> advec (grids::variable &vel_n, grids::variable &vel_m);
 } /* plans */
 
 #endif /* end of include guard: ADVECTION_HPP_5C2EB309 */

@@ -27,7 +27,6 @@ namespace plans
 		 * 
 		 * This term is assumed to be on the left hand side of the equation, so the coefficient's sign is reversed automatically. Please provide the coefficient of the advection term when it appears on the left side of the equation.
 		 ************************************************************************/
-		template <class datatype>
 		class uniform : public real_plan
 		{
 		private:
@@ -40,18 +39,18 @@ namespace plans
 			using real_plan::data_in;
 			using real_plan::data_out;
 		
-			datatype *vel_n; //!< A pointer to the horizontal component of the velocity
-			datatype *vel_m; //!< A pointer to the vertical component of the velocity
-			const datatype *pos_n; //!< A pointer to the horizontal position
-			const datatype *pos_m; //!< A pointer to the vertical position
+			double *vel_n; //!< A pointer to the horizontal component of the velocity
+			double *vel_m; //!< A pointer to the vertical component of the velocity
+			const double *pos_n; //!< A pointer to the horizontal position
+			const double *pos_m; //!< A pointer to the vertical position
 		
-			std::vector <datatype> x_vec; //!< A vector to hold the x component of the calculation
-			std::vector <datatype> z_vec; //!< A vector to hold the z component of the calculation
+			std::vector <double> x_vec; //!< A vector to hold the x component of the calculation
+			std::vector <double> z_vec; //!< A vector to hold the z component of the calculation
 		
-			datatype *x_ptr; //!< A pointer to x_vec for speed
-			datatype *z_ptr; //!< A pointer to z_vec for speed
-			datatype *oodx_ptr; //!< A pointer to oodx_vec for speed
-			datatype *oodz_ptr; //!< A pointer to oodz_vec for speed
+			double *x_ptr; //!< A pointer to x_vec for speed
+			double *z_ptr; //!< A pointer to z_vec for speed
+			double *oodx_ptr; //!< A pointer to oodx_vec for speed
+			double *oodz_ptr; //!< A pointer to oodz_vec for speed
 		
 		public:
 			/*!**********************************************************************
@@ -61,7 +60,7 @@ namespace plans
 			 * \param i_vel_n A pointer to the horizontal component of the velocity
 			 * \param i_vel_m A pointer to the vertical component of the velocity
 			 ************************************************************************/
-			uniform (grids::variable &i_vel_n, grids::variable &i_vel_m, grids::variable &i_data_in, grids::variable &i_data_out, datatype i_coeff = 1.0) : 
+			uniform (grids::variable &i_vel_n, grids::variable &i_vel_m, grids::variable &i_data_in, grids::variable &i_data_out, double i_coeff = 1.0) : 
 			real_plan (i_data_in, i_data_out, i_coeff), vel_n (i_vel_n.ptr ()), vel_m (i_vel_m.ptr ()), pos_n (&(grid_n [0])), pos_m (&(grid_m [0])) {
 				TRACE ("Adding advection...");
 				x_vec.resize (n * m * dims);
@@ -141,16 +140,16 @@ namespace plans
 				 * \param i_vel_n A pointer to the horizontal component of the velocity
 				 * \param i_vel_m A pointer to the vertical component of the velocity
 				 ************************************************************************/
-				factory (grids::variable &i_vel_n, grids::variable &i_vel_m, datatype i_coeff = 1.0) : real_plan::factory (i_coeff), vel_n (i_vel_n), vel_m (i_vel_m) {}
+				factory (grids::variable &i_vel_n, grids::variable &i_vel_m, double i_coeff = 1.0) : real_plan::factory (i_coeff), vel_n (i_vel_n), vel_m (i_vel_m) {}
 		
 				virtual ~factory () {}
 			
 				/*!**********************************************************************
 				 * \copydoc plan::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan > _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
+				virtual std::shared_ptr <plans::plan > _instance (double **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan > (new uniform <datatype> (vel_n, vel_m, i_data_in, i_data_out, coeff));
+						return std::shared_ptr <plans::plan > (new uniform (vel_n, vel_m, i_data_in, i_data_out, coeff));
 					}
 					return std::shared_ptr <plans::plan > ();
 				}

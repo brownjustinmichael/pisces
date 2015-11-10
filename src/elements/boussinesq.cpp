@@ -132,15 +132,15 @@ namespace pisces
 			*split_solver <datatype> (equations ["temperature"], timestep, 
 				neumann (i_params ["equations.temperature.bottom.value"].as <datatype> ()), 
 				dirichlet (i_params ["equations.temperature.top.value"].as <datatype> ())) 
-			+ advec <datatype> (data ["x_velocity"], data ["z_velocity"])
+			+ advec (data ["x_velocity"], data ["z_velocity"])
 			+ src (data ["z_velocity"] * data ["korre_Ts"])
 			== 
 			params ["equations.temperature.sources.z_velocity"] * src (data ["z_velocity"]);
 
 			if (uniform_diff) {
-				*equations ["temperature"] == params ["equations.temperature.diffusion"] * diff <datatype> ();
+				*equations ["temperature"] == params ["equations.temperature.diffusion"] * diff ();
 			} else {
-				*equations ["temperature"] == bg_diff <datatype> (data ["temperature_diffusion"].ptr ());
+				*equations ["temperature"] == bg_diff (data ["temperature_diffusion"].ptr ());
 			}
 			// if (i_params ["equations.temperature.linear"].IsDefined ()) *equations ["temperature"] == plans::diffusion::linear <datatype>::factory (i_params ["equations.temperature.linear"].as <datatype> (), 0.0, data ["temperature_diffusion"].ptr (), 10000);
 		}
@@ -150,10 +150,10 @@ namespace pisces
 			*split_solver <datatype> (equations ["composition"], timestep, 
 				dirichlet (i_params ["equations.composition.bottom.value"].as <datatype> ()), 
 				dirichlet (i_params ["equations.composition.top.value"].as <datatype> ())) 
-			+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
+			+ advec (data ["x_velocity"], data ["z_velocity"]) 
 			+ params ["equations.composition.sources.z_velocity"] * src (data ["z_velocity"]) 
 			== 
-			params ["equations.composition.diffusion"] * diff <datatype> ();
+			params ["equations.composition.diffusion"] * diff ();
 		}
 
 		// Set up the x_velocity equation, note the missing pressure term, which is handled in div
@@ -161,9 +161,9 @@ namespace pisces
 			*split_solver <datatype> (equations ["x_velocity"], timestep, 
 				neumann (0.0), 
 				neumann (0.0)) 
-			+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
+			+ advec (data ["x_velocity"], data ["z_velocity"]) 
 			== 
-			params ["equations.velocity.diffusion"] * diff <datatype> ();
+			params ["equations.velocity.diffusion"] * diff ();
 			if (params.get ("equations.x_velocity.ignore_net", false)) data ["x_velocity"].component_flags |= ignore_net;
 		}
 
@@ -172,11 +172,11 @@ namespace pisces
 			*split_solver <datatype> (equations ["z_velocity"], timestep, 
 				dirichlet (0.0), 
 				dirichlet (0.0)) 
-			+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
+			+ advec (data ["x_velocity"], data ["z_velocity"]) 
 			== 
 			params ["equations.z_velocity.sources.temperature"] * src (data ["temperature"])
 			+ params ["equations.z_velocity.sources.composition"] * src (data ["composition"]) 
-			+ params ["equations.velocity.diffusion"] * diff <datatype> ();
+			+ params ["equations.velocity.diffusion"] * diff ();
 			if (params.get ("equations.z_velocity.ignore_net", false)) data ["z_velocity"].component_flags |= ignore_net;
 		}
 
