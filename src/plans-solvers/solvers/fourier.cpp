@@ -18,8 +18,7 @@ namespace plans
 {
 	namespace solvers
 	{
-		template <class datatype>
-		void fourier <datatype>::init (datatype& i_timestep, std::shared_ptr <boundaries::boundary> i_boundary_0, std::shared_ptr <boundaries::boundary> i_boundary_n, datatype *i_rhs, grids::variable &i_data, grids::variable &i_data_out) {
+		void fourier::init (double& i_timestep, std::shared_ptr <boundaries::boundary> i_boundary_0, std::shared_ptr <boundaries::boundary> i_boundary_n, double *i_rhs, grids::variable &i_data, grids::variable &i_data_out) {
 			TRACE ("Building solver...");
 			n = i_data.get_grid (0).get_n ();
 			ldn = i_data.get_grid (0).get_ld ();
@@ -49,8 +48,7 @@ namespace plans
 			TRACE ("Solver built.");
 		}
 	
-		template <class datatype>
-		void fourier <datatype>::factorize () {
+		void fourier::factorize () {
 			TRACE ("Factorizing...");
 			double *fact_matrix = &factorized_matrix [0], *hor_matrix = &matrix [0];
 			
@@ -65,8 +63,7 @@ namespace plans
 			TRACE ("Done.");
 		}
 	
-		template <class datatype>
-		void fourier <datatype>::execute () {
+		void fourier::execute () {
 			solver::execute ();
 
 			TRACE ("Executing solve...");
@@ -134,8 +131,6 @@ namespace plans
 		
 			TRACE ("Execution complete.");
 		}
-	
-		template class fourier <double>;
 	} /* solvers */
 } /* plans */
 

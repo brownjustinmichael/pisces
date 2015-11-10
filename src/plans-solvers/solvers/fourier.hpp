@@ -23,7 +23,6 @@ namespace plans
 		 * 
 		 * This class is a simple implementation of the diagonal solve needed to solve the fourier components in the horizontal. If doing the full solve proves to be less complex than expected, this class will not be needed.
 		 ************************************************************************/
-		template <class datatype>
 		class fourier : public solver
 		{
 		private:
@@ -36,18 +35,18 @@ namespace plans
 			int ldn; //!< The horizontal extent of the data array
 			int m; //!< The vertical extent of the data
 			
-			datatype& timestep; //!< A datatype reference to the current timestep
-			datatype *rhs_ptr; //!< A pointer to the right hand side of the equation
+			double& timestep; //!< A double reference to the current timestep
+			double *rhs_ptr; //!< A pointer to the right hand side of the equation
 			
 			int excess_0; //!< The integer number of elements to recv from edge_0
 			int excess_n; //!< The integer number of elements to recv from edge_n
 			
-			datatype* default_matrix; //!< The datatype array of the non-timestep dependent matrix component
+			double* default_matrix; //!< The double array of the non-timestep dependent matrix component
 			
-			std::vector <datatype> data_temp; //!< A datatype vector to be used in lieu of data_out for non-updating steps
-			std::vector <datatype> matrix; //!< The left hand side of the equation in matrix form excluding the original value and the timestep mutliplication
-			std::vector <datatype> factorized_matrix; //!< A datatype vector containing the factorized sum of default matrix and timestep * matrix
-			std::vector <datatype> boundary_matrix; //!< Some memory space needed for the matrix solve
+			std::vector <double> data_temp; //!< A double vector to be used in lieu of data_out for non-updating steps
+			std::vector <double> matrix; //!< The left hand side of the equation in matrix form excluding the original value and the timestep mutliplication
+			std::vector <double> factorized_matrix; //!< A double vector containing the factorized sum of default matrix and timestep * matrix
+			std::vector <double> boundary_matrix; //!< Some memory space needed for the matrix solve
 			
 			std::vector <int> ns; //!< A vector containing the extents of all the elements
 			std::vector <int> ipiv; //!< A vector of integers needed to calculate the factorization
@@ -63,34 +62,34 @@ namespace plans
 			int overlap_n; //!< The total overlap region on the bottom
 			int lda; //!< The leading dimension of the matrices
 			
-			const datatype *pos_m; //!< A pointer to the array of positions in the vertical
+			const double *pos_m; //!< A pointer to the array of positions in the vertical
 
-			void init (datatype& i_timestep, std::shared_ptr <boundaries::boundary> i_boundary_0, std::shared_ptr <boundaries::boundary> i_boundary_n, datatype *i_rhs, grids::variable &i_data, grids::variable &i_data_out);
+			void init (double& i_timestep, std::shared_ptr <boundaries::boundary> i_boundary_0, std::shared_ptr <boundaries::boundary> i_boundary_n, double *i_rhs, grids::variable &i_data, grids::variable &i_data_out);
 			
 		public:
 			/*!**********************************************************************
-			 * \param i_timestep A datatype reference to the current timestep
+			 * \param i_timestep A double reference to the current timestep
 			 * \param i_boundary_0 A shared pointer to the top boundary object
 			 * \param i_boundary_n A shared pointer to the bottom boundary object
 			 * \param i_rhs A pointer to the right hand side of the equation
 			 * \param i_data A reference to the data to read
 			 * \param i_data_out A reference to the data to update
 			 ************************************************************************/
-			fourier (datatype& i_timestep, std::shared_ptr <boundaries::boundary> i_boundary_0, std::shared_ptr <boundaries::boundary> i_boundary_n, datatype *i_rhs, grids::variable &i_data, grids::variable &i_data_out) :
+			fourier (double& i_timestep, std::shared_ptr <boundaries::boundary> i_boundary_0, std::shared_ptr <boundaries::boundary> i_boundary_n, double *i_rhs, grids::variable &i_data, grids::variable &i_data_out) :
 			solver (i_data, i_data_out, this->get_state_in (), this->get_state ()),
 			timestep (i_timestep) {
 				init (i_timestep, i_boundary_0, i_boundary_n, i_rhs, i_data, i_data_out);
 			}
 			
 			/*!**********************************************************************
-			 * \param i_timestep A datatype reference to the current timestep
+			 * \param i_timestep A double reference to the current timestep
 			 * \param i_boundary_0 A boundary factory for the top boundary
 			 * \param i_boundary_n A boundary factory for the bottom boundary
 			 * \param i_rhs A pointer to the right hand side of the equation
 			 * \param i_data A reference to the data to read
 			 * \param i_data_out A reference to the data to update
 			 ************************************************************************/
-			fourier (datatype& i_timestep, typename boundaries::boundary::factory &i_boundary_0, typename boundaries::boundary::factory &i_boundary_n, datatype *i_rhs, grids::variable &i_data, grids::variable &i_data_out) :
+			fourier (double& i_timestep, typename boundaries::boundary::factory &i_boundary_0, typename boundaries::boundary::factory &i_boundary_n, double *i_rhs, grids::variable &i_data, grids::variable &i_data_out) :
 			solver (i_data, i_data_out, this->get_state_in (), this->get_state ()),
 			timestep (i_timestep) {
 				init (i_timestep, i_boundary_0.instance (i_data.get_grid (0), i_data.get_grid (1), false), i_boundary_n.instance (i_data.get_grid (0), i_data.get_grid (1), true), i_rhs, i_data, i_data_out);
@@ -108,7 +107,7 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc solver::matrix_ptr
 			 ************************************************************************/
-			datatype *matrix_ptr () {
+			double *matrix_ptr () {
 				return &matrix [0];
 			}
 			
@@ -135,7 +134,7 @@ namespace plans
 			class factory : public plans::solvers::solver::factory
 			{
 			private:
-				datatype &timestep; //!< The timestep reference for the solver to be constructed
+				double &timestep; //!< The timestep reference for the solver to be constructed
 				std::shared_ptr <boundaries::boundary> boundary_0; //!< A shared pointer to the top boundary for the solver to be constructed
 				std::shared_ptr <boundaries::boundary> boundary_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
 				typename boundaries::boundary::factory *boundary_factory_0; //!< A shared pointer to the top boundary for the solver to be constructed
@@ -147,7 +146,7 @@ namespace plans
 				 * \param i_boundary_0 A shared pointer to the top boundary for the solver to be constructed
 				 * \param i_boundary_n A shared pointer to the bottom boundary for the solver to be constructed
 				 ************************************************************************/
-				factory (datatype &i_timestep, std::shared_ptr <boundaries::boundary> i_boundary_0, std::shared_ptr <boundaries::boundary> i_boundary_n) : 
+				factory (double &i_timestep, std::shared_ptr <boundaries::boundary> i_boundary_0, std::shared_ptr <boundaries::boundary> i_boundary_n) : 
 				timestep (i_timestep), 
 				boundary_0 (i_boundary_0), 
 				boundary_n (i_boundary_n) {}
@@ -157,7 +156,7 @@ namespace plans
 				 * \param i_boundary_0 A reference to a boundary factory to generate the top boundary
 				 * \param i_boundary_n A reference to a boundary factory to generate the bottom boundary
 				 ************************************************************************/
-				factory (datatype &i_timestep, typename boundaries::boundary::factory &i_boundary_0, typename boundaries::boundary::factory &i_boundary_n) : 
+				factory (double &i_timestep, typename boundaries::boundary::factory &i_boundary_0, typename boundaries::boundary::factory &i_boundary_n) : 
 				timestep (i_timestep), 
 				boundary_factory_0 (&i_boundary_0), 
 				boundary_factory_n (&i_boundary_n) {}

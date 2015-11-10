@@ -35,8 +35,8 @@ namespace plans
 		if (equation_ptr->messenger_ptr->get_id () + 1 < equation_ptr->messenger_ptr->get_np ()) {
 			boundary_n = std::shared_ptr <typename boundaries::boundary::factory> (new typename boundaries::communicating_boundary::factory (equation_ptr->messenger_ptr));
 		}
-		equation_ptr->add_solver (typename solvers::collocation <datatype>::factory (equation_ptr->messenger_ptr, timestep, *boundary_0, *boundary_n), solvers::z_solver);
-		equation_ptr->add_solver (typename solvers::fourier <datatype>::factory (timestep, *boundary_0, *boundary_n), solvers::x_solver);
+		equation_ptr->add_solver (typename solvers::collocation::factory (equation_ptr->messenger_ptr, timestep, *boundary_0, *boundary_n), solvers::z_solver);
+		equation_ptr->add_solver (typename solvers::fourier::factory (timestep, *boundary_0, *boundary_n), solvers::x_solver);
 		return equation_ptr;
 	}
 
@@ -57,7 +57,7 @@ namespace plans
 		if (equation_ptr->messenger_ptr->get_id () + 1 < equation_ptr->messenger_ptr->get_np ()) {
 			boundary_n = std::shared_ptr <typename boundaries::boundary::factory> (new typename boundaries::communicating_boundary::factory (equation_ptr->messenger_ptr));
 		}
-		equation_ptr->add_solver (typename solvers::incompressible <datatype>::factory (equation_ptr->messenger_ptr,  *boundary_0, *boundary_n, *vel_n_ptr, *vel_m_ptr), solvers::x_solver);
+		equation_ptr->add_solver (typename solvers::incompressible::factory (equation_ptr->messenger_ptr,  *boundary_0, *boundary_n, *vel_n_ptr, *vel_m_ptr), solvers::x_solver);
 			return equation_ptr;
 	}
 
@@ -81,7 +81,7 @@ namespace plans
 		if (equation_ptr->messenger_ptr->get_id () + 1 < equation_ptr->messenger_ptr->get_np ()) {
 			boundary_n = std::shared_ptr <typename boundaries::boundary::factory> (new typename boundaries::communicating_boundary::factory (equation_ptr->messenger_ptr));
 		}
-		equation_ptr->add_solver (typename solvers::pseudo_incompressible <datatype>::factory (equation_ptr->messenger_ptr,  *boundary_0, *boundary_n, *vel_n_ptr, *vel_m_ptr, density, pressure, gamma), solvers::x_solver);
+		equation_ptr->add_solver (typename solvers::pseudo_incompressible::factory (equation_ptr->messenger_ptr,  *boundary_0, *boundary_n, *vel_n_ptr, *vel_m_ptr, density, pressure, gamma), solvers::x_solver);
 			return equation_ptr;
 	}
 

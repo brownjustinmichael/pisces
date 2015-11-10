@@ -21,7 +21,6 @@ namespace plans
 		/*!**********************************************************************
 		 * \brief A solver to correct the velocities and pressure to be incompressible
 		 ************************************************************************/
-		template <class datatype>
 		class incompressible : public solver
 		{
 		private:
@@ -39,23 +38,23 @@ namespace plans
 			
 			grids::variable &var_x; //!< A reference to the x component of the velocity
 			grids::variable &var_z; //!< A reference to the z component of the velocity
-			datatype *data_x; //!< A pointer to the x component of the data
-			datatype *data_z; //!< A pointer to the z component of the data
-			datatype *new_pos; //!< A pointer to the grid positions in the solve (midpoints)
+			double *data_x; //!< A pointer to the x component of the data
+			double *data_z; //!< A pointer to the z component of the data
+			double *new_pos; //!< A pointer to the grid positions in the solve (midpoints)
 			
-			datatype ex_pos_0; //!< The position one out from the top boundary
-			datatype ex_pos_m; //!< The position one out from the bottom boundary
-			datatype exx_pos_0; //!< The position two out from the top boundary
-			datatype exx_pos_m; //!< The position two out from the bottom boundary
-			datatype exxx_pos_0; //!< The position three out from the top boundary
-			datatype exxx_pos_m; //!< The position three out from the bottom boundary
+			double ex_pos_0; //!< The position one out from the top boundary
+			double ex_pos_m; //!< The position one out from the bottom boundary
+			double exx_pos_0; //!< The position two out from the top boundary
+			double exx_pos_m; //!< The position two out from the bottom boundary
+			double exxx_pos_0; //!< The position three out from the top boundary
+			double exxx_pos_m; //!< The position three out from the bottom boundary
 			
 			int *component_flags_x; //!< The component flags for the x component of the data
 			int *component_flags_z; //!< The component flags for the z component of the data
 			grids::grid &grid_n; //!< A reference to the horizontal grid object
 			grids::grid &grid_m; //!< A reference to the vertical grid object
-			const datatype *pos_n; //!< A pointer to the horizontal position, for convenience and speed
-			datatype *pos_m; //!< A pointer to the vertical position, for convenience and speed
+			const double *pos_n; //!< A pointer to the horizontal position, for convenience and speed
+			double *pos_m; //!< A pointer to the vertical position, for convenience and speed
 			
 			mpi::messenger* messenger_ptr; //!< A pointer to the mpi messenger object
 			
@@ -66,16 +65,16 @@ namespace plans
 			std::shared_ptr <boundaries::boundary> boundary_0; //!< A shared pointer to the top boundary object
 			std::shared_ptr <boundaries::boundary> boundary_n; //!< A shared pointer to the bottom boundary object
 			
-			std::vector <datatype> data_temp, diff, diff2; //!< A vector that represents the actual right hand side during the solve
-			std::vector <datatype> positions; //!< A vector containing the vertical positions
-			std::vector <datatype> new_positions; //!< A vector containing the midpoint vertical positions
+			std::vector <double> data_temp, diff, diff2; //!< A vector that represents the actual right hand side during the solve
+			std::vector <double> positions; //!< A vector containing the vertical positions
+			std::vector <double> new_positions; //!< A vector containing the midpoint vertical positions
 			
-			std::vector <datatype> x; //!< Additional storage for the block banded solve
-			std::vector <datatype> bufferl; //!< Additional storage for the block banded solve
-			std::vector <datatype> bufferr; //!< Additional storage for the block banded solve
-			std::vector <datatype> buffer; //!< Additional storage for the block banded solve
+			std::vector <double> x; //!< Additional storage for the block banded solve
+			std::vector <double> bufferl; //!< Additional storage for the block banded solve
+			std::vector <double> bufferr; //!< Additional storage for the block banded solve
+			std::vector <double> buffer; //!< Additional storage for the block banded solve
 			
-			std::vector <datatype> matrix; //!< The matrix data for the banded solve
+			std::vector <double> matrix; //!< The matrix data for the banded solve
 			std::vector <int> ipiv; //!< The positional swap information for the banded solve
 			std::vector <int> xipiv; //!< The positional swap information for the block banded solve
 			
@@ -96,7 +95,7 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc solver::matrix_ptr
 			 ************************************************************************/
-			datatype *matrix_ptr () {
+			double *matrix_ptr () {
 				return NULL;
 			}
 		

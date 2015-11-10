@@ -17,8 +17,7 @@ namespace plans
 {
 	namespace solvers
 	{
-		template <class datatype>
-		void collocation <datatype>::init (mpi::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <boundaries::boundary> i_boundary_0, std::shared_ptr <boundaries::boundary> i_boundary_n, datatype *i_rhs, grids::variable &i_data, grids::variable &i_data_out) {
+		void collocation::init (mpi::messenger* i_messenger_ptr, double& i_timestep, std::shared_ptr <boundaries::boundary> i_boundary_0, std::shared_ptr <boundaries::boundary> i_boundary_n, double *i_rhs, grids::variable &i_data, grids::variable &i_data_out) {
 			TRACE ("Building solver...");
 			n = i_data.get_grid (0).get_n ();
 			ldn = i_data.get_grid (0).get_ld ();
@@ -65,8 +64,7 @@ namespace plans
 			TRACE ("Solver built.");
 		}
 	
-		template <class datatype>
-		void collocation <datatype>::factorize () {
+		void collocation::factorize () {
 			int info;
 			std::stringstream debug;
 			
@@ -98,8 +96,7 @@ namespace plans
 			TRACE ("Done.");
 		}
 	
-		template <class datatype>
-		void collocation <datatype>::execute () {
+		void collocation::execute () {
 			solver::execute ();
 			int info;
 			TRACE ("Executing solve...");
@@ -164,8 +161,6 @@ namespace plans
 			
 			TRACE ("Solve complete.")
 		}
-		
-		template class collocation <double>;
 	} /* solvers */
 } /* plans */
 

@@ -31,8 +31,7 @@ namespace plans
 {
 	namespace solvers
 	{
-		template <class datatype>
-		incompressible <datatype>::incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary> i_boundary_0, std::shared_ptr <boundaries::boundary> i_boundary_n, grids::variable &i_data, grids::variable &i_data_out, grids::variable &i_data_x, grids::variable &i_data_z) : 
+		incompressible::incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary> i_boundary_0, std::shared_ptr <boundaries::boundary> i_boundary_n, grids::variable &i_data, grids::variable &i_data_out, grids::variable &i_data_x, grids::variable &i_data_z) : 
 		solver (i_data, i_data_out, this->get_state_in (), this->get_state ()), 
 		n (i_data.get_grid (0).get_n ()), 
 		ldn (i_data.get_grid (0).get_ld ()), 
@@ -109,8 +108,7 @@ namespace plans
 			data_temp.resize ((m + 2) * ldn);
 		}
 
-		template <class datatype>
-		void incompressible <datatype>::factorize () {
+		void incompressible::factorize () {
 			int info;
 			TRACE ("Factorizing laplace solver...");
 			
@@ -121,7 +119,7 @@ namespace plans
 			int lda = 2 * kl + ku + 1;
 			
 			// Define some new pointers for convenience and speed
-			datatype *matrix_ptr, *npos_m = &pos_m [excess_0];
+			double *matrix_ptr, *npos_m = &pos_m [excess_0];
 			new_pos = &new_positions [3];
 			
 			// Update new_pos to contain the midpoints of pos_m
@@ -170,8 +168,7 @@ namespace plans
 			linalg::block::banded_factorize (id, np, m + (nbot == 0 ? 1 : -nbot - excess_n - 1) + (id == 0 ? 1: -excess_0 - ntop), kl, ku, &matrix [(id == 0 ? 0 : 1 + excess_0) * lda], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &buffer [0], &info, ldn, lda, m + 2 + kl + ku);
 		}
 		
-		template <class datatype>
-		void incompressible <datatype>::execute () {
+		void incompressible::execute () {
 			solver::execute ();
 			static int count = 0;
 
@@ -183,10 +180,10 @@ namespace plans
 				
 			linalg::scale ((m + 2) * ldn, 0.0, &data_temp [0]);
 		
-			datatype scalar = acos (-1.0) * 2.0 / (pos_n [n - 1] - pos_n [0]);
-			datatype *data_ptr = &data_temp [1];
+			double scalar = acos (-1.0) * 2.0 / (pos_n [n - 1] - pos_n [0]);
+			double *data_ptr = &data_temp [1];
 			
-			datatype *npos_m = &pos_m [excess_0], *ndata_z = &data_z [excess_0], *ndata_x = &data_x [excess_0];
+			double *npos_m = &pos_m [excess_0], *ndata_z = &data_z [excess_0], *ndata_x = &data_x [excess_0];
 			
 			data_ptr += excess_0;
 		
@@ -297,7 +294,5 @@ namespace plans
 
 			TRACE ("Solved");
 		}
-
-		template class incompressible <double>;
 	} /* solvers */
 } /* plans */
