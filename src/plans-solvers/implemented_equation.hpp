@@ -65,7 +65,7 @@ namespace plans
 				old2_rhs_ptr = std::shared_ptr <grids::variable> (new grids::variable (grid_n, grid_m, *element_flags));
 				old3_rhs_ptr = std::shared_ptr <grids::variable> (new grids::variable (grid_n, grid_m, *element_flags));
 				cor_rhs_ptr = std::shared_ptr <grids::variable> (new grids::variable (grid_n, grid_m, *element_flags));
-				transform = std::shared_ptr <plans::plan > (new plans::transforms::horizontal <double> (*new_rhs_ptr, real_real));
+				transform = std::shared_ptr <plans::plan > (new plans::transforms::horizontal (*new_rhs_ptr, real_real));
 			}
 			
 			virtual ~implemented_equation () {}

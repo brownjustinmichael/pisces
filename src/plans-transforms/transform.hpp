@@ -27,7 +27,6 @@ namespace plans
 		/*!**********************************************************************
 		 * \brief A plan that transforms the data horizontally via Fourier transform
 		 ************************************************************************/
-		template <class datatype>
 		class horizontal : public plans::plan
 		{
 		protected:
@@ -39,7 +38,7 @@ namespace plans
 			int flags; //!< A set of flags for setting up the transform
 			int threads; //!< The integer number of threads to use
 			
-			datatype scalar; //!< The scalar by which to scale the data after transform
+			double scalar; //!< The scalar by which to scale the data after transform
 			std::vector <fftw_plan> plans; //!< A vector of fftw_plan objects
 			std::vector <fftwf_plan> plans_float; //!< A vector of fftwf_plan objects (for single precision)
 			fftw_iodim major_iodim; //!< A dimensional object needed by fftw
@@ -57,7 +56,7 @@ namespace plans
 			 * @param i_flags A set of flags for setting up the transform (e.g. inverse)
 			 * @param i_threads The number of threads over which to split the transform
 			 */
-			void init (int i_n, int i_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int i_threads = 0);
+			void init (int i_n, int i_m, double* i_data_in, double* i_data_out, int i_flags, int i_threads = 0);
 			
 		public:
 			/*!**********************************************************************
@@ -90,7 +89,7 @@ namespace plans
 				init (i_data_in.get_grid (0).get_n (), i_data_in.get_grid (1).get_n (), data_in, data_out, i_flags, i_threads);
 			}
 			
-			virtual ~horizontal () {}
+			virtual ~horizontal ();
 			
 			/*!**********************************************************************
 			 * \copydoc plan::execute
@@ -101,7 +100,6 @@ namespace plans
 		/*!**********************************************************************
 		 * \brief A plan that transforms the data vertically via Chebyshev/Cosine transform
 		 ************************************************************************/
-		template <class datatype>
 		class vertical : public plans::plan
 		{
 		protected:
@@ -113,12 +111,12 @@ namespace plans
 			int flags; //!< A set of flags for setting up the transform
 			int threads; //!< The integer number of threads to use
 			
-			datatype scalar; //!< The scalar by which to scale the data after transform
+			double scalar; //!< The scalar by which to scale the data after transform
 			std::vector <fftw_plan> plans; //!< A vector of fftw_plan objects
 			std::vector <fftwf_plan> plans_float; //!< A vector of fftwf_plan objects (for single precision)
 			
 		private:
-			void init (int i_n, int i_m, datatype* i_data_in, datatype* i_data_out, int i_flags, int i_threads = 0);
+			void init (int i_n, int i_m, double* i_data_in, double* i_data_out, int i_flags, int i_threads = 0);
 			
 		public:
 			/*!**********************************************************************
@@ -150,7 +148,7 @@ namespace plans
 				init (i_data_in.get_grid (0).get_n (), i_data_in.get_grid (1).get_n (), data_in, data_out, i_flags, i_threads);
 			}
 			
-			virtual ~vertical () {}
+			virtual ~vertical ();
 			
 			/*!**********************************************************************
 			 * \copydoc plan::execute

@@ -18,8 +18,7 @@ namespace plans
 {
 	namespace transforms
 	{
-		template <>
-		void horizontal <double>::init (int i_n, int i_m, double* i_data_in, double* i_data_out, int i_flags, int i_threads) {
+		void horizontal::init (int i_n, int i_m, double* i_data_in, double* i_data_out, int i_flags, int i_threads) {
 			n = i_n;
 			m = i_m;
 			data_in = i_data_in;
@@ -64,15 +63,13 @@ namespace plans
 
 		}
 		
-		template <>
-		horizontal <double>::~horizontal () {
+		horizontal::~horizontal () {
 			for (int i = 0; i < threads; ++i) {
 				fftw_destroy_plan (plans [i]);
 			}
 		}
 	
-		template <>
-		void horizontal <double>::execute () {
+		void horizontal::execute () {
 			TRACE ("Executing...");
 		
 	#pragma omp parallel for num_threads (threads)
@@ -85,10 +82,8 @@ namespace plans
 			TRACE ("Execution Complete.");
 		}
 	
-		template class horizontal <double>;
 		
-		template <>
-		void vertical <double>::init (int i_n, int i_m, double* i_data_in, double* i_data_out, int i_flags, int i_threads) {
+		void vertical::init (int i_n, int i_m, double* i_data_in, double* i_data_out, int i_flags, int i_threads) {
 			n = i_n;
 			m = i_m;
 			data_in = i_data_in;
@@ -117,13 +112,11 @@ namespace plans
 			}
 		}
 	
-		template <>
-		vertical <double>::~vertical () {
+		vertical::~vertical () {
 			fftw_destroy_plan (plans [0]);
 		}
 	
-		template <>
-		void vertical <double>::execute () {
+		void vertical::execute () {
 			TRACE ("Executing...");
 
 			if (m > 1 && !(flags & ignore_m)) {
@@ -138,6 +131,5 @@ namespace plans
 			TRACE ("Execution Complete.");
 		}
 	
-		template class vertical <double>;
 	} /* transforms */
 } /* plans */

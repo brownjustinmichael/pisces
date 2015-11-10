@@ -37,7 +37,6 @@ namespace plans
 		 * 
 		 * Note that the design of the element class expects that calling only the transform does not change the dataset. The transformed dataset must first be read back into the original for the transform to take effect.
 		 *********************************************************************/
-		template <class datatype>
 		class transformer
 		{
 		protected:
@@ -70,14 +69,5 @@ namespace plans
 		};
 	} /* transforms */
 } /* plans */
-
-/**
- * @brief A null shared pointer to a transformer class for convenience
- * @return A null shared pointer to a transformer class
- */
-template <class datatype>
-std::shared_ptr <plans::transforms::transformer <datatype>> NULL_transformer () {
-	return std::shared_ptr <plans::transforms::transformer <datatype>> ();
-}
 
 #endif /* end of include guard: TRANSFORM_HPP_S8KRHTX3 */

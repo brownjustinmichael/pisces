@@ -92,7 +92,7 @@ namespace data
 		int n_steps; //!< The number of steps the system has taken
 
 		std::map <std::string, bool> is_corrector; //!< A map indicating whether an equation is a solver or a corrector (correctors take place only after all solvers are done)
-		std::map <std::string, std::shared_ptr <plans::transforms::transformer <datatype>>> transformers; //!< A map of shared pointers to the transformers associated with each variable
+		std::map <std::string, std::shared_ptr <plans::transforms::transformer>> transformers; //!< A map of shared pointers to the transformers associated with each variable
 
 		datatype duration; //!< The total time elapsed in the simulation thus far
 		datatype timestep; //!< The current timestep
@@ -646,14 +646,14 @@ namespace data
 				for (int j = 0; j < m; ++j) {
 					linalg::copy (n, &((*grid_n) [0]), (*this) (name, real_real, 0, j), 1, m);
 				}
-				transformers [name] = NULL_transformer <datatype> ();
+				transformers [name] = std::shared_ptr <plans::transforms::transformer> ();
 			} else if (name == "z") {
 				for (int i = 0; i < n; ++i) {
 					linalg::copy (m, &((*grid_m) [0]), (*this) (name, real_real, i));
 				}
-				transformers [name] = NULL_transformer <datatype> ();
+				transformers [name] = std::shared_ptr <plans::transforms::transformer> ();
 			} else {
-				transformers [name] = std::shared_ptr <plans::transforms::transformer <datatype> > (new plans::transforms::implemented_transformer <datatype> (*grid_n, *grid_m, (*this) [name], plans::transforms::forward_vertical | plans::transforms::forward_horizontal | plans::transforms::inverse_vertical | plans::transforms::inverse_horizontal , &(flags), &((*this) [name].component_flags)));
+				transformers [name] = std::shared_ptr <plans::transforms::transformer > (new plans::transforms::implemented_transformer (*grid_n, *grid_m, (*this) [name], plans::transforms::forward_vertical | plans::transforms::forward_horizontal | plans::transforms::inverse_vertical | plans::transforms::inverse_horizontal , &(flags), &((*this) [name].component_flags)));
 			}
 			TRACE ("Done.");
 			return *variables [name];
