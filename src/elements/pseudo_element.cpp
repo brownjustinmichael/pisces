@@ -47,14 +47,14 @@ namespace pisces
 		data.transformers ["mmw"]->update ();
 		data.transformers ["density"]->update ();
 
-		*split_solver <datatype> (equations ["composition"], timestep, 
+		*split_solver (equations ["composition"], timestep, 
 			dirichlet (i_params ["equations.composition.bottom.value"].as <datatype> ()), 
 			dirichlet (i_params ["equations.composition.top.value"].as <datatype> ())) 
 		+ advec (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		params ["equations.composition.diffusion"] * density_diff (data ["density"]);
 
-		*split_solver <datatype> (equations ["temperature"], timestep, 
+		*split_solver (equations ["temperature"], timestep, 
 			dirichlet (i_params ["equations.temperature.bottom.value"].as <datatype> ()), 
 			dirichlet (i_params ["equations.temperature.top.value"].as <datatype> ())) 
 		+ advec (data ["x_velocity"], data ["z_velocity"]) 
@@ -65,7 +65,7 @@ namespace pisces
 		;
 
 		// Set up the x_velocity equation, note the missing pressure term, which is handled in div
-		*split_solver <datatype> (equations ["x_velocity"], timestep, neumann (0.0), neumann (0.0)) 
+		*split_solver (equations ["x_velocity"], timestep, neumann (0.0), neumann (0.0)) 
 		+ advec (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		params ["equations.velocity.diffusion"] * density_diff (data ["density"])
@@ -73,7 +73,7 @@ namespace pisces
 		;
 
 		// Set up the z_velocity equation, note the missing pressure term, which is handled in div
-		*split_solver <datatype> (equations ["z_velocity"], timestep, dirichlet (0.0), dirichlet (0.0)) 
+		*split_solver (equations ["z_velocity"], timestep, dirichlet (0.0), dirichlet (0.0)) 
 		+ advec (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		- grad_z (data ["bg_pressure"])

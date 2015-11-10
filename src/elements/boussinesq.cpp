@@ -129,7 +129,7 @@ namespace pisces
 		
 		// Set up the temperature equation
 		if (!(i_params ["equations.temperature.ignore"].IsDefined () && i_params ["equations.temperature.ignore"].as <bool> ())) {
-			*split_solver <datatype> (equations ["temperature"], timestep, 
+			*split_solver (equations ["temperature"], timestep, 
 				neumann (i_params ["equations.temperature.bottom.value"].as <datatype> ()), 
 				dirichlet (i_params ["equations.temperature.top.value"].as <datatype> ())) 
 			+ advec (data ["x_velocity"], data ["z_velocity"])
@@ -147,7 +147,7 @@ namespace pisces
 
 		// Set up the composition equation
 		if (i_params ["equations.composition"].IsDefined () && !(i_params ["equations.composition.ignore"].IsDefined () && i_params ["equations.composition.ignore"].as <bool> ())) {
-			*split_solver <datatype> (equations ["composition"], timestep, 
+			*split_solver (equations ["composition"], timestep, 
 				dirichlet (i_params ["equations.composition.bottom.value"].as <datatype> ()), 
 				dirichlet (i_params ["equations.composition.top.value"].as <datatype> ())) 
 			+ advec (data ["x_velocity"], data ["z_velocity"]) 
@@ -158,7 +158,7 @@ namespace pisces
 
 		// Set up the x_velocity equation, note the missing pressure term, which is handled in div
 		if (!(i_params ["equations.x_velocity.ignore"].IsDefined () && i_params ["equations.x_velocity.ignore"].as <bool> ())) {
-			*split_solver <datatype> (equations ["x_velocity"], timestep, 
+			*split_solver (equations ["x_velocity"], timestep, 
 				neumann (0.0), 
 				neumann (0.0)) 
 			+ advec (data ["x_velocity"], data ["z_velocity"]) 
@@ -169,7 +169,7 @@ namespace pisces
 
 		// Set up the z_velocity equation, note the missing pressure term, which is handled in div
 		if (!(i_params ["equations.z_velocity.ignore"].IsDefined () && i_params ["equations.z_velocity.ignore"].as <bool> ())) {
-			*split_solver <datatype> (equations ["z_velocity"], timestep, 
+			*split_solver (equations ["z_velocity"], timestep, 
 				dirichlet (0.0), 
 				dirichlet (0.0)) 
 			+ advec (data ["x_velocity"], data ["z_velocity"]) 

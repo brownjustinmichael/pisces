@@ -46,7 +46,6 @@ namespace boundaries
 	 * 
 	 * Note that the boundary point appears twice in the matrix. This is not an oversight; the two conditions to be met are 1) ensure that the boundary evolves according to the scheme and 2) ensure that B1 and B2 have the same value.
 	 ************************************************************************/
-	template <class datatype>
 	class boundary
 	{
 	public:
@@ -70,7 +69,7 @@ namespace boundaries
 			 * 
 			 * @return A shared pointer to the newly constructed boundary class
 			 */
-			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid **grids, bool top) = 0;
+			virtual std::shared_ptr <boundary> instance (grids::grid **grids, bool top) = 0;
 
 			/**
 			 * @brief Generate an instance of a boundary object associated with the factory
@@ -81,7 +80,7 @@ namespace boundaries
 			 * 
 			 * @return A shared pointer to the newly constructed boundary class
 			 */
-			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid &grid_n, grids::grid &grid_m, bool top) {
+			virtual std::shared_ptr <boundary> instance (grids::grid &grid_n, grids::grid &grid_m, bool top) {
 				grids::grid *grids [3] = {&grid_n, &grid_m};
 				return instance (grids, top);
 			}
@@ -137,25 +136,25 @@ namespace boundaries
 		/*!**********************************************************************
 		 * \brief If this is a communicating boundary, send data to the adjacent element, else do nothing
 		 * 
-		 * \param data_temp The datatype pointer to the data to send
+		 * \param data_temp The double pointer to the data to send
 		 * \param lda The leading dimension of the data to send
 		 * \param n The depth of the data to send, if negative, send the overlap region
 		 * 
 		 * This sends data_temp to the adjacent element if it exists. This will automatically send the full width of the boundary and will send the first n rows of data_temp.
 		 ************************************************************************/
-		virtual void send (datatype *data_temp, int lda, int n = -1) {}
+		virtual void send (double *data_temp, int lda, int n = -1) {}
 		
 		/*!**********************************************************************
 		 * \brief If this is a communicating boundary, receive data from the adjacent element, else do nothing
 		 * 
-		 * \param data_temp The datatype pointer to the data to receive
+		 * \param data_temp The double pointer to the data to receive
 		 * \param lda The leading dimension of the data to receive
 		 * \param n The depth of the data to receive, if negative, receive the overlap region
 		 * \param alpha Scale data_temp by alpha before adding in the received data (0.0 for a clean copy)
 		 * 
 		 * This receives data_temp to the adjacent element if it exists. This will automatically receive the full width of the boundary and will receive the first n rows of data_temp.
 		 ************************************************************************/
-		virtual void receive (datatype *data_temp, int lda, int n = -1, datatype alpha = 1.0) {}
+		virtual void receive (double *data_temp, int lda, int n = -1, double alpha = 1.0) {}
 		
 		/*!**********************************************************************
 		 * \brief Calculate the right hand side of the matrix equation
@@ -166,7 +165,7 @@ namespace boundaries
 		 * \param lda The leading dimension of data_temp
 		 * \param flag A flag indicating whether this is an x_solve or z_solve
 		 ************************************************************************/
-		virtual void calculate_rhs (datatype *data, datatype *data_temp, int m, int lda, int flag) = 0;
+		virtual void calculate_rhs (double *data, double *data_temp, int m, int lda, int flag) = 0;
 		
 		/*!**********************************************************************
 		 * \brief Calculate the matrix for the matrix equation
@@ -178,7 +177,7 @@ namespace boundaries
 		 * \param lda The leading dimension of matrix_out
 		 * \param diverging Whether this matrix is associated with the incompressible corrector object
 		 ************************************************************************/
-		virtual void calculate_matrix (datatype timestep, datatype *default_matrix, datatype *matrix_in, datatype *matrix_out, int lda, bool diverging = false) = 0;
+		virtual void calculate_matrix (double timestep, double *default_matrix, double *matrix_in, double *matrix_out, int lda, bool diverging = false) = 0;
 	};
 
 	/**
@@ -192,20 +191,7 @@ namespace boundaries
 	 * @param excess_0 The number of excess points past the top boundary
 	 * @param excess_n The number of excess points past the bottom boundary
 	 */
-	template <class datatype>
-	void boundary_match (int m, std::shared_ptr <boundaries::boundary <datatype>> &boundary_0, std::shared_ptr <boundaries::boundary <datatype>> &boundary_n, datatype *data, int excess_0 = 1, int excess_n = 1) {
-	if (boundary_n) {
-		boundary_n->send (data + m - 2 * excess_n - 1, m, excess_n);
-	}
-	if (boundary_0) {
-		boundary_0->receive (data, m, excess_0, 0.0);
-		boundary_0->send (data + excess_0, m, excess_0 + 1);
-	}
-	if (boundary_n) {
-		boundary_n->receive (data + m - excess_n - 1, m, excess_n + 1, 0.0);
-	}
-}
-
+	void boundary_match (int m, std::shared_ptr <boundaries::boundary> &boundary_0, std::shared_ptr <boundaries::boundary> &boundary_n, double *data, int excess_0 = 1, int excess_n = 1);
 } /* boundaries */
 
 #endif /* end of include guard: BOUNDARY_HPP_013D6464 */

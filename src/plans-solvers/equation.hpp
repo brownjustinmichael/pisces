@@ -26,7 +26,6 @@ namespace plans
 		 * 
 		 * Note that the design of the element class expects that calling only the solve does not change the dataset. The solved dataset must first be read back into the original for the solve to take effect. In general, 
 		 *********************************************************************/
-		template <class datatype>
 		class equation
 		{
 		public:
@@ -91,7 +90,7 @@ namespace plans
 			 * 
 			 * \return The ith dependency of the equation
 			 ************************************************************************/
-			virtual const equation <datatype> *get_dependency (int i) = 0;
+			virtual const equation *get_dependency (int i) = 0;
 		
 			/*!**********************************************************************
 			 * \brief Add a dependency to one of the solvers in the equation
@@ -99,7 +98,7 @@ namespace plans
 			 * \param name The name of the dependency
 			 * \param flags The solver flag indicating with which direction the dependency is associated
 			 ************************************************************************/
-			virtual void add_dependency (equation <datatype> *name, int flags = 0x00) = 0;
+			virtual void add_dependency (equation *name, int flags = 0x00) = 0;
 		
 			/*!**********************************************************************
 			 * \brief Return a pointer to the data associated with the solver
@@ -108,7 +107,7 @@ namespace plans
 			 *
 			 * \return The pointer to the associated data
 			 ************************************************************************/
-			virtual datatype *data_ptr () {
+			virtual double *data_ptr () {
 				return data.ptr ();
 			}
 
@@ -119,7 +118,7 @@ namespace plans
 			 * 
 			 * @return The pointer to the rhs data
 			 */
-			virtual datatype *rhs_ptr  (int state = 0) = 0;
+			virtual double *rhs_ptr  (int state = 0) = 0;
 
 			/*!**********************************************************************
 			 * \brief Return the variable object of the data associated with the solver
@@ -146,14 +145,14 @@ namespace plans
 			 * 
 			 * Note: these matrices are implementation dependent, so the implicit plans must be associated with particular matrix types.
 			 ************************************************************************/
-			virtual datatype *matrix_ptr (int index = 0) = 0;
+			virtual double *matrix_ptr (int index = 0) = 0;
 		
 			/*!**********************************************************************
 			 * \brief Get a solver from the equation object
 			 * 
 			 * \param flags A set of integer flags describing the direction of the solve to get (x_solver, z_solver)
 			 ************************************************************************/
-			virtual std::shared_ptr <plans::solvers::solver <datatype>> get_solver (int flags = 0x00) = 0;
+			virtual std::shared_ptr <plans::solvers::solver> get_solver (int flags = 0x00) = 0;
 	
 			/*!**********************************************************************
 			 * \brief Add a solver to the equation
@@ -161,7 +160,7 @@ namespace plans
 			 * \param i_solver A shared pointer to the solver object to add
 			 * \param flags A set of integer flags describing the direction of the solve (x_solver, z_solver)
 			 ************************************************************************/
-			virtual void add_solver (std::shared_ptr <solver <datatype> > i_solver, int flags = 0x00) = 0;
+			virtual void add_solver (std::shared_ptr <solver > i_solver, int flags = 0x00) = 0;
 	
 			/*!**********************************************************************
 			 * \brief Add a solver to the equation
@@ -169,7 +168,7 @@ namespace plans
 			 * \param i_factory A solver factory to generate the solver object to add
 			 * \param flags A set of integer flags describing the direction of the solve (x_solver, z_solver)
 			 ************************************************************************/
-			virtual void add_solver (const typename plans::solvers::solver <datatype>::factory &i_factory, int flags = 0x00) = 0;
+			virtual void add_solver (const typename plans::solvers::solver::factory &i_factory, int flags = 0x00) = 0;
 	
 			/*!*******************************************************************
 			 * \brief Adds a plan to be executed
@@ -265,7 +264,7 @@ namespace plans
 			 * @param i_factory A shared pointer to the factory from which the plan should be instantiated
 			 * @return A reference to this equation with the new plan added
 			 */
-			equation <datatype> &operator+ (const std::shared_ptr <typename plan::factory> i_factory) {
+			equation &operator+ (const std::shared_ptr <typename plan::factory> i_factory) {
 				return *this + typename plan::factory_container (i_factory);
 			}
 
@@ -276,7 +275,7 @@ namespace plans
 			 * @param i_container The container whose contents should be added to the equation
 			 * @return A reference to this equation with the new plans added
 			 */
-			equation <datatype> &operator+ (const typename plan::factory_container &i_container) {
+			equation &operator+ (const typename plan::factory_container &i_container) {
 				add_plan (-1.0 * i_container);
 				return *this;
 			}
@@ -288,7 +287,7 @@ namespace plans
 			 * @param scalar The scalar to add to the equation
 			 * @return A reference to this equation with the new plans added
 			 */
-			equation <datatype> &operator+ (const datatype scalar) {
+			equation &operator+ (const double scalar) {
 				add_plan ((typename plan::factory_container) constant (-scalar));
 				return *this;
 			}
@@ -301,7 +300,7 @@ namespace plans
 			 * @return A reference to this equation with the new plan or plans added
 			 */
 			template <class other>
-			equation <datatype> &operator- (other i_other) {
+			equation &operator- (other i_other) {
 				return *this + i_other * (-1.0);
 			}
 
@@ -313,7 +312,7 @@ namespace plans
 			 * @return A reference to this equation with the new plan or plans added
 			 */
 			template <class other>
-			equation <datatype> &operator== (other i_other) {
+			equation &operator== (other i_other) {
 				return *this - i_other;
 			}
 

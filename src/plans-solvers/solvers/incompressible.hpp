@@ -22,12 +22,12 @@ namespace plans
 		 * \brief A solver to correct the velocities and pressure to be incompressible
 		 ************************************************************************/
 		template <class datatype>
-		class incompressible : public solver <datatype>
+		class incompressible : public solver
 		{
 		private:
-			using plans::solvers::solver <datatype>::data_in;
-			using plans::solvers::solver <datatype>::data_out;
-			using plans::solvers::solver <datatype>::element_flags;
+			using plans::solvers::solver::data_in;
+			using plans::solvers::solver::data_out;
+			using plans::solvers::solver::element_flags;
 			
 			int n; //!< The horizontal extent of the data
 			int ldn; //!< The horizontal extent of the data array
@@ -63,8 +63,8 @@ namespace plans
 			int np; //!< The total number of mpi processes
 			// std::shared_ptr <plans::plan > transform, transform_h, x_deriv, z_deriv;
 			
-			std::shared_ptr <boundaries::boundary <datatype>> boundary_0; //!< A shared pointer to the top boundary object
-			std::shared_ptr <boundaries::boundary <datatype>> boundary_n; //!< A shared pointer to the bottom boundary object
+			std::shared_ptr <boundaries::boundary> boundary_0; //!< A shared pointer to the top boundary object
+			std::shared_ptr <boundaries::boundary> boundary_n; //!< A shared pointer to the bottom boundary object
 			
 			std::vector <datatype> data_temp, diff, diff2; //!< A vector that represents the actual right hand side during the solve
 			std::vector <datatype> positions; //!< A vector containing the vertical positions
@@ -89,7 +89,7 @@ namespace plans
 			 * \param i_data_x A reference to the x component of the velocity
 			 * \param i_data_z A reference to the z component of the velocity
 			 ************************************************************************/
-			incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, grids::variable &i_data, grids::variable &i_data_out, grids::variable &i_data_x, grids::variable &i_data_z);
+			incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary> i_boundary_0, std::shared_ptr <boundaries::boundary> i_boundary_n, grids::variable &i_data, grids::variable &i_data_out, grids::variable &i_data_x, grids::variable &i_data_z);
 			
 			virtual ~incompressible () {}
 			
@@ -120,16 +120,16 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc solver::factory
 			 ************************************************************************/
-			class factory : public plans::solvers::solver <datatype>::factory
+			class factory : public plans::solvers::solver::factory
 			{
 			private:
 				mpi::messenger *messenger_ptr; //!< A pointer to the mpi messenger object for the solver to be constructed
-				std::shared_ptr <boundaries::boundary <datatype>> boundary_0; //!< A shared pointer to the top boundary for the solver to be constructed
-				std::shared_ptr <boundaries::boundary <datatype>> boundary_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
-				typename boundaries::boundary <datatype>::factory *boundary_factory_0; //!< A shared pointer to the top boundary for the solver to be constructed
-				typename boundaries::boundary <datatype>::factory *boundary_factory_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
-				plans::solvers::equation <datatype> &equation_x; //!< A reference to the x-component equation
-				plans::solvers::equation <datatype> &equation_z; //!< A reference to the z-component equation
+				std::shared_ptr <boundaries::boundary> boundary_0; //!< A shared pointer to the top boundary for the solver to be constructed
+				std::shared_ptr <boundaries::boundary> boundary_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
+				typename boundaries::boundary::factory *boundary_factory_0; //!< A shared pointer to the top boundary for the solver to be constructed
+				typename boundaries::boundary::factory *boundary_factory_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
+				plans::solvers::equation &equation_x; //!< A reference to the x-component equation
+				plans::solvers::equation &equation_z; //!< A reference to the z-component equation
 
 			public:
 				/*!**********************************************************************
@@ -139,7 +139,7 @@ namespace plans
 				 * \param i_equation_x A reference to the x-component equation
 				 * \param i_equation_z A reference to the z-component equation
 				 ************************************************************************/
-				factory (mpi::messenger *i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, plans::solvers::equation <datatype> &i_equation_x, plans::solvers::equation <datatype> &i_equation_z) : messenger_ptr (i_messenger_ptr), boundary_0 (i_boundary_0), boundary_n (i_boundary_n), equation_x (i_equation_x), equation_z (i_equation_z) {}
+				factory (mpi::messenger *i_messenger_ptr, std::shared_ptr <boundaries::boundary> i_boundary_0, std::shared_ptr <boundaries::boundary> i_boundary_n, plans::solvers::equation &i_equation_x, plans::solvers::equation &i_equation_z) : messenger_ptr (i_messenger_ptr), boundary_0 (i_boundary_0), boundary_n (i_boundary_n), equation_x (i_equation_x), equation_z (i_equation_z) {}
 
 				/*!**********************************************************************
 				 * \param i_messenger_ptr A pointer to the mpi messenger object for the solver to be constructed
@@ -148,15 +148,15 @@ namespace plans
 				 * \param i_equation_x A reference to the x-component equation
 				 * \param i_equation_z A reference to the z-component equation
 				 ************************************************************************/
- 				factory (mpi::messenger *i_messenger_ptr, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n, plans::solvers::equation <datatype> &i_equation_x, plans::solvers::equation <datatype> &i_equation_z) : messenger_ptr (i_messenger_ptr), boundary_factory_0 (&i_boundary_0), boundary_factory_n (&i_boundary_n), equation_x (i_equation_x), equation_z (i_equation_z) {}
+ 				factory (mpi::messenger *i_messenger_ptr, typename boundaries::boundary::factory &i_boundary_0, typename boundaries::boundary::factory &i_boundary_n, plans::solvers::equation &i_equation_x, plans::solvers::equation &i_equation_z) : messenger_ptr (i_messenger_ptr), boundary_factory_0 (&i_boundary_0), boundary_factory_n (&i_boundary_n), equation_x (i_equation_x), equation_z (i_equation_z) {}
 				
 				virtual ~factory () {}
 				
 				/*!**********************************************************************
 				 * \copydoc solver::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::variable &i_data_in, grids::variable &i_data_out, grids::variable &i_rhs) const {
-					return std::shared_ptr <plans::solvers::solver <datatype>> (new incompressible (messenger_ptr, boundary_factory_0 ? boundary_factory_0->instance (i_data_in.get_grids (), false) : boundary_0, boundary_factory_n ? boundary_factory_n->instance (i_data_in.get_grids (), true) : boundary_n, i_data_in, i_data_out, equation_x.data_var (), equation_z.data_var ()));
+				virtual std::shared_ptr <plans::solvers::solver> instance (grids::variable &i_data_in, grids::variable &i_data_out, grids::variable &i_rhs) const {
+					return std::shared_ptr <plans::solvers::solver> (new incompressible (messenger_ptr, boundary_factory_0 ? boundary_factory_0->instance (i_data_in.get_grids (), false) : boundary_0, boundary_factory_n ? boundary_factory_n->instance (i_data_in.get_grids (), true) : boundary_n, i_data_in, i_data_out, equation_x.data_var (), equation_z.data_var ()));
 				}
 			};
 		};

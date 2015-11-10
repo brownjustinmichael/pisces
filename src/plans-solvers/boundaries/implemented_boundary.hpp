@@ -22,11 +22,10 @@ namespace boundaries
 	/*!**********************************************************************
 	 * \brief A boundary that fixes the value of the data at the edge
 	 ************************************************************************/
-	template <class datatype>
-	class fixed_boundary : public boundaries::boundary <datatype>
+	class fixed_boundary : public boundaries::boundary
 	{
 	private:
-		datatype value; //!< The value at which to fix the data
+		double value; //!< The value at which to fix the data
 		bool top; //!< A boolean regarding whether this is the top or bottom of an element
 		int ldn; //!< The horizontal array extent
 		int m; //!< The number of data points in the vertical
@@ -38,7 +37,7 @@ namespace boundaries
 		 * \param i_value The value at which to fix the data at the edge
 		 * \param i_top A boolean regarding whether this is the top or bottom of an element
 		 ************************************************************************/
-		fixed_boundary (grids::grid &i_grid_n, grids::grid &i_grid_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n.get_n ())), top (i_top) {
+		fixed_boundary (grids::grid &i_grid_n, grids::grid &i_grid_m, double i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n.get_n ())), top (i_top) {
 			ldn = i_grid_n.get_ld ();
 			m = i_grid_m.get_n ();
 		}
@@ -48,31 +47,31 @@ namespace boundaries
 		/**
 		 * @copydoc boundary::factory
 		 */
-		class factory : public boundaries::boundary <datatype>::factory
+		class factory : public boundaries::boundary::factory
 		{
 		private:
-			datatype value; //!< The value of the boundary
+			double value; //!< The value of the boundary
 
 		public:
 			/**
 			 * @param i_value The value of the boundary
 			 */
-			factory (datatype i_value) : value (i_value) {}
+			factory (double i_value) : value (i_value) {}
 
 			virtual ~factory () {}
 			
 			/**
 			 * @copydoc boundary::factory::instance
 			 */
-			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid **grids, bool top) {
-				return std::shared_ptr <boundary <datatype>> (new fixed_boundary (*grids [0], *grids [1], value, top));
+			virtual std::shared_ptr <boundary> instance (grids::grid **grids, bool top) {
+				return std::shared_ptr <boundary> (new fixed_boundary (*grids [0], *grids [1], value, top));
 			}
 		};
 		
 		/*!**********************************************************************
 		 * \copydoc boundary::calculate_rhs
 		 ************************************************************************/
-		virtual void calculate_rhs (datatype *data, datatype *data_temp, int m, int lda, int flag) {
+		virtual void calculate_rhs (double *data, double *data_temp, int m, int lda, int flag) {
 			// Because the equation will be solved in fourier space, set the first value to the desired value and the rest to 0
 			data_temp [0] = value;
 			for (int i = 1; i < ldn; ++i) {
@@ -83,7 +82,7 @@ namespace boundaries
 		/*!**********************************************************************
 		 * \copydoc boundary::calculate_matrix
 		 ************************************************************************/
-		virtual void calculate_matrix (datatype timestep, datatype *default_matrix, datatype *matrix_in, datatype *matrix_out, int lda, bool diverging = false) {
+		virtual void calculate_matrix (double timestep, double *default_matrix, double *matrix_in, double *matrix_out, int lda, bool diverging = false) {
 			linalg::scale (m, 0.0, matrix_out, lda);
 			linalg::add_scaled (m, 1.0, default_matrix, matrix_out, m, lda);
 		}
@@ -92,15 +91,14 @@ namespace boundaries
 	/*!**********************************************************************
 	 * \brief A boundary the fixes the derivative of the data at the edge
 	 ************************************************************************/
-	template <class datatype>
-	class fixed_deriv_boundary : public boundaries::boundary <datatype>
+	class fixed_deriv_boundary : public boundaries::boundary
 	{
 	private:
-		datatype value; //!< The value at which to fix the derivative
+		double value; //!< The value at which to fix the derivative
 		bool top; //!< A boolean regarding whether this is the top or bottom of an element
 		int ldn; //!< The horizontal array extent
 		int m; //!< The number of data points in the vertical
-		datatype *deriv_matrix; //!< The matrix containing the derivative information
+		double *deriv_matrix; //!< The matrix containing the derivative information
 		
 	public:
 		/*!**********************************************************************
@@ -109,7 +107,7 @@ namespace boundaries
 		 * \param i_value The value at which to fix the derivative at the edge
 		 * \param i_top A boolean regarding whether this is the top or bottom of an element
 		 ************************************************************************/
-		fixed_deriv_boundary (grids::grid &i_grid_n, grids::grid &i_grid_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n.get_n ())), top (i_top) {
+		fixed_deriv_boundary (grids::grid &i_grid_n, grids::grid &i_grid_m, double i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n.get_n ())), top (i_top) {
 			ldn = i_grid_n.get_ld ();
 			m = i_grid_m.get_n ();
 			
@@ -122,31 +120,31 @@ namespace boundaries
 		/**
 		 * @copydoc boundary::factory
 		 */
-		class factory : public boundaries::boundary <datatype>::factory
+		class factory : public boundaries::boundary::factory
 		{
 		private:
-			datatype value; //!< The value at which the derivative will be fixed
+			double value; //!< The value at which the derivative will be fixed
 
 		public:
 			/**
 			 * @param i_value The value at which the derivative will be fixed
 			 */
-			factory (datatype i_value) : value (i_value) {}
+			factory (double i_value) : value (i_value) {}
 
 			virtual ~factory () {}
 			
 			/**
 			 * @copydoc boundary::factory::instance
 			 */
-			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid **grids, bool top) {
-				return std::shared_ptr <boundary <datatype>> (new fixed_deriv_boundary (*grids [0], *grids [1], value, top));
+			virtual std::shared_ptr <boundary> instance (grids::grid **grids, bool top) {
+				return std::shared_ptr <boundary> (new fixed_deriv_boundary (*grids [0], *grids [1], value, top));
 			}
 		};
 		
 		/*!**********************************************************************
 		 * \copydoc boundary::calculate_rhs
 		 ************************************************************************/
-		virtual void calculate_rhs (datatype *data, datatype *data_temp, int m, int lda, int flag) {
+		virtual void calculate_rhs (double *data, double *data_temp, int m, int lda, int flag) {
 			// If this is a z-directional solve, it's the same as the fixed_boundary case
 			if (flag & z_solve) {
 				data_temp [0] = value;
@@ -166,7 +164,7 @@ namespace boundaries
 		/*!**********************************************************************
 		 * \copydoc boundary::calculate_matrix
 		 ************************************************************************/
-		virtual void calculate_matrix (datatype timestep, datatype *default_matrix, datatype *matrix_in, datatype *matrix_out, int lda, bool diverging = false) {
+		virtual void calculate_matrix (double timestep, double *default_matrix, double *matrix_in, double *matrix_out, int lda, bool diverging = false) {
 			linalg::scale (m, 0.0, matrix_out, lda);
 			linalg::add_scaled (m, 1.0, deriv_matrix, matrix_out, m, lda);
 		}
@@ -175,8 +173,7 @@ namespace boundaries
 	/*!**********************************************************************
 	 * \brief A boundary to communicate between adjacent elements
 	 ************************************************************************/
-	template <class datatype>
-	class communicating_boundary : public boundaries::boundary <datatype>
+	class communicating_boundary : public boundaries::boundary
 	{
 	private:
 		int ldn; //!< The horizontal extent of the data array
@@ -187,10 +184,10 @@ namespace boundaries
 		mpi::messenger *messenger_ptr; //!< A pointer to the element messenger for communication
 		int out_id; //!< The id of the adjacent element
 		
-		datatype alpha; //!< The alpha parameter (usually 0.5) indicating how we are winding across the boundary (0.0 would be adopt all properties from the external element)
+		double alpha; //!< The alpha parameter (usually 0.5) indicating how we are winding across the boundary (0.0 would be adopt all properties from the external element)
 		bool top; //!< A boolean regarding whether this is the top or bottom of an element
 		
-		std::vector <datatype> buffer; //!< A data buffer for convenience
+		std::vector <double> buffer; //!< A data buffer for convenience
 		
 	public:
 		/*!**********************************************************************
@@ -223,7 +220,7 @@ namespace boundaries
 		/**
 		 * @copydoc boundary::factory
 		 */
-		class factory : public boundaries::boundary <datatype>::factory
+		class factory : public boundaries::boundary::factory
 		{
 		private:
 			mpi::messenger *messenger_ptr; //!< A pointer to the mpi messenger object
@@ -239,8 +236,8 @@ namespace boundaries
 			/**
 			 * @copydoc boundary::factory::instance
 			 */
-			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid **grids, bool top) {
-				return std::shared_ptr <boundary <datatype>> (new communicating_boundary (messenger_ptr, grids [0]->get_ld (), grids [1]->get_n (), top ? grids [1]->get_excess_n () : grids [1]->get_excess_0 (), top));
+			virtual std::shared_ptr <boundary> instance (grids::grid **grids, bool top) {
+				return std::shared_ptr <boundary> (new communicating_boundary (messenger_ptr, grids [0]->get_ld (), grids [1]->get_n (), top ? grids [1]->get_excess_n () : grids [1]->get_excess_0 (), top));
 			}
 		};
 		
@@ -268,7 +265,7 @@ namespace boundaries
 		/*!**********************************************************************
 		 * \copydoc boundary::send
 		 ************************************************************************/
-		virtual void send (datatype *data_temp, int lda, int n = -1) {
+		virtual void send (double *data_temp, int lda, int n = -1) {
 			for (int i = 0; i < ldn; ++i) {
 				for (int j = 0; j < (n < 0 ? n_boundary_out + 1 : n); ++j) {
 					buffer [j * ldn + i] = data_temp [i * lda + j];
@@ -281,7 +278,7 @@ namespace boundaries
 		/*!**********************************************************************
 		 * \copydoc boundary::receive
 		 ************************************************************************/
-		virtual void receive (datatype *data_temp, int lda, int n = -1, datatype alpha = 1.0) {
+		virtual void receive (double *data_temp, int lda, int n = -1, double alpha = 1.0) {
 			messenger_ptr->recv ((n_boundary_in + 1) * ldn, &buffer [0], out_id, 0);
 			
 			for (int i = 0; i < ldn; ++i) {
@@ -295,7 +292,7 @@ namespace boundaries
 		/*!**********************************************************************
 		 * \copydoc boundary::calculate_rhs
 		 ************************************************************************/
-		virtual void calculate_rhs (datatype *data, datatype *data_temp, int m, int lda, int flag) {
+		virtual void calculate_rhs (double *data, double *data_temp, int m, int lda, int flag) {
 			// Zero everything but the internal boundary row
 			linalg::matrix_scale (1 + n_boundary_out + n_boundary_in, ldn, 0.0, data_temp + (top ? 1 : -1 - n_boundary_out - n_boundary_in), lda);
 			// Scale the internal boundary by alpha
@@ -311,7 +308,7 @@ namespace boundaries
 		/*!**********************************************************************
 		 * \copydoc boundary::calculate_matrix
 		 ************************************************************************/
-		virtual void calculate_matrix (datatype timestep, datatype *default_matrix, datatype *matrix_in, datatype *matrix_out, int lda, bool diverging = false) {
+		virtual void calculate_matrix (double timestep, double *default_matrix, double *matrix_in, double *matrix_out, int lda, bool diverging = false) {
 			// Zero everything but the internal boundary row
 			linalg::matrix_scale (1 + n_boundary_out + n_boundary_in, m, 0.0, matrix_out + (top ? 1 : -1 - n_boundary_out - n_boundary_in), lda);
 			// Setting the external boundary matrix row with the row from the internal boundary row

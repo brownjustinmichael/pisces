@@ -28,12 +28,12 @@ namespace plans
 	 * @return The equation pointer for use in equation definitions
 	 */
 	template <class datatype>
-	std::shared_ptr <solvers::equation <datatype>> split_solver (std::shared_ptr <typename solvers::equation <datatype>> equation_ptr, datatype &timestep, std::shared_ptr <typename boundaries::boundary <datatype>::factory> boundary_0, std::shared_ptr <typename boundaries::boundary <datatype>::factory> boundary_n) {
+	std::shared_ptr <solvers::equation> split_solver (std::shared_ptr <typename solvers::equation> equation_ptr, datatype &timestep, std::shared_ptr <typename boundaries::boundary::factory> boundary_0, std::shared_ptr <typename boundaries::boundary::factory> boundary_n) {
 		if (equation_ptr->messenger_ptr->get_id () > 0) {
-			boundary_0 = std::shared_ptr <typename boundaries::boundary <datatype>::factory> (new typename boundaries::communicating_boundary <datatype>::factory (equation_ptr->messenger_ptr));
+			boundary_0 = std::shared_ptr <typename boundaries::boundary::factory> (new typename boundaries::communicating_boundary::factory (equation_ptr->messenger_ptr));
 		}
 		if (equation_ptr->messenger_ptr->get_id () + 1 < equation_ptr->messenger_ptr->get_np ()) {
-			boundary_n = std::shared_ptr <typename boundaries::boundary <datatype>::factory> (new typename boundaries::communicating_boundary <datatype>::factory (equation_ptr->messenger_ptr));
+			boundary_n = std::shared_ptr <typename boundaries::boundary::factory> (new typename boundaries::communicating_boundary::factory (equation_ptr->messenger_ptr));
 		}
 		equation_ptr->add_solver (typename solvers::collocation <datatype>::factory (equation_ptr->messenger_ptr, timestep, *boundary_0, *boundary_n), solvers::z_solver);
 		equation_ptr->add_solver (typename solvers::fourier <datatype>::factory (timestep, *boundary_0, *boundary_n), solvers::x_solver);
@@ -49,13 +49,13 @@ namespace plans
 	 * @return The equation pointer for use in equation definitions
 	 */
 	template <class datatype>
-	std::shared_ptr <solvers::equation <datatype>> div (std::shared_ptr <solvers::equation <datatype>> equation_ptr, std::shared_ptr <solvers::equation <datatype>> vel_n_ptr, std::shared_ptr <solvers::equation <datatype>> vel_m_ptr) {
-		std::shared_ptr <typename boundaries::boundary <datatype>::factory> boundary_0, boundary_n;
+	std::shared_ptr <solvers::equation> div (std::shared_ptr <solvers::equation> equation_ptr, std::shared_ptr <solvers::equation> vel_n_ptr, std::shared_ptr <solvers::equation> vel_m_ptr) {
+		std::shared_ptr <typename boundaries::boundary::factory> boundary_0, boundary_n;
 		if (equation_ptr->messenger_ptr->get_id () > 0) {
-			boundary_0 = std::shared_ptr <typename boundaries::boundary <datatype>::factory> (new typename boundaries::communicating_boundary <datatype>::factory (equation_ptr->messenger_ptr));
+			boundary_0 = std::shared_ptr <typename boundaries::boundary::factory> (new typename boundaries::communicating_boundary::factory (equation_ptr->messenger_ptr));
 		}
 		if (equation_ptr->messenger_ptr->get_id () + 1 < equation_ptr->messenger_ptr->get_np ()) {
-			boundary_n = std::shared_ptr <typename boundaries::boundary <datatype>::factory> (new typename boundaries::communicating_boundary <datatype>::factory (equation_ptr->messenger_ptr));
+			boundary_n = std::shared_ptr <typename boundaries::boundary::factory> (new typename boundaries::communicating_boundary::factory (equation_ptr->messenger_ptr));
 		}
 		equation_ptr->add_solver (typename solvers::incompressible <datatype>::factory (equation_ptr->messenger_ptr,  *boundary_0, *boundary_n, *vel_n_ptr, *vel_m_ptr), solvers::x_solver);
 			return equation_ptr;
@@ -73,13 +73,13 @@ namespace plans
 	 * @return The equation pointer for use in equation definitions
 	 */
 	template <class datatype>
-	std::shared_ptr <solvers::equation <datatype>> pdiv (std::shared_ptr <solvers::equation <datatype>> equation_ptr, std::shared_ptr <solvers::equation <datatype>> vel_n_ptr, std::shared_ptr <solvers::equation <datatype>> vel_m_ptr, datatype *density, datatype *pressure, datatype gamma = 5./3.) {
-		std::shared_ptr <typename boundaries::boundary <datatype>::factory> boundary_0, boundary_n;
+	std::shared_ptr <solvers::equation> pdiv (std::shared_ptr <solvers::equation> equation_ptr, std::shared_ptr <solvers::equation> vel_n_ptr, std::shared_ptr <solvers::equation> vel_m_ptr, datatype *density, datatype *pressure, datatype gamma = 5./3.) {
+		std::shared_ptr <typename boundaries::boundary::factory> boundary_0, boundary_n;
 		if (equation_ptr->messenger_ptr->get_id () > 0) {
-			boundary_0 = std::shared_ptr <typename boundaries::boundary <datatype>::factory> (new typename boundaries::communicating_boundary <datatype>::factory (equation_ptr->messenger_ptr));
+			boundary_0 = std::shared_ptr <typename boundaries::boundary::factory> (new typename boundaries::communicating_boundary::factory (equation_ptr->messenger_ptr));
 		}
 		if (equation_ptr->messenger_ptr->get_id () + 1 < equation_ptr->messenger_ptr->get_np ()) {
-			boundary_n = std::shared_ptr <typename boundaries::boundary <datatype>::factory> (new typename boundaries::communicating_boundary <datatype>::factory (equation_ptr->messenger_ptr));
+			boundary_n = std::shared_ptr <typename boundaries::boundary::factory> (new typename boundaries::communicating_boundary::factory (equation_ptr->messenger_ptr));
 		}
 		equation_ptr->add_solver (typename solvers::pseudo_incompressible <datatype>::factory (equation_ptr->messenger_ptr,  *boundary_0, *boundary_n, *vel_n_ptr, *vel_m_ptr, density, pressure, gamma), solvers::x_solver);
 			return equation_ptr;
@@ -92,8 +92,8 @@ namespace plans
 	 * @return The boundary factory associated with the dirichlet boundary
 	 */
 	template <class datatype>
-	typename std::shared_ptr <typename boundaries::boundary <datatype>::factory> dirichlet (datatype value) {
-		return std::shared_ptr <typename boundaries::boundary <datatype>::factory> (new typename boundaries::fixed_boundary <datatype>::factory (value));
+	typename std::shared_ptr <typename boundaries::boundary::factory> dirichlet (datatype value) {
+		return std::shared_ptr <typename boundaries::boundary::factory> (new typename boundaries::fixed_boundary::factory (value));
 	}
 
 	/**
@@ -103,8 +103,8 @@ namespace plans
 	 * @return The boundary factory associated with the neumann boundary
 	 */
 	template <class datatype>
-	typename std::shared_ptr <typename boundaries::boundary <datatype>::factory> neumann (datatype value) {
-		return std::shared_ptr <typename boundaries::boundary <datatype>::factory> (new typename boundaries::fixed_deriv_boundary <datatype>::factory (value));
+	typename std::shared_ptr <typename boundaries::boundary::factory> neumann (datatype value) {
+		return std::shared_ptr <typename boundaries::boundary::factory> (new typename boundaries::fixed_deriv_boundary::factory (value));
 	}
 }
 

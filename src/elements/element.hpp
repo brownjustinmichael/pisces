@@ -62,7 +62,7 @@ namespace pisces
 		data::data <datatype> &data; //!< An object that contains all the data in the simulation
 		int &element_flags; //!< A map of integer flags
 		
-		std::map <std::string, std::shared_ptr <plans::solvers::equation <datatype>>> equations; //!< A vector of shared pointers to the matrix equations
+		std::map <std::string, std::shared_ptr <plans::solvers::equation>> equations; //!< A vector of shared pointers to the matrix equations
 
 	private:
 		datatype rezone_mult; //!< To merit rezoning, the new timestep must be at least this factor larger than the current one
@@ -194,7 +194,7 @@ namespace pisces
 		 * \param i_name The integer solver name to add
 		 * \param i_solver_ptr A pointer to a solver object
 		 *********************************************************************/
-		inline void add_equation (std::string i_name, std::shared_ptr <plans::solvers::equation <datatype> > i_solver_ptr) {
+		inline void add_equation (std::string i_name, std::shared_ptr <plans::solvers::equation > i_solver_ptr) {
 			TRACE ("Adding solver...");
 			equations [i_name] = i_solver_ptr;
 			if (data.is_corrector [i_name]) {

@@ -55,7 +55,6 @@ namespace plans
 			implicit_only = 0x10
 		};
 
-		template <class datatype>
 		class equation;
 		
 		/*!*******************************************************************
@@ -63,11 +62,10 @@ namespace plans
 		 * 
 		 * The solver class is a more specialized unit than the element class, but with broader use than the plan class. It is designed to keep track of an entire matrix equation, both in regards to its setup and solution. It is also used as a class of convenience. Since the solver class contains most of the information needed by the various plans employed by the code, it can be passed to them in lieu of the other
 		 *********************************************************************/
-		template <class datatype>
 		class solver : public plan
 		{
 		private:
-			std::vector <equation <datatype>*> deps; //!< A vector containing the dependencies of this solver
+			std::vector <equation*> deps; //!< A vector containing the dependencies of this solver
 	
 		public:
 			using plans::plan::element_flags;
@@ -123,7 +121,7 @@ namespace plans
 			 * 
 			 * \return The ith dependency
 			 ************************************************************************/
-			virtual const equation <datatype> *get_dependency (int i) {
+			virtual const equation *get_dependency (int i) {
 				return deps [i];
 			}
 		
@@ -132,7 +130,7 @@ namespace plans
 			 * 
 			 * \param equation A pointer to the equation to add as a dependency
 			 ************************************************************************/
-			virtual void add_dependency (equation <datatype> *equation) {
+			virtual void add_dependency (equation *equation) {
 				deps.push_back (equation);
 			}
 	
@@ -141,7 +139,7 @@ namespace plans
 			 * 
 			 * Note: these matrices are implementation dependent, so the implicit plans must be associated with particular matrix types.
 			 ************************************************************************/
-			virtual datatype *matrix_ptr () = 0;
+			virtual double *matrix_ptr () = 0;
 			/*
 				TODO Restrict implicit plans to only be associated with one type of matrix solver
 			*/
@@ -182,7 +180,7 @@ namespace plans
 				 * 
 				 * This method creates a shared_ptr to a solver instance. The benefit to this inclusion is that the instance method can be called in a uniform way and hide communication of grid and matrix information from the user. If a plan would be created that would not do anything (e.g. something with a coefficient of 0.0), this will return a NULL shared pointer.
 				 ************************************************************************/
-				virtual std::shared_ptr <solver <datatype>> instance (grids::variable &i_data_in, grids::variable &i_data_out, grids::variable &i_rhs) const = 0;
+				virtual std::shared_ptr <solver> instance (grids::variable &i_data_in, grids::variable &i_data_out, grids::variable &i_rhs) const = 0;
 			};
 		};
 	} /* solvers */

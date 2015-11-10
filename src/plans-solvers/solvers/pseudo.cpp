@@ -32,8 +32,8 @@ namespace plans
 	namespace solvers
 	{
 		template <class datatype>
-		pseudo_incompressible <datatype>::pseudo_incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, grids::variable &i_data, grids::variable &i_data_out, grids::variable &i_rhs, grids::variable &i_data_x, grids::variable &i_data_z, datatype *i_density, datatype *i_pressure, datatype i_gamma) : 
-		solver <datatype> (i_data, i_data_out, this->get_state_in (), this->get_state ()), 
+		pseudo_incompressible <datatype>::pseudo_incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary> i_boundary_0, std::shared_ptr <boundaries::boundary> i_boundary_n, grids::variable &i_data, grids::variable &i_data_out, grids::variable &i_rhs, grids::variable &i_data_x, grids::variable &i_data_z, datatype *i_density, datatype *i_pressure, datatype i_gamma) : 
+		solver (i_data, i_data_out, this->get_state_in (), this->get_state ()), 
 		n (i_data.get_grid (0).get_n ()), 
 		ldn (i_data.get_grid (0).get_ld ()), 
 		m (i_data.get_grid (1).get_n ()), 
@@ -210,7 +210,7 @@ namespace plans
 		
 		template <class datatype>
 		void pseudo_incompressible <datatype>::execute () {
-			solver <datatype>::execute ();
+			solver::execute ();
 
 			int info;
 			TRACE ("Solving...");

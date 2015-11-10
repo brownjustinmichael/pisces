@@ -110,7 +110,7 @@ namespace pisces
 			for (typename data::data <datatype>::iterator iter = data.begin (); iter != data.end (); ++iter) {
 				if ((*iter != "x") && (*iter != "z")) {
 					DEBUG ("Adding " << *iter);
-					element <datatype>::add_equation (*iter, std::shared_ptr <plans::solvers::equation <datatype> > (new plans::solvers::implemented_equation <datatype> (data [*iter], i_messenger_ptr)));
+					element <datatype>::add_equation (*iter, std::shared_ptr <plans::solvers::equation > (new plans::solvers::implemented_equation (data [*iter], i_messenger_ptr)));
 				}
 			}
 			

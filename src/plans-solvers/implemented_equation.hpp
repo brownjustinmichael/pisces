@@ -23,13 +23,12 @@ namespace plans
 		 * 
 		 * This implements the equation class into a two-dimensional object. It should be possible to remove this class by making equation more general.
 		 ************************************************************************/
-		template <class datatype>
-		class implemented_equation : public equation <datatype>
+		class implemented_equation : public equation
 		{
 		private:
-			using plans::solvers::equation <datatype>::data;
-			using plans::solvers::equation <datatype>::element_flags;
-			using plans::solvers::equation <datatype>::component_flags;
+			using plans::solvers::equation::data;
+			using plans::solvers::equation::element_flags;
+			using plans::solvers::equation::component_flags;
 			
 			int n; //!< The integer number of elements in the horizontal
 			int ldn; //!< The integer length of the array in the horizontal (can be larger than n)
@@ -38,8 +37,8 @@ namespace plans
 			grids::grid &grid_n; //!< The grid object in the horizontal
 			grids::grid &grid_m; //!< The grid object in the vertical
 			
-			std::shared_ptr <plans::solvers::solver <datatype> > x_solver; //!< A pointer to the horizontal solver
-			std::shared_ptr <plans::solvers::solver <datatype> > z_solver; //!< A pointer to the vertical solver
+			std::shared_ptr <plans::solvers::solver > x_solver; //!< A pointer to the horizontal solver
+			std::shared_ptr <plans::solvers::solver > z_solver; //!< A pointer to the vertical solver
 			
 			std::shared_ptr <grids::variable> old_rhs_ptr; //!< A variable of the old rhs pointer, for accuracy
 			std::shared_ptr <grids::variable> old2_rhs_ptr; //!< A variable of the rhs pointer from two steps ago
@@ -54,7 +53,7 @@ namespace plans
 			 * \copydoc equation::equation
 			 ************************************************************************/
 			implemented_equation (grids::variable &i_data, mpi::messenger *i_messenger_ptr) : 
-			plans::solvers::equation <datatype> (i_data, i_messenger_ptr), 
+			plans::solvers::equation (i_data, i_messenger_ptr), 
 			n (i_data.get_grid (0).get_n ()), 
 			ldn (i_data.get_grid (0).get_ld ()), 
 			m (i_data.get_grid (1).get_n ()), 
@@ -66,7 +65,7 @@ namespace plans
 				old2_rhs_ptr = std::shared_ptr <grids::variable> (new grids::variable (grid_n, grid_m, *element_flags));
 				old3_rhs_ptr = std::shared_ptr <grids::variable> (new grids::variable (grid_n, grid_m, *element_flags));
 				cor_rhs_ptr = std::shared_ptr <grids::variable> (new grids::variable (grid_n, grid_m, *element_flags));
-				transform = std::shared_ptr <plans::plan > (new plans::transforms::horizontal <datatype> (*new_rhs_ptr, real_real));
+				transform = std::shared_ptr <plans::plan > (new plans::transforms::horizontal <double> (*new_rhs_ptr, real_real));
 			}
 			
 			virtual ~implemented_equation () {}
@@ -95,7 +94,7 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc equation::get_dependency
 			 ************************************************************************/
-			virtual const equation <datatype> *get_dependency (int i) {
+			virtual const equation *get_dependency (int i) {
 				if (*component_flags & x_solve) {
 					return x_solver->get_dependency (i);
 				} else if (*component_flags & z_solve) {
@@ -129,14 +128,14 @@ namespace plans
 			 * 
 			 * @return The pointer to the rhs data
 			 */
-			virtual datatype *rhs_ptr  (int state = 0) {
+			virtual double *rhs_ptr  (int state = 0) {
 				return new_rhs_ptr->ptr (state);
 			}
 			
 			/*!**********************************************************************
 			 * \copydoc equation::get_solver
 			 ************************************************************************/
-			virtual std::shared_ptr <plans::solvers::solver <datatype>> get_solver (int flags = 0x00) {
+			virtual std::shared_ptr <plans::solvers::solver> get_solver (int flags = 0x00) {
 				if (!(flags & not_x_solver)) {
 					return x_solver;
 				}
@@ -150,7 +149,7 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc equation::add_dependency
 			 ************************************************************************/
-			virtual void add_dependency (equation <datatype> *name, int flags = 0x00) {
+			virtual void add_dependency (equation *name, int flags = 0x00) {
 				if (!(flags & not_x_solver)) {
 					if (x_solver) {
 						x_solver->add_dependency (name);
@@ -176,7 +175,7 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc equation::matrix_ptr
 			 ************************************************************************/
-			datatype *matrix_ptr (int index = 0) {
+			double *matrix_ptr (int index = 0) {
 				if (index == 0) {
 					if (x_solver) {
 						return x_solver->matrix_ptr ();
@@ -205,7 +204,7 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc equation::add_solver
 			 ************************************************************************/
-			virtual void add_solver (std::shared_ptr <plans::solvers::solver <datatype>> i_solver, int flags = 0x00) {
+			virtual void add_solver (std::shared_ptr <plans::solvers::solver> i_solver, int flags = 0x00) {
 				TRACE ("Adding solver...");
 				if (!(flags & not_x_solver)) {
 					x_solver = i_solver;
@@ -217,23 +216,23 @@ namespace plans
 			}
 			
 			/*!**********************************************************************
-			 * \copydoc equation::add_solver(const typename solver<datatype>::factory&,int)
+			 * \copydoc equation::add_solver(const typename solver<double>::factory&,int)
 			 ************************************************************************/
-			virtual void add_solver (const typename plans::solvers::solver <datatype>::factory &i_factory, int flags = 0x00) {
-				plans::solvers::implemented_equation <datatype>::add_solver (i_factory.instance (data, data, *cor_rhs_ptr), flags);
+			virtual void add_solver (const typename plans::solvers::solver::factory &i_factory, int flags = 0x00) {
+				plans::solvers::implemented_equation::add_solver (i_factory.instance (data, data, *cor_rhs_ptr), flags);
 			}
 			
 			/*!**********************************************************************
-			 * \copydoc equation::add_plan(const typename plan<datatype>::factory&)
+			 * \copydoc equation::add_plan(const typename plan<double>::factory&)
 			 ************************************************************************/
 			void add_plan (const typename plans::plan::factory &i_factory) {
 				TRACE ("Adding plan...");
-				datatype* matrices [2] = {matrix_ptr (0), matrix_ptr (1)};
-				plans::solvers::equation <datatype>::add_plan (i_factory.instance (matrices, data, *new_rhs_ptr));
+				double* matrices [2] = {matrix_ptr (0), matrix_ptr (1)};
+				plans::solvers::equation::add_plan (i_factory.instance (matrices, data, *new_rhs_ptr));
 			}
 			
 			/*!**********************************************************************
-			 * \copydoc equation::add_plan(const typename plan<datatype>::factory_container&)
+			 * \copydoc equation::add_plan(const typename plan<double>::factory_container&)
 			 ************************************************************************/
 			void add_plan (const typename plans::plan::factory_container &i_container) {
 				TRACE ("Adding plan...");
@@ -249,7 +248,7 @@ namespace plans
 			void setup_plans () {
 				if (x_solver) x_solver->setup ();
 				if (z_solver) z_solver->setup ();
-				equation <datatype>::setup_plans ();
+				equation::setup_plans ();
 			}
 		
 		protected:
@@ -319,7 +318,7 @@ namespace plans
 					linalg::matrix_copy (m, ldn, old_rhs_ptr->ptr (real_spectral), cor_rhs_ptr->ptr (real_spectral));
 
 					linalg::matrix_scale (m, ldn, 0.0, new_rhs_ptr->ptr (spectral_spectral));
-					equation <datatype>::execute_plans (implicit_only);
+					equation::execute_plans (implicit_only);
 					linalg::matrix_add_scaled (m, ldn, 1.0, new_rhs_ptr->ptr (spectral_spectral), cor_rhs_ptr->ptr (real_spectral));
 
 					if (*component_flags & ignore_net) {

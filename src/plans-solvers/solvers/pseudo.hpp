@@ -22,12 +22,12 @@ namespace plans
 		 * \brief A solver to correct the velocities and pressure to be incompressible
 		 ************************************************************************/
 		template <class datatype>
-		class pseudo_incompressible : public solver <datatype>
+		class pseudo_incompressible : public solver
 		{
 		private:
-			using plans::solvers::solver <datatype>::data_in;
-			using plans::solvers::solver <datatype>::data_out;
-			using plans::solvers::solver <datatype>::element_flags;
+			using plans::solvers::solver::data_in;
+			using plans::solvers::solver::data_out;
+			using plans::solvers::solver::element_flags;
 			
 			int n; //!< The horizontal extent of the data
 			int ldn; //!< The horizontal extent of the data array
@@ -63,8 +63,8 @@ namespace plans
 			int np; //!< The total number of mpi processes
 			// std::shared_ptr <plans::plan > transform, transform_h, x_deriv, z_deriv;
 			
-			std::shared_ptr <boundaries::boundary <datatype>> boundary_0; //!< A shared pointer to the top boundary object
-			std::shared_ptr <boundaries::boundary <datatype>> boundary_n; //!< A shared pointer to the bottom boundary object
+			std::shared_ptr <boundaries::boundary> boundary_0; //!< A shared pointer to the top boundary object
+			std::shared_ptr <boundaries::boundary> boundary_n; //!< A shared pointer to the bottom boundary object
 						
 			std::vector <datatype> x; //!< Additional storage for the block banded solve
 
@@ -95,7 +95,7 @@ namespace plans
 			 * @param i_density A pointer to the density data
 			 * @param i_gamma The specific heat ratio
 			 ************************************************************************/
-			pseudo_incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, grids::variable &i_data, grids::variable &i_data_out, grids::variable &i_rhs, grids::variable &i_data_x, grids::variable &i_data_z, datatype *i_density, datatype *i_pressure, datatype i_gamma = 5. / 3.);
+			pseudo_incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary> i_boundary_0, std::shared_ptr <boundaries::boundary> i_boundary_n, grids::variable &i_data, grids::variable &i_data_out, grids::variable &i_rhs, grids::variable &i_data_x, grids::variable &i_data_z, datatype *i_density, datatype *i_pressure, datatype i_gamma = 5. / 3.);
 			
 			virtual ~pseudo_incompressible () {}
 
@@ -133,17 +133,17 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc solver::factory
 			 ************************************************************************/
-			class factory : public plans::solvers::solver <datatype>::factory
+			class factory : public plans::solvers::solver::factory
 			{
 			private:
 				mpi::messenger *messenger_ptr; //!< A pointer to the mpi messenger object for the solver to be constructed
-				std::shared_ptr <boundaries::boundary <datatype>> boundary_0; //!< A shared pointer to the top boundary for the solver to be constructed
-				std::shared_ptr <boundaries::boundary <datatype>> boundary_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
-				typename boundaries::boundary <datatype>::factory *boundary_factory_0; //!< A shared pointer to the top boundary for the solver to be constructed
-				typename boundaries::boundary <datatype>::factory *boundary_factory_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
+				std::shared_ptr <boundaries::boundary> boundary_0; //!< A shared pointer to the top boundary for the solver to be constructed
+				std::shared_ptr <boundaries::boundary> boundary_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
+				typename boundaries::boundary::factory *boundary_factory_0; //!< A shared pointer to the top boundary for the solver to be constructed
+				typename boundaries::boundary::factory *boundary_factory_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
 				datatype gamma;
-				plans::solvers::equation <datatype> &equation_x; //!< A reference to the x-component equation
-				plans::solvers::equation <datatype> &equation_z; //!< A reference to the z-component equation
+				plans::solvers::equation &equation_x; //!< A reference to the x-component equation
+				plans::solvers::equation &equation_z; //!< A reference to the z-component equation
 				datatype *pressure; //!< The pointer to the pressure data
 				datatype *density; //!< The pointer to the density data
 
@@ -158,7 +158,7 @@ namespace plans
 				 * @param i_pressure The pointer to the pressure data
 				 * @param i_gamma The ratio of specific heats
 				 ************************************************************************/
-				factory (mpi::messenger *i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, plans::solvers::equation <datatype> &i_equation_x, plans::solvers::equation <datatype> &i_equation_z, datatype *i_density, datatype *i_pressure, datatype i_gamma = 5. / 3.) : 
+				factory (mpi::messenger *i_messenger_ptr, std::shared_ptr <boundaries::boundary> i_boundary_0, std::shared_ptr <boundaries::boundary> i_boundary_n, plans::solvers::equation &i_equation_x, plans::solvers::equation &i_equation_z, datatype *i_density, datatype *i_pressure, datatype i_gamma = 5. / 3.) : 
 				messenger_ptr (i_messenger_ptr), 
 				boundary_0 (i_boundary_0), 
 				boundary_n (i_boundary_n), 
@@ -178,7 +178,7 @@ namespace plans
 				 * @param i_pressure The pointer to the pressure data
 				 * @param i_gamma The ratio of specific heats
 				 ************************************************************************/
-				factory (mpi::messenger *i_messenger_ptr, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n, plans::solvers::equation <datatype> &i_equation_x, plans::solvers::equation <datatype> &i_equation_z, datatype *i_density, datatype *i_pressure, datatype i_gamma = 5. / 3.) : 
+				factory (mpi::messenger *i_messenger_ptr, typename boundaries::boundary::factory &i_boundary_0, typename boundaries::boundary::factory &i_boundary_n, plans::solvers::equation &i_equation_x, plans::solvers::equation &i_equation_z, datatype *i_density, datatype *i_pressure, datatype i_gamma = 5. / 3.) : 
 				messenger_ptr (i_messenger_ptr), 
 				boundary_factory_0 (&i_boundary_0), 
 				boundary_factory_n (&i_boundary_n), 
@@ -193,8 +193,8 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc solver::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::variable &i_data_in, grids::variable &i_data_out, grids::variable &i_rhs) const {
-					return std::shared_ptr <plans::solvers::solver <datatype>> (new pseudo_incompressible (messenger_ptr, boundary_factory_0 ? boundary_factory_0->instance (i_data_in.get_grids (), false) : boundary_0, boundary_factory_n ? boundary_factory_n->instance (i_data_in.get_grids (), true) : boundary_n, i_data_in, i_data_out, i_rhs, equation_x.data_var (), equation_z.data_var (), density, pressure, gamma));
+				virtual std::shared_ptr <plans::solvers::solver> instance (grids::variable &i_data_in, grids::variable &i_data_out, grids::variable &i_rhs) const {
+					return std::shared_ptr <plans::solvers::solver> (new pseudo_incompressible (messenger_ptr, boundary_factory_0 ? boundary_factory_0->instance (i_data_in.get_grids (), false) : boundary_0, boundary_factory_n ? boundary_factory_n->instance (i_data_in.get_grids (), true) : boundary_n, i_data_in, i_data_out, i_rhs, equation_x.data_var (), equation_z.data_var (), density, pressure, gamma));
 				}
 			};
 		};
