@@ -32,7 +32,6 @@
 #include "plans/plan.hpp"
 #include "plans-solvers/equation.hpp"
 
-#include "rezone.hpp"
 #include "data/data.hpp"
 
 /*!**********************************************************************
@@ -48,7 +47,6 @@ namespace pisces
 	 * A true run will contain multiple elements linked together at the 
 	 * boundaries. This code is designed to work by the collocation method.
 	 *********************************************************************/
-	template <class datatype>
 	class element
 	{
 	protected:
@@ -57,20 +55,20 @@ namespace pisces
 		int dimensions; //!< The integer number of dimensions in the element
 		io::parameters& params; //!< The map that contains the input parameters
 		
-		datatype &timestep; //!< The datatype timestep length
+		double &timestep; //!< The double timestep length
 
-		data::data <datatype> &data; //!< An object that contains all the data in the simulation
+		data::data &data; //!< An object that contains all the data in the simulation
 		int &element_flags; //!< A map of integer flags
 		
 		std::map <std::string, std::shared_ptr <plans::solvers::equation>> equations; //!< A vector of shared pointers to the matrix equations
 
 	private:
-		datatype rezone_mult; //!< To merit rezoning, the new timestep must be at least this factor larger than the current one
+		double rezone_mult; //!< To merit rezoning, the new timestep must be at least this factor larger than the current one
 		std::vector <std::string> equation_keys; //!< A vector of integer keys to the equations map
 		std::vector <std::string> corrector_keys; //!< A vector of integer keys to the equations map
 		
 	public:
-		datatype &duration; //!< The datatype total simulated time
+		double &duration; //!< The double total simulated time
 		std::vector <std::shared_ptr <grids::grid>> grids; //!< A vector of shared pointers to the collocation grids
 		mpi::messenger* messenger_ptr; //!< A pointer to the messenger object
 		formats::virtual_file *rezone_virtual_file; //!< A shared_ptr to a virtual file object, for rezoning
@@ -105,7 +103,7 @@ namespace pisces
 		* \param i_messenger_ptr A pointer to a messenger object for inter-element communication
 		* \param i_element_flags An integer set of global flags for the element
 		*********************************************************************/
-		element (int i_name, int i_dimensions, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
+		element (int i_name, int i_dimensions, io::parameters& i_params, data::data &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
 		dimensions (i_dimensions),
 		params (i_params),
 		timestep (i_data.timestep),
@@ -118,7 +116,7 @@ namespace pisces
 			axes.resize (i_dimensions);
 			messenger_ptr = i_messenger_ptr;
 			timestep = 0.0;
-			rezone_mult = params.get <datatype> ("grid.rezone.mult");
+			rezone_mult = params.get <double> ("grid.rezone.mult");
 		}
 		
 		virtual ~element () {}
@@ -139,27 +137,27 @@ namespace pisces
 		virtual std::string class_name() = 0;
 		
 		/*!*******************************************************************
-		 * \brief Get the datatype reference to the named scalar
+		 * \brief Get the double reference to the named scalar
 		 * 
 		 * \param name The integer name from the index enumeration
 		 * 
-		 * \return A datatype reference to the first element of the named scalar
+		 * \return A double reference to the first element of the named scalar
 		 *********************************************************************/
 		inline grids::variable &operator[] (std::string name) {
 			return data [name];
 		}
 		
 		/*!*******************************************************************
-		 * \brief Get the datatype reference to the given index of the named scalar
+		 * \brief Get the double reference to the given index of the named scalar
 		 * 
 		 * \param name The integer name from the index enumeration
 		 * \param index The integer index of interest	
 		 * 
 		 * For simplicity, this could be overwritten in higher dimensions.
 		 * 
-		 * \return A datatype reference to the given index of the named scalar
+		 * \return A double reference to the given index of the named scalar
 		 *********************************************************************/
-		virtual datatype *operator() (std::string name, int index = 0) {
+		virtual double *operator() (std::string name, int index = 0) {
 			return data (name, index);
 		}
 		
@@ -180,7 +178,7 @@ namespace pisces
 		 * 
 		 * \return A pointer to the given index of the named scalar
 		 ************************************************************************/
-		virtual datatype* ptr (std::string name, int index = 0) {
+		virtual double* ptr (std::string name, int index = 0) {
 			/*
 				TODO It would be nice to check if name exists in debug mode...
 			*/
@@ -215,7 +213,7 @@ namespace pisces
 		 * 
 		 * \return A pointer to the given index of the named solver matrix
 		 ************************************************************************/
-		inline datatype *matrix_ptr (std::string i_name, int index = 0) {
+		inline double *matrix_ptr (std::string i_name, int index = 0) {
 			/*
 				TODO It would be nice to check if name exists in debug mode...
 			*/
@@ -227,7 +225,7 @@ namespace pisces
 		 * 
 		 * \param i_name The integer index to be initialized from the index enumeration
 		 *********************************************************************/
-		virtual datatype *initialize (std::string i_name) {
+		virtual double *initialize (std::string i_name) {
 			return this->ptr (i_name);
 		}
 		
@@ -272,7 +270,7 @@ namespace pisces
 				data.transformers [equation_keys [i]]->update ();
 			}
 
-			for (typename data::data <datatype>::iterator iter = data.begin (); iter != data.end (); ++iter)
+			for (data::data ::iterator iter = data.begin (); iter != data.end (); ++iter)
 			{
 				DEBUG ("Updating " << *iter);
 				data [*iter].update ();
@@ -305,16 +303,16 @@ namespace pisces
 		 * This method should be overwritten in the final class. It uses the 
 		 * knowledge of the user to beat numerical instabilities.
 		 * 
-		 * \return The datatype recommended timestep for the next timestep
+		 * \return The double recommended timestep for the next timestep
 		 ************************************************************************/
-		virtual datatype calculate_min_timestep (formats::virtual_file *virtual_file = NULL, bool limiters = true) = 0;
+		virtual double calculate_min_timestep (formats::virtual_file *virtual_file = NULL, bool limiters = true) = 0;
 		
 		/*!**********************************************************************
 		 * \brief Caculate the zoning that minimizes the timestep according to size constraints
 		 * 
-		 * \param positions A datatype pointer to the zoning positions
-		 * \param min_size The datatype minimum distance between zoning positions
-		 * \param max_size The datatype maximum distance between zoning positions
+		 * \param positions A double pointer to the zoning positions
+		 * \param min_size The double minimum distance between zoning positions
+		 * \param max_size The double maximum distance between zoning positions
 		 * \param n_tries The number of attempts before stepping
 		 * \param iters_fixed_t The integer number of iterations at each temperature
 		 * \param step_size The real maximum step size
@@ -328,50 +326,7 @@ namespace pisces
 		 * 
 		 * \return A shared_ptr to a virtual_file object containing the chosen rezoning
 		 ************************************************************************/
-		virtual formats::virtual_file *rezone_minimize_ts (datatype *positions, datatype min_size, datatype max_size, int n_tries = 20, int iters_fixed_t = 1000, datatype step_size = 1.0, datatype k = 1.0, datatype t_initial = 0.008, datatype mu_t = 1.003, datatype t_min = 2.0e-6, double (*function) (element <datatype> *, formats::virtual_file *) = element <datatype>::rezone_calculate_ts) {
-			TRACE ("Rezoning...");
-
-			rezone_virtual_file = make_virtual_file (profile_only | timestep_only);
-			
-			rezone_data <datatype> data;
-			data.element_ptr = this;
-			data.id = messenger_ptr->get_id ();
-			data.np = messenger_ptr->get_np ();
-			data.merit_func = function;
-			data.min_size = min_size;
-			data.max_size = max_size;
-			
-			get_zoning_positions (data.positions);
-			
-			datatype original = rezone_data <datatype>::func (&data);
-			
-			gsl_siman_params_t params = {n_tries, iters_fixed_t, step_size, k, t_initial, mu_t, t_min};
-
-			const gsl_rng_type * T;
-			gsl_rng * r;
-			
-			gsl_rng_env_setup();
-			
-			T = gsl_rng_default;
-			r = gsl_rng_alloc(T);
-
-			gsl_siman_solve(r, &data, rezone_data <datatype>::func, rezone_data <datatype>::rezone_generate_step, rezone_data <datatype>::rezone_step_size, NULL, NULL, NULL, NULL, sizeof (rezone_data <datatype>), params);
-
-			gsl_rng_free (r);
-			
-			datatype value = rezone_data <datatype>::func (&data);
-			
-			DEBUG ("Old: " << original << " New: " << value);
-			
-			if (value < original * (original < 0. ? 1. / rezone_mult : rezone_mult)) {
-				for (int i = 0; i < data.np + 1; ++i) {
-					positions [i] = data.positions [i];
-				}
-				return make_rezoned_virtual_file (data.positions, make_virtual_file ());
-			}
-			
-			return NULL;
-		}
+		virtual formats::virtual_file *rezone_minimize_ts (double *positions, double min_size, double max_size, int n_tries = 20, int iters_fixed_t = 1000, double step_size = 1.0, double k = 1.0, double t_initial = 0.008, double mu_t = 1.003, double t_min = 2.0e-6, double (*function) (element *, formats::virtual_file *) = element::rezone_calculate_ts);
 		
 		/*!**********************************************************************
 		 * \brief The main function call of the class
@@ -405,7 +360,7 @@ namespace pisces
 		/*!**********************************************************************
 		 * \brief Protected method to rezone the current state into a virtual file
 		 * 
-		 * \param positions A datatype pointer to the zoning position array
+		 * \param positions A double pointer to the zoning position array
 		 * \param virtual_file_ptr A pointer to the virtual_file to be rezoned (for speed)
 		 * \param flags The binary flags for method execution
 		 * 
@@ -413,17 +368,17 @@ namespace pisces
 		 * 
 		 * \return A shared_ptr to the rezoned virtual file
 		 ************************************************************************/
-		virtual formats::virtual_file *make_rezoned_virtual_file (datatype *positions, formats::virtual_file *virtual_file_ptr, int flags = 0x00) = 0;
+		virtual formats::virtual_file *make_rezoned_virtual_file (double *positions, formats::virtual_file *virtual_file_ptr, int flags = 0x00) = 0;
 		
 	protected:
 		/*!**********************************************************************
 		 * \brief Get the current zoning position array
 		 * 
-		 * \param positions A datatype pointer to the input and output position array
+		 * \param positions A double pointer to the input and output position array
 		 * 
 		 * This method needs to be overwritten in a subclass
 		 ************************************************************************/
-		virtual void get_zoning_positions (datatype *positions) = 0;
+		virtual void get_zoning_positions (double *positions) = 0;
 		
 	private:
 		/*!**********************************************************************
@@ -433,7 +388,7 @@ namespace pisces
 		 * 
 		 * In order, the rezone_union objects must contain 1) a pointer to the element, 2) the total number of elements in the system, 3) min_size argument from rezone_minimize_ts, 4) max_size argument from rezone_minimize_ts, 5-n) positions of the zonal boundaries. This method is to be called by the GSL simulated annealing routine.
 		 ************************************************************************/
-		static double rezone_calculate_ts (element <datatype> *element_ptr, formats::virtual_file *virt) {
+		static double rezone_calculate_ts (element *element_ptr, formats::virtual_file *virt) {
 			double timestep = element_ptr->calculate_min_timestep (virt, false);
 			return -timestep;
 		}

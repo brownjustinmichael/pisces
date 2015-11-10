@@ -57,7 +57,6 @@ namespace data
 	 * 
 	 * This object contains both the physical data and the output instructions.
 	 ************************************************************************/
-	template <class datatype>
 	class data
 	{
 	protected:
@@ -77,7 +76,7 @@ namespace data
 		
 		std::vector <std::string> scalar_names; //!< The vector of variable names
 		std::map <std::string, std::shared_ptr <grids::variable>> variables; //!< The string map of vectors containing the variable data
-		datatype *weights; //!< Weights to be used for averaging over the data
+		double *weights; //!< Weights to be used for averaging over the data
 
 		clock_t cbegin; //!< A beginning time, for timing
 		clock_t cend; //!< An ending time, for timing 
@@ -94,8 +93,8 @@ namespace data
 		std::map <std::string, bool> is_corrector; //!< A map indicating whether an equation is a solver or a corrector (correctors take place only after all solvers are done)
 		std::map <std::string, std::shared_ptr <plans::transforms::transformer>> transformers; //!< A map of shared pointers to the transformers associated with each variable
 
-		datatype duration; //!< The total time elapsed in the simulation thus far
-		datatype timestep; //!< The current timestep
+		double duration; //!< The total time elapsed in the simulation thus far
+		double timestep; //!< The current timestep
 		int flags; //!< A map of the simulation flags
 
 		/**
@@ -176,11 +175,11 @@ namespace data
 			}
 
 			if (dump_stream) {
-				dump_stream->template append <datatype> (i_name, var.ptr (), output_flags);
+				dump_stream->template append <double> (i_name, var.ptr (), output_flags);
 			}
 			for (auto iter = streams.begin (); iter != streams.end (); ++iter)
 			{
-				(*iter)->template append <datatype> (i_name, var.ptr (), output_flags);
+				(*iter)->template append <double> (i_name, var.ptr (), output_flags);
 			}
 			scalar_names.push_back (i_name);
 			std::sort (scalar_names.begin (), scalar_names.end ());
@@ -377,7 +376,7 @@ namespace data
 
 			std::shared_ptr <io::output> output_stream;
 			if (output_params ["timed"].IsDefined () && output_params ["timed"].as <bool> ()) {
-				output_stream.reset (new io::timed_appender_output <datatype, formats::netcdf> (grid, file_from (output_params), duration, output_params ["timed_every"].as <datatype> ()));
+				output_stream.reset (new io::timed_appender_output <double, formats::netcdf> (grid, file_from (output_params), duration, output_params ["timed_every"].as <double> ()));
 			} else {
 				output_stream.reset (new io::appender_output <formats::netcdf> (grid, file_from (output_params), &duration, output_params ["every"].as <int> ()));
 			}
@@ -392,8 +391,8 @@ namespace data
 		 ************************************************************************/
 		virtual void setup_dump (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
 			// Iterate through the scalar fields and append them to the variables which the output will write to file
-			output_ptr->template append <datatype> ("t", &duration, formats::scalar);
-			output_ptr->template append <datatype> ("dt", &timestep, formats::scalar);
+			output_ptr->template append <double> ("t", &duration, formats::scalar);
+			output_ptr->template append <double> ("dt", &timestep, formats::scalar);
 			output_ptr->template append <const int> ("mode", &(get_mode ()), formats::scalar);
 			output_ptr->append("step", &n_steps, formats::scalar);
 
@@ -439,7 +438,7 @@ namespace data
 		 * 
 		 * \return A pointer to the indexed data
 		 ************************************************************************/
-		datatype *operator() (const std::string &name, int state = 0, int index = 0) {
+		double *operator() (const std::string &name, int state = 0, int index = 0) {
 			if (variables.find (name) != variables.end () && (int) variables.size () != 0) {
 				return variables [name]->ptr (state) + index * variables [name]->dims ();
 			}
@@ -458,25 +457,24 @@ namespace data
 	/*!**********************************************************************
 	 * \brief An implemeted form of data in 2D
 	 ************************************************************************/
-	template <class datatype>
-	class implemented_data : public data <datatype>
+	class implemented_data : public data
 	{
 	protected:
-		using data <datatype>::iterator;
-		using data <datatype>::weights;
-		using data <datatype>::variables;
-		using data <datatype>::flags;
+		using data::iterator;
+		using data::weights;
+		using data::variables;
+		using data::flags;
 		
 		std::shared_ptr <grids::grid> grid_n; //!< The horizontal grid object
 		std::shared_ptr <grids::grid> grid_m; //!< The vertical grid object
 		int n; //!< The horizontal extent of the data
 		int m; //!< The vertical extent of the data
 
-		std::vector <datatype> area; //!< A calculation of the area encompassed by each cell in the grid
+		std::vector <double> area; //!< A calculation of the area encompassed by each cell in the grid
 		
 	public:
-		using data <datatype>::transformers;
-		using data <datatype>::duration;
+		using data::transformers;
+		using data::duration;
 		
 		/*!**********************************************************************
 		 * \param i_axis_n The horizontal axis object
@@ -488,7 +486,7 @@ namespace data
 		 * \param dump_every The frequency to dump to file
 		 ************************************************************************/
 		implemented_data (grids::axis *i_axis_n, grids::axis *i_axis_m, io::parameters &i_params, int i_name = 0, std::string dump_file = "", std::string dump_directory = "./", int dump_every = 1) : 
-		data <datatype> (i_params, i_name), 
+		data (i_params, i_name), 
 		grid_n (std::shared_ptr <grids::grid> (new typename grids::horizontal::grid (i_axis_n))), 
 		grid_m (std::shared_ptr <grids::grid> (new typename grids::vertical::grid (i_axis_m))), 
 		n (grid_n->get_n ()), 
@@ -531,15 +529,15 @@ namespace data
 		 ************************************************************************/
 		virtual void setup_profile (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
 			typedef typename std::map <std::string, std::shared_ptr <grids::variable>>::iterator iterator;
-			for (iterator iter = data <datatype>::variables.begin (); iter != data <datatype>::variables.end (); ++iter) {
-				output_ptr->template append <datatype> (iter->first, (*this) (iter->first));
-				output_ptr->template append <datatype> ("rms_" + iter->first, std::shared_ptr <functors::functor> (new functors::root_mean_square_functor <datatype> ((*this) (iter->first), n, m)));
-				output_ptr->template append <datatype> ("avg_" + iter->first, std::shared_ptr <functors::functor> (new functors::average_functor <datatype> ((*this) (iter->first), n, m)));
+			for (iterator iter = data::variables.begin (); iter != data::variables.end (); ++iter) {
+				output_ptr->template append <double> (iter->first, (*this) (iter->first));
+				output_ptr->template append <double> ("rms_" + iter->first, std::shared_ptr <functors::functor> (new functors::root_mean_square_functor <double> ((*this) (iter->first), n, m)));
+				output_ptr->template append <double> ("avg_" + iter->first, std::shared_ptr <functors::functor> (new functors::average_functor <double> ((*this) (iter->first), n, m)));
 			}
-			output_ptr->template append <datatype> ("t", &(duration), formats::scalar);
-			output_ptr->template append <const int> ("mode", &(data <datatype>::get_mode ()), formats::scalar);
+			output_ptr->template append <double> ("t", &(duration), formats::scalar);
+			output_ptr->template append <const int> ("mode", &(data::get_mode ()), formats::scalar);
 
-			data <datatype>::setup_profile (output_ptr, flags);
+			data::setup_profile (output_ptr, flags);
 		}
 
 		/**
@@ -553,7 +551,7 @@ namespace data
 		std::shared_ptr <io::input> setup_from (YAML::Node input_params) {
 			const formats::data_grid grid = formats::data_grid::two_d (n, m);
 
-			return data <datatype>::template setup_from <format> (input_params, grid);
+			return data::template setup_from <format> (input_params, grid);
 		}
 
 		/**
@@ -569,7 +567,7 @@ namespace data
 		std::shared_ptr <io::output> setup_output_from (YAML::Node output_params, int state = real_real, int flags = 0x00) {
 			const formats::data_grid grid = formats::data_grid::two_d (n, m);
 
-			return data <datatype>::template setup_output_from <format> (output_params, grid, state, flags);
+			return data::template setup_output_from <format> (output_params, grid, state, flags);
 		}
 
 		/**
@@ -623,8 +621,8 @@ namespace data
 		 * @param j The z index of the variable to index
 		 * @return A pointer to the data cell for the given variable and state
 		 */
-		datatype *operator() (const std::string &name, int state = 0, int i = 0, int j = 0) {
-			return data <datatype>::operator() (name, state, i * m + j);
+		double *operator() (const std::string &name, int state = 0, int i = 0, int j = 0) {
+			return data::operator() (name, state, i * m + j);
 		}
 
 	protected:
@@ -635,13 +633,13 @@ namespace data
 			TRACE ("Initializing " << name << "...");
 			// Size allowing for real FFT buffer
 			if (i_flags & uniform_n) {
-				data <datatype>::variables [name] = std::shared_ptr <grids::variable> (new grids::variable (*grid_m, flags, name));
+				data::variables [name] = std::shared_ptr <grids::variable> (new grids::variable (*grid_m, flags, name));
 				return *variables [name];
 			} else if (i_flags & uniform_m) {
-				data <datatype>::variables [name] = std::shared_ptr <grids::variable> (new grids::variable (*grid_n, flags, name));
+				data::variables [name] = std::shared_ptr <grids::variable> (new grids::variable (*grid_n, flags, name));
 				return *variables [name];
 			}
-			data <datatype>::variables [name] = std::shared_ptr <grids::variable> (new grids::variable (*grid_n, *grid_m, flags, name, 3, i_flags & vector2D ? 2 : (i_flags & vector3D ? 3 : 1)));
+			data::variables [name] = std::shared_ptr <grids::variable> (new grids::variable (*grid_n, *grid_m, flags, name, 3, i_flags & vector2D ? 2 : (i_flags & vector3D ? 3 : 1)));
 			if (name == "x") {
 				for (int j = 0; j < m; ++j) {
 					linalg::copy (n, &((*grid_n) [0]), (*this) (name, real_real, 0, j), 1, m);

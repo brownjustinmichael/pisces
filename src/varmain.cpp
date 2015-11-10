@@ -64,9 +64,9 @@ int main (int argc, char *argv[])
 		
 		TRACE ("Constructing element");
 		
-		std::shared_ptr <pisces::element <double>> element (new pisces::vardiff_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
+		std::shared_ptr <pisces::element> element (new pisces::vardiff_element (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
 		
-		if (pisces::element <double>::version () < versions::version ("0.6.0.0")) {
+		if (pisces::element::version () < versions::version ("0.6.0.0")) {
 			INFO ("element.version < 0.6.0.0");
 		}
 		else {
@@ -86,7 +86,7 @@ int main (int argc, char *argv[])
 		while (n_steps < parameters.get <int> ("time.steps") && element->duration < parameters.get <double> ("time.stop")) {
 			if (parameters.get <int> ("grid.rezone.check_every") > 0 && n_steps != 0 && n_elements > 1) {
 				INFO ("Rezoning");
-				formats::virtual_file *virt = element->rezone_minimize_ts (&positions [0], parameters.get <double> ("grid.rezone.min_size"), parameters.get <double> ("grid.rezone.max_size"), parameters.get <int> ("grid.rezone.n_tries"), parameters.get <int> ("grid.rezone.iters_fixed_t"), parameters.get <double> ("grid.rezone.step_size"), parameters.get <double> ("grid.rezone.k"), parameters.get <double> ("grid.rezone.t_initial"), parameters.get <double> ("grid.rezone.mu_t"), parameters.get <double> ("grid.rezone.t_min"), pisces::vardiff_element <double>::rezone_merit);
+				formats::virtual_file *virt = element->rezone_minimize_ts (&positions [0], parameters.get <double> ("grid.rezone.min_size"), parameters.get <double> ("grid.rezone.max_size"), parameters.get <int> ("grid.rezone.n_tries"), parameters.get <int> ("grid.rezone.iters_fixed_t"), parameters.get <double> ("grid.rezone.step_size"), parameters.get <double> ("grid.rezone.k"), parameters.get <double> ("grid.rezone.t_initial"), parameters.get <double> ("grid.rezone.mu_t"), parameters.get <double> ("grid.rezone.t_min"), pisces::vardiff_element::rezone_merit);
 				
 				if (virt) {
 					formats::virtual_files ["main/virtual_file"] = *virt;
@@ -95,7 +95,7 @@ int main (int argc, char *argv[])
 					virtual_input.reset (new io::formatted_input <formats::virtual_format> (formats::data_grid::two_d (n, m), "main/virtual_file"));
 					data.setup (virtual_input);
 				
-					element.reset (new pisces::vardiff_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
+					element.reset (new pisces::vardiff_element (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
 				}
 			}
 			element->run (n_steps);

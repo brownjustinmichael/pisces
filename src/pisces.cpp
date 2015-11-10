@@ -61,13 +61,13 @@ int main (int argc, char *argv[])
 		
 		TRACE ("Building data");
 		
-		data::thermo_compositional_data <double> data (&horizontal_axis, &vertical_axis, id, n_elements, parameters);
+		data::thermo_compositional_data data (&horizontal_axis, &vertical_axis, id, n_elements, parameters);
 		
 		TRACE ("Constructing element");
 		
-		std::shared_ptr <pisces::element <double>> element (new pisces::pseudo_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
+		std::shared_ptr <pisces::element> element (new pisces::pseudo_element (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
 		
-		if (pisces::element <double>::version () < versions::version ("0.6.0.0")) {
+		if (pisces::element::version () < versions::version ("0.6.0.0")) {
 			INFO ("element.version < 0.6.0.0");
 		}
 		else {
@@ -96,7 +96,7 @@ int main (int argc, char *argv[])
 					virtual_input.reset (new io::formatted_input <formats::virtual_format> (formats::data_grid::two_d (n, m), "main/virtual_file"));
 					data.setup (virtual_input);
 				
-					element.reset (new pisces::pseudo_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
+					element.reset (new pisces::pseudo_element (horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00));
 				}
 			}
 			element->run (n_steps);

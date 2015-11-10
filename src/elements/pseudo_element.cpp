@@ -18,15 +18,14 @@ namespace pisces
 {
 	using namespace plans;
 
-	template <class datatype>
-	pseudo_element <datatype>::pseudo_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
-	implemented_element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags) {
+	pseudo_element::pseudo_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
+	implemented_element (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags) {
 		x_ptr = data ("x");
 		z_ptr = data ("z");
 		x_vel_ptr = data ("x_velocity");
 		z_vel_ptr = data ("z_velocity");
 		
-		cfl = i_params ["time.cfl"].as <datatype> ();
+		cfl = i_params ["time.cfl"].as <double> ();
 
 		data.initialize ("bg_pressure", uniform_n);
 		data.initialize ("mmw");
@@ -34,13 +33,13 @@ namespace pisces
 		for (int j = 0; j < m; ++j)
 		{
 			if ((*grids [1]) [j] > 0.0) {
-				data ["bg_pressure"].ptr () [j] = i_params ["equations.pressure.zero"].as<datatype>() + (*grids [1]) [j] * (i_params ["equations.pressure.top"].as<datatype>() - i_params ["equations.pressure.zero"].as<datatype>()) * 2.;
+				data ["bg_pressure"].ptr () [j] = i_params ["equations.pressure.zero"].as<double>() + (*grids [1]) [j] * (i_params ["equations.pressure.top"].as<double>() - i_params ["equations.pressure.zero"].as<double>()) * 2.;
 			} else {
-				data ["bg_pressure"].ptr () [j] = i_params ["equations.pressure.zero"].as<datatype>() + (*grids [1]) [j] * (i_params ["equations.pressure.zero"].as<datatype>() - i_params ["equations.pressure.bottom"].as<datatype>()) * 2.;
+				data ["bg_pressure"].ptr () [j] = i_params ["equations.pressure.zero"].as<double>() + (*grids [1]) [j] * (i_params ["equations.pressure.zero"].as<double>() - i_params ["equations.pressure.bottom"].as<double>()) * 2.;
 			}
 		}
 
-		data ["mmw"] == 1.0 / (1.0 - data ["composition"] * i_params ["equations.constants.mass_ratio"].as <datatype> ());
+		data ["mmw"] == 1.0 / (1.0 - data ["composition"] * i_params ["equations.constants.mass_ratio"].as <double> ());
 		data ["density"] == data ["bg_pressure"] / data ["temperature"] * data ["mmw"];
 		// The mass ratio is (m1 - m2) / m1: near 1 => m1 >> m2, near 0 => m1 ~= m2; m1 > m2 by definition
 
@@ -48,19 +47,19 @@ namespace pisces
 		data.transformers ["density"]->update ();
 
 		*split_solver (equations ["composition"], timestep, 
-			dirichlet (i_params ["equations.composition.bottom.value"].as <datatype> ()), 
-			dirichlet (i_params ["equations.composition.top.value"].as <datatype> ())) 
+			dirichlet (i_params ["equations.composition.bottom.value"].as <double> ()), 
+			dirichlet (i_params ["equations.composition.top.value"].as <double> ())) 
 		+ advec (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		params ["equations.composition.diffusion"] * density_diff (data ["density"]);
 
 		*split_solver (equations ["temperature"], timestep, 
-			dirichlet (i_params ["equations.temperature.bottom.value"].as <datatype> ()), 
-			dirichlet (i_params ["equations.temperature.top.value"].as <datatype> ())) 
+			dirichlet (i_params ["equations.temperature.bottom.value"].as <double> ()), 
+			dirichlet (i_params ["equations.temperature.top.value"].as <double> ())) 
 		+ advec (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		params ["equations.temperature.diffusion"] * density_diff (data ["density"] / data ["mmw"])
-		// + params ["equations.velocity.diffusion"] * heat <datatype> (data ["mmw"], data ["x_velocity"], data ["z_velocity"])
+		// + params ["equations.velocity.diffusion"] * heat <double> (data ["mmw"], data ["x_velocity"], data ["z_velocity"])
 		- diverge (data ["temperature"], data ["x_velocity"], data ["z_velocity"])
 		;
 
@@ -84,9 +83,9 @@ namespace pisces
 		data ["x_velocity"].component_flags |= plans::solvers::ignore_net;
 		data ["z_velocity"].component_flags |= plans::solvers::ignore_net;
 
-		// *div <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"])
+		// *div <double> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"])
 		// Set up the velocity constraint
-		*pdiv <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"], data ["density"].ptr (real_spectral), data ["bg_pressure"].ptr (), i_params ["equations.constants.gamma"].as <datatype> ())
+		*pdiv <double> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"], data ["density"].ptr (real_spectral), data ["bg_pressure"].ptr (), i_params ["equations.constants.gamma"].as <double> ())
 		==
 		params ["equations.temperature.diffusion"] * density_diff (data ["density"] / data ["mmw"], 0.0)
 		+ params ["equations.velocity.diffusion"] * heat (data ["mmw"], data ["x_velocity"], data ["z_velocity"])
@@ -95,8 +94,7 @@ namespace pisces
 	TRACE ("Initialized.");
 	}
 
-	template <class datatype>
-	datatype pseudo_element <datatype>::calculate_timestep (int i, int j, formats::virtual_file *virtual_file) {
+	double pseudo_element::calculate_timestep (int i, int j, formats::virtual_file *virtual_file) {
 		if (!x_vel_ptr || !z_vel_ptr) {
 			return 1.0 / 0.0;
 		}
@@ -105,9 +103,9 @@ namespace pisces
 				return 1.0 / 0.0;
 			}
 			if (i == 0 || i == virtual_file->dims ["z"] [0] - 1) {
-				return std::abs ((virtual_file->index <datatype> ("z", i, j + 1) - virtual_file->index <datatype> ("z", i, j - 1)) / virtual_file->index <datatype> ("z_velocity", i, j)) * cfl;
+				return std::abs ((virtual_file->index <double> ("z", i, j + 1) - virtual_file->index <double> ("z", i, j - 1)) / virtual_file->index <double> ("z_velocity", i, j)) * cfl;
 			} else {
-				return std::min (std::abs ((virtual_file->index <datatype> ("x", i + 1, j) - virtual_file->index <datatype> ("x", i - 1, j)) / virtual_file->index <datatype> ("x_velocity", i, j)), std::abs ((virtual_file->index <datatype> ("z", i, j + 1) - virtual_file->index <datatype> ("z", i, j - 1)) / virtual_file->index <datatype> ("z_velocity", i, j))) * cfl;
+				return std::min (std::abs ((virtual_file->index <double> ("x", i + 1, j) - virtual_file->index <double> ("x", i - 1, j)) / virtual_file->index <double> ("x_velocity", i, j)), std::abs ((virtual_file->index <double> ("z", i, j + 1) - virtual_file->index <double> ("z", i, j - 1)) / virtual_file->index <double> ("z_velocity", i, j))) * cfl;
 			}
 		} else {
 			if (j == 0 || j == m - 1) {
@@ -121,6 +119,4 @@ namespace pisces
 		}
 		return 1.0 / 0.0;
 	}
-
-	template class pseudo_element <double>;
 } /* pisces */

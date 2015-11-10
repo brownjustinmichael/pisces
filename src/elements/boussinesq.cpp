@@ -25,8 +25,7 @@
 
 namespace data
 {
-	template <class datatype>
-	thermo_compositional_data <datatype>::thermo_compositional_data (grids::axis *i_axis_n, grids::axis *i_axis_m, int id, int n_elements, io::parameters& i_params) : implemented_data <datatype> (i_axis_n, i_axis_m, i_params, id, i_params.get <std::string> ("dump.file"), i_params.get <std::string> ("root") + i_params.get <std::string> ("dump.directory"), i_params.get <int> ("dump.every")) {
+	thermo_compositional_data::thermo_compositional_data (grids::axis *i_axis_n, grids::axis *i_axis_m, int id, int n_elements, io::parameters& i_params) : implemented_data (i_axis_n, i_axis_m, i_params, id, i_params.get <std::string> ("dump.file"), i_params.get <std::string> ("root") + i_params.get <std::string> ("dump.directory"), i_params.get <int> ("dump.every")) {
 		TRACE ("Initializing...");
 
 		initialize ("pressure", corrector);
@@ -55,17 +54,15 @@ namespace data
 
 		if (!stat_stream) return;
 
-		for (typename data <datatype>::iterator iter = this->begin (); iter != this->end (); ++iter) {
+		for (typename data::iterator iter = this->begin (); iter != this->end (); ++iter) {
 			// For each data variable, output z_flux, average derivative across the center, average and max
 			std::string variable = *iter;
-			stat_stream->template append <datatype> ("max_" + variable, this->output_max (variable), formats::scalar);
-			stat_stream->template append <datatype> ("avg_" + variable, this->output_avg (variable), formats::scalar);
-			stat_stream->template append <datatype> ("deriv_" + variable, this->output_deriv (variable), formats::scalar);
-			stat_stream->template append <datatype> ("flux_" + variable, this->output_flux (variable, "z_velocity"), formats::scalar);
+			stat_stream->template append <double> ("max_" + variable, this->output_max (variable), formats::scalar);
+			stat_stream->template append <double> ("avg_" + variable, this->output_avg (variable), formats::scalar);
+			stat_stream->template append <double> ("deriv_" + variable, this->output_deriv (variable), formats::scalar);
+			stat_stream->template append <double> ("flux_" + variable, this->output_flux (variable, "z_velocity"), formats::scalar);
 		}
 	}
-	
-	template class thermo_compositional_data <double>;
 } /* data */
 
 namespace pisces
@@ -74,29 +71,28 @@ namespace pisces
 	using namespace plans::solvers;
 	using namespace boundaries;
 	
-	template <class datatype>
-	boussinesq_element <datatype>::boussinesq_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
-	implemented_element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags) {
+	boussinesq_element::boussinesq_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
+	implemented_element (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags) {
 		TRACE ("Initializing...");
 		x_ptr = data ("x");
 		z_ptr = data ("z");
 		x_vel_ptr = data ("x_velocity", real_real);
 		z_vel_ptr = data ("z_velocity", real_real);
 		
-		cfl = i_params ["time.cfl"].as <datatype> ();
-		allow = i_params ["time.allow"].as <datatype> ();
+		cfl = i_params ["time.cfl"].as <double> ();
+		allow = i_params ["time.allow"].as <double> ();
 
 		// Add a background temperature gradient of the form
 		// -C*Aout * arctan((z-rt)/dout), z < rt
 		// -C*Ain * arctan((z-rt)/din), z > rt
 		data.initialize ("korre_Ts", uniform_n);
 		if (i_params ["equations.temperature.korre_Ts"].IsDefined ()) {
-			datatype C = i_params ["equations.temperature.korre_Ts.C"].as <datatype> ();
-			datatype Ain = i_params ["equations.temperature.korre_Ts.Ain"].as <datatype> ();
-			datatype din = i_params ["equations.temperature.korre_Ts.din"].as <datatype> ();
-			datatype rt = i_params ["equations.temperature.korre_Ts.rt"].as <datatype> ();
-			datatype Aout = i_params ["equations.temperature.korre_Ts.Aout"].as <datatype> ();
-			datatype dout = i_params ["equations.temperature.korre_Ts.dout"].as <datatype> ();
+			double C = i_params ["equations.temperature.korre_Ts.C"].as <double> ();
+			double Ain = i_params ["equations.temperature.korre_Ts.Ain"].as <double> ();
+			double din = i_params ["equations.temperature.korre_Ts.din"].as <double> ();
+			double rt = i_params ["equations.temperature.korre_Ts.rt"].as <double> ();
+			double Aout = i_params ["equations.temperature.korre_Ts.Aout"].as <double> ();
+			double dout = i_params ["equations.temperature.korre_Ts.dout"].as <double> ();
 
 			for (int j = 0; j < m; ++j)
 			{
@@ -112,12 +108,12 @@ namespace pisces
 		data.initialize ("temperature_diffusion", uniform_n);
 		if (i_params ["equations.temperature.korre_diff"].IsDefined ()) {
 			uniform_diff = false;
-			datatype Prcz = 1.0 / i_params ["equations.temperature.diffusion"].as <datatype> ();
-			datatype Prrz = 1.0 / i_params ["equations.temperature.korre_diff.rz_diffusion"].as <datatype> ();
+			double Prcz = 1.0 / i_params ["equations.temperature.diffusion"].as <double> ();
+			double Prrz = 1.0 / i_params ["equations.temperature.korre_diff.rz_diffusion"].as <double> ();
 
 			DEBUG ("VARS ARE " << Prcz << " " << Prrz);
 
-			datatype A = (Prcz * data ["korre_Ts"] [0] + Prrz) / (data ["korre_Ts"] [0] + 1.);
+			double A = (Prcz * data ["korre_Ts"] [0] + Prrz) / (data ["korre_Ts"] [0] + 1.);
 			assert (A < Prcz);
 			for (int j = 0; j < m; ++j)
 			{
@@ -130,8 +126,8 @@ namespace pisces
 		// Set up the temperature equation
 		if (!(i_params ["equations.temperature.ignore"].IsDefined () && i_params ["equations.temperature.ignore"].as <bool> ())) {
 			*split_solver (equations ["temperature"], timestep, 
-				neumann (i_params ["equations.temperature.bottom.value"].as <datatype> ()), 
-				dirichlet (i_params ["equations.temperature.top.value"].as <datatype> ())) 
+				neumann (i_params ["equations.temperature.bottom.value"].as <double> ()), 
+				dirichlet (i_params ["equations.temperature.top.value"].as <double> ())) 
 			+ advec (data ["x_velocity"], data ["z_velocity"])
 			+ src (data ["z_velocity"] * data ["korre_Ts"])
 			== 
@@ -142,14 +138,14 @@ namespace pisces
 			} else {
 				*equations ["temperature"] == bg_diff (data ["temperature_diffusion"].ptr ());
 			}
-			// if (i_params ["equations.temperature.linear"].IsDefined ()) *equations ["temperature"] == plans::diffusion::linear <datatype>::factory (i_params ["equations.temperature.linear"].as <datatype> (), 0.0, data ["temperature_diffusion"].ptr (), 10000);
+			// if (i_params ["equations.temperature.linear"].IsDefined ()) *equations ["temperature"] == plans::diffusion::linear <double>::factory (i_params ["equations.temperature.linear"].as <double> (), 0.0, data ["temperature_diffusion"].ptr (), 10000);
 		}
 
 		// Set up the composition equation
 		if (i_params ["equations.composition"].IsDefined () && !(i_params ["equations.composition.ignore"].IsDefined () && i_params ["equations.composition.ignore"].as <bool> ())) {
 			*split_solver (equations ["composition"], timestep, 
-				dirichlet (i_params ["equations.composition.bottom.value"].as <datatype> ()), 
-				dirichlet (i_params ["equations.composition.top.value"].as <datatype> ())) 
+				dirichlet (i_params ["equations.composition.bottom.value"].as <double> ()), 
+				dirichlet (i_params ["equations.composition.top.value"].as <double> ())) 
 			+ advec (data ["x_velocity"], data ["z_velocity"]) 
 			+ params ["equations.composition.sources.z_velocity"] * src (data ["z_velocity"]) 
 			== 
@@ -182,7 +178,7 @@ namespace pisces
 
 		// Set up the velocity constraint
 		if (!(i_params ["equations.pressure.ignore"].IsDefined () && i_params ["equations.pressure.ignore"].as <bool> ())) {
-			*div <datatype> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"])
+			*div <double> (equations ["pressure"], equations ["x_velocity"], equations ["z_velocity"])
 			==
 			0.0;
 		}
@@ -190,8 +186,7 @@ namespace pisces
 	TRACE ("Initialized.");
 	}
 	
-	template <class datatype>
-	datatype boussinesq_element <datatype>::calculate_timestep (int i, int j, formats::virtual_file *virtual_file) {
+	double boussinesq_element::calculate_timestep (int i, int j, formats::virtual_file *virtual_file) {
 		if (!x_vel_ptr || !z_vel_ptr) {
 			return 1.0 / 0.0;
 		}
@@ -200,9 +195,9 @@ namespace pisces
 				return 1.0 / 0.0;
 			}
 			if (i == 0 || i == virtual_file->dims ["z"] [0] - 1) {
-				return std::abs ((virtual_file->index <datatype> ("z", i, j + 1) - virtual_file->index <datatype> ("z", i, j - 1)) / virtual_file->index <datatype> ("z_velocity", i, j)) * cfl;
+				return std::abs ((virtual_file->index <double> ("z", i, j + 1) - virtual_file->index <double> ("z", i, j - 1)) / virtual_file->index <double> ("z_velocity", i, j)) * cfl;
 			} else {
-				return std::min (std::abs ((virtual_file->index <datatype> ("x", i + 1, j) - virtual_file->index <datatype> ("x", i - 1, j)) / virtual_file->index <datatype> ("x_velocity", i, j)), std::abs ((virtual_file->index <datatype> ("z", i, j + 1) - virtual_file->index <datatype> ("z", i, j - 1)) / virtual_file->index <datatype> ("z_velocity", i, j))) * cfl;
+				return std::min (std::abs ((virtual_file->index <double> ("x", i + 1, j) - virtual_file->index <double> ("x", i - 1, j)) / virtual_file->index <double> ("x_velocity", i, j)), std::abs ((virtual_file->index <double> ("z", i, j + 1) - virtual_file->index <double> ("z", i, j - 1)) / virtual_file->index <double> ("z_velocity", i, j))) * cfl;
 			}
 		} else {
 			if (j == 0 || j == m - 1) {
@@ -216,6 +211,4 @@ namespace pisces
 		}
 		return 1.0 / 0.0;
 	}
-	
-	template class boussinesq_element <double>;
 } /* pisces */

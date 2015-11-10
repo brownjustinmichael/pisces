@@ -15,6 +15,7 @@
 #include <yaml-cpp/yaml.h>
 #include "linalg/exceptions.hpp"
 #include "data/data.hpp"
+#include "rezone.hpp"
 
 #include <ctime>
 #include <chrono>
@@ -26,10 +27,9 @@
 
 namespace pisces
 {
-	template <class datatype>
-	void element <datatype>::run (int &n_steps) {
+	void element::run (int &n_steps) {
 		TRACE ("Running...");
-		datatype t_timestep;
+		double t_timestep;
 
 		// Define the variables to use in timing the execution of the run
 		clock_t cbegin, cend;
@@ -46,7 +46,7 @@ namespace pisces
 		t_timestep = calculate_min_timestep ();
 		messenger_ptr->min (&t_timestep);
 
-		for (typename data::data <datatype>::iterator iter = data.begin (); iter != data.end (); ++iter) {
+		for (typename data::data::iterator iter = data.begin (); iter != data.end (); ++iter) {
 			if (data.transformers [*iter]) data.transformers [*iter]->update ();
 		}
 
@@ -54,7 +54,7 @@ namespace pisces
 		omp_set_nested (true);
 		int threads = params.get <int> ("parallel.maxthreads");
 		std::stringstream debug;
-		datatype stop = params ["time.stop"].as <datatype> ();
+		double stop = params ["time.stop"].as <double> ();
 		int max_steps = params.get <int> ("time.steps");
 		int check_every = params.get <int> ("grid.rezone.check_every");
 		// Iterate through the total number of timesteps
@@ -118,6 +118,49 @@ namespace pisces
 		INFO ("Profiling Output: CPU Time: " << output_time << " Wall Time: " << (double) output_duration.count () << " Efficiency: " << output_time / (double) output_duration.count () / omp_get_max_threads () * 100. << "%");
 		INFO ("Max Threads = " << threads << " of " << omp_get_max_threads ());
 	}
-	
-	template class element <double>;
+
+	formats::virtual_file *element::rezone_minimize_ts (double *positions, double min_size, double max_size, int n_tries, int iters_fixed_t, double step_size, double k, double t_initial, double mu_t, double t_min, double (*function) (element *, formats::virtual_file *)) {
+		TRACE ("Rezoning...");
+
+		rezone_virtual_file = make_virtual_file (profile_only | timestep_only);
+		
+		rezone_data data;
+		data.element_ptr = this;
+		data.id = messenger_ptr->get_id ();
+		data.np = messenger_ptr->get_np ();
+		data.merit_func = function;
+		data.min_size = min_size;
+		data.max_size = max_size;
+		
+		get_zoning_positions (data.positions);
+		
+		double original = rezone_data::func (&data);
+		
+		gsl_siman_params_t params = {n_tries, iters_fixed_t, step_size, k, t_initial, mu_t, t_min};
+
+		const gsl_rng_type * T;
+		gsl_rng * r;
+		
+		gsl_rng_env_setup();
+		
+		T = gsl_rng_default;
+		r = gsl_rng_alloc(T);
+
+		gsl_siman_solve(r, &data, rezone_data::func, rezone_data::rezone_generate_step, rezone_data::rezone_step_size, NULL, NULL, NULL, NULL, sizeof (rezone_data), params);
+
+		gsl_rng_free (r);
+		
+		double value = rezone_data::func (&data);
+		
+		DEBUG ("Old: " << original << " New: " << value);
+		
+		if (value < original * (original < 0. ? 1. / rezone_mult : rezone_mult)) {
+			for (int i = 0; i < data.np + 1; ++i) {
+				positions [i] = data.positions [i];
+			}
+			return make_rezoned_virtual_file (data.positions, make_virtual_file ());
+		}
+		
+		return NULL;
+	}
 } /* pisces */

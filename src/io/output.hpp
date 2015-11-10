@@ -10,6 +10,7 @@
 #define OUTPUT_HPP_31603039
 
 #include <fstream>
+#include <map>
 
 #include "logger/logger.hpp"
 
