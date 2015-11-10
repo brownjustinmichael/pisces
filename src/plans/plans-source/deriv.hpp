@@ -51,7 +51,7 @@ namespace plans
 			 * 
 			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
 			 ************************************************************************/
-			uniform_grad_x (grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : explicit_plan <datatype> (i_data_in, i_data_out, i_coeff), data_source (i_data_source.ptr (real_spectral)) {
+			uniform_grad_x (grids::variable &i_data_source, grids::variable &i_data_in, grids::variable &i_data_out, datatype i_coeff = 1.0) : explicit_plan <datatype> (i_data_in, i_data_out, i_coeff), data_source (i_data_source.ptr (real_spectral)) {
 				TRACE ("Adding source...");
 				scalar = acos (-1.0) * 2.0 / (i_data_in.get_grid (0) [n - 1] - i_data_in.get_grid (0) [0]);
 			}
@@ -79,21 +79,21 @@ namespace plans
 			class factory : public explicit_plan <datatype>::factory
 			{
 			private:
-				grids::variable <datatype> &data_source; //!< The data source to be used when constructing the plan
+				grids::variable &data_source; //!< The data source to be used when constructing the plan
 			
 			public:
 				/*!**********************************************************************
 				 * \param i_coeff The coefficient to be used when constructing the plan
 				 * \param i_data_source The data source to be used when constructing the plan
 				 ************************************************************************/
-				factory (grids::variable <datatype> &i_data_source, datatype i_coeff = 1.0) : explicit_plan <datatype>::factory (i_coeff), data_source (i_data_source) {}
+				factory (grids::variable &i_data_source, datatype i_coeff = 1.0) : explicit_plan <datatype>::factory (i_coeff), data_source (i_data_source) {}
 			
 				virtual ~factory () {}
 			
 				/*!**********************************************************************
 				 * \copydoc plan::factory::_instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
+				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
 					if (coeff) {
 						return std::shared_ptr <plans::plan <datatype> > (new uniform_grad_x <datatype> (data_source, i_data_in, i_data_out, coeff));
 					}
@@ -128,7 +128,7 @@ namespace plans
 			 * 
 			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
 			 ************************************************************************/
-			uniform_grad_z (grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : 
+			uniform_grad_z (grids::variable &i_data_source, grids::variable &i_data_in, grids::variable &i_data_out, datatype i_coeff = 1.0) : 
 			explicit_plan <datatype> (i_data_in, i_data_out, i_coeff), 
 			data_source (i_data_source.ptr (real_spectral)),
 			ld_source (i_data_source.get_ld ()) {
@@ -158,21 +158,21 @@ namespace plans
 			class factory : public explicit_plan <datatype>::factory
 			{
 			private:
-				grids::variable <datatype> &data_source; //!< The data source to be used when constructing the plan
+				grids::variable &data_source; //!< The data source to be used when constructing the plan
 			
 			public:
 				/*!**********************************************************************
 				 * \param i_coeff The coefficient to be used when constructing the plan
 				 * \param i_data_source The data source to be used when constructing the plan
 				 ************************************************************************/
-				factory (grids::variable <datatype> &i_data_source, datatype i_coeff = 1.0) : explicit_plan <datatype>::factory (i_coeff), data_source (i_data_source) {}
+				factory (grids::variable &i_data_source, datatype i_coeff = 1.0) : explicit_plan <datatype>::factory (i_coeff), data_source (i_data_source) {}
 			
 				virtual ~factory () {}
 			
 				/*!**********************************************************************
 				 * \copydoc plan::factory::_instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
+				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
 					if (coeff) {
 						return std::shared_ptr <plans::plan <datatype> > (new uniform_grad_z <datatype> (data_source, i_data_in, i_data_out, coeff));
 					}
@@ -206,7 +206,7 @@ namespace plans
 			 * 
 			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
 			 ************************************************************************/
-			z_src (datatype *i_data_source, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : real_plan <datatype> (i_data_in, i_data_out, i_coeff), data_source (i_data_source) {
+			z_src (datatype *i_data_source, grids::variable &i_data_in, grids::variable &i_data_out, datatype i_coeff = 1.0) : real_plan <datatype> (i_data_in, i_data_out, i_coeff), data_source (i_data_source) {
 				TRACE ("Adding source...");
 			}
 		
@@ -243,7 +243,7 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc plan::factory::_instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
+				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
 					if (coeff) {
 						return std::shared_ptr <plans::plan <datatype> > (new z_src <datatype> (data_source, i_data_in, i_data_out, coeff));
 					}

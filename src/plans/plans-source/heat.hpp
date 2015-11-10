@@ -48,7 +48,7 @@ namespace plans
 			 * @param i_data_x A reference to the x component of the velocity
 			 * @param i_data_z A reference to the z component of the velocity
 			 */
-			viscous_heat (grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : 
+			viscous_heat (grids::variable &i_data_source, grids::variable &i_data_x, grids::variable &i_data_z, grids::variable &i_data_in, grids::variable &i_data_out, datatype i_coeff = 1.0) : 
 			real_plan <datatype> (i_data_in, i_data_out, i_coeff), 
 			data_source (i_data_source.ptr ()),
 			data_x (i_data_x.ptr ()),
@@ -94,9 +94,9 @@ namespace plans
 			class factory : public real_plan <datatype>::factory
 			{
 			private:
-				grids::variable <datatype> &data_source; //!< The data source to be used when constructing the plan
-				grids::variable <datatype> &data_x; //!< The data source to be used when constructing the plan
-				grids::variable <datatype> &data_z; //!< The data source to be used when constructing the plan
+				grids::variable &data_source; //!< The data source to be used when constructing the plan
+				grids::variable &data_x; //!< The data source to be used when constructing the plan
+				grids::variable &data_z; //!< The data source to be used when constructing the plan
 			
 			public:
 				/*!**********************************************************************
@@ -105,7 +105,7 @@ namespace plans
 				 * \param i_data_x The x component of the velocity data to be used when constructing the plan
 				 * \param i_data_z The z component of the velocity data source to be used when constructing the plan
 				 ************************************************************************/
-				factory (grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z, datatype i_coeff = 1.0) : 
+				factory (grids::variable &i_data_source, grids::variable &i_data_x, grids::variable &i_data_z, datatype i_coeff = 1.0) : 
 				real_plan <datatype>::factory (i_coeff), 
 				data_source (i_data_source),
 				data_x (i_data_x),
@@ -116,7 +116,7 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc plan::factory::_instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
+				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
 					if (coeff) {
 						return std::shared_ptr <plans::plan <datatype> > (new viscous_heat <datatype> (data_source, data_x, data_z, i_data_in, i_data_out, coeff));
 					}
@@ -155,7 +155,7 @@ namespace plans
 			 * @param i_data_x A reference to the x component of the velocity
 			 * @param i_data_z A reference to the z component of the velocity
 			 */
-			divergence (grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : 
+			divergence (grids::variable &i_data_source, grids::variable &i_data_x, grids::variable &i_data_z, grids::variable &i_data_in, grids::variable &i_data_out, datatype i_coeff = 1.0) : 
 			real_plan <datatype> (i_data_in, i_data_out, i_coeff), 
 			data_source (i_data_source.ptr ()),
 			data_x (i_data_x.ptr ()),
@@ -191,9 +191,9 @@ namespace plans
 			class factory : public real_plan <datatype>::factory
 			{
 			private:
-				grids::variable <datatype> &data_source; //!< The data source to be used when constructing the plan
-				grids::variable <datatype> &data_x; //!< The data source to be used when constructing the plan
-				grids::variable <datatype> &data_z; //!< The data source to be used when constructing the plan
+				grids::variable &data_source; //!< The data source to be used when constructing the plan
+				grids::variable &data_x; //!< The data source to be used when constructing the plan
+				grids::variable &data_z; //!< The data source to be used when constructing the plan
 			
 			public:
 				/*!**********************************************************************
@@ -202,7 +202,7 @@ namespace plans
 				 * \param i_data_x The x component of the velocity data to be used when constructing the plan
 				 * \param i_data_z The z component of the velocity data source to be used when constructing the plan
 				 ************************************************************************/
-				factory (grids::variable <datatype> &i_data_source, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z, datatype i_coeff = 1.0) : 
+				factory (grids::variable &i_data_source, grids::variable &i_data_x, grids::variable &i_data_z, datatype i_coeff = 1.0) : 
 				real_plan <datatype>::factory (i_coeff), 
 				data_source (i_data_source),
 				data_x (i_data_x),
@@ -213,7 +213,7 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc plan::factory::_instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
+				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
 					if (coeff) {
 						return std::shared_ptr <plans::plan <datatype> > (new divergence <datatype> (data_source, data_x, data_z, i_data_in, i_data_out, coeff));
 					}

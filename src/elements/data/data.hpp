@@ -63,7 +63,7 @@ namespace data
 	protected:
 		int id; //!< The id of the current process
 		io::parameters &params; //!< A reference to the parameters
-		std::vector <grids::grid <datatype>> grids; //!< A vector of the grid objects for each dimension
+		std::vector <grids::grid> grids; //!< A vector of the grid objects for each dimension
 
 		static int mode; //!< The integer mode of the simulation (to prevent loading Chebyshev data into an even grid)
 		
@@ -76,7 +76,7 @@ namespace data
 		bool dump_done; //!< A boolean stating whether the dump has happened
 		
 		std::vector <std::string> scalar_names; //!< The vector of variable names
-		std::map <std::string, std::shared_ptr <grids::variable <datatype>>> variables; //!< The string map of vectors containing the variable data
+		std::map <std::string, std::shared_ptr <grids::variable>> variables; //!< The string map of vectors containing the variable data
 		datatype *weights; //!< Weights to be used for averaging over the data
 
 		clock_t cbegin; //!< A beginning time, for timing
@@ -167,8 +167,8 @@ namespace data
 		 * 
 		 * \return A pointer to the dataset
 		 ************************************************************************/
-		virtual grids::variable <datatype> &initialize (std::string i_name, int i_flags = 0x00) {
-			grids::variable <datatype> &var = _initialize (i_name, i_flags);
+		virtual grids::variable &initialize (std::string i_name, int i_flags = 0x00) {
+			grids::variable &var = _initialize (i_name, i_flags);
 			int output_flags = formats::all_d;
 			if (i_flags & uniform_n) {
 				INFO ("THIS IS 1D");
@@ -426,7 +426,7 @@ namespace data
 		 * 
 		 * \return A pointer to the indexed data
 		 ************************************************************************/
-		grids::variable <datatype> &operator[] (const std::string &name) {
+		grids::variable &operator[] (const std::string &name) {
 			return *variables [name];
 		}
 		
@@ -452,7 +452,7 @@ namespace data
 		/*!**********************************************************************
 		 * \brief Initialize a new dataset in the data object
 		 ************************************************************************/
-		virtual grids::variable <datatype> &_initialize (std::string i_name, int i_flags = 0x00) = 0;
+		virtual grids::variable &_initialize (std::string i_name, int i_flags = 0x00) = 0;
 	};
 	
 	/*!**********************************************************************
@@ -467,8 +467,8 @@ namespace data
 		using data <datatype>::variables;
 		using data <datatype>::flags;
 		
-		std::shared_ptr <grids::grid <datatype>> grid_n; //!< The horizontal grid object
-		std::shared_ptr <grids::grid <datatype>> grid_m; //!< The vertical grid object
+		std::shared_ptr <grids::grid> grid_n; //!< The horizontal grid object
+		std::shared_ptr <grids::grid> grid_m; //!< The vertical grid object
 		int n; //!< The horizontal extent of the data
 		int m; //!< The vertical extent of the data
 
@@ -489,8 +489,8 @@ namespace data
 		 ************************************************************************/
 		implemented_data (grids::axis *i_axis_n, grids::axis *i_axis_m, io::parameters &i_params, int i_name = 0, std::string dump_file = "", std::string dump_directory = "./", int dump_every = 1) : 
 		data <datatype> (i_params, i_name), 
-		grid_n (std::shared_ptr <grids::grid <datatype>> (new typename grids::horizontal::grid <datatype> (i_axis_n))), 
-		grid_m (std::shared_ptr <grids::grid <datatype>> (new typename grids::vertical::grid <datatype> (i_axis_m))), 
+		grid_n (std::shared_ptr <grids::grid> (new typename grids::horizontal::grid (i_axis_n))), 
+		grid_m (std::shared_ptr <grids::grid> (new typename grids::vertical::grid (i_axis_m))), 
 		n (grid_n->get_n ()), 
 		m (grid_m->get_n ()) {
 			// Set up output
@@ -530,7 +530,7 @@ namespace data
 		 * \copydoc data::setup_profile
 		 ************************************************************************/
 		virtual void setup_profile (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
-			typedef typename std::map <std::string, std::shared_ptr <grids::variable <datatype>>>::iterator iterator;
+			typedef typename std::map <std::string, std::shared_ptr <grids::variable>>::iterator iterator;
 			for (iterator iter = data <datatype>::variables.begin (); iter != data <datatype>::variables.end (); ++iter) {
 				output_ptr->template append <datatype> (iter->first, (*this) (iter->first));
 				output_ptr->template append <datatype> ("rms_" + iter->first, std::shared_ptr <functors::functor> (new functors::root_mean_square_functor <datatype> ((*this) (iter->first), n, m)));
@@ -631,17 +631,17 @@ namespace data
 		/*!**********************************************************************
 		 * \copydoc data::_initialize
 		 ************************************************************************/
-		virtual grids::variable <datatype> &_initialize (std::string name, int i_flags = 0x00) {
+		virtual grids::variable &_initialize (std::string name, int i_flags = 0x00) {
 			TRACE ("Initializing " << name << "...");
 			// Size allowing for real FFT buffer
 			if (i_flags & uniform_n) {
-				data <datatype>::variables [name] = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (*grid_m, flags, name));
+				data <datatype>::variables [name] = std::shared_ptr <grids::variable> (new grids::variable (*grid_m, flags, name));
 				return *variables [name];
 			} else if (i_flags & uniform_m) {
-				data <datatype>::variables [name] = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (*grid_n, flags, name));
+				data <datatype>::variables [name] = std::shared_ptr <grids::variable> (new grids::variable (*grid_n, flags, name));
 				return *variables [name];
 			}
-			data <datatype>::variables [name] = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (*grid_n, *grid_m, flags, name, 3, i_flags & vector2D ? 2 : (i_flags & vector3D ? 3 : 1)));
+			data <datatype>::variables [name] = std::shared_ptr <grids::variable> (new grids::variable (*grid_n, *grid_m, flags, name, 3, i_flags & vector2D ? 2 : (i_flags & vector3D ? 3 : 1)));
 			if (name == "x") {
 				for (int j = 0; j < m; ++j) {
 					linalg::copy (n, &((*grid_n) [0]), (*this) (name, real_real, 0, j), 1, m);

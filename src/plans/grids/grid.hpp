@@ -88,7 +88,6 @@ namespace grids
 	 * 
 	 * This will need to be instantiated for a collocation method. Ideally, the structure contains a grid of polynomial values at a number of collocation points which can be called for little temporal expense. Unfortunately, creating such a grid is an expensive procedure, so the creation is delayed until the get_data method is called.
 	 *********************************************************************/
-	template <class datatype>
 	class grid
 	{
 	protected:
@@ -96,17 +95,17 @@ namespace grids
 		int ld; //!< The number of meshpoints in the data along the axis (accounts for buffer points)
 		int excess_0; //!< The number of excess meshpoints near index 0
 		int excess_n; //!< The number of excess meshpoints near index n - 1
-		datatype position_0; //!< The position at index excess_0
-		datatype position_n; //!< The position at index n - 1 - excess_n
+		double position_0; //!< The position at index excess_0
+		double position_n; //!< The position at index n - 1 - excess_n
 		int derivs; //!< The integer number of derivatives deep the collocation grid runs
 		
-		std::vector <datatype> positions; //!< A vector containing the positions along the axis
-		std::vector <datatype> ood; //!< A vector containing one over the cell centered differential
-		std::vector <datatype> ood2; //!< A vector containing one over the boundary centered differential
+		std::vector <double> positions; //!< A vector containing the positions along the axis
+		std::vector <double> ood; //!< A vector containing one over the cell centered differential
+		std::vector <double> ood2; //!< A vector containing one over the boundary centered differential
 		bool calculated_matrix; //!< A boolean describing whether the collocation matrix has been calculated
 	
 	private:
-		std::vector<std::vector<datatype> > data; //!< A double vector containing the vectors of collocation data
+		std::vector<std::vector<double> > data; //!< A double vector containing the vectors of collocation data
 
 	public:
 		/*!*******************************************************************
@@ -180,7 +179,7 @@ namespace grids
 		 * 
 		 * \return A reference to a position along the grid
 		 ************************************************************************/
-		const datatype& operator[] (int index) {
+		const double& operator[] (int index) {
 			return positions [index];
 		}
 		
@@ -222,7 +221,7 @@ namespace grids
 		 * 
 		 * \return A pointer to the first element of the double data array
 		 *********************************************************************/
-		inline datatype* get_data (int deriv) {
+		inline double* get_data (int deriv) {
 			if (!calculated_matrix) {
 				calculate_matrix ();
 			}
@@ -232,14 +231,14 @@ namespace grids
 		/**
 		 * @return A pointer to one over the cell centered differential of the position
 		 */
-		inline datatype* get_ood () {
+		inline double* get_ood () {
 			return &ood [0];
 		}
 		
 		/**
 		 * @return A pointer to one over the boundary centered differential of the position
 		 */
-		inline datatype* get_ood2 () {
+		inline double* get_ood2 () {
 			return &ood2 [0];
 		}
 
@@ -253,7 +252,7 @@ namespace grids
 		 * 
 		 * \return The value at the index
 		 *********************************************************************/
-		inline datatype& index (int deriv, int row, int col) {
+		inline double& index (int deriv, int row, int col) {
 			return data [deriv] [row * ld + col];
 		}
 	
@@ -300,23 +299,22 @@ namespace grids
 		 * 
 		 * This collocation grid stores the N collocation points for up to the Mth order Chebyshev polynomial and their first and second derivatives
 		 *********************************************************************/
-		template <class datatype>
-		class grid : public grids::grid <datatype>
+		class grid : public grids::grid
 		{
 		private:
-			using grids::grid <datatype>::n;
-			using grids::grid <datatype>::ld;
-			using grids::grid <datatype>::excess_0;
-			using grids::grid <datatype>::excess_n;
-			using grids::grid <datatype>::position_0;
-			using grids::grid <datatype>::position_n;
-			using grids::grid <datatype>::derivs;
-			using grids::grid <datatype>::positions;
+			using grids::grid::n;
+			using grids::grid::ld;
+			using grids::grid::excess_0;
+			using grids::grid::excess_n;
+			using grids::grid::position_0;
+			using grids::grid::position_n;
+			using grids::grid::derivs;
+			using grids::grid::positions;
 	
-			datatype scale; //!< A datatype by which the collocation grid should be scaled
-			datatype width; //!< The datatype width of the collocation region
+			double scale; //!< A double by which the collocation grid should be scaled
+			double width; //!< The double width of the collocation region
 			std::vector<bool> exists_array; //!< A bool vector containing whether the points exist
-			datatype pioN; //!< The datatype 3.14159.../N, for use in calculations
+			double pioN; //!< The double 3.14159.../N, for use in calculations
 			
 		public:
 			/*!*******************************************************************
@@ -362,9 +360,9 @@ namespace grids
 			 * 
 			 * Uses known relationships of Chebyshev polynomials to calculate the value of the polynomial and its derivatives at an arbitrary collocation grid point.
 			 * 
-			 * \return The datatype value of the index
+			 * \return The double value of the index
 			 *********************************************************************/
-			datatype recursion (int d, int m, int k);
+			double recursion (int d, int m, int k);
 		};
 	} /* vertical */
 #else
@@ -384,22 +382,21 @@ namespace grids
 		 *
 		 * This collocation grid stores the N collocation points for up to the Mth order cosine modes and their first and second derivatives
 		 *********************************************************************/
-		template <class datatype>
-		class grid : public grids::grid <datatype>
+		class grid : public grids::grid
 		{
 		private:
-			using grids::grid <datatype>::n;
-			using grids::grid <datatype>::ld;
-			using grids::grid <datatype>::excess_0;
-			using grids::grid <datatype>::excess_n;
-			using grids::grid <datatype>::position_0;
-			using grids::grid <datatype>::position_n;
-			using grids::grid <datatype>::derivs;
-			using grids::grid <datatype>::positions;
+			using grids::grid::n;
+			using grids::grid::ld;
+			using grids::grid::excess_0;
+			using grids::grid::excess_n;
+			using grids::grid::position_0;
+			using grids::grid::position_n;
+			using grids::grid::derivs;
+			using grids::grid::positions;
 
-			datatype scale; //!< A datatype by which the collocation grid should be scaled
-			datatype width; //!< The datatype width of the collocation region
-			datatype pioN; //!< The datatype 3.14159.../N, for use in calculations
+			double scale; //!< A double by which the collocation grid should be scaled
+			double width; //!< The double width of the collocation region
+			double pioN; //!< The double 3.14159.../N, for use in calculations
 
 		public:
 			/*!*******************************************************************
@@ -430,22 +427,21 @@ namespace grids
 		 * 
 		 * This collocation grid stores the N collocation points for up to the Mth order fourier mode and their first and second derivatives
 		 *********************************************************************/
-		template <class datatype>
-		class grid : public grids::grid <datatype>
+		class grid : public grids::grid
 		{
 		private:
-			using grids::grid <datatype>::n;
-			using grids::grid <datatype>::ld;
-			using grids::grid <datatype>::excess_0;
-			using grids::grid <datatype>::excess_n;
-			using grids::grid <datatype>::position_0;
-			using grids::grid <datatype>::position_n;
-			using grids::grid <datatype>::derivs;
-			using grids::grid <datatype>::positions;
+			using grids::grid::n;
+			using grids::grid::ld;
+			using grids::grid::excess_0;
+			using grids::grid::excess_n;
+			using grids::grid::position_0;
+			using grids::grid::position_n;
+			using grids::grid::derivs;
+			using grids::grid::positions;
 	
-			datatype scale; //!< A datatype by which the collocation grid should be scaled
-			datatype width; //!< The datatype width of the collocation region
-			datatype pioN; //!< The datatype 3.14159.../N, for use in calculations
+			double scale; //!< A double by which the collocation grid should be scaled
+			double width; //!< The double width of the collocation region
+			double pioN; //!< The double 3.14159.../N, for use in calculations
 			
 		public:
 			/*!*******************************************************************

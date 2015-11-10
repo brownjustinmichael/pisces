@@ -24,22 +24,19 @@ namespace grids
 	/**
 	 * @brief A class designed to contain the values and state of a particular variable
 	 * @details The variable class is allowed to have a number of different states (e.g. real-real, real-spectral), which means that this contains space for a few times the amount of information nominally present.
-	 * 
-	 * @tparam datatype The type of data (float, double, long double)
 	 */
-	template <class datatype>
 	class variable
 	{
 	protected:
-		static std::vector <std::shared_ptr <variable <datatype>>> tmps; //!< A place to store freely floating variables if necessary
+		static std::vector <std::shared_ptr <variable>> tmps; //!< A place to store freely floating variables if necessary
 
-		std::vector <grids::grid <datatype> *> grids; //!< A vector of pointers to the grid objects associated with the system
+		std::vector <grids::grid *> grids; //!< A vector of pointers to the grid objects associated with the system
 		int dimensions; //!< Currently unimplemented, I'd like to allow variables to also be vectors on occasion
-		std::vector <datatype> data; //!< The actual data contained
+		std::vector <double> data; //!< The actual data contained
 		int states; //!< The number of states in the variable
 		// TODO This won't work. We need a way to keep references or entire variables
-		std::vector <variable <datatype> *> inner; //!< Some variables are compound, allowing them to be constructed from arithmetic operations on other variables, pointers to which are kept here
-		std::vector <datatype *> vars; //!< Some variables are compound, allowing them to be constructed from arithmetic operations on other variables, pointers to the data of which are kept here
+		std::vector <variable *> inner; //!< Some variables are compound, allowing them to be constructed from arithmetic operations on other variables, pointers to which are kept here
+		std::vector <double *> vars; //!< Some variables are compound, allowing them to be constructed from arithmetic operations on other variables, pointers to the data of which are kept here
 		std::vector <int> ops; //!< Some variables are compound, allowing them to be constructed from arithmetic operations on other variables, the arithmetic operations are kept here
 		std::vector <int> inner_states; //!< A record of the previous states for each inner variable
 		int ld; //!< The leading dimension of the system in the vertical direction
@@ -68,7 +65,7 @@ namespace grids
 		 * 
 		 * @param other A reference to the variable to store
 		 */
-		static void store_var (std::shared_ptr <variable <datatype>> &other) {
+		static void store_var (std::shared_ptr <variable> &other) {
 			tmps.push_back (other);
 		}
 
@@ -90,7 +87,7 @@ namespace grids
 		 * @param i_states The number of states to be stored in the variable
 		 * @param i_dimensions The number of components in the variable
 		 */
-		variable (grids::grid <datatype> &i_grid_m, int &i_element_flags, std::string i_name = "", int i_states = 3, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags), name (i_name) {
+		variable (grids::grid &i_grid_m, int &i_element_flags, std::string i_name = "", int i_states = 3, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags), name (i_name) {
 			grids.push_back (&i_grid_m);
 			total = i_grid_m.get_n ();
 			data.resize (total * dimensions * i_states, 0.0);
@@ -108,7 +105,7 @@ namespace grids
 		 * @param i_states The number of states to be stored in the variable
 		 * @param i_dimensions The number of components in the variable
 		 */
-		variable (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, int &i_element_flags, std::string i_name = "", int i_states = 3, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags), name (i_name) {
+		variable (grids::grid &i_grid_n, grids::grid &i_grid_m, int &i_element_flags, std::string i_name = "", int i_states = 3, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags), name (i_name) {
 			grids.push_back (&i_grid_n);
 			grids.push_back (&i_grid_m);
 			total = i_grid_m.get_n () * i_grid_n.get_ld ();
@@ -127,7 +124,7 @@ namespace grids
 		 * @param i_states The number of states to be stored in the variable
 		 * @param i_dimensions The number of components in the variable
 		 */
-		variable (int n, grids::grid <datatype> **i_grids, int &i_element_flags, std::string i_name = "", int i_states = 3, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags), name (i_name) {
+		variable (int n, grids::grid **i_grids, int &i_element_flags, std::string i_name = "", int i_states = 3, int i_dimensions = 1) : dimensions (i_dimensions), component_flags (0x00), element_flags (i_element_flags), name (i_name) {
 			total = n >= 1 ? 1 : 0;
 			for (int i = 0; i < n; ++i)
 			{
@@ -149,7 +146,7 @@ namespace grids
 		 * @param i_state The integer state being requested
 		 * @return A pointer to the data of the requested state
 		 */
-		datatype *ptr (int i_state = 0) {
+		double *ptr (int i_state = 0) {
 			if (i_state >= states) {
 				ERROR ("State " << i_state << " not initialized.");
 				throw 501;
@@ -182,14 +179,14 @@ namespace grids
 		 * @param n The index of the grid to exract
 		 * @return A reference to the nth grid in the variable
 		 */
-		grid <datatype> &get_grid (int n) {
+		grid &get_grid (int n) {
 			return *grids [n];
 		}
 
 		/**
 		 * @return An array of pointers to the grids contained in the variable
 		 */
-		grid <datatype>** get_grids () {
+		grid **get_grids () {
 			return &grids [0];
 		}
 
@@ -221,7 +218,7 @@ namespace grids
 		 * @param data A reference to the variable to add
 		 * @param op The integer representation of the operation to engage for this variable
 		 */
-		void add_var (variable <datatype> &data, int op) {
+		void add_var (variable &data, int op) {
 			inner.push_back (&data);
 			vars.push_back (data.ptr ());
 			ops.push_back (op);
@@ -252,7 +249,7 @@ namespace grids
 		 * 
 		 * @param index The integer index to index
 		 */
-		datatype &operator[] (int index) {
+		double &operator[] (int index) {
 			component_flags &= ~updated;
 			last_update = 0;
 			state++;
@@ -266,8 +263,8 @@ namespace grids
 		 * @param other The variable to add to this variable
 		 * @return A reference to a new compound variable
 		 */
-		variable <datatype> &operator+ (variable <datatype> &other) {
-			std::shared_ptr <variable <datatype>> new_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, "", 1)));
+		variable &operator+ (variable &other) {
+			std::shared_ptr <variable> new_var (std::shared_ptr <variable> (new variable (this->shape (), this->get_grids (), this->element_flags, "", 1)));
 			new_var->add_var (*this, add);
 			new_var->add_var (other, add);
 			store_var (new_var);
@@ -283,9 +280,9 @@ namespace grids
 		 * @param other The scalar to add to this variable
 		 * @return A reference to a new compound variable
 		 */
-		variable <datatype> &operator+ (datatype other) {
-			std::shared_ptr <variable <datatype>> new_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, "", 1)));
-			std::shared_ptr <variable <datatype>> uni_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, std::to_string ((long double) other), 1)));
+		variable &operator+ (double other) {
+			std::shared_ptr <variable> new_var (std::shared_ptr <variable> (new variable (this->shape (), this->get_grids (), this->element_flags, "", 1)));
+			std::shared_ptr <variable> uni_var (std::shared_ptr <variable> (new variable (this->shape (), this->get_grids (), this->element_flags, std::to_string ((long double) other), 1)));
 			linalg::copy (this->size (), &other, uni_var->ptr (), 0);
 			new_var->add_var (*this, add);
 			new_var->add_var (*uni_var, add);
@@ -303,8 +300,8 @@ namespace grids
 		 * @param other The variable to subtract from this variable
 		 * @return A reference to a new compound variable
 		 */
-		variable <datatype> &operator- (variable <datatype> &other) {
-			std::shared_ptr <variable <datatype>> new_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, "", 1)));
+		variable &operator- (variable &other) {
+			std::shared_ptr <variable> new_var (std::shared_ptr <variable> (new variable (this->shape (), this->get_grids (), this->element_flags, "", 1)));
 			new_var->add_var (*this, add);
 			new_var->add_var (other, sub);
 			store_var (new_var);
@@ -320,12 +317,12 @@ namespace grids
 		 * @param other The variable to multiply by this variable
 		 * @return A reference to a new compound variable
 		 */
-		variable <datatype> &operator* (variable <datatype> &other) {
-			std::shared_ptr <variable <datatype>> new_var;
+		variable &operator* (variable &other) {
+			std::shared_ptr <variable> new_var;
 			if (this->shape () > other.shape ()) {
-				new_var.reset (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, "", 1));
+				new_var.reset (new variable (this->shape (), this->get_grids (), this->element_flags, "", 1));
 			} else {
-				new_var.reset (new variable <datatype> (other.shape (), other.get_grids (), this->element_flags, "", 1));
+				new_var.reset (new variable (other.shape (), other.get_grids (), this->element_flags, "", 1));
 			}			new_var->add_var (*this, add);
 			new_var->add_var (other, mul);
 			store_var (new_var);
@@ -341,9 +338,9 @@ namespace grids
 		 * @param other The scalar to multiply by this variable
 		 * @return A reference to the new compound variable
 		 */
-		variable <datatype> &operator* (datatype other) {
-			std::shared_ptr <variable <datatype>> new_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, "", 1)));
-			std::shared_ptr <variable <datatype>> uni_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, std::to_string ((long double) other), 1)));
+		variable &operator* (double other) {
+			std::shared_ptr <variable> new_var (std::shared_ptr <variable> (new variable (this->shape (), this->get_grids (), this->element_flags, "", 1)));
+			std::shared_ptr <variable> uni_var (std::shared_ptr <variable> (new variable (this->shape (), this->get_grids (), this->element_flags, std::to_string ((long double) other), 1)));
 			linalg::copy (this->size (), &other, uni_var->ptr (), 0);
 			new_var->add_var (*this, add);
 			new_var->add_var (*uni_var, mul);
@@ -361,12 +358,12 @@ namespace grids
 		 * @param other The variable to divide
 		 * @return A reference to a new compound variable
 		 */
-		variable <datatype> &operator/ (variable <datatype> &other) {
-			std::shared_ptr <variable <datatype>> new_var;
+		variable &operator/ (variable &other) {
+			std::shared_ptr <variable> new_var;
 			if (this->shape () > other.shape ()) {
-				new_var.reset (new variable <datatype> (this->shape (), this->get_grids (), this->element_flags, "", 1));
+				new_var.reset (new variable (this->shape (), this->get_grids (), this->element_flags, "", 1));
 			} else {
-				new_var.reset (new variable <datatype> (other.shape (), other.get_grids (), this->element_flags, "", 1));
+				new_var.reset (new variable (other.shape (), other.get_grids (), this->element_flags, "", 1));
 			}
 			new_var->add_var (*this, add);
 			new_var->add_var (other, div);
@@ -382,7 +379,7 @@ namespace grids
 		 * @param other The variable to set this one to equal
 		 * @return A reference to this variable
 		 */
-		variable <datatype> &operator== (variable <datatype> &other) {
+		variable &operator== (variable &other) {
 			this->reset_vars ();
 			this->add_var (other, add);
 			this->update ();
@@ -397,11 +394,8 @@ namespace grids
 	 * @param other The variable to add this to
 	 * @return A reference to a variable
 	 */
-	template <class datatype>
-	variable <datatype> &operator+ (datatype first, variable <datatype> &other) {
-		return other + first;
-	}
-
+	variable &operator+ (double first, variable &other);
+	
 	/**
 	 * @brief If the variable is the second argument in subtraction, multiply by -1 then add it to the other
 	 * 
@@ -409,10 +403,7 @@ namespace grids
 	 * @param other The variable to subtract this to
 	 * @return A reference to a variable
 	 */
-	template <class datatype>
-	variable <datatype> &operator- (datatype first, variable <datatype> &other) {
-		return other * (-1.) + first;
-	}
+	variable &operator- (double first, variable &other);
 
 	/**
 	 * @brief If the variable is the second argument in division and the first isn't, rework it to use the built-in operators
@@ -421,14 +412,7 @@ namespace grids
 	 * @param other The variable to divide
 	 * @return A reference to a variable
 	 */
-	template <class datatype>
-	variable <datatype> &operator/ (datatype first, variable <datatype> &other) {
-		std::shared_ptr <variable <datatype>> uni_var (std::shared_ptr <variable <datatype>> (new variable <datatype> (other.shape (), other.get_grids (), other.element_flags, std::to_string ((long double) first))));
-		linalg::copy (other.size (), &first, uni_var->ptr (), 0);
-		variable <datatype>::store_var (uni_var);
-
-		return *uni_var / other;
-	}
+	variable &operator/ (double first, variable &other);
 }
 
 #endif /* end of include guard: VARIABLE_H__ */

@@ -77,8 +77,8 @@ namespace plans
 		datatype coeff; //!< A coefficient to multiply the results of the plan operation
 		datatype *data_in; //!< A pointer to the data to operate on
 		datatype *data_out; //!< A pointer to the location to output to
-		grids::variable <datatype> &var_in; //!< A datatype pointer to the input data
-		grids::variable <datatype> &var_out; //!< A datatype pointer to the input data
+		grids::variable &var_in; //!< A datatype pointer to the input data
+		grids::variable &var_out; //!< A datatype pointer to the input data
 		int &element_flags; //!< A pointer to the integer global flags
 		int &component_flags; //!< A pointer to the integer local flags
 
@@ -100,7 +100,7 @@ namespace plans
 		 * @param state_out An integer of which state of data_out to use as the output
 		 * @param i_coeff A coefficient to multiply the results of the plan operation
 		 ************************************************************************/
-		plan (grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, int state_in = 0, int state_out = 0, datatype i_coeff = 1.0) :
+		plan (grids::variable &i_data_in, grids::variable &i_data_out, int state_in = 0, int state_out = 0, datatype i_coeff = 1.0) :
 		coeff (i_coeff), 
 		data_in (i_data_in.ptr (state_in)),
 		data_out (i_data_out.ptr (state_out)),
@@ -116,7 +116,7 @@ namespace plans
 		 * @param state An integer of which state of data_in to use as the input and output
 		 * @param i_coeff A coefficient to multiply the results of the plan operation
 		 ************************************************************************/
-		plan (grids::variable <datatype> &i_data_in, int state = 0, datatype i_coeff = 1.0) :
+		plan (grids::variable &i_data_in, int state = 0, datatype i_coeff = 1.0) :
 		plan (i_data_in, i_data_in, state, state, i_coeff) {}
 		
 		virtual ~plan () {}
@@ -189,7 +189,7 @@ namespace plans
 			 * 
 			 * This method creates a shared_ptr to an implicit plan instance. The benefit to this inclusion is that the instance method can be called in a uniform way and hide communication of grid and matrix information from the user. If a plan would be created that would not do anything (e.g. something with a coefficient of 0.0), this will return a NULL shared pointer.
 			 ************************************************************************/
-			virtual std::shared_ptr <plan <datatype>> instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
+			virtual std::shared_ptr <plan <datatype>> instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
 					return _instance (matrices, i_data_in, i_data_out);
 				}
 
@@ -203,7 +203,7 @@ namespace plans
 			 * 
 			 * This method should be overloaded for each plan to allow for convenient plan generation
 			 ************************************************************************/
-			virtual std::shared_ptr <plan <datatype>> _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const = 0;
+			virtual std::shared_ptr <plan <datatype>> _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const = 0;
 		};
 
 		/**
@@ -261,9 +261,7 @@ namespace plans
 			 * @param var A reference to the variable source
 			 * @return A new factory continer with the old contents and the new source factory
 			 */
-			factory_container operator+ (grids::variable <datatype> &var) {
-				return *this + src (var);
-			}
+			factory_container operator+ (grids::variable &var);
 
 			/**
 			 * @brief Add a constant term to this container
@@ -272,9 +270,7 @@ namespace plans
 			 * @param scalar The constant scalar to use as the source term
 			 * @return A new factory container with the old contents and the new constant source factory
 			 */
-			factory_container operator+ (datatype scalar) {
-				return *this + constant (scalar);
-			}
+			factory_container operator+ (datatype scalar);
 
 			/**
 			 * @brief Append a new factory container with -1 times the coefficients contained
@@ -332,6 +328,19 @@ namespace plans
 			
 		};
 	};
+
+	std::shared_ptr <typename plan <double>::factory> src (grids::variable &data_source, bool dealias);
+	std::shared_ptr <typename plan <double>::factory> constant (double coeff);
+
+	template <class datatype>
+	typename plan <datatype>::factory_container plan <datatype>::factory_container::operator+ (grids::variable &var) {
+		return *this + src (var, false);
+	}
+
+	template <class datatype>
+	typename plan <datatype>::factory_container plan <datatype>::factory_container::operator+ (datatype scalar) {
+		return *this + constant (scalar);
+	}
 
 	/**
 	 * @brief Two shared pointers of factories add to a factory container containing both

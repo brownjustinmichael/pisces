@@ -177,7 +177,7 @@ namespace pisces
 	 * This method takes an input_virtual_file and input_grid and rezones them according to the extent of output_grid. It will do so by communicating with the other elements to collect the data necessary for the rezone.
 	 ************************************************************************/
 	template <class datatype>
-	void rezone (mpi::messenger *inter_messenger, grids::grid <datatype> *input_grid, grids::grid <datatype> *output_grid, formats::virtual_file *input_virtual_file, formats::virtual_file *output_virtual_file, datatype *value_buffer, datatype *inter_buffer) {
+	void rezone (mpi::messenger *inter_messenger, grids::grid *input_grid, grids::grid *output_grid, formats::virtual_file *input_virtual_file, formats::virtual_file *output_virtual_file, datatype *value_buffer, datatype *inter_buffer) {
 		if (output_virtual_file != input_virtual_file) {
 			*output_virtual_file = *input_virtual_file;
 		}

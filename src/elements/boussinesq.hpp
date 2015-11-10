@@ -121,7 +121,7 @@ namespace pisces
 		 ************************************************************************/
 		virtual formats::virtual_file *make_rezoned_virtual_file (datatype *positions, formats::virtual_file *virtual_file_ptr, int flags = 0x00) {
 			grids::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
-			std::shared_ptr <grids::grid <datatype>> vertical_grid = implemented_element <datatype>::generate_grid (&vertical_axis);
+			std::shared_ptr <grids::grid> vertical_grid = implemented_element <datatype>::generate_grid (&vertical_axis);
 			
 			pisces::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, virtual_file_ptr, &formats::virtual_files ["two_d/boussinesq/new_virtual_file"], value_buffer, inter_buffer);
 			

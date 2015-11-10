@@ -19,7 +19,7 @@ namespace plans
 	namespace solvers
 	{
 		template <class datatype>
-		void fourier <datatype>::init (datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out) {
+		void fourier <datatype>::init (datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, grids::variable &i_data, grids::variable &i_data_out) {
 			TRACE ("Building solver...");
 			n = i_data.get_grid (0).get_n ();
 			ldn = i_data.get_grid (0).get_ld ();

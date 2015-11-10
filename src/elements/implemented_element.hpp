@@ -98,8 +98,8 @@ namespace pisces
 			transform_threads = i_params.get <int> ("parallel.transform.subthreads");
 			
 			// Set up the grids
-			grids [0] = std::shared_ptr <grids::grid <datatype>> (new typename grids::horizontal::grid <datatype> (&i_axis_n));
-			grids [1] = std::shared_ptr <grids::grid <datatype>> (new typename grids::vertical::grid <datatype> (&i_axis_m));
+			grids [0] = std::shared_ptr <grids::grid> (new typename grids::horizontal::grid (&i_axis_n));
+			grids [1] = std::shared_ptr <grids::grid> (new typename grids::vertical::grid (&i_axis_m));
 			
 			value_buffer_vec.resize (i_messenger_ptr->get_np () * m * n);
 			value_buffer = &value_buffer_vec [0];
@@ -245,11 +245,11 @@ namespace pisces
 		/*!**********************************************************************
 		 * \copydoc element::generate_grid
 		 ************************************************************************/
-		virtual std::shared_ptr <grids::grid <datatype>> generate_grid (grids::axis *axis_ptr, int index = -1) {
+		virtual std::shared_ptr <grids::grid> generate_grid (grids::axis *axis_ptr, int index = -1) {
 			if (index == 0) {
-				return std::shared_ptr <grids::grid <datatype>> (new typename grids::horizontal::grid <datatype> (axis_ptr));
+				return std::shared_ptr <grids::grid> (new typename grids::horizontal::grid (axis_ptr));
 			} else if (index == 1 || index == -1) {
-				return std::shared_ptr <grids::grid <datatype>> (new typename grids::vertical::grid <datatype> (axis_ptr));
+				return std::shared_ptr <grids::grid> (new typename grids::vertical::grid (axis_ptr));
 			} else {
 				throw 0;
 			}
@@ -260,7 +260,7 @@ namespace pisces
 		 ************************************************************************/
 		virtual formats::virtual_file *make_rezoned_virtual_file (datatype *positions, formats::virtual_file *virtual_file_ptr, int flags = 0x00) {
 			grids::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
-			std::shared_ptr <grids::grid <datatype>> vertical_grid = generate_grid (&vertical_axis);
+			std::shared_ptr <grids::grid> vertical_grid = generate_grid (&vertical_axis);
 			
 			pisces::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, virtual_file_ptr, &formats::virtual_files ["two_d/element/new_virtual_file"], value_buffer, inter_buffer);
 			

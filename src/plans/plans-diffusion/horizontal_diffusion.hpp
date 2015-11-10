@@ -12,6 +12,8 @@
 #include "linalg/utils.hpp"
 
 #include "../implicit_plan.hpp"
+#include "../explicit_plan.hpp"
+#include "../real_plan.hpp"
 #include "io/parameters.hpp"
 
 namespace plans
@@ -50,7 +52,7 @@ namespace plans
 			 * \param i_coeff The diffusion coefficient
 			 * \param i_alpha The implicit fraction (1.0 for purely implicit, 0.0 for purely explicit)
 			 ************************************************************************/
-			horizontal (datatype i_alpha, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : implicit_plan <datatype> (i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_coeff, real_spectral), alpha (i_alpha) {
+			horizontal (datatype i_alpha, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable &i_data_in, grids::variable &i_data_out, datatype i_coeff = 1.0) : implicit_plan <datatype> (i_matrix_n, i_matrix_m, i_data_in, i_data_out, i_coeff, real_spectral), alpha (i_alpha) {
 				TRACE ("Instantiating...");
 				pioL2 = 4.0 * (std::acos (-1.0) * std::acos (-1.0) / (grid_n [n - 1] - grid_n [0]) / (grid_n [n - 1] - grid_n [0]));
 				setup ();
@@ -117,7 +119,7 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc plan::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
+				virtual std::shared_ptr <plan <datatype> > _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
 					if (coeff) {
 						return std::shared_ptr <plan <datatype> > (new horizontal <datatype> (alpha, matrices [0], matrices [1], i_data_in, i_data_out, coeff));
 					}
@@ -159,7 +161,7 @@ namespace plans
 			 * \param i_alpha The implicit fraction (1.0 for purely implicit, 0.0 for purely explicit)
 			 * \param i_diffusion A pointer to the datatype vector of diffusion coefficients
 			 ************************************************************************/
-			background_horizontal (datatype i_alpha, datatype *i_diffusion, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) : implicit_plan <datatype> (i_matrix_n, i_matrix_m, i_data_in, i_data_out, 1.0, real_spectral), alpha (i_alpha), diffusion (i_diffusion) {
+			background_horizontal (datatype i_alpha, datatype *i_diffusion, datatype *i_matrix_n, datatype *i_matrix_m, grids::variable &i_data_in, grids::variable &i_data_out) : implicit_plan <datatype> (i_matrix_n, i_matrix_m, i_data_in, i_data_out, 1.0, real_spectral), alpha (i_alpha), diffusion (i_diffusion) {
 				TRACE ("Instantiating...");
 				pioL2 = 4.0 * (std::acos (-1.0) * std::acos (-1.0) / (grid_n [n - 1] - grid_n [0]) / (grid_n [n - 1] - grid_n [0]));
 				setup ();
@@ -238,7 +240,7 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc plan::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
+				virtual std::shared_ptr <plan <datatype> > _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
 					return std::shared_ptr <plan <datatype> > (new background_horizontal <datatype> (alpha, diffusion, matrices [0], matrices [1], i_data_in, i_data_out));
 				}
 			};
@@ -281,7 +283,7 @@ namespace plans
 			 * 
 			 * In this plan, data_source is not used in leiu of data_in. The reason for this is that data_in is almost always assumed to be the current variable rather than some other source term.
 			 ************************************************************************/
-			horizontal_stress (grids::variable <datatype> &i_density, grids::variable <datatype> &i_data_other, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : 
+			horizontal_stress (grids::variable &i_density, grids::variable &i_data_other, grids::variable &i_data_in, grids::variable &i_data_out, datatype i_coeff = 1.0) : 
 			real_plan <datatype> (i_data_in, i_data_out, i_coeff), 
 			density (i_density.ptr ()),
 			data_other (i_data_other.ptr ()) {
@@ -329,11 +331,11 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc plan::factory
 			 ************************************************************************/
-			class factory : public explicit_plan <datatype>::factory
+			class factory : public real_plan <datatype>::factory
 			{
 			private:
-				grids::variable <datatype> &density; //!< The data source to be used when constructing the plan
-				grids::variable <datatype> &data_other; //!< The data source to be used when constructing the plan
+				grids::variable &density; //!< The data source to be used when constructing the plan
+				grids::variable &data_other; //!< The data source to be used when constructing the plan
 			
 			public:
 				/*!**********************************************************************
@@ -341,7 +343,7 @@ namespace plans
 				 * \param i_data_other The data of the other velocity component to be used when constructing the plan
 				 * @param i_density A reference to the density variable
 				 ************************************************************************/
-				factory (grids::variable <datatype> &i_density, grids::variable <datatype> &i_data_other, datatype i_coeff = 1.0) : 
+				factory (grids::variable &i_density, grids::variable &i_data_other, datatype i_coeff = 1.0) : 
 				explicit_plan <datatype>::factory (i_coeff), 
 				density (i_density),
 				data_other (i_data_other) {}
@@ -351,7 +353,7 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc plan::factory::_instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out) const {
+				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
 					if (coeff) {
 						return std::shared_ptr <plans::plan <datatype> > (new horizontal_stress <datatype> (density, data_other, i_data_in, i_data_out, coeff));
 					}

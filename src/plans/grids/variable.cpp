@@ -10,11 +10,9 @@
 
 namespace grids
 {
-	template <class datatype>
-	std::vector <std::shared_ptr <variable <datatype>>> grids::variable <datatype>::tmps;
+	std::vector <std::shared_ptr <variable>> grids::variable::tmps;
 
-	template <class datatype>
-	int variable <datatype>::update () {
+	int variable::update () {
 		bool needs_update = false;
 		int new_state;
 		for (int i = 0; i < (int) vars.size (); ++i)
@@ -31,7 +29,7 @@ namespace grids
 
 		DEBUG ("Update attempt on " << this->get_name ());
 		linalg::scale (this->size (), 0.0, this->ptr ());
-		datatype *tmp, *data = this->ptr ();
+		double *tmp, *data = this->ptr ();
 		for (int i = 0; i < (int) vars.size (); ++i)
 		{
 			DEBUG ("Incorporating " << inner [i]->get_name () << " at " << inner [i]->ptr ());
@@ -74,8 +72,7 @@ namespace grids
 		return state;
 	}
 
-	template <class datatype>
-	std::string variable <datatype>::get_name () {
+	std::string variable::get_name () {
 		std::string return_val = name;
 		bool inner_bool = false;
 		for (int i = 0; i < (int) this->inner.size (); ++i)
@@ -105,5 +102,19 @@ namespace grids
 		return return_val;
 	}
 
-	template class variable <double>;
+	variable &operator+ (double first, variable &other) {
+		return other + first;
+	}
+
+	variable &operator- (double first, variable &other) {
+		return other * (-1.) + first;
+	}
+
+	variable &operator/ (double first, variable &other) {
+		std::shared_ptr <variable> uni_var (std::shared_ptr <variable> (new variable (other.shape (), other.get_grids (), other.element_flags, std::to_string ((long double) first))));
+		linalg::copy (other.size (), &first, uni_var->ptr (), 0);
+		variable::store_var (uni_var);
+
+		return *uni_var / other;
+	}
 }

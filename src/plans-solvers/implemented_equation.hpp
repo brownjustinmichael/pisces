@@ -35,17 +35,17 @@ namespace plans
 			int ldn; //!< The integer length of the array in the horizontal (can be larger than n)
 			int m; //!< The integer number of elements in the vertical
 			int flags; //!< The integer flags associated with the equation
-			grids::grid <datatype> &grid_n; //!< The grid object in the horizontal
-			grids::grid <datatype> &grid_m; //!< The grid object in the vertical
+			grids::grid &grid_n; //!< The grid object in the horizontal
+			grids::grid &grid_m; //!< The grid object in the vertical
 			
 			std::shared_ptr <plans::solvers::solver <datatype> > x_solver; //!< A pointer to the horizontal solver
 			std::shared_ptr <plans::solvers::solver <datatype> > z_solver; //!< A pointer to the vertical solver
 			
-			std::shared_ptr <grids::variable <datatype>> old_rhs_ptr; //!< A variable of the old rhs pointer, for accuracy
-			std::shared_ptr <grids::variable <datatype>> old2_rhs_ptr; //!< A variable of the rhs pointer from two steps ago
-			std::shared_ptr <grids::variable <datatype>> old3_rhs_ptr; //!< A variable of the rhs pointer from three steps ago
-			std::shared_ptr <grids::variable <datatype>> new_rhs_ptr; //!< A variable of the current rhs pointer
-			std::shared_ptr <grids::variable <datatype>> cor_rhs_ptr; //!< A variable of the corrected rhs pointer, taking into account the older rhs pointers
+			std::shared_ptr <grids::variable> old_rhs_ptr; //!< A variable of the old rhs pointer, for accuracy
+			std::shared_ptr <grids::variable> old2_rhs_ptr; //!< A variable of the rhs pointer from two steps ago
+			std::shared_ptr <grids::variable> old3_rhs_ptr; //!< A variable of the rhs pointer from three steps ago
+			std::shared_ptr <grids::variable> new_rhs_ptr; //!< A variable of the current rhs pointer
+			std::shared_ptr <grids::variable> cor_rhs_ptr; //!< A variable of the corrected rhs pointer, taking into account the older rhs pointers
 			
 			std::shared_ptr <plans::plan <datatype> > transform; //!< A shared pointer to a transform if the equation has a real_rhs_vec
 		
@@ -53,7 +53,7 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc equation::equation
 			 ************************************************************************/
-			implemented_equation (grids::variable <datatype> &i_data, mpi::messenger *i_messenger_ptr) : 
+			implemented_equation (grids::variable &i_data, mpi::messenger *i_messenger_ptr) : 
 			plans::solvers::equation <datatype> (i_data, i_messenger_ptr), 
 			n (i_data.get_grid (0).get_n ()), 
 			ldn (i_data.get_grid (0).get_ld ()), 
@@ -61,11 +61,11 @@ namespace plans
 			grid_n (i_data.get_grid (0)), 
 			grid_m (i_data.get_grid (1)) {
 				flags = 0x00;
-				new_rhs_ptr = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (grid_n, grid_m, *element_flags));
-				old_rhs_ptr = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (grid_n, grid_m, *element_flags));
-				old2_rhs_ptr = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (grid_n, grid_m, *element_flags));
-				old3_rhs_ptr = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (grid_n, grid_m, *element_flags));
-				cor_rhs_ptr = std::shared_ptr <grids::variable <datatype>> (new grids::variable <datatype> (grid_n, grid_m, *element_flags));
+				new_rhs_ptr = std::shared_ptr <grids::variable> (new grids::variable (grid_n, grid_m, *element_flags));
+				old_rhs_ptr = std::shared_ptr <grids::variable> (new grids::variable (grid_n, grid_m, *element_flags));
+				old2_rhs_ptr = std::shared_ptr <grids::variable> (new grids::variable (grid_n, grid_m, *element_flags));
+				old3_rhs_ptr = std::shared_ptr <grids::variable> (new grids::variable (grid_n, grid_m, *element_flags));
+				cor_rhs_ptr = std::shared_ptr <grids::variable> (new grids::variable (grid_n, grid_m, *element_flags));
 				transform = std::shared_ptr <plans::plan <datatype> > (new plans::transforms::horizontal <datatype> (*new_rhs_ptr, real_real));
 			}
 			
@@ -165,7 +165,7 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc equation::grid_ptr
 			 ************************************************************************/
-			grids::grid <datatype> *grid_ptr (int index = 0) {
+			grids::grid *grid_ptr (int index = 0) {
 				if (index == 0) {
 					return &grid_n;
 				} else {
@@ -288,7 +288,7 @@ namespace plans
 				linalg::matrix_add_scaled (m, ldn, 55. / 24., new_rhs_ptr->ptr (real_spectral), cor_rhs_ptr->ptr (real_spectral));
 				
 				// Rotate the old timestep pointers
-				std::shared_ptr <grids::variable <datatype>> temp = old3_rhs_ptr;
+				std::shared_ptr <grids::variable> temp = old3_rhs_ptr;
 				old3_rhs_ptr = old2_rhs_ptr;
 				old2_rhs_ptr = old_rhs_ptr;
 				old_rhs_ptr = temp;

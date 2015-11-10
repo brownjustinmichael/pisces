@@ -71,7 +71,7 @@ namespace pisces
 		
 	public:
 		datatype &duration; //!< The datatype total simulated time
-		std::vector <std::shared_ptr <grids::grid <datatype>>> grids; //!< A vector of shared pointers to the collocation grids
+		std::vector <std::shared_ptr <grids::grid>> grids; //!< A vector of shared pointers to the collocation grids
 		mpi::messenger* messenger_ptr; //!< A pointer to the messenger object
 		formats::virtual_file *rezone_virtual_file; //!< A shared_ptr to a virtual file object, for rezoning
 		/*!**********************************************************************
@@ -145,7 +145,7 @@ namespace pisces
 		 * 
 		 * \return A datatype reference to the first element of the named scalar
 		 *********************************************************************/
-		inline grids::variable <datatype> &operator[] (std::string name) {
+		inline grids::variable &operator[] (std::string name) {
 			return data [name];
 		}
 		
@@ -237,7 +237,7 @@ namespace pisces
 		 * \param axis_ptr A pointer to an axis object, which contains the extent of the grid and number of gridpoints
 		 * \param index The index of the grid to add (defaults to the next available)
 		 ************************************************************************/
-		virtual std::shared_ptr <grids::grid <datatype>> generate_grid (grids::axis *axis_ptr, int index = -1) = 0;
+		virtual std::shared_ptr <grids::grid> generate_grid (grids::axis *axis_ptr, int index = -1) = 0;
 		
 		/*!**********************************************************************
 		 * \brief Factorize all equations
@@ -294,7 +294,7 @@ namespace pisces
 				data.transformers [*iter]->update ();
 			}
 
-			grids::variable <datatype>::update_tmps ();
+			grids::variable::update_tmps ();
 
 			TRACE ("Solve complete.");
 		}

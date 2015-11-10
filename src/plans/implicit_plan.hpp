@@ -33,8 +33,8 @@ namespace plans
 		int ldn; //!< The integer max dimension in the horizontal direction
 		int m; //!< The integer number of data elements in the vertical
 		int dims; //!< The number of dimensions the plan operates on
-		grids::grid <datatype> &grid_n; //!< A reference to the horizontal grid object
-		grids::grid <datatype> &grid_m; //!< A reference to the vertical grid object
+		grids::grid &grid_n; //!< A reference to the horizontal grid object
+		grids::grid &grid_m; //!< A reference to the vertical grid object
 		
 	public:
 		/*!**********************************************************************
@@ -46,7 +46,7 @@ namespace plans
 		 * @param state_in The state of i_data_in to use as the input
 		 * @param state_out The state of i_datat_out to use as the output
 		 ************************************************************************/
-		implicit_plan (datatype *i_matrix_n, datatype *i_matrix_m, grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0, int state_in = spectral_spectral, int state_out = spectral_spectral) :
+		implicit_plan (datatype *i_matrix_n, datatype *i_matrix_m, grids::variable &i_data_in, grids::variable &i_data_out, datatype i_coeff = 1.0, int state_in = spectral_spectral, int state_out = spectral_spectral) :
 		plans::plan <datatype> (i_data_in, i_data_out, state_in, state_out, i_coeff), 
 		matrix_n (i_matrix_n), 
 		matrix_m (i_matrix_m), 

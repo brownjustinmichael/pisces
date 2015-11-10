@@ -24,7 +24,7 @@ namespace plans
 	 * @return [description]
 	 */
 	template <class datatype>
-	std::shared_ptr <typename plan <datatype>::factory> advec (grids::variable <datatype> &vel_n, grids::variable <datatype> &vel_m) {
+	std::shared_ptr <typename plan <datatype>::factory> advec (grids::variable &vel_n, grids::variable &vel_m) {
 		return std::shared_ptr <typename real_plan <datatype>::factory> (new typename advection::uniform <datatype>::factory (vel_n, vel_m));
 	}
 } /* plans */

@@ -32,7 +32,7 @@ namespace plans
 	namespace solvers
 	{
 		template <class datatype>
-		incompressible <datatype>::incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z) : 
+		incompressible <datatype>::incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, grids::variable &i_data, grids::variable &i_data_out, grids::variable &i_data_x, grids::variable &i_data_z) : 
 		solver <datatype> (i_data, i_data_out, this->get_state_in (), this->get_state ()), 
 		n (i_data.get_grid (0).get_n ()), 
 		ldn (i_data.get_grid (0).get_ld ()), 

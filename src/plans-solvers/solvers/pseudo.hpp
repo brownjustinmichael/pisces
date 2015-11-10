@@ -39,8 +39,8 @@ namespace plans
 
 			datatype gamma; //!< The ratio of the specific heats
 			
-			grids::variable <datatype> &var_x; //!< The reference to the x_component of the velocity
-			grids::variable <datatype> &var_z; //!< The reference to the z_component of the velocity
+			grids::variable &var_x; //!< The reference to the x_component of the velocity
+			grids::variable &var_z; //!< The reference to the z_component of the velocity
 			datatype *data; //!< A pointer to the pressure data
 			datatype *data_x; //!< A pointer to the x component of the data
 			datatype *data_z; //!< A pointer to the z component of the data
@@ -51,8 +51,8 @@ namespace plans
 
 			int *component_flags_x; //!< The component flags for the x component of the data
 			int *component_flags_z; //!< The component flags for the z component of the data
-			grids::grid <datatype> &grid_n; //!< A reference to the horizontal grid object
-			grids::grid <datatype> &grid_m; //!< A reference to the vertical grid object
+			grids::grid &grid_n; //!< A reference to the horizontal grid object
+			grids::grid &grid_m; //!< A reference to the vertical grid object
 			const datatype *pos_n; //!< A pointer to the horizontal position, for convenience and speed
 			datatype *pos_m; //!< A pointer to the vertical position, for convenience and speed
 			datatype *new_pos; //!< A pointer to the halfway points along the grid, for convenience and speed
@@ -75,7 +75,7 @@ namespace plans
 			std::vector <datatype> grad_pressure, grad_density;
 			std::vector <datatype> grad2_pressure;
 
-			grids::variable <datatype> &rhs;
+			grids::variable &rhs;
 
 			std::shared_ptr <plan <datatype>> transform;
 
@@ -95,7 +95,7 @@ namespace plans
 			 * @param i_density A pointer to the density data
 			 * @param i_gamma The specific heat ratio
 			 ************************************************************************/
-			pseudo_incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out, grids::variable <datatype> &i_rhs, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z, datatype *i_density, datatype *i_pressure, datatype i_gamma = 5. / 3.);
+			pseudo_incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, grids::variable &i_data, grids::variable &i_data_out, grids::variable &i_rhs, grids::variable &i_data_x, grids::variable &i_data_z, datatype *i_density, datatype *i_pressure, datatype i_gamma = 5. / 3.);
 			
 			virtual ~pseudo_incompressible () {}
 
@@ -193,7 +193,7 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc solver::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, grids::variable <datatype> &i_rhs) const {
+				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::variable &i_data_in, grids::variable &i_data_out, grids::variable &i_rhs) const {
 					return std::shared_ptr <plans::solvers::solver <datatype>> (new pseudo_incompressible (messenger_ptr, boundary_factory_0 ? boundary_factory_0->instance (i_data_in.get_grids (), false) : boundary_0, boundary_factory_n ? boundary_factory_n->instance (i_data_in.get_grids (), true) : boundary_n, i_data_in, i_data_out, i_rhs, equation_x.data_var (), equation_z.data_var (), density, pressure, gamma));
 				}
 			};

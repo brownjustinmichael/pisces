@@ -38,7 +38,7 @@ namespace boundaries
 		 * \param i_value The value at which to fix the data at the edge
 		 * \param i_top A boolean regarding whether this is the top or bottom of an element
 		 ************************************************************************/
-		fixed_boundary (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n.get_n ())), top (i_top) {
+		fixed_boundary (grids::grid &i_grid_n, grids::grid &i_grid_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n.get_n ())), top (i_top) {
 			ldn = i_grid_n.get_ld ();
 			m = i_grid_m.get_n ();
 		}
@@ -64,7 +64,7 @@ namespace boundaries
 			/**
 			 * @copydoc boundary::factory::instance
 			 */
-			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid <datatype> **grids, bool top) {
+			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid **grids, bool top) {
 				return std::shared_ptr <boundary <datatype>> (new fixed_boundary (*grids [0], *grids [1], value, top));
 			}
 		};
@@ -109,7 +109,7 @@ namespace boundaries
 		 * \param i_value The value at which to fix the derivative at the edge
 		 * \param i_top A boolean regarding whether this is the top or bottom of an element
 		 ************************************************************************/
-		fixed_deriv_boundary (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n.get_n ())), top (i_top) {
+		fixed_deriv_boundary (grids::grid &i_grid_n, grids::grid &i_grid_m, datatype i_value, bool i_top) : value (i_value * std::sqrt (i_grid_n.get_n ())), top (i_top) {
 			ldn = i_grid_n.get_ld ();
 			m = i_grid_m.get_n ();
 			
@@ -138,7 +138,7 @@ namespace boundaries
 			/**
 			 * @copydoc boundary::factory::instance
 			 */
-			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid <datatype> **grids, bool top) {
+			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid **grids, bool top) {
 				return std::shared_ptr <boundary <datatype>> (new fixed_deriv_boundary (*grids [0], *grids [1], value, top));
 			}
 		};
@@ -239,7 +239,7 @@ namespace boundaries
 			/**
 			 * @copydoc boundary::factory::instance
 			 */
-			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid <datatype> **grids, bool top) {
+			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid **grids, bool top) {
 				return std::shared_ptr <boundary <datatype>> (new communicating_boundary (messenger_ptr, grids [0]->get_ld (), grids [1]->get_n (), top ? grids [1]->get_excess_n () : grids [1]->get_excess_0 (), top));
 			}
 		};

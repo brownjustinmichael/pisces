@@ -65,7 +65,7 @@ namespace plans
 			int overlap_n; //!< The total overlap region on the bottom
 			int lda; //!< The leading dimension of the matrices
 			
-		void init (mpi::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out);
+		void init (mpi::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, grids::variable &i_data, grids::variable &i_data_out);
 
 		public:
 			/*!**********************************************************************
@@ -89,7 +89,7 @@ namespace plans
 			 * 0 0 interpolating row for below element  0 0
 			 * 0 0 boundary row for below element       0 0
 			 ************************************************************************/
-			collocation (mpi::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out) :
+			collocation (mpi::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, grids::variable &i_data, grids::variable &i_data_out) :
 			solver <datatype> (i_data, i_data_out, this->get_state_in (), this->get_state ()),
 			timestep (i_timestep) {
 				init (i_messenger_ptr, i_timestep, i_boundary_0, i_boundary_n, i_rhs, i_data, i_data_out);
@@ -104,7 +104,7 @@ namespace plans
 			 * \param i_data A reference to the data to read
 			 * \param i_data_out A reference to the data to update
 			 ************************************************************************/
-			collocation (mpi::messenger* i_messenger_ptr, datatype& i_timestep, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n, datatype *i_rhs, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out) :
+			collocation (mpi::messenger* i_messenger_ptr, datatype& i_timestep, typename boundaries::boundary <datatype>::factory &i_boundary_0, typename boundaries::boundary <datatype>::factory &i_boundary_n, datatype *i_rhs, grids::variable &i_data, grids::variable &i_data_out) :
 			solver <datatype> (i_data, i_data_out, this->get_state_in (), this->get_state ()),
 			timestep (i_timestep) {
 				init (i_messenger_ptr, i_timestep, i_boundary_0.instance (i_data.get_grid (0), i_data.get_grid (1), false), i_boundary_n.instance (i_data.get_grid (0), i_data.get_grid (1), true), i_rhs, i_data, i_data_out);
@@ -183,7 +183,7 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc solver::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, grids::variable <datatype> &i_rhs) const {
+				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::variable &i_data_in, grids::variable &i_data_out, grids::variable &i_rhs) const {
 					return std::shared_ptr <plans::solvers::solver <datatype>> (new collocation (messenger_ptr, timestep, boundary_factory_0 ? boundary_factory_0->instance (i_data_in.get_grids (), false) : boundary_0, boundary_factory_n ? boundary_factory_n->instance (i_data_in.get_grids (), true) : boundary_n, i_rhs.ptr (real_spectral), i_data_in, i_data_out));
 				}
 			};

@@ -29,7 +29,7 @@ namespace plans
 			
 			int ldn; //!< The horizontal extent of the data array
 			int ldm; //!< The vertical extent of the data array
-			grids::variable <datatype> &data; //!< A pointer to the data to input
+			grids::variable &data; //!< A pointer to the data to input
 			
 			std::shared_ptr <plans::plan <datatype>> forward_horizontal_transform; //!< A shared pointer to the forward horizontal transform
 			std::shared_ptr <plans::plan <datatype>> forward_vertical_transform; //!< A shared pointer to the forward vertical transform
@@ -46,7 +46,7 @@ namespace plans
 			 * \param i_flags Integer flags to describe the setup (e.g. forward_vertical, inverse_horizontal, etc.)
 			 * \param i_threads The number of threads to use in the transform
 			 ************************************************************************/
-			implemented_transformer (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, grids::variable <datatype> &i_data, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 1) : 
+			implemented_transformer (grids::grid &i_grid_n, grids::grid &i_grid_m, grids::variable &i_data, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 1) : 
 			plans::transforms::transformer <datatype> (i_element_flags, i_component_flags), 
 			ldn (i_grid_n.get_ld ()), 
 			ldm (i_grid_m.get_ld ()), 

@@ -11,6 +11,9 @@ for library_dir in library_dirs:
     env.Append (LINKFLAGS = ["-L%s" % library_dir])
     env.Append (CPPFLAGS = ["-L%s" % library_dir])
 
+env.Append (CPPFLAGS = ["-Wno-deprecated"])
+env.Append (LINKFLAGS = ["-Wno-deprecated"])
+
 def directory (path, dirname):
     """
     Get the directory name relative to the given path

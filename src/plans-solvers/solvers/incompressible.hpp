@@ -37,8 +37,8 @@ namespace plans
 			int excess_0; //!< The number of excess points are included on the top
 			int excess_n; //!< The number of excess points are included on the bottom
 			
-			grids::variable <datatype> &var_x; //!< A reference to the x component of the velocity
-			grids::variable <datatype> &var_z; //!< A reference to the z component of the velocity
+			grids::variable &var_x; //!< A reference to the x component of the velocity
+			grids::variable &var_z; //!< A reference to the z component of the velocity
 			datatype *data_x; //!< A pointer to the x component of the data
 			datatype *data_z; //!< A pointer to the z component of the data
 			datatype *new_pos; //!< A pointer to the grid positions in the solve (midpoints)
@@ -52,8 +52,8 @@ namespace plans
 			
 			int *component_flags_x; //!< The component flags for the x component of the data
 			int *component_flags_z; //!< The component flags for the z component of the data
-			grids::grid <datatype> &grid_n; //!< A reference to the horizontal grid object
-			grids::grid <datatype> &grid_m; //!< A reference to the vertical grid object
+			grids::grid &grid_n; //!< A reference to the horizontal grid object
+			grids::grid &grid_m; //!< A reference to the vertical grid object
 			const datatype *pos_n; //!< A pointer to the horizontal position, for convenience and speed
 			datatype *pos_m; //!< A pointer to the vertical position, for convenience and speed
 			
@@ -89,7 +89,7 @@ namespace plans
 			 * \param i_data_x A reference to the x component of the velocity
 			 * \param i_data_z A reference to the z component of the velocity
 			 ************************************************************************/
-			incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, grids::variable <datatype> &i_data, grids::variable <datatype> &i_data_out, grids::variable <datatype> &i_data_x, grids::variable <datatype> &i_data_z);
+			incompressible (mpi::messenger* i_messenger_ptr, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, grids::variable &i_data, grids::variable &i_data_out, grids::variable &i_data_x, grids::variable &i_data_z);
 			
 			virtual ~incompressible () {}
 			
@@ -155,7 +155,7 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc solver::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, grids::variable <datatype> &i_rhs) const {
+				virtual std::shared_ptr <plans::solvers::solver <datatype>> instance (grids::variable &i_data_in, grids::variable &i_data_out, grids::variable &i_rhs) const {
 					return std::shared_ptr <plans::solvers::solver <datatype>> (new incompressible (messenger_ptr, boundary_factory_0 ? boundary_factory_0->instance (i_data_in.get_grids (), false) : boundary_0, boundary_factory_n ? boundary_factory_n->instance (i_data_in.get_grids (), true) : boundary_n, i_data_in, i_data_out, equation_x.data_var (), equation_z.data_var ()));
 				}
 			};

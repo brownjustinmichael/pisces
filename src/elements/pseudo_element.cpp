@@ -77,7 +77,7 @@ namespace pisces
 		+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		- grad_z <datatype> (data ["bg_pressure"])
-		- params ["equations.z_velocity.sources.density"] * src <datatype> (data ["density"], true)
+		- params ["equations.z_velocity.sources.density"] * src (data ["density"], true)
 		+ params ["equations.velocity.diffusion"] * density_diff <datatype> (data ["density"])
 		+ params ["equations.velocity.diffusion"] * vertical_stress (data ["density"], data ["x_velocity"])
 		;

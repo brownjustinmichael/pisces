@@ -60,8 +60,8 @@ int main (int argc, char *argv[])
 			excess_n = 1;
 		}
 
-		horizontal::grid <double> horizontal_grid (new grids::axis (n, position_n0, position_nn));
-		vertical::grid <double> vertical_grid (new grids::axis (m, position_m0, position_mm, excess_0, excess_n));
+		horizontal::grid horizontal_grid (new grids::axis (n, position_n0, position_nn));
+		vertical::grid vertical_grid (new grids::axis (m, position_m0, position_mm, excess_0, excess_n));
 
 		DEBUG ("TOTAL M: " << m);
 

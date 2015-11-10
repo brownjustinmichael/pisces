@@ -31,8 +31,8 @@ namespace plans
 		int ldn; //!< The integer max dimension in the horizontal direction
 		int m; //!< The integer number of data elements in the vertical
 		int dims; //!< The number of dimensions the plan operates in
-		grids::grid <datatype> &grid_n; //!< A reference to the horizontal grid object
-		grids::grid <datatype> &grid_m; //!< A reference to the vertical grid object
+		grids::grid &grid_n; //!< A reference to the horizontal grid object
+		grids::grid &grid_m; //!< A reference to the vertical grid object
 		
 	public:
 		/*!**********************************************************************
@@ -40,7 +40,7 @@ namespace plans
 		 * \param i_data_out A reference to the output data variable for the plan
 		 * @param i_coeff A coefficient by which the plan output should be multiplied
 		 ************************************************************************/
-		real_plan (grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, datatype i_coeff = 1.0) : 
+		real_plan (grids::variable &i_data_in, grids::variable &i_data_out, datatype i_coeff = 1.0) : 
 		plans::plan <datatype> (i_data_in, i_data_out, real_real, real_real, i_coeff), 
 		n (i_data_in.get_grid (0).get_n ()), 
 		ldn (i_data_in.get_grid (0).get_ld ()), 

@@ -80,7 +80,7 @@ namespace plans
 			 * @param state_in The state in i_data_in to use as the input
 			 * @param state_out The state in i_data_out to use as the output
 			 *********************************************************************/
-			solver (grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, int state_in = 0, int state_out = 0) : 
+			solver (grids::variable &i_data_in, grids::variable &i_data_out, int state_in = 0, int state_out = 0) : 
 			plan <datatype> (i_data_in, i_data_out, state_in, state_out) {}
 	
 			virtual ~solver () {}
@@ -182,7 +182,7 @@ namespace plans
 				 * 
 				 * This method creates a shared_ptr to a solver instance. The benefit to this inclusion is that the instance method can be called in a uniform way and hide communication of grid and matrix information from the user. If a plan would be created that would not do anything (e.g. something with a coefficient of 0.0), this will return a NULL shared pointer.
 				 ************************************************************************/
-				virtual std::shared_ptr <solver <datatype>> instance (grids::variable <datatype> &i_data_in, grids::variable <datatype> &i_data_out, grids::variable <datatype> &i_rhs) const = 0;
+				virtual std::shared_ptr <solver <datatype>> instance (grids::variable &i_data_in, grids::variable &i_data_out, grids::variable &i_rhs) const = 0;
 			};
 		};
 	} /* solvers */

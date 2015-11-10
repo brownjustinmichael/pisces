@@ -22,14 +22,7 @@ namespace plans
 	 * @param dealias Whether to ignore the last third of the data in the horizontal direction
 	 * @return A shared pointer the plan factory of the vertical gradient
 	 */
-	template <class datatype>
-	std::shared_ptr <typename plan <datatype>::factory> src (grids::variable <datatype> &data_source, bool dealias = false) {
-		if (data_source.get_states () > 1) {
-			return std::shared_ptr <typename explicit_plan <datatype>::factory> (new typename source::uniform <datatype>::factory (data_source, dealias, 1.0));
-		} else {
-			return std::shared_ptr <typename real_plan <datatype>::factory> (new typename source::uniform_real <datatype>::factory (data_source, 1.0));
-		}
-	}
+	std::shared_ptr <typename plan <double>::factory> src (grids::variable &data_source, bool dealias = false);
 
 	/**
 	 * @brief Shorthand to construct a horizontal gradient term
@@ -38,7 +31,7 @@ namespace plans
 	 * @return A shared pointer the plan factory of the horizontal gradient
 	 */
 	template <class datatype>
-	std::shared_ptr <typename plan <datatype>::factory> grad_x (grids::variable <datatype> &data_source) {
+	std::shared_ptr <typename plan <datatype>::factory> grad_x (grids::variable &data_source) {
 		return std::shared_ptr <typename explicit_plan <datatype>::factory> (new typename source::uniform_grad_x <datatype>::factory (data_source, 1.0));
 	}
 
@@ -49,7 +42,7 @@ namespace plans
 	 * @return A shared pointer the plan factory of the vertical gradient
 	 */
 	template <class datatype>
-	std::shared_ptr <typename plan <datatype>::factory> grad_z (grids::variable <datatype> &data_source) {
+	std::shared_ptr <typename plan <datatype>::factory> grad_z (grids::variable &data_source) {
 		return std::shared_ptr <typename explicit_plan <datatype>::factory> (new typename source::uniform_grad_z <datatype>::factory (data_source, 1.0));
 	}
 
@@ -59,10 +52,7 @@ namespace plans
 	 * @param coeff The value of the constant source
 	 * @return A shared pointer to the plan factory of the constant source
 	 */
-	template <class datatype>
-	std::shared_ptr <typename plan <datatype>::factory> constant (datatype coeff = 1.0) {
-		return std::shared_ptr <typename explicit_plan <datatype>::factory> (new typename source::constant <datatype>::factory (coeff));
-	}
+	std::shared_ptr <typename plan <double>::factory> constant (double coeff = 1.0);
 
 	/**
 	 * @brief Shorthand to construct a viscous heating term
@@ -73,7 +63,7 @@ namespace plans
 	 * @return A shared pointer to the plan factory of the heat term
 	 */
 	template <class datatype>
-	typename plan <datatype>::factory_container heat (grids::variable <datatype> &data_source, grids::variable <datatype> &data_x, grids::variable <datatype> &data_z) {
+	typename plan <datatype>::factory_container heat (grids::variable &data_source, grids::variable &data_x, grids::variable &data_z) {
 		return typename plan <datatype>::factory_container (std::shared_ptr <typename real_plan <datatype>::factory> (new typename source::viscous_heat <datatype>::factory (data_source, data_x, data_z, 1.0)));
 	}
 
@@ -86,7 +76,7 @@ namespace plans
 	 * @return A shared pointer to the plan factory of the devergence term
 	 */
 	template <class datatype>
-	typename plan <datatype>::factory_container diverge (grids::variable <datatype> &data_source, grids::variable <datatype> &data_x, grids::variable <datatype> &data_z) {
+	typename plan <datatype>::factory_container diverge (grids::variable &data_source, grids::variable &data_x, grids::variable &data_z) {
 		return typename plan <datatype>::factory_container (std::shared_ptr <typename real_plan <datatype>::factory> (new typename source::divergence <datatype>::factory (data_source, data_x, data_z, 1.0)));
 	}
 } /* plans */

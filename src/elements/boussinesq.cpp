@@ -135,7 +135,7 @@ namespace pisces
 			+ advec <datatype> (data ["x_velocity"], data ["z_velocity"])
 			+ src (data ["z_velocity"] * data ["korre_Ts"])
 			== 
-			params ["equations.temperature.sources.z_velocity"] * src <datatype> (data ["z_velocity"]);
+			params ["equations.temperature.sources.z_velocity"] * src (data ["z_velocity"]);
 
 			if (uniform_diff) {
 				*equations ["temperature"] == params ["equations.temperature.diffusion"] * diff <datatype> ();
@@ -151,7 +151,7 @@ namespace pisces
 				dirichlet (i_params ["equations.composition.bottom.value"].as <datatype> ()), 
 				dirichlet (i_params ["equations.composition.top.value"].as <datatype> ())) 
 			+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
-			+ params ["equations.composition.sources.z_velocity"] * src <datatype> (data ["z_velocity"]) 
+			+ params ["equations.composition.sources.z_velocity"] * src (data ["z_velocity"]) 
 			== 
 			params ["equations.composition.diffusion"] * diff <datatype> ();
 		}
@@ -174,8 +174,8 @@ namespace pisces
 				dirichlet (0.0)) 
 			+ advec <datatype> (data ["x_velocity"], data ["z_velocity"]) 
 			== 
-			params ["equations.z_velocity.sources.temperature"] * src <datatype> (data ["temperature"])
-			+ params ["equations.z_velocity.sources.composition"] * src <datatype> (data ["composition"]) 
+			params ["equations.z_velocity.sources.temperature"] * src (data ["temperature"])
+			+ params ["equations.z_velocity.sources.composition"] * src (data ["composition"]) 
 			+ params ["equations.velocity.diffusion"] * diff <datatype> ();
 			if (params.get ("equations.z_velocity.ignore_net", false)) data ["z_velocity"].component_flags |= ignore_net;
 		}

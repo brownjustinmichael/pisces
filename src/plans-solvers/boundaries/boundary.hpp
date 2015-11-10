@@ -70,7 +70,7 @@ namespace boundaries
 			 * 
 			 * @return A shared pointer to the newly constructed boundary class
 			 */
-			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid <datatype> **grids, bool top) = 0;
+			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid **grids, bool top) = 0;
 
 			/**
 			 * @brief Generate an instance of a boundary object associated with the factory
@@ -81,8 +81,8 @@ namespace boundaries
 			 * 
 			 * @return A shared pointer to the newly constructed boundary class
 			 */
-			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid <datatype> &grid_n, grids::grid <datatype> &grid_m, bool top) {
-				grids::grid <datatype> *grids [3] = {&grid_n, &grid_m};
+			virtual std::shared_ptr <boundary <datatype>> instance (grids::grid &grid_n, grids::grid &grid_m, bool top) {
+				grids::grid *grids [3] = {&grid_n, &grid_m};
 				return instance (grids, top);
 			}
 		};

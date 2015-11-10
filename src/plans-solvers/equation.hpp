@@ -35,7 +35,7 @@ namespace plans
 			mpi::messenger *messenger_ptr; //!< A pointer to the mpi::messenger object associated with the equation
 		
 		protected:
-			grids::variable <datatype> &data; //!< A pointer to the data held by the equation object
+			grids::variable &data; //!< A pointer to the data held by the equation object
 		
 		private:
 			std::vector <std::shared_ptr <plan <datatype> > > plans; //!< A vector of shared pointers of plans to be executed before the transforms
@@ -45,7 +45,7 @@ namespace plans
 			 * \param i_data A pointer to the data associated with the equation
 			 * \param i_messenger_ptr A pointer to the mpi messenger object that may be needed for particular solvers
 			 ************************************************************************/
-			equation (grids::variable <datatype> &i_data, mpi::messenger *i_messenger_ptr = NULL) : 
+			equation (grids::variable &i_data, mpi::messenger *i_messenger_ptr = NULL) : 
 			element_flags (&(i_data.element_flags)), 
 			component_flags (&(i_data.component_flags)), 
 			messenger_ptr (i_messenger_ptr), 
@@ -128,7 +128,7 @@ namespace plans
 			 * 
 			 * \return A reference to the variable object associated with the solver
 			 ************************************************************************/
-			virtual grids::variable <datatype> &data_var () {
+			virtual grids::variable &data_var () {
 				return data;
 			}
 			
@@ -137,7 +137,7 @@ namespace plans
 			 * 
 			 * \param index The index specifying from which dimension to grab the grid
 			 ************************************************************************/
-			virtual grids::grid <datatype> *grid_ptr (int index = 0) = 0;
+			virtual grids::grid *grid_ptr (int index = 0) = 0;
 			
 			/*!**********************************************************************
 			 * \brief Return a pointer to the solver's matrix for the index dimension
