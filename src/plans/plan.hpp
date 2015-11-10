@@ -70,15 +70,14 @@ namespace plans
 	* 
 	* An implemented plan class contains the operator and the addresses of all the relevant data arrays to operate on. Each plan need be constructed only once and can run any number of times each timestep.
 	*********************************************************************/
-	template <class datatype>
 	class plan
 	{
 	protected:
-		datatype coeff; //!< A coefficient to multiply the results of the plan operation
-		datatype *data_in; //!< A pointer to the data to operate on
-		datatype *data_out; //!< A pointer to the location to output to
-		grids::variable &var_in; //!< A datatype pointer to the input data
-		grids::variable &var_out; //!< A datatype pointer to the input data
+		double coeff; //!< A coefficient to multiply the results of the plan operation
+		double *data_in; //!< A pointer to the data to operate on
+		double *data_out; //!< A pointer to the location to output to
+		grids::variable &var_in; //!< A double pointer to the input data
+		grids::variable &var_out; //!< A double pointer to the input data
 		int &element_flags; //!< A pointer to the integer global flags
 		int &component_flags; //!< A pointer to the integer local flags
 
@@ -100,7 +99,7 @@ namespace plans
 		 * @param state_out An integer of which state of data_out to use as the output
 		 * @param i_coeff A coefficient to multiply the results of the plan operation
 		 ************************************************************************/
-		plan (grids::variable &i_data_in, grids::variable &i_data_out, int state_in = 0, int state_out = 0, datatype i_coeff = 1.0) :
+		plan (grids::variable &i_data_in, grids::variable &i_data_out, int state_in = 0, int state_out = 0, double i_coeff = 1.0) :
 		coeff (i_coeff), 
 		data_in (i_data_in.ptr (state_in)),
 		data_out (i_data_out.ptr (state_out)),
@@ -116,7 +115,7 @@ namespace plans
 		 * @param state An integer of which state of data_in to use as the input and output
 		 * @param i_coeff A coefficient to multiply the results of the plan operation
 		 ************************************************************************/
-		plan (grids::variable &i_data_in, int state = 0, datatype i_coeff = 1.0) :
+		plan (grids::variable &i_data_in, int state = 0, double i_coeff = 1.0) :
 		plan (i_data_in, i_data_in, state, state, i_coeff) {}
 		
 		virtual ~plan () {}
@@ -161,7 +160,7 @@ namespace plans
 		class factory
 		{
 		public:
-			datatype coeff; //!< The coefficient to be applied to the generated plan
+			double coeff; //!< The coefficient to be applied to the generated plan
 
 			/**
 			 * @brief A factory type used to identify which kind of plan we could be dealing with
@@ -176,20 +175,20 @@ namespace plans
 			/**
 			 * @param i_coeff The coefficient to be applied to the generated plan
 			 */
-			factory (datatype i_coeff = 0.0) : coeff (i_coeff) {}
+			factory (double i_coeff = 0.0) : coeff (i_coeff) {}
 
 			virtual ~factory () {}
 
 			/*!**********************************************************************
 			 * \brief Create an instance of the plan from the factory
 			 * 
-			 * \param matrices An array of the solver datatype matrices
+			 * \param matrices An array of the solver double matrices
 			 * \param i_data_in A reference to the variable input data
 			 * \param i_data_out A reference to the variable output data
 			 * 
 			 * This method creates a shared_ptr to an implicit plan instance. The benefit to this inclusion is that the instance method can be called in a uniform way and hide communication of grid and matrix information from the user. If a plan would be created that would not do anything (e.g. something with a coefficient of 0.0), this will return a NULL shared pointer.
 			 ************************************************************************/
-			virtual std::shared_ptr <plan <datatype>> instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
+			virtual std::shared_ptr <plan> instance (double **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
 					return _instance (matrices, i_data_in, i_data_out);
 				}
 
@@ -197,13 +196,13 @@ namespace plans
 			/*!**********************************************************************
 			 * \brief The abstract instance creating method
 			 * 
-			 * \param matrices An array of the solver datatype matrices
+			 * \param matrices An array of the solver double matrices
 			 * \param i_data_in A reference to the variable input data
 			 * \param i_data_out A reference to the variable output data
 			 * 
 			 * This method should be overloaded for each plan to allow for convenient plan generation
 			 ************************************************************************/
-			virtual std::shared_ptr <plan <datatype>> _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const = 0;
+			virtual std::shared_ptr <plan> _instance (double **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const = 0;
 		};
 
 		/**
@@ -250,7 +249,7 @@ namespace plans
 			 * @param i_factory The new factory to append to the container
 			 * @return A new factory container containing the old contents and the new factory
 			 */
-			factory_container operator+ (std::shared_ptr <plan <datatype>::factory> i_factory) {
+			factory_container operator+ (std::shared_ptr <plan::factory> i_factory) {
 				return *this + factory_container (i_factory);
 			}
 
@@ -270,7 +269,7 @@ namespace plans
 			 * @param scalar The constant scalar to use as the source term
 			 * @return A new factory container with the old contents and the new constant source factory
 			 */
-			factory_container operator+ (datatype scalar);
+			factory_container operator+ (double scalar);
 
 			/**
 			 * @brief Append a new factory container with -1 times the coefficients contained
@@ -290,7 +289,7 @@ namespace plans
 			 * @param i_factory The factory to append to this one
 			 * @return A new factory container with the old contents of this one and -1 times the new factory
 			 */
-			factory_container operator- (std::shared_ptr <plan <datatype>::factory> i_factory) {
+			factory_container operator- (std::shared_ptr <plan::factory> i_factory) {
 				return *this - factory_container (i_factory);
 			}
 
@@ -301,7 +300,7 @@ namespace plans
 			 * @param scalar The value by which to scale the contained coefficients
 			 * @return A new factory container with the old contents scaled by scalar
 			 */
-			factory_container operator* (datatype scalar) {
+			factory_container operator* (double scalar) {
 				factory_container container (*this);
 				for (int i = 0; i < (int) this->facts.size (); ++i)
 				{
@@ -312,35 +311,20 @@ namespace plans
 
 			/**
 			 * @brief Scale the contents of the factory by a YAML::Node
-			 * @details Assume that the node has the appropriate datatype (i.e. double or float) and scale the coefficients of the contained factories by that value. If the Node doesn't exist or has the wrong type, this will raise an error.
+			 * @details Assume that the node has the appropriate double (i.e. double or float) and scale the coefficients of the contained factories by that value. If the Node doesn't exist or has the wrong type, this will raise an error.
 			 * 
 			 * @param node A reference to the YAML Node by which to scale the contents
 			 * @return A factory container with the old contents scaled by the node value
 			 */
 			factory_container operator* (YAML::Node &node) {
 				// if (node.IsDefined ()) {
-					return *this * node.as <datatype> ();
+					return *this * node.as <double> ();
 				// }
 				WARN ("Missing parameter... Assuming to be 0.0")
 				return factory_container ();
 			}
-
-			
 		};
 	};
-
-	std::shared_ptr <typename plan <double>::factory> src (grids::variable &data_source, bool dealias);
-	std::shared_ptr <typename plan <double>::factory> constant (double coeff);
-
-	template <class datatype>
-	typename plan <datatype>::factory_container plan <datatype>::factory_container::operator+ (grids::variable &var) {
-		return *this + src (var, false);
-	}
-
-	template <class datatype>
-	typename plan <datatype>::factory_container plan <datatype>::factory_container::operator+ (datatype scalar) {
-		return *this + constant (scalar);
-	}
 
 	/**
 	 * @brief Two shared pointers of factories add to a factory container containing both
@@ -349,7 +333,7 @@ namespace plans
 	 * @param j_factory A shared pointer to the second plan factory
 	 * @return The factory container containing both of the given plans
 	 */
-	plan <double>::factory_container operator+ (std::shared_ptr <plan <double>::factory> i_factory, std::shared_ptr <plan <double>::factory> j_factory);
+	plan::factory_container operator+ (std::shared_ptr <plan::factory> i_factory, std::shared_ptr <plan::factory> j_factory);
 
 	/**
 	 * @brief A shared pointer of a factory and a factory container add to a factory container containing both
@@ -358,7 +342,7 @@ namespace plans
 	 * @param j_container A factory container
 	 * @return The factory container containing the given plan factory and the contents of the container
 	 */
-	plan <double>::factory_container operator+ (std::shared_ptr <plan <double>::factory> i_factory, plan <double>::factory_container j_container);
+	plan::factory_container operator+ (std::shared_ptr <plan::factory> i_factory, plan::factory_container j_container);
 
 	/**
 	 * @brief Reworks subtraction of a shared pointer to a factory in terms of addition and multiplication
@@ -369,7 +353,7 @@ namespace plans
 	 * @return [description]
 	 */
 	template <class type>
-	typename plan <double>::factory_container operator- (std::shared_ptr <typename plan <double>::factory> i_factory, type i_other) {
+	typename plan::factory_container operator- (std::shared_ptr <typename plan::factory> i_factory, type i_other) {
 		return i_factory + (-1.) * i_other;
 	}
 
@@ -379,7 +363,7 @@ namespace plans
 	 * @param i_factory The factory to be inverted
 	 * @return A factory container containing the factory
 	 */
-	plan <double>::factory_container operator- (std::shared_ptr <plan <double>::factory> i_factory);
+	plan::factory_container operator- (std::shared_ptr <plan::factory> i_factory);
 
 	/**
 	 * @brief Multiply the coefficient of a shared pointer of a factory by a scalar
@@ -389,33 +373,29 @@ namespace plans
 	 * 
 	 * @return The shared pointer to the factory
 	 */
-	template <class datatype>
-	std::shared_ptr <typename plan <datatype>::factory> operator* (std::shared_ptr <typename plan <datatype>::factory> i_factory, datatype scalar) {
-		i_factory->coeff *= scalar;
-		return i_factory;
-	}
+	std::shared_ptr <typename plan::factory> operator* (std::shared_ptr <typename plan::factory> i_factory, double scalar);
 
 	/**
 	 * @brief Multiply the coefficient of a shared pointer of a factory by a YAML Node
-	 * @details This does first convert the YAML Node into a desired datatype, which currently must be specified in plan.cpp
+	 * @details This does first convert the YAML Node into a desired double, which currently must be specified in plan.cpp
 	 * 
 	 * @param i_factory The shared pointer of the factory
 	 * @param node The YAML Node to multiply the coefficient of the factory by
 	 * 
 	 * @return The shared pointer to the factory
 	 */
-	std::shared_ptr <plan <double>::factory> operator* (std::shared_ptr <plan <double>::factory> i_factory, YAML::Node node);
+	std::shared_ptr <plan::factory> operator* (std::shared_ptr <plan::factory> i_factory, YAML::Node node);
 
 	/**
-	 * @brief If ever a plain datatype multiplies a factory container, reverse them
+	 * @brief If ever a plain double multiplies a factory container, reverse them
 	 * 
 	 * @param scalar The scalar value in the multiplication
 	 * @param i_container The container object for which the coefficients should be multiplied
 	 * 
 	 * @return The factory container with the new coefficients
 	 */
-	template <class datatype>
-	typename plan <datatype>::factory_container operator* (datatype scalar, typename plan <datatype>::factory_container i_container);
+
+	typename plan::factory_container operator* (double scalar, typename plan::factory_container i_container);
 
 	/**
 	 * @brief If ever in an instance where the YAML node is first in the multiplication, reverse them
@@ -425,19 +405,11 @@ namespace plans
 	 * 
 	 * @return Something in the type of other
 	 */
-	template <class datatype>
-	datatype operator* (YAML::Node node, datatype other) {
+	template <class type>
+	type operator* (YAML::Node node, type other) {
 		return other * node;
 	}
 
 } /* plans */
-
-/**
- * @return A null plan for convenience
- */
-template <class datatype>
-std::shared_ptr <plans::plan <datatype>> NULL_plan () {
-	return std::shared_ptr <plans::plan <datatype>> ();
-}
 
 #endif /* end of include guard: PLAN_HPP_S9YPWHOM */

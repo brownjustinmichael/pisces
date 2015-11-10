@@ -64,15 +64,15 @@ namespace plans
 		 * The solver class is a more specialized unit than the element class, but with broader use than the plan class. It is designed to keep track of an entire matrix equation, both in regards to its setup and solution. It is also used as a class of convenience. Since the solver class contains most of the information needed by the various plans employed by the code, it can be passed to them in lieu of the other
 		 *********************************************************************/
 		template <class datatype>
-		class solver : public plan <datatype>
+		class solver : public plan
 		{
 		private:
 			std::vector <equation <datatype>*> deps; //!< A vector containing the dependencies of this solver
 	
 		public:
-			using plans::plan <datatype>::element_flags;
-			using plans::plan <datatype>::component_flags;
-			using plans::plan <datatype>::var_out;
+			using plans::plan::element_flags;
+			using plans::plan::component_flags;
+			using plans::plan::var_out;
 		
 			/*!*******************************************************************
 			 * @param i_data_in A reference to the variable of the input data
@@ -81,7 +81,7 @@ namespace plans
 			 * @param state_out The state in i_data_out to use as the output
 			 *********************************************************************/
 			solver (grids::variable &i_data_in, grids::variable &i_data_out, int state_in = 0, int state_out = 0) : 
-			plan <datatype> (i_data_in, i_data_out, state_in, state_out) {}
+			plan (i_data_in, i_data_out, state_in, state_out) {}
 	
 			virtual ~solver () {}
 

@@ -28,17 +28,17 @@ namespace plans
 		 * This term is assumed to be on the left hand side of the equation, so the coefficient's sign is reversed automatically. Please provide the coefficient of the advection term when it appears on the left side of the equation.
 		 ************************************************************************/
 		template <class datatype>
-		class uniform : public real_plan <datatype>
+		class uniform : public real_plan
 		{
 		private:
-			using real_plan <datatype>::coeff;
-			using real_plan <datatype>::n;
-			using real_plan <datatype>::m;
-			using real_plan <datatype>::dims;
-			using real_plan <datatype>::grid_n;
-			using real_plan <datatype>::grid_m;
-			using real_plan <datatype>::data_in;
-			using real_plan <datatype>::data_out;
+			using real_plan::coeff;
+			using real_plan::n;
+			using real_plan::m;
+			using real_plan::dims;
+			using real_plan::grid_n;
+			using real_plan::grid_m;
+			using real_plan::data_in;
+			using real_plan::data_out;
 		
 			datatype *vel_n; //!< A pointer to the horizontal component of the velocity
 			datatype *vel_m; //!< A pointer to the vertical component of the velocity
@@ -62,7 +62,7 @@ namespace plans
 			 * \param i_vel_m A pointer to the vertical component of the velocity
 			 ************************************************************************/
 			uniform (grids::variable &i_vel_n, grids::variable &i_vel_m, grids::variable &i_data_in, grids::variable &i_data_out, datatype i_coeff = 1.0) : 
-			real_plan <datatype> (i_data_in, i_data_out, i_coeff), vel_n (i_vel_n.ptr ()), vel_m (i_vel_m.ptr ()), pos_n (&(grid_n [0])), pos_m (&(grid_m [0])) {
+			real_plan (i_data_in, i_data_out, i_coeff), vel_n (i_vel_n.ptr ()), vel_m (i_vel_m.ptr ()), pos_n (&(grid_n [0])), pos_m (&(grid_m [0])) {
 				TRACE ("Adding advection...");
 				x_vec.resize (n * m * dims);
 				x_ptr = &x_vec [0];
@@ -129,7 +129,7 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc plan::factory
 			 ************************************************************************/
-			class factory : public real_plan <datatype>::factory
+			class factory : public real_plan::factory
 			{
 			private:
 				grids::variable &vel_n; //!< A pointer to the horizontal component of the velocity
@@ -141,18 +141,18 @@ namespace plans
 				 * \param i_vel_n A pointer to the horizontal component of the velocity
 				 * \param i_vel_m A pointer to the vertical component of the velocity
 				 ************************************************************************/
-				factory (grids::variable &i_vel_n, grids::variable &i_vel_m, datatype i_coeff = 1.0) : real_plan <datatype>::factory (i_coeff), vel_n (i_vel_n), vel_m (i_vel_m) {}
+				factory (grids::variable &i_vel_n, grids::variable &i_vel_m, datatype i_coeff = 1.0) : real_plan::factory (i_coeff), vel_n (i_vel_n), vel_m (i_vel_m) {}
 		
 				virtual ~factory () {}
 			
 				/*!**********************************************************************
 				 * \copydoc plan::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
+				virtual std::shared_ptr <plans::plan > _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan <datatype> > (new uniform <datatype> (vel_n, vel_m, i_data_in, i_data_out, coeff));
+						return std::shared_ptr <plans::plan > (new uniform <datatype> (vel_n, vel_m, i_data_in, i_data_out, coeff));
 					}
-					return std::shared_ptr <plans::plan <datatype> > ();
+					return std::shared_ptr <plans::plan > ();
 				}
 			};
 		};

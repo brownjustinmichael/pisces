@@ -22,17 +22,17 @@ namespace plans
 		 * \brief A plan to add viscous heating
 		 ************************************************************************/
 		template <class datatype>
-		class viscous_heat : public real_plan <datatype>
+		class viscous_heat : public real_plan
 		{
 		private:
-			using real_plan <datatype>::coeff;
-			using real_plan <datatype>::n;
-			using real_plan <datatype>::ldn;
-			using real_plan <datatype>::m;
-			using real_plan <datatype>::dims;
-			using real_plan <datatype>::data_out;
-			using real_plan <datatype>::grid_n;
-			using real_plan <datatype>::grid_m;
+			using real_plan::coeff;
+			using real_plan::n;
+			using real_plan::ldn;
+			using real_plan::m;
+			using real_plan::dims;
+			using real_plan::data_out;
+			using real_plan::grid_n;
+			using real_plan::grid_m;
 		
 			datatype *data_source; //!< The data pointer for the source data
 			datatype *data_x; //!< The data pointer to the x component of the velocity
@@ -49,7 +49,7 @@ namespace plans
 			 * @param i_data_z A reference to the z component of the velocity
 			 */
 			viscous_heat (grids::variable &i_data_source, grids::variable &i_data_x, grids::variable &i_data_z, grids::variable &i_data_in, grids::variable &i_data_out, datatype i_coeff = 1.0) : 
-			real_plan <datatype> (i_data_in, i_data_out, i_coeff), 
+			real_plan (i_data_in, i_data_out, i_coeff), 
 			data_source (i_data_source.ptr ()),
 			data_x (i_data_x.ptr ()),
 			data_z (i_data_z.ptr ()) {
@@ -91,7 +91,7 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc plan::factory
 			 ************************************************************************/
-			class factory : public real_plan <datatype>::factory
+			class factory : public real_plan::factory
 			{
 			private:
 				grids::variable &data_source; //!< The data source to be used when constructing the plan
@@ -106,7 +106,7 @@ namespace plans
 				 * \param i_data_z The z component of the velocity data source to be used when constructing the plan
 				 ************************************************************************/
 				factory (grids::variable &i_data_source, grids::variable &i_data_x, grids::variable &i_data_z, datatype i_coeff = 1.0) : 
-				real_plan <datatype>::factory (i_coeff), 
+				real_plan::factory (i_coeff), 
 				data_source (i_data_source),
 				data_x (i_data_x),
 				data_z (i_data_z) {}
@@ -116,11 +116,11 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc plan::factory::_instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
+				virtual std::shared_ptr <plans::plan > _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan <datatype> > (new viscous_heat <datatype> (data_source, data_x, data_z, i_data_in, i_data_out, coeff));
+						return std::shared_ptr <plans::plan > (new viscous_heat <datatype> (data_source, data_x, data_z, i_data_in, i_data_out, coeff));
 					}
-					return std::shared_ptr <plans::plan <datatype> > ();
+					return std::shared_ptr <plans::plan > ();
 				}
 			};
 		};
@@ -129,17 +129,17 @@ namespace plans
 		 * \brief A plan to account for temperature change due to expansion and contraction
 		 ************************************************************************/
 		template <class datatype>
-		class divergence : public real_plan <datatype>
+		class divergence : public real_plan
 		{
 		private:
-			using real_plan <datatype>::coeff;
-			using real_plan <datatype>::n;
-			using real_plan <datatype>::ldn;
-			using real_plan <datatype>::m;
-			using real_plan <datatype>::dims;
-			using real_plan <datatype>::data_out;
-			using real_plan <datatype>::grid_n;
-			using real_plan <datatype>::grid_m;
+			using real_plan::coeff;
+			using real_plan::n;
+			using real_plan::ldn;
+			using real_plan::m;
+			using real_plan::dims;
+			using real_plan::data_out;
+			using real_plan::grid_n;
+			using real_plan::grid_m;
 		
 			datatype *data_source; //!< The data pointer for the source data
 			datatype *data_x; //!< The data pointer to the x component of the velocity
@@ -156,7 +156,7 @@ namespace plans
 			 * @param i_data_z A reference to the z component of the velocity
 			 */
 			divergence (grids::variable &i_data_source, grids::variable &i_data_x, grids::variable &i_data_z, grids::variable &i_data_in, grids::variable &i_data_out, datatype i_coeff = 1.0) : 
-			real_plan <datatype> (i_data_in, i_data_out, i_coeff), 
+			real_plan (i_data_in, i_data_out, i_coeff), 
 			data_source (i_data_source.ptr ()),
 			data_x (i_data_x.ptr ()),
 			data_z (i_data_z.ptr ()) {
@@ -188,7 +188,7 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc plan::factory
 			 ************************************************************************/
-			class factory : public real_plan <datatype>::factory
+			class factory : public real_plan::factory
 			{
 			private:
 				grids::variable &data_source; //!< The data source to be used when constructing the plan
@@ -203,7 +203,7 @@ namespace plans
 				 * \param i_data_z The z component of the velocity data source to be used when constructing the plan
 				 ************************************************************************/
 				factory (grids::variable &i_data_source, grids::variable &i_data_x, grids::variable &i_data_z, datatype i_coeff = 1.0) : 
-				real_plan <datatype>::factory (i_coeff), 
+				real_plan::factory (i_coeff), 
 				data_source (i_data_source),
 				data_x (i_data_x),
 				data_z (i_data_z) {}
@@ -213,11 +213,11 @@ namespace plans
 				/*!**********************************************************************
 				 * \copydoc plan::factory::_instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
+				virtual std::shared_ptr <plans::plan > _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
 					if (coeff) {
-						return std::shared_ptr <plans::plan <datatype> > (new divergence <datatype> (data_source, data_x, data_z, i_data_in, i_data_out, coeff));
+						return std::shared_ptr <plans::plan > (new divergence <datatype> (data_source, data_x, data_z, i_data_in, i_data_out, coeff));
 					}
-					return std::shared_ptr <plans::plan <datatype> > ();
+					return std::shared_ptr <plans::plan > ();
 				}
 			};
 		};

@@ -28,11 +28,11 @@ namespace plans
 		 * \brief A plan that transforms the data horizontally via Fourier transform
 		 ************************************************************************/
 		template <class datatype>
-		class horizontal : public plans::plan <datatype>
+		class horizontal : public plans::plan
 		{
 		protected:
-			using plans::plan <datatype>::data_in;
-			using plans::plan <datatype>::data_out;
+			using plans::plan::data_in;
+			using plans::plan::data_out;
 
 			int n; //!< The number of horizontal data points
 			int m; //!< The number of vertical data points
@@ -71,7 +71,7 @@ namespace plans
 			 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
 			 ************************************************************************/
 			horizontal (grids::variable &i_data_in, grids::variable &i_data_out, int state_in = 0, int state_out = 0, int i_flags = 0x00, int i_threads = 0) : 
-			plans::plan <datatype> (i_data_in, i_data_out, state_in, state_out) {
+			plans::plan (i_data_in, i_data_out, state_in, state_out) {
 				init (i_data_in.get_grid (0).get_n (), i_data_in.get_grid (1).get_n (), data_in, data_out, i_flags, i_threads);
 			}
 
@@ -86,7 +86,7 @@ namespace plans
 			 * 
 			 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
 			 ************************************************************************/
-			horizontal (grids::variable &i_data_in, int state_in = 0, int state_out = -1, int i_flags = 0x00, int i_threads = 0) : plans::plan <datatype> (i_data_in, i_data_in, state_in, state_out >= 0 ? state_out : state_in) {
+			horizontal (grids::variable &i_data_in, int state_in = 0, int state_out = -1, int i_flags = 0x00, int i_threads = 0) : plans::plan (i_data_in, i_data_in, state_in, state_out >= 0 ? state_out : state_in) {
 				init (i_data_in.get_grid (0).get_n (), i_data_in.get_grid (1).get_n (), data_in, data_out, i_flags, i_threads);
 			}
 			
@@ -102,11 +102,11 @@ namespace plans
 		 * \brief A plan that transforms the data vertically via Chebyshev/Cosine transform
 		 ************************************************************************/
 		template <class datatype>
-		class vertical : public plans::plan <datatype>
+		class vertical : public plans::plan
 		{
 		protected:
-			using plans::plan <datatype>::data_in;
-			using plans::plan <datatype>::data_out;
+			using plans::plan::data_in;
+			using plans::plan::data_out;
 
 			int n; //!< The number of data points in the horizontal direction
 			int m; //!< The number of data points in the vertical direction
@@ -132,7 +132,7 @@ namespace plans
 			 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)
 			 ************************************************************************/
 			vertical (grids::variable &i_data_in, grids::variable &i_data_out, int state_in = 0, int state_out = 0, int i_flags = 0x00, int i_threads = 0) : 
-			plans::plan <datatype> (i_data_in, i_data_out, state_in, state_out) {
+			plans::plan (i_data_in, i_data_out, state_in, state_out) {
 				init (i_data_in.get_grid (0).get_n (), i_data_in.get_grid (1).get_n (), data_in, data_out, i_flags, i_threads);
 			}
 
@@ -146,7 +146,7 @@ namespace plans
 			 * @param state_out The integer output state of the data (e.g. real_real, real_spectral)
 			 * 
 			 * WARNING!! BECAUSE OF THE REAL DATA FFT, THE ARRAYS MUST HAVE DIMENSION M * 2 * (N / 2 + 1)			 ************************************************************************/
-			vertical (grids::variable &i_data_in, int state_in = 0, int state_out = -1, int i_flags = 0x00, int i_threads = 0) : plans::plan <datatype> (i_data_in, i_data_in, state_in, state_out >= 0 ? state_out : state_in) {
+			vertical (grids::variable &i_data_in, int state_in = 0, int state_out = -1, int i_flags = 0x00, int i_threads = 0) : plans::plan (i_data_in, i_data_in, state_in, state_out >= 0 ? state_out : state_in) {
 				init (i_data_in.get_grid (0).get_n (), i_data_in.get_grid (1).get_n (), data_in, data_out, i_flags, i_threads);
 			}
 			

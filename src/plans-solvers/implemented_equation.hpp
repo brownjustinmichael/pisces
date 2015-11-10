@@ -47,7 +47,7 @@ namespace plans
 			std::shared_ptr <grids::variable> new_rhs_ptr; //!< A variable of the current rhs pointer
 			std::shared_ptr <grids::variable> cor_rhs_ptr; //!< A variable of the corrected rhs pointer, taking into account the older rhs pointers
 			
-			std::shared_ptr <plans::plan <datatype> > transform; //!< A shared pointer to a transform if the equation has a real_rhs_vec
+			std::shared_ptr <plans::plan > transform; //!< A shared pointer to a transform if the equation has a real_rhs_vec
 		
 		public:
 			/*!**********************************************************************
@@ -66,7 +66,7 @@ namespace plans
 				old2_rhs_ptr = std::shared_ptr <grids::variable> (new grids::variable (grid_n, grid_m, *element_flags));
 				old3_rhs_ptr = std::shared_ptr <grids::variable> (new grids::variable (grid_n, grid_m, *element_flags));
 				cor_rhs_ptr = std::shared_ptr <grids::variable> (new grids::variable (grid_n, grid_m, *element_flags));
-				transform = std::shared_ptr <plans::plan <datatype> > (new plans::transforms::horizontal <datatype> (*new_rhs_ptr, real_real));
+				transform = std::shared_ptr <plans::plan > (new plans::transforms::horizontal <datatype> (*new_rhs_ptr, real_real));
 			}
 			
 			virtual ~implemented_equation () {}
@@ -226,7 +226,7 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc equation::add_plan(const typename plan<datatype>::factory&)
 			 ************************************************************************/
-			void add_plan (const typename plans::plan <datatype>::factory &i_factory) {
+			void add_plan (const typename plans::plan::factory &i_factory) {
 				TRACE ("Adding plan...");
 				datatype* matrices [2] = {matrix_ptr (0), matrix_ptr (1)};
 				plans::solvers::equation <datatype>::add_plan (i_factory.instance (matrices, data, *new_rhs_ptr));
@@ -235,7 +235,7 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc equation::add_plan(const typename plan<datatype>::factory_container&)
 			 ************************************************************************/
-			void add_plan (const typename plans::plan <datatype>::factory_container &i_container) {
+			void add_plan (const typename plans::plan::factory_container &i_container) {
 				TRACE ("Adding plan...");
 				for (int i = 0; i < (int) i_container.facts.size (); ++i)
 				{

@@ -10,24 +10,38 @@
  ************************************************************************/
 
 #include "plan.hpp"
+#include "source.hpp"
 
  namespace plans
  {
-	plan <double>::factory_container operator+ (std::shared_ptr <plan <double>::factory> i_factory, std::shared_ptr <plan <double>::factory> j_factory) {
-		return plan <double>::factory_container (i_factory) + j_factory;
+ 	plan::factory_container plan::factory_container::operator+ (grids::variable &var) {
+ 		return *this + src (var, false);
+ 	}
+
+ 	plan::factory_container plan::factory_container::operator+ (double scalar) {
+ 		return *this + constant (scalar);
+ 	}
+
+	plan::factory_container operator+ (std::shared_ptr <plan::factory> i_factory, std::shared_ptr <plan::factory> j_factory) {
+		return plan::factory_container (i_factory) + j_factory;
 	}
 
-	plan <double>::factory_container operator+ (std::shared_ptr <plan <double>::factory> i_factory, plan <double>::factory_container j_container) {
+	plan::factory_container operator+ (std::shared_ptr <plan::factory> i_factory, plan::factory_container j_container) {
 		return j_container + i_factory;
 	}
 
-	plan <double>::factory_container operator- (std::shared_ptr <plan <double>::factory> i_factory) {
+	plan::factory_container operator- (std::shared_ptr <plan::factory> i_factory) {
 		return i_factory * (-1.);
 	}
 
+	std::shared_ptr <typename plan::factory> operator* (std::shared_ptr <typename plan::factory> i_factory, double scalar) {
+		i_factory->coeff *= scalar;
+		return i_factory;
+	}
+
 	// template <>
-	// plan <double>::factory_container operator* (plan <double>::factory_container i_container, double scalar) {
-	// 	plan <double>::factory_container container (i_container);
+	// plan::factory_container operator* (plan::factory_container i_container, double scalar) {
+	// 	plan::factory_container container (i_container);
 	// 	for (int i = 0; i < (int) i_container.facts.size (); ++i)
 	// 	{
 	// 		container.facts [i]->coeff *= scalar;
@@ -35,7 +49,7 @@
 	// 	return container;
 	// }
 
-	std::shared_ptr <plan <double>::factory> operator* (std::shared_ptr <plan <double>::factory> i_factory, YAML::Node node) {
+	std::shared_ptr <plan::factory> operator* (std::shared_ptr <plan::factory> i_factory, YAML::Node node) {
 		i_factory->coeff *= node.as <double> ();
 		return i_factory;
 	}
@@ -43,8 +57,7 @@
 	/**
 	 * @copydoc operator*(datatype, plan<datatype>::factory_container)
 	 */
-	template <>
-	plan <double>::factory_container operator* (double scalar, plan <double>::factory_container i_container) {
+	plan::factory_container operator* (double scalar, plan::factory_container i_container) {
 		return i_container * scalar;
 	}
  }

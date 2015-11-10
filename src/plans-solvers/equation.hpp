@@ -38,7 +38,7 @@ namespace plans
 			grids::variable &data; //!< A pointer to the data held by the equation object
 		
 		private:
-			std::vector <std::shared_ptr <plan <datatype> > > plans; //!< A vector of shared pointers of plans to be executed before the transforms
+			std::vector <std::shared_ptr <plan > > plans; //!< A vector of shared pointers of plans to be executed before the transforms
 
 		public:
 			/*!**********************************************************************
@@ -176,7 +176,7 @@ namespace plans
 			 * 
 			 * \param i_plan A shared pointer to the plan to add
 			 *********************************************************************/
-			inline void add_plan (std::shared_ptr <plan <datatype>> i_plan) {
+			inline void add_plan (std::shared_ptr <plan> i_plan) {
 				TRACE ("Adding plan...");
 				if (!i_plan) {
 					return;
@@ -190,14 +190,14 @@ namespace plans
 			 * 
 			 * \param i_factory A reference to the factory from which to construct the plan
 			 ************************************************************************/
-			virtual void add_plan (const typename plan <datatype>::factory &i_factory) = 0;
+			virtual void add_plan (const typename plan::factory &i_factory) = 0;
 
 			/*!**********************************************************************
 			 * \brief Adds a container of plans to be executed
 			 * 
 			 * \param i_container A reference to the factory container from which to construct the plans
 			 ************************************************************************/
-			virtual void add_plan (const typename plan <datatype>::factory_container &i_container) = 0;
+			virtual void add_plan (const typename plan::factory_container &i_container) = 0;
 			
 			/**
 			 * @brief Setup any implicit components of the plans contained
@@ -265,8 +265,8 @@ namespace plans
 			 * @param i_factory A shared pointer to the factory from which the plan should be instantiated
 			 * @return A reference to this equation with the new plan added
 			 */
-			equation <datatype> &operator+ (const std::shared_ptr <typename plan <datatype>::factory> i_factory) {
-				return *this + typename plan <datatype>::factory_container (i_factory);
+			equation <datatype> &operator+ (const std::shared_ptr <typename plan::factory> i_factory) {
+				return *this + typename plan::factory_container (i_factory);
 			}
 
 			/**
@@ -276,7 +276,7 @@ namespace plans
 			 * @param i_container The container whose contents should be added to the equation
 			 * @return A reference to this equation with the new plans added
 			 */
-			equation <datatype> &operator+ (const typename plan <datatype>::factory_container &i_container) {
+			equation <datatype> &operator+ (const typename plan::factory_container &i_container) {
 				add_plan (-1.0 * i_container);
 				return *this;
 			}
@@ -289,7 +289,7 @@ namespace plans
 			 * @return A reference to this equation with the new plans added
 			 */
 			equation <datatype> &operator+ (const datatype scalar) {
-				add_plan ((typename plan <datatype>::factory_container) constant (-scalar));
+				add_plan ((typename plan::factory_container) constant (-scalar));
 				return *this;
 			}
 

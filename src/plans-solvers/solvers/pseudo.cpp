@@ -130,7 +130,7 @@ namespace plans
 			
 			data_temp.resize ((m + 2) * ldn);
 
-			transform = typename std::shared_ptr <plan <datatype>> (new  transforms::horizontal <datatype> (rhs, real_real));
+			transform = typename std::shared_ptr <plan> (new  transforms::horizontal <datatype> (rhs, real_real));
 
 			oodx = grid_n.get_ood ();
 			oodx2 = grid_n.get_ood2 ();

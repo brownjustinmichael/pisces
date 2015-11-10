@@ -22,22 +22,22 @@ namespace plans
 		 * @details The precise form of the term is grad dot ($source) grad ($data). This usually occurs in the inclusion of density to the equations, though that is not the only case where terms like this appear. The execution of this plan does use a bit of a hack for stability: the right hand side generated is that from a full timestep ago.
 		 */
 		template <class datatype>
-		class variable_diffusion : public implicit_plan <datatype>
+		class variable_diffusion : public implicit_plan
 		{
 		protected:
-			using implicit_plan <datatype>::n;
-			using implicit_plan <datatype>::ldn;
-			using implicit_plan <datatype>::m;
-			using implicit_plan <datatype>::grid_n;
-			using implicit_plan <datatype>::grid_m;
-			using implicit_plan <datatype>::data_in;
-			using implicit_plan <datatype>::data_out;
-			using implicit_plan <datatype>::coeff;
-			using implicit_plan <datatype>::matrix_n;
-			using implicit_plan <datatype>::matrix_m;
+			using implicit_plan::n;
+			using implicit_plan::ldn;
+			using implicit_plan::m;
+			using implicit_plan::grid_n;
+			using implicit_plan::grid_m;
+			using implicit_plan::data_in;
+			using implicit_plan::data_out;
+			using implicit_plan::coeff;
+			using implicit_plan::matrix_n;
+			using implicit_plan::matrix_m;
 			
-			using implicit_plan <datatype>::element_flags;
-			using implicit_plan <datatype>::component_flags;
+			using implicit_plan::element_flags;
+			using implicit_plan::component_flags;
 
 			datatype *data_source; //!< A pointer to the source data
 			datatype *new_matrix; //!< A pointer to the diffusion matrix
@@ -66,7 +66,7 @@ namespace plans
 			 * @param i_coeff The coefficient by which to multiply the results
 			 */
 			variable_diffusion (datatype *matrix_n, datatype *matrix_m, grids::variable &i_data_source, grids::variable &i_data_in, grids::variable &i_data_out, datatype i_coeff = 1.0):
-			implicit_plan <datatype> (matrix_n, matrix_m, i_data_in, i_data_out, i_coeff, real_real, real_real),
+			implicit_plan (matrix_n, matrix_m, i_data_in, i_data_out, i_coeff, real_real, real_real),
 			data_source (i_data_source.ptr (real_real)) {
 				pos_n = &grid_n [0];
 				pos_m = &grid_m [0];
@@ -144,7 +144,7 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc plan::factory
 			 ************************************************************************/
-			class factory : public implicit_plan <datatype>::factory
+			class factory : public implicit_plan::factory
 			{
 			private:
 				grids::variable &data_source; //!< The source data pointer for the plan to be constructed
@@ -154,15 +154,15 @@ namespace plans
 				 * \param i_coeff The base coefficient for the plan to be constructed
 				 * \param i_data_source The source data pointer for the plan to be constructed
 				 ************************************************************************/
-				factory (grids::variable &i_data_source, datatype i_coeff = 1.0) : implicit_plan <datatype>::factory (i_coeff), data_source (i_data_source) {}
+				factory (grids::variable &i_data_source, datatype i_coeff = 1.0) : implicit_plan::factory (i_coeff), data_source (i_data_source) {}
 				
 				virtual ~factory () {}
 				
 				/*!**********************************************************************
 				 * \copydoc plan::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
-					return std::shared_ptr <plans::plan <datatype> > (new variable_diffusion <datatype> (matrices [0], matrices [1], data_source, i_data_in, i_data_out, coeff));
+				virtual std::shared_ptr <plans::plan > _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
+					return std::shared_ptr <plans::plan > (new variable_diffusion <datatype> (matrices [0], matrices [1], data_source, i_data_in, i_data_out, coeff));
 				}
 			};
 		};
@@ -171,19 +171,19 @@ namespace plans
 		 * \brief A plan to enact a diffusion coefficient linearly dependent on a variable
 		 ************************************************************************/
 		template <class datatype>
-		class linear : public real_plan <datatype>
+		class linear : public real_plan
 		{
 		private:
-			using real_plan <datatype>::n;
-			using real_plan <datatype>::ldn;
-			using real_plan <datatype>::m;
-			using real_plan <datatype>::grid_n;
-			using real_plan <datatype>::grid_m;
-			using real_plan <datatype>::data_in;
-			using real_plan <datatype>::data_out;
+			using real_plan::n;
+			using real_plan::ldn;
+			using real_plan::m;
+			using real_plan::grid_n;
+			using real_plan::grid_m;
+			using real_plan::data_in;
+			using real_plan::data_out;
 			
-			using real_plan <datatype>::element_flags;
-			using real_plan <datatype>::component_flags;
+			using real_plan::element_flags;
+			using real_plan::component_flags;
 			
 			int bg_every; //!< The number of evaluations between which to recalculate the background diffusion
 			int count; //!< The current count of evaluations
@@ -224,7 +224,7 @@ namespace plans
 			 * @param i_bg_every The number of evaluations between which to recalculate the background diffusion
 			 ************************************************************************/
 			linear (datatype i_min, grids::variable &i_data_source, datatype *i_bg_diff, int i_bg_every, grids::variable &i_data_in, grids::variable &i_data_out, datatype i_coeff = 1.0) : 
-			real_plan <datatype> (i_data_in, i_data_out, i_coeff),
+			real_plan (i_data_in, i_data_out, i_coeff),
 			bg_every (i_bg_every),
 			coeff (i_coeff),
 			min (i_min),
@@ -342,10 +342,10 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc plan::factory
 			 ************************************************************************/
-			class factory : public real_plan <datatype>::factory
+			class factory : public real_plan::factory
 			{
 			protected:
-				using real_plan <datatype>::factory::coeff;
+				using real_plan::factory::coeff;
 				datatype min; //!< The minimum value for the coefficient
 				grids::variable &data_source; //!< The source data pointer for the plan to be constructed
 				datatype *bg_diff; //!< The background diffusion coefficient
@@ -359,15 +359,15 @@ namespace plans
 				 * @param i_bg_diff The background diffusion coefficient
 				 * @param i_bg_every The number of evaluations between which to recalculate the background diffusion
 				 ************************************************************************/
-				factory (datatype i_coeff, datatype i_min, grids::variable &i_data_source, datatype *i_bg_diff, int i_bg_every) : real_plan <datatype>::factory (i_coeff), min (i_min), data_source (i_data_source), bg_diff (i_bg_diff), bg_every (i_bg_every) {}
+				factory (datatype i_coeff, datatype i_min, grids::variable &i_data_source, datatype *i_bg_diff, int i_bg_every) : real_plan::factory (i_coeff), min (i_min), data_source (i_data_source), bg_diff (i_bg_diff), bg_every (i_bg_every) {}
 				
 				virtual ~factory () {}
 				
 				/*!**********************************************************************
 				 * \copydoc plan::factory::instance
 				 ************************************************************************/
-				virtual std::shared_ptr <plans::plan <datatype> > _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
-					return std::shared_ptr <plans::plan <datatype> > (new linear <datatype> (min, data_source, bg_diff, bg_every, i_data_in, i_data_out, coeff));
+				virtual std::shared_ptr <plans::plan > _instance (datatype **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
+					return std::shared_ptr <plans::plan > (new linear <datatype> (min, data_source, bg_diff, bg_every, i_data_in, i_data_out, coeff));
 				}
 			};
 		};

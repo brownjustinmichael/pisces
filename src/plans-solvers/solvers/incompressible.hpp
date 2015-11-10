@@ -61,7 +61,7 @@ namespace plans
 			
 			int id; //!< The mpi id of this element
 			int np; //!< The total number of mpi processes
-			// std::shared_ptr <plans::plan <datatype> > transform, transform_h, x_deriv, z_deriv;
+			// std::shared_ptr <plans::plan > transform, transform_h, x_deriv, z_deriv;
 			
 			std::shared_ptr <boundaries::boundary <datatype>> boundary_0; //!< A shared pointer to the top boundary object
 			std::shared_ptr <boundaries::boundary <datatype>> boundary_n; //!< A shared pointer to the bottom boundary object
