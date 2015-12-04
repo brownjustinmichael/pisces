@@ -13,10 +13,10 @@ public:
 	void test_multiplication () {
 		int n = 200, m = 300, flags;
 
-		grids::horizontal::grid <double> grid_n (n, -1.0, 1.0);
-		grids::vertical::grid <double> grid_m (m, -1.0, 1.0);
+		grids::horizontal::grid grid_n (n, -1.0, 1.0);
+		grids::vertical::grid grid_m (m, -1.0, 1.0);
 		
-		grids::variable <double> a (grid_n, grid_m, flags), b (grid_n, grid_m, flags), c (grid_n, grid_m, flags), d (grid_n, grid_m, flags);
+		grids::variable a (grid_n, grid_m, flags), b (grid_n, grid_m, flags), c (grid_n, grid_m, flags), d (grid_n, grid_m, flags);
 
 		for (int i = 0; i < n; ++i)
 		{
@@ -40,10 +40,10 @@ public:
 	void test_division () {
 		int n = 200, m = 300, flags;
 
-		grids::horizontal::grid <double> grid_n (n, -1.0, 1.0);
-		grids::vertical::grid <double> grid_m (m, -1.0, 1.0);
+		grids::horizontal::grid grid_n (n, -1.0, 1.0);
+		grids::vertical::grid grid_m (m, -1.0, 1.0);
 		
-		grids::variable <double> a (grid_n, grid_m, flags), b (grid_n, grid_m, flags), c (grid_n, grid_m, flags), d (grid_n, grid_m, flags);
+		grids::variable a (grid_n, grid_m, flags), b (grid_n, grid_m, flags), c (grid_n, grid_m, flags), d (grid_n, grid_m, flags);
 
 		for (int i = 0; i < n; ++i)
 		{
@@ -68,10 +68,10 @@ public:
 	void test_addition () {
 		int n = 200, m = 300, flags;
 
-		grids::horizontal::grid <double> grid_n (n, -1.0, 1.0);
-		grids::vertical::grid <double> grid_m (m, -1.0, 1.0);
+		grids::horizontal::grid grid_n (n, -1.0, 1.0);
+		grids::vertical::grid grid_m (m, -1.0, 1.0);
 		
-		grids::variable <double> a (grid_n, grid_m, flags), b (grid_n, grid_m, flags), c (grid_n, grid_m, flags), d (grid_n, grid_m, flags);
+		grids::variable a (grid_n, grid_m, flags), b (grid_n, grid_m, flags), c (grid_n, grid_m, flags), d (grid_n, grid_m, flags);
 
 		for (int i = 0; i < n; ++i)
 		{
@@ -96,10 +96,10 @@ public:
 
 		int n = 200, m = 300, flags;
 
-		grids::horizontal::grid <double> grid_n (n, -1.0, 1.0);
-		grids::vertical::grid <double> grid_m (m, -1.0, 1.0);
+		grids::horizontal::grid grid_n (n, -1.0, 1.0);
+		grids::vertical::grid grid_m (m, -1.0, 1.0);
 		
-		grids::variable <double> a (grid_n, grid_m, flags), b (grid_n, grid_m, flags), c (grid_n, grid_m, flags), d (grid_n, grid_m, flags);
+		grids::variable a (grid_n, grid_m, flags), b (grid_n, grid_m, flags), c (grid_n, grid_m, flags), d (grid_n, grid_m, flags);
 
 		for (int i = 0; i < n; ++i)
 		{
@@ -123,10 +123,10 @@ public:
 	void test_pemdas () {
 		int n = 200, m = 300, flags;
 
-		grids::horizontal::grid <double> grid_n (n, -1.0, 1.0);
-		grids::vertical::grid <double> grid_m (m, -1.0, 1.0);
+		grids::horizontal::grid grid_n (n, -1.0, 1.0);
+		grids::vertical::grid grid_m (m, -1.0, 1.0);
 		
-		grids::variable <double> a (grid_n, grid_m, flags), b (grid_n, grid_m, flags), c (grid_n, grid_m, flags), d (grid_n, grid_m, flags);
+		grids::variable a (grid_n, grid_m, flags), b (grid_n, grid_m, flags), c (grid_n, grid_m, flags), d (grid_n, grid_m, flags);
 
 		for (int i = 0; i < n; ++i)
 		{

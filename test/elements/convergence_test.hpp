@@ -58,9 +58,9 @@ public:
 		// grids::axis horizontal_axis (n, -parameters.get <double> ("grid.x.width") / 2.0, parameters.get <double> ("grid.x.width") / 2.0);
 		// grids::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
 
-		// data::thermo_compositional_data <double> data (&horizontal_axis, &vertical_axis, id, n_elements, parameters);
+		// data::thermo_compositional_data data (&horizontal_axis, &vertical_axis, id, n_elements, parameters);
 		
-		// std::shared_ptr <pisces::element <double>> element (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &*process_messenger, 0x00));
+		// std::shared_ptr <pisces::element> element (new pisces::boussinesq_element (horizontal_axis, vertical_axis, name, parameters, data, &*process_messenger, 0x00));
 		
 		// int n_steps = 0;
 		// while (n_steps < parameters.get <int> ("time.steps")) {

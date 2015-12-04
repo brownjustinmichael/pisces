@@ -60,3 +60,29 @@ parallel:
         subthreads: 1
     solver:
         threads: 1
+equations:
+    temperature:
+        ignore: false
+        sources:
+            z_velocity: 0.0
+        top:
+            value: 0.0
+        bottom:
+            value: 0.0
+    composition:
+        ignore: false
+        top:
+            value: 0.0
+        bottom:
+            value: 0.0
+    velocity:
+        ignore: false
+    x_velocity:
+        ignore: false
+        ignore_net: true
+    z_velocity:
+        ignore: false
+        ignore_net: true
+        sources: 
+            temperature: 1.
+            composition: -1.

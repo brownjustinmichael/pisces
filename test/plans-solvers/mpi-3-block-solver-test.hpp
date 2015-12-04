@@ -259,6 +259,8 @@ public:
 		int np = process_messenger->get_np ();
 		int n = 60, nrhs = 10, ntop = 0, nbot = 0;
 
+		logger::log_config::set_severity (1);
+
 		int ku = 1, kl = 2;
 		if (id != 0) {
 			ntop = ku;
@@ -272,7 +274,7 @@ public:
 
 		std::vector <double> matrix (lda * ldaa * nrhs, 0.0);
 		std::vector <double> matrixcopy (lda * ldaa * nrhs, 0.0);
-		std::vector <double> bufferl (kl * nrhs * n, 0.0), bufferr (ku * nrhs * n, 0.0);
+		std::vector <double> bufferl (kl * nrhs * n, 0.0), bufferr (ku * nrhs * n, 0.0), buffer (nrhs * 4 * (ku + kl) * (ku + kl) * 3);
 		std::vector <int> ipiv (n * nrhs, 0);
 
 		std::vector <double> x ((ku + kl) * (ku + kl) * 4 * np * np * nrhs, 0.0);
@@ -335,9 +337,9 @@ public:
 			}
 
 			try {
-				linalg::block::banded_factorize (id, np, n - ntop - nbot, kl, ku, &matrix [0], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, nrhs, lda, ldaa);
+				linalg::block::banded_factorize (id, np, n + (nbot == 0 ? 0 : -nbot) + (ntop == 0 ? 0 : -ntop), kl, ku, &matrix [0], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &buffer [0], &info, nrhs, lda, ldaa);
 
-				linalg::block::banded_solve (id, np, n - ntop - nbot, kl, ku, &matrix [0], &ipiv [0], &b [kl], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &info, nrhs, lda, ldaa, ldb);
+				linalg::block::banded_solve (id, np, n + (nbot == 0 ? 0 : -nbot) + (ntop == 0 ? 0 : -ntop), kl, ku, &matrix [0], &ipiv [0], &b [kl], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &buffer [0], &info, nrhs, lda, ldaa, ldb);
 			} catch (std::exception& except) {
 				std::cout << except.what () << '\n';
 			}

@@ -28,7 +28,7 @@ public:
 		int id = process_messenger->get_id ();
 		int n_elements = process_messenger->get_np ();
 		
-		logger::log_config::set_severity (3);
+		logger::log_config::set_severity (2);
 		int num = 0;
 		// logger::log_config::configure (&num, NULL, id, "process_%d.log");
 		formats::ascii::print_headers = false;
@@ -42,6 +42,13 @@ public:
 		parameters ["dump.file"] = "";
 		parameters ["output.output"] = false;
 		parameters ["time.steps"] = 100;
+
+		parameters ["equations.temperature.diffusion"] = 1.;
+		parameters ["equations.composition.diffusion"] = 1.;
+		parameters ["equations.velocity.diffusion"] = 1.;
+		parameters ["equations.composition.sources.z_velocity"] = 1.;
+		parameters ["equations.velocity.sources.composition"] = -1.;
+		parameters ["equations.velocity.sources.temperature"] = 1.;
 	
 		int m = parameters.get <int> ("grid.z.points") / n_elements + 1;
 		m += m % 2;
@@ -58,9 +65,9 @@ public:
 		grids::axis horizontal_axis (n, -parameters.get <double> ("grid.x.width") / 2.0, parameters.get <double> ("grid.x.width") / 2.0);
 		grids::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
 
-		data::thermo_compositional_data <double> data (&horizontal_axis, &vertical_axis, id, n_elements, parameters);
+		data::thermo_compositional_data data (&horizontal_axis, &vertical_axis, id, n_elements, parameters);
 		
-		std::shared_ptr <pisces::element <double>> element (new pisces::boussinesq_element <double> (horizontal_axis, vertical_axis, name, parameters, data, &*process_messenger, 0x00));
+		std::shared_ptr <pisces::element> element (new pisces::boussinesq_element (horizontal_axis, vertical_axis, name, parameters, data, &*process_messenger, 0x00));
 		
 		int n_steps = 0;
 		while (n_steps < parameters.get <int> ("time.steps")) {

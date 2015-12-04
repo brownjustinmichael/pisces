@@ -62,10 +62,14 @@ namespace io
 		
 		// Iterate through the tokens, grabbing the relevant nodes
 		tokens.push_back (token);
-		nodes.push_back (YAML::Node::operator [] (token));
+		nodes.push_back (YAML::Node::operator[] (token));
 		while (std::getline (ss, token, '.')) {
 			tokens.push_back (token);
 			nodes.push_back (nodes [(int) nodes.size () - 1] [token]);
+		}
+
+		if (tokens.size () == 1) {
+			return nodes [0];
 		}
 		
 		// Check that the final node is actually defined

@@ -24,10 +24,10 @@ public:
 		int n = 200, m = 500;
 		int flags;
 
-		grids::horizontal::grid <double> grid_n (n, -1.0, 1.0);
-		grids::vertical::grid <double> grid_m (m, -1.0, 1.0);
+		grids::horizontal::grid grid_n (n, -1.0, 1.0);
+		grids::vertical::grid grid_m (m, -1.0, 1.0);
 		
-		grids::variable <double> x_velocity (grid_n, grid_m, flags), z_velocity (grid_n, grid_m, flags), data (grid_n, grid_m, flags), rhs (grid_n, grid_m, flags), rhs_compare (grid_n, grid_m, flags);
+		grids::variable x_velocity (grid_n, grid_m, flags), z_velocity (grid_n, grid_m, flags), data (grid_n, grid_m, flags), rhs (grid_n, grid_m, flags), rhs_compare (grid_n, grid_m, flags);
 
 		for (int j = 0; j < m; ++j) {
 			for (int i = 0; i < n; ++i) {
@@ -38,7 +38,7 @@ public:
 			}
 		}
 		
-		plans::advection::uniform <double> plan (x_velocity, z_velocity, data, rhs);
+		plans::advection::uniform plan (x_velocity, z_velocity, data, rhs);
 		
 		plan.execute ();
 		

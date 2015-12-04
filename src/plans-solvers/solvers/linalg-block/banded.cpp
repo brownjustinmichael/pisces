@@ -56,7 +56,7 @@ namespace linalg
 				// 	for (int k = 0; k < lda; ++k) {
 				// 		debug << matrix [i * lda * ldaa + j * lda + k] << " ";
 				// 	}
-				// 	DEBUG ("MAT " << debug.str ());
+				// 	DEBUG ("MAT [" << id << "] " << debug.str ());
 				// 	debug.str ("");
 				// }
 				linalg::matrix_banded_factorize (n, n, kl, ku, matrix + (i) * lda * ldaa + (kl + ntop) * lda, ipiv + i * n, info, lda);

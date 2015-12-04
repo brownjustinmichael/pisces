@@ -27,6 +27,7 @@ namespace linalg
 		 * \param xipiv The integer array to hold the LAPACK swap information for x
 		 * \param bufferl A buffer that is nrhs * kl * n
 		 * \param bufferr A buffer that is nrhs * ku * n
+		 * \param bufferr A buffer that is nrhs * 4 * (ku + kl)^2 * np
 		 * \param info A pointer to the result state of the solve, 0 if successful
 		 * \param nrhs The number of right hand sides in the matrix
 		 * \param lda The leading dimension of matrix, if < 0, 2 * kl + ku + 1
