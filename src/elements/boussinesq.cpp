@@ -126,7 +126,7 @@ namespace pisces
 		// Set up the temperature equation
 		if (!(i_params ["equations.temperature.ignore"].IsDefined () && i_params ["equations.temperature.ignore"].as <bool> ())) {
 			*split_solver (equations ["temperature"], timestep, 
-				neumann (i_params ["equations.temperature.bottom.value"].as <double> ()), 
+				dirichlet (i_params ["equations.temperature.bottom.value"].as <double> ()), 
 				dirichlet (i_params ["equations.temperature.top.value"].as <double> ())) 
 			+ advec (data ["x_velocity"], data ["z_velocity"])
 			+ src (data ["z_velocity"] * data ["korre_Ts"])

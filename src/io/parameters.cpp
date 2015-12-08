@@ -50,8 +50,8 @@ namespace io
 		return copyNode;
 	}
 	
-	YAML::Node parameters::operator[] (std::string key) const {
-		DEBUG ("Looking for " << key);
+	parameters parameters::operator[] (std::string key) const {
+		// DEBUG ("Looking for " << key);
 
 		// Tokenize the incoming string key using '.' as a delimeter
 		std::istringstream ss (key);
@@ -68,26 +68,28 @@ namespace io
 			nodes.push_back (nodes [(int) nodes.size () - 1] [token]);
 		}
 
-		if (tokens.size () == 1) {
-			return nodes [0];
-		}
+		// if (tokens.size () == 1) {
+		// 	return nodes [0];
+		// }
 		
-		// Check that the final node is actually defined
-		int i = (int) nodes.size () - 1;
-		std::string inner_tokens = "";
-		if (!nodes [i].IsDefined ()) {
-			// If not, search back through the nodes for a "link" key
-			for (int j = i - 1; j >= 0; --j) {
-				inner_tokens = tokens [j + 1] + inner_tokens;
-				if (nodes [j].IsDefined () && nodes [j] ["link"].IsDefined ()) {
-					// If a "link" key is found, check whether that key has the appropriate key
-					if (parameters::operator[] (nodes [j] ["link"].as <std::string> () + "." + inner_tokens).IsDefined ()) {
-						return parameters::operator [] (nodes [j] ["link"].as <std::string> () + "." + inner_tokens);
-					}
-				}
-				inner_tokens = "." + inner_tokens;
-			}
-		}
-		return nodes [i];
+		// // Check that the final node is actually defined
+		// int i = (int) nodes.size () - 1;
+		// std::string inner_tokens = "";
+		// if (!nodes [i].IsDefined ()) {
+		// 	// If not, search back through the nodes for a "link" key
+		// 	for (int j = i - 1; j >= 0; --j) {
+		// 		inner_tokens = tokens [j + 1] + inner_tokens;
+		// 		if (nodes [j].IsDefined () && nodes [j] ["link"].IsDefined ()) {
+		// 			// If a "link" key is found, check whether that key has the appropriate key
+		// 			if (parameters::operator[] (nodes [j] ["link"].as <std::string> () + "." + inner_tokens).IsDefined ()) {
+		// 				return parameters::operator [] (nodes [j] ["link"].as <std::string> () + "." + inner_tokens);
+		// 			}
+		// 		}
+		// 		inner_tokens = "." + inner_tokens;
+		// 	}
+		// }
+		// DEBUG ("FOUND " << nodes [tokens.size () - 1]);
+		// if (!(nodes [tokens.size () - 1].IsDefined ())) WARN ("Key " << key << " is not defined.");
+		return parameters (nodes [tokens.size () - 1], key);
 	}
 } /* io */

@@ -170,7 +170,6 @@ namespace data
 			grids::variable &var = _initialize (i_name, i_flags);
 			int output_flags = formats::all_d;
 			if (i_flags & uniform_n) {
-				INFO ("THIS IS 1D");
 				output_flags = formats::m_profile;
 			}
 

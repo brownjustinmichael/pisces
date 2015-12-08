@@ -37,6 +37,8 @@ namespace io
 	{
 	protected:
 		std::string yaml_data; //!< The string representation of the parameters in YAML
+		bool defined = true;
+		std::string path = "";
 
 	public:
 		using YAML::Node::operator=; // Use the assignment operator from the super class
@@ -96,8 +98,28 @@ namespace io
 			YAML::Node::operator= (copy (copy_node, *this));
 			TRACE ("Constructed");
 		}
-	
+
+		parameters (YAML::Node& node, std::string i_path = "") {
+			YAML::Node::operator= (node);
+			path = i_path;
+			defined = node.IsDefined ();
+		}
+
 		virtual ~parameters () {}
+
+		template <class datatype>
+		datatype as () {
+			try {
+				return YAML::Node::as <datatype> ();
+			} catch (YAML::Exception &e) {
+				ERROR ("Unable to interpret key " << path << " as " << typeid (datatype).name ());
+				throw e;
+			}
+		}
+
+		bool IsDefined () {
+			return defined;
+		}
 		
 		/*!**********************************************************************
 		 * \return The version of the class
@@ -139,7 +161,7 @@ namespace io
 		 * 
 		 * \return A copy of the YAML::Node object at the given parameter.
 		 ************************************************************************/
-		YAML::Node operator[] (std::string key) const;
+		parameters operator[] (std::string key) const;
 			
 		/*!**********************************************************************
 		 * \brief Get the parameter associated with the given key

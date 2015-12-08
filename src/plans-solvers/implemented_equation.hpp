@@ -327,6 +327,36 @@ namespace plans
 
 					z_solver->execute ();
 				}
+				
+				
+
+				// // Solve either the x direction solve or the z direction solve
+				// if (z_solver) {
+				// 	z_solver->execute ();
+				// 	state = z_solver->get_state ();
+				// }
+
+				// *component_flags &= ~z_solve;
+				// *component_flags |= x_solve;
+
+				// if (z_solver) {
+				// 	if (state >= 0 && state != z_solver->get_state_in ()) {
+				// 		FATAL ("Non-matching input output states for solver");
+				// 		throw 400;
+				// 	}
+
+				// 	linalg::matrix_copy (m, ldn, old_rhs_ptr->ptr (real_spectral), cor_rhs_ptr->ptr (real_spectral));
+
+				// 	linalg::matrix_scale (m, ldn, 0.0, new_rhs_ptr->ptr (spectral_spectral));
+				// 	equation::execute_plans (implicit_only);
+				// 	linalg::matrix_add_scaled (m, ldn, 1.0, new_rhs_ptr->ptr (spectral_spectral), cor_rhs_ptr->ptr (real_spectral));
+
+				// 	if (*component_flags & ignore_net) {
+				// 		linalg::scale (2 * m, 0.0, cor_rhs_ptr->ptr (real_spectral));
+				// 	}
+
+				// 	z_solver->execute ();
+				// }
 
 				*component_flags &= ~z_solve;
 				*component_flags |= x_solve;

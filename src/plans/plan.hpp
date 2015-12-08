@@ -316,7 +316,7 @@ namespace plans
 			 * @param node A reference to the YAML Node by which to scale the contents
 			 * @return A factory container with the old contents scaled by the node value
 			 */
-			factory_container operator* (YAML::Node &node) {
+			factory_container operator* (io::parameters &node) {
 				// if (node.IsDefined ()) {
 					return *this * node.as <double> ();
 				// }
@@ -406,7 +406,7 @@ namespace plans
 	 * @return Something in the type of other
 	 */
 	template <class type>
-	type operator* (YAML::Node node, type other) {
+	type operator* (io::parameters node, type other) {
 		return other * node;
 	}
 } /* plans */

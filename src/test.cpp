@@ -13,8 +13,8 @@ extern "C" void dgetrs_ (char *trans, int *n, int *nrhs, double *a, int *lda, in
 int main()
 {
     char trans = 'N';
-    int dim = 1024;    
-    int nrhs = 1024*1024;
+    int dim = 1024 * 10;    
+    int nrhs = 1024*10;
     int LDA = dim;
     int LDB = dim;
     int info;
