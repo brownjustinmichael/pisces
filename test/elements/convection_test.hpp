@@ -35,26 +35,28 @@ public:
 		parameters ["root"] = std::string (PISCES_ROOT) + "/test/elements/";
 		parameters ["output.cart.file"] = "convect_%02i";
 		parameters ["output.cart.every"] = 1;
+		parameters ["output.trans.file"] = "convect_t_%02i";
+		parameters ["output.trans.every"] = 1;
+
 		// parameters ["output.output"] = false;
 		parameters ["dump.file"] = "";
 		
 		parameters ["time.stop"] = 1.0;
 		parameters ["time.max"] = 1.e-2;
 		parameters ["time.init"] = 1.e-10;
-		parameters ["time.mult"] = 1.05;
+		parameters ["time.mult"] = 1.1;
 		
 		parameters ["input.file"] = "";
 		
 		parameters ["equations.composition.ignore"] = true;
 		
-		parameters ["equations.temperature.advection"] = 1.0;
 		parameters ["equations.temperature.diffusion"] = 1.0;
 
 		parameters ["equations.temperature.top.value"] = 0.0;
 		parameters ["equations.temperature.bottom.value"] = 1.0;
 
-		parameters ["equations.velocity.diffusion"] = 6.8;
-		parameters ["equations.z_velocity.sources.temperature"] = 10. * 5299.;
+		parameters ["equations.velocity.diffusion"] = 0.1;
+		parameters ["equations.z_velocity.sources.temperature"] = 2. * 5299.;
 		
 		parameters ["grid.x.width"] = 1.0;
 		parameters ["grid.z.width"] = 1.0;
@@ -62,7 +64,7 @@ public:
 		int m = 200;
 		int name = id;
 		int n = 300;
-		double scale = 0.001;
+		double scale = 0.00001;
 
 		grids::axis horizontal_axis (n, -parameters.get <double> ("grid.x.width") / 2.0, parameters.get <double> ("grid.x.width") / 2.0);
 		grids::axis vertical_axis (m, -parameters.get <double> ("grid.z.width") / 2.0, parameters.get <double> ("grid.z.width") / 2.0, id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
@@ -74,7 +76,7 @@ public:
 
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
-				data ["temperature_0"] [i * m + j] = data ["temperature"] [i * m + j] = scale * (rand () % 100 / 100.) + (-data ["z"] [j] + 0.5);
+				data ["temperature_0"] [i * m + j] = data ["temperature"] [i * m + j] = scale * (rand () % 100 / 100.) * cos (data ["z"] [j] / acos (-1.)) + (-data ["z"] [j] + 0.5);
 			}
 		}
 

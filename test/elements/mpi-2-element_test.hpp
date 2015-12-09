@@ -28,7 +28,7 @@ public:
 		int id = process_messenger->get_id ();
 		int n_elements = process_messenger->get_np ();
 		
-		logger::log_config::set_severity (2);
+		logger::log_config::set_severity (0);
 		int num = 0;
 		// logger::log_config::configure (&num, NULL, id, "process_%d.log");
 		formats::ascii::print_headers = false;
@@ -67,11 +67,11 @@ public:
 
 		data::thermo_compositional_data data (&horizontal_axis, &vertical_axis, id, n_elements, parameters);
 		
-		std::shared_ptr <pisces::element> element (new pisces::boussinesq_element (horizontal_axis, vertical_axis, name, parameters, data, &*process_messenger, 0x00));
+	// 	std::shared_ptr <pisces::element> element (new pisces::boussinesq_element (horizontal_axis, vertical_axis, name, parameters, data, &*process_messenger, 0x00));
 		
-		int n_steps = 0;
-		while (n_steps < parameters.get <int> ("time.steps")) {
-			element->run (n_steps);
-		}
+	// 	int n_steps = 0;
+	// 	while (n_steps < parameters.get <int> ("time.steps")) {
+	// 		element->run (n_steps);
+	// 	}
 	}
 };
