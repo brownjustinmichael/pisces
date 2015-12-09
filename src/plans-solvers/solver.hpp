@@ -159,6 +159,8 @@ namespace plans
 			virtual void execute () {
 				component_flags &= ~grids::updated;
 				var_out.last_update = get_state ();
+
+				// if (!(component_flags & factorized)) factorize ();
 			}
 		
 			/*!**********************************************************************

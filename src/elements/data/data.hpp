@@ -650,7 +650,7 @@ namespace data
 				}
 				transformers [name] = std::shared_ptr <plans::transforms::transformer> ();
 			} else {
-				transformers [name] = std::shared_ptr <plans::transforms::transformer > (new plans::transforms::implemented_transformer (*grid_n, *grid_m, (*this) [name], plans::transforms::forward_vertical | plans::transforms::forward_horizontal | plans::transforms::inverse_vertical | plans::transforms::inverse_horizontal , &(flags), &((*this) [name].component_flags)));
+				transformers [name] = std::shared_ptr <plans::transforms::transformer > (new plans::transforms::implemented_transformer ((*this) [name], &(flags), &((*this) [name].component_flags)));
 			}
 			TRACE ("Done.");
 			return *variables [name];

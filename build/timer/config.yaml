@@ -17,10 +17,14 @@ equations:
         bg_diffusion: 1.0
         advection: 1.0
         stratification: -1.0
+        sources:
+            z_velocity: 0.0
     composition:
         diffusion: 0.5
         advection: 1.0
         stratification: -0.5
+        sources:
+            z_velocity: 0.0
     velocity:
         diffusion: 0.5
         advection: 1.0
@@ -32,4 +36,4 @@ input:
     file: input_%02i
     full: true
 output:
-    output: false
+    output: true

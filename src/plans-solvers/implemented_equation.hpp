@@ -11,6 +11,7 @@
 
 #include "equation.hpp"
 #include "plans-transforms/transform.hpp"
+ #include "plans-transforms/implemented_transformer.hpp"
 
 namespace plans
 {
@@ -47,7 +48,8 @@ namespace plans
 			std::shared_ptr <grids::variable> cor_rhs_ptr; //!< A variable of the corrected rhs pointer, taking into account the older rhs pointers
 			
 			std::shared_ptr <plans::plan > transform; //!< A shared pointer to a transform if the equation has a real_rhs_vec
-		
+			std::shared_ptr <plans::transforms::transformer> transformer;
+
 		public:
 			/*!**********************************************************************
 			 * \copydoc equation::equation
@@ -66,6 +68,7 @@ namespace plans
 				old3_rhs_ptr = std::shared_ptr <grids::variable> (new grids::variable (grid_n, grid_m, *element_flags));
 				cor_rhs_ptr = std::shared_ptr <grids::variable> (new grids::variable (grid_n, grid_m, *element_flags));
 				transform = std::shared_ptr <plans::plan > (new plans::transforms::horizontal (*new_rhs_ptr, real_real));
+				transformer = std::shared_ptr <plans::transforms::transformer> (new plans::transforms::implemented_transformer (i_data, component_flags, element_flags));
 			}
 			
 			virtual ~implemented_equation () {}
@@ -267,100 +270,7 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc equation::_solve
 			 ************************************************************************/
-			virtual void _solve () {
-				TRACE ("Solving...");
-				
-				// Transform the real_rhs
-				if (transform) transform->execute ();
-				
-				// Add in the components from the last three timesteps for the AB scheme
-				linalg::matrix_copy (m, ldn, old3_rhs_ptr->ptr (real_spectral), cor_rhs_ptr->ptr (real_spectral));
-				linalg::matrix_scale (m, ldn, -3. / 8., cor_rhs_ptr->ptr (real_spectral));
-				linalg::matrix_add_scaled (m, ldn, 37. / 24., old2_rhs_ptr->ptr (real_spectral), cor_rhs_ptr->ptr (real_spectral));
-				linalg::matrix_add_scaled (m, ldn, -59. / 24., old_rhs_ptr->ptr (real_spectral), cor_rhs_ptr->ptr (real_spectral));
-				
-				// De-alias the RHS
-				linalg::matrix_scale (m, ldn / 3, 0.0, new_rhs_ptr->ptr (real_real) + m * (ldn - ldn / 3));
-				linalg::matrix_add_scaled (m, ldn, 1.0, new_rhs_ptr->ptr (real_real), new_rhs_ptr->ptr (real_spectral));
-				
-				// Add in the component from this timestep
-				linalg::matrix_add_scaled (m, ldn, 55. / 24., new_rhs_ptr->ptr (real_spectral), cor_rhs_ptr->ptr (real_spectral));
-				
-				// Rotate the old timestep pointers
-				std::shared_ptr <grids::variable> temp = old3_rhs_ptr;
-				old3_rhs_ptr = old2_rhs_ptr;
-				old2_rhs_ptr = old_rhs_ptr;
-				old_rhs_ptr = temp;
-				linalg::matrix_copy (m, ldn, new_rhs_ptr->ptr (real_spectral), old_rhs_ptr->ptr (real_spectral));
-				
-				// Add in the spectral component (the explicit part of the implicit component) after the AB scheme
-				linalg::matrix_add_scaled (m, ldn, 1.0, new_rhs_ptr->ptr (spectral_spectral), cor_rhs_ptr->ptr (real_spectral));
-				if (*component_flags & ignore_net) {
-					linalg::scale (2 * m, 0.0, cor_rhs_ptr->ptr (real_spectral));
-				}
-				
-				int state = -1;
-				// Solve either the x direction solve or the z direction solve
-				if (x_solver) {
-					x_solver->execute ();
-					state = x_solver->get_state ();
-				}
-
-				*component_flags &= ~x_solve;
-				*component_flags |= z_solve;
-
-				if (z_solver) {
-					if (state >= 0 && state != z_solver->get_state_in ()) {
-						FATAL ("Non-matching input output states for solver");
-						throw 400;
-					}
-
-					linalg::matrix_copy (m, ldn, old_rhs_ptr->ptr (real_spectral), cor_rhs_ptr->ptr (real_spectral));
-
-					linalg::matrix_scale (m, ldn, 0.0, new_rhs_ptr->ptr (spectral_spectral));
-					equation::execute_plans (implicit_only);
-					linalg::matrix_add_scaled (m, ldn, 1.0, new_rhs_ptr->ptr (spectral_spectral), cor_rhs_ptr->ptr (real_spectral));
-
-					if (*component_flags & ignore_net) {
-						linalg::scale (2 * m, 0.0, cor_rhs_ptr->ptr (real_spectral));
-					}
-
-					z_solver->execute ();
-				}
-				
-				
-
-				// // Solve either the x direction solve or the z direction solve
-				// if (z_solver) {
-				// 	z_solver->execute ();
-				// 	state = z_solver->get_state ();
-				// }
-
-				// *component_flags &= ~z_solve;
-				// *component_flags |= x_solve;
-
-				// if (z_solver) {
-				// 	if (state >= 0 && state != z_solver->get_state_in ()) {
-				// 		FATAL ("Non-matching input output states for solver");
-				// 		throw 400;
-				// 	}
-
-				// 	linalg::matrix_copy (m, ldn, old_rhs_ptr->ptr (real_spectral), cor_rhs_ptr->ptr (real_spectral));
-
-				// 	linalg::matrix_scale (m, ldn, 0.0, new_rhs_ptr->ptr (spectral_spectral));
-				// 	equation::execute_plans (implicit_only);
-				// 	linalg::matrix_add_scaled (m, ldn, 1.0, new_rhs_ptr->ptr (spectral_spectral), cor_rhs_ptr->ptr (real_spectral));
-
-				// 	if (*component_flags & ignore_net) {
-				// 		linalg::scale (2 * m, 0.0, cor_rhs_ptr->ptr (real_spectral));
-				// 	}
-
-				// 	z_solver->execute ();
-				// }
-
-				*component_flags &= ~z_solve;
-				*component_flags |= x_solve;
-			}
+			virtual void _solve ();
 		};
 	} /* solvers */
 } /* plans */

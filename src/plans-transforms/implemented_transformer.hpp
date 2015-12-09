@@ -45,10 +45,10 @@ namespace plans
 			 * \param i_flags Integer flags to describe the setup (e.g. forward_vertical, inverse_horizontal, etc.)
 			 * \param i_threads The number of threads to use in the transform
 			 ************************************************************************/
-			implemented_transformer (grids::grid &i_grid_n, grids::grid &i_grid_m, grids::variable &i_data, int i_flags, int *i_element_flags, int *i_component_flags, int i_threads = 1) : 
+			implemented_transformer (grids::variable &i_data, int *i_element_flags, int *i_component_flags, int i_flags = forward_vertical | forward_horizontal | inverse_vertical | inverse_horizontal, int i_threads = 1) : 
 			plans::transforms::transformer (i_element_flags, i_component_flags), 
-			ldn (i_grid_n.get_ld ()), 
-			ldm (i_grid_m.get_ld ()), 
+			ldn (i_data.get_grid (0).get_ld ()), 
+			ldm (i_data.get_grid (1).get_ld ()), 
 			data (i_data) {
 				// For each direction, check the flags to see which transforms to add and do so
 				TRACE("Initializing...");

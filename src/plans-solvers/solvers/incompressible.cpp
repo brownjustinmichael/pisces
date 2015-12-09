@@ -172,6 +172,10 @@ namespace plans
 			solver::execute ();
 			static int count = 0;
 
+			INFO ("SHALL SKIP?");
+			if (*component_flags_z & z_solve) return;
+			INFO ("RUNNING");
+
 			int info;
 			TRACE ("Solving...");
 			int kl = 2;
@@ -229,7 +233,7 @@ namespace plans
 			if (boundary_n) {
 				boundary_n->receive (&data_temp [m - excess_n], m + 2, 1, 0.0);
 			}
-			
+
 			// Update the velocities with the pressure derivatives
 			#pragma omp parallel for
 			for (int i = 2; i < ldn; i += 2) {
@@ -245,10 +249,10 @@ namespace plans
 					ndata_z [i * m + j] -= (data_ptr [i * (m + 2) + j] - data_ptr [i * (m + 2) + j - 1]) / (new_pos [j] - new_pos [j - 1]);
 				}
 				for (int j = 0; j < m + 1 - (nbot == 0 ? 0 : excess_n + 1) - excess_0; ++j) {
-					data_out [i * m + j + excess_0] = (data_temp [i * (m + 2) + j + excess_0] + data_temp [i * (m + 2) + j + 1 + excess_0]) / 2.0;
+					data_out [i * m + j + excess_0] = (data_ptr [i * (m + 2) + j + excess_0] + data_ptr [i * (m + 2) + j + 1 + excess_0]) / 2.0;
 				}
 			}
-			
+
 			// Since only one boundary was solved, get the other and the overlap region from the adjacent element
 			if (boundary_0) {
 				// This should be 1 + ex_excess_0

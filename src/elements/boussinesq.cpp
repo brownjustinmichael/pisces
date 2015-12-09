@@ -22,6 +22,7 @@
 #include "plans/source.hpp"
 #include "plans-solvers/boundaries/implemented_boundary.hpp"
 #include "plans-solvers/solvers.hpp"
+#include "io/functors/div.hpp"
 
 namespace data
 {
@@ -43,10 +44,12 @@ namespace data
 		i_params ["output.directory"] = i_params ["root"].as <std::string> () + "/" + i_params ["output.directory"].as <std::string> ();
 
 		TRACE ("Setting up cartesian output...");
-		this->template setup_output_from <formats::netcdf> (i_params ["output.cart"]);
+		std::shared_ptr <io::output> stream = this->template setup_output_from <formats::netcdf> (i_params ["output.cart"]);
+		// stream->template append <double> ("div_u", std::shared_ptr <typename functors::div_functor <double>> (new functors::div_functor <double> ((*this) ["x"].ptr (), (*this) ["z"].ptr (), (*this) ["x_velocity"].ptr (), (*this) ["z_velocity"].ptr (), n, m)));
 
 		TRACE ("Setting up transformed output...");
-		this->template setup_output_from <formats::netcdf> (i_params ["output.trans"], real_spectral);
+		stream = this->template setup_output_from <formats::netcdf> (i_params ["output.trans"], real_spectral);
+		// stream->template append <double> ("div_u", std::shared_ptr <typename functors::transform_div_functor <double>> (new functors::transform_div_functor <double> ((*this) ["x"].ptr (), (*this) ["z"].ptr (), (*this) ["x_velocity"].ptr (), (*this) ["z_velocity"].ptr (), n, m)));
 
 		TRACE ("Setting up stat output...");
 		std::shared_ptr <io::output> stat_stream =

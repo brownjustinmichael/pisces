@@ -139,14 +139,19 @@ class Timer (object):
                 for arg in self.uniques:
                     arg.setRandom ()
                 # times [variances] = timeCommand.delay (command = self.getCommand (), setupCommand = self.getSetupCommand (), processes = processes, threads = threads, commandRoot = self.commandRoot, stat_file = self ["stat"] ().split () [-1], **kwargs)
-                times [variances] = timeCommand (command = self.getCommand (), setupCommand = self.getSetupCommand (), processes = processes, threads = threads, commandRoot = self.commandRoot, stat_file = self ["stat"] ().split () [-1], **kwargs)
+                try:
+                    stat_file = stat_file = self ["stat"] ().split () [-1]
+                except IndexError:
+                    stat_file = None
+                times [variances] = timeCommand (command = self.getCommand (), setupCommand = self.getSetupCommand (), processes = processes, threads = threads, commandRoot = self.commandRoot, stat_file = stat_file, **kwargs)
 
         return times
 
     def __getitem__ (self, key):
-        for arg in self.commandArgs:
-            if arg.name == key:
-                return arg
+        for arg in self.variances + self.uniques:
+            if not isinstance (arg, Argument):
+                if arg.name == key:
+                    return arg
         raise IndexError ("No argument named %s" % key)
 
 class Argument (object):
