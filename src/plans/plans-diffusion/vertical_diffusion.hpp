@@ -92,39 +92,39 @@ namespace plans
 			virtual void execute () {
 				TRACE ("Operating...");
 				// Depending on the direction of the solve, treat this term as either partially or fully explicit
-				if (component_flags & z_solve) {
-					if (1.0 - alpha != 0.0) {
-						linalg::matrix_matrix_multiply (m, ldn, m, 1.0 - alpha, new_matrix, data_in, 1.0, data_out);
-					}
-				} else {
-					linalg::matrix_matrix_multiply (m, ldn, m, 1.0, new_matrix, data_in, 1.0, data_out);
-					// #pragma omp parallel for
-					// for (int i = 0; i < n; ++i)
-					// {
-					// 	for (int j = 1; j < m - 1; ++j)
-					// 	{
-					// 		data_out [i * m + j] += coeff * ((data_in [i * m + j + 1] - data_in [i * m + j]) / (pos_m [j + 1] - pos_m [j]) - (data_in [i * m + j] - data_in [i * m + j - 1]) / (pos_m [j] - pos_m [j - 1])) / (pos_m [j + 1] - pos_m [j - 1]);
-					// 	}
-					// }
+				// if (component_flags & z_solve) {
+				// 	if (1.0 - alpha != 0.0) {
+				// 		linalg::matrix_matrix_multiply (m, ldn, m, 1.0 - alpha, new_matrix, data_in, 1.0, data_out);
+				// 	}
+				// } else {
+				// 	linalg::matrix_matrix_multiply (m, ldn, m, 1.0, new_matrix, data_in, 1.0, data_out);
+				// 	// #pragma omp parallel for
+				// 	// for (int i = 0; i < n; ++i)
+				// 	// {
+				// 	// 	for (int j = 1; j < m - 1; ++j)
+				// 	// 	{
+				// 	// 		data_out [i * m + j] += coeff * ((data_in [i * m + j + 1] - data_in [i * m + j]) / (pos_m [j + 1] - pos_m [j]) - (data_in [i * m + j] - data_in [i * m + j - 1]) / (pos_m [j] - pos_m [j - 1])) / (pos_m [j + 1] - pos_m [j - 1]);
+				// 	// 	}
+				// 	// }
 
-					// #pragma omp parallel for
-					// for (int i = 1; i < m - 1; ++i)
-					// {
-					// 	for (int j = 0; j < m; ++j)
-					// 	{
-					// 		data_out [i * m + j] += coeff * ((data_in [(i + 1) * m + j] - data_in [i * m + j]) / (pos_n [i + 1] - pos_n [i]) - (data_in [i * m + j] - data_in [(i - 1) * m + j]) / (pos_n [i] - pos_n [i - 1])) / (pos_n [i + 1] - pos_n [i - 1]);
-					// 	}
-					// }
+				// 	// #pragma omp parallel for
+				// 	// for (int i = 1; i < m - 1; ++i)
+				// 	// {
+				// 	// 	for (int j = 0; j < m; ++j)
+				// 	// 	{
+				// 	// 		data_out [i * m + j] += coeff * ((data_in [(i + 1) * m + j] - data_in [i * m + j]) / (pos_n [i + 1] - pos_n [i]) - (data_in [i * m + j] - data_in [(i - 1) * m + j]) / (pos_n [i] - pos_n [i - 1])) / (pos_n [i + 1] - pos_n [i - 1]);
+				// 	// 	}
+				// 	// }
 
-					// for (int j = 0; j < m; ++j)
-					// {
-					// 	data_out [j] += coeff * ((data_in [m + j] - data_in [j]) / (pos_n [1] - pos_n [0]) - (data_in [j] - data_in [(n - 1) * m + j]) / (pos_n [1] - pos_n [0])) / 2. / (pos_n [1] - pos_n [0]);
-					// 	data_out [(n - 1) * m + j] += coeff * ((data_in [j] - data_in [(n - 1) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]) - (data_in [(n - 1) * m + j] - data_in [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2])) / 2. / (pos_n [n - 1] - pos_n [n - 2]);
-					// }
-				}
+				// 	// for (int j = 0; j < m; ++j)
+				// 	// {
+				// 	// 	data_out [j] += coeff * ((data_in [m + j] - data_in [j]) / (pos_n [1] - pos_n [0]) - (data_in [j] - data_in [(n - 1) * m + j]) / (pos_n [1] - pos_n [0])) / 2. / (pos_n [1] - pos_n [0]);
+				// 	// 	data_out [(n - 1) * m + j] += coeff * ((data_in [j] - data_in [(n - 1) * m + j]) / (pos_n [n - 1] - pos_n [n - 2]) - (data_in [(n - 1) * m + j] - data_in [(n - 2) * m + j]) / (pos_n [n - 1] - pos_n [n - 2])) / 2. / (pos_n [n - 1] - pos_n [n - 2]);
+				// 	// }
+				// }
 
 
-				TRACE ("Operation complete.");
+				// TRACE ("Operation complete.");
 			}
 		
 			/*!**********************************************************************
@@ -234,16 +234,16 @@ namespace plans
 			 ************************************************************************/
 			void execute () {
 				TRACE ("Operating...");
-				// Depending on the direction of the solve, treat this term as either partially or fully explicit
-				if (component_flags & z_solve) {
-					if (1.0 - alpha != 0.0) {
-						linalg::matrix_matrix_multiply (m, ldn, m, 1.0 - alpha, new_matrix, data_in, 1.0, data_out, m);
-					}
-				} else {
-					linalg::matrix_matrix_multiply (m, ldn, m, 1.0, new_matrix, data_in, 1.0, data_out, m);
-				}
+				// // Depending on the direction of the solve, treat this term as either partially or fully explicit
+				// if (component_flags & z_solve) {
+				// 	if (1.0 - alpha != 0.0) {
+				// 		linalg::matrix_matrix_multiply (m, ldn, m, 1.0 - alpha, new_matrix, data_in, 1.0, data_out, m);
+				// 	}
+				// } else {
+				// 	linalg::matrix_matrix_multiply (m, ldn, m, 1.0, new_matrix, data_in, 1.0, data_out, m);
+				// }
 
-				TRACE ("Operation complete.");
+				// TRACE ("Operation complete.");
 			}
 		
 			/*!**********************************************************************
