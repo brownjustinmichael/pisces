@@ -18,6 +18,8 @@ namespace pisces
 {
 	using namespace plans;
 
+	implemented_element::registrar <pseudo_element> pseudo_registrar ("pseudo");
+
 	pseudo_element::pseudo_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
 	implemented_element (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags) {
 		x_ptr = data ("x");

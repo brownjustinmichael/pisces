@@ -35,6 +35,10 @@ namespace pisces
 		vardiff_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags);
 		
 		virtual ~vardiff_element () {}
+
+		static std::shared_ptr <element> instance (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) {
+			return std::shared_ptr <element> (new vardiff_element (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags));
+		}
 		
 		/**
 		 * @brief An alternate rezone merit function that seeks the regions with strongest derivatives

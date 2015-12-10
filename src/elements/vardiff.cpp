@@ -15,6 +15,8 @@ namespace pisces
 {
 	using namespace plans;
 	using namespace plans::solvers;
+
+	implemented_element::registrar <vardiff_element> vardiff_registrar ("vardiff");
 	
 	vardiff_element::vardiff_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
 	boussinesq_element (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags) {

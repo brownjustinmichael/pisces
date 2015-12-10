@@ -1,3 +1,4 @@
+element: boussinesq
 grid:
     x:
         points: 256

@@ -14,6 +14,12 @@ namespace pisces
 	// int implemented_element::mode = mode_flag;
 	//
 	// template class element;
-		
+
+	std::map <std::string, implemented_element::element_function *> & implemented_element::registry()
+	{
+	    static std::map <std::string, implemented_element::element_function *> impl;
+	    return impl;
+	}
+
 	int implemented_element::mode = grids::mode_flag;
 } /* pisces */
