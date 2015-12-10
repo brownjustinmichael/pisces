@@ -84,7 +84,7 @@ public:
 		{
 			formats::data_grid io_grid = formats::data_grid::two_d (n, m);
 			std::cout << io_grid.get_n_dims ();
-			io::appender_output <formats::netcdf> output_stream (formats::data_grid::two_d (n, m), file_name, 1);
+			io::appender_output <formats::netcdf> output_stream (formats::data_grid::two_d (n, m), file_name, NULL, 1);
 			for (int k = 0; k < records; ++k) {
 				output_stream.append <double> ("test", &init [k * n * m]);
 				output_stream.append <double> ("scale", &scalar [k], formats::scalar);
@@ -132,7 +132,7 @@ public:
 	
 		srand (1);
 	
-		io::appender_output <formats::virtual_format> output_stream (formats::data_grid::two_d (n, m), file_name, 1);
+		io::appender_output <formats::virtual_format> output_stream (formats::data_grid::two_d (n, m), file_name, NULL, 1);
 		output_stream.append <double> ("test", &init [0]);
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {

@@ -35,6 +35,11 @@ namespace io
 	 ************************************************************************/
 	class parameters : public YAML::Node
 	{
+	protected:
+		std::string yaml_data; //!< The string representation of the parameters in YAML
+		bool defined = true;
+		std::string path = "";
+
 	public:
 		using YAML::Node::operator=; // Use the assignment operator from the super class
 	
@@ -93,14 +98,34 @@ namespace io
 			YAML::Node::operator= (copy (copy_node, *this));
 			TRACE ("Constructed");
 		}
-	
+
+		parameters (YAML::Node& node, std::string i_path = "") {
+			YAML::Node::operator= (node);
+			path = i_path;
+			defined = node.IsDefined ();
+		}
+
 		virtual ~parameters () {}
+
+		template <class datatype>
+		datatype as () {
+			try {
+				return YAML::Node::as <datatype> ();
+			} catch (YAML::Exception &e) {
+				ERROR ("Unable to interpret key " << path << " as " << typeid (datatype).name ());
+				throw e;
+			}
+		}
+
+		bool IsDefined () {
+			return defined;
+		}
 		
 		/*!**********************************************************************
 		 * \return The version of the class
 		 ************************************************************************/
 		static versions::version& version () {
-			static versions::version version ("1.0.1.0");
+			static versions::version version ("1.1.0.0");
 			return version;
 		}
 		
@@ -116,6 +141,17 @@ namespace io
 		 ************************************************************************/
 		static YAML::Node copy (const YAML::Node &from, const YAML::Node to);
 	
+		/**
+		 * @return A string representation of the full YAML output
+		 */
+		std::string &string () {
+			TRACE ("Emitting parameters");
+			YAML::Emitter out;
+			out << *this;
+			yaml_data = out.c_str ();
+			return yaml_data;
+		}
+
 		/*!**********************************************************************
 		 * \brief Overload the index operator for the YAML::Node
 		 * 
@@ -125,7 +161,7 @@ namespace io
 		 * 
 		 * \return A copy of the YAML::Node object at the given parameter.
 		 ************************************************************************/
-		YAML::Node operator[] (std::string key) const;
+		parameters operator[] (std::string key) const;
 			
 		/*!**********************************************************************
 		 * \brief Get the parameter associated with the given key
@@ -144,6 +180,26 @@ namespace io
 			} else {
 				ERROR ("Key " << key << " does not exist.");
 				throw exceptions::key_does_not_exist (key);
+			}
+		}
+
+		/*!**********************************************************************
+		 * \brief Get the parameter associated with the given key, if it does not exist, return the default value
+		 * 
+		 * \param key The string representation of the parameter
+		 * \param default_value The default valie to use if the key does not exist
+		 * 
+		 * This method is included for convenience. It avoids some of the messy YAML syntax and takes advantage of the overwritted index operator. Returns default_value if the index does not exist
+		 * 
+		 * \return Returns the value of the given parameter
+		 ************************************************************************/
+		template <typename datatype>
+		const datatype get (std::string key, datatype default_value) {
+			YAML::Node node = operator[] (key);
+			if (operator[] (key).IsDefined ()) {
+				return operator[] (key).as <datatype> ();
+			} else {
+				return default_value;
 			}
 		}
 	};

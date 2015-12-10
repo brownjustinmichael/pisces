@@ -252,7 +252,7 @@ def generate(env, **kwargs):
     #
     # Expected behaviour: keyword arguments override environment variables;
     # environment variables override default settings.
-    #          
+    #
     env.SetDefault( CXXTEST_RUNNER  = 'ErrorPrinter'        )
     env.SetDefault( CXXTEST_OPTS    = ''                    )
     env.SetDefault( CXXTEST_SUFFIX  = '.t.h'                )

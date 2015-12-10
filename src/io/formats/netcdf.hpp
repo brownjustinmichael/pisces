@@ -25,7 +25,7 @@ namespace formats
 	 * 
 	 * This function throws an io::bad_type exception if the type is not known
 	 * 
-	 * \return The netCDF::NcType object associated with the input type
+	 * \return The netCDF::NcType object associated with the input type 
 	 ************************************************************************/
 	inline netCDF::NcType netcdf_type (const std::type_info* type) {
 		if (type == &typeid (double)) {
@@ -51,7 +51,7 @@ namespace formats
 		static std::map <std::string, std::vector <std::string>> failures; //!< A map of failures for exception handling
 		static std::map <std::string, int> records; //!< A map of the current record of each file
 		static std::map <std::string, bool> first; //!< A map of booleans regarding whether a file has been output yet
-		
+
 	public:
 		static bool uses_files; //!< A boolean that contains whether this format uses file (true)
 		
@@ -72,12 +72,36 @@ namespace formats
 		 * \copydoc virtual_format::open_file
 		 ************************************************************************/
 		static void open_file (const data_grid &grid, std::string file_name, int file_type);
-		
+
 		/*!**********************************************************************
 		 * \copydoc virtual_format::close_file
 		 ************************************************************************/
 		static void close_file (std::string file_name, int file_type);
 		
+		/**
+		 * @brief Add a string global attribute to the output file
+		 * @details This attribute is not time dependent, and is not associated with any of the individual variables.
+		 * 
+		 * @param file_name The name of the file to which the attribute should be added
+		 * @param name The name of the attribute
+		 * @param attribute The string content of the attribute
+		 */
+		static void add_global_attribute (std::string file_name, std::string name, std::string attribute) {
+			DEBUG ("Attributes are " << attribute);
+			files [file_name]->putAtt (name, attribute.c_str ());
+		}
+
+		/**
+		 * @brief Check whether the file is currently open
+		 * 
+		 * @param file_name The file to check
+		 * @return True if the file is open, false otherwise
+		 */
+		static bool is_open (std::string file_name) {
+			if (files [file_name]) return true;
+			return false;
+		}
+
 		/*!**********************************************************************
 		 * \copydoc virtual_format::write
 		 ************************************************************************/
@@ -109,7 +133,7 @@ namespace formats
 			netCDF::NcVar ncdata = files [file_name]->getVar (name.c_str ());
 			if (ncdata.isNull ()) {
 				ncdata = files [file_name]->addVar (name.c_str (), netcdf_type (&typeid (datatype)), scalar_dims);
-				ncdata.setFill (true, NULL);
+				// ncdata.setFill (true, NULL);
 			}
 			ncdata.putVar (offsets, sizes, data);
 		}

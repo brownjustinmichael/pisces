@@ -24,13 +24,13 @@
 \graphicspath{{figs/}{pngs/}}
 
 \begin{document}
-\title[(P)ISCES]{(P)ISCES: A Spectral Element Code to Tackle Staircases in Double-Diffusive Convection}
+\title[PISCES]{PISCES: A Spectral Element Code to Tackle Minor Mixing Processes for Astrophysical and Oceanographic Applications}
 \author{Justin Brown \\ Pascale Garaud \\ Nic Brummell \\ Gary Glatzmaier}
-\date{6 March 2015}
+% \date{6 March 2015}
 
 \frame{\titlepage\vspace{-60pt}\begin{center}\includegraphics[width=60pt]{doe_logo.png}\hspace{180pt}\includegraphics[width=60pt]{UC_Logo.png}\end{center}}
 
-\section{The Problem}
+\section{Mixing in Stars}
 
 \frame{\tableofcontents[hideothersubsections]}
 
@@ -55,31 +55,31 @@
 \end{overprint}
 }
 
-\frame{\frametitle{Double-diffusive convection occurs in several physical scenarios.}
-\begin{itemize}
-	\item FC
-	\begin{itemize}
-		\item Thermocline of the ocean
-		\item Red Giant Branch of Sun-like stars
-	\end{itemize}
-	\item ODDC
-	\begin{itemize}
-		\item Beneath the arctic ice cap (also intrusions)
-		\item Throughout massive star evolution
-	\end{itemize}
-\end{itemize}
-In this talk (because I'm an astrophysics student), I will focus on the massive star applications.
-}
-
-\subsection{ODDC in Massive Stars}
-
-% \frame{\frametitle{Massive stars ($>8M_\odot$) are significant because they produce a large fraction of the heavy elements either during their evolution or in supernovae.}
-% \begin{figure}[h]
-% 	\centering
-% 		\includegraphics[width=.9\textwidth]{figs/abundances.pdf}\footnote{\citep{Lodders2010,Woosley2002,Burbidge1957}}
-% 	\label{fig:figs_abundances}
-% \end{figure}
+% \frame{\frametitle{Double-diffusive convection occurs in several physical scenarios.}
+% \begin{itemize}
+% 	\item FC
+% 	\begin{itemize}
+% 		\item Thermocline of the ocean
+% 		\item Red Giant Branch of Sun-like stars
+% 	\end{itemize}
+% 	\item ODDC
+% 	\begin{itemize}
+% 		\item Beneath the arctic ice cap (also intrusions)
+% 		\item Throughout massive star evolution
+% 	\end{itemize}
+% \end{itemize}
+% In this talk (because I'm an astrophysics student), I will focus on the massive star applications.
 % }
+
+% \subsection{ODDC in Massive Stars}
+
+\frame{\frametitle{Massive stars ($>8M_\odot$) are significant because they produce a large fraction of the heavy elements either during their evolution or in supernovae.}
+\begin{figure}[h]
+	\centering
+		\includegraphics[width=.9\textwidth]{figs/abundances.pdf}\footnote{\citep{Lodders2010,Woosley2002,Burbidge1957}}
+	\label{fig:figs_abundances}
+\end{figure}
+}
 
 \frame{\frametitle{ODDC is modeled in stars using the \citet{Langer1983} prescription by deriving a diffusion coefficient, $D$.}
 \begin{columns}
@@ -108,150 +108,212 @@ In this talk (because I'm an astrophysics student), I will focus on the massive 
 \end{columns}
 }
 
-% \frame{\frametitle{In particular, ODDC has strong relevance to stellar evolution because stellar cores are hot and heavy \citep{Robertson1972}.}
-% 	\begin{figure}[h]
-% 			\includegraphics[width=.5\textwidth]{hburn_abun.pdf}
-% 			\includegraphics[width=.5\textwidth]{figs/Langer-core-sc.png}\footnote{\citep{Langer1985}}
-% 		\label{fig:figs_Langer-core-sc}
-% 	\end{figure}
-% }
-%
-% \frame{\frametitle{The later stages of massive stars are complex.}
-% \begin{figure}[h]
-% 	\centering
-% 		\includegraphics[width=.8\textwidth]{figs/Maeder-HR-head.png}
-%
-% 		\hspace{7pt}\includegraphics[width=.8\textwidth]{figs/Maeder-HR-foot.png}\footnote{\citep{Maeder1988}}
-% 	\label{fig:figs_himasshr}
-% \end{figure}
-% }
-%
-% \frame{\frametitle{Since these late stages are dynamic, mixing processes (e.g. semi-convection) can drastically effect the final star structure and yields.}
-% \begin{figure}[h]
-% 	\centering
-% 		\includegraphics[width=.7\textwidth]{figs/semi_evolution.png}\footnote{\citep{Langer1985}}
-% 		\caption{With semi-convection (solid), without (dashed)}
-% 	\label{fig:figs_semi_evolution}
-% \end{figure}
-% }
-%
-% \frame{\frametitle{Small changes in the treatment of semi-convection can make the difference between stars becoming successful or failed supernovae by changing the final C/O cores.}
-% \begin{figure}[h]
-% 	\centering
-% 		\includegraphics[width=.65\textwidth]{figs/compactness.png}\footnote{\citep{Sukhbold2014}}
-% 		\caption{Likelihood of explosion, varying the semi-convection parameter from \citet{Woosley1988}}
-% 	\label{fig:figs_compactness}
-% \end{figure}
-% }
+\frame{\frametitle{In particular, ODDC has strong relevance to stellar evolution because stellar cores are hot and heavy \citep{Robertson1972}.}
+	\begin{figure}[h]
+			\includegraphics[width=.5\textwidth]{hburn_abun.pdf}
+			\includegraphics[width=.5\textwidth]{figs/Langer-core-sc.png}\footnote{\citep{Langer1985}}
+		\label{fig:figs_Langer-core-sc}
+	\end{figure}
+}
+
+\frame{\frametitle{The later stages of massive stars are complex.}
+\begin{figure}[h]
+	\centering
+		\includegraphics[width=.8\textwidth]{figs/Maeder-HR-head.png}
+
+		\hspace{7pt}\includegraphics[width=.8\textwidth]{figs/Maeder-HR-foot.png}\footnote{\citep{Maeder1988}}
+	\label{fig:figs_himasshr}
+\end{figure}
+}
+
+\frame{\frametitle{Since these late stages are dynamic, mixing processes (e.g. semi-convection) can drastically effect the final star structure and yields.}
+\begin{figure}[h]
+	\centering
+		\includegraphics[width=.7\textwidth]{figs/semi_evolution.png}\footnote{\citep{Langer1985}}
+		\caption{With semi-convection (solid), without (dashed)}
+	\label{fig:figs_semi_evolution}
+\end{figure}
+}
+
+\frame{\frametitle{Small changes in the treatment of semi-convection can make the difference between stars becoming successful or failed supernovae by changing the final C/O cores.}
+\begin{figure}[h]
+	\centering
+		\includegraphics[width=.65\textwidth]{figs/compactness.png}\footnote{\citep{Sukhbold2014}}
+		\caption{Likelihood of explosion, varying the semi-convection parameter from \citet{Woosley1988}}
+	\label{fig:figs_compactness}
+\end{figure}
+}
+
+\subsection{Overshooting Convection}
+
+\frame{\frametitle{Overshooting convection is characterized by a convective region mixing into a nominally stable region.}
+	\begin{figure}[h]
+		\centering
+			\includegraphics[width=.9\textwidth]{os_image.png}\footnote{\citep{Brummell2002}}
+		\label{fig:figs_scdiagram}
+	\end{figure}
+}
+
+\frame{\frametitle{This is distinct from penetrative convection, where the additional mixing extends the convection zone.}
+	\begin{figure}[h]
+		\centering
+			\includegraphics[width=.85\textwidth]{meakin_penetration.png}\footnote{\citep{Meakin2007}}
+		\label{fig:figs_scdiagram}
+	\end{figure}
+}
+
+\frame{\frametitle{Most numerical studies of overshooting convection investigate the effects of \textbf{stratification} at boundaries.}
+	Some recent examples:
+	\begin{itemize}
+		\item \citet{Brummell2002}
+		\item \citet{Meakin2007}
+		\item \citet{Gilet2013}
+	\end{itemize}
+	Some convective boundaries are affected by varying \textbf{diffusion}, e.g. envelope convection and core helium burning.
+}
 
 \subsection{Setup}
+
+\frame{\frametitle{Under the Boussinesq approximation, there are three possibilities for an overshooting region.}
+	\begin{itemize}
+		\item A spatially-dependent thermal expansion coefficient
+		\item A spatially-dependent heating term
+		\item A spatially-dependent diffusion coefficient
+	\end{itemize}
+}
 
 \frame{\frametitle{Governing equations \citep{Spiegel1960}}
 \begin{overprint}
 \only<1>{
+Assuming the Boussinesq approximation and an adiabatic temperature gradient (such as appears during a formal derivation of the Boussinesq approximation for a gas) yields
 \begin{align}
-	\rho_{0}\frac{D}{D{t}}{\mathbf{u}} =& -\nabla p + \left(-\alpha{T}+\beta\mu\right)\rho_{0}\mathbf{g} + \nu\rho_{0}\nabla^{2}\mathbf{u} \\
+	\rho_{0}\frac{D}{D{t}}{\mathbf{u}} =& -\nabla p + \rho_{0}\alpha g T + \rho_{0}\nu\nabla^{2}\mathbf{u} \\
 	\nabla\cdot\mathbf{u} =& 0 \\
-	\frac{D}{D{t}}{T} + w\frac{d}{dz}T_{0} =& \kappa_T \nabla^{2}T \\
-	\frac{D}{D{t}}{\mu} + w\frac{d}{dz}\mu_{0}=& \kappa_{\mu}\nabla^{2}\mu
-\end{align}}
-\only<2>{
-\begin{align}
-	\frac{1}{\rm{Pr}}\frac{D}{D{t}}{\mathbf{u}} =& -\nabla p + \left(-T+\mu\right)\mathbf{\hat{z}} + \nabla^{2}\mathbf{u},\rm{Pr}\equiv\frac{\nu}{\kappa_{T}} \\
-	\nabla\cdot\mathbf{u} =& 0 \\
-	\frac{D}{D{t}}{T} \pm w =& \nabla^{2}T \\
-	\frac{D}{D{t}}{\mu} \pm \frac{w}{R_{0}}=& \tau\nabla^{2}\mu, R_{0}\equiv\frac{\alpha\left(T_{0z}-T_{\rm{ad},z}\right)}{\beta\mu_{0z}}, \tau\equiv\frac{\kappa_{\mu}}{\kappa_{T}}
+	\rho_{0}\frac{D}{D{t}}{T} - \rho_{0}\left.\frac{d}{dz}T\right|_{\mathrm{ad}} =& \rho_{0}\nabla^{2}\kappa_{T}(z) T + H\left(z\right) \\
 \end{align}
-The $+$ corresponds to FC and the $-$, ODDC.}
+for the case with uniform diffusion but a z-dependent heating term.}
+\only<2>{
+or
+\begin{align}
+	\rho_{0}\frac{D}{D{t}}{\mathbf{u}} =& -\nabla p + \rho_{0}\alpha g T + \rho_{0}\nu\nabla^{2}\mathbf{u} \\
+	\nabla\cdot\mathbf{u} =& 0 \\
+	\rho_{0}\frac{D}{D{t}}{T} - \rho_{0}\left.\frac{d}{dz}T\right|_{\mathrm{ad}} =& \rho_{0}\nabla\cdot \left(\kappa_{T,0}+\kappa_{T}(z)\right)\nabla T \\
+\end{align}
+for the case with nonuniform diffusion.}
+\only<3>{
+Subtracting a static background temperature and non-dimensionalizing yields
+\begin{align}
+	\frac{D}{D{t}}{\mathbf{u}} =& -\nabla p + \frac{\mathrm{Ra}_{T}}{\mathrm{Pr}}{T} + \nabla^{2}\mathbf{u} \\
+	\nabla\cdot\mathbf{u} =& 0 \\
+	\frac{D}{D{t}}{T} + w f\left(z\right) =& \nabla\cdot \left(\mathrm{Pr}^{-1}+\kappa_{T}(z)/\kappa_{T,0}\right)^{-1}\nabla T, \\
+\end{align}
+where $\kappa_{T}(z)$ is zero in the uniform diffusion case.}
 \end{overprint}
+% \begin{overprint}
+% \only<1>{
+% \begin{align}
+% 	\rho_{0}\frac{D}{D{t}}{\mathbf{u}} =& -\nabla p + \left(-\alpha{T}+\beta\mu\right)\rho_{0}\mathbf{g} + \nu\rho_{0}\nabla^{2}\mathbf{u} \\
+% 	\nabla\cdot\mathbf{u} =& 0 \\
+% 	\frac{D}{D{t}}{T} + w\frac{d}{dz}T_{0} =& \kappa_T \nabla^{2}T \\
+% 	\frac{D}{D{t}}{\mu} + w\frac{d}{dz}\mu_{0}=& \kappa_{\mu}\nabla^{2}\mu
+% \end{align}}
+% \only<2>{
+% \begin{align}
+% 	\frac{1}{\rm{Pr}}\frac{D}{D{t}}{\mathbf{u}} =& -\nabla p + \left(-T+\mu\right)\mathbf{\hat{z}} + \nabla^{2}\mathbf{u},\rm{Pr}\equiv\frac{\nu}{\kappa_{T}} \\
+% 	\nabla\cdot\mathbf{u} =& 0 \\
+% 	\frac{D}{D{t}}{T} \pm w =& \nabla^{2}T \\
+% 	\frac{D}{D{t}}{\mu} \pm \frac{w}{R_{0}}=& \tau\nabla^{2}\mu, R_{0}\equiv\frac{\alpha\left(T_{0z}-T_{\rm{ad},z}\right)}{\beta\mu_{0z}}, \tau\equiv\frac{\kappa_{\mu}}{\kappa_{T}}
+% \end{align}
+% The $+$ corresponds to FC and the $-$, ODDC.}
+% \end{overprint}
 }
 
-\frame{\frametitle{Depending on the strength of the stabilizing composition, semi-convection can be in various forms.}
-\begin{overprint}
-	\only<1>{
-	\begin{equation}
-		1<R_{0}^{-1}<\frac{\rm{Pr} + 1}{\rm{Pr} + \tau}
-	\end{equation}
-	\vspace{-100pt}
-	\begin{figure}[h]
-		\centering
-			\includegraphics[width=.8\textwidth,angle=90]{../pngs/regimes-sc-flip-1.pdf}\footnote{\citep{Garaud2014}}
-		\label{fig:pngs_regimes}
-	\end{figure}
-	\vspace{-100pt}
-	}
-	\only<2>{
-	\begin{figure}[h]
-		\centering
-			\includegraphics[width=.5\textwidth]{../pngs/regimes_image.png}\footnote{\citep{Mirouh2012}}
-			\caption{$\rm{Pr}=\tau=0.03$, $R_{0}^{-1}=1.5\mbox{ (top)},5.0\mbox{ (bottom)}$}
-		\label{fig:pngs_regimes_image}
-	\end{figure}
-	}
-\end{overprint}
-}
+% \frame{\frametitle{Depending on the strength of the stabilizing composition, semi-convection can be in various forms.}
+% \begin{overprint}
+% 	\only<1>{
+% 	\begin{equation}
+% 		1<R_{0}^{-1}<\frac{\rm{Pr} + 1}{\rm{Pr} + \tau}
+% 	\end{equation}
+% 	\vspace{-100pt}
+% 	\begin{figure}[h]
+% 		\centering
+% 			\includegraphics[width=.8\textwidth,angle=90]{../pngs/regimes-sc-flip-1.pdf}\footnote{\citep{Garaud2014}}
+% 		\label{fig:pngs_regimes}
+% 	\end{figure}
+% 	\vspace{-100pt}
+% 	}
+% 	\only<2>{
+% 	\begin{figure}[h]
+% 		\centering
+% 			\includegraphics[width=.5\textwidth]{../pngs/regimes_image.png}\footnote{\citep{Mirouh2012}}
+% 			\caption{$\rm{Pr}=\tau=0.03$, $R_{0}^{-1}=1.5\mbox{ (top)},5.0\mbox{ (bottom)}$}
+% 		\label{fig:pngs_regimes_image}
+% 	\end{figure}
+% 	}
+% \end{overprint}
+% }
 
-\frame{\frametitle{To determine which regime is relevant to stars, we look at the condition for layer formation from \citet{Mirouh2012}.}
-	\begin{figure}[h]
-		\centering
-			\includegraphics[width=0.9\textwidth]{../pngs/layer_condition.png}\footnote{\citep{Mirouh2012}}
-			\caption{$R_{L}^{-1}$, the maximum $R_{0}^{-1}$ for which layers exist}
-		\label{fig:pngs_layer_condition}
-	\end{figure}
-}
+% \frame{\frametitle{To determine which regime is relevant to stars, we look at the condition for layer formation from \citet{Mirouh2012}.}
+% 	\begin{figure}[h]
+% 		\centering
+% 			\includegraphics[width=0.9\textwidth]{../pngs/layer_condition.png}\footnote{\citep{Mirouh2012}}
+% 			\caption{$R_{L}^{-1}$, the maximum $R_{0}^{-1}$ for which layers exist}
+% 		\label{fig:pngs_layer_condition}
+% 	\end{figure}
+% }
 
-\frame{\frametitle{We find in KEPLER simulations that semi-convection regions exist preferentially in the layer-forming regime.}
-\begin{figure}[h]
-	\centering
-		\includegraphics[width=.9\textwidth]{figs/r0hist.pdf}
-	\caption{For semi-convection to be in the layered regime, $1<R_{0}^{-1}<R_{L}^{-1}\sim1000$} 
-	\label{fig:figs_r0hist}
-\end{figure}
-}
+% \frame{\frametitle{We find in KEPLER simulations that semi-convection regions exist preferentially in the layer-forming regime.}
+% \begin{figure}[h]
+% 	\centering
+% 		\includegraphics[width=.9\textwidth]{figs/r0hist.pdf}
+% 	\caption{For semi-convection to be in the layered regime, $1<R_{0}^{-1}<R_{L}^{-1}\sim1000$} 
+% 	\label{fig:figs_r0hist}
+% \end{figure}
+% }
 
-\subsection{Model}
+% \subsection{Model}
 
-\frame{\frametitle{\citet{Wood2013} determined an empirical model for the fluxes in layers with one free parameter, $l_{\rm{semi}}$.}
-	\begin{figure}[h]
-		\centering
-			\includegraphics[width=.9\textwidth]{figs/wood-layers.png}\footnote{\citep{Wood2013}}
-		\label{fig:figs_wood-layers}
-	\end{figure}
-\begin{overprint}
-	\only<1>{\begin{equation}
-Q_{\rm{semi}}=-0.1\left(\frac{g\delta|\frac{dT}{dr}-\left.\frac{dT}{dr}\right|_{\rm ad}|(l_{\rm semi})^{4}}{T\kappa_{T}^{2}}\right)^{1/3}\rho{c_{p}}\kappa_{T}\left(\frac{dT}{dr}-\left.\frac{dT}{dr}\right|_{\rm ad}\right)
-\end{equation}}
-\only<2>{\begin{equation}
-		\kappa_{\mu, {\rm semi}}=0.03\left(\nu\kappa_{T}^{3}\right)^{1/4}\left(\frac{g\delta|\frac{dT}{dz}-\left.\frac{dT}{dz}\right|_{\rm ad}|(l_{\rm semi})^{4}}{\nu T\kappa_{T}}\right)^{0.37}
-	\end{equation}}
-\end{overprint}
-}
+% \frame{\frametitle{\citet{Wood2013} determined an empirical model for the fluxes in layers with one free parameter, $l_{\rm{semi}}$.}
+% 	\begin{figure}[h]
+% 		\centering
+% 			\includegraphics[width=.9\textwidth]{figs/wood-layers.png}\footnote{\citep{Wood2013}}
+% 		\label{fig:figs_wood-layers}
+% 	\end{figure}
+% \begin{overprint}
+% 	\only<1>{\begin{equation}
+% Q_{\rm{semi}}=-0.1\left(\frac{g\delta|\frac{dT}{dr}-\left.\frac{dT}{dr}\right|_{\rm ad}|(l_{\rm semi})^{4}}{T\kappa_{T}^{2}}\right)^{1/3}\rho{c_{p}}\kappa_{T}\left(\frac{dT}{dr}-\left.\frac{dT}{dr}\right|_{\rm ad}\right)
+% \end{equation}}
+% \only<2>{\begin{equation}
+% 		\kappa_{\mu, {\rm semi}}=0.03\left(\nu\kappa_{T}^{3}\right)^{1/4}\left(\frac{g\delta|\frac{dT}{dz}-\left.\frac{dT}{dz}\right|_{\rm ad}|(l_{\rm semi})^{4}}{\nu T\kappa_{T}}\right)^{0.37}
+% 	\end{equation}}
+% \end{overprint}
+% }
 
-\frame{\frametitle{The Boussinesq approximation does not constrain the layer height; layers merge until they fill the domain.}
-\begin{figure}[h]
-	\centering
-		\includegraphics[width=.9\textwidth]{figs/layer-merge.png}\footnote{\citep{Wood2013}}
-	\label{fig:figs_layer-merge}
-\end{figure}
-}
+% \frame{\frametitle{The Boussinesq approximation does not constrain the layer height; layers merge until they fill the domain.}
+% \begin{figure}[h]
+% 	\centering
+% 		\includegraphics[width=.9\textwidth]{figs/layer-merge.png}\footnote{\citep{Wood2013}}
+% 	\label{fig:figs_layer-merge}
+% \end{figure}
+% }
 
-\frame{\frametitle{We'd like to perform a new series of simulations to determine the maximum height of these layers.}
-\begin{itemize}
-	\item Cover new physics not present in PADDI
-	\begin{itemize}
-		\item Non-linear diffusion
-		\item Pseudo-incompressibility 
-	\end{itemize}
-	\item Attempt larger domains
-	\begin{itemize}
-		\item Move to 2D for this to be feasible
-	\end{itemize}
-	\item Finely resolve only layer interfaces
-	\begin{itemize}
-		\item Not possible in a traditional spectral code!
-	\end{itemize}
-\end{itemize}
-}
+% \frame{\frametitle{We'd like to perform a new series of simulations to determine the maximum height of these layers.}
+% \begin{itemize}
+% 	\item Cover new physics not present in PADDI
+% 	\begin{itemize}
+% 		\item Non-linear diffusion
+% 		\item Pseudo-incompressibility 
+% 	\end{itemize}
+% 	\item Attempt larger domains
+% 	\begin{itemize}
+% 		\item Move to 2D for this to be feasible
+% 	\end{itemize}
+% 	\item Finely resolve only layer interfaces
+% 	\begin{itemize}
+% 		\item Not possible in a traditional spectral code!
+% 	\end{itemize}
+% \end{itemize}
+% }
 
 \frame{\frametitle{A simple solution to this is a spectral element code using Chebyshev polynomials in the vertical direction.}
 \begin{columns}
@@ -343,7 +405,7 @@ Q_{\rm{semi}}=-0.1\left(\frac{g\delta|\frac{dT}{dr}-\left.\frac{dT}{dr}\right|_{
 \end{figure}
 }
 
-\section{(P)ISCES}
+\section{PISCES}
 
 \frame{\tableofcontents[hideothersubsections]}
 
@@ -486,28 +548,28 @@ We can solve equations with $z$-dependent coefficients implicitly
 \subsubsection{Dynamic Boundaries}
 
 \frame{\frametitle{The extents of these elements are dynamic, and can be rezoned using simulated annealing.}
-\begin{overprint}
-	\only<1>{
-We define $P (E (s), E (s'), T)$, the probability to accept a new state, $s'$, to maximize $E$, given a temperature, $T$, where $P > 0$ even if $E(s') < E(s)$ but that $P (E(s') < E(s)) \rightarrow 0$ as $T \rightarrow 0$.\footnote{Pseudocode from Wikipedia}
-\begin{itemize}
-	\item Let $s = s_{0}$
-	\item For $k$ in 0 to $k_{\rm{max}}$:
-	\begin{itemize}
-		\item $T =$ temperature ($\frac{k}{k_{\rm{max}}}$)
-		\item Pick a random neighbor, $s'$ = neighbor ($s$)
-		\item If $P(E(s), E(s'), T) >$ random(0, 1):
-		\begin{itemize}
-			\item $s = s_{\rm{new}}$
-		\end{itemize}
-	\end{itemize}
-	\item Return: $s$
-\end{itemize}}
-\only<2>{
+% \begin{overprint}
+% 	\only<1>{
+% We define $P (E (s), E (s'), T)$, the probability to accept a new state, $s'$, to maximize $E$, given a temperature, $T$, where $P > 0$ even if $E(s') < E(s)$ but that $P (E(s') < E(s)) \rightarrow 0$ as $T \rightarrow 0$.\footnote{Pseudocode from Wikipedia}
+% \begin{itemize}
+% 	\item Let $s = s_{0}$
+% 	\item For $k$ in 0 to $k_{\rm{max}}$:
+% 	\begin{itemize}
+% 		\item $T =$ temperature ($\frac{k}{k_{\rm{max}}}$)
+% 		\item Pick a random neighbor, $s'$ = neighbor ($s$)
+% 		\item If $P(E(s), E(s'), T) >$ random(0, 1):
+% 		\begin{itemize}
+% 			\item $s = s_{\rm{new}}$
+% 		\end{itemize}
+% 	\end{itemize}
+% 	\item Return: $s$
+% \end{itemize}}
+% \only<2>{
 \begin{figure}
 	\includemedia[width=\columnwidth,activate=onclick]{\includegraphics[width=\columnwidth,height=160pt]{out_00.png}}{out.swf}
 \end{figure}
-}
-\end{overprint}
+% }
+% \end{overprint}
 }
 
 \subsection{Results}
@@ -529,145 +591,156 @@ We define $P (E (s), E (s'), T)$, the probability to accept a new state, $s'$, t
 \end{figure}
 }
 
+\frame{\frametitle{We are investigating the differences between heating and variable diffusion.}
+\begin{figure}[h]
+	\centering
+		\includegraphics[width=.7\textwidth]{figs/variable_vs_heat.png}
+	\label{fig:var_vs_heat}
+\end{figure}
+}
+
 \section{Future}
 
 \frame{\tableofcontents[hideothersubsections]}
 
-\subsection{Layered Semi-Convection}
+% \subsection{Layered Semi-Convection}
 
-\frame{\frametitle{Future Code Development}
-\begin{itemize}
-	\item Implement nonlinear diffusion (working in 1D) in 2D
-	\begin{itemize}
-		\item Examine layer properties with $\mu$-dependent diffusion
-	\end{itemize}
-	\item Upgrade from Boussinesq to Pseudo-Incompressible
-	\begin{itemize}
-		\item Determine layer height across density scale heights
-	\end{itemize}
-	\item Update KEPLER and MESA with layer height
-\end{itemize}}
+% \frame{\frametitle{Future Code Development}
+% \begin{itemize}
+% 	\item Implement nonlinear diffusion (working in 1D) in 2D
+% 	\begin{itemize}
+% 		\item Examine layer properties with $\mu$-dependent diffusion
+% 	\end{itemize}
+% 	\item Upgrade from Boussinesq to Pseudo-Incompressible
+% 	\begin{itemize}
+% 		\item Determine layer height across density scale heights
+% 	\end{itemize}
+% 	\item Update KEPLER and MESA with layer height
+% \end{itemize}}
 
-\subsection{Additional Slides}
+% \subsection{Additional Slides}
 
-\frame{\tableofcontents[hideothersubsections]}
+% \frame{\tableofcontents[hideothersubsections]}
 
-\subsubsection{Pseudo-Incompressibility}
+% \subsubsection{Pseudo-Incompressibility}
 
-\frame{\frametitle{Governing equations}
-\begin{overprint}
-	\only<1>{\bf Fully Compressible}
-	\only<2>{\bf Incompressible, Current Equations}
-	\only<3>{\bf Pseudo-Incompressible}
-	\only<4>{\bf Pseudo-Incompressible, Energy Conserving (Wood, private communication)}
-	\only<1>{
-	\begin{align}
-		\rho\frac{D}{D{t}}{\mathbf{u}} =& -\nabla p + \rho \mathbf{g} + \nabla\cdot\mathbf{\Pi} \\
-		\frac{D}{D{t}}\rho =& -\rho\nabla\cdot\mathbf{u} \\
-		\rho{T}\frac{D}{D{t}}{s} =& \nabla\vect{u}:\vect{\Pi} + \sum_{i}\mu_{i}\nabla\cdot\vect{C}_{i} - \nabla\cdot{\vect{H}} \\
-		\rho\frac{D}{D{t}}{\xi_{i}}=&-\nabla\cdot\vect{C}_{i}
-	\end{align}}
-	\only<2>{
-	\begin{align}
-		\rho_{0}\frac{D}{D{t}}{\mathbf{u}} =& -\nabla p + \left(-\alpha{T}+\beta\mu\right)\rho_{0}\mathbf{g} + \nu\rho_{0}\nabla^{2}\mathbf{u} \\
-		\nabla\cdot\mathbf{u} =& 0 \\
-		\frac{D}{D{t}}{T} + w\frac{d}{dz}T_{0} =& \kappa_T \nabla^{2}T \\
-		\frac{D}{D{t}}{\xi_{i}} + w\frac{d}{dz}\xi_{i,0}=& \kappa_{i}\nabla^{2}\xi_{i}
-	\end{align}}
-	\only<3,4>{
-	\begin{align}
-		\rho\frac{D}{D{t}}\mathbf{u}=&-\nabla\left(p_{0}+p_{1}\right)+\frac{p_{1}}{\rho}\left(\frac{\partial p}{\partial \rho}\right)^{-1}\nabla p_{0} -\rho\nabla\Phi+\nabla\cdot\mathbf{\Pi}\\
-		p_{0}\left(z\right)=&p\left(\rho,s,\xi_{1},\xi_{2},\dots\right)\\
-		\frac{D}{D{t}}\rho =& -\rho\nabla\cdot\mathbf{u} \\
-		\rho{T}\frac{D}{D{t}}{s} =& \nabla\mathbf{u}:\mathbf{\Pi} + \sum_{i}\mu_{i}\nabla\cdot\mathbf{C}_{i} - \nabla\cdot{\mathbf{H}}\\
-		\rho\frac{D}{D{t}}\xi_{i}=&-\nabla\cdot\mathbf{C}_{i}, \only<4>{\left(T,\mu_{i}\right)\equiv\left(\frac{\partial e}{\partial s},\frac{\partial e}{\partial \xi_{i}}\right)+p_{1}\frac{\partial{\left(\frac{\partial e}{\partial s},\frac{\partial e}{\partial \xi_{i}}\right)}/\partial{\rho}}{\partial{p}/\partial{\rho}}}
-	\end{align}}
-\end{overprint}
-}
+% \frame{\frametitle{Governing equations}
+% \begin{overprint}
+% 	\only<1>{\bf Fully Compressible}
+% 	\only<2>{\bf Incompressible, Current Equations}
+% 	\only<3>{\bf Pseudo-Incompressible}
+% 	% \only<4>{\bf Pseudo-Incompressible, Energy Conserving (Wood, private communication)}
+% 	\only<1>{
+% 	\begin{align}
+% 		\rho\frac{D}{D{t}}{\mathbf{u}} =& -\nabla p + \rho \mathbf{g} + \nabla\cdot\mathbf{\Pi} \\
+% 		\frac{D}{D{t}}\rho =& -\rho\nabla\cdot\mathbf{u} \\
+% 		\rho{T}\frac{D}{D{t}}{s} =& \nabla\vect{u}:\vect{\Pi} + \sum_{i}\mu_{i}\nabla\cdot\vect{C}_{i} - \nabla\cdot{\vect{H}} \\
+% 		\rho\frac{D}{D{t}}{\xi_{i}}=&-\nabla\cdot\vect{C}_{i}
+% 	\end{align}}
+% 	\only<2>{
+% 	\begin{align}
+% 		\rho_{0}\frac{D}{D{t}}{\mathbf{u}} =& -\nabla p + \left(-\alpha{T}+\beta\mu\right)\rho_{0}\mathbf{g} + \nu\rho_{0}\nabla^{2}\mathbf{u} \\
+% 		\nabla\cdot\mathbf{u} =& 0 \\
+% 		\frac{D}{D{t}}{T} + w\frac{d}{dz}T_{0} =& \kappa_T \nabla^{2}T \\
+% 		\frac{D}{D{t}}{\xi_{i}} + w\frac{d}{dz}\xi_{i,0}=& \kappa_{i}\nabla^{2}\xi_{i}
+% 	\end{align}}
+% 	\only<3>{
+% 	\begin{align}
+% 		\rho\frac{D}{D{t}}\mathbf{u}=&-\nabla\left(p_{0}+p_{1}\right)+\frac{p_{1}}{\rho}\left(\frac{\partial p}{\partial \rho}\right)^{-1}\nabla p_{0} -\rho\nabla\Phi+\nabla\cdot\mathbf{\Pi}\\
+% 		p_{0}\left(z\right)=&p\left(\rho,s,\xi_{1},\xi_{2},\dots\right)\\
+% 		\frac{D}{D{t}}\rho =& -\rho\nabla\cdot\mathbf{u} \\
+% 		\rho{T}\frac{D}{D{t}}{s} =& \nabla\mathbf{u}:\mathbf{\Pi} + \sum_{i}\mu_{i}\nabla\cdot\mathbf{C}_{i} - \nabla\cdot{\mathbf{H}}\\
+% 		\rho\frac{D}{D{t}}\xi_{i}=&-\nabla\cdot\mathbf{C}_{i}, 
+% 		% \only<4>{\left(T,\mu_{i}\right)\equiv\left(\frac{\partial e}{\partial s},\frac{\partial e}{\partial \xi_{i}}\right)+p_{1}\frac{\partial{\left(\frac{\partial e}{\partial s},\frac{\partial e}{\partial \xi_{i}}\right)}/\partial{\rho}}{\partial{p}/\partial{\rho}}}
+% 	\end{align}}
+% \end{overprint}
+% }
 
-\frame{\frametitle{To solve these equations, we choose the equation of state of an ideal mixture.}
-	\begin{align}
-		\rho\frac{D}{D{t}}\mathbf{u}=&-\nabla\left(p_{0}+p_{1}\right)+\frac{p_{1}}{\gamma p_{0}}\nabla p_{0} -\rho\nabla\Phi+\nabla\cdot\mathbf{\Pi}\\
-		p_{0}\left(z\right)=&\frac{k\rho\tilde{T}}{\overline{m}}\\
-		\frac{D}{D{t}}\rho =& -\rho\nabla\cdot\mathbf{u} \\
-		\rho{T}\frac{D}{D{t}}{s} =& \nabla\mathbf{u}:\mathbf{\Pi} + \sum_{i}\mu_{i}\nabla\cdot\mathbf{C}_{i} - \nabla\cdot{\mathbf{H}}\\
-		\rho\frac{D}{D{t}}\xi_{i}=&-\nabla\cdot\mathbf{C}_{i}, \left(T,\mu_{i}\right)\equiv\frac{c_{p}p_{0}+kp_{1}}{c_{p}p_{0}}\left(\tilde{T},\tilde{\mu_{i}}\right)
-	\end{align}
-}
+% \frame{\frametitle{Incompressible Non-Dimensionalization}
+% 	\begin{align}
+% 		\frac{D}{D{t}}{\mathbf{u}} =& -\nabla p + \frac{-\mathrm{Ra}_{T}T+\mathrm{Ra}_{\mu}\mu}{\mathrm{Pr}} + \nabla^{2}\mathbf{u} \\
+% 		\nabla\cdot\mathbf{u} =& 0 \\
+% 		\frac{D}{D{t}}{T} =& \nabla\cdot\left(\mathrm{Pr}^{-1}+\frac{\kappa_{T,1}}{\nu}\left(z\right)\right) \nabla T \\
+% 		\frac{D}{D{t}}{\xi_{i}} =& \frac{\tau}{\mathrm{Pr}}\nabla^{2}\xi_{i}
+% 	\end{align}
+% }
 
-\frame{\frametitle{We can simplify this greatly by assuming a perfect gas and converting the entropy equation into a pseudo-temperature equation.}
-\begin{overprint}
-	\only<1>{
-	\begin{align}
-		\frac{De}{Dt}=&\frac{\partial e}{\partial \rho}\frac{D\rho}{Dt}+\frac{\partial e}{\partial s}\frac{Ds}{Dt}+\sum_{i}\frac{\partial e}{\partial \xi_{i}}\frac{D\xi_{i}}{Dt}=c_{v}\frac{D}{Dt}\frac{\partial e}{\partial s}\\
-	\end{align}
-		We draw a distinction between $\frac{\partial e}{\partial s}\equiv\tilde{T}$ and $T$, as there's no guarantee they are the same in the pseudo-incompressible equations.
-	}
-	\only<2>{
-	\begin{align}
-		\frac{De}{Dt}=&\frac{p}{\rho^{2}}\frac{D\rho}{Dt}+\tilde{T}\frac{Ds}{Dt}+\sum_{i}\tilde{\mu_{i}}\frac{D\xi_{i}}{Dt}=c_{v}\frac{D}{Dt}\tilde{T}\\
-		\rho{T}\frac{D}{D{t}}{s} =& \rho\frac{T}{\tilde{T}}\left(c_{v}\frac{D}{Dt}\tilde{T}-\frac{p}{\rho^{2}}\frac{D\rho}{Dt}-\sum_{i}\tilde{\mu_{i}}\frac{D\xi_{i}}{Dt}\right)\\
-		=&\nabla\mathbf{u}:\mathbf{\Pi} + \sum_{i}\mu_{i}\nabla\cdot\mathbf{C}_{i} - \nabla\cdot{\mathbf{H}\left(T\right)}
-	\end{align}
-	}
-	\only<3>{
-	After some algebra,
-	\begin{align}
-		\rho{c_{v}}\frac{D}{D{t}}{\tilde{T}}=&\frac{c_{p}p}{c_{p}p+kp_{1}}\left(\nabla\mathbf{u}:\mathbf{\Pi} - \nabla\cdot{\mathbf{H}\left(\frac{c_{p}p+kp_{1}}{c_{p}p}\tilde{T}\right)}\right)-p\nabla\cdot{\mathbf{u}}
-	\end{align}
-	}
-\end{overprint}
-}
+% \frame{\frametitle{To solve these equations, we choose the equation of state of an ideal mixture.}
+% 	\begin{align}
+% 		\rho\frac{D}{D{t}}\mathbf{u}=&-\nabla\left(p_{0}+p_{1}\right)+\frac{p_{1}}{\gamma p_{0}}\nabla p_{0} -\rho\nabla\Phi+\nabla\cdot\mathbf{\Pi}\\
+% 		p_{0}\left(z\right)=&\frac{k\rho\tilde{T}}{\overline{m}}\\
+% 		\frac{D}{D{t}}\rho =& -\rho\nabla\cdot\mathbf{u} \\
+% 		\rho{T}\frac{D}{D{t}}{s} =& \nabla\mathbf{u}:\mathbf{\Pi} + \sum_{i}\mu_{i}\nabla\cdot\mathbf{C}_{i} - \nabla\cdot{\mathbf{H}}\\
+% 		\rho\frac{D}{D{t}}\xi_{i}=&-\nabla\cdot\mathbf{C}_{i}, \left(T,\mu_{i}\right)\equiv\frac{c_{p}p_{0}+kp_{1}}{c_{p}p_{0}}\left(\tilde{T},\tilde{\mu_{i}}\right)
+% 	\end{align}
+% }
 
-\frame{\frametitle{Governing Equations}
-	\begin{align}
-		\rho\frac{D}{D{t}}\mathbf{u}=&-\nabla\left(p_{0}+p_{1}\right)+\frac{p_{1}}{\gamma p_{0}}\nabla p_{0} -\rho\nabla\Phi+\nabla\cdot\mathbf{\Pi}\\
-		\nabla\cdot{p_{0}^{\frac{1}{\gamma}}\mathbf{u}}=&\frac{1}{\gamma p_{0}^{\frac{\gamma-1}{\gamma}}}\left(\frac{\partial{p}}{\partial{s}}\frac{D}{D{t}}s+\sum_{i}\frac{\partial{p}}{\partial{\xi_{i}}}\frac{D}{D{t}}\xi_{i}\right)\\
-		p_{0}\left(z\right)=&\frac{k\rho\tilde{T}}{\overline{m}}\\
-		\rho{\frac{k}{\gamma-1}}\frac{D}{D{t}}{\tilde{T}}=&\frac{p_{0}}{p_{0}+\frac{\gamma-1}{\gamma}p_{1}}\left(\nabla\mathbf{u}:\mathbf{\Pi} - \nabla\cdot{\mathbf{H}}\right)-p\nabla\cdot{\mathbf{u}}\\
-		\rho\frac{D}{D{t}}\xi_{i}=&-\nabla\cdot\mathbf{C}_{i}
-	\end{align}
-}
+% \frame{\frametitle{We can simplify this by expressing the entropy equation as a temperature equation.}
+% \begin{overprint}
+% 	\only<1>{
+% 		\begin{equation}
+% 			\frac{D}{Dt}T=\frac{\partial T}{\partial \rho}\frac{D}{Dt}\rho + \frac{\partial T}{\partial s}\frac{D}{Dt}s + \frac{\partial T}{\partial \xi_{i}}\frac{D}{Dt}\xi_{i}.
+% 		\end{equation}
+% 		We can use the remainder of the governing equations and the equation of state to get the full equation.
+% 	}
+% 	\only<2>{
+% 		\begin{equation}
+% 			\rho\frac{D}{Dt}T=-\left(\gamma - 1\right)\rho T\nabla\cdot{u} + \left(\gamma - 1\right)\frac{\overline{m}}{k}\left(\nabla\vect{u}:\vect{\Pi}-\nabla\cdot{\vect{H}}\right).
+% 		\end{equation}
+% 	}
+% \end{overprint}
+% }
 
-\subsubsection{Two-Component Ideal Mixture}
+% \frame{\frametitle{Governing Equations}
+% 	\begin{align}
+% 		p_{0} &= \frac{\rho T}{\overline{m}} \\
+% 		\rho\frac{D}{Dt}\vect{u} &= -\nabla\left(p_{0} + p_{1}\right) + \frac{p_{1}}{\gamma p_{0}}\nabla{p_{0}} - \rho \hat{y} + \nabla \cdot \vect{\Pi} \\
+% 		\rho\frac{D}{Dt}\xi &= \nabla \cdot \rho \tau \nabla \xi \\
+% 		\frac{1}{\gamma - 1}\rho\frac{D}{Dt} T &= -\rho T \nabla \cdot \vect{u} + \overline{m}\left(\nabla\vect{u}:\vect{\Pi} + \nabla\cdot \frac{\rho}{\overline{m}}\nabla{T}\right)\left(1 + Q\right) \\
+% 		\nabla\cdot{p_{0}^{\frac{1}{\gamma}}} &= \frac{\gamma - 1}{\gamma}p_{0}^{\frac{1}{\gamma}-1}\left(\nabla\vect{u}:\vect{\Pi}-\nabla\cdot \frac{\rho}{\overline{m}}\nabla{T}\right)\left(1 + Q\right) \\
+% 		\Pi_{ij} &= \rho \mathrm{Pr}\left(\frac{\partial u_{i}}{\partial x_{j}} + \frac{\partial u_{j}}{\partial x_{i}} - \frac{2}{3}\delta_{ij}\nabla\cdot{\vect{u}}\right)
+% 	\end{align}
+% }
 
-\frame{\frametitle{Derivation of the Equation of State for a two-component mixture.}
-\begin{overprint}
-	\only<1>{
-	Start with the EOS for an ideal gas:
-	\begin{align}
-		e_{i}\left(\rho_{i},s_{i}\right)=&\frac{c_{V}}{m_{i}}\left(\frac{\rho_{i}}{m_{i}}\phi_{i} e^{\frac{m_{i}s_{i}}{k}}\right)^{\frac{k}{c_{V}}}
-	\end{align}
-	Each component of the gas must follow this, and the total energy is $\overline{m}e=m_{1}e_{1}+m_{2}e_{2}$.
-	}
-	\only<2>{
-	Note the entropy of the mixture is defined as $\overline{m}s=m_{1}\xi_{1}s_{1}+_{2}\xi_{2}s_{2}-k\xi_{1}\ln{\xi_{1}}-k\xi_{2}\ln{\xi_{2}}$.
-	We assume the gases are thermally coupled:
-	\begin{align}
-		T=&\left(\frac{\rho\xi_{1}\phi_{1}}{\overline{m}}e^{\frac{m_{1}s_{1}}{k}}\right)^{\frac{k}{c_{v}}}=\left(\frac{\rho\xi_{2}\phi_{2}}{\overline{m}}e^{\frac{m_{2}s_{2}}{k}}\right)^{\frac{k}{c_{v}}}\\
-		e^{\frac{m_{1}s_{1}}{k}}=&\left(\frac{\xi_{2}\phi_{2}}{\xi_{1}\phi_{1}}\right)^{\xi_{2}}e^{\frac{\overline{m}s}{k}+\xi_{1}\ln{\xi_{1}}+\xi_{2}\ln{\xi_{2}}}
-	\end{align}
-	And likewise for $s_{2}$
-	}
-	\only<3>{
-	Thus, the total energy is
-\begin{align}
-	e_{1}\left(\rho,s,\xi_{1},\xi_{2}\right)&=c_{V}\left(\frac{\rho\xi_{1}\phi_{1}}{m_{1}}\left[\frac{\xi_{2}\phi_{2}}{\xi_{1}\phi{1}}\right]^{\xi_{2}} e^{\frac{\overline{m}s}{k}+\xi_{1}\ln{\xi_{1}}+\xi_{2}\ln{\xi_{2}}}\right)^{\frac{k}{c_{V}}},\\
-	e_{2}\left(\rho,s,\xi_{1},\xi_{2}\right)&=c_{V}\left(\frac{\rho\xi_{2}\phi_{2}}{m_{2}}\left[\frac{\xi_{1}\phi_{1}}{\xi_{2}\phi{2}}\right]^{\xi_{1}} e^{\frac{\overline{m}s}{k}+\xi_{1}\ln{\xi_{1}}+\xi_{2}\ln{\xi_{2}}}\right)^{\frac{k}{c_{V}}},\\
-	\overline{m} e\left(\rho,s,\xi_{1}\right)&=\sum_{i} m_{i} \xi_{i} e_{i}\left(\rho,s,\xi_{1},1-\xi_{1}\right).
-\end{align}
-	}
-	\only<4>{
-	\begin{tabular}{|r | c | c | c |}
-		\hline
-		 & & $\frac{\partial}{\partial \rho}$ & $\frac{\partial/\partial \rho}{\partial p / \partial \rho}$ \\ \hline
-		$p$ & $\frac{k}{c_{v}}\rho e$ & $\frac{c_{p}}{c_{v}}\frac{p}{\rho}$ & 1 \\ \hline
-		$T$ & $\frac{e}{c_{v}}$ & $\frac{kT}{c_{v}\rho}$ & $\frac{kT}{c_{p}p}$ \\ \hline
-		$\mu_{1}$ & $\frac{\frac{1}{\xi_{1}}\left(m_{2}-\overline{m}\right)\left(c_{p}-\overline{m}s\right)+k\ln{\frac{\phi_{1}}{\phi_{2}}}}{c_{v}}e$ & $\frac{k\mu_{1}}{c_{v}\rho}$ & $\frac{k\mu_{1}}{c_{p}p}$ \\ \hline
-	\end{tabular}
-	}
-\end{overprint}
-}
+% \subsubsection{Two-Component Ideal Mixture}
+
+% \frame{\frametitle{Derivation of the Equation of State for a two-component mixture.}
+% \begin{overprint}
+% 	\only<1>{
+% 	Start with the EOS for an ideal gas:
+% 	\begin{align}
+% 		e_{i}\left(\rho_{i},s_{i}\right)=&\frac{c_{V}}{m_{i}}\left(\frac{\rho_{i}}{m_{i}}\phi_{i} e^{\frac{m_{i}s_{i}}{k}}\right)^{\frac{k}{c_{V}}}
+% 	\end{align}
+% 	Each component of the gas must follow this, and the total energy is $\overline{m}e=m_{1}e_{1}+m_{2}e_{2}$.
+% 	}
+% 	\only<2>{
+% 	Note the entropy of the mixture is defined as $\overline{m}s=m_{1}\xi_{1}s_{1}+_{2}\xi_{2}s_{2}-k\xi_{1}\ln{\xi_{1}}-k\xi_{2}\ln{\xi_{2}}$.
+% 	We assume the gases are thermally coupled:
+% 	\begin{align}
+% 		T=&\left(\frac{\rho\xi_{1}\phi_{1}}{\overline{m}}e^{\frac{m_{1}s_{1}}{k}}\right)^{\frac{k}{c_{v}}}=\left(\frac{\rho\xi_{2}\phi_{2}}{\overline{m}}e^{\frac{m_{2}s_{2}}{k}}\right)^{\frac{k}{c_{v}}}\\
+% 		e^{\frac{m_{1}s_{1}}{k}}=&\left(\frac{\xi_{2}\phi_{2}}{\xi_{1}\phi_{1}}\right)^{\xi_{2}}e^{\frac{\overline{m}s}{k}+\xi_{1}\ln{\xi_{1}}+\xi_{2}\ln{\xi_{2}}}
+% 	\end{align}
+% 	And likewise for $s_{2}$
+% 	}
+% 	\only<3>{
+% 	Thus, the total energy is
+% \begin{align}
+% 	e_{1}\left(\rho,s,\xi_{1},\xi_{2}\right)&=c_{V}\left(\frac{\rho\xi_{1}\phi_{1}}{m_{1}}\left[\frac{\xi_{2}\phi_{2}}{\xi_{1}\phi{1}}\right]^{\xi_{2}} e^{\frac{\overline{m}s}{k}+\xi_{1}\ln{\xi_{1}}+\xi_{2}\ln{\xi_{2}}}\right)^{\frac{k}{c_{V}}},\\
+% 	e_{2}\left(\rho,s,\xi_{1},\xi_{2}\right)&=c_{V}\left(\frac{\rho\xi_{2}\phi_{2}}{m_{2}}\left[\frac{\xi_{1}\phi_{1}}{\xi_{2}\phi{2}}\right]^{\xi_{1}} e^{\frac{\overline{m}s}{k}+\xi_{1}\ln{\xi_{1}}+\xi_{2}\ln{\xi_{2}}}\right)^{\frac{k}{c_{V}}},\\
+% 	\overline{m} e\left(\rho,s,\xi_{1}\right)&=\sum_{i} m_{i} \xi_{i} e_{i}\left(\rho,s,\xi_{1},1-\xi_{1}\right).
+% \end{align}
+% 	}
+% 	\only<4>{
+% 	\begin{tabular}{|r | c | c | c |}
+% 		\hline
+% 		 & & $\frac{\partial}{\partial \rho}$ & $\frac{\partial/\partial \rho}{\partial p / \partial \rho}$ \\ \hline
+% 		$p$ & $\frac{k}{c_{v}}\rho e$ & $\frac{c_{p}}{c_{v}}\frac{p}{\rho}$ & 1 \\ \hline
+% 		$T$ & $\frac{e}{c_{v}}$ & $\frac{kT}{c_{v}\rho}$ & $\frac{kT}{c_{p}p}$ \\ \hline
+% 		$\mu_{1}$ & $\frac{\frac{1}{\xi_{1}}\left(m_{2}-\overline{m}\right)\left(c_{p}-\overline{m}s\right)+k\ln{\frac{\phi_{1}}{\phi_{2}}}}{c_{v}}e$ & $\frac{k\mu_{1}}{c_{v}\rho}$ & $\frac{k\mu_{1}}{c_{p}p}$ \\ \hline
+% 	\end{tabular}
+% 	}
+% \end{overprint}
+% }
 
 \begingroup
 \renewcommand{\section}[2]{}%

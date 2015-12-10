@@ -11,13 +11,14 @@
 #include <algorithm>
 #include <omp.h>
 #include "utils.hpp"
+#include "logger/logger.hpp"
 
 /*!**********************************************************************
  * \def MIN_PARALLEL
  * 
  * \brief The minimum number of elements for automatic OpenMP parallelization in utils
  ************************************************************************/
-#define MIN_PARALLEL 1024 * 1024 * 1024
+#define MIN_PARALLEL 1024 * 1024
 
 /*!*******************************************************************
  * \brief Function from BLAS that calculates a dot product
@@ -347,6 +348,10 @@ namespace linalg
 			daxpy_ (&n, &da, dx, &incx, dy, &incy);
 		}
 	}
+
+	void add_scaled (int n, const double *dx, double *dy, int incx, int incy) {
+		add_scaled (n, 1., dx, dy, incx, incy);
+	}
 	
 	void matrix_add_scaled (int n, int m, float da, float *dx, float *dy, int ldx, int ldy) {
 		int ione = 1;
@@ -449,9 +454,12 @@ namespace linalg
 			int threads = omp_get_max_threads ();
 			#pragma omp parallel for
 			for (int i = 0; i < threads; ++i) {
-				int num = m / threads + (i < (m % threads) ? 1 : 0);
-				int dist = i * (m / threads) + std::min (m % threads, i);
-				dgemm_ (&charN, &charN, &num, &n, &k, &alpha, a + dist, &lda, b, &ldb, &beta, c + dist, &ldc);
+				// int num = m / threads + (i < (m % threads) ? 1 : 0);
+				// int dist = i * (m / threads) + std::min (m % threads, i);
+				// dgemm_ (&charN, &charN, &num, &n, &k, &alpha, a + dist, &lda, b, &ldb, &beta, c + dist, &ldc);
+				int num = n / threads + (i < (n % threads) ? 1 : 0);
+				int dist = i * (n / threads) + std::min (n % threads, i);
+				dgemm_ (&charN, &charN, &m, &num, &k, &alpha, a + dist * lda, &lda, b, &ldb, &beta, c + dist * ldc, &ldc);
 			}
 		} else {
 			dgemm_ (&charN, &charN, &m, &n, &k, &alpha, a, &lda, b, &ldb, &beta, c, &ldc);

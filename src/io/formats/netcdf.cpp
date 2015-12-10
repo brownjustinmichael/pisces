@@ -34,10 +34,10 @@ namespace formats
 			}
 			// Load information from file
 			files [file_name] = new netCDF::NcFile (file_name.c_str (), netCDF::NcFile::read);
-			if (files [file_name]->isNull () or files [file_name]->getDim ("record").isNull ()) {
+			if (files [file_name]->isNull () or files [file_name]->getDim ("time").isNull ()) {
 				records [file_name] = 0;
 			} else {
-				records [file_name] = files [file_name]->getDim ("record").getSize () - 1;
+				records [file_name] = files [file_name]->getDim ("time").getSize () - 1;
 			}
 		} else if (file_type == replace_file || records [file_name] == 0) {
 			if (files [file_name]) {
@@ -47,20 +47,20 @@ namespace formats
 			// Set up dimensions
 			files [file_name] = new netCDF::NcFile (file_name.c_str (), netCDF::NcFile::replace);
 			dims [file_name].resize (3);
-			dims [file_name] [0] = files [file_name]->addDim ("record");
+			dims [file_name] [0] = files [file_name]->addDim ("time");
 			dims [file_name] [1] = files [file_name]->addDim ("x", grid.get_max (0));
 			dims [file_name] [2] = files [file_name]->addDim ("z", grid.get_max (1));
-			records [file_name] = 0;
+			records [file_name] = 0.;
 		} else if (file_type == append_file) {
 			// Set up dimensions
 			files [file_name] = new netCDF::NcFile (file_name.c_str (), netCDF::NcFile::write);
-			dims [file_name] [0] = files [file_name]->getDim ("record");
+			dims [file_name] [0] = files [file_name]->getDim ("time");
 			dims [file_name] [1] = files [file_name]->getDim ("x");
 			dims [file_name] [2] = files [file_name]->getDim ("z");
-			if (files [file_name]->isNull () or files [file_name]->getDim ("record").isNull ()) {
+			if (files [file_name]->isNull () or files [file_name]->getDim ("time").isNull ()) {
 				records [file_name] = 0;
 			} else {
-				records [file_name] = files [file_name]->getDim ("record").getSize ();
+				records [file_name] = files [file_name]->getDim ("time").getSize ();
 			}
 		} else {
 			FATAL ("Unrecognized file type.");
@@ -76,6 +76,7 @@ namespace formats
 	}
 
 	void netcdf::close_file (std::string file_name, int file_type) {
+		records [file_name] += 1;
 		if (files [file_name]) {
 			delete files [file_name];
 			files [file_name] = NULL;

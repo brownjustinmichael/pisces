@@ -10,6 +10,7 @@
 #define OUTPUT_HPP_31603039
 
 #include <fstream>
+#include <map>
 
 #include "logger/logger.hpp"
 
@@ -52,7 +53,9 @@ namespace io
 		 * \param i_file_name The string representation of the output file; do not include the extension; it will be added later
 		 * \param i_file_format The integer io_flag associated with the desired output type (e.g. replace_file)
 		 *********************************************************************/
-		output (formats::data_grid i_grid, std::string i_file_name = "out", int i_file_format = formats::replace_file) : file_name (i_file_name), file_format (i_file_format), grid (i_grid) {}
+		output (formats::data_grid i_grid, std::string i_file_name = "out", int i_file_format = formats::replace_file) : file_name (i_file_name), file_format (i_file_format), grid (i_grid) {
+			DEBUG ("Names has size " << names.size ());
+		}
 
 		virtual ~output () {}
 		
@@ -60,7 +63,7 @@ namespace io
 		 * \return The version of the class
 		 ************************************************************************/
 		static versions::version& version () {
-			static versions::version version ("1.1.0.0");
+			static versions::version version ("1.3.0.0");
 			return version;
 		}
 		
@@ -88,6 +91,14 @@ namespace io
 		 * \return A pointer to the appropriate write function for int arrays
 		 ************************************************************************/
 		virtual func_t *get_function (const int *) = 0;
+
+		/**
+		 * @brief Add an attribute to the output to provide metadata
+		 * 
+		 * @param name The key name for the attribute
+		 * @param attribute The string metadata to add
+		 */
+		virtual void add_global_attribute (std::string name, std::string attribute) = 0;
 
 		/*!**********************************************************************
 		 * \brief Append a datatype functor to the list to be output
@@ -157,11 +168,22 @@ namespace io
 	template <class format>
 	class formatted_output : public output
 	{
+	private:
+		std::map <std::string, std::string> globals;
+		bool first;
+		double *time_ptr;
 	public:
 		/*!**********************************************************************
 		 * \copydoc output::output
+		 * @param i_time_ptr A pointer to the current time in the simulation
 		 ************************************************************************/
-		formatted_output (formats::data_grid i_grid, std::string i_file_name = "out", int i_file_format = formats::replace_file) : output (i_grid, i_file_name + format::extension (), i_file_format) {}		
+		formatted_output (formats::data_grid i_grid, std::string i_file_name = "out", int i_file_format = formats::replace_file, double *i_time_ptr = NULL) : 
+		output (i_grid, i_file_name + format::extension (), i_file_format),
+		time_ptr (i_time_ptr) {
+			first = true;
+			if (format::uses_files) check_file (file_name.c_str ());
+			// format::open_file (grid, file_name.c_str (), output::file_format);
+		}		
 
 		virtual ~formatted_output () {}
 		
@@ -191,7 +213,11 @@ namespace io
 		virtual func_t *get_function (const int *ptr) {
 			return &format::template write <int>;
 		}
-		
+
+		virtual void add_global_attribute (std::string name, std::string attribute) {
+			globals [name] = attribute;
+		}
+
 		/*!**********************************************************************
 		 * \brief Check it the file opens; otherwise, raise an exception
 		 * 
@@ -218,9 +244,19 @@ namespace io
 			TRACE ("Sending to file...");
 	
 			INFO ("Outputting to file " << file_name << "...");
-			
+
 			if (format::uses_files) check_file (file_name.c_str ());
-			format::open_file (grid, file_name.c_str (), output::file_format);
+			if (!format::is_open (file_name)) {
+				format::open_file (grid, file_name.c_str (), output::file_format);
+			}
+
+			if (first) {
+				for (auto iter = globals.begin (); iter != globals.end (); ++iter)
+				{
+					format::add_global_attribute (file_name, iter->first, iter->second);
+				}
+				first = false;
+			}
 	
 			// Calculate the inner values of any relevant functors
 			for (int i = 0; i < (int) functor_ptrs.size (); ++i) {
@@ -254,8 +290,9 @@ namespace io
 		 * \param i_grid The data_grid object representing the structure of the data
 		 * \param i_file_format A string file format, using standard string formatting for the increments (e.g. "output_%02d")
 		 * \param i_output_every The integer frequency of outputs
+		 * @param i_time_ptr A pointer to the current time in the simulation
 		 ************************************************************************/
-		incremental (formats::data_grid i_grid, std::string i_file_format, int i_output_every = 1) : formatted_output <format> (i_grid, "", formats::replace_file), file_format (i_file_format + format::extension ()), output_every (i_output_every > 0 ? i_output_every : 1),
+		incremental (formats::data_grid i_grid, std::string i_file_format, double *i_time_ptr = NULL, int i_output_every = 1) : formatted_output <format> (i_grid, "", formats::replace_file, i_time_ptr), file_format (i_file_format + format::extension ()), output_every (i_output_every > 0 ? i_output_every : 1),
 		count (0) {}
 
 		virtual ~incremental () {}
@@ -294,8 +331,11 @@ namespace io
 		 * \param i_grid The data_grid object representing the structure of the data
 		 * \param i_file_name A string file name
 		 * \param i_output_every The integer frequency of outputs
+		 * @param i_time_ptr A pointer to the current time in the simulation
 		 ************************************************************************/
-		appender_output (formats::data_grid i_grid, std::string i_file_name, int i_output_every = 1) : formatted_output <format> (i_grid, i_file_name, formats::append_file), output_every (i_output_every > 0 ? i_output_every : 1), count (0) {}
+		appender_output (formats::data_grid i_grid, std::string i_file_name, double *i_time_ptr = NULL, int i_output_every = 1) : formatted_output <format> (i_grid, i_file_name, formats::append_file, i_time_ptr), output_every (i_output_every > 0 ? i_output_every : 1), count (0) {
+			DEBUG ("CONSTRUCTING");
+		}
 
 		virtual ~appender_output () {}
 
@@ -322,17 +362,22 @@ namespace io
 	class timed_appender_output : public formatted_output <format>
 	{
 	private:
-		datatype &duration;
+		datatype &duration; //!< A reference to the time duration
 		datatype output_every; //!< The integer frequency of outputs
-		datatype previous;
+		datatype previous; //!< The previous time at which the last output occured
 
 	public:
 		/*!**********************************************************************
 		 * \param i_grid The data_grid object representing the structure of the data
 		 * \param i_file_name A string file name
 		 * \param i_output_every The integer frequency of outputs
+		 * @param i_duration A reference to the current time in the simulation
 		 ************************************************************************/
-		timed_appender_output (formats::data_grid i_grid, std::string i_file_name, datatype &i_duration, datatype i_output_every = 1.0) : formatted_output <format> (i_grid, i_file_name, formats::append_file), duration (i_duration), output_every (i_output_every > 0.0 ? i_output_every : 1.0), previous (-output_every) {}
+		timed_appender_output (formats::data_grid i_grid, std::string i_file_name, datatype &i_duration, datatype i_output_every = 1.0) : 
+		formatted_output <format> (i_grid, i_file_name, formats::append_file, &i_duration), 
+		duration (i_duration), 
+		output_every (i_output_every > 0.0 ? i_output_every : 1.0), 
+		previous (-output_every) {}
 
 		virtual ~timed_appender_output () {}
 
@@ -343,6 +388,7 @@ namespace io
 		 ************************************************************************/
 		void to_file (int record = -1) {
 			TRACE ("Sending to file...");
+			INFO("PREVIOUS " << previous << " EVERY " << output_every << " DIFF " << duration - previous);
 			while (duration - previous >= output_every) {
 				formatted_output <format>::to_file (record);
 				previous += output_every;

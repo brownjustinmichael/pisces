@@ -1,0 +1,101 @@
+\subsubsection{Element Solver}
+
+\frame{\frametitle{The code currently constrains the velocity using a predictor-corrector method according to the incompressible velocity constraint \citep{Chorin1997}.}
+\begin{align}
+	\nabla\cdot\mathbf{u}^{\rm{new}}=&0
+\end{align}
+Update the velocity according to the momentum equation, ignoring the pressure term.
+\begin{align}
+	\rho_{0}\frac{D}{Dt}\mathbf{u^{\rm{mid}}}=&\left(-\alpha{T}+\beta\mu\right)\rho_{0}\mathbf{g} + \nu\rho_{0}\nabla^{2}\mathbf{u^{\rm{mid}}}\\
+	\frac{\mathbf{u}^{\rm{new}}-\mathbf{\mathbf{u}^{\rm{mid}}}}{\Delta t}=&-\frac{\nabla{p}}{\rho_{0}} \\
+	\frac{-\nabla\cdot\mathbf{\mathbf{u}^{\rm{mid}}}}{\Delta t}=&-\nabla\cdot\frac{\nabla{p}}{\rho_{0}}
+\end{align}
+}
+
+\frame{\frametitle{The code solves the diffusion implicitly by alternating directions, solving by collocation in the vertical and by spectral method in the horizontal.}
+\begin{align}
+	\sum_{k}\left(T_{k}\left(\frac{z_{l}-z_{0}}{L_{z}/2}\right)-\kappa\left(z_{l}\right)\frac{\Delta t}{L_{z}^{2}/4} T''_{k}\left(\frac{z_{l}-z_{0}}{L_{z}/2}\right)\right) f_{j,k}^{\rm{new}}=& \nonumber \\
+	F_{j}^{\rm{old}}\left(z_{l}\right)+\Delta t RHS_{j}\left(z_{l}\right)&
+\end{align}
+We can solve equations with $z$-dependent coefficients implicitly
+\begin{equation}
+	\left(1-\kappa\left(z_{l}\right)\Delta t\left(\frac{2\pi  ij}{L_{x}}\right)^{2}\right)F^{\rm{new}}_{j}\left(z_{l}\right)=F^{\rm{old}}_{j}\left(z_{l}\right)+\Delta t  RHS_{j}\left(z_{l}\right)
+\end{equation}
+}
+
+\subsubsection{Collocation Matrix Solve}
+
+\frame{\frametitle{The collocation method matches the boundaries of the elements with spectral accuracy; the matrix can be solved as follows (Beaume, private communication).}
+\begin{overprint}
+	\only<1>{\scalebox{0.7}{$\left(\begin{array}{c c c c c c c}
+	A_{0,0} & A_{1,0} & 0 & 0 & \dots & 0 & 0 \\
+	A_{0,1} & A_{1,1} & A_{2,1} & 0 & \dots & 0 & 0 \\
+	0 & A_{1,2} & A_{2,2} & A_{3,2} & \dots & 0 & 0 \\
+	0 & 0 & A_{2,3} & A_{3,3} & \dots & 0 & 0 \\
+	\vdots & \vdots & \vdots & \vdots & \ddots & A_{N-2,N-3} & 0 \\
+	0 & 0 & 0 & 0 & A_{N-3,N-2} & A_{N-2,N-2} & A_{N-1,N-2} \\
+	0 & 0 & 0 & 0 & 0 & A_{N-2,N-1} & A_{N-1,N-1} 
+\end{array}\right)
+\left(\begin{array}{c}
+	X_{0}\\
+	X_{1}\\
+	X_{2}\\
+	X_{3}\\
+	\vdots\\
+	X_{N-2}\\
+	X_{N-1}
+\end{array}\right)=
+\left(\begin{array}{c}
+	B_{0}\\
+	B_{1}\\
+	B_{2}\\
+	B_{3}\\
+	\vdots\\
+	B_{N-2}\\
+	B_{N-1}
+\end{array}\right)$}
+	}
+	\only<2>{\scalebox{0.9}{$\left(\begin{array}{c c c c c | c c c c}
+	A_{0,0} & 0 & \dots & \dots &  0 & A_{1,0} & 0 & \dots & 0 \\
+	0 & A_{2,2} & \dots & \dots &  0 & A_{1,2} & A_{3,2} & \dots & 0 \\
+	\vdots & \vdots & \ddots & \dots & \vdots & \vdots & \ddots & \ddots & \vdots \\
+	0 & 0 & \dots & \ddots & 0 & 0 & 0 & \ddots & A_{N-2,N-3} \\
+	0 & 0 & \dots & \dots & A_{N-1,N-1} & 0 & 0 & \dots & A_{N-2,N-1} \\
+	\hline
+	A_{0,1} & A_{2,1} & \dots & 0 & 0 & A_{1,1}  & 0 & \dots & 0 \\
+	0 & A_{2,3} & \ddots & 0 & 0 & 0 & A_{3,3} & \dots & 0 \\
+	\vdots & \vdots & \ddots & \ddots & \vdots & \vdots & \vdots & \ddots & \vdots \\
+	0 & 0 & \dots & A_{N-3,N-2} & A_{N-1,N-2} & 0 & 0 & \dots & A_{N-2,N-2} \\
+\end{array}\right)$}}
+	\only<3>{
+	\begin{align}
+	\left(\begin{array}{c c}
+		A_{TL} & A_{TR} \\
+		A_{BL} & A_{BR}
+	\end{array}\right)
+	\left(\begin{array}{c}
+		X_{L}\\
+		X_{R}
+	\end{array}\right)=&
+	\left(\begin{array}{c}
+		B_{T}\\
+		B_{B}
+	\end{array}\right)\\
+		A_{TL}X_{L}+A_{TR}X_{R}=&B_{T}\\
+		A_{BL}X_{L}+A_{BL}A_{TL}^{-1}A_{TR}X_{R}=&A_{BL}A_{TL}^{-1}B_{T}\\
+	\left(\begin{array}{c c}
+			A_{TL} & 0 \\
+			0 & A_{BR}-A_{BL}A_{TL}^{-1}A_{TR}
+		\end{array}\right)&
+		\left(\begin{array}{c}
+			X_{L}+A_{TL}^{-1}A_{TR}X_{R}\\
+			X_{R}
+		\end{array}\right)=\\
+		&\left(\begin{array}{c}
+			B_{T}\\
+			B_{B}-A_{BL}A_{TL}^{-1}B_{T} 
+		\end{array}\right)
+		\end{align}
+		}
+\end{overprint}
+}

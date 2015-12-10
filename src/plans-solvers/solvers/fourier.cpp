@@ -18,10 +18,15 @@ namespace plans
 {
 	namespace solvers
 	{
-		template <class datatype>
-		fourier <datatype>::fourier (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : 
-		solver <datatype> (i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), data (i_data), timestep (i_timestep), excess_0 (i_grid_m.get_excess_0 ()), excess_n (i_grid_m.get_excess_n ()), pos_m (&i_grid_m [0]) {
+		void fourier::init (double& i_timestep, std::shared_ptr <boundaries::boundary> i_boundary_0, std::shared_ptr <boundaries::boundary> i_boundary_n, double *i_rhs, grids::variable &i_data, grids::variable &i_data_out) {
 			TRACE ("Building solver...");
+			n = i_data.get_grid (0).get_n ();
+			ldn = i_data.get_grid (0).get_ld ();
+			m = i_data.get_grid (1).get_n ();
+			excess_0 = i_data.get_grid (1).get_excess_0 ();
+			excess_n = i_data.get_grid (1).get_excess_n ();
+			default_matrix = i_data.get_grid (1).get_data (0);
+
 			matrix.resize (m * ldn);
 			factorized_matrix.resize (m * ldn);
 			rhs_ptr = i_rhs;
@@ -36,13 +41,14 @@ namespace plans
 			overlap_n = boundary_n ? boundary_n->get_overlap () : 0;
 			lda = m + ex_overlap_n + ex_overlap_0;
 			inner_m = lda - overlap_0 - overlap_n;
+
+			pos_m = &(i_data.get_grid (1) [0]);
 			
 			data_temp.resize (lda * ldn);
 			TRACE ("Solver built.");
 		}
 	
-		template <class datatype>
-		void fourier <datatype>::factorize () {
+		void fourier::factorize () {
 			TRACE ("Factorizing...");
 			double *fact_matrix = &factorized_matrix [0], *hor_matrix = &matrix [0];
 			
@@ -57,8 +63,9 @@ namespace plans
 			TRACE ("Done.");
 		}
 	
-		template <class datatype>
-		void fourier <datatype>::execute () {
+		void fourier::execute () {
+			solver::execute ();
+
 			TRACE ("Executing solve...");
 			
 			/*
@@ -74,17 +81,17 @@ namespace plans
 			
 			// Include the contributions from the boundaries; if there aren't boundaries, just use the data present
 			if (boundary_0) {
-				boundary_0->calculate_rhs (data + excess_0, &data_temp [ex_overlap_0 + excess_0], m, lda, x_solve);
+				boundary_0->calculate_rhs (data_in + excess_0, &data_temp [ex_overlap_0 + excess_0], m, lda, x_solve);
 			} else {
-				linalg::matrix_add_scaled (1 + excess_0, ldn, 1.0, data, &data_temp [ex_overlap_0], m, lda);
+				linalg::matrix_add_scaled (1 + excess_0, ldn, 1.0, data_in, &data_temp [ex_overlap_0], m, lda);
 			}
 			if (boundary_n) {
-				boundary_n->calculate_rhs (data + m - 1 - excess_n, &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda, x_solve);
+				boundary_n->calculate_rhs (data_in + m - 1 - excess_n, &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda, x_solve);
 			} else {
-				linalg::matrix_add_scaled (1 + excess_n, ldn, 1.0, data + m - 1 - excess_n, &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda);
+				linalg::matrix_add_scaled (1 + excess_n, ldn, 1.0, data_in + m - 1 - excess_n, &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda);
 			}
 			
-			linalg::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
+			linalg::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data_in + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
 
 			// Send and receive the boundaries for multi-processing
 			if (boundary_0) {
@@ -98,27 +105,32 @@ namespace plans
 				boundary_0->receive (&data_temp [ex_overlap_0], lda);
 			}
 			
+			TRACE ("Executing diagonal solve");
+
 			// Solve the diagonal equation for each vertical slice
 			#pragma omp parallel for
 			for (int j = excess_0; j < m - excess_n; ++j) {
 				linalg::diagonal_solve (ldn, &factorized_matrix [j], &data_temp [ex_overlap_0 + j], m, lda);
 			}
-			linalg::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data, lda);
-			
+
+			TRACE ("Diagonal solve complete.")
+
+			linalg::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data_out, lda);
+
+			DEBUG (data_out << " " << pos_m);
+
 			// Because we only have derivative information for the non-overlapping regions, linearly extrapolate the overlap
 			for (int i = 0; i < ldn; ++i) {
 				for (int j = excess_0 - 1; j >= 0; --j) {
-					data [i * m + j] = (data [i * m + j + 2] - data [i * m + j + 1]) / (pos_m [j + 2] - pos_m [j + 1]) * (pos_m [j] - pos_m [j + 1]) + data [i * m + j + 1];
+					data_out [i * m + j] = (data_out [i * m + j + 2] - data_out [i * m + j + 1]) / (pos_m [j + 2] - pos_m [j + 1]) * (pos_m [j] - pos_m [j + 1]) + data_out [i * m + j + 1];
 				}
 				for (int j = m - excess_n; j < m; ++j) {
-					data [i * m + j] = (data [i * m + j - 2] - data [i * m + j - 1]) / (pos_m [j - 2] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]) + data [i * m + j - 1];
+					data_out [i * m + j] = (data_out [i * m + j - 2] - data_out [i * m + j - 1]) / (pos_m [j - 2] - pos_m [j - 1]) * (pos_m [j] - pos_m [j - 1]) + data_out [i * m + j - 1];
 				}
 			}
 		
 			TRACE ("Execution complete.");
 		}
-	
-		template class fourier <double>;
 	} /* solvers */
 } /* plans */
 

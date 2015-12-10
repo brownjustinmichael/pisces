@@ -17,9 +17,16 @@ namespace plans
 {
 	namespace solvers
 	{
-		template <class datatype>
-		collocation <datatype>::collocation (grids::grid <datatype> &i_grid_n, grids::grid <datatype> &i_grid_m, mpi::messenger* i_messenger_ptr, datatype& i_timestep, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_0, std::shared_ptr <boundaries::boundary <datatype>> i_boundary_n, datatype *i_rhs, datatype* i_data, int *i_element_flags, int *i_component_flags) : solver <datatype> (i_element_flags, i_component_flags), n (i_grid_n.get_n ()), ldn (i_grid_n.get_ld ()), m (i_grid_m.get_n ()), data (i_data), messenger_ptr (i_messenger_ptr), timestep (i_timestep), excess_0 (i_grid_m.get_excess_0 ()), excess_n (i_grid_m.get_excess_n ()), default_matrix (i_grid_m.get_data (0)) {
+		void collocation::init (mpi::messenger* i_messenger_ptr, double& i_timestep, std::shared_ptr <boundaries::boundary> i_boundary_0, std::shared_ptr <boundaries::boundary> i_boundary_n, double *i_rhs, grids::variable &i_data, grids::variable &i_data_out) {
 			TRACE ("Building solver...");
+			n = i_data.get_grid (0).get_n ();
+			ldn = i_data.get_grid (0).get_ld ();
+			m = i_data.get_grid (1).get_n ();
+			messenger_ptr = i_messenger_ptr;
+			excess_0 = i_data.get_grid (1).get_excess_0 ();
+			excess_n = i_data.get_grid (1).get_excess_n ();
+			default_matrix = i_data.get_grid (1).get_data (0);
+
 			matrix.resize (m * m, 0.0);
 			rhs_ptr = i_rhs;
 			
@@ -57,8 +64,7 @@ namespace plans
 			TRACE ("Solver built.");
 		}
 	
-		template <class datatype>
-		void collocation <datatype>::factorize () {
+		void collocation::factorize () {
 			int info;
 			std::stringstream debug;
 			
@@ -90,8 +96,8 @@ namespace plans
 			TRACE ("Done.");
 		}
 	
-		template <class datatype>
-		void collocation <datatype>::execute () {
+		void collocation::execute () {
+			solver::execute ();
 			int info;
 			TRACE ("Executing solve...");
 			
@@ -108,19 +114,21 @@ namespace plans
 			
 			// Include the contributions from the boundaries; if there aren't boundaries, just use the data present
 			if (boundary_0) {
-				boundary_0->calculate_rhs (data + excess_0, &data_temp [ex_overlap_0 + excess_0], m, lda, z_solve);
+				boundary_0->calculate_rhs (data_in + excess_0, &data_temp [ex_overlap_0 + excess_0], m, lda, z_solve);
 			} else {
-				linalg::matrix_add_scaled (1 + excess_0, ldn, 1.0, data, &data_temp [ex_overlap_0], m, lda);
+				linalg::matrix_add_scaled (1 + excess_0, ldn, 1.0, data_in, &data_temp [ex_overlap_0], m, lda);
 			}
 			if (boundary_n) {
-				boundary_n->calculate_rhs (data + m - 1 - excess_n, &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda, z_solve);
+				boundary_n->calculate_rhs (data_in + m - 1 - excess_n, &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda, z_solve);
 			} else {
-				linalg::matrix_add_scaled (1 + excess_n, ldn, 1.0, data + m - 1 - excess_n, &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda);
+				linalg::matrix_add_scaled (1 + excess_n, ldn, 1.0, data_in + m - 1 - excess_n, &data_temp [lda - 1 - excess_n - ex_overlap_n], m, lda);
 			}
 			
 			// Add the data from the previous timestep
-			linalg::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
+			linalg::matrix_add_scaled (m - 2 - excess_0 - excess_n, ldn, 1.0, data_in + 1 + excess_0, &data_temp [ex_overlap_0 + 1 + excess_0], m, lda);
 			
+			TRACE ("Performing matrix solve.")
+
 			linalg::block::matrix_solve (messenger_ptr->get_id (), messenger_ptr->get_np (), inner_m, overlap_0, overlap_n, &factorized_matrix [0], &ipiv [0], &data_temp [0], &boundary_matrix [0], messenger_ptr->get_id () == 0 ? &bipiv [0] : NULL, messenger_ptr->get_id () == 0 ? &ns [0] : NULL, &info, ldn, lda, sqrt ((int) boundary_matrix.size ()), lda);
 			
 			TRACE ("Matrix solve complete.");
@@ -146,15 +154,13 @@ namespace plans
 	#endif
 			
 			TRACE ("Updating...");
-			linalg::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data, lda, m);
+			linalg::matrix_copy (m, ldn, &data_temp [ex_overlap_0], data_out, lda, m);
 			
 			// This solve transforms, so we specify that in the component flags
-			*component_flags |= transformed_vertical;
+			component_flags |= transformed_vertical;
 			
 			TRACE ("Solve complete.")
 		}
-		
-		template class collocation <double>;
 	} /* solvers */
 } /* plans */
 

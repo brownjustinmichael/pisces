@@ -14,6 +14,8 @@
 
 #include "versions/version.hpp"
 #include "solver.hpp"
+#include "mpi/messenger.hpp"
+#include "plans/source.hpp"
 
 namespace plans
 {
@@ -22,31 +24,31 @@ namespace plans
 		/*!*******************************************************************
 		 * \brief A class designed to track and implement the solvers of a particular dataset
 		 * 
-		 * Note that the design of the element class expects that calling only the solve does not change the dataset. The solveed dataset must first be read back into the original for the solve to take effect.
+		 * Note that the design of the element class expects that calling only the solve does not change the dataset. The solved dataset must first be read back into the original for the solve to take effect. In general, 
 		 *********************************************************************/
-		template <class datatype>
 		class equation
 		{
 		public:
 			int *element_flags; //!< A pointer to the flags describing the global state of the element
 			int *component_flags; //!< A pointer to the flags describing the state of the local variable
+			mpi::messenger *messenger_ptr; //!< A pointer to the mpi::messenger object associated with the equation
 		
 		protected:
-			datatype *data; //!< A pointer to the data held by the equation object
+			grids::variable &data; //!< A pointer to the data held by the equation object
 		
 		private:
-			std::vector <std::shared_ptr <plan <datatype> > > pre_transform_plans; //!< A vector of shared pointers of plans to be executed before the transforms
-			std::vector <std::shared_ptr <plan <datatype> > > mid_transform_plans; //!< A vector of shared pointers of plans to be executed after the vertical transform
-			std::vector <std::shared_ptr <plan <datatype> > > post_transform_plans; //!< A vector of shared pointers of plans to be executed after both transforms
-			std::vector <std::shared_ptr <plan <datatype> > > pre_solve_plans; //!< A vector of shared pointers of plans to be executed after both transforms
+			std::vector <std::shared_ptr <plan > > plans; //!< A vector of shared pointers of plans to be executed before the transforms
 
 		public:
 			/*!**********************************************************************
 			 * \param i_data A pointer to the data associated with the equation
-			 * \param i_element_flags A pointer to the flags describing the global state of the element
-			 * \param i_component_flags A pointer to the flags describing the state of the local variable
+			 * \param i_messenger_ptr A pointer to the mpi messenger object that may be needed for particular solvers
 			 ************************************************************************/
-			equation (datatype *i_data, int *i_element_flags, int *i_component_flags) : element_flags (i_element_flags), component_flags (i_component_flags), data (i_data) {
+			equation (grids::variable &i_data, mpi::messenger *i_messenger_ptr = NULL) : 
+			element_flags (&(i_data.element_flags)), 
+			component_flags (&(i_data.component_flags)), 
+			messenger_ptr (i_messenger_ptr), 
+			data (i_data) {
 				*component_flags &= ~factorized;
 			}
 			/*
@@ -64,6 +66,15 @@ namespace plans
 				static versions::version version ("1.0.1.0");
 				return version;
 			}
+
+			/*!**********************************************************************
+			 * \brief Get the state of the variable object upon output
+			 *
+			 * The equation solve function operates on a variable instance, which can have various states (e.g. real-real or real-spectral). The solve operation updates only one of these, leaving the variable and transformer classes to repopulate the other states. This returns the state that is updated during the evaluation of solve.
+			 * 
+			 * \return The state of the variable object upon output
+			 ************************************************************************/
+			virtual int get_state () = 0;
 		
 			/*!**********************************************************************
 			 * \brief Get the number of dependencies in its current state
@@ -79,7 +90,7 @@ namespace plans
 			 * 
 			 * \return The ith dependency of the equation
 			 ************************************************************************/
-			virtual const std::string& get_dependency (int i) = 0;
+			virtual const equation *get_dependency (int i) = 0;
 		
 			/*!**********************************************************************
 			 * \brief Add a dependency to one of the solvers in the equation
@@ -87,14 +98,36 @@ namespace plans
 			 * \param name The name of the dependency
 			 * \param flags The solver flag indicating with which direction the dependency is associated
 			 ************************************************************************/
-			virtual void add_dependency (std::string name, int flags = 0x00) = 0;
+			virtual void add_dependency (equation *name, int flags = 0x00) = 0;
 		
 			/*!**********************************************************************
 			 * \brief Return a pointer to the data associated with the solver
 			 * 
 			 * Each solver is implemented to solve a matrix equation for a particular variable. This returns a pointer to the first element of that variable's dataset.
+			 *
+			 * \return The pointer to the associated data
 			 ************************************************************************/
-			virtual datatype *data_ptr () {
+			virtual double *data_ptr () {
+				return data.ptr ();
+			}
+
+			/**
+			 * @brief Return a pointer to the rhs data
+			 * 
+			 * @param state The state of the rhs data to retrieve
+			 * 
+			 * @return The pointer to the rhs data
+			 */
+			virtual double *rhs_ptr  (int state = 0) = 0;
+
+			/*!**********************************************************************
+			 * \brief Return the variable object of the data associated with the solver
+			 *
+			 * If more advanced interactions with the data are needed, a variable object can be returned at increased computational cost.
+			 * 
+			 * \return A reference to the variable object associated with the solver
+			 ************************************************************************/
+			virtual grids::variable &data_var () {
 				return data;
 			}
 			
@@ -103,17 +136,8 @@ namespace plans
 			 * 
 			 * \param index The index specifying from which dimension to grab the grid
 			 ************************************************************************/
-			virtual grids::grid <datatype> *grid_ptr (int index = 0) = 0;
+			virtual grids::grid *grid_ptr (int index = 0) = 0;
 			
-			/*!**********************************************************************
-			 * \brief Return a pointer to the right hand side of the matrix equation
-			 * 
-			 * \param index The index specifying which right hand side, (explicit_rhs, implicit_rhs, real_rhs)
-			 * 
-			 * The matrix solve can have several right hand sides, in particular explicit, implicit, and real. Explicit right hand sides generally contain nonlinear terms. Implicit right hand sides contain an explicit version of the implicit terms on the left hand side for additional stability. Both of these are in spectral-cartesian space for a collocation method. The real right hand side contains the explicit terms in pure Cartesian space that are transformed by the solver before a solution is calculated.
-			 ************************************************************************/
-			virtual datatype *rhs_ptr (int index = 0) = 0;
-
 			/*!**********************************************************************
 			 * \brief Return a pointer to the solver's matrix for the index dimension
 			 * 
@@ -121,14 +145,14 @@ namespace plans
 			 * 
 			 * Note: these matrices are implementation dependent, so the implicit plans must be associated with particular matrix types.
 			 ************************************************************************/
-			virtual datatype *matrix_ptr (int index = 0) = 0;
+			virtual double *matrix_ptr (int index = 0) = 0;
 		
 			/*!**********************************************************************
 			 * \brief Get a solver from the equation object
 			 * 
 			 * \param flags A set of integer flags describing the direction of the solve to get (x_solver, z_solver)
 			 ************************************************************************/
-			virtual std::shared_ptr <plans::solvers::solver <datatype>> get_solver (int flags = 0x00) = 0;
+			virtual std::shared_ptr <plans::solvers::solver> get_solver (int flags = 0x00) = 0;
 	
 			/*!**********************************************************************
 			 * \brief Add a solver to the equation
@@ -136,7 +160,7 @@ namespace plans
 			 * \param i_solver A shared pointer to the solver object to add
 			 * \param flags A set of integer flags describing the direction of the solve (x_solver, z_solver)
 			 ************************************************************************/
-			virtual void add_solver (std::shared_ptr <solver <datatype> > i_solver, int flags = 0x00) = 0;
+			virtual void add_solver (std::shared_ptr <solver > i_solver, int flags = 0x00) = 0;
 	
 			/*!**********************************************************************
 			 * \brief Add a solver to the equation
@@ -144,31 +168,19 @@ namespace plans
 			 * \param i_factory A solver factory to generate the solver object to add
 			 * \param flags A set of integer flags describing the direction of the solve (x_solver, z_solver)
 			 ************************************************************************/
-			virtual void add_solver (const typename plans::solvers::solver <datatype>::factory &i_factory, int flags = 0x00) = 0;
+			virtual void add_solver (const typename plans::solvers::solver::factory &i_factory, int flags = 0x00) = 0;
 	
 			/*!*******************************************************************
 			 * \brief Adds a plan to be executed
 			 * 
 			 * \param i_plan A shared pointer to the plan to add
-			 * \param flags Binary flags to specify the time to execute the flag, from solver_plan_flags
 			 *********************************************************************/
-			inline void add_plan (std::shared_ptr <plan <datatype>> i_plan, int flags) {
+			inline void add_plan (std::shared_ptr <plan> i_plan) {
 				TRACE ("Adding plan...");
 				if (!i_plan) {
 					return;
 				}
-				if (flags & pre_plan) {
-					pre_transform_plans.push_back (i_plan);
-				}
-				if (flags & mid_plan) {
-					mid_transform_plans.push_back (i_plan);
-				}
-				if (flags & post_plan) {
-					post_transform_plans.push_back (i_plan);
-				}
-				if (flags & pre_solve_plan) {
-					pre_solve_plans.push_back (i_plan);
-				}
+				plans.push_back (i_plan);
 				TRACE ("Added.");
 			}
 	
@@ -176,32 +188,23 @@ namespace plans
 			 * \brief Adds a plan to be executed
 			 * 
 			 * \param i_factory A reference to the factory from which to construct the plan
-			 * \param flags Binary flags to specify the time to execute the flag, from solver_plan_flags
 			 ************************************************************************/
-			virtual void add_plan (const typename explicit_plan <datatype>::factory &i_factory, int flags) = 0;
-	
+			virtual void add_plan (const typename plan::factory &i_factory) = 0;
+
 			/*!**********************************************************************
-			 * \copydoc add_plan(const typename explicit_plan<datatype>::factory&,int)
+			 * \brief Adds a container of plans to be executed
+			 * 
+			 * \param i_container A reference to the factory container from which to construct the plans
 			 ************************************************************************/
-			virtual void add_plan (const typename real_plan <datatype>::factory &i_factory, int flags) = 0;
-	
-			/*!**********************************************************************
-			 * \copydoc add_plan(const typename explicit_plan<datatype>::factory&,int)
-			 ************************************************************************/
-			virtual void add_plan (const typename implicit_plan <datatype>::factory &i_factory, int flags) = 0;
+			virtual void add_plan (const typename plan::factory_container &i_container) = 0;
 			
+			/**
+			 * @brief Setup any implicit components of the plans contained
+			 * @details Each plan class is permitted the definition of a setup() member, which is called by this method. This is designed to happen whenever the base matrices (ie. the non-time-dependent parts) become invalid.
+			 */
 			virtual void setup_plans () {
-				for (int i = 0; i < (int) pre_transform_plans.size (); ++i) {
-					pre_transform_plans [i]->setup ();
-				}
-				for (int i = 0; i < (int) mid_transform_plans.size (); ++i) {
-					mid_transform_plans [i]->setup ();
-				}
-				for (int i = 0; i < (int) post_transform_plans.size (); ++i) {
-					post_transform_plans [i]->setup ();
-				}
-				for (int i = 0; i < (int) pre_solve_plans.size (); ++i) {
-					pre_solve_plans [i]->setup ();
+				for (int i = 0; i < (int) plans.size (); ++i) {
+					plans [i]->setup ();
 				}
 				*component_flags |= plans_setup;
 			}
@@ -211,25 +214,10 @@ namespace plans
 			 * 
 			 * \param flags The flags of the plans to executed (e.g. pre_solve)
 			 ************************************************************************/
-			inline void execute_plans (int flags) {
-				if (flags & pre_plan) {
-					for (int i = 0; i < (int) pre_transform_plans.size (); ++i) {
-						pre_transform_plans [i]->execute ();
-					}
-				}
-				if (flags & mid_plan) {
-					for (int i = 0; i < (int) mid_transform_plans.size (); ++i) {
-						mid_transform_plans [i]->execute ();
-					}
-				}
-				if (flags & post_plan) {
-					for (int i = 0; i < (int) post_transform_plans.size (); ++i) {
-						post_transform_plans [i]->execute ();
-					}
-				}
-				if (flags & pre_solve_plan) {
-					for (int i = 0; i < (int) pre_solve_plans.size (); ++i) {
-						pre_solve_plans [i]->execute ();
+			inline void execute_plans (int flags = 0x00) {
+				for (int i = 0; i < (int) plans.size (); ++i) {
+					if (!(flags & implicit_only) || ((flags & implicit_only) && plans [i]->implicit ())) {
+						plans [i]->execute ();
 					}
 				}
 			}
@@ -267,6 +255,65 @@ namespace plans
 					factorize ();
 				}
 				_solve ();
+			}
+
+			/**
+			 * @brief Add the plan generated by a factory to this equation
+			 * @details Generate an instance of a plan from the given factory and append it to the plans to be run by this equation. Warning: this does not generate a new equation, as would normally be expected of an addition operator.
+			 * 
+			 * @param i_factory A shared pointer to the factory from which the plan should be instantiated
+			 * @return A reference to this equation with the new plan added
+			 */
+			equation &operator+ (const std::shared_ptr <typename plan::factory> i_factory) {
+				return *this + typename plan::factory_container (i_factory);
+			}
+
+			/**
+			 * @brief Add the contents of a factory container to this equation
+			 * @details Append the contents of a factory container to the equation to be run as individual plans. Warning: this does not generate a new equation, as would normally be expected of an addition operator.
+			 * 
+			 * @param i_container The container whose contents should be added to the equation
+			 * @return A reference to this equation with the new plans added
+			 */
+			equation &operator+ (const typename plan::factory_container &i_container) {
+				add_plan (-1.0 * i_container);
+				return *this;
+			}
+
+			/**
+			 * @brief Add a constant to the equation
+			 * @details Append a scalar plan to the equation. Warning: this does not generate a new equation, as would normally be expected of an addition operator.
+			 * 
+			 * @param scalar The scalar to add to the equation
+			 * @return A reference to this equation with the new plans added
+			 */
+			equation &operator+ (const double scalar) {
+				add_plan ((typename plan::factory_container) constant (-scalar));
+				return *this;
+			}
+
+			/**
+			 * @brief Add a new plan or plans to the equation
+			 * @details Append the plans to the equation, making sure to multiply them by -1 such that the coefficients are generated properly. Warning: this does not generate a new equation, as would normally be expected of an addition operator.
+			 * 
+			 * @param i_other Anything that has an overloaded + operator (factory, factory_container, etc.)
+			 * @return A reference to this equation with the new plan or plans added
+			 */
+			template <class other>
+			equation &operator- (other i_other) {
+				return *this + i_other * (-1.0);
+			}
+
+			/**
+			 * @brief Add a new plan or plans to the equation
+			 * @details Append the plans on the right side of the equal sign to the equation, making sure to multiply them by -1 such that the coefficients are generated properly. Warning: this does not generate a new equation, as would normally be expected of an addition operator.
+			 * 
+			 * @param i_other Anything that has an overloaded + operator (factory, factory_container, etc.)
+			 * @return A reference to this equation with the new plan or plans added
+			 */
+			template <class other>
+			equation &operator== (other i_other) {
+				return *this - i_other;
 			}
 
 		protected:

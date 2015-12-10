@@ -22,7 +22,8 @@ namespace linalg
 {
 	namespace block
 	{
-		void banded_factorize (int id, int np, int n, int kl, int ku, double* matrix, int* ipiv, double *x, int *xipiv, double *bufferl, double *bufferr, int *info, int nrhs, int lda, int ldaa) {
+		void banded_factorize (int id, int np, int n, int kl, int ku, double* matrix, int* ipiv, double *x, int *xipiv, double *bufferl, double *bufferr, double* buffer, int *info, int nrhs, int lda, int ldaa) {
+
 			int ntop, nbot;
 			std::stringstream debug;
 			int ldx = 2 * (kl + ku);
@@ -55,7 +56,7 @@ namespace linalg
 				// 	for (int k = 0; k < lda; ++k) {
 				// 		debug << matrix [i * lda * ldaa + j * lda + k] << " ";
 				// 	}
-				// 	DEBUG ("MAT " << debug.str ());
+				// 	DEBUG ("MAT [" << id << "] " << debug.str ());
 				// 	debug.str ("");
 				// }
 				linalg::matrix_banded_factorize (n, n, kl, ku, matrix + (i) * lda * ldaa + (kl + ntop) * lda, ipiv + i * n, info, lda);
@@ -126,19 +127,34 @@ namespace linalg
 				}
 			}
 
-			if (id == 0) {
-				ldx = np * (2 * ku + 2 * kl);
-				std::vector <double> buffer (np * 4 * (ku + kl) * (ku + kl));
-				for (int q = 0; q < nrhs; ++q) {
-					MPI::COMM_WORLD.Gather (x + q * ldxx, 4 * (ku + kl) * (ku + kl), MPI::DOUBLE, &buffer [0], 4 * (ku + kl) * (ku + kl), MPI::DOUBLE, 0);
+			for (int i = 0; i < nrhs; ++i)
+			{
+				for (int j = 0; j < 4 * (ku + kl) * (ku + kl); ++j)
+				{
+					buffer [j * nrhs + i] = x [j + i * ldxx];
+				}
+			}
 
+			MPI::COMM_WORLD.Gather (buffer, 4 * (ku + kl) * (ku + kl) * nrhs, MPI::DOUBLE, x, 4 * (ku + kl) * (ku + kl) * nrhs, MPI::DOUBLE, 0);
+
+			if (id == 0) {
+				for (int i = 0; i < nrhs; ++i)
+				{
+					for (int j = 0; j < 4 * (ku + kl) * (ku + kl) * np; ++j)
+					{
+						buffer [j + i * 4 * (ku + kl) * (ku + kl) * np] = x [j * nrhs + i];
+					}
+				}
+				ldx = np * (2 * ku + 2 * kl);
+				for (int q = 0; q < nrhs; ++q) {
 					linalg::scale (ldx * ldx, 0.0, x + q * ldxx);
 
-					int bcur = 0, xcur = 0;
+					int bcur = q * np * 4 * (ku + kl) * (ku + kl), xcur = q * ldxx;
+
 					for (int i = 0; i < np - 1; ++i) {
 						for (int j = 0; j < 2 * ku + 2 * kl; ++j) {
 							for (int k = 0; k < 2 * kl + 2 * ku; ++k) {
-								x [q * ldxx + xcur + k * ldx + j] += buffer [bcur + k * 2 * (ku + kl) + j];
+								x [xcur + k * ldx + j] += buffer [bcur + k * 2 * (ku + kl) + j];
 							}
 						}
 						bcur += (2 * ku + 2 * kl) * 2 * (ku + kl);
@@ -146,22 +162,18 @@ namespace linalg
 					}
 					for (int j = 0; j < 2 * ku + 2 * kl; ++j) {
 						for (int k = 0; k < 2 * kl + 2 * ku; ++k) {
-							x [q * ldxx + xcur + k * ldx + j] += buffer [bcur + k * 2 * (ku + kl) + j];
+							x [xcur + k * ldx + j] += buffer [bcur + k * 2 * (ku + kl) + j];
 						}
 					}
-				
+
 					linalg::matrix_factorize ((ku + kl) * (np - 1), (ku + kl) * (np - 1), x + q * ldxx + (kl + ku) * (ldx + 1), xipiv + q * ldx, info, ldx);
 				}
 
-			} else {
-				for (int q = 0; q < nrhs; ++q) {
-					MPI::COMM_WORLD.Gather (x + q * ldxx, (2 * ku + 2 * kl) * 2 * (ku + kl), mpi::mpi_type (&typeid (double)), NULL, (2 * ku + 2 * kl) * 2 * (ku + kl), mpi::mpi_type (&typeid (double)), 0);
-				}
 			}
 	#endif
 		}
 
-		void banded_solve (int id, int np, int n, int kl, int ku, double* matrix, int* ipiv, double* b, double *x, int *xipiv, double *bufferl, double *bufferr, int *info, int nrhs, int lda, int ldaa, int ldb) {
+		void banded_solve (int id, int np, int n, int kl, int ku, double* matrix, int* ipiv, double* b, double *x, int *xipiv, double *bufferl, double *bufferr, double *buffer, int *info, int nrhs, int lda, int ldaa, int ldb) {
 			std::stringstream debug;
 			std::vector <double> y (2 * (ku + kl) * np * nrhs, 0.0);
 			int ntop, nbot;
@@ -231,20 +243,37 @@ namespace linalg
 					}
 				}
 			}
+
+			for (int i = 0; i < nrhs; ++i)
+			{
+				for (int j = 0; j < 2 * (kl + ku); ++j)
+				{
+					buffer [j * nrhs + i] = y [j + i * ldy];
+				}
+			}
+			MPI::COMM_WORLD.Gather (buffer, 2 * (kl + ku) * nrhs, mpi::mpi_type (&typeid (double)), &y [0], 2 * (kl + ku) * nrhs, mpi::mpi_type (&typeid (double)), 0);
+
+
 			if (id == 0) {
 				int ycur = 0, bcur = 0;
 				ldx = np * (2 * ku + 2 * kl);
 
-				std::vector <double> buffer (2 * (ku + kl) * np);
+				for (int i = 0; i < nrhs; ++i)
+				{
+					for (int j = 0; j < 2 * (ku + kl) * np; ++j)
+					{
+						buffer [j + i * 2 * (ku + kl) * np] = y [j * nrhs + i];
+					}
+				}
+
 				for (int j = 0; j < nrhs; ++j) {
-					ycur = 0;
-					bcur = 0;
+					ycur = j * ldy;
+					bcur = j * 2 * (ku + kl) * np;
 				
-					MPI::COMM_WORLD.Gather (&y [j * ldy], 2 * (kl + ku), mpi::mpi_type (&typeid (double)), &buffer [0], 2 * (kl + ku), mpi::mpi_type (&typeid (double)), 0);
 					linalg::scale (ldy, 0.0, &y [j * ldy]);
 					for (int i = 0; i < np; ++i) {
 							for (int k = 0; k < 2 * (ku + kl); ++k) {
-								y [j * ldy + ycur + k] += buffer [bcur + k];
+								y [ycur + k] += buffer [bcur + k];
 							}
 						ycur += ku + kl;
 						bcur += 2 * (ku + kl);
@@ -252,25 +281,36 @@ namespace linalg
 
 					linalg::matrix_solve ((ku + kl) * (np - 1), x + j * ldx * ldx + (kl + ku) * (ldx + 1), xipiv + j * ldx, &y [j * ldy + kl + ku], info, 1, ldx);
 
-					ycur = 0;
-					bcur = 0;
+					ycur = j * ldy;
+					bcur = j * 2 * (ku + kl) * np;
 					for (int i = 0; i < np; ++i) {
 						for (int k = 0; k < 2 * (ku + kl); ++k) {
-							buffer [bcur + k] = y [j * ldy + ycur + k];
+							buffer [bcur + k] = y [ycur + k];
 						}
 						ycur += ku + kl;
 						bcur += 2 * (ku + kl);
 					}
-				
-					MPI::COMM_WORLD.Scatter (&buffer [0], 2 * (kl + ku), mpi::mpi_type (&typeid (double)), &y [j * ldy], 2 * (kl + ku), mpi::mpi_type (&typeid (double)), 0);
 				}
-			} else {
-				for (int j = 0; j < nrhs; ++j) {
-					MPI::COMM_WORLD.Gather (&y [j * ldy], 2 * (kl + ku), mpi::mpi_type (&typeid (double)), NULL, 2 * (kl + ku), mpi::mpi_type (&typeid (double)), 0);
-					MPI::COMM_WORLD.Scatter (NULL, 2 * (kl + ku), mpi::mpi_type (&typeid (double)), &y [j * ldy], 2 * (kl + ku), mpi::mpi_type (&typeid (double)), 0);
+
+				for (int i = 0; i < nrhs; ++i)
+				{
+					for (int j = 0; j < 2 * (kl + ku) * np; ++j)
+					{
+						y [j * nrhs + i] = buffer [j + i * 2 * (ku + kl) * np];
+					}
 				}
 			}
+
+			MPI::COMM_WORLD.Scatter (&y [0], 2 * (kl + ku) * nrhs, MPI::DOUBLE, buffer, 2 * (kl + ku) * nrhs, MPI::DOUBLE, 0);
 		
+			for (int i = 0; i < nrhs; ++i)
+			{
+				for (int j = 0; j < 2 * (kl + ku); ++j)
+				{
+					y [j + i * ldy] = buffer [j * nrhs + i];
+				}
+			}
+
 			if (id != 0) {
 				linalg::matrix_copy (ntop, nrhs, &y [kl], b, ldy, ldb);
 			}

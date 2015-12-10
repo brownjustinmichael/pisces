@@ -18,33 +18,27 @@
 #define TEST_TINY 1.e-6
 
 class plan_solver_test_suite : public CxxTest::TestSuite
-{
-private:
-	mpi::messenger mess;
-	
+{	
 public:
 	void test_advection () {
-		std::vector <double> x_velocity, z_velocity, data, rhs, rhs_compare;
 		int n = 200, m = 500;
+		int flags;
+
+		grids::horizontal::grid grid_n (n, -1.0, 1.0);
+		grids::vertical::grid grid_m (m, -1.0, 1.0);
 		
-		x_velocity.resize (n * m);
-		z_velocity.resize (n * m);
-		data.resize (n * m);
-		rhs.resize (n * m);
-		rhs_compare.resize (n * m);
-		
+		grids::variable x_velocity (grid_n, grid_m, flags), z_velocity (grid_n, grid_m, flags), data (grid_n, grid_m, flags), rhs (grid_n, grid_m, flags), rhs_compare (grid_n, grid_m, flags);
+
 		for (int j = 0; j < m; ++j) {
 			for (int i = 0; i < n; ++i) {
-				x_velocity [i * m + j] = rand () % 1000 / 1000;
-				z_velocity [i * m + j] = rand () % 1000 / 1000;
-				data [i * m + j] = rand () % 1000 / 1000;
+				x_velocity [i * m + j] = (rand () % 1000) / 1000.;
+				z_velocity [i * m + j] = (rand () % 1000) / 1000.;
+				data [i * m + j] = (rand () % 1000) / 1000.;
+				rhs [i * m + j] = 0.0;
 			}
 		}
 		
-		grids::horizontal::grid <double> grid_n (n, -1.0, 1.0);
-		grids::vertical::grid <double> grid_m (m, -1.0, 1.0);
-		
-		plans::advection::uniform <double> plan (grid_n, grid_m, 1.0, &x_velocity [0], &z_velocity [0], &data [0], &rhs [0]);
+		plans::advection::uniform plan (x_velocity, z_velocity, data, rhs);
 		
 		plan.execute ();
 		
@@ -56,7 +50,7 @@ public:
 		
 		for (int i = 1; i < n - 1; ++i) {
 			for (int j = 1; j < m - 1; ++j) {
-				TSM_ASSERT_DELTA ("Advection failure", rhs_compare [i * m + j], -rhs [i * m + j], 1.0e-8);
+				TSM_ASSERT_DELTA ("Advection failure", rhs_compare [i * m + j], rhs [i * m + j], 1.0e-8);
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 from timing import Timer, Argument
 
-mpiProcs = Argument ("mpirun -np %d", extent = [1, 2, 4, 8], prepend = True, processes = True, runOnly = "-machinefile $HOSTFILE")
+mpiProcs = Argument ("mpirun -np %d", extent = [1, 2, 4, 8], prepend = True, processes = True, runOnly = "-machinefile $HOSTFILE -genv I_MPI_FABRICS shm:ofa")
 maxThreads = Argument ("-V parallel.maxthreads %d", extent = [1, 4, 8], threads = True)
 
 timer = Timer ("isces", 

@@ -13,7 +13,9 @@ app = Celery('pisces_timer', backend = 'amqp')
 app.config_from_object (celeryconfig)
 
 @app.task
-def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wrapper.py", processes = 1, threads = 1, torque = False, commandRoot = "job", hours = 1):
+def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wrapper.py", processes = 1, threads = 1, torque = False, commandRoot = "job", hours = 1, stat_file = ""):
+    print ("STAT FILE IS %s" % stat_file)
+
     if isinstance (command, str):
         command = [command]
     
@@ -48,11 +50,12 @@ def timeCommand (command, setupCommand = None, iterations = 1, wrapperFile = "wr
         batch_file.write ("cd $PBS_O_WORKDIR\n")
         batch_file.write ("cp $PBS_NODEFILE .\n")
         batch_file.write ("export HOSTFILE=hostfile_%04d\n" % guess)
+        batch_file.write ("export I_MPI_PIN_DOMAIN=omp")
+        batch_file.write ("export KMP_AFFINITY=compact")
         
         batch_file.write ("module load python\n")
         batch_file.write ("module switch python python/3.4.1\n")
         batch_file.write ("python3 host_rewrite.py $PBS_NODEFILE --ppn %d > $HOSTFILE\n" % (threads))
-        # batch_file.write ("OMP_NUM_THREADS=%d\n" % threads)
         batch_file.write ("export OMP_NUM_THREADS=%d\n" % threads)
 
         batch_file.write (" ".join (["python", wrapperFile, "-a", str (socket.gethostbyname(socket.gethostname())), "-p", str (guess)]))
@@ -135,9 +138,21 @@ class Timer (object):
 
                 for arg in self.uniques:
                     arg.setRandom ()
-                times [variances] = timeCommand.delay (command = self.getCommand (), setupCommand = self.getSetupCommand (), processes = processes, threads = threads, commandRoot = self.commandRoot, **kwargs)
+                # times [variances] = timeCommand.delay (command = self.getCommand (), setupCommand = self.getSetupCommand (), processes = processes, threads = threads, commandRoot = self.commandRoot, stat_file = self ["stat"] ().split () [-1], **kwargs)
+                try:
+                    stat_file = stat_file = self ["stat"] ().split () [-1]
+                except IndexError:
+                    stat_file = None
+                times [variances] = timeCommand (command = self.getCommand (), setupCommand = self.getSetupCommand (), processes = processes, threads = threads, commandRoot = self.commandRoot, stat_file = stat_file, **kwargs)
 
         return times
+
+    def __getitem__ (self, key):
+        for arg in self.variances + self.uniques:
+            if not isinstance (arg, Argument):
+                if arg.name == key:
+                    return arg
+        raise IndexError ("No argument named %s" % key)
 
 class Argument (object):
     """
@@ -155,6 +170,7 @@ class Argument (object):
         self.processes = kwargs.get ("processes", False)
         self.threads = kwargs.get ("threads", False)
         self.runOnly = kwargs.get ("runOnly", "")
+        self.name = kwargs.get ("name", self.command)
         
     def getValue (self):
         return self._value

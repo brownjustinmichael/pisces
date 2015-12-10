@@ -1,0 +1,61 @@
+init:
+    scale: 0.0001
+grid:
+    x:
+        points: 256
+        width: 2.828
+    z:
+        points: 256
+        width: 2.0
+    rezone:
+        check_every: -1
+time:
+    steps: 10000000
+    init: 1e-10
+    max: 1e-5
+    mult: 1.005
+    cfl: 0.1
+equations:
+    temperature:
+        diffusion: 10.0
+        advection: 1.0
+        sources:
+            z_velocity: -0.0
+        korre_Ts:
+            C: 1.0
+            Ain: 10.0
+            din: 0.3
+            rt: 0.0
+            Aout: 1.0
+            dout: 0.03
+        top:
+            value: 0.
+        bottom:
+            value: 0.
+    velocity:
+        diffusion: 1.0
+        advection: 1.0
+    x_velocity:
+        ignore_net: true
+    z_velocity:
+        ignore_net: true
+        sources:
+            temperature: 1.0e8
+            composition: 0.0
+    pressure:
+        ignore: false
+input:
+    file: sameRa_%02i
+output:
+    number: 0
+    cart:
+        file: cart_sameRa_%02i_%%02i
+        every: 1000
+    trans:
+        file: trans_sameRa_%02i_%%02i
+        every: 1000
+    stat:
+        file: stat_sameRa_%02i_%%02i
+        every: 100
+dump:
+    file: dump_sameRa_%02i

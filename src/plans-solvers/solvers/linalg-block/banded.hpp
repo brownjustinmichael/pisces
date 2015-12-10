@@ -27,6 +27,7 @@ namespace linalg
 		 * \param xipiv The integer array to hold the LAPACK swap information for x
 		 * \param bufferl A buffer that is nrhs * kl * n
 		 * \param bufferr A buffer that is nrhs * ku * n
+		 * \param bufferr A buffer that is nrhs * 4 * (ku + kl)^2 * np
 		 * \param info A pointer to the result state of the solve, 0 if successful
 		 * \param nrhs The number of right hand sides in the matrix
 		 * \param lda The leading dimension of matrix, if < 0, 2 * kl + ku + 1
@@ -34,7 +35,7 @@ namespace linalg
 		 * 
 		 * The input matrix should be in banded LAPACK format. To handle the overlap region, which wouldn't normally appear in such a format, extend the matrix by kl on the left and ku on the right. The overlapping data should be included in the same format. For details on the algorithm, see linalg::block::matrix_factorize.
 		 ************************************************************************/
-		void banded_factorize (int id, int np, int n, int kl, int ku, double* matrix, int* ipiv, double *x, int *xipiv, double *bufferl, double *bufferr, int *info = NULL, int nrhs = 1, int lda = -1, int ldaa = -1);
+		void banded_factorize (int id, int np, int n, int kl, int ku, double* matrix, int* ipiv, double *x, int *xipiv, double *bufferl, double *bufferr, double *buffer, int *info = NULL, int nrhs = 1, int lda = -1, int ldaa = -1);
 		
 		/*!**********************************************************************
 		 * \brief Solve a banded block matrix
@@ -59,7 +60,7 @@ namespace linalg
 		 * 
 		 * For details on the algorithm, see linalg::block::matrix_solve
 		 ************************************************************************/
-		void banded_solve (int id, int np, int n, int kl, int ku, double* matrix, int* ipiv, double* b, double *x, int *xipiv, double *bufferl, double *bufferr, int *info = NULL, int nrhs = 1, int lda = -1, int ldaa = -1, int ldb = -1);
+		void banded_solve (int id, int np, int n, int kl, int ku, double* matrix, int* ipiv, double* b, double *x, int *xipiv, double *bufferl, double *bufferr, double *buffer, int *info = NULL, int nrhs = 1, int lda = -1, int ldaa = -1, int ldb = -1);
 	} /* block */
 } /* linalg */
 

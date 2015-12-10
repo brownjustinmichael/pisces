@@ -13,10 +13,7 @@
 
 namespace data
 {
-	template <class datatype>
-	int data <datatype>::mode = grids::mode_flag;
-	
-	template class data <double>;
+	int data::mode = grids::mode_flag;
 } /* data */
 
 #endif /* end of include guard: DATA_CPP_A42CF84C */

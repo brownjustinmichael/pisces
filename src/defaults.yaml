@@ -1,7 +1,3 @@
-init:
-    scale: 0.001
-    mean: 0.0
-    sigma: 10.
 grid:
     x:
         points: 256
@@ -26,97 +22,70 @@ time:
     stop: 100.0
     init: 1.0e-5
     max: 4.e-3
-    mult: 1.01
-    down_mult: 0.6
-    cfl: 0.1
+    mult: 1.05
+    down_mult: 0.8
+    cfl: 0.4
     alpha: 1.00
     allow: 1000.0
-equations:
-    temperature:
-        diffusion: 1.0
-        advection: 1.0
-        sources:
-            z_velocity: 1.0
-        top:
-            type: fixed_value
-            value: 0.0
-        bottom:
-            type: fixed_value
-            value: 0.0
-    composition:
-        diffusion: 0.5
-        advection: 1.0
-        sources:
-            z_velocity: 0.5
-        top:
-            type: fixed_value
-            value: 0.0
-        bottom:
-            type: fixed_value
-            value: 0.0
-    velocity:
-        ignore: True
-        diffusion: 0.5
-        advection: 1.0
-    x_velocity:
-        ignore: False
-        link: "equations.velocity"
-        top:
-            type: fixed_derivative
-            value: 0.0
-        bottom:
-            type: fixed_derivative
-            value: 0.0
-    z_velocity:
-        ignore: False
-        link: "equations.velocity"
-        sources:
-            temperature: 0.5
-            composition: -0.5
-        top:
-            type: fixed_value
-            value: 0.0
-        bottom:
-            type: fixed_value
-            value: 0.0
-    pressure:
-        ignore: false
-        incompressible: true
-        x_velocity: x_velocity
-        z_velocity: z_velocity
 root: ./
 input:
     directory: input/
     file: input_%02i
     full: true
 output:
-    count: 0
-    name: ""
     directory: output/
-    files:
-        cart_%02i_%%02i:
-            every: 1000
-            full: true
-        timed_%02i_%%02i:
-            every: 0.1
-            timed: true
-            full: true
-        trans_%02i_%%02i:
-            every: 0.1
-            timed: true
-            transform: true
-            full: true
-        stat_%02i_%%02i:
-            every: 100
-            stat: true
+    output: true
+    name: ""
+    number: 0
+    cart:
+        file: cart_%02i_%%02i
+        every: 1000
+        timed: false
+    trans:
+        file: stat_%02i_%%02i
+        every: 100
+        timed: false
+    stat:
+        file: stat_%02i_%%02i
+        every: 100
+        timed: false
 dump:
     file: dump_%02i
     directory: input/
     every: 1000
 parallel:
-    maxthreads: 4
+    maxthreads: 16
     transform:
         threads: 4
         subthreads: 1
     solver:
-        threads: 4
+        threads: 1
+equations:
+    temperature:
+        ignore: false
+        advection: 1.0
+        sources:
+            z_velocity: 0.0
+        top:
+            value: 0.0
+        bottom:
+            value: 0.0
+    composition:
+        ignore: false
+        advection: 1.0
+        top:
+            value: 0.0
+        bottom:
+            value: 0.0
+    velocity:
+        ignore: false
+        advection: 1.0
+    x_velocity:
+        ignore: false
+        ignore_net: true
+    z_velocity:
+        ignore: false
+        ignore_net: true
+        sources: 
+            temperature: 1.
+            composition: -1.

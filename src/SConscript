@@ -1,13 +1,18 @@
 import os, inspect
-Import ("env")
-Import ("include_mp")
-Import ("include_mpi")
-Import ("include_vt")
-Import ("dimensions")
-Import ("vertical_grid")
-Import ("defaults")
-Import ("root")
-Import ("quiet")
+Import ("*")
+
+for env_var in env_vars:
+    env ["ENV"] [env_var] = env_vars [env_var]
+
+for include_dir in include_dirs:
+    env.Append (CPPFLAGS = ["-I%s" % include_dir])
+
+for library_dir in library_dirs:
+    env.Append (LINKFLAGS = ["-L%s" % library_dir])
+    env.Append (CPPFLAGS = ["-L%s" % library_dir])
+
+env.Append (CPPFLAGS = ["-Wno-deprecated"])
+env.Append (LINKFLAGS = ["-Wno-deprecated"])
 
 def directory (path, dirname):
     """
@@ -21,19 +26,19 @@ def directory (path, dirname):
         return dirname [len (path) + 1:] + "/"
         
 if include_mpi:
+    env ["CC"] = "mpicc"
     env ["CXX"] = "mpicxx"
 
     env.Append (CPPFLAGS = ["-D_MPI", "-fexceptions"])
         
-if include_vt:
-    env ["CXX"] = "vtcxx"
-    env.Append (CPPFLAGS = ["-DVTRACE"])
-    env.Append (VTFLAGS = ["-vt:cxx", "mpicxx"])
-    conf = Configure (env)
-    conf.CheckLib ("mpi")
-    conf.CheckLib ("mpi_cxx")
-    env = conf.Finish ()
-        
+if cppcompiler is not None:
+    env ["CXX"] = cppcompiler
+
+if ccompiler is not None:
+    env ["CC"] = ccompiler
+
+env.Append (CPPFLAGS = compiler_flags)
+
 if include_mp:
     env.Append (CPPFLAGS = ["-fopenmp"])
     env.Append (CPPFLAGS = ["-D_MP"])
@@ -50,23 +55,6 @@ env.Append (LINKFLAGS = ["-Wall", "-g", "-std=c++0x"])
 
 # Add the source directory to the include path for better package importing
 env.Append (CPPPATH = os.getcwd ())
-
-# If using MPI, change the compiler and add a compiler flag to let the code know to include MPI functionality
-if include_mpi:
-    env ["CXX"] = "mpicxx"
-
-    env.Append (CPPFLAGS = ["-D_MPI", "-fexceptions"])
-
-# If using vampirtrace, change the compiler, and add a compiler flag to let the code know to include vampirtrace and MPI functionality
-if include_vt:
-    env ["CXX"] = "vtcxx"
-    env.Append (CPPFLAGS = ["-DVTRACE"])
-    env.Append (VTFLAGS = ["-vt:cxx", "mpicxx"])
-    env.Append (CPPFLAGS = env ["VTFLAGS"])
-    conf = Configure (env)
-    conf.CheckLib ("mpi")
-    conf.CheckLib ("mpi_cxx")
-    env = conf.Finish ()
 
 # If using openmp, add compiler and link flags to let the code know to include openmp functionality
 if include_mp:
@@ -100,7 +88,7 @@ for dirname, dirnames, filenames in os.walk (path):
         for filename in filenames:
             if filename == "SConscript":
                 # Load any SConscript files found
-                env.SConscript(dirname + '/' + filename, variant_dir = os.path.join (".", directory (path, dirname)), duplicate = 0, exports = {'env': env, "objects": objects, "include_mp": include_mp})
+                env.SConscript(dirname + '/' + filename, duplicate = 0, exports = {'env': env, "objects": objects, "include_mp": include_mp})
                 
             if filename.split ('.') [-1] == 'cpp':
                 # Add any .cpp files found to the list of objects to compile
@@ -112,14 +100,17 @@ conf.CheckLib ("gfortran")
 env = conf.Finish ()
 
 # Compile the main code
-env.Default (env.Program(target = "../run/isces", source = (["main.cpp"] + objects)))
+env.Default (env.Program(target = "../run/isces", source = (["isces.cpp"] + objects)))
+
+env.Default (env.Program(target = "../run/pisces", source = (["pisces.cpp"] + objects)))
 
 # Compile the code initializer
 env.Default (env.Program(target = "../run/isces_init", source = (["init.cpp"] + objects)))
+env.Default (env.Program(target = "../run/pisces_init", source = (["pisces_init.cpp"] + objects)))
 
-env.Default (env.Program(target = "../run/isces_var", source = (["varmain.cpp"] + objects)))
-
-env.Default (env.Program(target = "../run/isces_varinit", source = (["varinit.cpp"] + objects)))
+print (Dir('.').abspath)
+print (objects [3] [0].abspath)
 
 # Add the tests, which can be run with scons check
-env.SConscript('../test/SConscript', variant_dir = "./test", duplicate = 0, exports = {'env': env, "objects": objects, "include_mp": include_mp})
+if cxxtest:
+    env.SConscript('../test/SConscript', variant_dir = "./test", duplicate = 0, exports = {'env': env, "objects": objects, "include_mp": include_mp})

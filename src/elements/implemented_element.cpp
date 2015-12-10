@@ -11,12 +11,9 @@
 namespace pisces
 {
 	// template <class datatype>
-	// int implemented_element <datatype>::mode = mode_flag;
+	// int implemented_element::mode = mode_flag;
 	//
-	// template class element <double>;
+	// template class element;
 		
-	template <class datatype>
-	int implemented_element <datatype>::mode = grids::mode_flag;
-
-	template class implemented_element <double>;
+	int implemented_element::mode = grids::mode_flag;
 } /* pisces */

@@ -16,9 +16,8 @@ namespace pisces
 	using namespace plans;
 	using namespace plans::solvers;
 	
-	template <class datatype>
-	vardiff_element <datatype>::vardiff_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
-	boussinesq_element <datatype> (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags, false) {
+	vardiff_element::vardiff_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
+	boussinesq_element (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags) {
 		TRACE ("Initializing...");
 		
 		std::string variable;
@@ -35,33 +34,28 @@ namespace pisces
 			
 			if (terms ["diffusion"].IsDefined ()) {
 				for (int i = 0; i < m; ++i) {
-					diffusion [variable] [i] = terms ["diffusion"].as <datatype> ();
+					diffusion [variable] [i] = terms ["diffusion"].as <double> ();
 				}
 				
 				if (terms ["bg_diffusion"].IsDefined ()) {
-					datatype diff_width = 0.2;
+					double lo_diffusion = 1.0e-6;
+					double hi_diffusion = terms ["bg_diffusion"].as <double> () - terms ["diffusion"].as <double> ();
+					double diff_width = 0.2;
 					if (terms ["diff_width"].IsDefined ()) {
-						diff_width = terms ["diff_width"].as <datatype> ();
+						diff_width = terms ["diff_width"].as <double> ();
 					}
 					for (int i = 0; i < m; ++i) {
-						if (ptr ("z") [i] > diff_width) {
-							diffusion [variable] [i] = terms ["bg_diffusion"].as <datatype> ();
-						} else if (ptr ("z") [i] < -diff_width) {
-							continue;
-						} else {
-							diffusion [variable] [i] += (terms ["bg_diffusion"].as <datatype> () - terms ["diffusion"].as <datatype> ()) * (ptr ("z") [i] + diff_width) / (2.0 * diff_width);
-						}
+						diffusion [variable] [i] = exp (atan (ptr ("z") [i] / diff_width) * (log (hi_diffusion) - log(lo_diffusion)) / 3.14159 + log (lo_diffusion) + (log (hi_diffusion) - log (lo_diffusion)) / 2.0);
+						DEBUG ("Diffusion: " << diffusion [variable] [i]);
 					}
+
+					equations [variable]->add_plan (typename diffusion::background_vertical::factory (1.0, &(diffusion [variable] [0])));
+					equations [variable]->add_plan (typename diffusion::background_horizontal::factory (1.0, &(diffusion [variable] [0])));
 				}
-			
-				// If a diffusion value is specified, construct the diffusion plans
-				equations [variable]->add_plan (typename diffusion::background_vertical <datatype>::factory (i_params.get <datatype> ("time.alpha"), &diffusion [variable] [0], true), pre_plan);
-				// equations [variable]->add_plan (typename diffusion::expliti_background_vertical <datatype>::factory (&diffusion [variable] [0]), pre_plan);
-				equations [variable]->add_plan (typename diffusion::background_horizontal <datatype>::factory (i_params.get <datatype> ("time.alpha"), &diffusion [variable] [0]), mid_plan);
 			
 				if (terms ["variable_diffusion"].IsDefined ()) {
 					DEBUG ("Implementing...");
-					equations [variable]->add_plan (typename diffusion::linear <datatype>::factory (terms ["variable_diffusion.coefficient"].as <datatype> (), terms ["variable_diffusion.min"].IsDefined () ? terms ["variable_diffusion.min"].as <datatype> () : -(terms ["diffusion"].as <datatype> ()), ptr (terms ["variable_diffusion.source"].as <std::string> ()), &diffusion [variable] [0], 100), post_plan);
+					equations [variable]->add_plan (typename diffusion::linear::factory (terms ["variable_diffusion.coefficient"].as <double> (), terms ["variable_diffusion.min"].IsDefined () ? terms ["variable_diffusion.min"].as <double> () : -(terms ["diffusion"].as <double> ()), (*this) [terms ["variable_diffusion.source"].as <std::string> ()], &diffusion [variable] [0], 100));
 				}
 			} else if (terms ["variable_diffusion"].IsDefined ()) {
 				FATAL ("Can't use variable diffusion without base diffusion yet.");
@@ -71,6 +65,4 @@ namespace pisces
 		}
 		TRACE ("Initialized.");
 	}
-	
-	template class vardiff_element <double>;
 } /* pisces */

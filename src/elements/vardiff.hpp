@@ -18,34 +18,40 @@ namespace pisces
 	/*!**********************************************************************
 	 * \brief An element built to use the Boussinesq approximation
 	 ************************************************************************/
-	template <class datatype>
-	class vardiff_element : public boussinesq_element <datatype>
+	class vardiff_element : public boussinesq_element
 	{
 	private:
-		std::map <std::string, std::vector <datatype>> diffusion; //!< A vector of diffusion data, for background diffusion
-		using boussinesq_element <datatype>::equations;
-		using boussinesq_element <datatype>::ptr;
-		using boussinesq_element <datatype>::m;
-		using boussinesq_element <datatype>::messenger_ptr;
+		std::map <std::string, std::vector <double>> diffusion; //!< A vector of diffusion data, for background diffusion
+		using boussinesq_element::equations;
+		using boussinesq_element::ptr;
+		using boussinesq_element::m;
+		using boussinesq_element::messenger_ptr;
 		
 	public:
 		
 		/*!**********************************************************************
 		 * \copydoc implemented_element::implemented_element
 		 ************************************************************************/
-		vardiff_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data <datatype> &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags);
+		vardiff_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags);
 		
 		virtual ~vardiff_element () {}
 		
-		static double rezone_merit (element <datatype> *element_ptr, formats::virtual_file *virt) {
-			datatype *temp = &(virt->index <datatype> ("temperature"));
-			datatype *vel = &(virt->index <datatype> ("z_velocity"));
-			datatype *pos = &(virt->index <datatype> ("z"));
-			datatype value = 0.0;
+		/**
+		 * @brief An alternate rezone merit function that seeks the regions with strongest derivatives
+		 * 
+		 * @param element_ptr A pointer to the element in question
+		 * @param virt A virtual file on which to operate the merit function
+		 * 
+		 * @return A value to be minimized in order to get the boundaries to occur at strongest derivatives
+		 */
+		static double rezone_merit (element *element_ptr, formats::virtual_file *virt) {
+			double *temp = &(virt->index <double> ("temperature"));
+			double *vel = &(virt->index <double> ("z_velocity"));
+			double *pos = &(virt->index <double> ("z"));
+			double value = 0.0;
 			for (int j = 0; j < virt->dims ["z"] [1] - 1; ++j) {
 				value += -(vel [j] - vel [j + 1]) * (vel [j] - vel [j + 1]) - 1.0e3 * (temp [j] - temp [j + 1]) * (temp [j] - temp [j + 1]) + 1.0e-5 / ((pos [j] - pos [j + 1]) * (pos [j] - pos [j + 1]));
 			}
-			DEBUG (value);
 			return value;
 		}
 	};

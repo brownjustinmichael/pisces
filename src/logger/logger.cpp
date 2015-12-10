@@ -127,7 +127,7 @@ namespace logger
 		}
 	}
 	
-	void log_config::set_severity (i_severity) {
+	void log_config::set_severity (int i_severity) {
 		severity = i_severity;
 	}
 } /* logger */

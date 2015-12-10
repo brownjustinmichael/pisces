@@ -9,3 +9,5 @@ latex/*
 *.bib
 *.blg
 *.out
+*.nav
+*.toc

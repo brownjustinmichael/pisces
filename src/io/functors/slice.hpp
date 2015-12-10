@@ -9,6 +9,7 @@
 #ifndef SLICE_HPP_3123131F
 #define SLICE_HPP_3123131F
 
+#include <vector>
 #include "functor.hpp"
 
 namespace functors
