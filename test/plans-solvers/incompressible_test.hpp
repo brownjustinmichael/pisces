@@ -27,7 +27,7 @@ public:
 		grids::horizontal::grid grid_n (n, -1.0, 1.0);
 		grids::vertical::grid grid_m (m, -1.0, 1.0);
 
-		logger::log_config::set_severity (0);
+		logger::log_config::set_severity (3);
 		
 		grids::variable x_velocity (grid_n, grid_m, flags), z_velocity (grid_n, grid_m, flags), data (grid_n, grid_m, flags), rhs (grid_n, grid_m, flags), rhs_compare (grid_n, grid_m, flags);
 

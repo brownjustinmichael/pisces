@@ -28,7 +28,7 @@ public:
 		int id = process_messenger->get_id ();
 		int n_elements = process_messenger->get_np ();
 		
-		logger::log_config::set_severity (0);
+		logger::log_config::set_severity (2);
 		int num = 0;
 		// logger::log_config::configure (&num, NULL, id, "process_%d.log");
 		formats::ascii::print_headers = false;

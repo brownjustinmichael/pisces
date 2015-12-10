@@ -58,7 +58,7 @@ namespace plans
 				}
 			}
 			
-			linalg::add_scaled (m * ldn, timestep / 2.0, hor_matrix, fact_matrix);
+			linalg::add_scaled (m * ldn, timestep, hor_matrix, fact_matrix);
 			
 			TRACE ("Done.");
 		}
@@ -76,7 +76,7 @@ namespace plans
 			
 			// Add in the right hand side scaled by the timestep
 			if (rhs_ptr) {
-				linalg::matrix_add_scaled (m, ldn, timestep / 2.0, rhs_ptr, &data_temp [ex_overlap_0], m, lda);
+				linalg::matrix_add_scaled (m, ldn, timestep, rhs_ptr, &data_temp [ex_overlap_0], m, lda);
 			}
 			
 			// Include the contributions from the boundaries; if there aren't boundaries, just use the data present

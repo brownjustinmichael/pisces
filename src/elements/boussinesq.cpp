@@ -108,22 +108,22 @@ namespace pisces
 		}
 
 		bool uniform_diff = true;
-		data.initialize ("temperature_diffusion", uniform_n);
-		if (i_params ["equations.temperature.korre_diff"].IsDefined ()) {
-			uniform_diff = false;
-			double Prcz = 1.0 / i_params ["equations.temperature.diffusion"].as <double> ();
-			double Prrz = 1.0 / i_params ["equations.temperature.korre_diff.rz_diffusion"].as <double> ();
+		// data.initialize ("temperature_diffusion", uniform_n);
+		// if (i_params ["equations.temperature.korre_diff"].IsDefined ()) {
+		// 	uniform_diff = false;
+		// 	double Prcz = 1.0 / i_params ["equations.temperature.diffusion"].as <double> ();
+		// 	double Prrz = 1.0 / i_params ["equations.temperature.korre_diff.rz_diffusion"].as <double> ();
 
-			DEBUG ("VARS ARE " << Prcz << " " << Prrz);
+		// 	DEBUG ("VARS ARE " << Prcz << " " << Prrz);
 
-			double A = (Prcz * data ["korre_Ts"] [0] + Prrz) / (data ["korre_Ts"] [0] + 1.);
-			assert (A < Prcz);
-			for (int j = 0; j < m; ++j)
-			{
-				data ["temperature_diffusion"] [j] = 1. / (A - data ["korre_Ts"] [j] * (Prcz - A));
-				DEBUG ("DIFF IS " << data ["temperature_diffusion"] [j]);
-			}
-		}
+		// 	double A = (Prcz * data ["korre_Ts"] [0] + Prrz) / (data ["korre_Ts"] [0] + 1.);
+		// 	assert (A < Prcz);
+		// 	for (int j = 0; j < m; ++j)
+		// 	{
+		// 		data ["temperature_diffusion"] [j] = 1. / (A - data ["korre_Ts"] [j] * (Prcz - A));
+		// 		DEBUG ("DIFF IS " << data ["temperature_diffusion"] [j]);
+		// 	}
+		// }
 
 		
 		// Set up the temperature equation
@@ -131,8 +131,8 @@ namespace pisces
 			*split_solver (equations ["temperature"], timestep, 
 				dirichlet (i_params ["equations.temperature.bottom.value"].as <double> ()), 
 				dirichlet (i_params ["equations.temperature.top.value"].as <double> ())) 
-			+ advec (data ["x_velocity"], data ["z_velocity"])
-			+ src (data ["z_velocity"] * data ["korre_Ts"])
+			+ params ["equations.temperature.advection"] * advec (data ["x_velocity"], data ["z_velocity"])
+			// + src (data ["z_velocity"] * data ["korre_Ts"])
 			== 
 			params ["equations.temperature.sources.z_velocity"] * src (data ["z_velocity"]);
 
@@ -149,7 +149,7 @@ namespace pisces
 			*split_solver (equations ["composition"], timestep, 
 				dirichlet (i_params ["equations.composition.bottom.value"].as <double> ()), 
 				dirichlet (i_params ["equations.composition.top.value"].as <double> ())) 
-			+ advec (data ["x_velocity"], data ["z_velocity"]) 
+			+ params ["equations.composition.advection"] * advec (data ["x_velocity"], data ["z_velocity"]) 
 			+ params ["equations.composition.sources.z_velocity"] * src (data ["z_velocity"]) 
 			== 
 			params ["equations.composition.diffusion"] * diff ();
@@ -160,7 +160,7 @@ namespace pisces
 			*split_solver (equations ["x_velocity"], timestep, 
 				neumann (0.0), 
 				neumann (0.0)) 
-			+ advec (data ["x_velocity"], data ["z_velocity"]) 
+			+ params ["equations.velocity.advection"] * advec (data ["x_velocity"], data ["z_velocity"]) 
 			== 
 			params ["equations.velocity.diffusion"] * diff ();
 			if (params.get ("equations.x_velocity.ignore_net", false)) data ["x_velocity"].component_flags |= ignore_net;
@@ -171,7 +171,7 @@ namespace pisces
 			*split_solver (equations ["z_velocity"], timestep, 
 				dirichlet (0.0), 
 				dirichlet (0.0)) 
-			+ advec (data ["x_velocity"], data ["z_velocity"]) 
+			+ params ["equations.velocity.advection"] * advec (data ["x_velocity"], data ["z_velocity"]) 
 			== 
 			params ["equations.z_velocity.sources.temperature"] * src (data ["temperature"])
 			+ params ["equations.z_velocity.sources.composition"] * src (data ["composition"]) 

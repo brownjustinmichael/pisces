@@ -28,7 +28,7 @@ public:
 		int id = 0;
 		int n_elements = 1;
 		
-		logger::log_config::set_severity (2);
+		logger::log_config::set_severity (3);
 		formats::ascii::print_headers = false;
 		
 		io::parameters parameters;
@@ -79,7 +79,7 @@ public:
 
 		std::shared_ptr <pisces::element> element (new pisces::boussinesq_element (horizontal_axis, vertical_axis, name, parameters, data, &*process_messenger, 0x00));
 
-		// element->run ();
+		element->run ();
 
 		double total = 0.0;
 		double diff = 0.0;
@@ -93,6 +93,6 @@ public:
 		}
 
 		INFO ("L2 relative error is " << diff / total);
-		// TS_ASSERT (fabs (diff / total) < 3.0e-2);
+		TS_ASSERT (fabs (diff / total) < 3.0e-2);
 	}
 };

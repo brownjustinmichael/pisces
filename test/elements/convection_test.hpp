@@ -1,5 +1,5 @@
 /*!**********************************************************************
- * \file element_test.hpp
+ * \file convection_test.hpp
  * /Users/justinbrown/Dropbox/pisces
  * 
  * Created by Justin Brown on 2015-01-28.
@@ -27,43 +27,45 @@ public:
 		int id = 0;
 		int n_elements = 1;
 		
-		logger::log_config::set_severity (2);
+		logger::log_config::set_severity (3);
 		formats::ascii::print_headers = false;
 		
 		io::parameters parameters;
 		
 		parameters ["root"] = std::string (PISCES_ROOT) + "/test/elements/";
 		parameters ["output.cart.file"] = "convect_%02i";
-		parameters ["output.cart.every"] = 1;
+		parameters ["output.cart.every"] = 100;
 		parameters ["output.trans.file"] = "convect_t_%02i";
-		parameters ["output.trans.every"] = 1;
+		parameters ["output.trans.every"] = 100;
 
 		// parameters ["output.output"] = false;
 		parameters ["dump.file"] = "";
 		
 		parameters ["time.stop"] = 1.0;
 		parameters ["time.max"] = 1.e-2;
-		parameters ["time.init"] = 1.e-10;
-		parameters ["time.mult"] = 1.1;
+		parameters ["time.init"] = 1.e-6;
+		parameters ["time.mult"] = 1.01;
+		parameters ["time.steps"] = 10000;
 		
 		parameters ["input.file"] = "";
 		
 		parameters ["equations.composition.ignore"] = true;
 		
 		parameters ["equations.temperature.diffusion"] = 1.0;
+		// parameters ["equations.temperature.sources.z_velocity"] = 1.0;
 
 		parameters ["equations.temperature.top.value"] = 0.0;
 		parameters ["equations.temperature.bottom.value"] = 1.0;
 
-		parameters ["equations.velocity.diffusion"] = 0.1;
-		parameters ["equations.z_velocity.sources.temperature"] = 2. * 5299.;
+		parameters ["equations.velocity.diffusion"] = 6.8;
+		parameters ["equations.z_velocity.sources.temperature"] = 4. * 657.5 * 6.8;
 		
-		parameters ["grid.x.width"] = 1.0;
+		parameters ["grid.x.width"] = 2.8284;
 		parameters ["grid.z.width"] = 1.0;
 	
-		int m = 200;
+		int m = 100;
 		int name = id;
-		int n = 300;
+		int n = 100;
 		double scale = 0.00001;
 
 		grids::axis horizontal_axis (n, -parameters.get <double> ("grid.x.width") / 2.0, parameters.get <double> ("grid.x.width") / 2.0);
@@ -73,6 +75,7 @@ public:
 		data.initialize ("temperature_0");
 
 		auto avg_flux = data.output_flux ("temperature", "z_velocity");
+		auto avg_deriv = data.output_deriv ("temperature");
 
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
@@ -83,8 +86,9 @@ public:
 		std::shared_ptr <pisces::element> element (new pisces::boussinesq_element (horizontal_axis, vertical_axis, name, parameters, data, &*process_messenger, 0x00));
 
 		element->run ();
-		
-		INFO ("FLUX IS " << *((double *) (avg_flux->calculate ())));
-		// TS_ASSERT (fabs (diff / total) < 2.e-4);
+
+		INFO ("FLUX: " <<  (*(double *) (avg_flux->calculate ())) - *(double *) (avg_deriv->calculate ()));
+
+		TS_ASSERT (fabs ((*(double *) (avg_flux->calculate ())) - *(double *) (avg_deriv->calculate ()) - 3.04) < 0.02);
 	}
 };

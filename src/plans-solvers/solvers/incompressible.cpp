@@ -172,9 +172,9 @@ namespace plans
 			solver::execute ();
 			static int count = 0;
 
-			INFO ("SHALL SKIP?");
-			if (*component_flags_z & z_solve) return;
-			INFO ("RUNNING");
+			// INFO ("SHALL SKIP?");
+			// if (*component_flags_z & z_solve) return;
+			// INFO ("RUNNING");
 
 			int info;
 			TRACE ("Solving...");

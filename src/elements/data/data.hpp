@@ -595,8 +595,8 @@ namespace data
 		 * @param variable The string variable from which the average of the derivative should be calculated
 		 * @return The derivative functor, which should be added to an output stream
 		 */
-		std::shared_ptr <functors::functor> output_deriv (std::string variable) {
-			return typename std::shared_ptr <functors::functor> (new functors::average_functor <double> (n, 1, typename std::shared_ptr <functors::functor> (new typename functors::slice_functor <double> (n, m, m / 2, typename std::shared_ptr <functors::functor> (new functors::deriv_functor <double> ((*this) (variable), n, m, &(*grid_m) [0]))))));
+		std::shared_ptr <functors::functor> output_deriv (std::string variable, int slice_index = -1) {
+			return typename std::shared_ptr <functors::functor> (new functors::average_functor <double> (n, 1, typename std::shared_ptr <functors::functor> (new typename functors::slice_functor <double> (n, m, slice_index < 0 ? m / 2 : slice_index, typename std::shared_ptr <functors::functor> (new functors::deriv_functor <double> ((*this) (variable), n, m, &(*grid_m) [0]))))));
 		}
 
 		/**
@@ -607,8 +607,8 @@ namespace data
 		 * 
 		 * @return The flux functor, which should be added to an output stream.
 		 */
-		std::shared_ptr <functors::functor> output_flux (std::string variable, std::string velocity) {
-			return typename std::shared_ptr <functors::functor> (new functors::average_functor <double> (n, 1, typename std::shared_ptr <functors::functor> (new typename functors::slice_functor <double> (n, m, m / 2, typename std::shared_ptr <functors::functor> (new typename functors::product_functor <double> (n, m, (*this) (velocity), (*this) (variable)))))));
+		std::shared_ptr <functors::functor> output_flux (std::string variable, std::string velocity, int slice_index = -1) {
+			return typename std::shared_ptr <functors::functor> (new functors::average_functor <double> (n, 1, typename std::shared_ptr <functors::functor> (new typename functors::slice_functor <double> (n, m, slice_index < 0 ? m / 2 : slice_index, typename std::shared_ptr <functors::functor> (new typename functors::product_functor <double> (n, m, (*this) (velocity), (*this) (variable)))))));
 		}
 	
 		/**
