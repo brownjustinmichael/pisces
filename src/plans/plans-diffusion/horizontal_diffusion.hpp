@@ -81,19 +81,19 @@ namespace plans
 			void execute () {	
 				TRACE ("Operating..." << element_flags);
 				// Depending on the direction of the solve, we'll either treat the term as partially implicit or fully explicit
-				if (component_flags & x_solve) {
-					if (1.0 - alpha != 0.0) {
-						// #pragma omp parallel for
-						for (int i = 2; i < ldn; ++i) {
-							linalg::add_scaled (m * dims, -coeff * (1.0 - alpha) * pioL2 * (i / 2) * (i / 2), data_in + i * m * dims, data_out + i * m * dims);
-						}
-					}
-				} else {
-					// #pragma omp parallel for
-					for (int i = 2; i < ldn; ++i) {
-						linalg::add_scaled (m * dims, -coeff * pioL2 * (i / 2) * (i / 2), data_in + i * m * dims, data_out + i * m * dims);
-					}
-				}
+				// if (component_flags & x_solve) {
+				// 	if (1.0 - alpha != 0.0) {
+				// 		// #pragma omp parallel for
+				// 		for (int i = 2; i < ldn; ++i) {
+				// 			linalg::add_scaled (m * dims, -coeff * (1.0 - alpha) * pioL2 * (i / 2) * (i / 2), data_in + i * m * dims, data_out + i * m * dims);
+				// 		}
+				// 	}
+				// } else {
+				// 	// #pragma omp parallel for
+				// 	for (int i = 2; i < ldn; ++i) {
+				// 		linalg::add_scaled (m * dims, -coeff * pioL2 * (i / 2) * (i / 2), data_in + i * m * dims, data_out + i * m * dims);
+				// 	}
+				// }
 				TRACE ("Operation complete.");
 			}
 		
@@ -191,29 +191,29 @@ namespace plans
 			void execute () {	
 				TRACE ("Operating..." << element_flags);
 				// Depending on the direction of the solve, we'll either treat the term as partially implicit or fully explicit
-				if (component_flags & x_solve) {
-					if (1.0 - alpha != 0.0) {
-						// #pragma omp parallel for
-						for (int j = 0; j < m; ++j) {
-							for (int k = 0; k < dims; ++k)
-							{
-								for (int i = 2; i < ldn; ++i) {
-									data_out [(i * m + j) * dims + k] -= coeff * diffusion [j] * (1.0 - alpha) * pioL2 * (i / 2) * (i / 2) * data_in [(i * m + j) * dims + k];
-								}
-							}
-						}
-					}
-				} else {
-					// #pragma omp parallel for
-					for (int j = 0; j < m; ++j) {
-						for (int i = 2; i < ldn; ++i) {
-							for (int k = 0; k < dims; ++k)
-							{
-								data_out [(i * m + j) * dims + k] -= coeff * diffusion [j] * pioL2 * (i / 2) * (i / 2) * data_in [(i * m + j) * dims + k];
-							}
-						}
-					}
-				}
+				// if (component_flags & x_solve) {
+				// 	if (1.0 - alpha != 0.0) {
+				// 		// #pragma omp parallel for
+				// 		for (int j = 0; j < m; ++j) {
+				// 			for (int k = 0; k < dims; ++k)
+				// 			{
+				// 				for (int i = 2; i < ldn; ++i) {
+				// 					data_out [(i * m + j) * dims + k] -= coeff * diffusion [j] * (1.0 - alpha) * pioL2 * (i / 2) * (i / 2) * data_in [(i * m + j) * dims + k];
+				// 				}
+				// 			}
+				// 		}
+				// 	}
+				// } else {
+				// 	// #pragma omp parallel for
+				// 	for (int j = 0; j < m; ++j) {
+				// 		for (int i = 2; i < ldn; ++i) {
+				// 			for (int k = 0; k < dims; ++k)
+				// 			{
+				// 				data_out [(i * m + j) * dims + k] -= coeff * diffusion [j] * pioL2 * (i / 2) * (i / 2) * data_in [(i * m + j) * dims + k];
+				// 			}
+				// 		}
+				// 	}
+				// }
 				TRACE ("Operation complete.");
 			}
 		

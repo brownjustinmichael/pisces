@@ -51,7 +51,7 @@ namespace io
 	}
 	
 	parameters parameters::operator[] (std::string key) const {
-		// DEBUG ("Looking for " << key);
+		DEBUG ("Looking for " << key);
 
 		// Tokenize the incoming string key using '.' as a delimeter
 		std::istringstream ss (key);

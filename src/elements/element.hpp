@@ -76,7 +76,7 @@ namespace pisces
 		 * \brief Element iterator for iterating through the contained equations
 		 ************************************************************************/
 		typedef typename std::vector <std::string>::iterator iterator;
-		
+
 		/*!**********************************************************************
 		 * \brief Generate an iterator to iterate through the equations
 		 * 
