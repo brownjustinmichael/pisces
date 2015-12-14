@@ -2,4 +2,9 @@ language: c++
 compiler: gcc
 before_install:
     - sudo apt-get install libfftw3-dev libfftw3-doc
+    - sudo apt-get install yaml-cpp
+    - sudo apt-get install log4cplus
+    - sudo apt-get install netcdf_c++4
+    - sudo apt-get install gsl
+    - sudo apt-get install lapack
 script: scons
