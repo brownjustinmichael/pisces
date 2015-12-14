@@ -33,4 +33,4 @@ exports ["defaults"] = os.path.join (exports ["root"], exports ["defaults"])
 exports ["env"] = Environment (tools = ["default"], **os.environ)
 exports ["env"].Tool ("cxxtest", CXXTEST = exports ["cxxtestgen_location"])
 
-exports ["env"].SConscript ("../src/SConscript", variant_dir = ".", duplicate = 0, exports = exports)
+exports ["env"].SConscript ("src/SConscript", variant_dir = "build/", duplicate = 0, exports = exports)
