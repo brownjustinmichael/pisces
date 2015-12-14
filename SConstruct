@@ -6,7 +6,7 @@ exports = {}
 import sys
 print ("Python version is %s" % str (sys.version))
 
-exports ["include_mpi"] = True
+exports ["include_mpi"] = False
 exports ["include_vt"] = False
 exports ["include_mp"] = True
 exports ["dimensions"] = 2
@@ -15,14 +15,12 @@ exports ["vertical_grid"] = 'chebyshev'
 exports ["logger"] = "log4cplus"
 exports ["defaults"] = "src/defaults.yaml"
 
-exports ["cppcompiler"] = "mpicxx"
-exports ["ccompiler"] = "mpicc"
-# exports ["cppcompiler"] = "mpiicpc"
-# exports ["ccompiler"] = "mpiicc"
+exports ["cppcompiler"] = None
+exports ["ccompiler"] = None
 exports ["compiler_flags"] = []
 # exports ["compiler_flags"] = ["-mt_mpi"]
 exports ["cxxtestgen_location"] = "/usr/local/Cellar/cxxtest/4.4/libexec/bin/cxxtestgen"
-exports ["cxxtest"] = True
+exports ["cxxtest"] = False
 exports ["include_dirs"] = ["/usr/local/include", "/usr/local/opt/lapack/include"]
 exports ["library_dirs"] = ["/usr/local/lib", "/usr/local/opt/lapack/lib"]
 exports ["env_vars"] = {}
