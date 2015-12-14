@@ -58,10 +58,8 @@ namespace pisces
 			}
 		}
 
-		bool uniform_diff = true;
 		data.initialize ("temperature_diffusion", uniform_n);
 		if (i_params ["equations.temperature.korre_diff"].IsDefined ()) {
-			uniform_diff = false;
 			double Prcz = 1.0 / i_params ["equations.temperature.diffusion"].as <double> ();
 			double Prrz = 1.0 / i_params ["equations.temperature.korre_diff.rz_diffusion"].as <double> ();
 
@@ -74,6 +72,11 @@ namespace pisces
 				data ["temperature_diffusion"] [j] = 1. / (A - data ["korre_Ts"] [j] * (Prcz - A));
 				DEBUG ("DIFF IS " << data ["temperature_diffusion"] [j]);
 			}
+		} else {
+			for (int j = 0; j < m; ++j)
+			{
+				data ["temperature_diffusion"] [j] = params ["equations.temperature.diffusion"].as <double> ();
+			}
 		}
 
 		// Set up the temperature equation
@@ -84,14 +87,10 @@ namespace pisces
 			+ params ["equations.temperature.advection"] * advec (data ["x_velocity"], data ["z_velocity"])
 			+ src (data ["z_velocity"] * data ["korre_Ts"])
 			== 
-			params ["equations.temperature.sources.z_velocity"] * src (data ["z_velocity"]);
+			params ["equations.temperature.sources.z_velocity"] * src (data ["z_velocity"])
+			+ bg_diff (data ["temperature_diffusion"].ptr ());
 
-			if (uniform_diff) {
-				*equations ["temperature"] == params ["equations.temperature.diffusion"] * diff ();
-			} else {
-				*equations ["temperature"] == bg_diff (data ["temperature_diffusion"].ptr ());
-			}
-			// if (i_params ["equations.temperature.linear"].IsDefined ()) *equations ["temperature"] == plans::diffusion::linear <double>::factory (i_params ["equations.temperature.linear"].as <double> (), 0.0, data ["temperature_diffusion"].ptr (), 10000);
+			if (i_params ["equations.temperature.linear"].IsDefined ()) *equations ["temperature"] == std::shared_ptr <plans::plan::factory> (new plans::diffusion::linear::factory (i_params ["equations.temperature.linear"].as <double> (), 0.0, data ["composition"], data ["temperature_diffusion"].ptr (), 10000));
 		}
 		
 	TRACE ("Initialized.");

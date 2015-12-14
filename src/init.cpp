@@ -72,6 +72,7 @@ int main (int argc, char *argv[])
 		double stop = 0.0, sbot = 1.0;
 		stop = parameters.get <double> ("equations.composition.top.value", 0.0);
 		sbot = parameters.get <double> ("equations.composition.bottom.value", 0.0);
+		DEBUG ("stop " << stop << " sbot " << sbot);
 
 		double ttop = 0.0, tbot = 1.0;
 		ttop = parameters.get <double> ("equations.temperature.top.value", 0.0);
@@ -84,14 +85,15 @@ int main (int argc, char *argv[])
 		#pragma omp parallel for
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
-				tempt [i * m + j] = (ttop - tbot) / (height) * (pos_z [j] + height / 2.0) + tbot;
-				if (pos_z [j] > 0.0) {
-					temps [i * m + j] = stop;
-					// tempt [i * m + j] = ttop;
-				} else {
-					temps [i * m + j] = sbot;
-					// tempt [i * m + j] = tbot;
-				}
+				// tempt [i * m + j] = (ttop - tbot) / (height) * (pos_z [j] + height / 2.0) + tbot;
+				temps [i * m + j] = (stop - sbot) / (height) * (pos_z [j] + height / 2.0) + sbot;
+				// if (pos_z [j] > 0.0) {
+				// 	temps [i * m + j] = stop;
+				// 	// tempt [i * m + j] = ttop;
+				// } else {
+				// 	temps [i * m + j] = sbot;
+				// 	// tempt [i * m + j] = tbot;
+				// }
 				temps [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3 * std::cos(pos_z [j] * 3.14159);
 				tempt [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3 * std::cos(pos_z [j] * 3.14159);
 			}

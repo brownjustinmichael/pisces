@@ -74,6 +74,8 @@ equations:
     composition:
         ignore: false
         advection: 1.0
+        sources:
+            z_velocity: 0.0
         top:
             value: 0.0
         bottom:
