@@ -17,16 +17,15 @@ addons:
             - cmake
         sources:
             - kubuntu-backports
-            - dhart-ppa
 
 env: CXXTEST=/usr/bin/cxxtestgen
 
 before_install:
     - wget https://github.com/CxxTest/cxxtest/archive/master.zip
     - unzip master.zip
-    - mv cxxtest-master/bin/* /usr/bin
+    - sudo mv cxxtest-master/bin/* /usr/bin
     - cd cxxtest-master/python
-    - python setup.py
+    - sudo python setup.py
     - cd ../..
     - rm master.zip
     - wget https://github.com/jbeder/yaml-cpp/archive/master.zip
