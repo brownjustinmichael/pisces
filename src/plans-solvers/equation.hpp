@@ -168,7 +168,7 @@ namespace plans
 			 * \param i_factory A solver factory to generate the solver object to add
 			 * \param flags A set of integer flags describing the direction of the solve (x_solver, z_solver)
 			 ************************************************************************/
-			virtual void add_solver (const typename plans::solvers::solver::factory &i_factory, int flags = 0x00) = 0;
+			virtual void add_solver (const plans::solvers::solver::factory &i_factory, int flags = 0x00) = 0;
 	
 			/*!*******************************************************************
 			 * \brief Adds a plan to be executed
@@ -189,14 +189,14 @@ namespace plans
 			 * 
 			 * \param i_factory A reference to the factory from which to construct the plan
 			 ************************************************************************/
-			virtual void add_plan (const typename plan::factory &i_factory) = 0;
+			virtual void add_plan (const plan::factory &i_factory) = 0;
 
 			/*!**********************************************************************
 			 * \brief Adds a container of plans to be executed
 			 * 
 			 * \param i_container A reference to the factory container from which to construct the plans
 			 ************************************************************************/
-			virtual void add_plan (const typename plan::factory_container &i_container) = 0;
+			virtual void add_plan (const plan::factory_container &i_container) = 0;
 			
 			/**
 			 * @brief Setup any implicit components of the plans contained
@@ -264,8 +264,8 @@ namespace plans
 			 * @param i_factory A shared pointer to the factory from which the plan should be instantiated
 			 * @return A reference to this equation with the new plan added
 			 */
-			equation &operator+ (const std::shared_ptr <typename plan::factory> i_factory) {
-				return *this + typename plan::factory_container (i_factory);
+			equation &operator+ (const std::shared_ptr <plan::factory> i_factory) {
+				return *this + plan::factory_container (i_factory);
 			}
 
 			/**
@@ -275,7 +275,7 @@ namespace plans
 			 * @param i_container The container whose contents should be added to the equation
 			 * @return A reference to this equation with the new plans added
 			 */
-			equation &operator+ (const typename plan::factory_container &i_container) {
+			equation &operator+ (const plan::factory_container &i_container) {
 				add_plan (-1.0 * i_container);
 				return *this;
 			}
@@ -288,7 +288,7 @@ namespace plans
 			 * @return A reference to this equation with the new plans added
 			 */
 			equation &operator+ (const double scalar) {
-				add_plan ((typename plan::factory_container) constant (-scalar));
+				add_plan ((plan::factory_container) constant (-scalar));
 				return *this;
 			}
 

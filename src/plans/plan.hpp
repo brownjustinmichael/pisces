@@ -359,7 +359,7 @@ namespace plans
 	 * @return [description]
 	 */
 	template <class type>
-	typename plan::factory_container operator- (std::shared_ptr <plan::factory> i_factory, type i_other) {
+	plan::factory_container operator- (std::shared_ptr <plan::factory> i_factory, type i_other) {
 		return i_factory + (-1.) * i_other;
 	}
 
