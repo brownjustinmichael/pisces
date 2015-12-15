@@ -13,11 +13,11 @@ compiler_flags: []
 cxxtestgen_location: "/usr/local/Cellar/cxxtest/4.4/libexec/bin/cxxtestgen"
 
 include_dirs:
-	- "/usr/include"
+    - "/usr/include"
     - "/usr/local/include"
     - "/usr/local/opt/lapack/include"
 library_dirs:
-	- "/usr/lib"
+    - "/usr/lib"
     - "/usr/local/lib"
     - "/usr/local/opt/lapack/lib"
 env_vars: {}
