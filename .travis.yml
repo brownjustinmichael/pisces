@@ -15,7 +15,7 @@ addons:
             - liblapack-dev
 
 before_install:
-	- sudo apt-get libnetcdf4-dev
+    - sudo apt-get libnetcdf4-dev
     - wget https://github.com/jbeder/yaml-cpp/archive/master.zip
     - unzip master.zip -d yaml-cpp
     - mkdir yaml-cpp/yaml-cpp-master/build
