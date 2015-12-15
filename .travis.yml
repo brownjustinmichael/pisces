@@ -9,6 +9,7 @@ sudo: required
 addons:
     apt:
         packages:
+            - cxxtest
             - libfftw3-dev
             - libboost-all-dev
             - libgsl0-dev
@@ -35,4 +36,4 @@ before_install:
     - sudo make install
     - cd ..
 
-script: scons
+script: scons check
