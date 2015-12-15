@@ -9,7 +9,6 @@ sudo: required
 addons:
     apt:
         packages:
-            - cxxtest
             - libfftw3-dev
             - libboost-all-dev
             - libgsl0-dev
@@ -20,7 +19,16 @@ addons:
             - kubuntu-backports
             - dhart-ppa
 
+env: CXXTEST=/usr/bin/cxxtestgen
+
 before_install:
+    - wget https://github.com/CxxTest/cxxtest/archive/master.zip
+    - unzip master.zip
+    - mv cxxtest/bin/* /usr/bin
+    - cd cxxtest/python
+    - python setup.py
+    - cd ../..
+    - rm master.zip
     - wget https://github.com/jbeder/yaml-cpp/archive/master.zip
     - unzip master.zip
     - mkdir yaml-cpp-master/build
