@@ -5,12 +5,12 @@ before_install:
     - sudo apt-get install libboost-all-dev
     - wget https://github.com/jbeder/yaml-cpp/archive/master.zip
     - unzip master.zip -d yaml-cpp
-    - mkdir yaml-cpp/build
-    - cd yaml-cpp/build
+    - mkdir yaml-cpp/yaml-cpp-master/build
+    - cd yaml-cpp/yaml-cpp-master/build
     - cmake ..
     - make
     - sudo make install
-    - cd ../..
+    - cd ../../..
     - sudo apt-get install log4cplus
     - sudo apt-get install netcdf_c++4
     - sudo apt-get install gsl
