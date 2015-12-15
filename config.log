@@ -14,10 +14,13 @@ scons: Configure: The original builder output was:
   |  |}
   |  |
   |
-gcc-5 -o .sconf_temp/conftest_0.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_0.c
+mpicc -o .sconf_temp/conftest_0.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_0.c
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
-gcc-5 -o .sconf_temp/conftest_0 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_0.o -lgsl
+scons: Configure: ".sconf_temp/conftest_0" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_0 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_0.o -lgsl
+  |
 scons: Configure: yes
 
 
@@ -37,10 +40,13 @@ scons: Configure: The original builder output was:
   |  |}
   |  |
   |
-gcc-5 -o .sconf_temp/conftest_1.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_1.c
+mpicc -o .sconf_temp/conftest_1.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_1.c
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
-gcc-5 -o .sconf_temp/conftest_1 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_1.o -lgsl -lnetcdf_c++4
+scons: Configure: ".sconf_temp/conftest_1" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_1 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_1.o -lgsl -lnetcdf_c++4
+  |
 scons: Configure: yes
 
 scons: Configure: Checking for C library netcdf... 
@@ -57,10 +63,13 @@ scons: Configure: The original builder output was:
   |  |}
   |  |
   |
-gcc-5 -o .sconf_temp/conftest_2.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_2.c
+mpicc -o .sconf_temp/conftest_2.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_2.c
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
-gcc-5 -o .sconf_temp/conftest_2 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_2.o -lgsl -lnetcdf_c++4 -lnetcdf
+scons: Configure: ".sconf_temp/conftest_2" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_2 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_2.o -lgsl -lnetcdf_c++4 -lnetcdf
+  |
 scons: Configure: yes
 
 scons: Configure: Checking for C library irc... 
@@ -77,12 +86,13 @@ scons: Configure: The original builder output was:
   |  |}
   |  |
   |
-gcc-5 -o .sconf_temp/conftest_3.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_3.c
+mpicc -o .sconf_temp/conftest_3.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_3.c
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
-gcc-5 -o .sconf_temp/conftest_3 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_3.o -lgsl -lnetcdf_c++4 -lnetcdf -lirc
-ld: library not found for -lirc
-collect2: error: ld returned 1 exit status
+scons: Configure: Building ".sconf_temp/conftest_3" failed in a previous run and all its sources are up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_3 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_3.o -lgsl -lnetcdf_c++4 -lnetcdf -lirc
+  |
 scons: Configure: no
 
 scons: Configure: Checking for C library imf... 
@@ -99,12 +109,13 @@ scons: Configure: The original builder output was:
   |  |}
   |  |
   |
-gcc-5 -o .sconf_temp/conftest_4.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_4.c
+mpicc -o .sconf_temp/conftest_4.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_4.c
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
-gcc-5 -o .sconf_temp/conftest_4 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_4.o -lgsl -lnetcdf_c++4 -lnetcdf -limf
-ld: library not found for -limf
-collect2: error: ld returned 1 exit status
+scons: Configure: Building ".sconf_temp/conftest_4" failed in a previous run and all its sources are up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_4 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_4.o -lgsl -lnetcdf_c++4 -lnetcdf -limf
+  |
 scons: Configure: no
 
 scons: Configure: Checking for C library yaml-cpp... 
@@ -121,10 +132,13 @@ scons: Configure: The original builder output was:
   |  |}
   |  |
   |
-gcc-5 -o .sconf_temp/conftest_5.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_5.c
+mpicc -o .sconf_temp/conftest_5.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_5.c
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
-gcc-5 -o .sconf_temp/conftest_5 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_5.o -lgsl -lnetcdf_c++4 -lnetcdf -lyaml-cpp
+scons: Configure: ".sconf_temp/conftest_5" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_5 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_5.o -lgsl -lnetcdf_c++4 -lnetcdf -lyaml-cpp
+  |
 scons: Configure: yes
 
 
@@ -144,10 +158,13 @@ scons: Configure: The original builder output was:
   |  |}
   |  |
   |
-gcc-5 -o .sconf_temp/conftest_6.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_6.c
+mpicc -o .sconf_temp/conftest_6.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_6.c
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
-gcc-5 -o .sconf_temp/conftest_6 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_6.o -lgsl -lnetcdf_c++4 -lnetcdf -lyaml-cpp -llapack
+scons: Configure: ".sconf_temp/conftest_6" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_6 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_6.o -lgsl -lnetcdf_c++4 -lnetcdf -lyaml-cpp -llapack
+  |
 scons: Configure: yes
 
 scons: Configure: Checking for C library cblas... 
@@ -164,10 +181,13 @@ scons: Configure: The original builder output was:
   |  |}
   |  |
   |
-gcc-5 -o .sconf_temp/conftest_7.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_7.c
+mpicc -o .sconf_temp/conftest_7.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_7.c
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
-gcc-5 -o .sconf_temp/conftest_7 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_7.o -lgsl -lnetcdf_c++4 -lnetcdf -lyaml-cpp -llapack -lcblas
+scons: Configure: ".sconf_temp/conftest_7" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_7 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_7.o -lgsl -lnetcdf_c++4 -lnetcdf -lyaml-cpp -llapack -lcblas
+  |
 scons: Configure: yes
 
 scons: Configure: Checking for C library f77blas... 
@@ -184,12 +204,13 @@ scons: Configure: The original builder output was:
   |  |}
   |  |
   |
-gcc-5 -o .sconf_temp/conftest_8.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_8.c
+mpicc -o .sconf_temp/conftest_8.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_8.c
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
-gcc-5 -o .sconf_temp/conftest_8 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_8.o -lgsl -lnetcdf_c++4 -lnetcdf -lyaml-cpp -llapack -lcblas -lf77blas
-ld: library not found for -lf77blas
-collect2: error: ld returned 1 exit status
+scons: Configure: Building ".sconf_temp/conftest_8" failed in a previous run and all its sources are up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_8 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_8.o -lgsl -lnetcdf_c++4 -lnetcdf -lyaml-cpp -llapack -lcblas -lf77blas
+  |
 scons: Configure: no
 
 scons: Configure: Checking for C library atlas... 
@@ -206,18 +227,22 @@ scons: Configure: The original builder output was:
   |  |}
   |  |
   |
-gcc-5 -o .sconf_temp/conftest_9.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_9.c
+mpicc -o .sconf_temp/conftest_9.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_9.c
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
-gcc-5 -o .sconf_temp/conftest_9 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_9.o -lgsl -lnetcdf_c++4 -lnetcdf -lyaml-cpp -llapack -lcblas -latlas
-ld: library not found for -latlas
-collect2: error: ld returned 1 exit status
+scons: Configure: Building ".sconf_temp/conftest_9" failed in a previous run and all its sources are up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_9 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_9.o -lgsl -lnetcdf_c++4 -lnetcdf -lyaml-cpp -llapack -lcblas -latlas
+  |
 scons: Configure: no
 
 
-file /Users/justinbrown/Dropbox/pisces/src/logger/SConscript,line 3:
+file /Users/justinbrown/Dropbox/pisces/src/logger/SConscript,line 4:
 	Configure(confdir = .sconf_temp)
-scons: Configure: Checking for C library log4cplus... 
+
+file /Users/justinbrown/Dropbox/pisces/src/plans-transforms/SConscript,line 3:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library fftw3... 
 scons: Configure: ".sconf_temp/conftest_10.c" is up to date.
 scons: Configure: The original builder output was:
   |.sconf_temp/conftest_10.c <-
@@ -231,16 +256,16 @@ scons: Configure: The original builder output was:
   |  |}
   |  |
   |
-gcc-5 -o .sconf_temp/conftest_10.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_10.c
+mpicc -o .sconf_temp/conftest_10.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_10.c
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
-gcc-5 -o .sconf_temp/conftest_10 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_10.o -lgsl -lnetcdf_c++4 -lnetcdf -lyaml-cpp -llapack -lcblas -llog4cplus
+scons: Configure: ".sconf_temp/conftest_10" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_10 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_10.o -lgsl -lnetcdf_c++4 -lnetcdf -lyaml-cpp -llapack -lcblas -lfftw3
+  |
 scons: Configure: yes
 
-
-file /Users/justinbrown/Dropbox/pisces/src/plans-transforms/SConscript,line 3:
-	Configure(confdir = .sconf_temp)
-scons: Configure: Checking for C library fftw3... 
+scons: Configure: Checking for C library fftw3f... 
 scons: Configure: ".sconf_temp/conftest_11.c" is up to date.
 scons: Configure: The original builder output was:
   |.sconf_temp/conftest_11.c <-
@@ -254,13 +279,19 @@ scons: Configure: The original builder output was:
   |  |}
   |  |
   |
-gcc-5 -o .sconf_temp/conftest_11.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -D_LOG4CPLUS -Ibuild -Isrc .sconf_temp/conftest_11.c
+mpicc -o .sconf_temp/conftest_11.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_11.c
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
-gcc-5 -o .sconf_temp/conftest_11 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_11.o -lgsl -lnetcdf_c++4 -lnetcdf -lyaml-cpp -llapack -lcblas -llog4cplus -lfftw3
+scons: Configure: ".sconf_temp/conftest_11" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_11 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_11.o -lgsl -lnetcdf_c++4 -lnetcdf -lyaml-cpp -llapack -lcblas -lfftw3 -lfftw3f
+  |
 scons: Configure: yes
 
-scons: Configure: Checking for C library fftw3f... 
+
+file /Users/justinbrown/Dropbox/pisces/src/SConscript,line 100:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library gfortran... 
 scons: Configure: ".sconf_temp/conftest_12.c" is up to date.
 scons: Configure: The original builder output was:
   |.sconf_temp/conftest_12.c <-
@@ -274,33 +305,13 @@ scons: Configure: The original builder output was:
   |  |}
   |  |
   |
-gcc-5 -o .sconf_temp/conftest_12.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -D_LOG4CPLUS -Ibuild -Isrc .sconf_temp/conftest_12.c
+mpicc -o .sconf_temp/conftest_12.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -Ibuild -Isrc .sconf_temp/conftest_12.c
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
 cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
-gcc-5 -o .sconf_temp/conftest_12 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_12.o -lgsl -lnetcdf_c++4 -lnetcdf -lyaml-cpp -llapack -lcblas -llog4cplus -lfftw3 -lfftw3f
-scons: Configure: yes
-
-
-file /Users/justinbrown/Dropbox/pisces/src/SConscript,line 100:
-	Configure(confdir = .sconf_temp)
-scons: Configure: Checking for C library gfortran... 
-scons: Configure: ".sconf_temp/conftest_13.c" is up to date.
+scons: Configure: ".sconf_temp/conftest_12" is up to date.
 scons: Configure: The original builder output was:
-  |.sconf_temp/conftest_13.c <-
-  |  |
-  |  |
-  |  |
-  |  |int
-  |  |main() {
-  |  |  
-  |  |return 0;
-  |  |}
-  |  |
+  |mpicc -o .sconf_temp/conftest_12 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_12.o -lgsl -lnetcdf_c++4 -lnetcdf -lyaml-cpp -llapack -lcblas -lfftw3 -lfftw3f -lgfortran
   |
-gcc-5 -o .sconf_temp/conftest_13.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=-1 -D_LOG4CPLUS -Ibuild -Isrc .sconf_temp/conftest_13.c
-cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
-cc1: warning: command line option '-std=c++11' is valid for C++/ObjC++ but not for C
-gcc-5 -o .sconf_temp/conftest_13 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_13.o -lgsl -lnetcdf_c++4 -lnetcdf -lyaml-cpp -llapack -lcblas -llog4cplus -lfftw3 -lfftw3f -lgfortran
 scons: Configure: yes
 
 

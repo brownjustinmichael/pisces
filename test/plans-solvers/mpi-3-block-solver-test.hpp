@@ -10,6 +10,7 @@
 
 #include "mpi/messenger.hpp"
 #include <vector>
+#include <memory>
 #include <stdio.h>
 #include <cstdlib>
 #include <ctime>

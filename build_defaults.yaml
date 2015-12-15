@@ -1,0 +1,21 @@
+include_mpi: False
+include_mp: False
+dimensions: 2
+quiet: -1
+vertical_grid: 'chebyshev'
+logger: None
+defaults: "src/defaults.yaml"
+
+cppcompiler: 
+ccompiler: 
+compiler_flags: []
+
+cxxtestgen_location: "/usr/local/Cellar/cxxtest/4.4/libexec/bin/cxxtestgen"
+
+include_dirs:
+    - "/usr/local/include"
+    - "/usr/local/opt/lapack/include"
+library_dirs:
+    - "/usr/local/lib"
+    - "/usr/local/opt/lapack/lib"
+env_vars: {}
