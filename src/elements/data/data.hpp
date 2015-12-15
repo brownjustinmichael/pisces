@@ -127,7 +127,7 @@ namespace data
 		/*!**********************************************************************
 		 * \brief Element iterator for iterating through the contained data
 		 ************************************************************************/
-		typedef typename std::vector <std::string>::iterator iterator;
+		typedef std::vector <std::string>::iterator iterator;
 	
 		/*!**********************************************************************
 		 * \brief Generate an iterator to iterate through the data
@@ -174,11 +174,11 @@ namespace data
 			}
 
 			if (dump_stream) {
-				dump_stream->template append <double> (i_name, var.ptr (), output_flags);
+				dump_stream->append <double> (i_name, var.ptr (), output_flags);
 			}
 			for (auto iter = streams.begin (); iter != streams.end (); ++iter)
 			{
-				(*iter)->template append <double> (i_name, var.ptr (), output_flags);
+				(*iter)->append <double> (i_name, var.ptr (), output_flags);
 			}
 			scalar_names.push_back (i_name);
 			std::sort (scalar_names.begin (), scalar_names.end ());
@@ -390,9 +390,9 @@ namespace data
 		 ************************************************************************/
 		virtual void setup_dump (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
 			// Iterate through the scalar fields and append them to the variables which the output will write to file
-			output_ptr->template append <double> ("t", &duration, formats::scalar);
-			output_ptr->template append <double> ("dt", &timestep, formats::scalar);
-			output_ptr->template append <const int> ("mode", &(get_mode ()), formats::scalar);
+			output_ptr->append <double> ("t", &duration, formats::scalar);
+			output_ptr->append <double> ("dt", &timestep, formats::scalar);
+			output_ptr->append <const int> ("mode", &(get_mode ()), formats::scalar);
 			output_ptr->append("step", &n_steps, formats::scalar);
 
 			// Check the desired output time and save the output object in the appropriate variable
@@ -529,12 +529,12 @@ namespace data
 		virtual void setup_profile (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
 			typedef typename std::map <std::string, std::shared_ptr <grids::variable>>::iterator iterator;
 			for (iterator iter = data::variables.begin (); iter != data::variables.end (); ++iter) {
-				output_ptr->template append <double> (iter->first, (*this) (iter->first));
-				output_ptr->template append <double> ("rms_" + iter->first, std::shared_ptr <functors::functor> (new functors::root_mean_square_functor <double> ((*this) (iter->first), n, m)));
-				output_ptr->template append <double> ("avg_" + iter->first, std::shared_ptr <functors::functor> (new functors::average_functor <double> ((*this) (iter->first), n, m)));
+				output_ptr->append <double> (iter->first, (*this) (iter->first));
+				output_ptr->append <double> ("rms_" + iter->first, std::shared_ptr <functors::functor> (new functors::root_mean_square_functor <double> ((*this) (iter->first), n, m)));
+				output_ptr->append <double> ("avg_" + iter->first, std::shared_ptr <functors::functor> (new functors::average_functor <double> ((*this) (iter->first), n, m)));
 			}
-			output_ptr->template append <double> ("t", &(duration), formats::scalar);
-			output_ptr->template append <const int> ("mode", &(data::get_mode ()), formats::scalar);
+			output_ptr->append <double> ("t", &(duration), formats::scalar);
+			output_ptr->append <const int> ("mode", &(data::get_mode ()), formats::scalar);
 
 			data::setup_profile (output_ptr, flags);
 		}
@@ -596,7 +596,7 @@ namespace data
 		 * @return The derivative functor, which should be added to an output stream
 		 */
 		std::shared_ptr <functors::functor> output_deriv (std::string variable, int slice_index = -1) {
-			return typename std::shared_ptr <functors::functor> (new functors::average_functor <double> (n, 1, typename std::shared_ptr <functors::functor> (new typename functors::slice_functor <double> (n, m, slice_index < 0 ? m / 2 : slice_index, typename std::shared_ptr <functors::functor> (new functors::deriv_functor <double> ((*this) (variable), n, m, &(*grid_m) [0]))))));
+			return std::shared_ptr <functors::functor> (new functors::average_functor <double> (n, 1, std::shared_ptr <functors::functor> (new functors::slice_functor <double> (n, m, slice_index < 0 ? m / 2 : slice_index, std::shared_ptr <functors::functor> (new functors::deriv_functor <double> ((*this) (variable), n, m, &(*grid_m) [0]))))));
 		}
 
 		/**
@@ -608,7 +608,7 @@ namespace data
 		 * @return The flux functor, which should be added to an output stream.
 		 */
 		std::shared_ptr <functors::functor> output_flux (std::string variable, std::string velocity, int slice_index = -1) {
-			return typename std::shared_ptr <functors::functor> (new functors::average_functor <double> (n, 1, typename std::shared_ptr <functors::functor> (new typename functors::slice_functor <double> (n, m, slice_index < 0 ? m / 2 : slice_index, typename std::shared_ptr <functors::functor> (new typename functors::product_functor <double> (n, m, (*this) (velocity), (*this) (variable)))))));
+			return std::shared_ptr <functors::functor> (new functors::average_functor <double> (n, 1, std::shared_ptr <functors::functor> (new functors::slice_functor <double> (n, m, slice_index < 0 ? m / 2 : slice_index, std::shared_ptr <functors::functor> (new functors::product_functor <double> (n, m, (*this) (velocity), (*this) (variable)))))));
 		}
 	
 		/**
