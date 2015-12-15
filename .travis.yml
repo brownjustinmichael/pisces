@@ -17,7 +17,7 @@ addons:
 
 before_install:
     - sudo add-apt-repository ppa:kubuntu-ppa/backports -y
-    - sudo apt-get install cmake
+    - sudo apt-get install -t kubuntu-ppa-backports cmake
     - wget https://github.com/jbeder/yaml-cpp/archive/master.zip
     - unzip master.zip -d yaml-cpp
     - mkdir yaml-cpp/yaml-cpp-master/build
