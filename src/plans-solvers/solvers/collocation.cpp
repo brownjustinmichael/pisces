@@ -45,7 +45,7 @@ namespace plans
 			// Gather the extents of all the elements, and resize the boundary matrix information to fit
 			if (messenger_ptr->get_id () == 0) {
 				ns.resize (messenger_ptr->get_np ());
-				messenger_ptr->template gather <int> (1, &ns0, &ns [0]);
+				messenger_ptr->gather <int> (1, &ns0, &ns [0]);
 				int ntot = 0;
 				for (int i = 0; i < messenger_ptr->get_np (); ++i) {
 					ntot += ns [i];
@@ -53,7 +53,7 @@ namespace plans
 				boundary_matrix.resize (ntot * ntot);
 				bipiv.resize (ntot);
 			} else {
-				messenger_ptr->template gather <int> (1, &ns0, NULL);
+				messenger_ptr->gather <int> (1, &ns0, NULL);
 				boundary_matrix.resize ((overlap_0 + overlap_n) * (overlap_0 + overlap_n));
 			}
 			
