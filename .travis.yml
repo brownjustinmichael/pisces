@@ -25,5 +25,12 @@ before_install:
     - make
     - sudo make install
     - cd ../../..
+    - wget https://github.com/Unidata/netcdf-cxx4/archive/master.zip
+    - unzip master.zip -d netcdf-cxx4
+    - mkdir netcdf-cxx4/netcdf-cxx4-master/build
+    - cd netcdf-cxx4/netcdf-cxx4-master/build
+    - cmake ..
+    - make
+    - sudo make install
 
 script: scons
