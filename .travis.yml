@@ -40,7 +40,7 @@ before_install:
     - wget https://github.com/Unidata/netcdf-cxx4/archive/v4.2.1.zip
     - unzip v4.2.1.zip
     - cd netcdf-cxx4-4.2.1
-    - ./configure
+    - ./configure --disable-shared
     - make
     - sudo make install
     - cd ..
