@@ -12,7 +12,7 @@ exports ["include_mp"] = True
 exports ["dimensions"] = 2
 exports ["quiet"] = -1
 exports ["vertical_grid"] = 'chebyshev'
-exports ["logger"] = "log4cplus"
+exports ["logger"] = None
 exports ["defaults"] = "src/defaults.yaml"
 
 exports ["cppcompiler"] = None
