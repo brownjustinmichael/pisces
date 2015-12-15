@@ -4,7 +4,14 @@ import os, inspect
 
 conf = Configure (env)
 
-for lib in ["netcdf_c++4", "netcdf", "irc", "imf", "yaml-cpp"]:
+for lib in ["irc", "imf", "yaml-cpp"]:
     conf.CheckLib (lib)
+
+if not conf.CheckLib ("netcdf_c++4"):
+	conf.CheckLib ("hdf5")
+	conf.CheckLib ("hdf5_hl")
+	conf.CheckLib ("netcdf_c++4")
+else:
+	conf.CheckLib ("netcdf")
 
 env = conf.Finish ()
