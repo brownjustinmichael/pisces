@@ -116,7 +116,13 @@ namespace plans
 		 * @param i_coeff A coefficient to multiply the results of the plan operation
 		 ************************************************************************/
 		plan (grids::variable &i_data_in, int state = 0, double i_coeff = 1.0) :
-		plan (i_data_in, i_data_in, state, state, i_coeff) {}
+		coeff (i_coeff), 
+		data_in (i_data_in.ptr (state)),
+		data_out (i_data_in.ptr (state)),
+		var_in (i_data_in),
+		var_out (i_data_in),
+		element_flags (i_data_in.element_flags),
+		component_flags (i_data_in.component_flags) {}
 		
 		virtual ~plan () {}
 		
