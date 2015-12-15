@@ -486,8 +486,8 @@ namespace data
 		 ************************************************************************/
 		implemented_data (grids::axis *i_axis_n, grids::axis *i_axis_m, io::parameters &i_params, int i_name = 0, std::string dump_file = "", std::string dump_directory = "./", int dump_every = 1) : 
 		data (i_params, i_name), 
-		grid_n (std::shared_ptr <grids::grid> (new typename grids::horizontal::grid (i_axis_n))), 
-		grid_m (std::shared_ptr <grids::grid> (new typename grids::vertical::grid (i_axis_m))), 
+		grid_n (std::shared_ptr <grids::grid> (new grids::horizontal::grid (i_axis_n))), 
+		grid_m (std::shared_ptr <grids::grid> (new grids::vertical::grid (i_axis_m))), 
 		n (grid_n->get_n ()), 
 		m (grid_m->get_n ()) {
 			// Set up output
