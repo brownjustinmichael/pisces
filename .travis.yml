@@ -29,11 +29,10 @@ before_install:
     - cd ../..
     - wget https://github.com/Unidata/netcdf-cxx4/archive/v4.2.1.zip
     - unzip v4.2.1.zip
-    - mkdir netcdf-cxx4-4.2.1/build
-    - cd netcdf-cxx4-4.2.1/build
-    - cmake .. -DCMAKE_INSTALL_PREFIX:PATH=/usr
+    - cd netcdf-cxx4-4.2.1
+    - ./configure
     - make
     - sudo make install
-    - cd ../..
+    - cd ..
 
 script: scons
