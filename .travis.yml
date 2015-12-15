@@ -16,6 +16,8 @@ addons:
             - libnetcdf-dev
 
 before_install:
+    - sudo add-apt-repository ppa:kubuntu-ppa/backports
+    - sudo apt-get install cmake
     - wget https://github.com/jbeder/yaml-cpp/archive/master.zip
     - unzip master.zip -d yaml-cpp
     - mkdir yaml-cpp/yaml-cpp-master/build
