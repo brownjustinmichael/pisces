@@ -51,13 +51,13 @@ namespace pisces
 						DEBUG ("Diffusion: " << diffusion [variable] [i]);
 					}
 
-					equations [variable]->add_plan (typename diffusion::background_vertical::factory (1.0, &(diffusion [variable] [0])));
-					equations [variable]->add_plan (typename diffusion::background_horizontal::factory (1.0, &(diffusion [variable] [0])));
+					equations [variable]->add_plan (diffusion::background_vertical::factory (1.0, &(diffusion [variable] [0])));
+					equations [variable]->add_plan (diffusion::background_horizontal::factory (1.0, &(diffusion [variable] [0])));
 				}
 			
 				if (terms ["variable_diffusion"].IsDefined ()) {
 					DEBUG ("Implementing...");
-					equations [variable]->add_plan (typename diffusion::linear::factory (terms ["variable_diffusion.coefficient"].as <double> (), terms ["variable_diffusion.min"].IsDefined () ? terms ["variable_diffusion.min"].as <double> () : -(terms ["diffusion"].as <double> ()), (*this) [terms ["variable_diffusion.source"].as <std::string> ()], &diffusion [variable] [0], 100));
+					equations [variable]->add_plan (diffusion::linear::factory (terms ["variable_diffusion.coefficient"].as <double> (), terms ["variable_diffusion.min"].IsDefined () ? terms ["variable_diffusion.min"].as <double> () : -(terms ["diffusion"].as <double> ()), (*this) [terms ["variable_diffusion.source"].as <std::string> ()], &diffusion [variable] [0], 100));
 				}
 			} else if (terms ["variable_diffusion"].IsDefined ()) {
 				FATAL ("Can't use variable diffusion without base diffusion yet.");

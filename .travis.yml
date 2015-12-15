@@ -16,7 +16,6 @@ addons:
             - libnetcdf-dev
 
 before_install:
-    - git clone git@github.com:Unidata/netcdf-cxx4.git
     - wget https://github.com/jbeder/yaml-cpp/archive/master.zip
     - unzip master.zip -d yaml-cpp
     - mkdir yaml-cpp/yaml-cpp-master/build
