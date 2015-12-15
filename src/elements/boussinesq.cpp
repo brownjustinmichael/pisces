@@ -45,11 +45,11 @@ namespace data
 
 		TRACE ("Setting up cartesian output...");
 		std::shared_ptr <io::output> stream = this->setup_output_from <formats::netcdf> (i_params ["output.cart"]);
-		// stream->append <double> ("div_u", std::shared_ptr <typename functors::div_functor <double>> (new functors::div_functor <double> ((*this) ["x"].ptr (), (*this) ["z"].ptr (), (*this) ["x_velocity"].ptr (), (*this) ["z_velocity"].ptr (), n, m)));
+		// stream->append <double> ("div_u", std::shared_ptr <functors::div_functor <double>> (new functors::div_functor <double> ((*this) ["x"].ptr (), (*this) ["z"].ptr (), (*this) ["x_velocity"].ptr (), (*this) ["z_velocity"].ptr (), n, m)));
 
 		TRACE ("Setting up transformed output...");
 		stream = this->setup_output_from <formats::netcdf> (i_params ["output.trans"], real_spectral);
-		// stream->append <double> ("div_u", std::shared_ptr <typename functors::transform_div_functor <double>> (new functors::transform_div_functor <double> ((*this) ["x"].ptr (), (*this) ["z"].ptr (), (*this) ["x_velocity"].ptr (), (*this) ["z_velocity"].ptr (), n, m)));
+		// stream->append <double> ("div_u", std::shared_ptr <functors::transform_div_functor <double>> (new functors::transform_div_functor <double> ((*this) ["x"].ptr (), (*this) ["z"].ptr (), (*this) ["x_velocity"].ptr (), (*this) ["z_velocity"].ptr (), n, m)));
 
 		TRACE ("Setting up stat output...");
 		std::shared_ptr <io::output> stat_stream =
@@ -57,7 +57,7 @@ namespace data
 
 		if (!stat_stream) return;
 
-		for (typename data::iterator iter = this->begin (); iter != this->end (); ++iter) {
+		for (data::iterator iter = this->begin (); iter != this->end (); ++iter) {
 			// For each data variable, output z_flux, average derivative across the center, average and max
 			std::string variable = *iter;
 			stat_stream->append <double> ("max_" + variable, this->output_max (variable), formats::scalar);
