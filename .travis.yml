@@ -12,6 +12,7 @@ addons:
             - libfftw3-dev
             - libboost-all-dev
             - libnetcdf-dev
+            - libnetcdfc++4-dev
             - libgsl0-dev
             - liblapack-dev
 
