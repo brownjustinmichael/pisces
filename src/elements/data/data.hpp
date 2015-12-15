@@ -527,7 +527,7 @@ namespace data
 		 * \copydoc data::setup_profile
 		 ************************************************************************/
 		virtual void setup_profile (std::shared_ptr <io::output> output_ptr, int flags = 0x00) {
-			typedef typename std::map <std::string, std::shared_ptr <grids::variable>>::iterator iterator;
+			typedef std::map <std::string, std::shared_ptr <grids::variable>>::iterator iterator;
 			for (iterator iter = data::variables.begin (); iter != data::variables.end (); ++iter) {
 				output_ptr->append <double> (iter->first, (*this) (iter->first));
 				output_ptr->append <double> ("rms_" + iter->first, std::shared_ptr <functors::functor> (new functors::root_mean_square_functor <double> ((*this) (iter->first), n, m)));
