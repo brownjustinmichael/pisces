@@ -307,7 +307,7 @@ namespace pisces
 			if (fp) {
 				return fp (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags);
 			} else {
-				return NULL;
+				return std::shared_ptr <element> ();
 			}
 		}
 
