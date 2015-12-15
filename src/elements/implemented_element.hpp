@@ -68,9 +68,9 @@ namespace pisces
 		static int mode; //!< The mode of the simulation (from grids)
 		
 	public:
-		using element_function = std::shared_ptr <element> (grids::axis, grids::axis, int, io::parameters&, data::data&, mpi::messenger*, int);
+		typedef std::shared_ptr <element> (*element_function) (grids::axis, grids::axis, int, io::parameters&, data::data&, mpi::messenger*, int);
 
-		static std::map <std::string, element_function*> & registry ();
+		static std::map <std::string, element_function> & registry ();
 
 		/*!*******************************************************************
 		* \param i_axis_n The axis for the horizontal direction
@@ -297,13 +297,13 @@ namespace pisces
 			}
 		}
 
-		static void registrate (std::string const & name, element_function * fp) {
+		static void registrate (std::string const & name, element_function fp) {
 			registry () [name] = fp;
 		}
 
 		static std::shared_ptr <element> instance (std::string const & name, grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) {
 			auto it = registry ().find (name);
-			element_function * fp = (it == registry ().end () ? NULL : (it->second));
+			element_function fp = (it == registry ().end () ? NULL : (it->second));
 			if (fp) {
 				return fp (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags);
 			} else {
