@@ -103,7 +103,7 @@ namespace plans
 			 * \param i_data A reference to the data to read
 			 * \param i_data_out A reference to the data to update
 			 ************************************************************************/
-			collocation (mpi::messenger* i_messenger_ptr, double& i_timestep, typename boundaries::boundary::factory &i_boundary_0, typename boundaries::boundary::factory &i_boundary_n, double *i_rhs, grids::variable &i_data, grids::variable &i_data_out) :
+			collocation (mpi::messenger* i_messenger_ptr, double& i_timestep, boundaries::boundary::factory &i_boundary_0, boundaries::boundary::factory &i_boundary_n, double *i_rhs, grids::variable &i_data, grids::variable &i_data_out) :
 			solver (i_data, i_data_out, this->get_state_in (), this->get_state ()),
 			timestep (i_timestep) {
 				init (i_messenger_ptr, i_timestep, i_boundary_0.instance (i_data.get_grid (0), i_data.get_grid (1), false), i_boundary_n.instance (i_data.get_grid (0), i_data.get_grid (1), true), i_rhs, i_data, i_data_out);
@@ -149,8 +149,8 @@ namespace plans
 				double &timestep; //!< A reference to the timestep for the solver to be constructed
 				std::shared_ptr <boundaries::boundary> boundary_0; //!< A shared pointer to the top boundary for the solver to be constructed
 				std::shared_ptr <boundaries::boundary> boundary_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
-				typename boundaries::boundary::factory *boundary_factory_0; //!< A shared pointer to the top boundary for the solver to be constructed
-				typename boundaries::boundary::factory *boundary_factory_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
+				boundaries::boundary::factory *boundary_factory_0; //!< A shared pointer to the top boundary for the solver to be constructed
+				boundaries::boundary::factory *boundary_factory_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
 				
 			public:
 				/*!**********************************************************************
@@ -171,7 +171,7 @@ namespace plans
 				 * \param i_boundary_0 A boundary factory to the top boundary
 				 * \param i_boundary_n A boundary factory to the bottom boundary
 				 ************************************************************************/
-				factory (mpi::messenger *i_messenger_ptr, double &i_timestep, typename boundaries::boundary::factory &i_boundary_0, typename boundaries::boundary::factory &i_boundary_n) : 
+				factory (mpi::messenger *i_messenger_ptr, double &i_timestep, boundaries::boundary::factory &i_boundary_0, boundaries::boundary::factory &i_boundary_n) : 
 				messenger_ptr (i_messenger_ptr), 
 				timestep (i_timestep), 
 				boundary_factory_0 (&i_boundary_0), 
