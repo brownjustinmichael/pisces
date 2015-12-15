@@ -3,7 +3,8 @@ compiler: gcc
 before_install:
     - sudo apt-get install libfftw3-dev libfftw3-doc
     - sudo apt-get install libboost-all-dev
-    - git clone git@github.com:jbeder/yaml-cpp.git
+    - wget https://github.com/jbeder/yaml-cpp/archive/master.zip
+    - unzip master.zip -d yaml-cpp
     - mkdir yaml-cpp/build
     - cd yaml-cpp/build
     - cmake ..
