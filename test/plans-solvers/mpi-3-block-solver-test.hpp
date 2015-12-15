@@ -21,7 +21,7 @@
 #include "plans-solvers/solvers/linalg-block/block_solver.hpp"
 #include <iostream>
 
-#define TEST_TINY 1.e-6
+#define TEST_TINY 1.e-4
 
 class mpi_solver_test_suite : public CxxTest::TestSuite
 {
