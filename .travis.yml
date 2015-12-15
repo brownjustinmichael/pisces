@@ -9,6 +9,7 @@ sudo: required
 addons:
     apt:
         packages:
+            - openmpi-bin
             - libopenmpi-dev
             - libfftw3-dev
             - libboost-all-dev
