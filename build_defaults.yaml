@@ -16,6 +16,5 @@ include_dirs:
     - "/usr/include"
 library_dirs:
     - "/usr/lib"
-    - "/usr/lib/x86_64-linux-gnu"
     
 env_vars: {}
