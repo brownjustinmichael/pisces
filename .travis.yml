@@ -11,12 +11,11 @@ addons:
         packages:
             - libfftw3-dev
             - libboost-all-dev
-            - libnetcdf-dev
-            - libnetcdfc++4-dev
             - libgsl0-dev
             - liblapack-dev
 
 before_install:
+	- sudo apt-get libnetcdf4-dev
     - wget https://github.com/jbeder/yaml-cpp/archive/master.zip
     - unzip master.zip -d yaml-cpp
     - mkdir yaml-cpp/yaml-cpp-master/build
