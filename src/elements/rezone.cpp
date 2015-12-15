@@ -34,7 +34,7 @@ namespace pisces
 		inter_messenger->allgatherv <double> (nn, &((*input_grid) [0]), &ns [0], &position_buffer [0]);
 		
 		// Iterate through the data
-		for (typename std::map <std::string, void *>::iterator iter = input_virtual_file->begin (); iter != input_virtual_file->end (); iter++) {
+		for (std::map <std::string, void *>::iterator iter = input_virtual_file->begin (); iter != input_virtual_file->end (); iter++) {
 			if (input_virtual_file->dims [iter->first] [1] != 1 && input_virtual_file->check_type <double> (iter->first)) {
 				TRACE ("Rezoning " << iter->first << "...");
 				
