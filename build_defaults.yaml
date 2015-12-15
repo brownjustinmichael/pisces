@@ -1,5 +1,5 @@
-include_mpi: False
-include_mp: False
+include_mpi: True
+include_mp: True
 dimensions: 2
 quiet: -1
 vertical_grid: 'chebyshev'
@@ -16,5 +16,5 @@ include_dirs:
     - "/usr/include"
 library_dirs:
     - "/usr/lib"
-    
+
 env_vars: {}
