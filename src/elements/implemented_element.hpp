@@ -101,8 +101,8 @@ namespace pisces
 			transform_threads = i_params.get <int> ("parallel.transform.subthreads");
 			
 			// Set up the grids
-			grids [0] = std::shared_ptr <grids::grid> (new typename grids::horizontal::grid (&i_axis_n));
-			grids [1] = std::shared_ptr <grids::grid> (new typename grids::vertical::grid (&i_axis_m));
+			grids [0] = std::shared_ptr <grids::grid> (new grids::horizontal::grid (&i_axis_n));
+			grids [1] = std::shared_ptr <grids::grid> (new grids::vertical::grid (&i_axis_m));
 			
 			value_buffer_vec.resize (i_messenger_ptr->get_np () * m * n);
 			value_buffer = &value_buffer_vec [0];
@@ -110,7 +110,7 @@ namespace pisces
 			inter_buffer = &inter_buffer_vec [0];
 			
 			// For every variable in the data object, add a corresponding equation and transformer
-			for (typename data::data::iterator iter = data.begin (); iter != data.end (); ++iter) {
+			for (data::data::iterator iter = data.begin (); iter != data.end (); ++iter) {
 				if ((*iter != "x") && (*iter != "z")) {
 					DEBUG ("Adding " << *iter);
 					element::add_equation (*iter, std::shared_ptr <plans::solvers::equation > (new plans::solvers::implemented_equation (data [*iter], i_messenger_ptr)));
@@ -250,9 +250,9 @@ namespace pisces
 		 ************************************************************************/
 		virtual std::shared_ptr <grids::grid> generate_grid (grids::axis *axis_ptr, int index = -1) {
 			if (index == 0) {
-				return std::shared_ptr <grids::grid> (new typename grids::horizontal::grid (axis_ptr));
+				return std::shared_ptr <grids::grid> (new grids::horizontal::grid (axis_ptr));
 			} else if (index == 1 || index == -1) {
-				return std::shared_ptr <grids::grid> (new typename grids::vertical::grid (axis_ptr));
+				return std::shared_ptr <grids::grid> (new grids::vertical::grid (axis_ptr));
 			} else {
 				throw 0;
 			}
@@ -282,18 +282,18 @@ namespace pisces
 				double temp [messenger_ptr->get_np () * 2];
 				temp [0] = axes [1].get_position_0 ();
 				temp [1] = axes [1].get_position_n ();
-				messenger_ptr->template gather <double> (2, temp, temp);
+				messenger_ptr->gather <double> (2, temp, temp);
 				for (int i = 0; i < messenger_ptr->get_np (); ++i) {
 					positions [i] = temp [2 * i];
 					DEBUG ("REZONING " << positions [i]);
 				}
 				positions [messenger_ptr->get_np ()] = temp [messenger_ptr->get_np () * 2 - 1];
 				DEBUG ("REZONING " << positions [messenger_ptr->get_np ()]);
-				messenger_ptr->template bcast <double> (messenger_ptr->get_np () + 1, positions);
+				messenger_ptr->bcast <double> (messenger_ptr->get_np () + 1, positions);
 			} else {
 				double temp [2] = {axes [1].get_position_0 (), axes [1].get_position_n ()};
-				messenger_ptr->template gather <double> (2, temp, temp);
-				messenger_ptr->template bcast <double> (messenger_ptr->get_np () + 1, positions);
+				messenger_ptr->gather <double> (2, temp, temp);
+				messenger_ptr->bcast <double> (messenger_ptr->get_np () + 1, positions);
 			}
 		}
 

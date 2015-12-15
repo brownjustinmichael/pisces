@@ -13,9 +13,9 @@ addons:
             - libboost-all-dev
             - libgsl0-dev
             - liblapack-dev
+            - libnetcdf-dev
 
 before_install:
-    - sudo apt-get install libnetcdf4-dev
     - wget https://github.com/jbeder/yaml-cpp/archive/master.zip
     - unzip master.zip -d yaml-cpp
     - mkdir yaml-cpp/yaml-cpp-master/build
@@ -24,5 +24,6 @@ before_install:
     - make
     - sudo make install
     - cd ../../..
+    - git clone git@github.com:Unidata/netcdf-cxx4.git
 
 script: scons
