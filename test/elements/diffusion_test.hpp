@@ -35,7 +35,7 @@ public:
 		parameters ["root"] = std::string (PISCES_ROOT) + "/test/elements/";
 		parameters ["output.cart.file"] = "diffusion_%02i";
 		parameters ["output.cart.every"] = 1;
-		// parameters ["output.output"] = false;
+		parameters ["output.output"] = false;
 		parameters ["dump.file"] = "";
 		
 		parameters ["time.stop"] = 1.0;
