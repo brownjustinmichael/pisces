@@ -115,4 +115,4 @@ print (objects [3] [0].abspath)
 
 # Add the tests, which can be run with scons check
 if cxxtest:
-    env.SConscript('../test/SConscript', variant_dir = "./test", duplicate = 0, exports = {'env': env, "objects": objects, "include_mp": include_mp})
+    env.SConscript('../test/SConscript', variant_dir = "./test", duplicate = 0, exports = {'env': env, "objects": objects, "include_mp": include_mp, "include_mpi": include_mpi})
