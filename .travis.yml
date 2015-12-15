@@ -33,7 +33,7 @@ before_install:
     - ls netcdf-cxx4
     - mkdir netcdf-cxx4/netcdf-cxx4-master/build
     - cd netcdf-cxx4/netcdf-cxx4-master/build
-    - cmake ..
+    - cmake .. -DCMAKE_INSTALL_PREFIX:PATH=/usr
     - make
     - sudo make install
     - cd ../../..
