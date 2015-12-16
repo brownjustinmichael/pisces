@@ -3,7 +3,7 @@ include_mp: True
 dimensions: 2
 quiet: -1
 vertical_grid: 'chebyshev'
-logger: None
+logger: 
 defaults: "src/defaults.yaml"
 
 cppcompiler: 

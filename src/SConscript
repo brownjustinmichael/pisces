@@ -34,8 +34,6 @@ if include_mpi:
 if cppcompiler is not None:
     env ["CXX"] = cppcompiler
 
-print (env ["CXX"])
-
 if ccompiler is not None:
     env ["CC"] = ccompiler
 

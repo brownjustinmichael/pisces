@@ -24,7 +24,9 @@ exports ["env"] = Environment (tools = ["default"], **os.environ)
 exports ["cxxtest"] = False
 if "check" in sys.argv:
 	exports ["cxxtest"] = True
-	exports ["cxxtestgen_location"] = "/usr/local/Cellar/cxxtest/4.4/libexec/bin/cxxtestgen"
-	exports ["env"].Tool ("cxxtest", CXXTEST = exports ["cxxtestgen_location"])
+	if "cxxtestgen_location" in exports:
+		exports ["env"].Tool ("cxxtest", CXXTEST = exports ["cxxtestgen_location"])
+	else:
+		exports ["env"].Tool ("cxxtest")
 
 exports ["env"].SConscript ("src/SConscript", variant_dir = "build/", duplicate = 0, exports = exports)
