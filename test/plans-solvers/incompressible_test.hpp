@@ -34,7 +34,8 @@ public:
 		double *z_ptr = z_velocity.ptr (real_spectral), *x_ptr = x_velocity.ptr (real_spectral);
 		mpi::messenger mess;
 
-		auto solver = plans::solvers::incompressible (&mess, NULL, NULL, data, data, x_velocity, z_velocity);
+		std::shared_ptr <boundaries::boundary> null;
+		auto solver = plans::solvers::incompressible (&mess, null, null, data, data, x_velocity, z_velocity);
 
 		solver.factorize ();
 
