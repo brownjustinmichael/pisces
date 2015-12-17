@@ -1,0 +1,4 @@
+*.cdf
+build_custom.yaml
+.sconf_temp/*
+.sconsign.dblite

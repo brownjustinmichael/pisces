@@ -23,11 +23,12 @@ time:
     stop: 100.0
     init: 1.0e-5
     max: 4.e-3
-    mult: 1.05
+    mult: 1.5
     down_mult: 0.8
     cfl: 0.4
     alpha: 1.00
     allow: 1000.0
+    increase_every: 100
 root: ./
 input:
     directory: input/

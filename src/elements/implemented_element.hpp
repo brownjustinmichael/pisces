@@ -63,6 +63,7 @@ namespace pisces
 		double init_timestep; //!< The starting timestep value
 		double mult_timestep; //!< The value by which to multiply or divide the timestep upon update
 		double down_mult_timestep; //!< The value by which to multiply or divide the timestep upon update
+		int check_every;
 		double next_timestep; //!< The value of the next timestep
 		int transform_threads; //!< The integer number of transform threads
 		static int mode; //!< The mode of the simulation (from grids)
@@ -93,6 +94,7 @@ namespace pisces
 			init_timestep = i_params.get <double> ("time.init");
 			mult_timestep = i_params.get <double> ("time.mult");
 			down_mult_timestep = i_params.get <double> ("time.down_mult");
+			increase_every = i_params.get <int> ("time.increase_every");
 			next_timestep = 0.0;
 			
 			// Initialize x and z
@@ -186,6 +188,7 @@ namespace pisces
 		 ************************************************************************/
 		inline double calculate_min_timestep (formats::virtual_file *virtual_file = NULL, bool limiters = true) {
 			double shared_min = max_timestep;
+			static int count = 0;
 			
 			// Calculate the minimum timestep in parallel
 			#pragma omp parallel
@@ -211,11 +214,16 @@ namespace pisces
 				}
 				if (shared_min * down_mult_timestep > timestep) {
 					// If the minimum is larger than the current, increase the timestep
-					next_timestep = 0.0;
-					return std::min (mult_timestep * timestep, max_timestep);
+					count++;
+					if (count % increase_every == 0) {
+						return std::min (mult_timestep * timestep, max_timestep);
+					} else {
+						return timestep;
+					}
 				}
 				if (shared_min < timestep) {
 					// If the minimum is lower than the current, decrease the timestep
+					count = 0;
 					return shared_min * down_mult_timestep;
 				} else {
 					return timestep;

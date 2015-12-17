@@ -10,6 +10,10 @@
 
 #include "plans/plan.hpp"
 #include "plans/diffusion.hpp"
+#include "plans/advection.hpp"
+#include "plans-solvers/boundaries/implemented_boundary.hpp"
+#include "plans-solvers/solvers.hpp"
+
 
 namespace pisces
 {
@@ -22,48 +26,22 @@ namespace pisces
 	boussinesq_element (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags) {
 		TRACE ("Initializing...");
 		
-		std::string variable;
-		for (YAML::const_iterator iter = i_params ["equations"].begin (); iter != i_params ["equations"].end (); ++iter) {
-			variable = iter->first.as <std::string> ();
-			INFO ("Setting up " << variable);
-			io::parameters::alias terms (i_params, "equations." + variable);
-			if (terms ["ignore"].IsDefined () && terms ["ignore"].as <bool> ()) {
-				continue;
-			}
-			
-			int m = i_axis_m.get_n ();
-			diffusion [variable].resize (m);
-			
-			if (terms ["diffusion"].IsDefined ()) {
-				for (int i = 0; i < m; ++i) {
-					diffusion [variable] [i] = terms ["diffusion"].as <double> ();
-				}
-				
-				if (terms ["bg_diffusion"].IsDefined ()) {
-					double lo_diffusion = 1.0e-6;
-					double hi_diffusion = terms ["bg_diffusion"].as <double> () - terms ["diffusion"].as <double> ();
-					double diff_width = 0.2;
-					if (terms ["diff_width"].IsDefined ()) {
-						diff_width = terms ["diff_width"].as <double> ();
-					}
-					for (int i = 0; i < m; ++i) {
-						diffusion [variable] [i] = exp (atan (ptr ("z") [i] / diff_width) * (log (hi_diffusion) - log(lo_diffusion)) / 3.14159 + log (lo_diffusion) + (log (hi_diffusion) - log (lo_diffusion)) / 2.0);
-						DEBUG ("Diffusion: " << diffusion [variable] [i]);
-					}
+		data.initialize ("temperature_diffusion", uniform_n);
+		for (int j = 0; j < m; ++j)
+		{
+			data ["temperature_diffusion"] [j] = params ["equations.temperature.diffusion"].as <double> ();
+		}
 
-					equations [variable]->add_plan (typename diffusion::background_vertical::factory (1.0, &(diffusion [variable] [0])));
-					equations [variable]->add_plan (typename diffusion::background_horizontal::factory (1.0, &(diffusion [variable] [0])));
-				}
-			
-				if (terms ["variable_diffusion"].IsDefined ()) {
-					DEBUG ("Implementing...");
-					equations [variable]->add_plan (typename diffusion::linear::factory (terms ["variable_diffusion.coefficient"].as <double> (), terms ["variable_diffusion.min"].IsDefined () ? terms ["variable_diffusion.min"].as <double> () : -(terms ["diffusion"].as <double> ()), (*this) [terms ["variable_diffusion.source"].as <std::string> ()], &diffusion [variable] [0], 100));
-				}
-			} else if (terms ["variable_diffusion"].IsDefined ()) {
-				FATAL ("Can't use variable diffusion without base diffusion yet.");
-				throw 0;
-			}
+		if (!(i_params ["equations.temperature.ignore"].IsDefined () && i_params ["equations.temperature.ignore"].as <bool> ())) {
+			*split_solver (equations ["temperature"], timestep, 
+				neumann (i_params ["equations.temperature.bottom.value"].as <double> ()), 
+				dirichlet (i_params ["equations.temperature.top.value"].as <double> ())) 
+			+ params ["equations.temperature.advection"] * advec (data ["x_velocity"], data ["z_velocity"])
+			== 
+			params ["equations.temperature.sources.z_velocity"] * src (data ["z_velocity"])
+			+ bg_diff (data ["temperature_diffusion"].ptr ());
 
+			if (i_params ["equations.temperature.linear"].IsDefined ()) *equations ["temperature"] == std::shared_ptr <plans::plan::factory> (new plans::diffusion::linear::factory (i_params ["equations.temperature.linear"].as <double> (), -1.0, data ["composition"], data ["temperature_diffusion"].ptr (), 10000));
 		}
 		TRACE ("Initialized.");
 	}
