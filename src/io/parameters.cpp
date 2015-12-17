@@ -90,6 +90,6 @@ namespace io
 		// }
 		// DEBUG ("FOUND " << nodes [tokens.size () - 1]);
 		// if (!(nodes [tokens.size () - 1].IsDefined ())) WARN ("Key " << key << " is not defined.");
-		return parameters (nodes [tokens.size () - 1], key);
+		return parameters (nodes [tokens.size () - 1], path + key);
 	}
 } /* io */

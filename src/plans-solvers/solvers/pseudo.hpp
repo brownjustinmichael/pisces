@@ -138,8 +138,8 @@ namespace plans
 				mpi::messenger *messenger_ptr; //!< A pointer to the mpi messenger object for the solver to be constructed
 				std::shared_ptr <boundaries::boundary> boundary_0; //!< A shared pointer to the top boundary for the solver to be constructed
 				std::shared_ptr <boundaries::boundary> boundary_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
-				typename boundaries::boundary::factory *boundary_factory_0; //!< A shared pointer to the top boundary for the solver to be constructed
-				typename boundaries::boundary::factory *boundary_factory_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
+				boundaries::boundary::factory *boundary_factory_0; //!< A shared pointer to the top boundary for the solver to be constructed
+				boundaries::boundary::factory *boundary_factory_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
 				double gamma;
 				plans::solvers::equation &equation_x; //!< A reference to the x-component equation
 				plans::solvers::equation &equation_z; //!< A reference to the z-component equation
@@ -177,7 +177,7 @@ namespace plans
 				 * @param i_pressure The pointer to the pressure data
 				 * @param i_gamma The ratio of specific heats
 				 ************************************************************************/
-				factory (mpi::messenger *i_messenger_ptr, typename boundaries::boundary::factory &i_boundary_0, typename boundaries::boundary::factory &i_boundary_n, plans::solvers::equation &i_equation_x, plans::solvers::equation &i_equation_z, double *i_density, double *i_pressure, double i_gamma = 5. / 3.) : 
+				factory (mpi::messenger *i_messenger_ptr, boundaries::boundary::factory &i_boundary_0, boundaries::boundary::factory &i_boundary_n, plans::solvers::equation &i_equation_x, plans::solvers::equation &i_equation_z, double *i_density, double *i_pressure, double i_gamma = 5. / 3.) : 
 				messenger_ptr (i_messenger_ptr), 
 				boundary_factory_0 (&i_boundary_0), 
 				boundary_factory_n (&i_boundary_n), 

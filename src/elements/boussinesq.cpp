@@ -39,31 +39,31 @@ namespace data
 		// Set up the data from the input file in params
 		TRACE ("Setting up from input...");
 		i_params ["input.directory"] = i_params ["root"].as <std::string> () + "/" + i_params ["input.directory"].as <std::string> ();
-		this->template setup_from <formats::netcdf> (i_params ["input"]);
+		this->setup_from <formats::netcdf> (i_params ["input"]);
 		
 		i_params ["output.directory"] = i_params ["root"].as <std::string> () + "/" + i_params ["output.directory"].as <std::string> ();
 
 		TRACE ("Setting up cartesian output...");
-		std::shared_ptr <io::output> stream = this->template setup_output_from <formats::netcdf> (i_params ["output.cart"]);
-		// stream->template append <double> ("div_u", std::shared_ptr <typename functors::div_functor <double>> (new functors::div_functor <double> ((*this) ["x"].ptr (), (*this) ["z"].ptr (), (*this) ["x_velocity"].ptr (), (*this) ["z_velocity"].ptr (), n, m)));
+		std::shared_ptr <io::output> stream = this->setup_output_from <formats::netcdf> (i_params ["output.cart"]);
+		// stream->append <double> ("div_u", std::shared_ptr <functors::div_functor <double>> (new functors::div_functor <double> ((*this) ["x"].ptr (), (*this) ["z"].ptr (), (*this) ["x_velocity"].ptr (), (*this) ["z_velocity"].ptr (), n, m)));
 
 		TRACE ("Setting up transformed output...");
-		stream = this->template setup_output_from <formats::netcdf> (i_params ["output.trans"], real_spectral);
-		// stream->template append <double> ("div_u", std::shared_ptr <typename functors::transform_div_functor <double>> (new functors::transform_div_functor <double> ((*this) ["x"].ptr (), (*this) ["z"].ptr (), (*this) ["x_velocity"].ptr (), (*this) ["z_velocity"].ptr (), n, m)));
+		stream = this->setup_output_from <formats::netcdf> (i_params ["output.trans"], real_spectral);
+		// stream->append <double> ("div_u", std::shared_ptr <functors::transform_div_functor <double>> (new functors::transform_div_functor <double> ((*this) ["x"].ptr (), (*this) ["z"].ptr (), (*this) ["x_velocity"].ptr (), (*this) ["z_velocity"].ptr (), n, m)));
 
 		TRACE ("Setting up stat output...");
 		std::shared_ptr <io::output> stat_stream =
-		this->template setup_output_from <formats::netcdf> (i_params ["output.stat"], real_real, no_variables);
+		this->setup_output_from <formats::netcdf> (i_params ["output.stat"], real_real, no_variables);
 
 		if (!stat_stream) return;
 
-		for (typename data::iterator iter = this->begin (); iter != this->end (); ++iter) {
+		for (data::iterator iter = this->begin (); iter != this->end (); ++iter) {
 			// For each data variable, output z_flux, average derivative across the center, average and max
 			std::string variable = *iter;
-			stat_stream->template append <double> ("max_" + variable, this->output_max (variable), formats::scalar);
-			stat_stream->template append <double> ("avg_" + variable, this->output_avg (variable), formats::scalar);
-			stat_stream->template append <double> ("deriv_" + variable, this->output_deriv (variable), formats::scalar);
-			stat_stream->template append <double> ("flux_" + variable, this->output_flux (variable, "z_velocity"), formats::scalar);
+			stat_stream->append <double> ("max_" + variable, this->output_max (variable), formats::scalar);
+			stat_stream->append <double> ("avg_" + variable, this->output_avg (variable), formats::scalar);
+			stat_stream->append <double> ("deriv_" + variable, this->output_deriv (variable), formats::scalar);
+			stat_stream->append <double> ("flux_" + variable, this->output_flux (variable, "z_velocity"), formats::scalar);
 		}
 	}
 } /* data */

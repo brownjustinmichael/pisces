@@ -10,6 +10,7 @@
 
 #include "mpi/messenger.hpp"
 #include <vector>
+#include <memory>
 #include <stdio.h>
 #include <cstdlib>
 #include <ctime>
@@ -255,144 +256,144 @@ public:
 	}
 	
 	void test_block_banded_solve () {
-		int id = process_messenger->get_id ();
-		int np = process_messenger->get_np ();
-		int n = 60, nrhs = 10, ntop = 0, nbot = 0;
+		// int id = process_messenger->get_id ();
+		// int np = process_messenger->get_np ();
+		// int n = 60, nrhs = 10, ntop = 0, nbot = 0;
 
-		logger::log_config::set_severity (1);
+		// logger::log_config::set_severity (1);
 
-		int ku = 1, kl = 2;
-		if (id != 0) {
-			ntop = ku;
-		}
-		if (id != np - 1) {
-			nbot = kl;
-		}
-		int lda = ku + 2 * kl + 1 + 4;
-		int ldaa = n + ku + kl + 8;
-		int ldb = ldaa + 10;
+		// int ku = 1, kl = 2;
+		// if (id != 0) {
+		// 	ntop = ku;
+		// }
+		// if (id != np - 1) {
+		// 	nbot = kl;
+		// }
+		// int lda = ku + 2 * kl + 1 + 4;
+		// int ldaa = n + ku + kl + 8;
+		// int ldb = ldaa + 10;
 
-		std::vector <double> matrix (lda * ldaa * nrhs, 0.0);
-		std::vector <double> matrixcopy (lda * ldaa * nrhs, 0.0);
-		std::vector <double> bufferl (kl * nrhs * n, 0.0), bufferr (ku * nrhs * n, 0.0), buffer (nrhs * 4 * (ku + kl) * (ku + kl) * 3);
-		std::vector <int> ipiv (n * nrhs, 0);
+		// std::vector <double> matrix (lda * ldaa * nrhs, 0.0);
+		// std::vector <double> matrixcopy (lda * ldaa * nrhs, 0.0);
+		// std::vector <double> bufferl (kl * nrhs * n, 0.0), bufferr (ku * nrhs * n, 0.0), buffer (nrhs * 4 * (ku + kl) * (ku + kl) * 3);
+		// std::vector <int> ipiv (n * nrhs, 0);
 
-		std::vector <double> x ((ku + kl) * (ku + kl) * 4 * np * np * nrhs, 0.0);
-		std::vector <int> xipiv (2 * (ku + kl) * np * nrhs, 0);
+		// std::vector <double> x ((ku + kl) * (ku + kl) * 4 * np * np * nrhs, 0.0);
+		// std::vector <int> xipiv (2 * (ku + kl) * np * nrhs, 0);
 
-		std::vector <double> b (ldb * nrhs, 0.0);
-		std::vector <double> bcopy (ldb * nrhs, 0.0);
+		// std::vector <double> b (ldb * nrhs, 0.0);
+		// std::vector <double> bcopy (ldb * nrhs, 0.0);
 	
-		for (int i = 0; i < 10; ++i) {
-			int info;
+		// for (int i = 0; i < 10; ++i) {
+		// 	int info;
 
-			srand (1);
-			for (int i = 0; i < n; ++i) {
-				for (int j = 0; j < nrhs; ++j) {
-					for (int k = kl; k < 2 * kl + ku + 1; ++k) {
-						matrix [j * lda * ldaa + (i + kl) * lda + k] = rand () % 100;
-						matrixcopy [j * lda * ldaa + (i + kl) * lda + k] = matrix [j * lda * ldaa + (i + kl) * lda + k];
-					}
-					b [j * ldb + i + kl] = rand () % 100;
-					bcopy [j * ldb + i + kl] = b [j * ldb + i + kl];
-				}
-			}
+		// 	srand (1);
+		// 	for (int i = 0; i < n; ++i) {
+		// 		for (int j = 0; j < nrhs; ++j) {
+		// 			for (int k = kl; k < 2 * kl + ku + 1; ++k) {
+		// 				matrix [j * lda * ldaa + (i + kl) * lda + k] = rand () % 100;
+		// 				matrixcopy [j * lda * ldaa + (i + kl) * lda + k] = matrix [j * lda * ldaa + (i + kl) * lda + k];
+		// 			}
+		// 			b [j * ldb + i + kl] = rand () % 100;
+		// 			bcopy [j * ldb + i + kl] = b [j * ldb + i + kl];
+		// 		}
+		// 	}
 	
-			if (id != 0) {
-				for (int j = 0; j < nrhs; ++j) {
-					for (int i = 0; i < kl; ++i) {
-						for (int k = 2 * kl + ku - i; k < 2 * kl + ku + 1; ++k) {
-							matrix [j * lda * ldaa + (i) * lda + k] = rand () % 100;
-							matrixcopy [j * lda * ldaa + (i) * lda + k] = matrix [j * lda * ldaa + i * lda + k];
-						}
-					}
-				}
-			}
-			for (int j = 0; j < nrhs; ++j) {
-				for (int i = kl; i < kl + ku; ++i) {
-					for (int k = kl; k < 2 * kl + ku - i; ++k) {
-						matrix [j * lda * ldaa + (i) * lda + k] = 0.0;
-						matrixcopy [j * lda * ldaa + (i) * lda + k] = matrix [j * lda * ldaa + i * lda + k];
-					}
-				}
-			}
+		// 	if (id != 0) {
+		// 		for (int j = 0; j < nrhs; ++j) {
+		// 			for (int i = 0; i < kl; ++i) {
+		// 				for (int k = 2 * kl + ku - i; k < 2 * kl + ku + 1; ++k) {
+		// 					matrix [j * lda * ldaa + (i) * lda + k] = rand () % 100;
+		// 					matrixcopy [j * lda * ldaa + (i) * lda + k] = matrix [j * lda * ldaa + i * lda + k];
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		// 	for (int j = 0; j < nrhs; ++j) {
+		// 		for (int i = kl; i < kl + ku; ++i) {
+		// 			for (int k = kl; k < 2 * kl + ku - i; ++k) {
+		// 				matrix [j * lda * ldaa + (i) * lda + k] = 0.0;
+		// 				matrixcopy [j * lda * ldaa + (i) * lda + k] = matrix [j * lda * ldaa + i * lda + k];
+		// 			}
+		// 		}
+		// 	}
 
-			if (id != np - 1) {
-				for (int j = 0; j < nrhs; ++j) {
-					for (int i = kl + n; i < kl + n + ku; ++i) {
-						for (int k = kl; k < 2 * kl + ku - i + n; ++k) {
-							matrix [j * lda * ldaa + (i) * lda + k] = rand () % 100;
-							matrixcopy [j * lda * ldaa + (i) * lda + k] = matrix [j * lda * ldaa + i * lda + k];
-						}
-					}
-				}
-			}
-			for (int j = 0; j < nrhs; ++j) {
-				for (int i = n; i < kl + n; ++i) {
-					for (int k = 2 * kl + ku - i + n; k < 2 * kl + ku + 1; ++k) {
-						matrix [j * lda * ldaa + (i) * lda + k] = 0.0;
-						matrixcopy [j * lda * ldaa + (i) * lda + k] = matrix [j * lda * ldaa + i * lda + k];
-					}
-				}
-			}
+		// 	if (id != np - 1) {
+		// 		for (int j = 0; j < nrhs; ++j) {
+		// 			for (int i = kl + n; i < kl + n + ku; ++i) {
+		// 				for (int k = kl; k < 2 * kl + ku - i + n; ++k) {
+		// 					matrix [j * lda * ldaa + (i) * lda + k] = rand () % 100;
+		// 					matrixcopy [j * lda * ldaa + (i) * lda + k] = matrix [j * lda * ldaa + i * lda + k];
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		// 	for (int j = 0; j < nrhs; ++j) {
+		// 		for (int i = n; i < kl + n; ++i) {
+		// 			for (int k = 2 * kl + ku - i + n; k < 2 * kl + ku + 1; ++k) {
+		// 				matrix [j * lda * ldaa + (i) * lda + k] = 0.0;
+		// 				matrixcopy [j * lda * ldaa + (i) * lda + k] = matrix [j * lda * ldaa + i * lda + k];
+		// 			}
+		// 		}
+		// 	}
 
-			try {
-				linalg::block::banded_factorize (id, np, n + (nbot == 0 ? 0 : -nbot) + (ntop == 0 ? 0 : -ntop), kl, ku, &matrix [0], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &buffer [0], &info, nrhs, lda, ldaa);
+		// 	try {
+		// 		linalg::block::banded_factorize (id, np, n + (nbot == 0 ? 0 : -nbot) + (ntop == 0 ? 0 : -ntop), kl, ku, &matrix [0], &ipiv [0], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &buffer [0], &info, nrhs, lda, ldaa);
 
-				linalg::block::banded_solve (id, np, n + (nbot == 0 ? 0 : -nbot) + (ntop == 0 ? 0 : -ntop), kl, ku, &matrix [0], &ipiv [0], &b [kl], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &buffer [0], &info, nrhs, lda, ldaa, ldb);
-			} catch (std::exception& except) {
-				std::cout << except.what () << '\n';
-			}
+		// 		linalg::block::banded_solve (id, np, n + (nbot == 0 ? 0 : -nbot) + (ntop == 0 ? 0 : -ntop), kl, ku, &matrix [0], &ipiv [0], &b [kl], &x [0], &xipiv [0], &bufferl [0], &bufferr [0], &buffer [0], &info, nrhs, lda, ldaa, ldb);
+		// 	} catch (std::exception& except) {
+		// 		std::cout << except.what () << '\n';
+		// 	}
 
-			std::vector <double> edge_0 (nrhs * ku), edge_n (nrhs * kl), redge_0 (nrhs * kl), redge_n (nrhs * ku);
+		// 	std::vector <double> edge_0 (nrhs * ku), edge_n (nrhs * kl), redge_0 (nrhs * kl), redge_n (nrhs * ku);
 
-			for (int i = 0; i < nrhs; ++i) {
-				for (int j = 0; j < ku; ++j) {
-					edge_0 [i * ku + j] = b [i * ldb + j + kl];
-				}
-				for (int j = 0; j < kl; ++j) {
-					edge_n [i * kl + j] = b [i * ldb + n + j];
-				}
-			}
+		// 	for (int i = 0; i < nrhs; ++i) {
+		// 		for (int j = 0; j < ku; ++j) {
+		// 			edge_0 [i * ku + j] = b [i * ldb + j + kl];
+		// 		}
+		// 		for (int j = 0; j < kl; ++j) {
+		// 			edge_n [i * kl + j] = b [i * ldb + n + j];
+		// 		}
+		// 	}
 
-			if (id != 0) {
-				process_messenger->send (nrhs * ku, &edge_0 [0], id - 1, 0);
-			}
-			if (id != np - 1) {
-				process_messenger->recv (nrhs * ku, &redge_n [0], id + 1, 0);
-			}
-			if (id != np - 1) {
-				process_messenger->send (nrhs * kl, &edge_n [0], id + 1, 1);
-			}
-			if (id != 0) {
-				process_messenger->recv (nrhs * kl, &redge_0 [0], id - 1, 1);
-			}
+		// 	if (id != 0) {
+		// 		process_messenger->send (nrhs * ku, &edge_0 [0], id - 1, 0);
+		// 	}
+		// 	if (id != np - 1) {
+		// 		process_messenger->recv (nrhs * ku, &redge_n [0], id + 1, 0);
+		// 	}
+		// 	if (id != np - 1) {
+		// 		process_messenger->send (nrhs * kl, &edge_n [0], id + 1, 1);
+		// 	}
+		// 	if (id != 0) {
+		// 		process_messenger->recv (nrhs * kl, &redge_0 [0], id - 1, 1);
+		// 	}
 
-			for (int i = 0; i < nrhs; ++i) {
-				for (int j = 0; j < kl; ++j) {
-					b [i * ldb + j] = redge_0 [i * kl + j];
-				}
-				for (int j = 0; j < kl; ++j) {
-					b [i * ldb + n + kl + j] = redge_n [i * ku + j];
-				}
-			}
+		// 	for (int i = 0; i < nrhs; ++i) {
+		// 		for (int j = 0; j < kl; ++j) {
+		// 			b [i * ldb + j] = redge_0 [i * kl + j];
+		// 		}
+		// 		for (int j = 0; j < kl; ++j) {
+		// 			b [i * ldb + n + kl + j] = redge_n [i * ku + j];
+		// 		}
+		// 	}
 
-			for (int j = 0; j < nrhs; ++j) {
-				for (int i = 0; i < n + kl + ku; ++i) {
-					for (int k = -ku; k < kl + 1; ++k) {
-						if (i + k >= 0 && i + k < n + kl + ku) {
-							bcopy [j * ldb + k + i] -= matrixcopy [j * lda * ldaa + (i) * lda + k + kl + ku] * b [j * ldb + i];
-						}
-					}
-				}
-			}
+		// 	for (int j = 0; j < nrhs; ++j) {
+		// 		for (int i = 0; i < n + kl + ku; ++i) {
+		// 			for (int k = -ku; k < kl + 1; ++k) {
+		// 				if (i + k >= 0 && i + k < n + kl + ku) {
+		// 					bcopy [j * ldb + k + i] -= matrixcopy [j * lda * ldaa + (i) * lda + k + kl + ku] * b [j * ldb + i];
+		// 				}
+		// 			}
+		// 		}
+		// 	}
 
-			for (int j = 0; j < nrhs; ++j) {
-				for (int i = 0; i < kl + ku + n; ++i) {
-					TSM_ASSERT_DELTA ("Banded block solver failure", bcopy [j * ldb + i], 0.0, TEST_TINY);
-				}
-			}
-		}
+		// 	for (int j = 0; j < nrhs; ++j) {
+		// 		for (int i = 0; i < kl + ku + n; ++i) {
+		// 			TSM_ASSERT_DELTA ("Banded block solver failure", bcopy [j * ldb + i], 0.0, TEST_TINY);
+		// 		}
+		// 	}
+		// }
 	}
 };
 

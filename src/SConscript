@@ -88,7 +88,7 @@ for dirname, dirnames, filenames in os.walk (path):
         for filename in filenames:
             if filename == "SConscript":
                 # Load any SConscript files found
-                env.SConscript(dirname + '/' + filename, duplicate = 0, exports = {'env': env, "objects": objects, "include_mp": include_mp})
+                env.SConscript(dirname + '/' + filename, duplicate = 0, exports = {'env': env, "objects": objects, "include_mp": include_mp, "logger": logger})
                 
             if filename.split ('.') [-1] == 'cpp':
                 # Add any .cpp files found to the list of objects to compile
@@ -97,6 +97,7 @@ for dirname, dirnames, filenames in os.walk (path):
 # Occasionally, the code won't work without the gfortran library, so check for it
 conf = Configure (env)
 conf.CheckLib ("gfortran")
+conf.CheckLib ("curl")
 env = conf.Finish ()
 
 # Compile the main code
@@ -113,4 +114,4 @@ print (objects [3] [0].abspath)
 
 # Add the tests, which can be run with scons check
 if cxxtest:
-    env.SConscript('../test/SConscript', variant_dir = "./test", duplicate = 0, exports = {'env': env, "objects": objects, "include_mp": include_mp})
+    env.SConscript('../test/SConscript', variant_dir = "./test", duplicate = 0, exports = {'env': env, "objects": objects, "include_mp": include_mp, "include_mpi": include_mpi})

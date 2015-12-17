@@ -1,0 +1,20 @@
+include_mpi: True
+include_mp: True
+dimensions: 2
+quiet: -1
+vertical_grid: 'chebyshev'
+logger: 
+defaults: "src/defaults.yaml"
+
+cppcompiler: 
+ccompiler: 
+compiler_flags: []
+
+cxxtestgen_location: "/usr/local/Cellar/cxxtest/4.4/libexec/bin/cxxtestgen"
+
+include_dirs:
+    - "/usr/include"
+library_dirs:
+    - "/usr/lib"
+
+env_vars: {}

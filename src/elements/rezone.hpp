@@ -112,10 +112,10 @@ namespace pisces
 				}
 				positions [np] = old_positions [np];
 				// Broadcast the new positions
-				messenger_ptr->template bcast <double> (np + 1, positions);
+				messenger_ptr->bcast <double> (np + 1, positions);
 			} else {
 				// Receive the new positions
-				messenger_ptr->template bcast <double> (np + 1, positions);
+				messenger_ptr->bcast <double> (np + 1, positions);
 			}
 			// Iterate forward through the data, checking that the mininum and maximum sizes are obeyed
 			old_positions [0] = positions [0];

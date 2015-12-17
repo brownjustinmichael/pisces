@@ -34,7 +34,7 @@
 		return i_factory * (-1.);
 	}
 
-	std::shared_ptr <typename plan::factory> operator* (std::shared_ptr <typename plan::factory> i_factory, double scalar) {
+	std::shared_ptr <plan::factory> operator* (std::shared_ptr <plan::factory> i_factory, double scalar) {
 		i_factory->coeff *= scalar;
 		return i_factory;
 	}

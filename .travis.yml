@@ -1,0 +1,50 @@
+language: c++
+compiler: gcc
+
+# Setting sudo to false opts in to Travis-CI container-based builds.
+sudo: required
+
+# The apt packages below are needed for sphinx builds, which can no longer
+# be installed with sudo apt-get.
+addons:
+    apt:
+        packages:
+            - openmpi-bin
+            - libopenmpi-dev
+            - libfftw3-dev
+            - libboost-all-dev
+            - libgsl0-dev
+            - liblapack-dev
+            - libnetcdf-dev
+            - cmake
+        sources:
+            - kubuntu-backports
+
+env: CXXTEST=/usr/bin/cxxtestgen
+
+before_install:
+    - wget https://github.com/CxxTest/cxxtest/archive/master.zip
+    - unzip master.zip
+    - sudo mv cxxtest-master/bin/* /usr/bin
+    - sudo mv cxxtest-master/cxxtest /usr/include
+    - cd cxxtest-master/python
+    - sudo python setup.py install
+    - cd ../..
+    - rm master.zip
+    - wget https://github.com/jbeder/yaml-cpp/archive/master.zip
+    - unzip master.zip
+    - mkdir yaml-cpp-master/build
+    - cd yaml-cpp-master/build
+    - cmake ..
+    - make
+    - sudo make install
+    - cd ../..
+    - wget https://github.com/Unidata/netcdf-cxx4/archive/v4.2.1.zip
+    - unzip v4.2.1.zip
+    - cd netcdf-cxx4-4.2.1
+    - ./configure --disable-shared
+    - make
+    - sudo make install
+    - cd ..
+
+script: scons check

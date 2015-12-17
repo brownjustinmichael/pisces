@@ -125,8 +125,8 @@ namespace plans
 				mpi::messenger *messenger_ptr; //!< A pointer to the mpi messenger object for the solver to be constructed
 				std::shared_ptr <boundaries::boundary> boundary_0; //!< A shared pointer to the top boundary for the solver to be constructed
 				std::shared_ptr <boundaries::boundary> boundary_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
-				typename boundaries::boundary::factory *boundary_factory_0; //!< A shared pointer to the top boundary for the solver to be constructed
-				typename boundaries::boundary::factory *boundary_factory_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
+				boundaries::boundary::factory *boundary_factory_0; //!< A shared pointer to the top boundary for the solver to be constructed
+				boundaries::boundary::factory *boundary_factory_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
 				plans::solvers::equation &equation_x; //!< A reference to the x-component equation
 				plans::solvers::equation &equation_z; //!< A reference to the z-component equation
 
@@ -147,7 +147,7 @@ namespace plans
 				 * \param i_equation_x A reference to the x-component equation
 				 * \param i_equation_z A reference to the z-component equation
 				 ************************************************************************/
- 				factory (mpi::messenger *i_messenger_ptr, typename boundaries::boundary::factory &i_boundary_0, typename boundaries::boundary::factory &i_boundary_n, plans::solvers::equation &i_equation_x, plans::solvers::equation &i_equation_z) : messenger_ptr (i_messenger_ptr), boundary_factory_0 (&i_boundary_0), boundary_factory_n (&i_boundary_n), equation_x (i_equation_x), equation_z (i_equation_z) {}
+ 				factory (mpi::messenger *i_messenger_ptr, boundaries::boundary::factory &i_boundary_0, boundaries::boundary::factory &i_boundary_n, plans::solvers::equation &i_equation_x, plans::solvers::equation &i_equation_z) : messenger_ptr (i_messenger_ptr), boundary_factory_0 (&i_boundary_0), boundary_factory_n (&i_boundary_n), equation_x (i_equation_x), equation_z (i_equation_z) {}
 				
 				virtual ~factory () {}
 				

@@ -38,7 +38,7 @@ public:
 		parameters ["output.trans.file"] = "convect_t_%02i";
 		parameters ["output.trans.every"] = 100;
 
-		// parameters ["output.output"] = false;
+		parameters ["output.output"] = false;
 		parameters ["dump.file"] = "";
 		
 		parameters ["time.stop"] = 1.0;

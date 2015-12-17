@@ -116,7 +116,13 @@ namespace plans
 		 * @param i_coeff A coefficient to multiply the results of the plan operation
 		 ************************************************************************/
 		plan (grids::variable &i_data_in, int state = 0, double i_coeff = 1.0) :
-		plan (i_data_in, i_data_in, state, state, i_coeff) {}
+		coeff (i_coeff), 
+		data_in (i_data_in.ptr (state)),
+		data_out (i_data_in.ptr (state)),
+		var_in (i_data_in),
+		var_out (i_data_in),
+		element_flags (i_data_in.element_flags),
+		component_flags (i_data_in.component_flags) {}
 		
 		virtual ~plan () {}
 		
@@ -353,7 +359,7 @@ namespace plans
 	 * @return [description]
 	 */
 	template <class type>
-	typename plan::factory_container operator- (std::shared_ptr <typename plan::factory> i_factory, type i_other) {
+	plan::factory_container operator- (std::shared_ptr <plan::factory> i_factory, type i_other) {
 		return i_factory + (-1.) * i_other;
 	}
 
@@ -373,7 +379,7 @@ namespace plans
 	 * 
 	 * @return The shared pointer to the factory
 	 */
-	std::shared_ptr <typename plan::factory> operator* (std::shared_ptr <typename plan::factory> i_factory, double scalar);
+	std::shared_ptr <plan::factory> operator* (std::shared_ptr <plan::factory> i_factory, double scalar);
 
 	/**
 	 * @brief Multiply the coefficient of a shared pointer of a factory by a YAML Node
@@ -395,7 +401,7 @@ namespace plans
 	 * @return The factory container with the new coefficients
 	 */
 
-	typename plan::factory_container operator* (double scalar, typename plan::factory_container i_container);
+	plan::factory_container operator* (double scalar, plan::factory_container i_container);
 
 	/**
 	 * @brief If ever in an instance where the YAML node is first in the multiplication, reverse them

@@ -221,14 +221,14 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc equation::add_solver(const typename solver<double>::factory&,int)
 			 ************************************************************************/
-			virtual void add_solver (const typename plans::solvers::solver::factory &i_factory, int flags = 0x00) {
+			virtual void add_solver (const plans::solvers::solver::factory &i_factory, int flags = 0x00) {
 				plans::solvers::implemented_equation::add_solver (i_factory.instance (data, data, *cor_rhs_ptr), flags);
 			}
 			
 			/*!**********************************************************************
 			 * \copydoc equation::add_plan(const typename plan<double>::factory&)
 			 ************************************************************************/
-			void add_plan (const typename plans::plan::factory &i_factory) {
+			void add_plan (const plans::plan::factory &i_factory) {
 				TRACE ("Adding plan...");
 				double* matrices [2] = {matrix_ptr (0), matrix_ptr (1)};
 				plans::solvers::equation::add_plan (i_factory.instance (matrices, data, *new_rhs_ptr));
@@ -237,7 +237,7 @@ namespace plans
 			/*!**********************************************************************
 			 * \copydoc equation::add_plan(const typename plan<double>::factory_container&)
 			 ************************************************************************/
-			void add_plan (const typename plans::plan::factory_container &i_container) {
+			void add_plan (const plans::plan::factory_container &i_container) {
 				TRACE ("Adding plan...");
 				for (int i = 0; i < (int) i_container.facts.size (); ++i)
 				{

@@ -15,9 +15,9 @@ namespace pisces
 	//
 	// template class element;
 
-	std::map <std::string, implemented_element::element_function *> & implemented_element::registry()
+	std::map <std::string, implemented_element::element_function> & implemented_element::registry()
 	{
-	    static std::map <std::string, implemented_element::element_function *> impl;
+	    static std::map <std::string, implemented_element::element_function> impl;
 	    return impl;
 	}
 

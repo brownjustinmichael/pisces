@@ -1,8 +1,16 @@
 Import ("env")
+Import ("logger")
 
 conf = Configure (env)
 
-if conf.CheckLib ("log4cplus"):
-    env.Append (CPPFLAGS = ["-D_LOG4CPLUS"])
+if logger is None:
+	if conf.CheckLib ("log4cplus"):
+	    env.Append (CPPFLAGS = ["-D_LOG4CPLUS"])
+
+if logger is "log4cplus":
+	if conf.CheckLib ("log4cplus"):
+	    env.Append (CPPFLAGS = ["-D_LOG4CPLUS"])
+	else:
+		raise RuntimeError ("Missing log4cplus library")
 
 env = conf.Finish ()

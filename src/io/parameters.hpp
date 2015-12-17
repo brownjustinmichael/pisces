@@ -37,8 +37,8 @@ namespace io
 	{
 	protected:
 		std::string yaml_data; //!< The string representation of the parameters in YAML
-		bool defined = true;
-		std::string path = "";
+		bool defined;
+		std::string path;
 
 	public:
 		using YAML::Node::operator=; // Use the assignment operator from the super class
@@ -83,6 +83,8 @@ namespace io
 		parameters (std::string file_name = "", std::string defaults_file = DEFAULTS_FILE) {
 			TRACE ("Constructing parameters");
 			YAML::Node copy_node;
+			defined = true;
+			path = "";
 			
 			// Load the defaults file (by default, the DEFAULTS_FILE macro)
 			if (defaults_file != "") {

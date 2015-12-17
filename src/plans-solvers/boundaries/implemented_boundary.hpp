@@ -209,8 +209,8 @@ namespace boundaries
 			
 			// Communicate the excess information
 			out_id = messenger_ptr->get_id () + (top ? 1 : -1);
-			messenger_ptr->template send <int> (1, &i_n_boundary_in, out_id, 0);
-			messenger_ptr->template recv <int> (1, &n_boundary_out, out_id, 0);
+			messenger_ptr->send <int> (1, &i_n_boundary_in, out_id, 0);
+			messenger_ptr->recv <int> (1, &n_boundary_out, out_id, 0);
 			
 			buffer.resize ((std::max (n_boundary_out, n_boundary_in) + 1) * ldn);
 		}

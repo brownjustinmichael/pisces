@@ -3,8 +3,8 @@ Import ("env")
 conf = Configure (env)
 
 conf.CheckLib ("lapack")
+conf.CheckLib ("blas")
 conf.CheckLib ("cblas")
-conf.CheckLib ("f77blas")
 
 conf.CheckLib ("atlas")
 

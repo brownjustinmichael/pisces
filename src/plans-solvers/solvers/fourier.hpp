@@ -89,7 +89,7 @@ namespace plans
 			 * \param i_data A reference to the data to read
 			 * \param i_data_out A reference to the data to update
 			 ************************************************************************/
-			fourier (double& i_timestep, typename boundaries::boundary::factory &i_boundary_0, typename boundaries::boundary::factory &i_boundary_n, double *i_rhs, grids::variable &i_data, grids::variable &i_data_out) :
+			fourier (double& i_timestep, boundaries::boundary::factory &i_boundary_0, boundaries::boundary::factory &i_boundary_n, double *i_rhs, grids::variable &i_data, grids::variable &i_data_out) :
 			solver (i_data, i_data_out, this->get_state_in (), this->get_state ()),
 			timestep (i_timestep) {
 				init (i_timestep, i_boundary_0.instance (i_data.get_grid (0), i_data.get_grid (1), false), i_boundary_n.instance (i_data.get_grid (0), i_data.get_grid (1), true), i_rhs, i_data, i_data_out);
@@ -137,8 +137,8 @@ namespace plans
 				double &timestep; //!< The timestep reference for the solver to be constructed
 				std::shared_ptr <boundaries::boundary> boundary_0; //!< A shared pointer to the top boundary for the solver to be constructed
 				std::shared_ptr <boundaries::boundary> boundary_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
-				typename boundaries::boundary::factory *boundary_factory_0; //!< A shared pointer to the top boundary for the solver to be constructed
-				typename boundaries::boundary::factory *boundary_factory_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
+				boundaries::boundary::factory *boundary_factory_0; //!< A shared pointer to the top boundary for the solver to be constructed
+				boundaries::boundary::factory *boundary_factory_n; //!< A shared pointer to the bottom boundary for the solver to be constructed
 				
 			public:
 				/*!**********************************************************************
@@ -156,7 +156,7 @@ namespace plans
 				 * \param i_boundary_0 A reference to a boundary factory to generate the top boundary
 				 * \param i_boundary_n A reference to a boundary factory to generate the bottom boundary
 				 ************************************************************************/
-				factory (double &i_timestep, typename boundaries::boundary::factory &i_boundary_0, typename boundaries::boundary::factory &i_boundary_n) : 
+				factory (double &i_timestep, boundaries::boundary::factory &i_boundary_0, boundaries::boundary::factory &i_boundary_n) : 
 				timestep (i_timestep), 
 				boundary_factory_0 (&i_boundary_0), 
 				boundary_factory_n (&i_boundary_n) {}

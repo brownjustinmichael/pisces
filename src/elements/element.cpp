@@ -46,7 +46,7 @@ namespace pisces
 		t_timestep = calculate_min_timestep ();
 		messenger_ptr->min (&t_timestep);
 
-		for (typename data::data::iterator iter = data.begin (); iter != data.end (); ++iter) {
+		for (data::data::iterator iter = data.begin (); iter != data.end (); ++iter) {
 			if (data.transformers [*iter]) data.transformers [*iter]->update ();
 		}
 
