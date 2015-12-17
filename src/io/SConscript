@@ -9,7 +9,7 @@ for lib in ["irc", "imf", "yaml-cpp"]:
 
 conf.CheckLib ("netcdf_c++4")
 conf.CheckLib ("netcdf")
-conf.CheckLib ("hdf5")
 conf.CheckLib ("hdf5_hl")
+conf.CheckLib ("hdf5")
 
 env = conf.Finish ()

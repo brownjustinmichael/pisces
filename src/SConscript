@@ -97,6 +97,7 @@ for dirname, dirnames, filenames in os.walk (path):
 # Occasionally, the code won't work without the gfortran library, so check for it
 conf = Configure (env)
 conf.CheckLib ("gfortran")
+conf.CheckLib ("curl")
 env = conf.Finish ()
 
 # Compile the main code
