@@ -2,6 +2,7 @@ import os, inspect
 Import ("*")
 
 for env_var in env_vars:
+    env [env_var] = env_vars [env_var]
     env ["ENV"] [env_var] = env_vars [env_var]
 
 for include_dir in include_dirs:

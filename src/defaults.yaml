@@ -23,7 +23,7 @@ time:
     stop: 100.0
     init: 1.0e-5
     max: 4.e-3
-    mult: 1.5
+    mult: 1.05
     down_mult: 0.8
     cfl: 0.4
     alpha: 1.00

@@ -41,7 +41,7 @@ namespace pisces
 			params ["equations.temperature.sources.z_velocity"] * src (data ["z_velocity"])
 			+ bg_diff (data ["temperature_diffusion"].ptr ());
 
-			if (i_params ["equations.temperature.linear"].IsDefined ()) *equations ["temperature"] == std::shared_ptr <plans::plan::factory> (new plans::diffusion::linear::factory (i_params ["equations.temperature.linear"].as <double> (), -1.0, data ["composition"], data ["temperature_diffusion"].ptr (), 10000));
+			if (i_params ["equations.temperature.linear"].IsDefined ()) *equations ["temperature"] == std::shared_ptr <plans::plan::factory> (new plans::diffusion::linear::factory (i_params ["equations.temperature.linear"].as <double> (), -1.0, data ["composition"], data ["temperature_diffusion"].ptr (), 10));
 		}
 		TRACE ("Initialized.");
 	}

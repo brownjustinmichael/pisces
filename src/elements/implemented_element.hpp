@@ -63,7 +63,7 @@ namespace pisces
 		double init_timestep; //!< The starting timestep value
 		double mult_timestep; //!< The value by which to multiply or divide the timestep upon update
 		double down_mult_timestep; //!< The value by which to multiply or divide the timestep upon update
-		int check_every;
+		int increase_every;
 		double next_timestep; //!< The value of the next timestep
 		int transform_threads; //!< The integer number of transform threads
 		static int mode; //!< The mode of the simulation (from grids)
@@ -214,16 +214,16 @@ namespace pisces
 				}
 				if (shared_min * down_mult_timestep > timestep) {
 					// If the minimum is larger than the current, increase the timestep
-					count++;
-					if (count % increase_every == 0) {
+					// count++;
+					// if (count % increase_every == 0) {
 						return std::min (mult_timestep * timestep, max_timestep);
-					} else {
-						return timestep;
-					}
+					// } else {
+						// return timestep;
+					// }
 				}
 				if (shared_min < timestep) {
 					// If the minimum is lower than the current, decrease the timestep
-					count = 0;
+					// count = 0;
 					return shared_min * down_mult_timestep;
 				} else {
 					return timestep;
