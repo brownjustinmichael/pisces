@@ -76,8 +76,9 @@ int main (int argc, char *argv[])
 
 		double ttop = 0.0, tbot = 1.0;
 		ttop = parameters.get <double> ("equations.temperature.top.value", 0.0);
-		tbot = parameters.get <double> ("equations.temperature.bottom.value", 0.0);
-	
+		// tbot = parameters.get <double> ("equations.temperature.bottom.value", 0.0);
+		tbot = ttop - parameters.get <double> ("equations.temperature.bottom.value", 0.0) * parameters.get <double> ("grid.z.width");
+
 		double height = parameters.get <double> ("grid.z.width");
 		double diff_bottom = parameters.get <double> ("equations.temperature.diffusion");
 		

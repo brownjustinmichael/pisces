@@ -34,14 +34,14 @@ namespace pisces
 
 		if (!(i_params ["equations.temperature.ignore"].IsDefined () && i_params ["equations.temperature.ignore"].as <bool> ())) {
 			*split_solver (equations ["temperature"], timestep, 
-				neumann (i_params ["equations.temperature.bottom.value"].as <double> ()), 
-				dirichlet (i_params ["equations.temperature.top.value"].as <double> ())) 
+				neumann (i_params ["equations.temperature.bottom.value"].as <double> () / (i_params ["equations.temperature.diffusion"].as <double> () * (1 + i_params ["equations.temperature.linear"].as <double> ()))), 
+				dirichlet (0.0)) 
 			+ params ["equations.temperature.advection"] * advec (data ["x_velocity"], data ["z_velocity"])
 			== 
 			params ["equations.temperature.sources.z_velocity"] * src (data ["z_velocity"])
 			+ bg_diff (data ["temperature_diffusion"].ptr ());
 
-			if (i_params ["equations.temperature.linear"].IsDefined ()) *equations ["temperature"] == std::shared_ptr <plans::plan::factory> (new plans::diffusion::linear::factory (i_params ["equations.temperature.linear"].as <double> (), -1.0, data ["composition"], data ["temperature_diffusion"].ptr (), 10));
+			if (i_params ["equations.temperature.linear"].IsDefined ()) *equations ["temperature"] == std::shared_ptr <plans::plan::factory> (new plans::diffusion::linear::factory (i_params ["equations.temperature.linear"].as <double> () * i_params ["equations.temperature.diffusion"].as <double> (), -1.0, data ["composition"], data ["temperature_diffusion"].ptr (), 10));
 		}
 		TRACE ("Initialized.");
 	}

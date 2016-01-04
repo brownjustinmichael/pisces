@@ -1,9 +1,10 @@
-\documentclass[12pt]{emulateapj}
+\documentclass[12pt]{aastex}
 
 \graphicspath{{figs/}}
 \makeatletter
 \def\input@path{{text/}}
 \makeatother
+\usepackage{nomencl}
 
 \input{header.tex}
 
@@ -26,9 +27,16 @@
 
 \maketitle
 
+\input{text/variables}
+
 % \input{intro.tex}
 
-\input{model.tex}
+% \input{model.tex}
+
+\section{Overshooting Setup for Variable Diffusion} % (fold)
+\label{sec:os_setup}
+	\input{text/os_setup}
+% section os_setup (end)
 
 % \input{results.tex}
 
