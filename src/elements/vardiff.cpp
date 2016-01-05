@@ -34,7 +34,7 @@ namespace pisces
 
 		if (!(i_params ["equations.temperature.ignore"].IsDefined () && i_params ["equations.temperature.ignore"].as <bool> ())) {
 			*split_solver (equations ["temperature"], timestep, 
-				neumann (i_params ["equations.temperature.bottom.value"].as <double> () / (i_params ["equations.temperature.diffusion"].as <double> () * (1 + i_params ["equations.temperature.linear"].as <double> ()))), 
+				neumann (i_params ["equations.temperature.bottom.value"].as <double> () / (1 + i_params ["equations.temperature.linear"].as <double> ())), 
 				dirichlet (0.0)) 
 			+ params ["equations.temperature.advection"] * advec (data ["x_velocity"], data ["z_velocity"])
 			== 

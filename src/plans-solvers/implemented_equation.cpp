@@ -50,7 +50,7 @@ namespace plans
 			
 			int state = -1;
 			// Solve either the x direction solve or the z direction solve
-			if ((*component_flags & x_solve)) {
+			// if ((*component_flags & x_solve)) {
 				if (x_solver) {
 					x_solver->execute ();
 					state = x_solver->get_state ();
@@ -66,28 +66,28 @@ namespace plans
 					z_solver->execute ();
 				}
 
-				*component_flags &= ~x_solve;
-				*component_flags |= z_solve;
-			} else {
-				// Solve either the x direction solve or the z direction solve
-				if (z_solver) {
-					z_solver->execute ();
-					state = z_solver->get_state ();
-				}
+				// *component_flags &= ~x_solve;
+				// *component_flags |= z_solve;
+			// } else {
+			// 	// Solve either the x direction solve or the z direction solve
+			// 	if (z_solver) {
+			// 		z_solver->execute ();
+			// 		state = z_solver->get_state ();
+			// 	}
 
-				if (x_solver) {
-					if (state >= 0 && state != x_solver->get_state_in ()) {
-						transformer->update ();
-					}
+			// 	if (x_solver) {
+			// 		if (state >= 0 && state != x_solver->get_state_in ()) {
+			// 			transformer->update ();
+			// 		}
 
-					linalg::matrix_scale (m, ldn, 0.0, cor_rhs_ptr->ptr (real_spectral));
+			// 		linalg::matrix_scale (m, ldn, 0.0, cor_rhs_ptr->ptr (real_spectral));
 
-					x_solver->execute ();
+			// 		x_solver->execute ();
 
-					*component_flags &= ~z_solve;
-					*component_flags |= x_solve;
-				}
-			}
+			// 		*component_flags &= ~z_solve;
+			// 		*component_flags |= x_solve;
+			// 	}
+			// }
 		}
 	} /* solvers */
 } /* plans */
