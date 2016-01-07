@@ -89,11 +89,12 @@ for dirname, dirnames, filenames in os.walk (path):
         for filename in filenames:
             if filename == "SConscript":
                 # Load any SConscript files found
-                env.SConscript(dirname + '/' + filename, duplicate = 0, exports = {'env': env, "objects": objects, "include_mp": include_mp, "logger": logger})
+                env.SConscript(dirname + '/' + filename, duplicate = 0, exports = {'env': env, "objects": objects, "include_mp": include_mp, "logger": logger, "path": path})
                 
             if filename.split ('.') [-1] == 'cpp':
                 # Add any .cpp files found to the list of objects to compile
-                objects.append (env.Object (os.path.relpath (dirname, path) + '/' + filename))
+                if dirname [-4:] != "init":
+                    objects.append (env.Object (os.path.relpath (dirname, path) + '/' + filename))
 
 # Occasionally, the code won't work without the gfortran library, so check for it
 conf = Configure (env)
@@ -102,13 +103,12 @@ conf.CheckLib ("curl")
 env = conf.Finish ()
 
 # Compile the main code
-env.Default (env.Program(target = "../run/isces", source = (["isces.cpp"] + objects)))
+env.Default (env.Program(target = "../run/pisces", source = (["main.cpp"] + objects)))
 
-env.Default (env.Program(target = "../run/pisces", source = (["pisces.cpp"] + objects)))
-
-# Compile the code initializer
-env.Default (env.Program(target = "../run/isces_init", source = (["init.cpp"] + objects)))
-env.Default (env.Program(target = "../run/pisces_init", source = (["pisces_init.cpp"] + objects)))
+for dirname, dirnames, filenames in os.walk(os.path.join(path, "init")):
+    for filename in filenames:
+        if filename.split ('.') [-1] == 'cpp':
+            env.Default (env.Program(target = os.path.join("../../run", filename.split ('.') [0]), source = ([os.path.relpath (dirname, path) + "/" + filename] + objects)))
 
 print (Dir('.').abspath)
 print (objects [3] [0].abspath)

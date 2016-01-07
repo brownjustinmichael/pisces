@@ -2,13 +2,20 @@
 \subsection{Equations} % (fold)
 \label{sub:equations}
 
+	The Boussinesq equations for a fluid with density contributions from temperature but not composition are as follows:
+	\begin{align}
+		\frac{\partial{\vel}}{\partial{t}}+\vel\cdot\nabla\vel&=-\nabla\p+\frac{\alpha\grav}\T\zunit+\visc\nabla^{2}\vel\\
+		\frac{\partial{\T}}{\partial{t}}+\vel\cdot\nabla\T-w\Tad&=\nabla\cdot\left(\kt\left(1+\phi\comp\right)\nabla\T\right)\\
+		\frac{\partial{\comp}}{\partial{t}}+\vel\cdot\nabla\comp&=\km\nabla^{2}\comp\\
+		\nabla\cdot\vel&=0
+	\end{align}
+
 	We define our non-dimensional equations as follows, where we have taken $\nu=[L]^{2}/[t]$, $[T]=[L]|\Tad|$.
 	We let $[L]$ be half the height of the domain, going from $-[L]$ to $[L]$.
-	$\flux$ is the incident flux on the bottom boundary.
 
 	\begin{align}
 		\frac{\partial{\ndvel}}{\partial{\ndt}}+\ndvel\cdot\ndnabla\ndvel&=-\ndnabla\ndp+\frac{\Ra}{\Pran}\ndT\zunit+\ndnabla^{2}\ndvel\\
-		\frac{\partial{\ndT}}{\partial{\ndt}}+\ndvel\cdot\ndnabla\ndT+\ndw&=\ndnabla\cdot\left(\left(\Pran^{-1}+\Pran_{\T}^{-1}\ndT+\Pran_{\comp}^{-1}\comp\right)\ndnabla\ndT\right)\\
+		\frac{\partial{\ndT}}{\partial{\ndt}}+\ndvel\cdot\ndnabla\ndT+\ndw&=\ndnabla\cdot\left(\Pran^{-1}\left(1+\phi\comp\right)\ndnabla\ndT\right)\\
 		\frac{\partial{\comp}}{\partial{\ndt}}+\ndvel\cdot\ndnabla\comp&=\frac{\Le}{\Pran}\ndnabla^{2}\comp\\
 		\ndnabla\cdot\ndvel&=0
 	\end{align}
@@ -17,56 +24,63 @@
 	We choose to allow $\comp$ to go from -1 to 1, allowing us to define $\Pran$ to be something like the average Prandtl number.
 	We will require (for the moment) that $\Pran_{\comp}^{-1}>0$, so $\comp$ must go to 1 in the radiative zone (stronger diffusion, weaker convection) and to -1 in the convective zone.
 	This sets our boundary conditions for $\comp$.
-	We will also define $\ndTad\equiv\Tad\visc/\flux$ as the non-dimensional adiabatic temperature gradient.
 
 	We want the system to be generated such that the temperature gradient for pure diffusion and no contributions to the diffusion coefficient from composition be exactly the adiabatic temperature gradient.
-		This constitutes $\ndTad=-\Pran$ as the stable temperature gradient is simply $\ndnabla\ndT=-F\nu/F\kt=-\Pran$.
-		We'll let $\ndTad=-\psi\Pran$ for some added flexibility.
-	Unfortunately, this choice complicates our bottom boundary.
-		Since we are requiring the flux through that boundary be $\flux$, the gradient must be $\ndnabla\ndT=-\psi\left(\Pran^{-1}+\Pran_{\T}^{-1}\ndT+\Pran_{\comp}^{-1}\comp\right)^{-1}$.
-		This is of course, a problem since we would have to prescribe $\T$ at the bottom boundary, so for the moment, we investigate only systems with $\Pran_{\T}^{-1}=0$.
-		The boundary condition is then $\ndnabla\ndT=-\psi\left(\Pran^{-1}+\Pran_{\comp}^{-1}\right)^{-1}$ at the bottom boundary.
+		This constitutes $\frac{\flux}{\kt}=-\Tad$.
+		We'll let $\frac{\flux}{\kt}=-\psi\Tad$ for some added flexibility with the understanding that $\psi=1$ would be ideal.
+	Since we are requiring the flux through the bottom boundary be $\flux$, the gradient must be $\ndnabla\ndT=-\frac{\psi}{1+\phi}$.
 		We may choose the $\T$ of the top boundary arbitrarily, so we let it be 0.
 
 	The boundaries are impermeable and stress-free as well.
 
-	% We first want to subtract the background hydrostatic state:
-	% \begin{equation}
-	% 	0=\ndnabla^{2}\comp,
-	% \end{equation}
-	% and we will assume a background state of $\comp=-\ndz$.
-	% Next, we look at $\T$:
-	% \begin{align}
-	% 	0&=\ndnabla\cdot\left(\left(\Pran^{-1}-\Pran_{\comp}^{-1}z\right)\ndnabla\ndT\right),\\
-	% 	0&=-\Pran_{\comp}^{-1}\comp_{0z}\frac{\partial^{2}}{\partial \ndz^{2}}\ndT+\left(\Pran^{-1}-\Pran_{\comp}^{-1}\ndz\right)\frac{\partial^{2}}{\partial \ndz^{2}}\ndT,\\
-	% \end{align}
-	% to which a solution is $\ndT=-\frac{F}{\Pran}\ndz$.
-	% The solution to the last equation is trivial and can just be absorbed into the background pressure.
-
-	% Assuming a solution of the form $\ndT=\ndT\left(z\right)e^{\lambda \ndt + i k \ndx}$ and ignoring non-linear terms, the equations become:
-	% \begin{align}
-	% 	\lambda\ndvel&=-ik\ndp\xunit-\frac{\partial}{\partial \ndz}\ndp\zunit+\frac{\Ra}{\Pran}\ndT\zunit+\left(-k^{2}+\frac{\partial^{2}}{\partial \ndz^{2}}\right)\ndvel\\
-	% 	\lambda\ndT+\ndw\left(\Pran - \frac{F}{\Pran}\right)&=\left(\Pran^{-1}-\Pran^{-1}_{\comp}z\right)\left(-k^{2}+\frac{\partial^{2}}{\partial \ndz^{2}}\right)\ndT-\frac{F}{\Pran}\frac{\partial}{\partial \ndz}\ndT - \frac{\partial}{\partial \ndz}\comp\\
-	% 	\lambda\comp-\ndw\ndz&=\frac{\Le}{\Pran}\left(-k^{2}+\frac{\partial^{2}}{\partial \ndz^{2}}\right)\comp\\
-	% 	ik\ndu + \frac{\partial}{\partial \ndz}\ndw&=0
-	% \end{align}
-
 	The Rayleigh number and Prandtl number are well-defined for a fluid with $\comp=0$, but what are they otherwise?
-		In this context, the Rayleigh number in the equation is defined as $\Ra=\alpha g \flux H^{4}/\visc/\kt^{2}$, which is the Rayleigh number in the absence of fluid motion.
-			The full $\Ra$ (including the adiabatic temperature gradient) is $\Ra=\alpha g \Tad \left(\psi/\left(1 + \phi\comp\right) - 1\right) H^{4}/\visc\kt\left(1+\phi\comp\right)$.
+		In this context, the Rayleigh number in the equation is defined as $\Ra=\alpha g \Tad H^{4}/\visc\kt$, which has the right dimensional dependency, but isn't a traditional Rayleigh number.
+			The full $\Ra$ is $\Ra=\alpha g \Tad \left(\psi/\left(1 + \phi\comp\right) - 1\right) H^{4}/\visc\kt\left(1+\phi\comp\right)$.
 			The Rayleigh number at the top of the convection zone is then this with $\comp=-1$ and that at the bottom boundary has $\comp=1$.
-		The stiffness of the simulation is then $S=\frac{\Ra\left(1\right)}{\Ra\left(-1\right)}$, which is
+		The stiffness of the simulation is then $S=\frac{\Ra\left(1\right)}{\Ra\left(-1\right)}$ (modulo a negative sign), which is
 		\begin{equation}
 			S=\frac{\left(\psi/\left(1 + \phi\right) - 1\right)\left(1-\phi\right)}{\left(\psi/\left(1 - \phi\right) - 1\right)\left(1+\phi\right)}
 		\end{equation}
 		\begin{equation}
-			S=\frac{\left(\psi - 1 - \phi\right)\left(1-\phi\right)^{2}}{\left(\psi - 1 + \phi\right)\left(1+\phi\right)^{2}}
+			S=\frac{\left(\psi - 1 - \phi\right)\left(1-\phi\right)^{2}}{\left(\psi - 1 + \phi\right)\left(1+\phi\right)^{2}}.
 		\end{equation}
+		This proves to be quite the mess.
+
+	Setting $\psi=1$ (pretty near what we would like as this makes $\Ra=0$ when $\comp=0$) results in
 		\begin{equation}
-			S=\frac{\psi\left(1-2\phi+\phi^{2}\right)-1+2\phi^{2}-\phi^{4}}{\psi\left(1+2\phi+\phi^{2}\right)-1+2\phi^{2}-\phi^{4}}.
+			S=-\frac{\left(1-\phi\right)^{2}}{\left(1+\phi\right)^{2}},\phi\ne0,
 		\end{equation}
-
-
-
+		which varies from -1 near $\phi=0$ to 0 at $\phi=1$, which means that we can't use this to achieve strong stiffness.
+		If we instead change the background flux to $\psi=1-\epsilon$, we introduce a singularity at $\phi=\epsilon$, meaning we can achieve as stiff a problem as desired as long as $\phi>\epsilon$.
+		As long as $S<0$, the radiative zone remains stable.
 
 % subsection equations (end)
+
+\subsection{Linear Stability} % (fold)
+\label{sub:linear_stability}
+
+	We first want to subtract the background hydrostatic state of each equation, beginning with the composition equation:
+	\begin{equation}
+		0=\ndnabla^{2}\comp,
+	\end{equation}
+	and we will assume a background state of $\comp=-\ndz$, which satisfies our two boundary conditions.
+	Next, we look at $\T$:
+	\begin{align}
+		0&=\ndnabla\cdot\left(\left(1-\phi z\right)\ndnabla\ndT\right),\\
+		0&=\left(1-\phi z\right)\frac{\partial^{2}}{\partial \ndz^{2}}\ndT-\phi\frac{\partial}{\partial \ndz}\ndT,\\
+	\end{align}
+	to which the solution that satisfies the boundaries is $\ndT=\frac{\psi}{\phi}\ln{\frac{1-\phi}{1-\phi \ndz}}$.
+	The solution to the last equation is trivial and can just be absorbed into the background pressure.
+
+	Assuming a solution of the form $\ndT=\ndT\left(z\right)e^{\lambda \ndt + i k \ndx}$ and ignoring non-linear terms, the equations become:
+	\begin{align}
+		\lambda\ndvel&=-ik\ndp\xunit-\frac{\partial}{\partial \ndz}\ndp\zunit+\frac{\Ra}{\Pran}\ndT\zunit+\left(-k^{2}+\frac{\partial^{2}}{\partial \ndz^{2}}\right)\ndvel\\ 
+		\lambda\ndT+\ndw\left(1 + \frac{\psi}{1-\ndz\phi}\right)&=\Pran^{-1}\left(1+\phi\comp-\phi z\right)\nabla^{2}\left(\ndT+\frac{\psi}{\phi}\ln{\frac{1-\phi}{1-\phi \ndz}}\right)-\Pran^{-1}\phi\frac{\partial}{\partial \ndz}\ndT+\Pran^{-1}\frac{\phi\psi}{1-\ndz\phi}\frac{\partial}{\partial \ndz}\xi\\
+		&=\Pran^{-1}\left(1-\phi z\right)\left(-k^{2}+\frac{\partial^{2}}{\partial \ndz^{2}}\right)\ndT+\Pran^{-1}\phi\comp\frac{\psi\phi}{\left(1-\phi \ndz\right)^{2}}-\Pran^{-1}\phi\frac{\partial}{\partial \ndz}\ndT+\Pran^{-1}\frac{\phi\psi}{1-\ndz\phi}\frac{\partial}{\partial \ndz}\xi\\
+		\lambda\comp-\ndw\ndz&=\frac{\Le}{\Pran}\left(-k^{2}+\frac{\partial^{2}}{\partial \ndz^{2}}\right)\comp\\
+		ik\ndu + \frac{\partial}{\partial \ndz}\ndw&=0
+	\end{align}
+
+	This can be arranged into one eighth order ODE, but even writing it down would take pages, and I've yet to find a solution.
+
+% subsection linear_stability (end)

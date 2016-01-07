@@ -28,8 +28,6 @@ register_adapter(np.int32, adapt_numpy_int32)
 # Create the declarative base from which the entries will derive
 Base=declarative_base()
 
-password="occuthe9"
-
 # See if a password is defined; if so, use it
 # Otherwise, request the password at the terminal
 # This doesn't seem to work inside SublimeText, so the password can be specified manually by setting password= here
@@ -68,6 +66,9 @@ class SimulationEntry(object):
 
     @property
     def entry(self):
+        """
+        Return the entry associated with the current simulation. This property first checks that the database entry has the correct table to be in the database and if not, copies the contents of the previous entry into the correct table.
+        """
         if not isinstance(self._entry, self.Table):
             tmp=self._entry
             self._entry=self.Table()
@@ -81,7 +82,7 @@ class SimulationEntry(object):
     @classmethod
     def _process(cls, value, dictionary=None, current_key=""):
         """
-        Process a YAML nested dictionary into a flat dictionary with different levels becoming underscore-separated keys
+        Process a YAML nested dictionary into a flat dictionary with different levels becoming '__'-separated keys
         """
         if dictionary is None:
             dictionary={}
@@ -98,6 +99,9 @@ class SimulationEntry(object):
 
     @classmethod
     def add_columns(cls, session=None, **kwargs):
+        """
+        Add columns to the underlying database. kwargs should be a dictionary where the keys are the parameter names and the values are default values for the column.
+        """
         changed=False
         for arg in kwargs:
             try:
@@ -227,6 +231,14 @@ class SimulationEntry(object):
         return new
 
     def run(self, init="../../run/isces_init", cwd=None, debug=None, session=None, **kwargs):
+        """
+        Run the simulation with the given parameters.
+
+        :param init: The executable to call to set up the problem
+        :param cwd: The working directory where the user would like the code to be executed
+        :param debug: An integer indicated the debug level (0: TRACE, 1: DEBUG, 2: INFO, 3: WARN, 4: ERROR, 5: FATAL)
+        :param session: A SQLAclhemy session object for databasing; if None, attempt to recover the session from the entry
+        """
         if session is None:
             session=Session.object_session(self.entry)
 

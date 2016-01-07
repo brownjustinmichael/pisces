@@ -1,0 +1,93 @@
+%!TEX root = /Users/justinbrown/Dropbox/pisces/documentation/publication.tex
+Overshooting convection has been an important question in massive stellar evolution since it was originally posed by \citet{Saslaw1965}; however, the nature of this process has remained a topic of intense debate since that era.
+	Overshooting convection is the phenomenon that occurs at any radiative/convective boundary within a star.
+	This process likely mixes both entropy and composition with less efficiency than true convection, but the nature and extent of this mixing are not well understood.
+
+\subsection{Physics} % (fold)
+\label{sub:intro:osht:physics}
+	% I want to provide a complete and uncluttered description here of the process
+
+	The nature of overshooting convection is currently a hot subject of debate, but the general notion is that due to the proximity of the convective region, the adjacent radiative zone undergoes some additional mixing.
+		Simulations \citep[e.g.][]{Brummell2002,Meakin2007} in particular have shown two very different realizations of this process, which have become known as ``overshooting'' and ``penetrative'' convection by the fluids community, although the terms have been used interchangeably by the astronomical community.
+		``Overshooting'' convection describes a ballistic process, in which plumes pierce the boundary and mix the surrounding material slightly.
+		``Penetrative'' convection is more efficient, gradually entraining material into the convection zone and extending the boundary over time into the stable region.
+		In this paper, unless otherwise specified, the term overshooting convection will refer generally to the true nature of the fluid at this boundary, whether that be ``overshooting'' or ``penetrative'' convection in a technical sense.
+
+	% What's the current state of understanding this phenomenon?
+	\citet{Veronis1963} analyzed the behavior of overshooting convection by comparing the results of a finite-amplitude stability analysis with laboratory experiments on water, finding that convective motion can penetrate into the stable layer.
+		Analyses of the nonlinear problem in both Boussinesq \citep[as in][]{Musman1968} and anelastic \citep[as in][]{Latour1981} cases show that convective motions do penetrate substantially into the stable region.
+		Further work \citep[e.g.][]{Hurlburt1986,Freytag1996} began simulating these scenarios in two dimensions, \citet{Hurlburt1986} in particular found that overshooting was much stronger in downward plumes than upward ones and that the gravity waves generated in the stable zone fed back substantially into the dynamics of the convection zone.
+		Much recent work has been devoted to three-dimensional simulations both in the Boussinesq approximation \citep[e.g.][]{Singh1994,Muthsam1995}; however, some of these, such as \citet{Singh1994}, use a subgrid scale model, which generally is a parameterization of physics that occurs smaller than the resolution scale of a simulation to which the results can be sensitive.
+		It should be noted that despite the great progress that has been achieved, the true nature of overshooting in stars remains unclear since many of these simulations seem to be only moderately turbulent, and stars exist in the highly turbulent regime.
+	
+	% What is the state of hydrodynamical simulation?
+	The most up-to-date simulations of solar convection have been completed by \citet{Brummell2002} and \citet{Rogers2006} for a small, but very turbulent, 3D domain and a global, but largely laminar, 2D domain, respectively.
+		Both these groups confirm an overshoot length of approximately $0.05 \pscale$ beneath the solar convection zone.
+		The work of \citet{Brummell2002}, being one of the most resolved series of overshoot calculations, also provides a possible scaling of the overshoot length with the parameters of the system (discussed more in Section \ref{sub:methods:osht:previous}).
+		However, both of these groups run their models in regimes far outside that of the true stellar parameter space (increased viscosity).
+		Alternately, \citet{Meakin2007} have performed 3D numerical simulations of convection in the correct stellar regime for massive stars, finding that a mass entrainment model best represents overshoot, but these simulations likely only apply when the star is out of energy equilibrium (see discussion in Section \ref{sub:methods:osht:previous}).
+	
+% subsection physics (end)
+
+\subsection{Significance in Stellar Evolution} % (fold)
+\label{sub:intro:osht:significance}
+	% What are the current scientific issues that will benefit from understanding this process?
+
+	Overshooting convection, occurring at any radiative-convective boundary in a star has substantial significance in stellar evolution.
+		Around core convecting regions, it changes the amount of fuel available to the core of the star and hence the time spent on that stage of evolution.
+		
+		It can substantially change the timescales that stars spend throughout their lives and their outer structure, which are both important immediately observable consequences.
+			Many of the main observable consequences occur on the main sequence, which demonstrates older ages at turn-off and hence a larger ratio of main sequence stars to post-main sequence stars \citep{Maeder1989}.
+			Several groups have produced isochrones illustrating this behavior \citep[e.g.][]{Bertelli1990} and have reported good agreement with observations of clusters.
+			\citet{Buonanno1985} applied the same methodology to later stages to examine the mixing during the He burning lifetime.
+			However, all these models use an arbitrary parameter to determine the strength of overshoot.
+			
+		Below envelope convection, overshoot extends the depth at which material is dredged up to the surface for observation or how far delicate isotopes are dredged down for destruction and change the luminosity.
+			In red supergiants, the outer convection zone can bring unburned H into the He layer \citet{Stothers1991}.
+			This additional source of fuel can substantially affect whether the star transitions back into a blue supergiant star.
+			In addition, \citet{Xiong2009} discuss the relevance of overshoot to atmospheric lithium depletion in Sun-like stars and conclude that overshooting is a dominant contributor in stars less than $1 \Msun$.
+			
+		Of most interest to people working on supernovae and nucleosynthesis, these small changes in the lifetime of the star can substantially affect the final nucleosynthesis.
+			In particular, the $s$-process can be substantially (factor of 4) altered by adding a few percent of a pressure scale height to the overshooting extent for solar metallicity models \citep{Pumo2011}; this is less extreme but still substantial at low metallicity.
+			It can also change the final structure and compactness of the star, which has consequences not only in supernova nucleosynthesis, but also in their lightcurves and whether these stars will become supernovae at all \citep{Sukhbold2014}.
+
+% subsection significance_in_stellar_evolution (end)
+
+\subsection{Advances in Stellar Overshoot} % (fold)
+\label{sub:intro:osht:advances}
+
+	The extent of overshooting convection in stars has been a topic of much debate for the past fifty years.
+		Early investigations using mixing length theory found that the extent of overshooting was negligible.
+			For example, \citet{Saslaw1965} linearized the governing equations and let a quantity they term the ``buoyancy factor'' (a measure of the local superadiabaticity, which is quite small in the convection zones of stars) asymptote to zero.
+			They solve for the eigenstates of the system and found that as the buoyancy factor asymptotes to zero, the overshoot extent becomes negligible; this was consistent with the findings of \citet{Roxburgh1965}, who performed a similar analysis.
+
+	However, \citet{Shaviv1973} found through a nonlocal analysis that these regions might extend substantially.
+		\citet{Shaviv1973} explored the problem by adapting mixing length theory into a more realistic model.
+		They model the buoyancy forces on the mixing length theory parcels accurately and let them diffuse when their velocity reaches zero or when it travels half a mixing length, regardless of whether that location is within the convection zone or not.
+		\citet{Shaviv1973} also let the ratio of flux to maximum convective flux asymptote to zero, but they find that the overshoot extent is not negligible even as they approach the astrophysical regime with an average extent of 0.07 pressure scale heights. % Awkward
+		This was consistent with other groups at the time \citep[e.g.]{Maeder1975}.
+		
+	Some later groups attempted to model overshoot using analytic theories.
+		\citet{Schmitt1984} modeled the region below the solar convection zone using a simplified hydrodynamic model of stochastic plumes, and find only a small overshoot into the Sun.
+		\citet{Xiong1986,Xiong2001} used a statistical non-local theory of convection and found that the overshooting was extensive, and that appropriate overshoot removed the need for semi-convection.
+		Though these theories attempted to derive from physics, they all had to assume some phenomenology of the nature of the process to construct the model, which of course has no guarantee of being physical.
+		
+	The advent of helioseismology has made it possible to directly measure the extent for the Sun.
+		Most studies of helioseismology \citep[e.g.]{Basu1997} have found no substantial detection of overshoot beneath the solar convection zone, placing upper limits of $0.05 \pscale$, using parameterized models for overshoot.
+		However, several groups have contested this result, including \citet{Xiong2001}, who show that their model \citep[implemented in][]{Xiong1986} is consistent with helioseismic observations but penetrates $0.63 \pscale$. % Is there a rebuttal to this paper? Check on Xiong1985
+		A few recent works by \citet{Baturin2010,Christensen-Dalsgaard2011} model overshoot by fixing the gradients at the convective-radiative interface, and \citet{Christensen-Dalsgaard2011} show that the temperature profile of the Sun is consistent with $0.37 \pscale$; however, this work assumes the resulting temperature gradients for overshoot without a self-consistent model of overshoot mixing.
+		More accurately, these works suggest that helioseismology is consistent with a model with smoothed gradients spanning $0.37--0.63 \pscale$, which could be partially or mostly due to overshooting convection.
+
+% subsection advances_in_stellar_overshoot (end)
+
+\subsection{Implementation in Stellar Evolution Codes} % (fold)
+\label{sub:intro:osht:implementation}
+	% Current prescriptions of overshooting convection are largely ad-hoc; some of them are superior to others, which will be mentioned later
+
+		In the past, these have been implemented into stellar evolution codes primarily in three distinct ways.
+			In early stellar models, overshoot was viewed as an extension of the convection zone and simply served to advance the boundary beyond nominal stability \citep[e.g. see the work by Doctor Doom:][]{Bressan1981,Doom1986}.
+			\citet{Deng1996} and \citet{Freytag1996} were some of the first to treat overshoot as a diffusive process instead of an instantaneous one; this marked a significant departure in thinking of the nature of the zone.
+				The works of \citet{Woosley1988} and \citet{Herwig2000}---the main overshoot models for KEPLER and MESA respectively---both use models of this type and will be explained in detail in Section \ref{sub:methods:osht:previous}
+			The most advanced models that can be used in stellar evolution would be Turbulent Convection Models, like those of \citet{Xiong1986,Canuto2011}, which more accurately capture more convoluted cases, such as overshoot in the presence of molecular gradients; however, these models are exceedingly complex and would require substantial modification to implement.
+
+% subsection implementation_in_stellar_evolution_codes (end)
