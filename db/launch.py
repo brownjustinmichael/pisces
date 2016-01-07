@@ -43,19 +43,19 @@ def Configuration(file_name=None, default=None, **kwargs):
 
     return tmp
 
-class Registry(type):
+class CodeRegistry(type):
     registry = {}
 
     @staticmethod
     def register_class(target_class):
-        Registry.registry[target_class.__name__] = target_class
+        CodeRegistry.registry[target_class.__name__] = target_class
 
     def __new__(cls, clsname, bases, attrs):
-        newclass = super(Registry, cls).__new__(cls, clsname, bases, attrs)
-        Registry.register_class(newclass)  # here is your register function
+        newclass = super(CodeRegistry, cls).__new__(cls, clsname, bases, attrs)
+        CodeRegistry.register_class(newclass)  # here is your register function
         return newclass
 
-class Code(object, metaclass=Registry):
+class Code(object, metaclass=CodeRegistry):
     """
     An abstract class describing the way to translate from a configuration to code execution
     """
@@ -120,7 +120,19 @@ class ISCES(Code):
         """
         return ["mpiexec", "-np", str(self.np), os.path.join(os.path.dirname(__file__), "../run/isces"), self._config_file]
         
-class Launcher(object):
+class LauncherRegistry(type):
+    registry = {}
+
+    @staticmethod
+    def register_class(target_class):
+        LauncherRegistry.registry[target_class.__name__] = target_class
+
+    def __new__(cls, clsname, bases, attrs):
+        newclass = super(LauncherRegistry, cls).__new__(cls, clsname, bases, attrs)
+        LauncherRegistry.register_class(newclass)  # here is your register function
+        return newclass
+
+class Launcher(object, metaclass=LauncherRegistry):
     """
     An "abstract" class that takes a Code object and executes it.
 
