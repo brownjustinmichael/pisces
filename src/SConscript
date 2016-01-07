@@ -108,7 +108,7 @@ env.Default (env.Program(target = "../run/pisces", source = (["main.cpp"] + obje
 for dirname, dirnames, filenames in os.walk(os.path.join(path, "init")):
     for filename in filenames:
         if filename.split ('.') [-1] == 'cpp':
-            env.Default (env.Program(target = os.path.join("../../run", filename.split ('.') [0]), source = ([os.path.relpath (dirname, path) + "/" + filename] + objects)))
+            env.Default (env.Program(target = os.path.join("../run", filename.split ('.') [0]), source = ([os.path.relpath (dirname, path) + "/" + filename] + objects)))
 
 print (Dir('.').abspath)
 print (objects [3] [0].abspath)
