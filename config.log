@@ -1,0 +1,426 @@
+file /Users/justinbrown/Dropbox/pisces/src/elements/SConscript,line 3:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library gsl... 
+scons: Configure: ".sconf_temp/conftest_0.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_0.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_0.o" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_0.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=2 -Ibuild -Isrc .sconf_temp/conftest_0.c
+  |
+scons: Configure: ".sconf_temp/conftest_0" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_0 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_0.o -lgsl
+  |
+scons: Configure: (cached) yes
+
+
+file /Users/justinbrown/Dropbox/pisces/src/io/SConscript,line 5:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library irc... 
+scons: Configure: ".sconf_temp/conftest_1.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_1.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_1.o" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_1.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=2 -Ibuild -Isrc .sconf_temp/conftest_1.c
+  |
+scons: Configure: Building ".sconf_temp/conftest_1" failed in a previous run and all its sources are up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_1 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_1.o -lgsl -lirc
+  |
+scons: Configure: (cached) no
+
+scons: Configure: Checking for C library imf... 
+scons: Configure: ".sconf_temp/conftest_2.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_2.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_2.o" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_2.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=2 -Ibuild -Isrc .sconf_temp/conftest_2.c
+  |
+scons: Configure: Building ".sconf_temp/conftest_2" failed in a previous run and all its sources are up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_2 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_2.o -lgsl -limf
+  |
+scons: Configure: (cached) no
+
+scons: Configure: Checking for C library yaml-cpp... 
+scons: Configure: ".sconf_temp/conftest_3.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_3.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_3.o" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_3.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=2 -Ibuild -Isrc .sconf_temp/conftest_3.c
+  |
+scons: Configure: ".sconf_temp/conftest_3" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_3 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_3.o -lgsl -lyaml-cpp
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C library netcdf_c++4... 
+scons: Configure: ".sconf_temp/conftest_4.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_4.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_4.o" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_4.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=2 -Ibuild -Isrc .sconf_temp/conftest_4.c
+  |
+scons: Configure: ".sconf_temp/conftest_4" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_4 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_4.o -lgsl -lyaml-cpp -lnetcdf_c++4
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C library netcdf... 
+scons: Configure: ".sconf_temp/conftest_5.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_5.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_5.o" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_5.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=2 -Ibuild -Isrc .sconf_temp/conftest_5.c
+  |
+scons: Configure: ".sconf_temp/conftest_5" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_5 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_5.o -lgsl -lyaml-cpp -lnetcdf_c++4 -lnetcdf
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C library hdf5_hl... 
+scons: Configure: ".sconf_temp/conftest_6.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_6.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_6.o" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_6.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=2 -Ibuild -Isrc .sconf_temp/conftest_6.c
+  |
+scons: Configure: ".sconf_temp/conftest_6" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_6 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_6.o -lgsl -lyaml-cpp -lnetcdf_c++4 -lnetcdf -lhdf5_hl
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C library hdf5... 
+scons: Configure: ".sconf_temp/conftest_7.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_7.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_7.o" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_7.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=2 -Ibuild -Isrc .sconf_temp/conftest_7.c
+  |
+scons: Configure: ".sconf_temp/conftest_7" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_7 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_7.o -lgsl -lyaml-cpp -lnetcdf_c++4 -lnetcdf -lhdf5_hl -lhdf5
+  |
+scons: Configure: (cached) yes
+
+
+file /Users/justinbrown/Dropbox/pisces/src/linalg/SConscript,line 3:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library lapack... 
+scons: Configure: ".sconf_temp/conftest_8.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_8.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_8.o" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_8.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=2 -Ibuild -Isrc .sconf_temp/conftest_8.c
+  |
+scons: Configure: ".sconf_temp/conftest_8" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_8 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_8.o -lgsl -lyaml-cpp -lnetcdf_c++4 -lnetcdf -lhdf5_hl -lhdf5 -llapack
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C library blas... 
+scons: Configure: ".sconf_temp/conftest_9.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_9.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_9.o" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_9.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=2 -Ibuild -Isrc .sconf_temp/conftest_9.c
+  |
+scons: Configure: ".sconf_temp/conftest_9" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_9 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_9.o -lgsl -lyaml-cpp -lnetcdf_c++4 -lnetcdf -lhdf5_hl -lhdf5 -llapack -lblas
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C library cblas... 
+scons: Configure: ".sconf_temp/conftest_10.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_10.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_10.o" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_10.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=2 -Ibuild -Isrc .sconf_temp/conftest_10.c
+  |
+scons: Configure: ".sconf_temp/conftest_10" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_10 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_10.o -lgsl -lyaml-cpp -lnetcdf_c++4 -lnetcdf -lhdf5_hl -lhdf5 -llapack -lblas -lcblas
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C library atlas... 
+scons: Configure: ".sconf_temp/conftest_11.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_11.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_11.o" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_11.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=2 -Ibuild -Isrc .sconf_temp/conftest_11.c
+  |
+scons: Configure: Building ".sconf_temp/conftest_11" failed in a previous run and all its sources are up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_11 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_11.o -lgsl -lyaml-cpp -lnetcdf_c++4 -lnetcdf -lhdf5_hl -lhdf5 -llapack -lblas -lcblas -latlas
+  |
+scons: Configure: (cached) no
+
+
+file /Users/justinbrown/Dropbox/pisces/src/logger/SConscript,line 4:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library log4cplus... 
+scons: Configure: ".sconf_temp/conftest_12.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_12.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_12.o" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_12.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=2 -Ibuild -Isrc .sconf_temp/conftest_12.c
+  |
+scons: Configure: ".sconf_temp/conftest_12" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_12 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_12.o -lgsl -lyaml-cpp -lnetcdf_c++4 -lnetcdf -lhdf5_hl -lhdf5 -llapack -lblas -lcblas -llog4cplus
+  |
+scons: Configure: (cached) yes
+
+
+file /Users/justinbrown/Dropbox/pisces/src/plans-transforms/SConscript,line 3:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library fftw3... 
+scons: Configure: ".sconf_temp/conftest_13.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_13.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_13.o" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_13.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=2 -D_LOG4CPLUS -Ibuild -Isrc .sconf_temp/conftest_13.c
+  |
+scons: Configure: ".sconf_temp/conftest_13" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_13 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_13.o -lgsl -lyaml-cpp -lnetcdf_c++4 -lnetcdf -lhdf5_hl -lhdf5 -llapack -lblas -lcblas -llog4cplus -lfftw3
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C library fftw3f... 
+scons: Configure: ".sconf_temp/conftest_14.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_14.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_14.o" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_14.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=2 -D_LOG4CPLUS -Ibuild -Isrc .sconf_temp/conftest_14.c
+  |
+scons: Configure: ".sconf_temp/conftest_14" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_14 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_14.o -lgsl -lyaml-cpp -lnetcdf_c++4 -lnetcdf -lhdf5_hl -lhdf5 -llapack -lblas -lcblas -llog4cplus -lfftw3 -lfftw3f
+  |
+scons: Configure: (cached) yes
+
+
+file /Users/justinbrown/Dropbox/pisces/src/SConscript,line 100:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C library gfortran... 
+scons: Configure: ".sconf_temp/conftest_15.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_15.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_15.o" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_15.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=2 -D_LOG4CPLUS -Ibuild -Isrc .sconf_temp/conftest_15.c
+  |
+scons: Configure: ".sconf_temp/conftest_15" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_15 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_15.o -lgsl -lyaml-cpp -lnetcdf_c++4 -lnetcdf -lhdf5_hl -lhdf5 -llapack -lblas -lcblas -llog4cplus -lfftw3 -lfftw3f -lgfortran
+  |
+scons: Configure: (cached) yes
+
+scons: Configure: Checking for C library curl... 
+scons: Configure: ".sconf_temp/conftest_16.c" is up to date.
+scons: Configure: The original builder output was:
+  |.sconf_temp/conftest_16.c <-
+  |  |
+  |  |
+  |  |
+  |  |int
+  |  |main() {
+  |  |  
+  |  |return 0;
+  |  |}
+  |  |
+  |
+scons: Configure: ".sconf_temp/conftest_16.o" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_16.o -c -I/usr/local/include -I/usr/local/opt/lapack/include -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -D_MPI -fexceptions -fopenmp -D_MP -DPISCES_ROOT=\"/Users/justinbrown/Dropbox/pisces/\" -DDEFAULTS_FILE=\"/Users/justinbrown/Dropbox/pisces/src/defaults.yaml\" -Wall -g -std=c++0x -fopenmp -D_MP -DND=2 -Wall -g -std=c++0x -DQUIET=2 -D_LOG4CPLUS -Ibuild -Isrc .sconf_temp/conftest_16.c
+  |
+scons: Configure: ".sconf_temp/conftest_16" is up to date.
+scons: Configure: The original builder output was:
+  |mpicc -o .sconf_temp/conftest_16 -L/usr/local/lib -L/usr/local/opt/lapack/lib -Wno-deprecated -fopenmp -Wall -g -std=c++0x -fopenmp -Wall -g -std=c++0x .sconf_temp/conftest_16.o -lgsl -lyaml-cpp -lnetcdf_c++4 -lnetcdf -lhdf5_hl -lhdf5 -llapack -lblas -lcblas -llog4cplus -lfftw3 -lfftw3f -lgfortran -lcurl
+  |
+scons: Configure: (cached) yes
+
+

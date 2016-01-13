@@ -1,0 +1,75 @@
+import os
+import yaml
+import collections
+
+def update(d, u):
+    for k, v in u.items():
+        if isinstance(v, collections.Mapping):
+            r = update(d.get(k, {}), v)
+            d[k] = r
+        else:
+            d[k] = u[k]
+    return d
+
+def process(value, dictionary=None, current_key=""):
+    """
+    Process a YAML nested dictionary into a flat dictionary with different levels becoming '__'-separated keys
+    """
+    if dictionary is None:
+        dictionary = {}
+    if isinstance(value, dict):
+        for key in value:
+            if current_key:
+                composite_key="__".join([current_key, key])
+            else:
+                composite_key=key
+            process(value[key], dictionary, composite_key)
+    else:
+        dictionary[current_key]=value
+    return dictionary
+
+def unprocess(value, dictionary=None, keys = None):
+    if dictionary is None:
+        dictionary = {}
+    if keys is None:
+        keys = []
+    if len(keys) == 1:
+        if value is not None:
+            dictionary[keys[0]]=value
+        else:
+            return
+    else:
+        if keys[0] not in dictionary:
+            dictionary[keys[0]]={}
+        unprocess(value, dictionary[keys[0]], keys[1:])
+    return dictionary
+
+def Configuration(file_name=None, default=None, **kwargs):
+    """
+    Returns a dictionary setup object for use with code objects
+
+    :param file: The file from which the configuration should be loaded
+    :param kwargs: Any additional parameters that should be added can be added as kwargs
+    :return: The configuration dictionary
+    :rtype: `dict`
+    """
+    # Load the default configuration
+    if default is not None:
+        tmp = yaml.load(open(default))
+    else:
+        tmp = yaml.load(open(os.path.join(os.path.dirname(__file__), "../src/defaults.yaml")))
+
+    # Load any additional keys from the given file
+    if file_name is not None:
+        tmp = update(tmp, yaml.load(open(file_name)))
+
+    # Update any additional arguments provided to the function
+    tmp.update (kwargs)
+
+    # Add some defaults if they haven't been specified
+    if "np" not in tmp:
+        tmp ["np"] = 1
+    if "wd" not in tmp:
+        tmp ["wd"] = os.getcwd()
+
+    return tmp

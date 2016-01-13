@@ -1,47 +1,8 @@
 import os
-import abc
 import yaml
+import abc
 import subprocess
-import collections
-
-def update(d, u):
-    for k, v in u.items():
-        if isinstance(v, collections.Mapping):
-            r = update(d.get(k, {}), v)
-            d[k] = r
-        else:
-            d[k] = u[k]
-    return d
-
-def Configuration(file_name=None, default=None, **kwargs):
-    """
-    Returns a dictionary setup object for use with code objects
-
-    :param file: The file from which the configuration should be loaded
-    :param kwargs: Any additional parameters that should be added can be added as kwargs
-    :return: The configuration dictionary
-    :rtype: `dict`
-    """
-    # Load the default configuration
-    if default is not None:
-        tmp = yaml.load(open(default))
-    else:
-        tmp = yaml.load(open(os.path.join(os.path.dirname(__file__), "../src/defaults.yaml")))
-
-    # Load any additional keys from the given file
-    if file_name is not None:
-        tmp = update(tmp, yaml.load(open(file_name)))
-
-    # Update any additional arguments provided to the function
-    tmp.update (kwargs)
-
-    # Add some defaults if they haven't been specified
-    if "np" not in tmp:
-        tmp ["np"] = 1
-    if "wd" not in tmp:
-        tmp ["wd"] = "."
-
-    return tmp
+import pisces_utils.pisces_db as db
 
 class CodeRegistry(type):
     registry = {}
@@ -79,6 +40,13 @@ class Code(object, metaclass=CodeRegistry):
         pass
 
     @abc.abstractmethod
+    def resume(self):
+        """
+        Generates any files needed for the code to resume a previous run.
+        """
+        pass
+
+    @abc.abstractmethod
     def call(self):
         """
         Returns a list of the executable arguments to run the code
@@ -88,13 +56,25 @@ class Code(object, metaclass=CodeRegistry):
         """
         pass
 
+    @abc.abstractmethod
+    def record(self):
+        """
+        Stores the run in a database
+        """
+        pass
+
 class ISCES(Code):
     """
     A class that translates from configuration to an executable form for ISCES
     """
-    def __init__(self, config, config_file="config.yaml"):
+    def __init__(self, config, config_file="config.yaml", init="init"):
         super(ISCES, self).__init__(config)
         self._config_file = config_file
+        self.init = init
+
+    @property
+    def threads(self):
+        return self.config ["parallel"] ["maxthreads"]
         
     def setup(self):
         """
@@ -105,20 +85,40 @@ class ISCES(Code):
         with open (self._config_file, "w") as stream:
             stream.write (yaml.dump (self.config))
         # Check that the input and output directories exist and make them if they don't
-        if not os.path.isdir(self.config ["root"] + self.config ["input"] ["directory"]):
-            os.makedirs(self.config ["root"] + self.config ["input"] ["directory"])
-        if not os.path.isdir(self.config ["root"] + self.config ["output"] ["directory"]):
-            os.makedirs(self.config ["root"] + self.config ["output"] ["directory"])
+        for dirname in [self.config ["input"] ["directory"], self.config ["output"] ["directory"], self.config ["dump"] ["directory"]]:
+            if not os.path.isdir(self.config ["root"] + dirname):
+                os.makedirs(self.config ["root"] + dirname)
 
-        subprocess.call(["mpiexec", "-np", str(self.np), os.path.join(os.path.dirname(__file__), "../run/isces_init"), self._config_file])
+        subprocess.call(["mpiexec", "-np", str(self.np), os.path.join(os.path.dirname(__file__), "../run/", self.init), self._config_file])
 
         os.chdir(self.wd)
+
+    def resume(self):
+        self.config ["input"] ["file"] = self.config ["dump"] ["file"]
+        self.config ["input"] ["directory"] = self.config ["dump"] ["directory"]
+        self.config ["output"] ["number"] += 1
 
     def call(self):
         """
         Returns the ISCES executable.
         """
-        return ["mpiexec", "-np", str(self.np), os.path.join(os.path.dirname(__file__), "../run/isces"), self._config_file]
+        return ["mpiexec", "-np", str(self.np), os.path.join(os.path.dirname(__file__), "../run/pisces"), self._config_file]
+
+    def record(self, session):
+        entry = db.SimulationEntry.from_config(**self.config)
+        session.add (entry)
+        files = []
+        for sub in self.config ["output"]:
+            try:
+                files.append (sub ["file"])
+            except Exception as e:
+                raise e
+        for filename in files:
+            steps = db.StepEntry.from_file (os.path.join(self.config ["root"], self.config ["output"] ["directory"], filename), sim = entry)
+            for step in steps:
+                session.add (step)
+
+        session.commit ()
         
 class LauncherRegistry(type):
     registry = {}
@@ -141,8 +141,29 @@ class Launcher(object, metaclass=LauncherRegistry):
     def __init__(self, code):
         super(Launcher, self).__init__()
         self.code = code
+        self.process = None
 
-    def launch(self, init=True):
+    def launch(self, *args, init=True, **kwargs):
+        if self.process is not None:
+            raise RuntimeError("Already running")
         if init:
             self.code.setup()
-        subprocess.call(self.code.call ())
+        else:
+            self.code.resume()
+
+        self._launch(*args, **kwargs)
+
+    def _launch(self, *args, **kwargs):
+        self.process = subprocess.Popen(self.code.call ())
+
+    def wait(self, *args, record=True, **kwargs):
+        if self.process is None:
+            raise RuntimeError("Not yet running")
+        self._wait(*args, **kwargs)
+        if record:
+            self.code.record(db.Session())
+        self.process = None
+
+    def _wait(self, *args, **kwargs):
+        self.process.wait()
+

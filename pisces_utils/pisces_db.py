@@ -15,6 +15,8 @@ from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm.exc import NoResultFound
 
+import pisces_utils.config as config
+
 # The numpy types are not recognized by psycopg2, so we need to register them
 from psycopg2.extensions import register_adapter, AsIs
 def adapt_numpy_float64(numpy_float64):
@@ -58,11 +60,11 @@ class SimulationEntry(object):
     else:
         Table=type("SimulationTable", (Base,), {"__table__": sqlalchemy.Table("simulations", Base.metadata, autoload=True, autoload_with=engine, extend_existing=True)})
 
-    def __init__(self, entry=None, default_file="../src/defaults.yaml", *args, **kwargs):
+    def __init__(self, entry=None, *args, **kwargs):
         self._entry=entry
         if self._entry is None:
             self._entry=self.Table(*args, **kwargs)
-            self.add_params(default_file)
+            self.add_params(**kwargs)
 
     @property
     def entry(self):
@@ -78,24 +80,6 @@ class SimulationEntry(object):
                 except AttributeError:
                     pass
         return self._entry
-
-    @classmethod
-    def _process(cls, value, dictionary=None, current_key=""):
-        """
-        Process a YAML nested dictionary into a flat dictionary with different levels becoming '__'-separated keys
-        """
-        if dictionary is None:
-            dictionary={}
-        if isinstance(value, dict):
-            for key in value:
-                if current_key:
-                    composite_key="__".join([current_key, key])
-                else:
-                    composite_key=key
-                cls._process(value[key], dictionary, composite_key)
-        else:
-            dictionary[current_key]=value
-        return dictionary
 
     @classmethod
     def add_columns(cls, session=None, **kwargs):
@@ -118,149 +102,27 @@ class SimulationEntry(object):
             Base.metadata.reflect(bind=engine)
             cls.Table=type("SimulationTable", (Base,), {"__table__": sqlalchemy.Table("simulations", Base.metadata, autoload=True, autoload_with=engine, extend_existing=True)})
 
-    # def __getattr__(self, attr):
-    #     try:
-    #         return getattr(self.entry, attr)
-    #     except AttributeError:
-    #         pass
-
-    #     if not isinstance(self.entry, self.Table):
-    #         tmp=self.entry
-    #         self.entry=self.Table()
-    #         for column in tmp.__table__.columns:
-    #             try:
-    #                 setattr(self.entry, column.key, getattr(tmp, column.key))
-    #             except AttributeError:
-    #                 pass
-    #     return getattr(self.entry, attr)
-      
     def steps(self, session = None):
         if session is None:
             session=Session.object_session(self.entry)
         return session.query(StepEntry.Table).filter(StepEntry.Table.simulation==self.entry)
 
-    def add_params(self, param_file):
-        if param_file:
-            try:
-                translation=self._process(yaml.load(open(param_file)))
-            except OSError:
-                translation=self._process(yaml.load(param_file))
-            self.add_columns(**translation)
-            for param in translation:
-                setattr(self.entry, param, translation[param])
+    def add_params(self, **kwargs):
+        self.add_columns(**kwargs)
+        for param in kwargs:
+            setattr(self.entry, param, kwargs[param])
 
     @classmethod
-    def from_params(cls, *args, default_file="../src/defaults.yaml", session=None, **kwargs):
+    def from_config(cls, session=None, **kwargs):
         """
         Generate a simulation entry from a YAML string of parameters. If the simulation already exists in the database, return that instead
         """
         # Parse the input parameters
-        translation={}
-        for params in (default_file,) + args:
-            if not params:
-                continue
-            try:
-                params=open(params)
-            except IOError:
-                pass
-            translation=cls._process(yaml.load(params), translation)
-            for kw in kwargs:
-                translation[kw]=kwargs[kw]
-
-            cls.add_columns(session=session, **translation)
+        translation=config.process(kwargs)
+        cls.add_columns(session=session, **translation)
 
         # No acceptable simulation has been found, so we generate one from scratch
-        entry=cls(default_file="")
-        for param in translation:
-            setattr(entry.entry, param, translation[param])
-        return entry
-
-    @classmethod
-    def _unprocess(cls, value, dictionary, keys):
-        if len(keys) == 1:
-            if value is not None:
-                dictionary[keys[0]]=value
-            else:
-                return
-        else:
-            if keys[0] not in dictionary:
-                dictionary[keys[0]]={}
-            cls._unprocess(value, dictionary[keys[0]], keys[1:])
-
-    def to_file(self, file_name="config.yaml", **kwargs):
-        result={}
-        for column in self.Table.__table__.columns:
-            if column.key != "id":
-                if column.key not in kwargs:
-                    self._unprocess(getattr(self.entry, column.key), result, column.key.split("__"))
-                else:
-                    self._unprocess(getattr(kwargs, column.key), result, column.key.split("__"))
-        f=open(file_name, "w")
-        yaml.dump(result, f, default_flow_style=False)
-
-    def resume(self, execute="../../run/pisces", cwd=None, reset=False, debug=None, session=None, **kwargs):
-        if session is None:
-            session=Session.object_session(self.entry)
-        # final=self.steps(session).order_by(StepEntry.Table.step.desc()).first()
-
-        # if final is not None:
-        #     kwargs["output__number"]=self.entry.output__number + 1
-        #     kwargs["input__file"]=self.entry.dump__file
-        #     kwargs["input__directory"]=self.entry.dump__directory
-        # if final is None or (final.t < self.entry.time__stop and final.step < self.entry.time__steps):
-        currentdir=os.getcwd()
-        if cwd:
-            os.chdir(cwd)
-        else:
-            os.chdir(self.entry.cwd)
-        self.to_file(**kwargs)
-
-        try:
-            np = str(self.entry.np if self.entry.np else 1)
-        except AttributeError:
-            np = "1"
-
-        exit=subprocess.call(["mpiexec", "-np", np, execute] + ([] if debug is None else ["-D%i" % debug]))
-        if exit != 0:
-            raise RuntimeError("The subprocess exited with a nonzero exit code of %i" % exit)
-        new=[]
-
-        for i in range(int (np)):
-            new+=StepEntry.from_file(session, os.path.join(self.entry.root, self.entry.output__directory, ((self.entry.output__stat__file % i) % self.entry.output__number) + ".cdf"), sim=self, reset=reset)
-        os.chdir(currentdir)
-        return new
-
-    def run(self, init="../../run/isces_init", cwd=None, debug=None, session=None, **kwargs):
-        """
-        Run the simulation with the given parameters.
-
-        :param init: The executable to call to set up the problem
-        :param cwd: The working directory where the user would like the code to be executed
-        :param debug: An integer indicated the debug level (0: TRACE, 1: DEBUG, 2: INFO, 3: WARN, 4: ERROR, 5: FATAL)
-        :param session: A SQLAclhemy session object for databasing; if None, attempt to recover the session from the entry
-        """
-        if session is None:
-            session=Session.object_session(self.entry)
-
-        # try:
-        #     self.entry=session.query(SimulationEntry).filter(SimulationEntry.hash==self.calculate_hash()).one()
-        # except NoResultFound:
-        currentdir=os.getcwd()
-        if cwd:
-            os.chdir(cwd)
-        else:
-            os.chdir(self.entry.cwd)
-        self.to_file()
-        os.makedirs(os.path.join(self.entry.root, self.entry.input__directory), exist_ok=True)
-        os.makedirs(os.path.join(self.entry.root, self.entry.output__directory), exist_ok=True)
-        try:
-            np = str(self.entry.np if self.entry.np else 1)
-        except AttributeError:
-            np = "1"
-        subprocess.call(["mpiexec", "-np", np, init] + ([] if debug is None else ["-D%i" % debug]))
-        os.chdir(currentdir)
-
-        return self.resume(cwd=cwd, debug=debug, session=session, **kwargs)
+        return cls(kwargs)
 
     def same_sub(self, query, key, tolerance=1.e-4):
         for column in SimulationEntry.Table.__table__.columns:

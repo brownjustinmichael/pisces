@@ -77,25 +77,23 @@ int main (int argc, char *argv[])
 		double ttop = 0.0, tbot = 1.0;
 		ttop = parameters.get <double> ("equations.temperature.top.value", 0.0);
 		// tbot = parameters.get <double> ("equations.temperature.top.value", 0.0);
-		tbot = ttop - parameters.get <double> ("equations.temperature.bottom.value", 0.0) * parameters.get <double> ("grid.z.width") / (1.0 + parameters.get <double> ("equations.temperature.linear", 0.0));
+		tbot = ttop - parameters.get <double> ("equations.temperature.bottom.value", 0.0) * parameters.get <double> ("grid.z.width") / (1.0 + parameters.get <double> ("equations.temperature.linear", 0.0) * parameters.get <double> ("equations.composition.bottom.value", 0.0));
 
 		double height = parameters.get <double> ("grid.z.width");
 		double diff_bottom = parameters.get <double> ("equations.temperature.diffusion");
+		double diff = parameters.get <double> ("equations.temperature.diffusion");
+		double phi = parameters.get <double> ("equations.temperature.linear");
+		double flux = parameters.get <double> ("equations.temperature.bottom.value");
+		(-Pr \[Psi] Log[-1 + f] + Pr \[Psi] Log[-1 + f z])/f
+		(Pr \[Psi] Log[(-1 + 0.1 z)/(-1 + 0.1)])/f
 		
 		double scale = 0.001;
 		double width = parameters.get <double> ("grid.z.width");
 		#pragma omp parallel for
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
-				tempt [i * m + j] = (ttop - tbot) / (height) * (pos_z [j] + height / 2.0) + tbot;
+				tempt [i * m + j] = ttop + flux * log((-1. + phi * pos_z[j]) / (-1. + phi)) / diff / phi;
 				temps [i * m + j] = (stop - sbot) / (height) * (pos_z [j] + height / 2.0) + sbot;
-				// if (pos_z [j] > 0.0) {
-				// 	temps [i * m + j] = stop;
-				// 	// tempt [i * m + j] = ttop;
-				// } else {
-				// 	temps [i * m + j] = sbot;
-				// 	// tempt [i * m + j] = tbot;
-				// }
 				temps [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3 * std::cos(pos_z [j] * 3.14159 / width);
 				tempt [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3 * std::cos(pos_z [j] * 3.14159 / width);
 			}
