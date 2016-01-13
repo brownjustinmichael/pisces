@@ -3,3 +3,4 @@ build_custom.yaml
 .sconf_temp/*
 .sconsign.dblite
 pisces_utils.egg-info/*
+config.log

@@ -84,8 +84,6 @@ int main (int argc, char *argv[])
 		double diff = parameters.get <double> ("equations.temperature.diffusion");
 		double phi = parameters.get <double> ("equations.temperature.linear");
 		double flux = parameters.get <double> ("equations.temperature.bottom.value");
-		(-Pr \[Psi] Log[-1 + f] + Pr \[Psi] Log[-1 + f z])/f
-		(Pr \[Psi] Log[(-1 + 0.1 z)/(-1 + 0.1)])/f
 		
 		double scale = 0.001;
 		double width = parameters.get <double> ("grid.z.width");
