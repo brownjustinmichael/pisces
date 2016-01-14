@@ -23,7 +23,7 @@ class TorqueLauncher(Launcher):
 
         batch_file.write("#PBS -S /bin/bash\n")
         batch_file.write("#PBS -q normal\n")
-        batch_file.write("#PBS -N %s\n" % commandRoot)
+        batch_file.write("#PBS -N %s\n" % self.code.__class__.__name__)
 
         batch_file.write("#PBS -l nodes=%d:ppn=%d\n" % (self.code.np, self.code.threads))
         batch_file.write("#PBS -l walltime=%02i:00:00\n" % hours)
