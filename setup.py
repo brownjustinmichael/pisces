@@ -9,5 +9,5 @@ setup(name='pisces_utils',
       author_email='jumbrown@ucsc.edu',
       license='MIT',
       packages=['pisces_utils'],
-      install_requires=["sqlalchemy","celery","netCDF4","pyyaml","psycopg2"],
+      install_requires=["sqlalchemy","celery","netCDF4","pyyaml"],
       zip_safe=False)

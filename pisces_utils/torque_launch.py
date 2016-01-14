@@ -19,7 +19,7 @@ class TorqueLauncher(Launcher):
         cwd = os.getcwd()
         os.chdir(self.code.wd)
 
-        batch_file = open("batch.pbs" % guess, "w")
+        batch_file = open("batch.pbs", "w")
 
         batch_file.write("#PBS -S /bin/bash\n")
         batch_file.write("#PBS -q normal\n")

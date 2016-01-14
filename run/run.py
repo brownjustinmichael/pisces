@@ -22,4 +22,4 @@ code = launch.CodeRegistry.registry[args.code](configuration, init=args.init)
 
 launcher = launch.LauncherRegistry.registry[args.launcher](code)
 launcher.launch(init=(args.init not in ["None", "none", "False", "false", "f", "F"]))
-launcher.wait()
+# launcher.wait()
