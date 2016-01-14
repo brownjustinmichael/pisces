@@ -2,7 +2,12 @@ import os
 import yaml
 import abc
 import subprocess
-import pisces_utils.pisces_db as db
+
+try:
+    import pisces_utils.pisces_db as db
+except ImportError:
+    db = None
+    print("Could not import database")
 
 class CodeRegistry(type):
     registry = {}
@@ -111,6 +116,8 @@ class ISCES(Code):
         return ["mpiexec", "-np", str(self.np), os.path.join(os.path.dirname(__file__), "../run/pisces"), self._config_file]
 
     def record(self, session):
+        if db is None:
+            raise RuntimeError("Could not record as the database backend is not functional")
         entry = db.SimulationEntry.from_config(**self.config)
         session.add (entry)
         files = []
