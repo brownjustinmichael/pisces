@@ -15,7 +15,7 @@ class TorqueLauncher(Launcher):
         self.code = code
         self.sub_launcher = sub_launcher
 
-    def _launch(self, *args, hours=24 **kwargs):
+    def _launch(self, *args, hours=24, **kwargs):
         cwd = os.getcwd()
         os.chdir(self.code.wd)
 
