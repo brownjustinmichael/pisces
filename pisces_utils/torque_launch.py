@@ -44,9 +44,9 @@ class TorqueLauncher(Launcher):
         
         p = subprocess.Popen(["qsub", "batch.pbs"], stdout=subprocess.PIPE)
         output = p.communicate()
-        print(output.split(".")[0])
-        self.process = output.split(".")[0]
-
+        print(output[0].decode().split(".")[0])
+        self.process = output[0].decode().split(".")[0]
+        
         os.chdir(cwd)
 
     def _wait(self, *args, **kwargs):
