@@ -26,7 +26,11 @@ class Code(object, metaclass=CodeRegistry):
 
     @property
     def np(self):
-        return self.config ["np"]
+        return self.config["np"]
+
+    @np.setter
+    def np(self, value):
+        self.config["np"] = value
     
     @property
     def wd(self):
@@ -76,7 +80,7 @@ class ISCES(Code):
     def threads(self):
         return self.config ["parallel"] ["maxthreads"]
         
-    def setup(self):
+    def setup(self, init=True):
         """
         Generates the config file containing the parameters for the run and the initial state of the system
         """
@@ -89,7 +93,8 @@ class ISCES(Code):
             if not os.path.isdir(self.config ["root"] + dirname):
                 os.makedirs(self.config ["root"] + dirname)
 
-        subprocess.call(["mpiexec", "-np", str(self.np), os.path.join(os.path.dirname(__file__), "../run/", self.init), self._config_file])
+        if init:
+            subprocess.call(["mpiexec", "-np", str(self.np), os.path.join(os.path.dirname(__file__), "../run/", self.init), self._config_file])
 
         os.chdir(self.wd)
 
@@ -97,6 +102,7 @@ class ISCES(Code):
         self.config ["input"] ["file"] = self.config ["dump"] ["file"]
         self.config ["input"] ["directory"] = self.config ["dump"] ["directory"]
         self.config ["output"] ["number"] += 1
+        self.setup(init=False)
 
     def call(self):
         """

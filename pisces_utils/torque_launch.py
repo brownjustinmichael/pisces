@@ -1,7 +1,7 @@
 import time
 import subprocess
 
-from db.launch import Launcher, CodeRegistry, LauncherRegistry
+from pisces_utils.launch import Launcher, CodeRegistry, LauncherRegistry
 
 class TorqueLauncher(Launcher):
     """
