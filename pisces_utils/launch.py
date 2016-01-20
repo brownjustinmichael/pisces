@@ -2,6 +2,8 @@ import os
 import yaml
 import abc
 import subprocess
+import shutil
+import glob
 
 try:
     import pisces_utils.pisces_db as db
@@ -28,6 +30,11 @@ class Code(object, metaclass=CodeRegistry):
     def __init__(self, config):
         super(Code, self).__init__()
         self.config = config
+        try:
+            print ("WARNING: wd is defined in config object. (%s) Continue?" % config ["wd"])
+            input ("Return to continue: ")
+        except IndexError:
+            pass
 
     @property
     def np(self):
@@ -76,10 +83,14 @@ class ISCES(Code):
     """
     A class that translates from configuration to an executable form for ISCES
     """
-    def __init__(self, config, config_file="config.yaml", init="init"):
+    def __init__(self, config, config_file="config.yaml", init=None):
         super(ISCES, self).__init__(config)
         self._config_file = config_file
-        self.init = init
+        if init is not None:
+            config["init"] = init
+        else:
+            if "init" not in config:
+                config["init"] = "init"
 
     @property
     def threads(self):
@@ -99,15 +110,27 @@ class ISCES(Code):
                 os.makedirs(self.config ["root"] + dirname)
 
         if init:
-            subprocess.call(["mpiexec", "-np", str(self.np), os.path.join(os.path.dirname(__file__), "../run/", self.init), self._config_file])
+            subprocess.call(["mpiexec", "-np", str(self.np), os.path.join(os.path.dirname(__file__), "../run/", self.config ["init"]), self._config_file])
 
         os.chdir(self.wd)
 
     def resume(self):
+        cwd = os.getcwd()
+        os.chdir(self.wd)
+
+        try:
+            os.makedirs(os.path.join(self.config ["dump"] ["directory"], "previous_%02i" % self.config ["output"] ["number"]))
+        except FileExistsError:
+            pass
+        for file in glob.glob(os.path.join(self.config ["dump"] ["directory"], self.config ["dump"] ["file"].replace("%02i", "*")) + ".cdf"):
+            shutil.copy(file, os.path.join(self.config ["dump"] ["directory"], "previous_%02i" % self.config ["output"] ["number"]))
         self.config ["input"] ["file"] = self.config ["dump"] ["file"]
         self.config ["input"] ["directory"] = self.config ["dump"] ["directory"]
         self.config ["output"] ["number"] += 1
         self.setup(init=False)
+
+        os.chdir(self.wd)
+
 
     def call(self):
         """

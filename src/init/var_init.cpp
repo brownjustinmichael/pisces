@@ -75,23 +75,28 @@ int main (int argc, char *argv[])
 		DEBUG ("stop " << stop << " sbot " << sbot);
 
 		double ttop = 0.0, tbot = 1.0;
-		ttop = parameters.get <double> ("equations.temperature.top.value", 0.0);
-		// tbot = parameters.get <double> ("equations.temperature.top.value", 0.0);
-		tbot = ttop - parameters.get <double> ("equations.temperature.bottom.value", 0.0) * parameters.get <double> ("grid.z.width") / (1.0 + parameters.get <double> ("equations.temperature.linear", 0.0) * parameters.get <double> ("equations.composition.bottom.value", 0.0));
+		// ttop = parameters.get <double> ("equations.temperature.top.value", 0.0);
+		tbot = parameters.get <double> ("equations.temperature.bottom.value", 0.0);
+		ttop = tbot + parameters.get <double> ("equations.temperature.top.value", 0.0) * parameters.get <double> ("grid.z.width");
 
 		double height = parameters.get <double> ("grid.z.width");
 		double diff_bottom = parameters.get <double> ("equations.temperature.diffusion");
 		double diff = parameters.get <double> ("equations.temperature.diffusion");
-		double phi = parameters.get <double> ("equations.temperature.linear");
-		double flux = parameters.get <double> ("equations.temperature.bottom.value");
+		double phi = parameters.get <double> ("equations.temperature.tanh.coeff");
+		double mu_length = parameters.get <double> ("equations.temperature.tanh.length");
+		double mu_zero = parameters.get <double> ("equations.temperature.tanh.zero");
+		double stiffness = parameters.get <double> ("equations.temperature.stiffness");
+		double chi = 2. * phi / (1.0 + phi) / (stiffness * (1.0 + phi) / (1.0 - phi) + 1.0);
 		
 		double scale = 0.001;
 		double width = parameters.get <double> ("grid.z.width");
 		#pragma omp parallel for
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
-				tempt [i * m + j] = ttop + flux * log((-1. + phi * pos_z[j]) / (-1. + phi)) / diff / phi;
+				tempt [i * m + j] = (-1. + tbot*chi - pos_z[j] + tbot*phi*chi + mu_length*phi*log((-std::cosh((-1 + mu_zero) / mu_length) + phi*std::sinh((-1 + mu_zero) / mu_length)) / (-std::cosh((pos_z[j] + mu_zero) / mu_length) + phi*std::sinh((pos_z[j] + mu_zero) / mu_length)))) / (1. + phi) / chi;
+				// tempt [i * m + j] = tbot + (pos_z[j] + height / 2) * (ttop - tbot) / height;
 				temps [i * m + j] = (stop - sbot) / (height) * (pos_z [j] + height / 2.0) + sbot;
+
 				temps [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3 * std::cos(pos_z [j] * 3.14159 / width);
 				tempt [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3 * std::cos(pos_z [j] * 3.14159 / width);
 			}

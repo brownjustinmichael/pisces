@@ -173,7 +173,7 @@ namespace plans
 		
 		class linear : public real_plan
 		{
-		private:
+		protected:
 			using real_plan::n;
 			using real_plan::ldn;
 			using real_plan::m;
@@ -327,7 +327,7 @@ namespace plans
 						bg_diff [j] += coeff * (bg_state [j] - old_bg);
 					}
 					bg_deriv [0] = (bg_state [1] - bg_state [0]);
-					for (int j = 0; j < m; ++j) {
+					for (int j = 1; j < m - 1; ++j) {
 						bg_deriv [j] = (bg_state [j + 1] - bg_state [j - 1]);
 					}
 					bg_deriv [m - 1] = (bg_state [m - 1] - bg_state [m - 2]);
@@ -337,6 +337,10 @@ namespace plans
 				count++;
 				
 				TRACE ("Operation complete.");
+			}
+
+			void reset_source (double *new_source) {
+				data_source = new_source;
 			}
 			
 			/*!**********************************************************************
@@ -368,6 +372,110 @@ namespace plans
 				 ************************************************************************/
 				virtual std::shared_ptr <plans::plan > _instance (double **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
 					return std::shared_ptr <plans::plan > (new linear (min, data_source, bg_diff, bg_every, i_data_in, i_data_out, coeff));
+				}
+			};
+		};
+
+		class tanh : public linear
+		{
+		protected:
+			using linear::n;
+			using linear::ldn;
+			using linear::m;
+			using linear::grid_n;
+			using linear::grid_m;
+			using linear::data_in;
+			using linear::data_out;
+			
+			using linear::element_flags;
+			using linear::component_flags;
+			
+			double source_length;
+			double source_zero;
+
+			std::vector <double> src_vec;
+			double *src_ptr;
+			double *data_orig; //!< A pointer to the source data
+
+		public:
+			/*!**********************************************************************
+			 * \copydoc real_plan::real_plan
+			 * 
+			 * @param i_min The minimum value of the coefficient
+			 * \param i_data_source A pointer to the source data
+			 * @param i_bg_diff The background diffusion coefficient
+			 * @param i_bg_every The number of evaluations between which to recalculate the background diffusion
+			 ************************************************************************/
+			tanh (double i_source_length, double i_source_zero, double i_min, grids::variable &i_data_source, double *i_bg_diff, int i_bg_every, grids::variable &i_data_in, grids::variable &i_data_out, double i_coeff = 1.0) : 
+			linear (i_min, i_data_source, i_bg_diff, i_bg_every, i_data_in, i_data_out, i_coeff),
+			source_length (i_source_length),
+			source_zero (i_source_zero),
+			data_orig (i_data_source.ptr ()) {
+				TRACE ("Instantiating...");
+				src_vec.resize (n * m);
+				src_ptr = &src_vec [0];
+				linear::reset_source (src_ptr);
+			}
+			
+			virtual ~tanh () {}
+
+			/*!**********************************************************************
+			 * \copydoc real_plan::execute
+			 ************************************************************************/
+			void execute () {
+				// The full term is kappa * T * grad^2 f + kappa grad T grad f
+				// div T grad f = ddx (T) ddx f + ddz (T) ddz f
+				TRACE ("Operating...");
+				
+				// Calculate the source value
+				int g;
+				for (int i = 0; i < n; ++i) {
+					for (int j = 0; j < m; ++j) {
+						g = i * m + j;
+						if (data_source [g] > source_zero)
+						{
+							src_ptr [g] = std::tanh ((data_orig [g] - source_zero) / source_length);
+						} else {
+							src_ptr [g] = std::tanh ((data_orig [g] - source_zero) / source_length);
+						}
+					}
+				}
+
+				linear::execute ();
+				TRACE ("Operation complete.");
+			}
+			
+			/*!**********************************************************************
+			 * \copydoc plan::factory
+			 ************************************************************************/
+			class factory : public real_plan::factory
+			{
+			protected:
+				using real_plan::factory::coeff;
+				double min; //!< The minimum value for the coefficient
+				double source_length;
+				double source_zero;
+				grids::variable &data_source; //!< The source data pointer for the plan to be constructed
+				double *bg_diff; //!< The background diffusion coefficient
+				int bg_every; //!< The number of evaluations between which to recalculate the background diffusion
+				
+			public:
+				/*!**********************************************************************
+				 * \param i_coeff The base coefficient for the plan to be constructed
+				 * \param i_data_source The source data pointer for the plan to be constructed
+				 * @param i_min The minimum value of the data for the plan to be constructed
+				 * @param i_bg_diff The background diffusion coefficient
+				 * @param i_bg_every The number of evaluations between which to recalculate the background diffusion
+				 ************************************************************************/
+				factory (double i_coeff, double i_source_length, double i_source_zero, double i_min, grids::variable &i_data_source, double *i_bg_diff, int i_bg_every) : real_plan::factory (i_coeff), min (i_min), source_length (i_source_length), source_zero (i_source_zero), data_source (i_data_source), bg_diff (i_bg_diff), bg_every (i_bg_every) {}
+				
+				virtual ~factory () {}
+				
+				/*!**********************************************************************
+				 * \copydoc plan::factory::instance
+				 ************************************************************************/
+				virtual std::shared_ptr <plans::plan > _instance (double **matrices, grids::variable &i_data_in, grids::variable &i_data_out) const {
+					return std::shared_ptr <plans::plan > (new tanh (source_length, source_zero, min, data_source, bg_diff, bg_every, i_data_in, i_data_out, coeff));
 				}
 			};
 		};

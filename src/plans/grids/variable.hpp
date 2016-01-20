@@ -138,6 +138,20 @@ namespace grids
 			states = i_states;
 		}
 
+		variable (const variable &other) : dimensions (other.dimensions), component_flags (other.component_flags), element_flags (other.element_flags), name (other.name) {
+			total = other.total;
+			for (int i = 0; i < (int) other.grids.size (); ++i)
+			{
+				grids.push_back (other.grids [i]);
+			}
+			data.resize (other.data.size ());
+			linalg::copy (other.data.size (), &(other.data [0]), &data [0]);
+			ld = other.ld;
+			state = other.state;
+			last_update = other.last_update;
+			states = other.states;
+		}
+
 		virtual ~variable () {}
 
 		/**
