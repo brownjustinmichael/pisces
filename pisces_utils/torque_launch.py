@@ -37,10 +37,7 @@ class TorqueLauncher(Launcher):
         
         batch_file.write("module load python\n")
         batch_file.write("module switch python python/3.4.1\n")
-
-        directory = os.path.dirname(os.path.realpath(__file__))
-
-        batch_file.write("python3 %s/host_rewrite.py $PBS_NODEFILE --ppn %d > $HOSTFILE\n" % (directory, self.code.threads))
+        batch_file.write("module load open_mpi/gcc_1.6.2\n")
 
         batch_file.write(" ".join(self.code.call(machinefile="hosts.$PBS_JOBID")))
         batch_file.write("\n")
