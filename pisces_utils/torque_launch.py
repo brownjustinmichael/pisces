@@ -29,7 +29,9 @@ class TorqueLauncher(Launcher):
         batch_file.write("#PBS -l walltime=%02i:00:00\n" % hours)
         batch_file.write("cd $PBS_O_WORKDIR\n")
         batch_file.write("cp $PBS_NODEFILE .\n")
-        batch_file.write("export HOSTFILE=hostfile\n")
+        batch_file.write("cat $PBS_NODEFILE | sort | uniq > hosts.$PBS_JOBID")
+
+        batch_file.write("export OMP_NUM_THREADS=%d\n" % self.code.threads)
         batch_file.write("export I_MPI_PIN_DOMAIN=omp")
         batch_file.write("export KMP_AFFINITY=compact")
         
@@ -39,9 +41,8 @@ class TorqueLauncher(Launcher):
         directory = os.path.dirname(os.path.realpath(__file__))
 
         batch_file.write("python3 %s/host_rewrite.py $PBS_NODEFILE --ppn %d > $HOSTFILE\n" % (directory, self.code.threads))
-        batch_file.write("export OMP_NUM_THREADS=%d\n" % self.code.threads)
 
-        batch_file.write(" ".join(self.code.call()))
+        batch_file.write(" ".join(self.code.call(machine="hosts.$PBS_JOBID", ppn=1, genv={"I_MPI_FABRICS", "shm:ofa"})))
         batch_file.write("\n")
         batch_file.close()
         
