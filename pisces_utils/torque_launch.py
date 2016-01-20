@@ -29,11 +29,11 @@ class TorqueLauncher(Launcher):
         batch_file.write("#PBS -l walltime=%02i:00:00\n" % hours)
         batch_file.write("cd $PBS_O_WORKDIR\n")
         batch_file.write("cp $PBS_NODEFILE .\n")
-        batch_file.write("cat $PBS_NODEFILE | sort | uniq > hosts.$PBS_JOBID")
+        batch_file.write("cat $PBS_NODEFILE | sort | uniq > hosts.$PBS_JOBID\n")
 
         batch_file.write("export OMP_NUM_THREADS=%d\n" % self.code.threads)
-        batch_file.write("export I_MPI_PIN_DOMAIN=omp")
-        batch_file.write("export KMP_AFFINITY=compact")
+        batch_file.write("export I_MPI_PIN_DOMAIN=omp\n")
+        batch_file.write("export KMP_AFFINITY=compact\n")
         
         batch_file.write("module load python\n")
         batch_file.write("module switch python python/3.4.1\n")
