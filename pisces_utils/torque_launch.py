@@ -42,7 +42,7 @@ class TorqueLauncher(Launcher):
 
         batch_file.write("python3 %s/host_rewrite.py $PBS_NODEFILE --ppn %d > $HOSTFILE\n" % (directory, self.code.threads))
 
-        batch_file.write(" ".join(self.code.call(machine="hosts.$PBS_JOBID", ppn=1, genv={"I_MPI_FABRICS": "shm:ofa"})))
+        batch_file.write(" ".join(self.code.call(machinefile="hosts.$PBS_JOBID")))
         batch_file.write("\n")
         batch_file.close()
         
