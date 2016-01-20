@@ -35,7 +35,10 @@ class TorqueLauncher(Launcher):
         
         batch_file.write("module load python\n")
         batch_file.write("module switch python python/3.4.1\n")
-        batch_file.write("python3 host_rewrite.py $PBS_NODEFILE --ppn %d > $HOSTFILE\n" %(self.code.threads))
+
+        directory = os.path.dirname(os.path.realpath(__file__))
+
+        batch_file.write("python3 %s/host_rewrite.py $PBS_NODEFILE --ppn %d > $HOSTFILE\n" % (directory, self.code.threads))
         batch_file.write("export OMP_NUM_THREADS=%d\n" % self.code.threads)
 
         batch_file.write(" ".join(self.code.call()))
