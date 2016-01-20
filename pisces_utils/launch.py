@@ -138,12 +138,12 @@ class ISCES(Code):
         """
         if genv is None:
             genv = {}
-        call = ["mpiexec", "-n", str(self.np), os.path.join(os.path.dirname(__file__), "../run/pisces"), self._config_file]
+        call = ["mpiexec"]
         for arg in genv:
             call += ["-genv", arg, str(genv[arg])]
         for arg in kwargs:
             call += ["-" + arg, str(kwargs[arg])]
-        return call
+        return call + ["-n", str(self.np), os.path.join(os.path.dirname(__file__), "../run/pisces"), self._config_file]
 
     def record(self, session):
         if db is None:
