@@ -39,7 +39,7 @@ class TorqueLauncher(Launcher):
         batch_file.write("module switch python python/3.4.1\n")
         batch_file.write("module load open_mpi/gcc_1.6.2\n")
 
-        batch_file.write(" ".join(self.code.call(machinefile="hosts.$PBS_JOBID")))
+        batch_file.write(" ".join(self.code.call(machinefile="hosts.$PBS_JOBID", **kwargs)))
         batch_file.write("\n")
         batch_file.close()
         
