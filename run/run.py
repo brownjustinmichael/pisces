@@ -8,7 +8,7 @@ import pisces_utils.torque_launch as tlaunch
 
 exports = {}
 try:
-	with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "run_custom.yaml", 'r') as stream:
+	with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "run_custom.yaml"), 'r') as stream:
 		new_exports = yaml.load(stream)
 		for key in new_exports:
 		    exports [key] = new_exports [key]
