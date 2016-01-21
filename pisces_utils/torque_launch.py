@@ -33,13 +33,14 @@ class TorqueLauncher(Launcher):
 
         batch_file.write("export OMP_NUM_THREADS=%d\n" % self.code.threads)
         batch_file.write("export I_MPI_PIN_DOMAIN=omp\n")
+        batch_file.write("export I_MPI_FABRICS=shm:ofa\n")
         batch_file.write("export KMP_AFFINITY=compact\n")
         
         batch_file.write("module load python\n")
         batch_file.write("module switch python python/3.4.1\n")
         batch_file.write("module load open_mpi/gcc_1.6.2\n")
 
-        batch_file.write(" ".join(self.code.call(machinefile="hosts.$PBS_JOBID", **kwargs)))
+        batch_file.write(" ".join(self.code.call(machinefile="hosts.$PBS_JOBID", x=["I_MPI_FABRICS", "LD_LIBRARY_PATH"], **kwargs)))
         batch_file.write("\n")
         batch_file.close()
         

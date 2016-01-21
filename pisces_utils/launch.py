@@ -132,15 +132,15 @@ class ISCES(Code):
         os.chdir(self.wd)
 
 
-    def call(self, genv = None, mpi="mpiexec", **kwargs):
+    def call(self, x = None, mpi="mpiexec", **kwargs):
         """
         Returns the ISCES executable.
         """
         if genv is None:
-            genv = {}
+            x = []
         call = [mpi]
-        for arg in genv:
-            call += ["-genv", arg, str(genv[arg])]
+        for arg in x:
+            call += ["-x", arg]
         for arg in kwargs:
             call += ["-" + arg, str(kwargs[arg])]
         return call + ["-n", str(self.np), os.path.join(os.path.dirname(__file__), "../run/pisces"), self._config_file]
