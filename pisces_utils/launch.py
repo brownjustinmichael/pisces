@@ -136,7 +136,7 @@ class ISCES(Code):
         """
         Returns the ISCES executable.
         """
-        if genv is None:
+        if x is None:
             x = []
         call = [mpi]
         for arg in x:
