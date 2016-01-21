@@ -15,11 +15,11 @@ class TorqueLauncher(Launcher):
         self.code = code
         self.sub_launcher = sub_launcher
 
-    def _launch(self, *args, hours=24, **kwargs):
+    def _launch(self, *args, hours=24, thread_factor=1, **kwargs):
         cwd = os.getcwd()
         os.chdir(self.code.wd)
 
-        ppn = self.code.threads // kwargs.get ("thread_factor", 1)
+        ppn = self.code.threads // thread_factor
 
         batch_file = open("batch.pbs", "w")
 
