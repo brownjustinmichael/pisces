@@ -31,8 +31,9 @@ class Code(object, metaclass=CodeRegistry):
         super(Code, self).__init__()
         self.config = config
         try:
-            print ("WARNING: wd is defined in config object. (%s) Continue?" % config ["wd"])
-            input ("Return to continue: ")
+            if os.path.abspath(config["wd"]) != os.path.abspath("."):
+                print ("WARNING: wd is not the local directory. (%s) Continue?" % config ["wd"])
+                input ("Return to continue: ")
         except IndexError:
             pass
 
@@ -132,7 +133,7 @@ class ISCES(Code):
         os.chdir(self.wd)
 
 
-    def call(self, x = None, mpi="mpiexec", **kwargs):
+    def call(self, x = None, mpi="mpiexec", debug = 2, **kwargs):
         """
         Returns the ISCES executable.
         """
@@ -143,7 +144,7 @@ class ISCES(Code):
             call += ["-x", arg]
         for arg in kwargs:
             call += ["-" + arg, str(kwargs[arg])]
-        return call + ["-n", str(self.np), os.path.join(os.path.dirname(__file__), "../run/pisces"), self._config_file]
+        return call + ["-n", str(self.np), os.path.join(os.path.dirname(__file__), "../run/pisces"), self._config_file, "-D%i" % debug]
 
     def record(self, session):
         if db is None:

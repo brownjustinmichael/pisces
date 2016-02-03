@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 import os
 import argparse
 import yaml
@@ -14,6 +16,8 @@ try:
 		    exports [key] = new_exports [key]
 except IOError:
 	pass
+except TypeError:
+	pass
 
 parser = argparse.ArgumentParser()
 
@@ -22,13 +26,15 @@ parser.add_argument("--np", type=int, default=1)
 parser.add_argument("--init", default=None)
 parser.add_argument("--code", default="ISCES")
 parser.add_argument("--launcher", default="Launcher")
+parser.add_argument("--debug", default=2, type=int)
 
 args = parser.parse_args()
 
 configuration = config.Configuration(args.config_file)
-configuration["np"] = args.np
+if args.np != 1 or "np" not in configuration:
+	configuration["np"] = args.np
 
-code = launch.CodeRegistry.registry[args.code](configuration, init=args.init, )
+code = launch.CodeRegistry.registry[args.code](configuration, init=args.init)
 
 exports ["init"] = (args.init not in ["False", "false", "f", "F"])
 

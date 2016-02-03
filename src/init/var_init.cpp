@@ -82,23 +82,74 @@ int main (int argc, char *argv[])
 		double height = parameters.get <double> ("grid.z.width");
 		double diff_bottom = parameters.get <double> ("equations.temperature.diffusion");
 		double diff = parameters.get <double> ("equations.temperature.diffusion");
-		double phi = parameters.get <double> ("equations.temperature.tanh.coeff");
 		double mu_length = parameters.get <double> ("equations.temperature.tanh.length");
 		double mu_zero = parameters.get <double> ("equations.temperature.tanh.zero");
 		double stiffness = parameters.get <double> ("equations.temperature.stiffness");
-		double chi = 2. * phi / (1.0 + phi) / (stiffness * (1.0 + phi) / (1.0 - phi) + 1.0);
+		double chi = 1. / (1. - parameters.get <double> ("equations.temperature.sources.z_velocity"));
+
+		if (chi < 0.) {
+			FATAL("Chi cannot be less than zero.");
+			throw 3;
+		}
+
+		double a = chi - 1.;
+		double b = 1. + 2. * (stiffness - 2.) * chi + chi * chi;
+		double c = 2. * (1. + stiffness) * chi;
+		double d = chi * (1. - stiffness);
+		double e = chi * (1 + stiffness);
 		
 		double scale = 0.001;
 		double width = parameters.get <double> ("grid.z.width");
-		#pragma omp parallel for
+		double arg;
+
+
+		INFO("Chi = " << chi);
+		INFO("Stiffness = " << stiffness);
+		INFO("Diffusion = " << diff);
+		INFO("");
+
+		INFO("a = " << a);
+		INFO("b = " << b);
+		INFO("c = " << c);
+		INFO("d = " << d);
+		INFO("e = " << e);
+		// if (b + c < 0.) {
+		// 	FATAL("Problem setup failed at lower boundary: try different values of chi, stiffness, and diffusion");
+		// 	throw 1;
+		// }
+		// if (b - c < 0.) {
+		// 	FATAL("Problem setup failed at upper boundary: try different values of chi, stiffness, and diffusion");
+		// 	throw 2;
+		// }
+
+		double phi = -((-1.0 + chi + sqrt(1.0 - 2.0 * chi + 4.0 * stiffness * chi + chi * chi)) / (2.0 * stiffness * chi) - 1.0) / 2.0;
+
+		WARN("Phi = " << phi);
+
+		// #pragma omp parallel for
 		for (int i = 0; i < n; ++i) {
 			for (int j = 0; j < m; ++j) {
-				tempt [i * m + j] = (-1. + tbot*chi - pos_z[j] + tbot*phi*chi + mu_length*phi*log((-std::cosh((-1 + mu_zero) / mu_length) + phi*std::sinh((-1 + mu_zero) / mu_length)) / (-std::cosh((pos_z[j] + mu_zero) / mu_length) + phi*std::sinh((pos_z[j] + mu_zero) / mu_length)))) / (1. + phi) / chi;
+				// double temp = (-std::cosh((pos_z[j] + mu_zero) / mu_length) + phi*std::sinh((pos_z[j] + mu_zero) / mu_length)) / (-std::cosh((-1. + mu_zero) / mu_length) + phi*std::sinh((-1. + mu_zero) / mu_length));
+				// tempt [i * m + j] = (-tbot*chi + tbot*phi*phi*chi + (1. - phi*std::tanh((1. + mu_zero)/mu_length))*(1. + pos_z[j] + mu_length*phi*log(temp))) / (-1. + phi*phi) / chi;
+				
 				// tempt [i * m + j] = tbot + (pos_z[j] + height / 2) * (ttop - tbot) / height;
+				// 
+				if (j == 0) {
+					tempt[i * m + j] = tbot;
+				} else {
+					arg = (-(pos_z[j] + pos_z[j - 1]) / 2.0 - mu_zero) / mu_length;
+					tempt[i * m + j] = tempt[i * m + j - 1] - (pos_z[j] - pos_z[j - 1]) * (1. - phi) / chi / (1.0 + phi * std::tanh(arg));
+					// INFO ((-diff / (diff + (a - sqrt(b - c * std::tanh(arg))) / (d + e * std::tanh(arg))) * (chi - 1.)) / chi << " " << (b - c * std::tanh(arg)));
+				}
+			}
+		}
+
+		for (int i = 0; i < n; ++i) {
+			for (int j = 0; j < m; ++j) {
 				temps [i * m + j] = (stop - sbot) / (height) * (pos_z [j] + height / 2.0) + sbot;
 
 				temps [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3 * std::cos(pos_z [j] * 3.14159 / width);
-				tempt [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3 * std::cos(pos_z [j] * 3.14159 / width);
+				// tempt [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3 * std::cos(pos_z [j] * 3.14159 / width);
 			}
 		}
 
