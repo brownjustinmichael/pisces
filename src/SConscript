@@ -110,9 +110,6 @@ for dirname, dirnames, filenames in os.walk(os.path.join(path, "init")):
         if filename.split ('.') [-1] == 'cpp':
             env.Default (env.Program(target = os.path.join("../run", filename.split ('.') [0]), source = ([os.path.relpath (dirname, path) + "/" + filename] + objects)))
 
-print (Dir('.').abspath)
-print (objects [3] [0].abspath)
-
 # Add the tests, which can be run with scons check
 if cxxtest:
     env.SConscript('../test/SConscript', variant_dir = "./test", duplicate = 0, exports = {'env': env, "objects": objects, "include_mp": include_mp, "include_mpi": include_mpi})

@@ -44,7 +44,7 @@ def unprocess(value, dictionary=None, keys = None):
         unprocess(value, dictionary[keys[0]], keys[1:])
     return dictionary
 
-def Configuration(file_name=None, default=None, **kwargs):
+def Configuration(file=None, default=None, **kwargs):
     """
     Returns a dictionary setup object for use with code objects
 
@@ -60,8 +60,12 @@ def Configuration(file_name=None, default=None, **kwargs):
         tmp = yaml.load(open(os.path.join(os.path.dirname(__file__), "../src/defaults.yaml")))
 
     # Load any additional keys from the given file
-    if file_name is not None:
-        tmp = update(tmp, yaml.load(open(file_name)))
+    try:
+        file = open(file)
+    except Exception as e:
+        pass
+    if file is not None:
+        tmp = update(tmp, yaml.load(file))
 
     # Update any additional arguments provided to the function
     tmp.update (kwargs)

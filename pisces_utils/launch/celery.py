@@ -1,9 +1,10 @@
 from celery import Celery
-import pisces_utils.celeryconfig as celeryconfig
 import json
 import operator
 
-from db.launch import Launcher, CodeRegistry, LauncherRegistry
+from . import celeryconfig
+from .code import CodeRegistry
+from .launch import Launcher, LauncherRegistry
 
 app = Celery('pisces', backend = 'amqp')
 app.config_from_object (celeryconfig)

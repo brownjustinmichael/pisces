@@ -4,12 +4,13 @@ import abc
 import subprocess
 import shutil
 import glob
+import re
 
 try:
-    import pisces_utils.pisces_db as db
-except ImportError:
+    from .. import db
+except ImportError as e:
     db = None
-    print("Could not import database")
+    print("Could not import database (%s)" % str(e))
 
 class CodeRegistry(type):
     registry = {}
@@ -27,7 +28,7 @@ class Code(object, metaclass=CodeRegistry):
     """
     An abstract class describing the way to translate from a configuration to code execution
     """
-    def __init__(self, config):
+    def __init__(self, config, init=None):
         super(Code, self).__init__()
         self.config = config
         try:
@@ -111,7 +112,7 @@ class ISCES(Code):
                 os.makedirs(self.config ["root"] + dirname)
 
         if init:
-            subprocess.call(["mpiexec", "-np", str(self.np), os.path.join(os.path.dirname(__file__), "../run/", self.config ["init"]), self._config_file])
+            subprocess.call(["mpiexec", "-np", str(self.np), os.path.join(os.path.dirname(__file__), "../../run/", self.config ["init"]), self._config_file])
 
         os.chdir(self.wd)
 
@@ -133,7 +134,7 @@ class ISCES(Code):
         os.chdir(self.wd)
 
 
-    def call(self, x = None, mpi="mpiexec", debug = 2, **kwargs):
+    def call(self, x=None, mpi="mpiexec", debug=2, **kwargs):
         """
         Returns the ISCES executable.
         """
@@ -144,70 +145,25 @@ class ISCES(Code):
             call += ["-x", arg]
         for arg in kwargs:
             call += ["-" + arg, str(kwargs[arg])]
-        return call + ["-n", str(self.np), os.path.join(os.path.dirname(__file__), "../run/pisces"), self._config_file, "-D%i" % debug]
+        return call + ["-n", str(self.np), os.path.join(os.path.dirname(__file__), "../../run/pisces"), self._config_file, "-D%i" % debug]
 
-    def record(self, session):
+    def record(self, session=None):
         if db is None:
             raise RuntimeError("Could not record as the database backend is not functional")
-        entry = db.SimulationEntry.from_config(**self.config)
+        if session is None:
+            session = db.Session()
+
+        filename = os.path.join(self.config["root"], self.config["output"]["directory"], self.config["output"]["stat"]["file"])
+        filename = re.sub("\%*\d*[id]", "[0-9]*", filename)
+        etnry = None
+
+        entry = db.SimulationEntry.from_config(session, **self.config)
         session.add (entry)
-        files = []
-        for sub in self.config ["output"]:
-            try:
-                files.append (sub ["file"])
-            except Exception as e:
-                raise e
-        for filename in files:
-            steps = db.StepEntry.from_file (os.path.join(self.config ["root"], self.config ["output"] ["directory"], filename), sim = entry)
+
+        for filename in glob.glob(filename + ".*"):
+            steps = db.StepEntry.from_file (session, filename, sim = entry)
             for step in steps:
                 session.add (step)
 
         session.commit ()
         
-class LauncherRegistry(type):
-    registry = {}
-
-    @staticmethod
-    def register_class(target_class):
-        LauncherRegistry.registry[target_class.__name__] = target_class
-
-    def __new__(cls, clsname, bases, attrs):
-        newclass = super(LauncherRegistry, cls).__new__(cls, clsname, bases, attrs)
-        LauncherRegistry.register_class(newclass)  # here is your register function
-        return newclass
-
-class Launcher(object, metaclass=LauncherRegistry):
-    """
-    An "abstract" class that takes a Code object and executes it.
-
-    If the base class is used, the code is executed directly without going through Celery or Torque, for example.
-    """
-    def __init__(self, code):
-        super(Launcher, self).__init__()
-        self.code = code
-        self.process = None
-
-    def launch(self, *args, init=True, **kwargs):
-        if self.process is not None:
-            raise RuntimeError("Already running")
-        if init:
-            self.code.setup()
-        else:
-            self.code.resume()
-
-        self._launch(*args, **kwargs)
-
-    def _launch(self, *args, **kwargs):
-        self.process = subprocess.Popen(self.code.call ())
-
-    def wait(self, *args, record=True, **kwargs):
-        if self.process is None:
-            raise RuntimeError("Not yet running")
-        self._wait(*args, **kwargs)
-        if record:
-            self.code.record(db.Session())
-        self.process = None
-
-    def _wait(self, *args, **kwargs):
-        self.process.wait()
-
