@@ -188,7 +188,6 @@ namespace pisces
 		 ************************************************************************/
 		inline double calculate_min_timestep (formats::virtual_file *virtual_file = NULL, bool limiters = true) {
 			double shared_min = max_timestep;
-			static int count = 0;
 			
 			// Calculate the minimum timestep in parallel
 			#pragma omp parallel

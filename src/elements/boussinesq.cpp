@@ -34,7 +34,7 @@ namespace data
 		initialize ("temperature");
 		initialize ("x_velocity");
 		initialize ("z_velocity");
-		initialize ("density");
+		// initialize ("density");
 
 		// Set up the data from the input file in params
 		TRACE ("Setting up from input...");
@@ -74,7 +74,15 @@ namespace pisces
 	using namespace plans::solvers;
 	using namespace boundaries;
 
+	std::string boussinesq_element::class_name() {
+		return "boussinesq";
+	}
+
 	implemented_element::registrar <boussinesq_element> boussinesq_registrar ("boussinesq");
+
+	std::shared_ptr <element> boussinesq_element::instance (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) {
+		return std::shared_ptr <element> (new boussinesq_element (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags));
+	}
 	
 	boussinesq_element::boussinesq_element (grids::axis i_axis_n, grids::axis i_axis_m, int i_name, io::parameters& i_params, data::data &i_data, mpi::messenger* i_messenger_ptr, int i_element_flags) : 
 	implemented_element (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags) {
@@ -170,5 +178,55 @@ namespace pisces
 			}
 		}
 		return 1.0 / 0.0;
+	}
+	
+	/*!**********************************************************************
+	 * \copydoc implemented_element::make_virtual_file
+	 ************************************************************************/
+	formats::virtual_file* boussinesq_element::make_virtual_file (int flags) {
+		std::shared_ptr <io::output> virtual_output;
+		if (flags & profile_only) {
+			// If only the profile is desired, just build that
+			virtual_output.reset (new io::formatted_output <formats::virtual_format> (formats::data_grid::two_d (1, m), "two_d/boussinesq/virtual_file", formats::replace_file));
+			if (flags & timestep_only) {
+				// If only the timestep is needed, only load z and x_velocity
+				virtual_output->append <double> ("z", std::shared_ptr <functors::functor> (new functors::average_functor <double> (ptr ("z"), n, m)));
+				virtual_output->append <double> ("z_velocity", std::shared_ptr <functors::functor> (new functors::root_mean_square_functor <double> (ptr ("z_velocity"), n, m)));
+				virtual_output->append <double> ("temperature", std::shared_ptr <functors::functor> (new functors::root_mean_square_functor <double> (ptr ("temperature"), n, m)));
+				virtual_output->append <double> ("composition", std::shared_ptr <functors::functor> (new functors::root_mean_square_functor <double> (ptr ("composition"), n, m)));
+			} else {
+				FATAL ("HAVEN'T GOT A TREATMENT FOR THIS YET");
+				throw 0;
+				data.setup_profile (virtual_output, data::no_save);
+			}
+		} else {
+			virtual_output.reset (new io::formatted_output <formats::virtual_format> (formats::data_grid::two_d (n, m), "two_d/boussinesq/virtual_file", formats::replace_file));
+			if (flags & timestep_only) {
+				// If only the timestep is needed, grab the positions and velocities
+				virtual_output->append <double> ("z", ptr ("z"));
+				virtual_output->append <double> ("x", ptr ("x"));
+				virtual_output->append <double> ("z_velocity", ptr ("z_velocity"));
+				virtual_output->append <double> ("x_velocity", ptr ("x_velocity"));
+				virtual_output->append <double> ("temperature", ptr ("temperature"));
+				virtual_output->append <double> ("composition", ptr ("composition"));
+			} else {
+				// Load the whole dataset
+				data.setup_output (virtual_output, data::no_save);
+			}
+		}
+		virtual_output->to_file ();
+		return &formats::virtual_files ["two_d/boussinesq/virtual_file"];
+	}
+	
+	/*!**********************************************************************
+	 * \copydoc implemented_element::make_rezoned_virtual_file
+	 ************************************************************************/
+	formats::virtual_file* boussinesq_element::make_rezoned_virtual_file (double *positions, formats::virtual_file *virtual_file_ptr, int flags) {
+		grids::axis vertical_axis (m, positions [messenger_ptr->get_id ()], positions [messenger_ptr->get_id () + 1], messenger_ptr->get_id () == 0 ? 0 : 1, messenger_ptr->get_id () == messenger_ptr->get_np () - 1 ? 0 : 1);
+		std::shared_ptr <grids::grid> vertical_grid = implemented_element::generate_grid (&vertical_axis);
+		
+		pisces::rezone (messenger_ptr, &*(grids [1]), &*vertical_grid, virtual_file_ptr, &formats::virtual_files ["two_d/boussinesq/new_virtual_file"], value_buffer, inter_buffer);
+		
+		return &formats::virtual_files ["two_d/boussinesq/new_virtual_file"];
 	}
 } /* pisces */

@@ -122,8 +122,6 @@ class StepEntry(object):
 
         # session.flush()
 
-        print(entries)
-
         return entries
 
 sqlalchemy.orm.mapper(StepEntry, StepEntry.Table.__table__)
