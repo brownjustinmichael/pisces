@@ -48,7 +48,7 @@ namespace pisces
 			dirichlet (i_params ["equations.scalar.bottom.value"].as <double> ()), 
 			dirichlet (i_params ["equations.scalar.top.value"].as <double> ())) 
 		== 
-		params ["equations.scalar.diffusion"] * diff ();		
+		params ["equations.scalar.diffusion"] * diff ();	
 	TRACE ("Initialized.");
 	}
 	

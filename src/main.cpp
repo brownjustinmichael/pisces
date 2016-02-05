@@ -75,18 +75,12 @@ int main (int argc, char *argv[])
 		
 		TRACE ("Building data");
 		
-		data::thermo_compositional_data data (&horizontal_axis, &vertical_axis, id, n_elements, parameters);
+		// data::thermo_compositional_data data (&horizontal_axis, &vertical_axis, id, n_elements, parameters);
+		auto data = data::implemented_data::instance(parameters["data"].as<std::string>(), &horizontal_axis, &vertical_axis, id, n_elements, parameters);
 		
 		TRACE ("Constructing element");
 		
-		auto element = pisces::implemented_element::instance (parameters ["element"].as <std::string> (), horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00);
-		
-		if (pisces::element::version () < versions::version ("0.6.0.0")) {
-			INFO ("element.version < 0.6.0.0");
-		}
-		else {
-			INFO ("element.version not < 0.6.0.0");
-		}
+		auto element = pisces::implemented_element::instance (parameters ["element"].as <std::string> (), horizontal_axis, vertical_axis, name, parameters, *data, &process_messenger, 0x00);
 
 		TRACE ("Element constructed.");
 
@@ -96,7 +90,7 @@ int main (int argc, char *argv[])
 		cbegin = clock ();
 		begin = std::chrono::system_clock::now ();
 
-		int n_steps = data.n_steps;
+		int n_steps = data->n_steps;
 		std::shared_ptr <io::input> virtual_input;
 		while (n_steps < parameters.get <int> ("time.steps") && element->duration < parameters.get <double> ("time.stop")) {
 			if (parameters.get <int> ("grid.rezone.check_every") > 0 && n_steps != 0 && n_elements > 1) {
@@ -108,9 +102,9 @@ int main (int argc, char *argv[])
 					grids::axis vertical_axis (m, positions [id], positions [id + 1], id == 0 ? 0 : 1, id == n_elements - 1 ? 0 : 1);
 				
 					virtual_input.reset (new io::formatted_input <formats::virtual_format> (formats::data_grid::two_d (n, m), "main/virtual_file"));
-					data.setup (virtual_input);
+					data->setup (virtual_input);
 				
-					element = pisces::implemented_element::instance (parameters ["element"].as <std::string> (), horizontal_axis, vertical_axis, name, parameters, data, &process_messenger, 0x00);
+					element = pisces::implemented_element::instance (parameters ["element"].as <std::string> (), horizontal_axis, vertical_axis, name, parameters, *data, &process_messenger, 0x00);
 				}
 			}
 			element->run (n_steps);

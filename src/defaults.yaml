@@ -1,3 +1,4 @@
+data: thermo_compositional
 element: boussinesq
 grid:
     x:
