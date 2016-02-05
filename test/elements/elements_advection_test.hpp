@@ -14,6 +14,7 @@
 #include "io/parameters.hpp"
 #include "plans/plan.hpp"
 #include "elements/boussinesq.hpp"
+#include "elements/data/thermo_compositional.hpp"
 #include "logger/logger.hpp"
 #include "io/formats/ascii.hpp"
 
