@@ -45,7 +45,7 @@ output:
         every: 1000
         timed: false
     trans:
-        file: stat_%02i_%%02i
+        file: trans_%02i_%%02i
         every: 100
         timed: false
     stat:
