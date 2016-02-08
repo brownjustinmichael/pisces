@@ -26,13 +26,27 @@ namespace pisces
 	boussinesq_element (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags) {
 		TRACE ("Initializing...");
 		
+		double stiffness;
+		double phi;
+		double diff = i_params ["equations.temperature.diffusion"].as <double> ();
+		double chi = 1. / (1. - i_params.get <double> ("equations.temperature.sources.z_velocity"));
+
+		if (i_params ["equations.temperature.tanh"].IsDefined ()) {
+			stiffness = i_params ["equations.temperature.stiffness"].as <double> ();
+			phi = i_params ["equations.temperature.diffusion"].as <double> () * ((1.0 - chi - sqrt(1.0 - 2.0 * chi - 4.0 * stiffness * chi + chi * chi)) / (2.0 * stiffness * chi) - 1.0) / 2.0;
+			if (phi < 0.0) {
+				FATAL("Cannot realize stiffness with positive diffusion. Try changing chi or the stiffness.")
+				throw 2;
+			}
+			diff += phi;
+			WARN(1.0 - 2.0 * chi - 4.0 * stiffness * chi + chi * chi);
+		}
+
 		data.initialize ("temperature_diffusion", uniform_n);
 		for (int j = 0; j < m; ++j)
 		{
-			data ["temperature_diffusion"] [j] = i_params ["equations.temperature.diffusion"].as <double> ();
+			data ["temperature_diffusion"] [j] = diff;
 		}
-
-		double chi = 1. / (1. - i_params.get <double> ("equations.temperature.sources.z_velocity"));
 
 		WARN("Chi = " << chi);
 
@@ -47,9 +61,6 @@ namespace pisces
 
 			// if (i_params ["equations.temperature.linear"].IsDefined ()) *equations ["temperature"] == std::shared_ptr <plans::plan::factory> (new plans::diffusion::linear::factory (i_params ["equations.temperature.linear"].as <double> () * i_params ["equations.temperature.diffusion"].as <double> (), -1.0, data ["composition"], data ["temperature_diffusion"].ptr (), 10));
 			if (i_params ["equations.temperature.tanh"].IsDefined ()) {
-				double stiffness = i_params ["equations.temperature.stiffness"].as <double> ();
-				double phi = -i_params ["equations.temperature.diffusion"].as <double> () * ((-1.0 + chi + sqrt(1.0 - 2.0 * chi + 4.0 * stiffness * chi + chi * chi)) / (2.0 * stiffness * chi) - 1.0) / 2.0;
-
 				WARN ("Phi = " << phi);
 
 				*equations ["temperature"] == std::shared_ptr <plans::plan::factory> (new plans::diffusion::tanh::factory (phi, i_params ["equations.temperature.tanh.length"].as <double> (), i_params ["equations.temperature.tanh.zero"].as <double> (), -1.0, data ["composition"], data ["temperature_diffusion"].ptr (), 10));

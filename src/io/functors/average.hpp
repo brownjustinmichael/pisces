@@ -62,6 +62,13 @@ namespace functors
 				sum += weight [i];
 			}
 			inner_data = linalg::dot (m * n, weight, data) / sum;
+			// DEBUG ("INNER DATA = " << inner_data);
+			// if (inner_data > 1.e10) {
+			// 	for (int i = 0; i < m * n; ++i) {
+			// 		DEBUG ("WEIGHT IS " << weight[i]);
+			// 		DEBUG ("DATUM IS " << data[i]);
+			// 	}
+			// }
 			return &inner_data;
 		}
 	};

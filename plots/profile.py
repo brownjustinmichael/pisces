@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 import netCDF4 as nc
 import argparse
 import numpy as np

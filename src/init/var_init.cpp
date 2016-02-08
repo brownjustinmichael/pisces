@@ -122,8 +122,11 @@ int main (int argc, char *argv[])
 		// 	throw 2;
 		// }
 
-		double phi = -((-1.0 + chi + sqrt(1.0 - 2.0 * chi + 4.0 * stiffness * chi + chi * chi)) / (2.0 * stiffness * chi) - 1.0) / 2.0;
-
+		double phi = ((1.0 - chi - sqrt(1.0 - 2.0 * chi - 4.0 * stiffness * chi + chi * chi)) / (2.0 * stiffness * chi) - 1.0) / 2.0;
+		if (phi < 0.0) {
+			FATAL("Cannot realize stiffness with positive diffusion. Try changing chi or the stiffness.")
+			throw 2;
+		}
 		WARN("Phi = " << phi);
 
 		// #pragma omp parallel for
