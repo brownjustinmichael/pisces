@@ -141,7 +141,7 @@ int main (int argc, char *argv[])
 					tempt[i * m + j] = tbot;
 				} else {
 					arg = (-(pos_z[j] + pos_z[j - 1]) / 2.0 - mu_zero) / mu_length;
-					tempt[i * m + j] = tempt[i * m + j - 1] - (pos_z[j] - pos_z[j - 1]) * (1. - phi) / chi / (1.0 + phi * std::tanh(arg));
+					tempt[i * m + j] = tempt[i * m + j - 1] - (pos_z[j] - pos_z[j - 1]) / chi / (1.0 + phi + phi * std::tanh(arg));
 					// INFO ((-diff / (diff + (a - sqrt(b - c * std::tanh(arg))) / (d + e * std::tanh(arg))) * (chi - 1.)) / chi << " " << (b - c * std::tanh(arg)));
 				}
 			}

@@ -13,9 +13,6 @@ class SimulationEntry(object):
         Table=type("SimulationTable", (Base,), {"__table__": sqlalchemy.Table("simulations", Base.metadata, autoload=True, autoload_with=engine, extend_existing=True)})
 
     def __init__(self, entry=None, *args, **kwargs):
-        print(entry)
-        # if isinstance(entry, SimulationEntry):
-            # entry = entry._entry
         if entry:
             self._entry=entry
         else:
@@ -140,6 +137,3 @@ class SimulationEntry(object):
         for column in SimulationEntry.Table.__table__.columns:
             setattr(sim.entry, column.key, getattr(self.entry, column.key))
         return sim
-
-
-sqlalchemy.orm.mapper(SimulationEntry, SimulationEntry.Table.__table__)

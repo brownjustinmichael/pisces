@@ -6,7 +6,10 @@
  * Copyright 2014 Justin Brown. All rights reserved.
  ************************************************************************/
 
+
 #include "implemented_data.hpp"
+
+#include "io/functors/profile.hpp"
 
 namespace data
 {
@@ -91,6 +94,18 @@ namespace data
 
 	std::shared_ptr <functors::functor> implemented_data::output_flux (std::string variable, std::string velocity, int slice_index) {
 		return std::shared_ptr <functors::functor> (new functors::average_functor <double> (n, 1, std::shared_ptr <functors::functor> (new functors::slice_functor <double> (n, m, slice_index < 0 ? m / 2 : slice_index, std::shared_ptr <functors::functor> (new functors::product_functor <double> (n, m, (*this) (velocity), (*this) (variable)))))));
+	}
+
+	std::shared_ptr <functors::functor> implemented_data::output_avg_flux (std::string variable, std::string velocity, int slice_index) {
+		return std::shared_ptr <functors::functor> (new functors::weighted_average_functor <double> (n, m, this->weights, std::shared_ptr <functors::functor> (new functors::product_functor <double> (n, m, (*this) (velocity), (*this) (variable)))));
+	}
+
+	std::shared_ptr <functors::functor> implemented_data::output_prof (std::string variable) {
+		return std::shared_ptr <functors::functor> (new functors::profile_functor <double> (n, m, (*this) (variable)));
+	}
+
+	std::shared_ptr <functors::functor> implemented_data::output_deriv_prof (std::string variable) {
+		return std::shared_ptr <functors::functor> (new functors::profile_functor <double> (n, m, std::shared_ptr <functors::functor> (new functors::deriv_functor <double> ((*this) (variable), n, m, &(*grid_m) [0]))));
 	}
 
 	double *implemented_data::operator() (const std::string &name, int state, int i, int j) {

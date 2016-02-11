@@ -157,6 +157,32 @@ namespace data
 		std::shared_ptr <functors::functor> output_flux (std::string variable, std::string velocity, int slice_index = -1);
 
 		/**
+		 * @brief Construct a flux functor for a given string variable
+		 * 
+		 * @param variable The string variable for which to construct the flux
+		 * @param velocity The string representation of the velocity variable needed to construct the flux
+		 * 
+		 * @return The flux functor, which should be added to an output stream.
+		 */
+		std::shared_ptr <functors::functor> output_avg_flux (std::string variable, std::string velocity);
+
+		/**
+		 * @brief Construct a functor that returns the profile of a given string variable
+		 * 
+		 * @param variable The string variable from which the profile should be calculated
+		 * @return The profile functor, which should be added to an output stream
+		 */
+		std::shared_ptr <functors::functor> output_prof (std::string variable);
+
+		/**
+		 * @brief Construct a functor that returns the profile of the derivative of a given string variable
+		 * 
+		 * @param variable The string variable from which the profile should be calculated
+		 * @return The profile functor, which should be added to an output stream
+		 */
+		std::shared_ptr <functors::functor> output_deriv_prof (std::string variable);
+
+		/**
 		 * @brief Index the data in two dimensions and return the appropriate pointer
 		 * 
 		 * @param name The name of the variable to index

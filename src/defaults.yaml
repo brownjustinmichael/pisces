@@ -47,11 +47,16 @@ output:
         timed_every: 1.0
     trans:
         file: trans_%02i_%%02i
-        every: 100
+        every: 1000
         timed: false
         timed_every: 1.0
     stat:
         file: stat_%02i_%%02i
+        every: 100
+        timed: false
+        timed_every: 1.0
+    prof:
+        file: prof_%02i_%%02i
         every: 100
         timed: false
         timed_every: 1.0

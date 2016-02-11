@@ -172,12 +172,12 @@ class PISCES(Code):
 
         entry = db.SimulationEntry.from_config(session, **self.config)
         entry.date = self.date
-        session.add (entry)
+        session.add (entry.entry)
 
         for filename in glob.glob(filename + ".*"):
             steps = db.StepEntry.from_file (session, filename, sim = entry)
             for step in steps:
-                session.add (step)
+                session.add (step.entry)
 
         session.commit ()
         return entry

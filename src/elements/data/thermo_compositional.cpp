@@ -38,6 +38,9 @@ namespace data
 		stream = this->setup_output_from <formats::netcdf> (i_params ["output.trans"], real_spectral);
 		// stream->append <double> ("div_u", std::shared_ptr <functors::transform_div_functor <double>> (new functors::transform_div_functor <double> ((*this) ["x"].ptr (), (*this) ["z"].ptr (), (*this) ["x_velocity"].ptr (), (*this) ["z_velocity"].ptr (), n, m)));
 
+		TRACE ("Setting up profile output...");
+		stream = this->setup_output_from <formats::netcdf> (i_params ["output.prof"], real_real, profile);
+
 		TRACE ("Setting up stat output...");
 		std::shared_ptr <io::output> stat_stream =
 		this->setup_output_from <formats::netcdf> (i_params ["output.stat"], real_real, no_variables);
@@ -51,6 +54,7 @@ namespace data
 			stat_stream->append <double> ("avg_" + variable, this->output_avg (variable), formats::scalar);
 			stat_stream->append <double> ("deriv_" + variable, this->output_deriv (variable), formats::scalar);
 			stat_stream->append <double> ("flux_" + variable, this->output_flux (variable, "z_velocity"), formats::scalar);
+			stat_stream->append <double> ("avg_flux_" + variable, this->output_flux (variable, "z_velocity"), formats::scalar);
 		}
 	}
 } /* data */

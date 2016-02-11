@@ -218,11 +218,12 @@ namespace plans
 				coeff_dz [m - 1] = coeff * (diffusion [m - 1] - diffusion [m - 2]) * oodz [m - 1];
 				
 				if (matrix_m) {
+					linalg::scale(m * m, 0.0, new_matrix);
 					for (int j = 0; j < m; ++j) {
-						// DEBUG ("Updating diff " << diffusion [j]);
 						linalg::add_scaled (m, coeff * diffusion [j], grid_m.get_data (2) + j, new_matrix + j, m, m);
 						linalg::add_scaled (m, coeff_dz [j], grid_m.get_data (1) + j, new_matrix + j, m, m);
 					}
+
 					linalg::add_scaled (m * m, -1.0 * alpha, new_matrix, matrix_m);
 				} else {
 					WARN ("No matrix");

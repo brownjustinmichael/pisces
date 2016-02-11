@@ -155,10 +155,12 @@ namespace functors
 		 * \return The first element of the averaged 1D array
 		 ************************************************************************/
 		void *calculate () {
-			for (int j = 1; j < m - 1; ++j) {
-				for (int i = 0; i < n; ++i) {
+			for (int i = 0; i < n; ++i) {
+				for (int j = 1; j < m - 1; ++j) {
 					inner_data [i * m + j] = (data [i * m + j + 1] - data [i * m + j - 1]) / (position_m [j + 1] - position_m [j - 1]);
 				}
+				inner_data[i * m] = inner_data[i * m + 1];
+				inner_data[i * m + m - 1] = inner_data[i * m + m - 2];
 			}
 			return &inner_data [0];
 		}

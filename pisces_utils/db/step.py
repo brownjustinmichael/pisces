@@ -90,7 +90,7 @@ class StepEntry(object):
 
         date = datetime.datetime.fromtimestamp (os.path.getmtime(file_name))
         # If reset is set, delete all entries in the database matching the current file
-        previous = session.query(cls).filter(cls.file == os.path.abspath(file_name)).order_by(cls.line).all()
+        previous = session.query(cls.Table).filter(cls.Table.file == os.path.abspath(file_name)).order_by(cls.Table.line).all()
         if len(previous) > 0:
             if date > previous[0].date:
                 if reset:
@@ -110,7 +110,7 @@ class StepEntry(object):
             entries.append(StepEntry.Table())
             entries[-1].file = os.path.abspath(file_name)
             entries[-1].line = time
-            entries[-1].simulation_id = sim.id
+            entries[-1].simulation_id = sim.entry.id
             entries[-1].date = date
 
             for variable in data.variables:
@@ -118,10 +118,8 @@ class StepEntry(object):
                 var = ma.filled(var, 0.0).tolist()
                 if len(data[variable].dimensions) == 1:
                     setattr(entries[-1], variable, var)
-            session.add(entries[-1])
+            session.add(cls(entries[-1]))
 
         # session.flush()
 
         return entries
-
-sqlalchemy.orm.mapper(StepEntry, StepEntry.Table.__table__)

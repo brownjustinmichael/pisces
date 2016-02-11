@@ -46,6 +46,7 @@ namespace data
 		uniform_m = 0x02, //!< Copy the input array across the data in the m direction
 		no_save = 0x04,
 		no_variables = 0x08,
+		profile = 0x80,
 		vector = 0x10,
 		vector2D = 0x10,
 		vector3D = 0x20,
@@ -326,9 +327,17 @@ namespace data
 			if (!(params ["output.output"].as <bool> ())) return std::shared_ptr <io::output> ();
 
 			if (!(flags & no_variables)) {
-				for (data::iterator iter = begin (); iter != end (); ++iter) {
-					TRACE ("Appending " << *iter << " to output...");
-					output->append (*iter, (*this) (*iter, state));
+				if (flags & profile) {
+					for (data::iterator iter = begin (); iter != end (); ++iter) {
+						TRACE ("Appending " << *iter << " profile to output...");
+						output->append<double>(*iter, this->output_prof(*iter), formats::m_profile);
+						output->append<double>(*iter + "_deriv", this->output_deriv_prof(*iter), formats::m_profile);
+					}
+				} else {
+					for (data::iterator iter = begin (); iter != end (); ++iter) {
+						TRACE ("Appending " << *iter << " to output...");
+						output->append (*iter, (*this) (*iter, state));
+					}
 				}
 			}
 			
@@ -444,7 +453,22 @@ namespace data
 			ERROR ("Variable " << name << " is undefined");
 			throw 500;
 		}
-		
+
+		/**
+		 * @brief Construct a functor that returns the profile of a given string variable
+		 * 
+		 * @param variable The string variable from which the profile should be calculated
+		 * @return The profile functor, which should be added to an output stream
+		 */
+		virtual std::shared_ptr <functors::functor> output_prof (std::string variable) = 0;
+
+		/**
+		 * @brief Construct a functor that returns the profile of the derivative a given string variable
+		 * 
+		 * @param variable The string variable from which the profile should be calculated
+		 * @return The profile functor, which should be added to an output stream
+		 */
+		virtual std::shared_ptr <functors::functor> output_deriv_prof (std::string variable) = 0;
 
 	protected:
 		/*!**********************************************************************
