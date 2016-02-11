@@ -1,0 +1,48 @@
+dump: {directory: input/, every: 1000, file: dump_%02i}
+element: vardiff
+equations:
+  composition:
+    advection: 1.0
+    bottom: {value: 1.0}
+    diffusion: 1.0
+    ignore: false
+    sources: {z_velocity: 0.0}
+    top: {value: -1.0}
+  temperature:
+    advection: 1.0
+    bottom: {value: -1.1}
+    diffusion: 1.0
+    ignore: false
+    sources: {z_velocity: -1.0}
+    stiffness: 10.0
+    tanh: {coeff: 0.5, length: 0.1, zero: 0.0}
+    top: {value: 0.0}
+  velocity: {advection: 1.0, diffusion: 1.0, ignore: false}
+  x_velocity: {ignore: false, ignore_net: true}
+  z_velocity:
+    ignore: false
+    ignore_net: true
+    sources: {composition: 0.0, temperature: 1.0e8}
+grid:
+  rezone: {check_every: -500, iters_fixed_t: 1, k: 1.0, max_size: 70.0, min_size: 20.0,
+    mu_t: 1.003, mult: 1.0, n_tries: 1, step_size: 5.0, t_initial: 8e-1, t_min: 2e-1}
+  x: {points: 512, width: 2.828}
+  z: {points: 512, width: 2.0}
+input: {directory: input/, file: input_%02i, full: true}
+np: 1
+output:
+  cart: {every: 10, file: cart_%02i_%%02i, timed: false}
+  directory: output/
+  name: ''
+  number: 0
+  output: true
+  stat: {every: 100, file: stat_%02i_%%02i, timed: false}
+  trans: {every: 100, file: stat_%02i_%%02i, timed: false}
+parallel:
+  maxthreads: 16
+  solver: {threads: 1}
+  transform: {subthreads: 1, threads: 4}
+root: ./
+time: {allow: 1000.0, alpha: 1.0, cfl: 0.1, down_mult: 0.8, increase_every: 100, init: 1.0e-05,
+  max: 0.004, mult: 1.05, steps: 100000, stop: 100.0}
+wd: /Users/justinbrown/Dropbox/pisces/sims/variable_0.8_0.1

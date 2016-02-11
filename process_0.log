@@ -1,3 +1,0 @@
-2016-01-08 00:32:50 FATAL: (int main(int, char**) 126) - Fatal error occurred. Check log.
-2016-01-08 00:32:50 FATAL: (int main(int, char**) 127) - NcNotNCF: Not a netcdf file
-file: ncFile.cpp  line:45

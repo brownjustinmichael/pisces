@@ -59,6 +59,7 @@ namespace data
 		if (fp) {
 			return fp (i_axis_n, i_axis_m, i_name, n_elements, i_params);
 		} else {
+			WARN("No data type associated with name " << name);
 			return std::shared_ptr <data> ();
 		}
 	}

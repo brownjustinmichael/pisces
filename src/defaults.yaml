@@ -44,14 +44,17 @@ output:
         file: cart_%02i_%%02i
         every: 1000
         timed: false
+        timed_every: 1.0
     trans:
         file: trans_%02i_%%02i
         every: 100
         timed: false
+        timed_every: 1.0
     stat:
         file: stat_%02i_%%02i
         every: 100
         timed: false
+        timed_every: 1.0
 dump:
     file: dump_%02i
     directory: input/
@@ -63,34 +66,3 @@ parallel:
         subthreads: 1
     solver:
         threads: 1
-equations:
-    temperature:
-        ignore: false
-        advection: 1.0
-        sources:
-            z_velocity: 0.0
-        top:
-            value: 0.0
-        bottom:
-            value: 0.0
-    composition:
-        ignore: false
-        advection: 1.0
-        sources:
-            z_velocity: 0.0
-        top:
-            value: 0.0
-        bottom:
-            value: 0.0
-    velocity:
-        ignore: false
-        advection: 1.0
-    x_velocity:
-        ignore: false
-        ignore_net: true
-    z_velocity:
-        ignore: false
-        ignore_net: true
-        sources: 
-            temperature: 1.
-            composition: -1.

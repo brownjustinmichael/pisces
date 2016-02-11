@@ -28,20 +28,18 @@ def process(value, dictionary=None, current_key=""):
         dictionary[current_key]=value
     return dictionary
 
-def unprocess(value, dictionary=None, keys = None):
+def unprocess(value, dictionary=None):
     if dictionary is None:
         dictionary = {}
-    if keys is None:
-        keys = []
-    if len(keys) == 1:
-        if value is not None:
-            dictionary[keys[0]]=value
-        else:
-            return
-    else:
-        if keys[0] not in dictionary:
-            dictionary[keys[0]]={}
-        unprocess(value, dictionary[keys[0]], keys[1:])
+    for key in value:
+        keys = key.split("__")
+        dict = dictionary
+        while len(keys) > 1:
+            if keys[0] not in dict:
+                dict[keys[0]] = {}
+            dict = dict[keys[0]]
+            keys.pop(0)
+        dict[keys[0]] = value[key]
     return dictionary
 
 def Configuration(file=None, default=None, **kwargs):

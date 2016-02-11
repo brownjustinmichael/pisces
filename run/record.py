@@ -21,7 +21,7 @@ except TypeError:
 parser = argparse.ArgumentParser()
 
 parser.add_argument("config_file", nargs="?", default="config.yaml")
-parser.add_argument("--code", default="ISCES")
+parser.add_argument("--code", default="PISCES")
 
 args = parser.parse_args()
 

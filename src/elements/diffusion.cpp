@@ -45,8 +45,9 @@ namespace pisces
 		TRACE ("Initializing...");
 		// Set up the scalar equation
 		*split_solver (equations ["scalar"], timestep, 
-			dirichlet (i_params ["equations.scalar.bottom.value"].as <double> ()), 
-			dirichlet (i_params ["equations.scalar.top.value"].as <double> ())) 
+			dirichlet (0.0), 
+			dirichlet (0.0))
+		+ params ["equations.scalar.advection"] * advec (data ["x_velocity"], data ["z_velocity"]) 
 		== 
 		params ["equations.scalar.diffusion"] * diff ();	
 	TRACE ("Initialized.");

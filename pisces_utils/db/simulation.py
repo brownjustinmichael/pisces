@@ -1,3 +1,4 @@
+import os
 import sqlalchemy
 
 from .db import Base, engine, strtypes
@@ -6,12 +7,15 @@ from pisces_utils import config
 class SimulationEntry(object):
     if "simulations" not in Base.metadata.tables:
         # If not, create one with columns id and hash
-        Table=type("SimulationTable", (Base,), {"__table__": sqlalchemy.Table("simulations", Base.metadata, sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True))})
+        Table=type("SimulationTable", (Base,), {"__table__": sqlalchemy.Table("simulations", Base.metadata, sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True), sqlalchemy.Column("date", sqlalchemy.DateTime))})
         Base.metadata.tables["simulations"].create(engine)
     else:
         Table=type("SimulationTable", (Base,), {"__table__": sqlalchemy.Table("simulations", Base.metadata, autoload=True, autoload_with=engine, extend_existing=True)})
 
     def __init__(self, entry=None, *args, **kwargs):
+        print(entry)
+        # if isinstance(entry, SimulationEntry):
+            # entry = entry._entry
         if entry:
             self._entry=entry
         else:
@@ -64,10 +68,7 @@ class SimulationEntry(object):
             setattr(self.entry, param, kwargs[param])
 
     @classmethod
-    def from_config(cls, session=None, **kwargs):
-        """
-        Generate a simulation entry from a YAML string of parameters. If the simulation already exists in the database, return that instead
-        """
+    def query(cls, session, **kwargs):
         # Parse the input parameters
         translation=config.process(kwargs)
         cls.add_columns(session=session, **translation)
@@ -76,7 +77,9 @@ class SimulationEntry(object):
         for key in translation:
             if key[:5] == "input":
                 remove.append(key)
-            if key == "output__number":
+            if key in ["output__number", "wd"]:
+                remove.append(key)
+            if key in ["time__steps", "time__stop"]:
                 remove.append(key)
 
         for key in remove:
@@ -84,12 +87,43 @@ class SimulationEntry(object):
             
         try:
             entry = session.query(cls).filter_by(**translation).one()
-            return entry
+            return cls(entry)
         except sqlalchemy.orm.exc.NoResultFound:
             pass
+        except sqlalchemy.exc.InvalidRequestError:
+            pass
+
+        return None
+
+    @classmethod
+    def from_config(cls, session=None, **kwargs):
+        """
+        Generate a simulation entry from a YAML string of parameters. If the simulation already exists in the database, return that instead
+        """
+        if session is not None:
+            entry = cls.query(session, **kwargs)
+            if entry is not None:
+                return entry
 
         # No acceptable simulation has been found, so we generate one from scratch
-        return cls.Table(**config.process(kwargs))
+        return cls(**config.process(kwargs))
+
+    def get_config(self):
+        configuration = {}
+        for column in SimulationEntry.Table.__table__.columns:
+            if column not in ["id", "date"]:
+                configuration[column.key] = getattr(self, column.key)
+        return config.unprocess(configuration)
+
+    def get_files(self, type="cart", output_number=None, element_number=0, format=".cdf"):
+        if output_number is None:
+            output_number = [i for i in range(self.entry.np)]
+        files = []
+        for number in output_number:
+            filename = (getattr(self.entry, "output__%s__file" % type) % element_number) % number
+            output_dir = (getattr(self.entry, "output__directory"))
+            files.append(os.path.join(self.entry.wd, output_dir, filename + format))
+        return files
 
     def same_sub(self, query, key, tolerance=1.e-4):
         for column in SimulationEntry.Table.__table__.columns:

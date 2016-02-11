@@ -3,9 +3,6 @@
  * /Users/justinbrown/Dropbox/pisces/src/elements/data/thermo_compositional.cpp
  ************************************************************************/
 
-#ifndef THERMO_COMPOSITIONAL_H__
-#define THERMO_COMPOSITIONAL_H__
-
 #include "thermo_compositional.hpp"
 
 namespace data
@@ -57,5 +54,3 @@ namespace data
 		}
 	}
 } /* data */
-
-#endif /* end of include guard: THERMO_COMPOSITIONAL_H__ */

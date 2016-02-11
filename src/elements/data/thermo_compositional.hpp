@@ -5,6 +5,9 @@
 
 #include "implemented_data.hpp"
 
+#ifndef THERMO_COMPOSITIONAL_H__
+#define THERMO_COMPOSITIONAL_H__
+
 namespace data
 {
 	/*!**********************************************************************
@@ -38,3 +41,5 @@ namespace data
 		static std::shared_ptr<data> instance(grids::axis* i_axis_n, grids::axis* i_axis_m, int i_name, int n_elements, io::parameters& i_params);
 	};
 } /* data */
+
+#endif /* end of include guard: THERMO_COMPOSITIONAL_H__ */

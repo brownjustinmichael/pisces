@@ -314,6 +314,7 @@ namespace pisces
 			if (fp) {
 				return fp (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags);
 			} else {
+				WARN("No element type associated with name " << name);
 				return std::shared_ptr <element> ();
 			}
 		}

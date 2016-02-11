@@ -5,6 +5,7 @@ import subprocess
 import shutil
 import glob
 import re
+import datetime
 
 try:
     from .. import db
@@ -28,15 +29,13 @@ class Code(object, metaclass=CodeRegistry):
     """
     An abstract class describing the way to translate from a configuration to code execution
     """
-    def __init__(self, config, init=None):
+    def __init__(self, config):
         super(Code, self).__init__()
         self.config = config
-        try:
-            if os.path.abspath(config["wd"]) != os.path.abspath("."):
-                print ("WARNING: wd is not the local directory. (%s) Continue?" % config ["wd"])
-                input ("Return to continue: ")
-        except IndexError:
-            pass
+
+    @classmethod
+    def from_simulation_entry(cls, simulation_entry):
+        return cls(simulation_entry.get_config())
 
     @property
     def np(self):
@@ -49,6 +48,11 @@ class Code(object, metaclass=CodeRegistry):
     @property
     def wd(self):
         return self.config ["wd"]
+
+    @property
+    def date(self):
+        """Return the last modified time of the executable"""
+        return datetime.datetime.fromtimestamp (os.path.getmtime(self.executable()))
     
     @abc.abstractmethod
     def setup(self):
@@ -64,8 +68,21 @@ class Code(object, metaclass=CodeRegistry):
         """
         pass
 
+    def call(self, x=None, mpi="mpiexec", debug=2, **kwargs):
+        """
+        Returns the ISCES executable.
+        """
+        if x is None:
+            x = []
+        call = [mpi]
+        for arg in x:
+            call += ["-x", arg]
+        for arg in kwargs:
+            call += ["-" + arg, str(kwargs[arg])]
+        return call + ["-n", str(self.np), self.executable(), self._config_file, "-D%i" % debug]
+
     @abc.abstractmethod
-    def call(self):
+    def executable(self):
         """
         Returns a list of the executable arguments to run the code
 
@@ -81,12 +98,12 @@ class Code(object, metaclass=CodeRegistry):
         """
         pass
 
-class ISCES(Code):
+class PISCES(Code):
     """
     A class that translates from configuration to an executable form for ISCES
     """
     def __init__(self, config, config_file="config.yaml", init=None):
-        super(ISCES, self).__init__(config)
+        super(PISCES, self).__init__(config)
         self._config_file = config_file
         if init is not None:
             config["init"] = init
@@ -103,6 +120,9 @@ class ISCES(Code):
         Generates the config file containing the parameters for the run and the initial state of the system
         """
         cwd = os.getcwd()
+        print("Setting up in ", self.wd)
+        if not os.path.isdir(self.wd):
+            os.makedirs(self.wd)
         os.chdir(self.wd)
         with open (self._config_file, "w") as stream:
             stream.write (yaml.dump (self.config))
@@ -134,18 +154,11 @@ class ISCES(Code):
         os.chdir(self.wd)
 
 
-    def call(self, x=None, mpi="mpiexec", debug=2, **kwargs):
+    def executable(self):
         """
         Returns the ISCES executable.
         """
-        if x is None:
-            x = []
-        call = [mpi]
-        for arg in x:
-            call += ["-x", arg]
-        for arg in kwargs:
-            call += ["-" + arg, str(kwargs[arg])]
-        return call + ["-n", str(self.np), os.path.join(os.path.dirname(__file__), "../../run/pisces"), self._config_file, "-D%i" % debug]
+        return os.path.join(os.path.dirname(__file__), "../../run/pisces")
 
     def record(self, session=None):
         if db is None:
@@ -155,9 +168,10 @@ class ISCES(Code):
 
         filename = os.path.join(self.config["root"], self.config["output"]["directory"], self.config["output"]["stat"]["file"])
         filename = re.sub("\%*\d*[id]", "[0-9]*", filename)
-        etnry = None
+        entry = None
 
         entry = db.SimulationEntry.from_config(session, **self.config)
+        entry.date = self.date
         session.add (entry)
 
         for filename in glob.glob(filename + ".*"):
@@ -166,4 +180,5 @@ class ISCES(Code):
                 session.add (step)
 
         session.commit ()
+        return entry
         

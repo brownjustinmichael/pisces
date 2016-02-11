@@ -389,7 +389,6 @@ namespace io
 		 ************************************************************************/
 		void to_file (int record = -1) {
 			TRACE ("Sending to file...");
-			INFO("PREVIOUS " << previous << " EVERY " << output_every << " DIFF " << duration - previous);
 			while (duration - previous >= output_every) {
 				formatted_output <format>::to_file (record);
 				previous += output_every;
