@@ -96,7 +96,7 @@ namespace data
 		return std::shared_ptr <functors::functor> (new functors::average_functor <double> (n, 1, std::shared_ptr <functors::functor> (new functors::slice_functor <double> (n, m, slice_index < 0 ? m / 2 : slice_index, std::shared_ptr <functors::functor> (new functors::product_functor <double> (n, m, (*this) (velocity), (*this) (variable)))))));
 	}
 
-	std::shared_ptr <functors::functor> implemented_data::output_avg_flux (std::string variable, std::string velocity, int slice_index) {
+	std::shared_ptr <functors::functor> implemented_data::output_avg_flux (std::string variable, std::string velocity) {
 		return std::shared_ptr <functors::functor> (new functors::weighted_average_functor <double> (n, m, this->weights, std::shared_ptr <functors::functor> (new functors::product_functor <double> (n, m, (*this) (velocity), (*this) (variable)))));
 	}
 
