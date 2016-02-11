@@ -1,0 +1,31 @@
+equations:
+    temperature:
+        ignore: false
+        advection: 1.0
+        sources:
+            z_velocity: 0.0
+        top:
+            value: 0.0
+        bottom:
+            value: 0.0
+    composition:
+        ignore: false
+        advection: 1.0
+        sources:
+            z_velocity: 0.0
+        top:
+            value: 0.0
+        bottom:
+            value: 0.0
+    velocity:
+        ignore: false
+        advection: 1.0
+    x_velocity:
+        ignore: false
+        ignore_net: true
+    z_velocity:
+        ignore: false
+        ignore_net: true
+        sources: 
+            temperature: 1.
+            composition: -1.

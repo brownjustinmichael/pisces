@@ -54,7 +54,7 @@ namespace data
 			stat_stream->append <double> ("avg_" + variable, this->output_avg (variable), formats::scalar);
 			stat_stream->append <double> ("deriv_" + variable, this->output_deriv (variable), formats::scalar);
 			stat_stream->append <double> ("flux_" + variable, this->output_flux (variable, "z_velocity"), formats::scalar);
-			stat_stream->append <double> ("avg_flux_" + variable, this->output_flux (variable, "z_velocity"), formats::scalar);
+			stat_stream->append <double> ("avg_flux_" + variable, this->output_avg_flux (variable, "z_velocity"), formats::scalar);
 		}
 	}
 } /* data */

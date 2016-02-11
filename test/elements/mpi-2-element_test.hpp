@@ -34,7 +34,7 @@ public:
 		// logger::log_config::configure (&num, NULL, id, "process_%d.log");
 		formats::ascii::print_headers = false;
 		
-		io::parameters parameters;
+		io::parameters parameters(std::string (PISCES_ROOT) + "/test/elements/config.yaml");
 		
 		parameters ["root"] = std::string (PISCES_ROOT) + "/test/elements/";
 		parameters ["output.files.compare_%02i.output"] = true;

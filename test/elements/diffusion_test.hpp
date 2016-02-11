@@ -31,7 +31,7 @@ public:
 		logger::log_config::set_severity (3);
 		formats::ascii::print_headers = false;
 		
-		io::parameters parameters;
+		io::parameters parameters(std::string (PISCES_ROOT) + "/test/elements/config.yaml");
 		
 		parameters ["root"] = std::string (PISCES_ROOT) + "/test/elements/";
 		parameters ["output.cart.file"] = "diffusion_%02i";
