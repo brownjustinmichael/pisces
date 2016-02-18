@@ -45,7 +45,9 @@ namespace functors
 		 * \param i_func The shared pointer to the functor containing the processed data
 		 ************************************************************************/
 		profile_functor (int i_n, int i_m, std::shared_ptr <functor> i_func) : data ((datatype *) i_func->calculate ()), func (i_func), n (i_n), m (i_m) {
-			inner_data.resize (n);
+			DEBUG(" " << data);
+			DEBUG(" " << func);
+			inner_data.resize (m);
 		}
 
 		/*!**********************************************************************
@@ -54,7 +56,9 @@ namespace functors
 		 * \return The first element of the averaged 1D array
 		 ************************************************************************/
 		void *calculate () {
+			DEBUG("Cacluating");
 			if (func) {
+				DEBUG("Cacluating func");
 				func->calculate ();
 			}
 			for (int j = 0; j < m; ++j) {

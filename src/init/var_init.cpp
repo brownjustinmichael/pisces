@@ -102,7 +102,7 @@ int main (int argc, char *argv[])
 		INFO("Diffusion = " << diff);
 		INFO("");
 
-		double phi = ((1.0 - chi - sqrt(1.0 - 2.0 * chi - 4.0 * stiffness * chi + chi * chi)) / (2.0 * stiffness * chi) - 1.0) / 2.0;
+		double phi = ((1.0 - chi + sqrt(1.0 - 2.0 * chi - 4.0 * stiffness * chi + chi * chi)) / (2.0 * stiffness * chi) - 1.0) / 2.0;
 		if (phi < 0.0) {
 			FATAL("Cannot realize stiffness with positive diffusion. Try changing chi or the stiffness.")
 			throw 2;
@@ -132,7 +132,7 @@ int main (int argc, char *argv[])
 				temps [i * m + j] = (stop - sbot) / (height) * (pos_z [j] + height / 2.0) + sbot;
 
 				temps [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3 * std::cos(pos_z [j] * 3.14159 / width);
-				// tempt [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3 * std::cos(pos_z [j] * 3.14159 / width);
+				tempt [i * m + j] += (double) (rand () % 2000 - 1000) * scale / 1.0e3 * std::cos(pos_z [j] * 3.14159 / width);
 			}
 		}
 

@@ -10,6 +10,7 @@
 #define PRODUCT_HPP_3123131F
 
 #include "functor.hpp"
+#include "logger/logger.hpp"
 
 namespace functors
 {
@@ -34,6 +35,7 @@ namespace functors
 		 * \param i_data_2 A datatype pointer to the right input data to multiply
 		 ************************************************************************/
 		product_functor (int i_n, int i_m, datatype *i_data_1, datatype *i_data_2) : data_1 (i_data_1), data_2 (i_data_2), n (i_n), m (i_m) {
+			DEBUG(i_data_1 << " " << i_data_2);
 			inner_data.resize (n * m);
 		}
 
@@ -43,6 +45,7 @@ namespace functors
 		 * \return A pointer to the first element of the 2D product array
 		 ************************************************************************/
 		void *calculate () {
+			DEBUG("inner_data " << (&inner_data[0]));
 			for (int i = 0; i < n; ++i) {
 				for (int j = 0; j < m; ++j) {
 					inner_data [i * m + j] = data_1 [i * m + j] * data_2 [i * m + j];

@@ -97,7 +97,8 @@ class StepEntry(object):
                     for prev in previous:
                         session.delete(prev)
             else:
-                return previous
+                entries = [cls(prev) for prev in previous]
+                return entries
 
         # Irrelevant, but the code breaks without this line
         session.flush()

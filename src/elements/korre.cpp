@@ -37,7 +37,7 @@ namespace pisces
 		TRACE ("Initializing...");
 
 		data.initialize ("korre_Ts", uniform_n);
-		// data.initialize ("temperature_diffusion", uniform_n);
+		data.initialize ("temperature_diffusion", uniform_n);
 
 		double stiffness = i_params ["equations.temperature.stiffness"].as <double> ();
 		double diff = i_params ["equations.temperature.diffusion"].as <double> ();
@@ -51,7 +51,7 @@ namespace pisces
 
 			for (int j = 0; j < m; ++j)
 			{
-				data ["korre_Ts"] [j] = (1.0 + stiffness) / 2.0 * std::tanh ((z_ptr [j] - zero) / length) + (1.0 - stiffness) / 2.0;
+				data ["korre_Ts"] [j] = (1.0 + stiffness) / 2.0 * std::tanh ((z_ptr [j] + zero) / length) + (1.0 - stiffness) / 2.0;
 			}
 			for (int j = 0; j < m; ++j)
 			{

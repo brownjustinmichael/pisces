@@ -192,3 +192,11 @@ class PISCES(Code):
         session.commit ()
         return entry
         
+    def query(self, session, **kwargs):
+        temp = {}
+        for key in self.config:
+            temp[key] = self.config[key]
+        for key in kwargs:
+            temp[key] = kwargs[key]
+
+        return db.SimulationEntry.query(session, **temp)

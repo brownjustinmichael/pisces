@@ -452,6 +452,7 @@ namespace data
 		 * \return A pointer to the indexed data
 		 ************************************************************************/
 		double *operator() (const std::string &name, int state = 0, int index = 0) {
+			DEBUG("Searching for " << name << " with index " << index);
 			if (variables.find (name) != variables.end () && (int) variables.size () != 0) {
 				return variables [name]->ptr (state) + index * variables [name]->dims ();
 			}

@@ -72,10 +72,9 @@ class Launcher(object, metaclass=LauncherRegistry):
 
     def __enter__(self):
         if self.session is not None:
-            entry = db.SimulationEntry.query(self.session, crashed=False, **self.code.config)
-            if entry is not None and entry.date >= code.date:
+            entry = self.code.query(self.session, crashed=False)
+            if entry is not None and entry.date >= self.code.date:
                 print("Up-to-date db entry already exists for simulation.")
-                code = Code.from_simulation_entry(entry)
                 self.from_dump = True
         return self
 
@@ -90,4 +89,4 @@ class Launcher(object, metaclass=LauncherRegistry):
             self.cancel()
             killed = True
         if self.session is not None:
-            code.record(self.session, killed=killed, returncode=returncode)
+            self.code.record(self.session, killed=killed, returncode=returncode)

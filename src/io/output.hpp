@@ -112,15 +112,20 @@ namespace io
 		 ************************************************************************/
 		template <class datatype>
 		void append (std::string name, std::shared_ptr <functors::functor> functor_ptr, int flags = formats::all_d) {
-			TRACE ("Appending " << name << " to output...");
+			DEBUG ("IAppending " << name << " to output...");
+			DEBUG(names.size ());
 			for (int i = 0; i < (int) names.size (); ++i) {
+				DEBUG(i);
 				if (names [i] == name) {
 					WARN ("Reuse of name " << name);
 					functor_ptrs [i] = functor_ptr;
 					return;
 				}
 			}
+			DEBUG("HI");
+			DEBUG(&*functor_ptr);
 			functor_ptrs.push_back (functor_ptr);
+			DEBUG("Pointer is " << (datatype *) functor_ptr->calculate ());
 			append <datatype> (name, (datatype *) functor_ptr->calculate (), flags);
 			TRACE ("Functor appended.");
 		}
@@ -136,14 +141,17 @@ namespace io
 		 *********************************************************************/
 		template <class datatype>
 		void append (std::string name, datatype *data_ptr, int flags = formats::all_d) {
-			TRACE ("Appending " << name << " to output..." << *data_ptr);
+			DEBUG("Appending " << name << " to output..." << *data_ptr);
 			for (int i = 0; i < (int) names.size (); ++i) {
+				DEBUG(i);
 				if (names [i] == name) {
 					WARN ("Reuse of name " << name);
 					data_ptrs [i] = (void *) data_ptr;
 					return;
 				}
 			}
+			DEBUG("HI");
+
 			names.push_back (name);
 			dims.push_back (flags);
 			data_ptrs.push_back ((void *) data_ptr);
@@ -335,7 +343,6 @@ namespace io
 		 * @param i_time_ptr A pointer to the current time in the simulation
 		 ************************************************************************/
 		appender_output (formats::data_grid i_grid, std::string i_file_name, double *i_time_ptr = NULL, int i_output_every = 1) : formatted_output <format> (i_grid, i_file_name, formats::append_file, i_time_ptr), output_every (i_output_every > 0 ? i_output_every : 1), count (0) {
-			DEBUG ("CONSTRUCTING");
 		}
 
 		virtual ~appender_output () {}

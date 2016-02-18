@@ -24,28 +24,40 @@ namespace data
 		// initialize ("density");
 
 		// Set up the data from the input file in params
+		
+		if (!i_params ["output.output"].as<bool>()) {
+			return;
+		}
+		 
 		TRACE ("Setting up from input...");
 		i_params ["input.directory"] = i_params ["root"].as <std::string> () + "/" + i_params ["input.directory"].as <std::string> ();
 		this->setup_from <formats::netcdf> (i_params ["input"]);
 		
 		i_params ["output.directory"] = i_params ["root"].as <std::string> () + "/" + i_params ["output.directory"].as <std::string> ();
 
-		TRACE ("Setting up cartesian output...");
+		DEBUG ("Setting up cartesian output...");
 		std::shared_ptr <io::output> stream = this->setup_output_from <formats::netcdf> (i_params ["output.cart"]);
 		// stream->append <double> ("div_u", std::shared_ptr <functors::div_functor <double>> (new functors::div_functor <double> ((*this) ["x"].ptr (), (*this) ["z"].ptr (), (*this) ["x_velocity"].ptr (), (*this) ["z_velocity"].ptr (), n, m)));
 
-		TRACE ("Setting up transformed output...");
+		DEBUG ("Setting up transformed output...");
 		stream = this->setup_output_from <formats::netcdf> (i_params ["output.trans"], real_spectral);
 		// stream->append <double> ("div_u", std::shared_ptr <functors::transform_div_functor <double>> (new functors::transform_div_functor <double> ((*this) ["x"].ptr (), (*this) ["z"].ptr (), (*this) ["x_velocity"].ptr (), (*this) ["z_velocity"].ptr (), n, m)));
 
-		TRACE ("Setting up profile output...");
+		DEBUG ("Setting up profile output...");
 		stream = this->setup_output_from <formats::netcdf> (i_params ["output.prof"], real_real, profile);
 		for (data::iterator iter = this->begin (); iter != this->end (); ++iter) {
 			std::string variable = *iter;
-			stream->append <double> ("flux_" + variable, this->output_flux_prof(variable, "z_velocity"), formats::scalar);
+			DEBUG("ADDING FLUX PROF " << variable);
+			DEBUG(" ");
+			auto test = ((*this)[variable]);
+			DEBUG(" ");
+			auto test2 = ((*this)["z_velocity"]);
+
+			stream->append <double> ("flux_" + variable, this->output_flux_prof(variable, "z_velocity"), formats::one_d);
+			DEBUG("AFTER");
 		}
 
-		TRACE ("Setting up stat output...");
+		DEBUG ("Setting up stat output...");
 		std::shared_ptr <io::output> stat_stream =
 		this->setup_output_from <formats::netcdf> (i_params ["output.stat"], real_real, no_variables);
 
