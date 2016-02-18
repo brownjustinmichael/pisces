@@ -24,12 +24,16 @@ class Launcher(object, metaclass=LauncherRegistry):
 
     If the base class is used, the code is executed directly without going through Celery or Torque, for example.
     """
-    def __init__(self, code):
+    def __init__(self, code, from_dump=None, session=None):
         super(Launcher, self).__init__()
         self.code = code
         self.process = None
+        self.session = session
+        self.from_dump = from_dump
 
-    def launch(self, *args, from_dump=False, check_dir=True, **kwargs):
+    def launch(self, *args, from_dump=None, check_dir=True, **kwargs):
+        if from_dump is None:
+            from_dump = self.from_dump
         if self.process is not None:
             raise RuntimeError("Already running")
         if check_dir:
@@ -47,7 +51,7 @@ class Launcher(object, metaclass=LauncherRegistry):
         return self._launch(*args, **kwargs)
 
     def _launch(self, *args, **kwargs):
-        self.process = subprocess.Popen(self.code.call(), preexec_fn=os.setsid)
+        self.process = subprocess.Popen(self.code.call(), preexec_fn=os.setsid, stdout=subprocess.PIPE)
         return self.process
 
     def cancel(self):
@@ -56,9 +60,34 @@ class Launcher(object, metaclass=LauncherRegistry):
     def wait(self, *args, record=True, session=None, **kwargs):
         if self.process is None:
             raise RuntimeError("Not yet running")
-        self._wait(*args, **kwargs)
+        result = self._wait(*args, **kwargs)
+        if result != 0:
+            print(self.process.communicate()[0].decode())
         self.process = None
+        return result
 
     def _wait(self, *args, **kwargs):
         self.process.wait()
+        return self.process.returncode
 
+    def __enter__(self):
+        if self.session is not None:
+            entry = db.SimulationEntry.query(self.session, crashed=False, **self.code.config)
+            if entry is not None and entry.date >= code.date:
+                print("Up-to-date db entry already exists for simulation.")
+                code = Code.from_simulation_entry(entry)
+                self.from_dump = True
+        return self
+
+    def __exit__(self, ex_type, ex_val, tb):
+        killed = False
+        returncode = 0
+        try:
+            print("Launching simulation")
+            returncode = self.wait()
+        except KeyboardInterrupt:
+            print("Received keyboard interrupt. Canceling task.")
+            self.cancel()
+            killed = True
+        if self.session is not None:
+            code.record(self.session, killed=killed, returncode=returncode)

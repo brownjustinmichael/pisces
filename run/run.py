@@ -38,23 +38,6 @@ Launcher = launch.LauncherRegistry.registry[args.launcher]
 code = Code(configuration, init=args.init)
 
 session = db.Session()
-entry = db.SimulationEntry.query(session, **configuration)
 
-if entry is not None and entry.date >= code.date:
-	print("Up-to-date db entry already exists for simulation.")
-	code = Code.from_simulation_entry(entry)
-	args.from_dump = True
-session.close()
-
-launcher = Launcher(code)
-try:
-	print("Launching simulation")
+with Launcher(code, session=session) as launcher:
 	launcher.launch(from_dump=args.from_dump, **exports)
-	launcher.wait()
-except KeyboardInterrupt:
-	print("Received keyboard interrupt. Canceling task.")
-	launcher.cancel()
-
-print("Recording in database.")
-session = db.Session()
-code.record(session)

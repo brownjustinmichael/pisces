@@ -153,14 +153,13 @@ class PISCES(Code):
 
         os.chdir(self.wd)
 
-
     def executable(self):
         """
         Returns the ISCES executable.
         """
         return os.path.join(os.path.dirname(__file__), "../../run/pisces")
 
-    def record(self, session=None):
+    def record(self, session=None, returncode=0, killed=False):
         if db is None:
             raise RuntimeError("Could not record as the database backend is not functional")
         if session is None:
@@ -172,6 +171,17 @@ class PISCES(Code):
 
         entry = db.SimulationEntry.from_config(session, **self.config)
         entry.date = self.date
+        if killed:
+            entry.complete = False
+            entry.crashed = False
+        else:
+            if returncode == 0:
+                entry.complete = True
+                entry.crashed = False
+            else:
+                entry.complete = False
+                entry.crashed = True
+
         session.add (entry.entry)
 
         for filename in glob.glob(filename + ".*"):

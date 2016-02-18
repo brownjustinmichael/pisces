@@ -41,23 +41,23 @@ def run(np, dt):
 		raise RuntimeError("Something weird happened")
 	return entry
 
-base = run(128, 1.e-2)
+base = run(1024, 0.001)
 solution = Output.from_simulation_entry(base)[-1]
 runs = []
 nps = []
 dts = []
 results = []
-for dt in numpy.arange(-0.5, -2.0, -0.25):
+for dt in numpy.arange(2, 10, 2):
 	for np in range(4, 10):
-		entry = run(2**np, 10.**dt)
+		entry = run(2**np, 1. / dt)
 		runs.append(entry)
 		output = Output.from_simulation_entry(entry)[-1]
 		nps.append(2**np)
-		dts.append(10.**dt)
+		dts.append(1. / dt)
 		results.append(solution.norm(output, variable="scalar"))
 
 fig, ax = plt.subplots(1, 1)
-s = ax.scatter(nps, results, c=np.log10(dts))
+s = ax.scatter(nps, results, c=numpy.log10(dts))
 ax.set_xscale("log")
 ax.set_xlim((10,1.e3))
 ax.set_yscale("log")

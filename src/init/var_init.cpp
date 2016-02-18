@@ -92,12 +92,6 @@ int main (int argc, char *argv[])
 			throw 3;
 		}
 
-		double a = chi - 1.;
-		double b = 1. + 2. * (stiffness - 2.) * chi + chi * chi;
-		double c = 2. * (1. + stiffness) * chi;
-		double d = chi * (1. - stiffness);
-		double e = chi * (1 + stiffness);
-		
 		double scale = 0.001;
 		double width = parameters.get <double> ("grid.z.width");
 		double arg;
@@ -107,20 +101,6 @@ int main (int argc, char *argv[])
 		INFO("Stiffness = " << stiffness);
 		INFO("Diffusion = " << diff);
 		INFO("");
-
-		INFO("a = " << a);
-		INFO("b = " << b);
-		INFO("c = " << c);
-		INFO("d = " << d);
-		INFO("e = " << e);
-		// if (b + c < 0.) {
-		// 	FATAL("Problem setup failed at lower boundary: try different values of chi, stiffness, and diffusion");
-		// 	throw 1;
-		// }
-		// if (b - c < 0.) {
-		// 	FATAL("Problem setup failed at upper boundary: try different values of chi, stiffness, and diffusion");
-		// 	throw 2;
-		// }
 
 		double phi = ((1.0 - chi - sqrt(1.0 - 2.0 * chi - 4.0 * stiffness * chi + chi * chi)) / (2.0 * stiffness * chi) - 1.0) / 2.0;
 		if (phi < 0.0) {

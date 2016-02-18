@@ -5,58 +5,56 @@
 	The Boussinesq equations for a fluid with density contributions from temperature but not composition are as follows:
 	\begin{align}
 		\frac{\partial{\vel}}{\partial{t}}+\vel\cdot\nabla\vel&=-\nabla\p+\frac{\alpha\grav}\T\zunit+\visc\nabla^{2}\vel\\
-		\frac{\partial{\T}}{\partial{t}}+\vel\cdot\nabla\T-w\Tad&=\nabla\cdot\left(\kt\left(1+\phi\comp\right)\nabla\T\right)\\
-		\frac{\partial{\comp}}{\partial{t}}+\vel\cdot\nabla\comp&=\km\nabla^{2}\comp\\
+		\frac{\partial{\T}}{\partial{t}}+\vel\cdot\nabla\T-w\Tad&=\nabla\cdot\left(\kt\left(1+\phi\left(\comp\right)\right)\nabla\T\right)\\
+		\frac{\partial{\comp}}{\partial{t}}+\vel\cdot\nabla\comp&=\kc\nabla^{2}\comp\\
 		\nabla\cdot\vel&=0
 	\end{align}
+		For application to the Sun, $\comp$ is a scalar tracer for the ionization fraction, which we assume can be advected and diffuses according to Fick's Law.
+		We note here that for the case of the Sun, it would be more physical to have $\phi$ depend on the temperature rather than a scalar tracer; however, this would make the boundary conditions somewhat less well-posed.
+			For the moment, we simply state that $\kc$ is expected to be much larger than microscopic diffusion of ions.	
 
-	We define our non-dimensional equations as follows, where we have taken $\nu=[L]^{2}/[t]$, $[T]=[L]|\Tad|$.
-	We let $[L]$ be half the height of the domain, going from $-[L]$ to $[L]$.
+	We apply the boundary conditions $\comp\left(z=-[L]/2\right)=1/2$, $\comp\left(z=[L]/2\right)=-1/2$, where $[L]$ is the height of the domain, since the zero point of this tracer is irrelevant.
+		We let $\T\left(z=-[L]/2\right)=0$ as an arbitrary choice and $\partial \T/\partial z\left(z=[L]/2\right)=\partial \T/\partial z|_{\mathrm{CZ}}$, which is an assumed constant input.
+		We assume the top and bottom are impermeable and stress-free.
+		All variables are assumed horizontally periodic.
+
+	We define our non-dimensional equations as follows, where we have taken $\nu=[L]^{2}/[t]$, $[T]=[L]|\partial \T/\partial z|_{\mathrm{CZ}}-\Tad|$, etc.
 
 	\begin{align}
-		\frac{\partial{\ndvel}}{\partial{\ndt}}+\ndvel\cdot\ndnabla\ndvel&=-\ndnabla\ndp+\frac{\Ra}{\Pran}\ndT\zunit+\ndnabla^{2}\ndvel\\
-		\frac{\partial{\ndT}}{\partial{\ndt}}+\ndvel\cdot\ndnabla\ndT+\ndw&=\ndnabla\cdot\left(\Pran^{-1}\left(1+\phi\comp\right)\ndnabla\ndT\right)\\
-		\frac{\partial{\comp}}{\partial{\ndt}}+\ndvel\cdot\ndnabla\comp&=\frac{\Le}{\Pran}\ndnabla^{2}\comp\\
+		\frac{\partial{\ndvel}}{\partial{\ndt}}+\ndvel\cdot\ndnabla\ndvel&=-\ndnabla\ndp+\frac{\Ra_{\mathrm{CZ}}}{\Pran_{\mathrm{CZ}}}\ndT\zunit+\ndnabla^{2}\ndvel\\
+		\frac{\partial{\ndT}}{\partial{\ndt}}+\ndvel\cdot\ndnabla\ndT+\ndw\left(\frac{1}{\chi}-1\right)&=\ndnabla\cdot\left(\Pran^{-1}_{\mathrm{CZ}}\left(1+\phi\left(\comp\right)\right)\ndnabla\ndT\right)\\
+		\frac{\partial{\comp}}{\partial{\ndt}}+\ndvel\cdot\ndnabla\comp&=\Sc^{-1}\ndnabla^{2}\comp\\
 		\ndnabla\cdot\ndvel&=0
 	\end{align}
 
-	Some decisions need to be made regarding definitions.
-	We choose to allow $\comp$ to go from -1 to 1, allowing us to define $\Pran$ to be something like the average Prandtl number.
-	We will require (for the moment) that $\Pran_{\comp}^{-1}>0$, so $\comp$ must go to 1 in the radiative zone (stronger diffusion, weaker convection) and to -1 in the convective zone.
-	This sets our boundary conditions for $\comp$.
-
-	We want the system to be generated such that the temperature gradient for pure diffusion and no contributions to the diffusion coefficient from composition be exactly the adiabatic temperature gradient.
-		This constitutes $\frac{\flux}{\kt}=-\Tad$.
-		We'll let $\frac{\flux}{\kt}=-\psi\Tad$ for some added flexibility with the understanding that $\psi=1$ would be ideal.
-	Since we are requiring the flux through the bottom boundary be $\flux$, the gradient must be $\ndnabla\ndT=-\frac{\psi}{1+\phi}$.
-		We may choose the $\T$ of the top boundary arbitrarily, so we let it be 0.
-
-	The boundaries are impermeable and stress-free as well.
-
-	The Rayleigh number and Prandtl number are well-defined for a fluid with $\comp=0$, but what are they otherwise?
-		In this context, the Rayleigh number in the equation is defined as $\Ra=\alpha g \Tad H^{4}/\visc\kt$, which has the right dimensional dependency, but isn't a traditional Rayleigh number.
-			The full $\Ra$ is $\Ra=\alpha g \Tad \left(\psi/\left(1 + \phi\comp\right) - 1\right) H^{4}/\visc\kt\left(1+\phi\comp\right)$.
-			The Rayleigh number at the top of the convection zone is then this with $\comp=-1$ and that at the bottom boundary has $\comp=1$.
-		The stiffness of the simulation is then $S=\frac{\Ra\left(1\right)}{\Ra\left(-1\right)}$ (modulo a negative sign), which is
+	The value $\chi$ is defined as
+	\begin{equation}
+		\chi=\left|\frac{\partial \T/\partial z|_{\mathrm{CZ}}-\Tad}{\partial \T/\partial z|_{\mathrm{CZ}}}\right|.
+	\end{equation}
+	This makes the top boundary condition $\partial \ndT/\partial \ndz\left(z=[L]/2\right)=-1/\chi$.
+	We define $\Pran_{\mathrm{CZ}}$ and $\Ra_{\mathrm{CZ}}$ to be the Prandtl number and Rayleigh number in the convection zone, respectively, by enforcing that $\phi\left(\comp\right)$ be $0$ for $\comp=-1/2$ and everywhere greater than or equal to zero.
+		If the desire is to set the stiffness of the system, $S=|\Ra_{RZ}/\Ra_{CZ}$, where we are being somewhat loose with the definition of the Rayleigh number as the radiative fluid is stable to convection.
+		For a given $\chi$ and a given $S$, the maximum $\phi$ is given by the analogous equation in Korre et al. (in prep) by solving
 		\begin{equation}
-			S=\frac{\left(\psi/\left(1 + \phi\right) - 1\right)\left(1-\phi\right)}{\left(\psi/\left(1 - \phi\right) - 1\right)\left(1+\phi\right)}
+			\Pran_{\mathrm{RZ}}^{2}-\left(1-\chi\right)\Pran_{\mathrm{CZ}}\Pran_{\mathrm{RZ}}-\Pran_{\mathrm{CZ}}^{2}\chi S=0
 		\end{equation}
-		\begin{equation}
-			S=\frac{\left(\psi - 1 - \phi\right)\left(1-\phi\right)^{2}}{\left(\psi - 1 + \phi\right)\left(1+\phi\right)^{2}}.
-		\end{equation}
-		This proves to be quite the mess.
+		for $\Pran_{\mathrm{RZ}}$, and then $\phi_{\mathrm{max}}=\left(\Pran_{\mathrm{RZ}}-\Pran_{\mathrm{CZ}}\right)/\Pran_{\mathrm{CZ}}$.
 
-	Setting $\psi=1$ (pretty near what we would like as this makes $\Ra=0$ when $\comp=0$) results in
-		\begin{equation}
-			S=-\frac{\left(1-\phi\right)^{2}}{\left(1+\phi\right)^{2}},\phi\ne0,
-		\end{equation}
-		which varies from -1 near $\phi=0$ to 0 at $\phi=1$, which means that we can't use this to achieve strong stiffness.
-		If we instead change the background flux to $\psi=1-\epsilon$, we introduce a singularity at $\phi=\epsilon$, meaning we can achieve as stiff a problem as desired as long as $\phi>\epsilon$.
-		As long as $S<0$, the radiative zone remains stable.
-
-	Unfortunately, for the unstable region to remain unstable, $\psi>1-\phi$ and for the stable region to remain stable, $\psi<1+\phi$.
+	For the time being, we are using a hyperbolic tangent function, so
+	\begin{equation}
+		\phi\left(\comp\right)=\frac{\phi_{\mathrm{max}}}{2}\tanh{\frac{\comp-\comp_{0}}{d_{\comp}}}+\frac{\phi_{\mathrm{max}}}{2},
+	\end{equation}
+	where $\comp_{0}$ and $d_{\comp}$ are free parameters.
+		This is intended to represent the opacity of material with some ionization state, which is very high above some threshold and very low below it.
 
 % subsection equations (end)
+
+\subsection{Additional Methods} % (fold)
+\label{sub:additional_methods}
+
+	We must introduce one additional method for the treatment of this new non-linear term.
+
+% subsection additional_methods (end)
 
 \subsection{Linear Stability} % (fold)
 \label{sub:linear_stability}

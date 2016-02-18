@@ -107,18 +107,18 @@ class StepEntry(object):
         entries=[]
         for time in range(times):
             # Otherwise, make a new entry and set its basic values
-            entries.append(StepEntry.Table())
-            entries[-1].file = os.path.abspath(file_name)
-            entries[-1].line = time
-            entries[-1].simulation_id = sim.entry.id
-            entries[-1].date = date
+            entries.append(cls(StepEntry.Table()))
+            entries[-1].entry.file = os.path.abspath(file_name)
+            entries[-1].entry.line = time
+            entries[-1].entry.simulation_id = sim.entry.id
+            entries[-1].entry.date = date
 
             for variable in data.variables:
                 var = data[variable][time]
                 var = ma.filled(var, 0.0).tolist()
                 if len(data[variable].dimensions) == 1:
-                    setattr(entries[-1], variable, var)
-            session.add(cls(entries[-1]))
+                    setattr(entries[-1].entry, variable, var)
+            session.add(entries[-1].entry)
 
         # session.flush()
 

@@ -175,6 +175,15 @@ namespace data
 		std::shared_ptr <functors::functor> output_prof (std::string variable);
 
 		/**
+		 * @brief Construct a functor that returns the profile of the vertical flux of a given string variable
+		 * 
+		 * @param variable The string variable from which the profile should be calculated
+		 * @param velocity The string representation of the velocity variable needed to construct the flux
+		 * @return The profile functor, which should be added to an output stream
+		 */
+		std::shared_ptr <functors::functor> output_flux_prof (std::string variable, std::string velocity);
+
+		/**
 		 * @brief Construct a functor that returns the profile of the derivative of a given string variable
 		 * 
 		 * @param variable The string variable from which the profile should be calculated

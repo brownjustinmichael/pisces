@@ -7,7 +7,12 @@ from pisces_utils import config
 class SimulationEntry(object):
     if "simulations" not in Base.metadata.tables:
         # If not, create one with columns id and hash
-        Table=type("SimulationTable", (Base,), {"__table__": sqlalchemy.Table("simulations", Base.metadata, sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True), sqlalchemy.Column("date", sqlalchemy.DateTime))})
+        Table=type("SimulationTable", (Base,), 
+            {"__table__": sqlalchemy.Table("simulations", Base.metadata, 
+                sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True), 
+                sqlalchemy.Column("date", sqlalchemy.DateTime), 
+                sqlalchemy.Column("crashed", sqlalchemy.Boolean), 
+                sqlalchemy.Column("complete", sqlalchemy.Boolean))})
         Base.metadata.tables["simulations"].create(engine)
     else:
         Table=type("SimulationTable", (Base,), {"__table__": sqlalchemy.Table("simulations", Base.metadata, autoload=True, autoload_with=engine, extend_existing=True)})
@@ -17,6 +22,33 @@ class SimulationEntry(object):
             self._entry=entry
         else:
             self._entry=self.Table(*args, **config.process(kwargs))
+
+    def __repr__(self):
+        return "<SimulationEntry at %s>" % (self.entry.wd)
+
+    @property
+    def date(self):
+        return self.entry.date
+
+    @date.setter
+    def date(self, value):
+        self.entry.date = value
+
+    @property
+    def crashed(self):
+        return self.entry.crashed
+
+    @crashed.setter
+    def crashed(self, value):
+        self.entry.crashed = value
+    
+    @property
+    def complete(self):
+        return self.entry.complete
+
+    @complete.setter
+    def complete(self, value):
+        self.entry.complete = value
 
     @property
     def entry(self):
@@ -71,10 +103,11 @@ class SimulationEntry(object):
         cls.add_columns(session=session, **translation)
 
         remove = []
+        wd = translation.pop("wd", None)
         for key in translation:
             if key[:5] == "input":
                 remove.append(key)
-            if key in ["output__number", "wd"]:
+            if key in ["output__number"]:
                 remove.append(key)
             if key in ["time__steps", "time__stop"]:
                 remove.append(key)
@@ -83,12 +116,15 @@ class SimulationEntry(object):
             translation.pop(key)
             
         try:
-            entry = session.query(cls).filter_by(**translation).one()
+            entry = session.query(cls.Table).filter_by(**translation).one()
             return cls(entry)
         except sqlalchemy.orm.exc.NoResultFound:
+            print("No results")
             pass
-        except sqlalchemy.exc.InvalidRequestError:
-            pass
+        except sqlalchemy.orm.exc.MultipleResultsFound as e:
+            for entry in session.query(cls.Table).filter_by(**translation).all():
+                print(cls(entry))
+            raise e
 
         return None
 

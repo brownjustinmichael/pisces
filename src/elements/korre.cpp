@@ -36,61 +36,45 @@ namespace pisces
 	boussinesq_element (i_axis_n, i_axis_m, i_name, i_params, i_data, i_messenger_ptr, i_element_flags) {
 		TRACE ("Initializing...");
 
-		// Add a background temperature gradient of the form
-		// -C*Aout * arctan((z-rt)/dout), z < rt
-		// -C*Ain * arctan((z-rt)/din), z > rt
 		data.initialize ("korre_Ts", uniform_n);
-		if (i_params ["equations.temperature.korre_Ts"].IsDefined ()) {
-			double C = i_params ["equations.temperature.korre_Ts.C"].as <double> ();
-			double Ain = i_params ["equations.temperature.korre_Ts.Ain"].as <double> ();
-			double din = i_params ["equations.temperature.korre_Ts.din"].as <double> ();
-			double rt = i_params ["equations.temperature.korre_Ts.rt"].as <double> ();
-			double Aout = i_params ["equations.temperature.korre_Ts.Aout"].as <double> ();
-			double dout = i_params ["equations.temperature.korre_Ts.dout"].as <double> ();
+		// data.initialize ("temperature_diffusion", uniform_n);
+
+		double stiffness = i_params ["equations.temperature.stiffness"].as <double> ();
+		double diff = i_params ["equations.temperature.diffusion"].as <double> ();
+		double chi = 1. / (1. - i_params.get <double> ("equations.temperature.sources.z_velocity"));
+
+		if (i_params ["equations.temperature.tanh"].IsDefined ()) {
+
+			double stiffness = i_params ["equations.temperature.stiffness"].as <double> ();
+			double zero = i_params ["equations.temperature.tanh.zero"].as <double> ();
+			double length = i_params ["equations.temperature.tanh.length"].as <double> ();
 
 			for (int j = 0; j < m; ++j)
 			{
-				if (z_ptr [j] > rt) {
-					data ["korre_Ts"] [j] = -C * Aout * std::tanh ((z_ptr [j] - rt) / dout);
-				} else {
-					data ["korre_Ts"] [j] = -C * Ain * std::tanh ((z_ptr [j] - rt) / din);
-				}
+				data ["korre_Ts"] [j] = (1.0 + stiffness) / 2.0 * std::tanh ((z_ptr [j] - zero) / length) + (1.0 - stiffness) / 2.0;
 			}
-		}
-
-		data.initialize ("temperature_diffusion", uniform_n);
-		if (i_params ["equations.temperature.korre_diff"].IsDefined ()) {
-			double Prcz = 1.0 / i_params ["equations.temperature.diffusion"].as <double> ();
-			double Prrz = 1.0 / i_params ["equations.temperature.korre_diff.rz_diffusion"].as <double> ();
-
-			DEBUG ("VARS ARE " << Prcz << " " << Prrz);
-
-			double A = (Prcz * data ["korre_Ts"] [0] + Prrz) / (data ["korre_Ts"] [0] + 1.);
-			assert (A < Prcz);
 			for (int j = 0; j < m; ++j)
 			{
-				data ["temperature_diffusion"] [j] = 1. / (A - data ["korre_Ts"] [j] * (Prcz - A));
+				data ["temperature_diffusion"] [j] = 2.0 * diff / (1.0 - chi + sqrt((chi - 1.0) * (chi - 1.0) + 4.0 * chi * data ["korre_Ts"] [j]));
 				DEBUG ("DIFF IS " << data ["temperature_diffusion"] [j]);
 			}
 		} else {
 			for (int j = 0; j < m; ++j)
 			{
-				data ["temperature_diffusion"] [j] = params ["equations.temperature.diffusion"].as <double> ();
+				data ["temperature_diffusion"] [j] = diff;
 			}
 		}
 
 		// Set up the temperature equation
 		if (!(i_params ["equations.temperature.ignore"].IsDefined () && i_params ["equations.temperature.ignore"].as <bool> ())) {
 			*split_solver (equations ["temperature"], timestep, 
-				neumann (i_params ["equations.temperature.bottom.value"].as <double> ()), 
-				dirichlet (i_params ["equations.temperature.top.value"].as <double> ())) 
+				dirichlet (i_params ["equations.temperature.bottom.value"].as <double> ()), 
+				neumann (i_params ["equations.temperature.top.value"].as <double> ())) 
 			+ params ["equations.temperature.advection"] * advec (data ["x_velocity"], data ["z_velocity"])
-			+ src (data ["z_velocity"] * data ["korre_Ts"])
+			// + src (data ["z_velocity"] * data ["korre_Ts"])
 			== 
 			params ["equations.temperature.sources.z_velocity"] * src (data ["z_velocity"])
 			+ bg_diff (data ["temperature_diffusion"].ptr ());
-
-			if (i_params ["equations.temperature.linear"].IsDefined ()) *equations ["temperature"] == std::shared_ptr <plans::plan::factory> (new plans::diffusion::linear::factory (i_params ["equations.temperature.linear"].as <double> (), 0.0, data ["composition"], data ["temperature_diffusion"].ptr (), 10000));
 		}
 		
 	TRACE ("Initialized.");

@@ -434,7 +434,12 @@ namespace data
 		 * \return A pointer to the indexed data
 		 ************************************************************************/
 		grids::variable &operator[] (const std::string &name) {
-			return *variables [name];
+			if (variables.find(name) != variables.end()) {
+				return *variables [name];
+			} else {
+				ERROR("Variable " << name << " not found in data object.");
+				throw 10;
+			}
 		}
 		
 		/*!**********************************************************************

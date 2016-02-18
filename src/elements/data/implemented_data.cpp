@@ -104,6 +104,10 @@ namespace data
 		return std::shared_ptr <functors::functor> (new functors::profile_functor <double> (n, m, (*this) (variable)));
 	}
 
+	std::shared_ptr <functors::functor> implemented_data::output_flux_prof (std::string variable, std::string velocity) {
+		return std::shared_ptr <functors::functor> (new functors::profile_functor <double> (n, m, std::shared_ptr <functors::functor> (new functors::product_functor <double> (n, m, (*this) (velocity), (*this) (variable)))));
+	}
+
 	std::shared_ptr <functors::functor> implemented_data::output_deriv_prof (std::string variable) {
 		return std::shared_ptr <functors::functor> (new functors::profile_functor <double> (n, m, std::shared_ptr <functors::functor> (new functors::deriv_functor <double> ((*this) (variable), n, m, &(*grid_m) [0]))));
 	}

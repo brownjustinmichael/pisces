@@ -39,7 +39,6 @@ namespace pisces
 				throw 2;
 			}
 			diff += phi;
-			WARN(1.0 - 2.0 * chi - 4.0 * stiffness * chi + chi * chi);
 		}
 
 		data.initialize ("temperature_diffusion", uniform_n);

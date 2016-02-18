@@ -50,6 +50,8 @@ namespace pisces
 			if (data.transformers [*iter]) data.transformers [*iter]->update ();
 		}
 
+		data.output ();
+
 		// Set up openmp to run multiple plans simultaneously
 		omp_set_nested (true);
 		int threads = params.get <int> ("parallel.maxthreads");
@@ -63,10 +65,6 @@ namespace pisces
 			data.reset ();
 			INFO ("Timestep: " << n_steps);
 
-			TIME (
-			data.output ();
-			, output_time, output_duration);
-			
 			TRACE ("Executing plans...");
 
 			TIME (
@@ -105,10 +103,13 @@ namespace pisces
 
 			TRACE ("Update complete");
 
+			TIME (
+			data.output ();
+			, output_time, output_duration);
+
 			++n_steps;
 			--check_every;
 		}
-
 
 		INFO ("Profiling Factorize: CPU Time: " << factorize_time << " Wall Time: " << (double) factorize_duration.count () << " Efficiency: " << factorize_time / (double) factorize_duration.count () / omp_get_max_threads () * 100. << "%");
 		INFO ("Profiling Transform: CPU Time: " << transform_time << " Wall Time: " << (double) transform_duration.count () << " Efficiency: " << transform_time / (double) transform_duration.count () / omp_get_max_threads () * 100. << "%");

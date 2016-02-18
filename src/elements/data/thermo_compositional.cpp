@@ -40,6 +40,10 @@ namespace data
 
 		TRACE ("Setting up profile output...");
 		stream = this->setup_output_from <formats::netcdf> (i_params ["output.prof"], real_real, profile);
+		for (data::iterator iter = this->begin (); iter != this->end (); ++iter) {
+			std::string variable = *iter;
+			stream->append <double> ("flux_" + variable, this->output_flux_prof(variable, "z_velocity"), formats::scalar);
+		}
 
 		TRACE ("Setting up stat output...");
 		std::shared_ptr <io::output> stat_stream =

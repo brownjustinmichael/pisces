@@ -389,7 +389,7 @@ namespace io
 		 ************************************************************************/
 		void to_file (int record = -1) {
 			TRACE ("Sending to file...");
-			while (duration - previous >= output_every) {
+			while (duration - previous + 1.e-10 >= output_every) {
 				formatted_output <format>::to_file (record);
 				previous += output_every;
 			}
